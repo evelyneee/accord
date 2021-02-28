@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)"
+options: "8492bb0ab85a2bc77b2b09575602038d"
+build_time: [1610036140, 784064000]
+inputs:
+  "/Users/althio/Documents/Helselia/HelseliaWidgets/HelseliaWidgets.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/build/Helselia.build/Release/HelseliaWidgetsExtension.build/DerivedSources/IntentDefinitionGenerated/HelseliaWidgets/ConfigurationIntent.swift": [9223372036, 854775807]

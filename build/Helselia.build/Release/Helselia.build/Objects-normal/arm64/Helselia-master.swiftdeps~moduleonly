@@ -1,0 +1,15 @@
+version: "Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)"
+options: "3b8e42d1ada5f163f5d54a92084f4a30"
+build_time: [1610044807, 904122000]
+inputs:
+  "/Users/althio/Documents/Helselia/Helselia/MyIssues.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/SettingsView.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/ClubView.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/Snowflakes.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/ProfileView.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/HomeView.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/backendClient.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/ContentView.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/IssueCreationUI.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/Helselia/HelseliaApp.swift": [9223372036, 854775807]
+  "/Users/althio/Documents/Helselia/build/Helselia.build/Release/Helselia.build/DerivedSources/IntentDefinitionGenerated/HelseliaWidgets/ConfigurationIntent.swift": [9223372036, 854775807]
