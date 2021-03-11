@@ -18,8 +18,8 @@ import SwiftUI
 
 var InputMsgIndex: Int = 0
 var root: Int = 999999999999
-let messages = GetMessages()
-let net = GetMessages()
+let messages = NetworkHandling()
+let net = NetworkHandling()
 let parser = parseMessages()
 
 struct CoolButtonStyle: ButtonStyle {
@@ -53,6 +53,7 @@ extension Dictionary {
 
 struct ClubView: View {
     
+    
 //    main variables for chat, will be migrated to backendClient later
     
     @State var chatTextFieldContents: String = ""
@@ -64,14 +65,14 @@ struct ClubView: View {
     @State var MaxChannelNumber = 0
     @State var userID = 999999999999
     @State var channelID = 999999999999
-    @State var messageArray = [] {
-        didSet {
-            msgCount = messageArray.count
-        }
-    }
+    @State var messageArray = []
     @State var usernameArray = []
-    @State var msgCount: Int = 0
 //    actual view begins here
+    
+    func refresh() {
+        messageArray = parser.getArray(forKey: "content", messageDictionary: net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:]))
+        usernameArray = parser.getArray(forKey: "author", messageDictionary: net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:]))
+    }
     
     var body: some View {
         
@@ -80,7 +81,7 @@ struct ClubView: View {
             Spacer()
             HStack {
 //                chat view
-                List(0..<msgCount, id: \.self) { index in
+                List(0..<messageArray.count, id: \.self) { index in
                     HStack {
                         Image("pfp").resizable()
                             .frame(maxWidth: 33, maxHeight: 33)
@@ -88,8 +89,21 @@ struct ClubView: View {
                             .padding(.horizontal, 5)
                             .scaledToFill()
                         VStack(alignment: .leading) {
-                            Text(usernameArray[index] as? String ?? "")
+                            HStack {
+                                Text((usernameArray[index] as? String ?? "").dropLast(5))
                                     .fontWeight(.bold)
+                                if (usernameArray[index] as? String ?? "").suffix(5) != "#0000" {
+                                    Text((usernameArray[index] as? String ?? "").suffix(5))
+                                        .foregroundColor(Color.secondary)
+                                }
+                                if (usernameArray[index] as? String ?? "").suffix(5) == "#0000" {
+                                    Text("Bot")
+                                        .fontWeight(.semibold)
+                                        .padding(2)
+                                        .background(Color.pink)
+                                        .cornerRadius(2)
+                                }
+                            }
                             Text(messageArray[index] as? String ?? "")
                         }
                         Spacer()
@@ -118,7 +132,8 @@ struct ClubView: View {
 //                where messages are sent
                 
                 Button(action: {
-                    print("cock")
+                    messageArray = net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
+                    refresh()
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
@@ -128,8 +143,8 @@ struct ClubView: View {
             .padding()
         }
         .onAppear {
-            messageArray = parser.getArray(forKey: "content", messageDictionary: net.getMessageArray(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", Bearer: "Bearer MTQ4Mjg1NjMwNDI0NjgyNDk2.YCedEQ.QAXCkOGcqHRozfA4bDLrpA6ty9w", Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET))
-            usernameArray = parser.getArray(forKey: "author", messageDictionary: net.getMessageArray(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", Bearer: "Bearer MTQ4Mjg1NjMwNDI0NjgyNDk2.YCedEQ.QAXCkOGcqHRozfA4bDLrpA6ty9w", Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET))
+            refresh()
+            print(token)
         }
     }
 }

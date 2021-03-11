@@ -39,3 +39,4 @@ public var refLinks: [String: String] = [:]
 
 var issueContainer: [String] = []
 
+public var token = "MTU3NTk5Mzk5MjE0NzE0ODgw.YEmAZA.DLKZ7M5NMByHWKSfZTssoQ6HSQ4"

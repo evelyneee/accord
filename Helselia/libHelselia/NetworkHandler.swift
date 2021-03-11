@@ -8,8 +8,10 @@
 
 import Foundation
 
-public class GetMessages {
-    func getMessageArray(url: String, Bearer: String, Cookie: String, json: Bool, type: requests.requestTypes) -> [[String:Any]] {
+let debug = true
+
+public class NetworkHandling {
+    func request(url: String, token: String, Cookie: String, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
         var completion: Bool = false
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
@@ -27,9 +29,13 @@ public class GetMessages {
         case .PUT:
             request.httpMethod = "PUT"
         }
-        request.httpMethod = "GET"
-        request.addValue(Bearer, forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.addValue(Cookie, forHTTPHeaderField: "Cookie")
+        if type == .POST {
+            request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            print(bodyObject)
+        }
         var returnArray: [[String:Any]] = []
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
@@ -45,21 +51,28 @@ public class GetMessages {
                 } else {
                     returnArray = [["Code":statusCode]]
                 }
-                print("URL Session Task Succeeded: HTTP \(statusCode)")
+                if debug {
+                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                }
             }
             else {
-                // Failure
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
-        while completion == false {
+        if type == .GET {
+            while completion == false {
+                task.resume()
+                session.finishTasksAndInvalidate()
+                sleep(1)
+                if retData != Data() {
+                    completion = true
+                    break
+                }
+            }
+        } else {
             task.resume()
             session.finishTasksAndInvalidate()
             sleep(1)
-            if retData != Data() {
-                completion = true
-                break
-            }
         }
         return returnArray
     }

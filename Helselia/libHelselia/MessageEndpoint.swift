@@ -19,7 +19,6 @@ public class parseMessages {
             }
         }
         if secondary == true {
-            #warning("test this shit on wifi bitch")
             if type(of: returnItem) == Dictionary<String, Any>.self {
                 for i in (returnItem as! Dictionary<String, Any>).keys {
                     if i == secondaryItem {

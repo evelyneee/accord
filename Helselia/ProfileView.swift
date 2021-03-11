@@ -32,7 +32,7 @@ struct ProfileView: View {
 //                bio/description
                 
                 VStack(alignment: .leading) {
-                    Text(backendUsername)
+                    Text(token)
                         .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                         .font(.title2)
                     Text("Pronouns: \(pronouns)")

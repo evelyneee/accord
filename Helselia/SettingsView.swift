@@ -49,10 +49,10 @@ struct SettingsView: View {
                     .toggleStyle(SwitchToggleStyle())
                 }
                 HStack(alignment: .top) {
-                    TextField("Username", text: $usernameSettings)
+                    TextField("Token", text: $usernameSettings)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     Button(action: {
-                        backendUsername = usernameSettings
+                        token = usernameSettings
                     }, label: {
                         Text("Set")
                             .fontWeight(.bold)
@@ -97,7 +97,7 @@ struct SettingsView: View {
 
         }
         .onAppear {
-            usernameSettings = backendUsername
+            usernameSettings = token
             showPFP = enablePFP
         }
         .frame(minWidth: 400, minHeight: 300)
