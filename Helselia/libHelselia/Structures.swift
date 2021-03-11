@@ -7,7 +7,18 @@
 
 import Foundation
 
-struct Message: Decodable, Hashable {
+public class requests {
+    enum requestTypes {
+        case GET
+        case POST
+        case PATCH
+        case DELETE
+        case PUT
+    }
+}
+
+/*
+public struct Message: Hashable {
     struct author {
         var avatar: URL
         var bot: Bool
@@ -27,7 +38,7 @@ struct Message: Decodable, Hashable {
             var url: URL
         }
         var color: Int
-        var content: String
+        var embedContent: String
         var title: String
         enum type {
             case rich
@@ -46,3 +57,4 @@ struct Message: Decodable, Hashable {
     var tts: Bool
     var type: Int
 }
+*/

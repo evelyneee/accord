@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* backendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* backendClient.swift */; };
 		320BEAA8258D40CE000CC1E2 /* IssueCreationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */; };
+		32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* MessageEndpoint.swift */; };
 		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719325EB279000550BA5 /* Snowflakes.swift */; };
@@ -37,6 +38,7 @@
 
 /* Begin PBXFileReference section */
 		320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueCreationUI.swift; sourceTree = "<group>"; };
+		32291D3925F565B300881B5F /* MessageEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719325EB279000550BA5 /* Snowflakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowflakes.swift; sourceTree = "<group>"; };
@@ -67,13 +69,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		32AA719225EAEEF700550BA5 /* Network and API */ = {
+		32AA719225EAEEF700550BA5 /* libHelselia */ = {
 			isa = PBXGroup;
 			children = (
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
 				32AA719525EBB17B00550BA5 /* Structures.swift */,
+				32291D3925F565B300881B5F /* MessageEndpoint.swift */,
 			);
-			path = "Network and API";
+			path = libHelselia;
 			sourceTree = "<group>";
 		};
 		32ADD5872583997E008D1715 /* Frameworks */ = {
@@ -105,7 +108,7 @@
 		32F4C959256D7D3300343BB3 /* Helselia */ = {
 			isa = PBXGroup;
 			children = (
-				32AA719225EAEEF700550BA5 /* Network and API */,
+				32AA719225EAEEF700550BA5 /* libHelselia */,
 				32F3742A25733D8000ADB7E6 /* ClubView.swift */,
 				3278609E2590222B00EBEF23 /* HomeView.swift */,
 				32F3742B25733D8000ADB7E6 /* MyIssues.swift */,
@@ -193,6 +196,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				32F3743025733D8100ADB7E6 /* MyIssues.swift in Sources */,
+				32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ClubView.swift in Sources */,

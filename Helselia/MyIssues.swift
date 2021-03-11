@@ -2,7 +2,7 @@
 //  MyIssues.swift
 //  Helselia
 //
-//  Created by althio on 2020-11-27.
+//  Created by evelyn on 2020-11-27.
 //
 
 import SwiftUI

@@ -2,7 +2,7 @@
 //  IssueCreationUI.swift
 //  Helselia
 //
-//  Created by althio on 2020-12-18.
+//  Created by evelyn on 2020-12-18.
 //
 
 import SwiftUI

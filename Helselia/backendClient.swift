@@ -2,7 +2,7 @@
 //  backendClient.swift
 //  Helselia
 //
-//  Created by althio on 2020-11-27.
+//  Created by evelyn on 2020-11-27.
 //
 
 import Foundation
@@ -10,9 +10,7 @@ import CryptoKit
 
 public var messageControlTransfer: String = "hello"
 
-public var accountName = "whattheclap"
-
-public var pronouns = "they/them"
+public var pronouns = "she/her"
 
 public var openIssues = 5
 
@@ -20,7 +18,7 @@ public var totalIssues = 103
 
 public var usedLanguages = "Objective-C, Swift, Python"
 
-public var backendUsername = "althio"
+public var backendUsername = "evelyn"
 
 public var backendUsernameStorage: [String: String] = [:]
 public var backendMessageStorage: [String: String] = [:]

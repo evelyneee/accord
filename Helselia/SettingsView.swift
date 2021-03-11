@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  Helselia
 //
-//  Created by althio on 2020-12-08.
+//  Created by evelyn on 2020-12-08.
 //
 
 import SwiftUI

@@ -2,7 +2,7 @@
 //  ClubView.swift
 //  Helselia
 //
-//  Created by althio on 2020-11-27.
+//  Created by evelyn on 2020-11-27.
 //
 // SNOWFLAKES
 // Structure: TIMESTAMP MESSAGE USER CHANNEL
@@ -19,6 +19,8 @@ import SwiftUI
 var InputMsgIndex: Int = 0
 var root: Int = 999999999999
 let messages = GetMessages()
+let net = GetMessages()
+let parser = parseMessages()
 
 struct CoolButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
@@ -47,8 +49,6 @@ extension Dictionary {
     }
 }
 
-
-
 // the messaging view concept
 
 struct ClubView: View {
@@ -57,8 +57,6 @@ struct ClubView: View {
     
     @State var chatTextFieldContents: String = ""
     @State var username = backendUsername
-    @State public var msgArray: Array = ["test"]
-    
     @State public var ChannelKey = 1
     
 //    message storing vars
@@ -66,148 +64,42 @@ struct ClubView: View {
     @State var MaxChannelNumber = 0
     @State var userID = 999999999999
     @State var channelID = 999999999999
-    
-    @State public var messageStorage: [String: String] = [:]
-    
-//    althio's function collection
-    
-//    who are you
-    
-    public func WhoAreYou(userID: Int) -> String {
-        if userID == 999999999999 {
-            return backendUsername
-        } else {
-            return "Deleted User \(userID)"
+    @State var messageArray = [] {
+        didSet {
+            msgCount = messageArray.count
         }
     }
-    
-//    Message Sending
-    
-    public func sendMessage(IDChannel: Int) {
-        if chatTextFieldContents != "" && chatTextFieldContents != " " {
-            messageStorage["\(generateSnowflakes(userID: 999999999999, channelID: IDChannel, messageID: Int(1000000000000 - (messageStorage.count + 1))))"] = chatTextFieldContents
-            chatTextFieldContents = ""
-        }
-    }
-    
-//    grab number of messages marching channel ID
-    
-    public func messageCountInChannel(channelID: Int) -> Int {
-        var outputFilteredMessagesMatchingChannel: [String] = []
-        
-        for snowflakeReg in messageStorage.keys {
-            if parseSnowflakes(output: .channelID, snowflake: snowflakeReg).contains(String(channelID)) {
-                outputFilteredMessagesMatchingChannel.append(snowflakeReg)
-            }
-        }
-        return outputFilteredMessagesMatchingChannel.count
-    }
-    
-//    get message content to display
-    
-    public func findMessageContent(messageSituation: Int, channelLocation: Int) -> String {
-        var messageContents = ""
-        for snowflake in messageStorage.keys {
-            if parseSnowflakes(output: .channelID, snowflake: snowflake) == String(channelLocation) {
-                if String(messageSituation) == parseSnowflakes(output: .messageID, snowflake: snowflake) {
-                    messageContents = messageStorage[snowflake] ?? "error"
-                }
-            }
-        }
-        return messageContents
-    }
-    
-//    realign .messageID after deleting message
-    
-    public func switchToMinusOne(snowflake: String) -> String {
-        var addingOne: Int
-        if parseSnowflakes(output: .messageID, snowflake: snowflake) != "999999999999" {
-            addingOne = 1 + Int(parseSnowflakes(output: .messageID, snowflake: snowflake))!
-        } else {
-            addingOne = 999999999999
-        }
-        print(addingOne)
-        return parseSnowflakes(output: .timestamp, snowflake: snowflake) + String(addingOne) + parseSnowflakes(output: .userID, snowflake: snowflake) + parseSnowflakes(output: .channelID, snowflake: snowflake)
-    }
-    
-//    remove message
-    
-    public func removeMessage(messageSituation: Int, channelLocation: Int) {
-//      get snowflake to process here
-        for snowflake in messageStorage.keys {
-//          check if processing number matches when passing through keys
-            if parseSnowflakes(output: .channelID, snowflake: snowflake) == String(channelLocation) {
-//              second check here
-                if String(messageSituation) == parseSnowflakes(output: .messageID, snowflake: snowflake) {
-//                  remove message and realign keys for .messageID
-                    messageStorage.removeValue(forKey: snowflake)
-                    if 999999999999 - messageSituation != messageStorage.count {
-                        for messageNumber in (999999999999 - messageSituation)...(messageStorage.count - 1) {
-                            let currentMessage = 999999999999 - messageNumber
-                            let messageToSwitchFrom = currentMessage - 1
-                            messageStorage.switchKey(fromKey: (parseSnowflakes(output: .timestamp, snowflake: snowflake) + String(messageToSwitchFrom) + parseSnowflakes(output: .userID, snowflake: snowflake) + parseSnowflakes(output: .channelID, snowflake: snowflake)), toKey: (parseSnowflakes(output: .timestamp, snowflake: snowflake) + String(currentMessage) + parseSnowflakes(output: .userID, snowflake: snowflake) + parseSnowflakes(output: .channelID, snowflake: snowflake)))
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
+    @State var usernameArray = []
+    @State var msgCount: Int = 0
 //    actual view begins here
     
     var body: some View {
         
 //      chat view
-        
         VStack(alignment: .leading) {
             Spacer()
             HStack {
-                
 //                chat view
-                
-                List(0..<Int(messageCountInChannel(channelID: 999999999999)), id: \.self) { msgIndex in
+                List(0..<msgCount, id: \.self) { index in
                     HStack {
-                        if enablePFP == true {
-//                          Main style, like any messaging app
-                            Image("pfp").resizable()
-                                .frame(maxWidth: 33, maxHeight: 33)
-                                .clipShape(Circle())
-                                .padding(.horizontal, 5)
-                                .scaledToFill()
-                            VStack(alignment: .leading) {
-                                Text(WhoAreYou(userID: 999999999999))
-                                        .fontWeight(.bold)
-                                        .padding(EdgeInsets())
-                                Text(findMessageContent(messageSituation: 999999999999 - msgIndex, channelLocation: 999999999999))
-                            }
-                            Spacer()
-                            Button(action: {
-                                removeMessage(messageSituation: 999999999999 - msgIndex, channelLocation: 999999999999)
-                                backendMessageStorage = messageStorage
-                            }) {
-                                Image(systemName: "trash")
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                        } else {
-//                          IRC Style
-                            HStack(alignment: .top) {
-                                Text(WhoAreYou(userID: 999999999999))
-                                        .fontWeight(.bold)
-                                        .padding(EdgeInsets())
-                                Text(findMessageContent(messageSituation: 999999999999 - msgIndex, channelLocation: 999999999999))
-                                Spacer()
-                                Button(action: {
-                                    removeMessage(messageSituation: 999999999999 - msgIndex, channelLocation: 999999999999)
-                                    backendMessageStorage = messageStorage
-                                }) {
-                                    Image(systemName: "trash")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                            }
+                        Image("pfp").resizable()
+                            .frame(maxWidth: 33, maxHeight: 33)
+                            .clipShape(Circle())
+                            .padding(.horizontal, 5)
+                            .scaledToFill()
+                        VStack(alignment: .leading) {
+                            Text(usernameArray[index] as? String ?? "")
+                                    .fontWeight(.bold)
+                            Text(messageArray[index] as? String ?? "")
                         }
+                        Spacer()
+                        Button(action: {
+                            print("cock")
+                        }) {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
-
-
                 }
                 .padding([.leading, .top], -25.0)
                 .padding(.bottom, -9.0)
@@ -226,8 +118,7 @@ struct ClubView: View {
 //                where messages are sent
                 
                 Button(action: {
-                    sendMessage(IDChannel: 999999999999)
-                    backendMessageStorage = messageStorage
+                    print("cock")
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
@@ -237,14 +128,8 @@ struct ClubView: View {
             .padding()
         }
         .onAppear {
-            messageStorage = backendMessageStorage
-            messages.restructureToMessage(array: messages.getMessageArray(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", Bearer: "Bearer MTQ4Mjg1NjMwNDI0NjgyNDk2.YCedEQ.QAXCkOGcqHRozfA4bDLrpA6ty9w", Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301"))
+            messageArray = parser.getArray(forKey: "content", messageDictionary: net.getMessageArray(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", Bearer: "Bearer MTQ4Mjg1NjMwNDI0NjgyNDk2.YCedEQ.QAXCkOGcqHRozfA4bDLrpA6ty9w", Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET))
+            usernameArray = parser.getArray(forKey: "author", messageDictionary: net.getMessageArray(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", Bearer: "Bearer MTQ4Mjg1NjMwNDI0NjgyNDk2.YCedEQ.QAXCkOGcqHRozfA4bDLrpA6ty9w", Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET))
         }
-    }
-}
-
-struct ClubView_Previews: PreviewProvider {
-    static var previews: some View {
-        ClubView()
     }
 }
