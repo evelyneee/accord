@@ -65,15 +65,12 @@ struct ClubView: View {
     @State var MaxChannelNumber = 0
     @State var userID = 999999999999
     @State var channelID = 999999999999
-    @State var messageArray = []
-    @State var usernameArray = []
+    @State var data: [[String:Any]] = []
 //    actual view begins here
-    
     func refresh() {
-        messageArray = parser.getArray(forKey: "content", messageDictionary: net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:]))
-        usernameArray = parser.getArray(forKey: "author", messageDictionary: net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:]))
+        data = net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:])
     }
-    
+    let timer = Timer.publish(every: 1, on: .current, in: .common).autoconnect()
     var body: some View {
         
 //      chat view
@@ -81,7 +78,7 @@ struct ClubView: View {
             Spacer()
             HStack {
 //                chat view
-                List(0..<messageArray.count, id: \.self) { index in
+                List(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                     HStack {
                         Image("pfp").resizable()
                             .frame(maxWidth: 33, maxHeight: 33)
@@ -90,13 +87,13 @@ struct ClubView: View {
                             .scaledToFill()
                         VStack(alignment: .leading) {
                             HStack {
-                                Text((usernameArray[index] as? String ?? "").dropLast(5))
+                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
                                     .fontWeight(.bold)
-                                if (usernameArray[index] as? String ?? "").suffix(5) != "#0000" {
-                                    Text((usernameArray[index] as? String ?? "").suffix(5))
+                                if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
+                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
                                         .foregroundColor(Color.secondary)
                                 }
-                                if (usernameArray[index] as? String ?? "").suffix(5) == "#0000" {
+                                if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
                                     Text("Bot")
                                         .fontWeight(.semibold)
                                         .padding(2)
@@ -104,7 +101,7 @@ struct ClubView: View {
                                         .cornerRadius(2)
                                 }
                             }
-                            Text(messageArray[index] as? String ?? "")
+                            Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
                         }
                         Spacer()
                         Button(action: {
@@ -114,7 +111,11 @@ struct ClubView: View {
                         }
                         .buttonStyle(BorderlessButtonStyle())
                     }
+                    .rotationEffect(.radians(.pi))
+                    .scaleEffect(x: -1, y: 1, anchor: .center)
                 }
+                .rotationEffect(.radians(.pi))
+                .scaleEffect(x: -1, y: 1, anchor: .center)
                 .padding([.leading, .top], -25.0)
                 .padding(.bottom, -9.0)
                 
@@ -132,8 +133,9 @@ struct ClubView: View {
 //                where messages are sent
                 
                 Button(action: {
-                    messageArray = net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
+                    net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
                     refresh()
+                    chatTextFieldContents = ""
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
@@ -144,7 +146,6 @@ struct ClubView: View {
         }
         .onAppear {
             refresh()
-            print(token)
         }
     }
 }

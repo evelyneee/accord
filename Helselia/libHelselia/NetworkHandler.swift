@@ -12,6 +12,7 @@ let debug = true
 
 public class NetworkHandling {
     func request(url: String, token: String, Cookie: String, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
+        let group = DispatchGroup()
         var completion: Bool = false
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
@@ -42,9 +43,9 @@ public class NetworkHandling {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 retData = Data(data!)
-                if json == true {
+                if data != Data() {
                     do {
-                        returnArray = try JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                     }
@@ -63,18 +64,22 @@ public class NetworkHandling {
             while completion == false {
                 task.resume()
                 session.finishTasksAndInvalidate()
-                sleep(1)
                 if retData != Data() {
+                    do {
+                        returnArray = try JSONSerialization.jsonObject(with: retData ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                    } catch {
+                        print("error at serializing: \(error.localizedDescription)")
+                    }
                     completion = true
-                    break
+                    return returnArray
                 }
             }
         } else {
             task.resume()
             session.finishTasksAndInvalidate()
             sleep(1)
+            return returnArray
         }
-        return returnArray
     }
     func checkConnection() -> Bool {
         var ret: Bool = false
@@ -94,14 +99,8 @@ public class NetworkHandling {
                 ret = false
             }
         })
-        do {
-            task.resume()
-            session.finishTasksAndInvalidate()
-            return ret
-        } catch {
-            print("not responding")
-            ret = false
-            return ret
-        }
+        task.resume()
+        session.finishTasksAndInvalidate()
+        return ret
     }
 }
