@@ -10,6 +10,23 @@
 		3207A24425867586006C2665 /* backendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* backendClient.swift */; };
 		320BEAA8258D40CE000CC1E2 /* IssueCreationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */; };
 		32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* MessageEndpoint.swift */; };
+		3261381125FD576800DCAA51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3261381025FD576800DCAA51 /* Assets.xcassets */; };
+		3261381425FD576800DCAA51 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3261381325FD576800DCAA51 /* Preview Assets.xcassets */; };
+		3261384925FD57A200DCAA51 /* MyIssues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383525FD57A100DCAA51 /* MyIssues.swift */; };
+		3261384B25FD57A200DCAA51 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383725FD57A100DCAA51 /* ProfileView.swift */; };
+		3261384D25FD57A200DCAA51 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383A25FD57A100DCAA51 /* Structures.swift */; };
+		3261384E25FD57A200DCAA51 /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383B25FD57A100DCAA51 /* MessageEndpoint.swift */; };
+		3261384F25FD57A200DCAA51 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383C25FD57A100DCAA51 /* NetworkHandler.swift */; };
+		3261385025FD57A200DCAA51 /* Snowflakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383D25FD57A100DCAA51 /* Snowflakes.swift */; };
+		3261385125FD57A200DCAA51 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383E25FD57A100DCAA51 /* HomeView.swift */; };
+		3261385225FD57A200DCAA51 /* HelseliaiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261383F25FD57A200DCAA51 /* HelseliaiOSApp.swift */; };
+		3261385325FD57A200DCAA51 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384025FD57A200DCAA51 /* SettingsView.swift */; };
+		3261385425FD57A200DCAA51 /* IssueCreationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384225FD57A200DCAA51 /* IssueCreationUI.swift */; };
+		3261385525FD57A200DCAA51 /* ClubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384325FD57A200DCAA51 /* ClubView.swift */; };
+		3261385725FD57A200DCAA51 /* backendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384525FD57A200DCAA51 /* backendClient.swift */; };
+		3261385825FD57A200DCAA51 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384625FD57A200DCAA51 /* ContentView.swift */; };
+		3261385A25FD59C400DCAA51 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C963256D7D3500343BB3 /* Info.plist */; };
+		3266F17A25FC2A61004F8C97 /* messages.json in Resources */ = {isa = PBXBuildFile; fileRef = 3266F17925FC2A61004F8C97 /* messages.json */; };
 		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719325EB279000550BA5 /* Snowflakes.swift */; };
@@ -39,6 +56,26 @@
 /* Begin PBXFileReference section */
 		320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueCreationUI.swift; sourceTree = "<group>"; };
 		32291D3925F565B300881B5F /* MessageEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
+		3261380A25FD576500DCAA51 /* HelseliaiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelseliaiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3261381025FD576800DCAA51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3261381325FD576800DCAA51 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3261383525FD57A100DCAA51 /* MyIssues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyIssues.swift; sourceTree = "<group>"; };
+		3261383625FD57A100DCAA51 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3261383725FD57A100DCAA51 /* ProfileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		3261383825FD57A100DCAA51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3261383A25FD57A100DCAA51 /* Structures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
+		3261383B25FD57A100DCAA51 /* MessageEndpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
+		3261383C25FD57A100DCAA51 /* NetworkHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
+		3261383D25FD57A100DCAA51 /* Snowflakes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Snowflakes.swift; sourceTree = "<group>"; };
+		3261383E25FD57A100DCAA51 /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		3261383F25FD57A200DCAA51 /* HelseliaiOSApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelseliaiOSApp.swift; sourceTree = "<group>"; };
+		3261384025FD57A200DCAA51 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3261384125FD57A200DCAA51 /* Helselia.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Helselia.entitlements; sourceTree = "<group>"; };
+		3261384225FD57A200DCAA51 /* IssueCreationUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IssueCreationUI.swift; sourceTree = "<group>"; };
+		3261384325FD57A200DCAA51 /* ClubView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClubView.swift; sourceTree = "<group>"; };
+		3261384525FD57A200DCAA51 /* backendClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = backendClient.swift; sourceTree = "<group>"; };
+		3261384625FD57A200DCAA51 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3266F17925FC2A61004F8C97 /* messages.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = messages.json; path = ../../../messages.json; sourceTree = "<group>"; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719325EB279000550BA5 /* Snowflakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowflakes.swift; sourceTree = "<group>"; };
@@ -59,6 +96,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3261380725FD576500DCAA51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32F4C954256D7D3300343BB3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -69,6 +113,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3261380B25FD576500DCAA51 /* HelseliaiOS */ = {
+			isa = PBXGroup;
+			children = (
+				3261383825FD57A100DCAA51 /* Assets.xcassets */,
+				3261384525FD57A200DCAA51 /* backendClient.swift */,
+				3261384325FD57A200DCAA51 /* ClubView.swift */,
+				3261384625FD57A200DCAA51 /* ContentView.swift */,
+				3261384125FD57A200DCAA51 /* Helselia.entitlements */,
+				3261383F25FD57A200DCAA51 /* HelseliaiOSApp.swift */,
+				3261383E25FD57A100DCAA51 /* HomeView.swift */,
+				3261383625FD57A100DCAA51 /* Info.plist */,
+				3261384225FD57A200DCAA51 /* IssueCreationUI.swift */,
+				3261383925FD57A100DCAA51 /* libHelselia */,
+				3261383525FD57A100DCAA51 /* MyIssues.swift */,
+				3261383725FD57A100DCAA51 /* ProfileView.swift */,
+				3261384025FD57A200DCAA51 /* SettingsView.swift */,
+				3261383D25FD57A100DCAA51 /* Snowflakes.swift */,
+				3261381025FD576800DCAA51 /* Assets.xcassets */,
+				3261381225FD576800DCAA51 /* Preview Content */,
+			);
+			path = HelseliaiOS;
+			sourceTree = "<group>";
+		};
+		3261381225FD576800DCAA51 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				3261381325FD576800DCAA51 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3261383925FD57A100DCAA51 /* libHelselia */ = {
+			isa = PBXGroup;
+			children = (
+				3261383A25FD57A100DCAA51 /* Structures.swift */,
+				3261383B25FD57A100DCAA51 /* MessageEndpoint.swift */,
+				3261383C25FD57A100DCAA51 /* NetworkHandler.swift */,
+			);
+			path = libHelselia;
+			sourceTree = "<group>";
+		};
 		32AA719225EAEEF700550BA5 /* libHelselia */ = {
 			isa = PBXGroup;
 			children = (
@@ -92,6 +177,7 @@
 			isa = PBXGroup;
 			children = (
 				32F4C959256D7D3300343BB3 /* Helselia */,
+				3261380B25FD576500DCAA51 /* HelseliaiOS */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -101,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				32F4C957256D7D3300343BB3 /* Helselia.app */,
+				3261380A25FD576500DCAA51 /* HelseliaiOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,6 +208,7 @@
 				32AA719325EB279000550BA5 /* Snowflakes.swift */,
 				32F3742C25733D8000ADB7E6 /* backendClient.swift */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
+				3266F17925FC2A61004F8C97 /* messages.json */,
 				32F4C964256D7D3500343BB3 /* Helselia.entitlements */,
 			);
 			path = Helselia;
@@ -129,6 +217,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3261380925FD576500DCAA51 /* HelseliaiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3261382C25FD576800DCAA51 /* Build configuration list for PBXNativeTarget "HelseliaiOS" */;
+			buildPhases = (
+				3261380625FD576500DCAA51 /* Sources */,
+				3261380725FD576500DCAA51 /* Frameworks */,
+				3261380825FD576500DCAA51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HelseliaiOS;
+			productName = HelseliaiOS;
+			productReference = 3261380A25FD576500DCAA51 /* HelseliaiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		32F4C956256D7D3300343BB3 /* Helselia */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 32F4C97D256D7D3500343BB3 /* Build configuration list for PBXNativeTarget "Helselia" */;
@@ -153,9 +258,12 @@
 		32F4C94F256D7D3300343BB3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1230;
+				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1230;
 				TargetAttributes = {
+					3261380925FD576500DCAA51 = {
+						CreatedOnToolsVersion = 12.5;
+					};
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
 					};
@@ -175,22 +283,54 @@
 			projectRoot = "";
 			targets = (
 				32F4C956256D7D3300343BB3 /* Helselia */,
+				3261380925FD576500DCAA51 /* HelseliaiOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3261380825FD576500DCAA51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3261381425FD576800DCAA51 /* Preview Assets.xcassets in Resources */,
+				3261381125FD576800DCAA51 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32F4C955256D7D3300343BB3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3261385A25FD59C400DCAA51 /* Info.plist in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
+				3266F17A25FC2A61004F8C97 /* messages.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3261380625FD576500DCAA51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3261385425FD57A200DCAA51 /* IssueCreationUI.swift in Sources */,
+				3261385125FD57A200DCAA51 /* HomeView.swift in Sources */,
+				3261385825FD57A200DCAA51 /* ContentView.swift in Sources */,
+				3261385025FD57A200DCAA51 /* Snowflakes.swift in Sources */,
+				3261384D25FD57A200DCAA51 /* Structures.swift in Sources */,
+				3261385525FD57A200DCAA51 /* ClubView.swift in Sources */,
+				3261384B25FD57A200DCAA51 /* ProfileView.swift in Sources */,
+				3261384E25FD57A200DCAA51 /* MessageEndpoint.swift in Sources */,
+				3261385725FD57A200DCAA51 /* backendClient.swift in Sources */,
+				3261384925FD57A200DCAA51 /* MyIssues.swift in Sources */,
+				3261385225FD57A200DCAA51 /* HelseliaiOSApp.swift in Sources */,
+				3261384F25FD57A200DCAA51 /* NetworkHandler.swift in Sources */,
+				3261385325FD57A200DCAA51 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32F4C953256D7D3300343BB3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -214,6 +354,53 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		3261382D25FD576800DCAA51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"HelseliaiOS/Preview Content\"";
+				DEVELOPMENT_TEAM = UUGF4RZ8S8;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = HelseliaiOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = althio.HelseliaiOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3261382E25FD576800DCAA51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"HelseliaiOS/Preview Content\"";
+				DEVELOPMENT_TEAM = UUGF4RZ8S8;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = HelseliaiOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = althio.HelseliaiOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		32F4C97B256D7D3500343BB3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -376,6 +563,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3261382C25FD576800DCAA51 /* Build configuration list for PBXNativeTarget "HelseliaiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3261382D25FD576800DCAA51 /* Debug */,
+				3261382E25FD576800DCAA51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		32F4C952256D7D3300343BB3 /* Build configuration list for PBXProject "Helselia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -14,6 +14,7 @@ public class NetworkHandling {
     func request(url: String, token: String, Cookie: String, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
         let group = DispatchGroup()
         var completion: Bool = false
+        var tries: Int = 0
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -66,11 +67,24 @@ public class NetworkHandling {
                 session.finishTasksAndInvalidate()
                 if retData != Data() {
                     do {
-                        returnArray = try JSONSerialization.jsonObject(with: retData ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        returnArray = try JSONSerialization.jsonObject(with: retData, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                     }
                     completion = true
+                    return returnArray
+                }
+                if task.error != nil {
+                    guard let file = Bundle.main.url(forResource: "messages.json", withExtension: nil)
+                        else {
+                            fatalError("Couldn't find in main bundle.")
+                    }
+                    do {
+                        let backupdata = try Data(contentsOf: file)
+                        returnArray = try JSONSerialization.jsonObject(with: backupdata as! Data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                    } catch {
+                        
+                    }
                     return returnArray
                 }
             }
