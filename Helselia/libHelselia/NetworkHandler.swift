@@ -74,19 +74,6 @@ public class NetworkHandling {
                     completion = true
                     return returnArray
                 }
-                if task.error != nil {
-                    guard let file = Bundle.main.url(forResource: "messages.json", withExtension: nil)
-                        else {
-                            fatalError("Couldn't find in main bundle.")
-                    }
-                    do {
-                        let backupdata = try Data(contentsOf: file)
-                        returnArray = try JSONSerialization.jsonObject(with: backupdata as! Data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                    } catch {
-                        
-                    }
-                    return returnArray
-                }
             }
         } else {
             task.resume()

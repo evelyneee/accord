@@ -26,7 +26,6 @@
 		3261385725FD57A200DCAA51 /* backendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384525FD57A200DCAA51 /* backendClient.swift */; };
 		3261385825FD57A200DCAA51 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384625FD57A200DCAA51 /* ContentView.swift */; };
 		3261385A25FD59C400DCAA51 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C963256D7D3500343BB3 /* Info.plist */; };
-		3266F17A25FC2A61004F8C97 /* messages.json in Resources */ = {isa = PBXBuildFile; fileRef = 3266F17925FC2A61004F8C97 /* messages.json */; };
 		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719325EB279000550BA5 /* Snowflakes.swift */; };
@@ -75,7 +74,6 @@
 		3261384325FD57A200DCAA51 /* ClubView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClubView.swift; sourceTree = "<group>"; };
 		3261384525FD57A200DCAA51 /* backendClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = backendClient.swift; sourceTree = "<group>"; };
 		3261384625FD57A200DCAA51 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		3266F17925FC2A61004F8C97 /* messages.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = messages.json; path = ../../../messages.json; sourceTree = "<group>"; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719325EB279000550BA5 /* Snowflakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowflakes.swift; sourceTree = "<group>"; };
@@ -208,7 +206,6 @@
 				32AA719325EB279000550BA5 /* Snowflakes.swift */,
 				32F3742C25733D8000ADB7E6 /* backendClient.swift */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
-				3266F17925FC2A61004F8C97 /* messages.json */,
 				32F4C964256D7D3500343BB3 /* Helselia.entitlements */,
 			);
 			path = Helselia;
@@ -304,7 +301,6 @@
 			files = (
 				3261385A25FD59C400DCAA51 /* Info.plist in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
-				3266F17A25FC2A61004F8C97 /* messages.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,7 +360,7 @@
 				DEVELOPMENT_TEAM = UUGF4RZ8S8;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = HelseliaiOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -387,7 +383,7 @@
 				DEVELOPMENT_TEAM = UUGF4RZ8S8;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = HelseliaiOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
