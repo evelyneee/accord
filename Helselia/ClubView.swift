@@ -68,7 +68,7 @@ struct ClubView: View {
     @State var data: [[String:Any]] = []
 //    actual view begins here
     func refresh() {
-        data = net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: true, type: .GET, bodyObject: [:])
+        data = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: true, type: .GET, bodyObject: [:])
     }
     let timer = Timer.publish(every: 1, on: .current, in: .common).autoconnect()
     var body: some View {
@@ -126,21 +126,25 @@ struct ClubView: View {
 //            the controls part, easy
             
             HStack(alignment: .bottom) {
-                TextField("What's wrong?", text: $chatTextFieldContents)
+                TextField("What's up?", text: $chatTextFieldContents)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(EdgeInsets())
 
 //                where messages are sent
                 
                 Button(action: {
-                    net.request(url: "https://constanze.live/api/v1/channels/148502836349636615/messages", token: token, Cookie: "__cfduid=d7ec9d856babfb5509db14c7da55eaf4f1614381301", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
-                    refresh()
-                    chatTextFieldContents = ""
+                    DispatchQueue.main.async {
+                        _ = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
+                        print("done")
+                        refresh()
+                        chatTextFieldContents = ""
+                    }
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
-                .coolButtonStyle()
-                .shadow(radius: 2)
+                .keyboardShortcut(.defaultAction)
+                .buttonStyle(BorderlessButtonStyle())
+                .foregroundColor(Color.white)
             }
             .padding()
         }

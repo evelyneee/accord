@@ -38,6 +38,7 @@
 		32F4C95B256D7D3300343BB3 /* HelseliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* HelseliaApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
+		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -56,13 +57,6 @@
 /* Begin PBXFileReference section */
 		320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueCreationUI.swift; sourceTree = "<group>"; };
 		32291D3925F565B300881B5F /* MessageEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
-		322AF4DD2600193900453BDD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		322AF4DF2600193900453BDD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		322AF4E12600193B00453BDD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		322AF4E42600193B00453BDD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		322AF4E72600193B00453BDD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		322AF4E92600193B00453BDD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		322AF4EA2600193B00453BDD /* HelseliaCOCOA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelseliaCOCOA.entitlements; sourceTree = "<group>"; };
 		322AF50C26001C5700453BDD /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		3261380A25FD576500DCAA51 /* HelseliaiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelseliaiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3261381025FD576800DCAA51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -100,6 +94,7 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Helselia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Helselia.entitlements; sourceTree = "<group>"; };
+		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,28 +115,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		322AF4DC2600193900453BDD /* HelseliaCOCOA */ = {
-			isa = PBXGroup;
-			children = (
-				322AF4DD2600193900453BDD /* AppDelegate.swift */,
-				322AF4DF2600193900453BDD /* ContentView.swift */,
-				322AF4E12600193B00453BDD /* Assets.xcassets */,
-				322AF4E62600193B00453BDD /* Main.storyboard */,
-				322AF4E92600193B00453BDD /* Info.plist */,
-				322AF4EA2600193B00453BDD /* HelseliaCOCOA.entitlements */,
-				322AF4E32600193B00453BDD /* Preview Content */,
-			);
-			path = HelseliaCOCOA;
-			sourceTree = "<group>";
-		};
-		322AF4E32600193B00453BDD /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				322AF4E42600193B00453BDD /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
 		3261380B25FD576500DCAA51 /* HelseliaiOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -207,7 +180,6 @@
 			children = (
 				32F4C959256D7D3300343BB3 /* Helselia */,
 				3261380B25FD576500DCAA51 /* HelseliaiOS */,
-				322AF4DC2600193900453BDD /* HelseliaCOCOA */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -227,6 +199,7 @@
 			children = (
 				32AA719225EAEEF700550BA5 /* libHelselia */,
 				32F3742A25733D8000ADB7E6 /* ClubView.swift */,
+				A88A3D14265B22C4003AE08F /* LoginView.swift */,
 				3278609E2590222B00EBEF23 /* HomeView.swift */,
 				32F3742B25733D8000ADB7E6 /* MyIssues.swift */,
 				320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */,
@@ -373,6 +346,7 @@
 				32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
 				3278609F2590222B00EBEF23 /* HomeView.swift in Sources */,
+				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
 				3207A24425867586006C2665 /* backendClient.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
@@ -382,17 +356,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		322AF4E62600193B00453BDD /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				322AF4E72600193B00453BDD /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		3261382D25FD576800DCAA51 /* Debug */ = {

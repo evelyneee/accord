@@ -2,7 +2,7 @@
 //  HomeView.swift
 //  Helselia
 //
-//  Created by Charles Bélanger on 2020-12-20.
+//  Created by Évelyne Bélanger on 2020-12-20.
 //
 
 import SwiftUI

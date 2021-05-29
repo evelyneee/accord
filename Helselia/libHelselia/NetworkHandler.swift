@@ -20,14 +20,14 @@ struct socketPayload {
 }
 
 public class NetworkHandling {
-    func request(url: String, token: String, Cookie: String, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
-        let group = DispatchGroup()
+    func request(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
         var completion: Bool = false
-        var tries: Int = 0
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        var retData: Data = Data()
+        var retData: Data?
+        
+        // setup of the request
         switch type {
         case .GET:
             request.httpMethod = "GET"
@@ -40,13 +40,31 @@ public class NetworkHandling {
         case .PUT:
             request.httpMethod = "PUT"
         }
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.addValue(Cookie, forHTTPHeaderField: "Cookie")
-        if type == .POST {
+        
+        // helselia specific stuff starts here
+        
+        if token != nil {
+            request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
+        }
+        if json == false && type == .POST {
+            let bodyParameters = [
+                "email": "ebel@helselia.dev",
+                "password": "ebelanger27",
+            ]
+            let bodyString = (bodyObject as? [String:String] ?? [:]).queryParameters
+            print(bodyString)
+            request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        }
+        request.addValue(Cookie ?? "", forHTTPHeaderField: "Cookie")
+        if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
         var returnArray: [[String:Any]] = []
+        
+        // ends here
+        
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
                 // Success
@@ -58,12 +76,15 @@ public class NetworkHandling {
                         returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
-                    }
+                        /Users/evelyn/Documents/Helselia/Helselia/libHelselia                  }
                 } else {
                     returnArray = [["Code":statusCode]]
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print(request.allHTTPHeaderFields)
+                    print(request.url)
+                    print(bodyObject)
                 }
             }
             else {
@@ -78,7 +99,7 @@ public class NetworkHandling {
                 if retData != Data() {
                     print("none yet : \(Date())")
                     do {
-                        returnArray = try JSONSerialization.jsonObject(with: retData, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        returnArray = try JSONSerialization.jsonObject(with: retData ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                     }
@@ -228,3 +249,29 @@ public class WebSocketHandler {
         return checkConnection()
     }
 }
+
+protocol URLQueryParameterStringConvertible {
+    var queryParameters: String {get}
+}
+
+extension Dictionary : URLQueryParameterStringConvertible {
+    var queryParameters: String {
+        var parts: [String] = []
+        for (key, value) in self {
+            let part = String(format: "%@=%@",
+                String(describing: key).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!,
+                String(describing: value).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
+            parts.append(part as String)
+        }
+        return parts.joined(separator: "&")
+    }
+    
+}
+
+extension URL {
+    func appendingQueryParameters(_ parametersDictionary : Dictionary<String, String>) -> URL {
+        let URLString : String = String(format: "%@?%@", self.absoluteString, parametersDictionary.queryParameters)
+        return URL(string: URLString)!
+    }
+}
+
