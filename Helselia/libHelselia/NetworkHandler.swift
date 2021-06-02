@@ -70,13 +70,13 @@ public class NetworkHandling {
                 // Success
                 print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
-                retData = Data(data!)
                 if data != Data() {
                     do {
                         returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        print(returnArray)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
-                        /Users/evelyn/Documents/Helselia/Helselia/libHelselia                  }
+                    }
                 } else {
                     returnArray = [["Code":statusCode]]
                 }
@@ -96,15 +96,10 @@ public class NetworkHandling {
             while completion == false {
                 task.resume()
                 session.finishTasksAndInvalidate()
-                if retData != Data() {
-                    print("none yet : \(Date())")
-                    do {
-                        returnArray = try JSONSerialization.jsonObject(with: retData ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                    } catch {
-                        print("error at serializing: \(error.localizedDescription)")
-                    }
+                if !(returnArray.isEmpty) {
                     completion = true
                     print("returned properly \(Date())")
+                    print(retData)
                     return returnArray
                 }
             }

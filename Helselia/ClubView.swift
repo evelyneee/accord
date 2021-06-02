@@ -135,6 +135,7 @@ struct ClubView: View {
                 Button(action: {
                     DispatchQueue.main.async {
                         _ = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
+
                         print("done")
                         refresh()
                         chatTextFieldContents = ""
