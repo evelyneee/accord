@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3207A24425867586006C2665 /* backendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* backendClient.swift */; };
+		3207A24425867586006C2665 /* temp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* temp.swift */; };
 		320BEAA8258D40CE000CC1E2 /* IssueCreationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */; };
 		32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* MessageEndpoint.swift */; };
 		322AF50D26001C5700453BDD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 322AF50C26001C5700453BDD /* Main.storyboard */; };
@@ -28,7 +28,6 @@
 		3261385825FD57A200DCAA51 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3261384625FD57A200DCAA51 /* ContentView.swift */; };
 		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
-		32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719325EB279000550BA5 /* Snowflakes.swift */; };
 		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
 		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
 		32F2BB2B25FEC0230070C872 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C963256D7D3500343BB3 /* Info.plist */; };
@@ -79,7 +78,6 @@
 		3261384625FD57A200DCAA51 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
-		32AA719325EB279000550BA5 /* Snowflakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowflakes.swift; sourceTree = "<group>"; };
 		32AA719525EBB17B00550BA5 /* Structures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
 		32ADD5882583997F008D1715 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		32ADD58A2583997F008D1715 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -87,7 +85,7 @@
 		32F37415257302C300ADB7E6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		32F3742A25733D8000ADB7E6 /* ClubView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClubView.swift; sourceTree = "<group>"; };
 		32F3742B25733D8000ADB7E6 /* MyIssues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyIssues.swift; sourceTree = "<group>"; };
-		32F3742C25733D8000ADB7E6 /* backendClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = backendClient.swift; sourceTree = "<group>"; };
+		32F3742C25733D8000ADB7E6 /* temp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = temp.swift; sourceTree = "<group>"; };
 		32F4C957256D7D3300343BB3 /* Helselia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helselia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F4C95A256D7D3300343BB3 /* HelseliaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelseliaApp.swift; sourceTree = "<group>"; };
 		32F4C95C256D7D3300343BB3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -197,24 +195,31 @@
 		32F4C959256D7D3300343BB3 /* Helselia */ = {
 			isa = PBXGroup;
 			children = (
-				32AA719225EAEEF700550BA5 /* libHelselia */,
-				32F3742A25733D8000ADB7E6 /* ClubView.swift */,
-				A88A3D14265B22C4003AE08F /* LoginView.swift */,
-				3278609E2590222B00EBEF23 /* HomeView.swift */,
-				32F3742B25733D8000ADB7E6 /* MyIssues.swift */,
-				320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */,
 				32F4C95A256D7D3300343BB3 /* HelseliaApp.swift */,
 				32F4C95C256D7D3300343BB3 /* ContentView.swift */,
-				32F37415257302C300ADB7E6 /* ProfileView.swift */,
-				32DC838A257FA71B004520AE /* SettingsView.swift */,
+				32AA719225EAEEF700550BA5 /* libHelselia */,
+				A8FA9A9B266823B4003710A4 /* UI */,
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
-				32AA719325EB279000550BA5 /* Snowflakes.swift */,
-				32F3742C25733D8000ADB7E6 /* backendClient.swift */,
+				32F3742C25733D8000ADB7E6 /* temp.swift */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
 				32F4C964256D7D3500343BB3 /* Helselia.entitlements */,
 				322AF50C26001C5700453BDD /* Main.storyboard */,
 			);
 			path = Helselia;
+			sourceTree = "<group>";
+		};
+		A8FA9A9B266823B4003710A4 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				32F3742A25733D8000ADB7E6 /* ClubView.swift */,
+				A88A3D14265B22C4003AE08F /* LoginView.swift */,
+				3278609E2590222B00EBEF23 /* HomeView.swift */,
+				32F3742B25733D8000ADB7E6 /* MyIssues.swift */,
+				320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */,
+				32F37415257302C300ADB7E6 /* ProfileView.swift */,
+				32DC838A257FA71B004520AE /* SettingsView.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -343,12 +348,11 @@
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ClubView.swift in Sources */,
-				32AA719425EB279000550BA5 /* Snowflakes.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
 				3278609F2590222B00EBEF23 /* HomeView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
-				3207A24425867586006C2665 /* backendClient.swift in Sources */,
+				3207A24425867586006C2665 /* temp.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				320BEAA8258D40CE000CC1E2 /* IssueCreationUI.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* HelseliaApp.swift in Sources */,

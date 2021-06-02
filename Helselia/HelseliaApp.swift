@@ -17,7 +17,7 @@ struct HelseliaApp: App {
 //                    LoginView()
 //                        .frame(width: 450, height: 300)
 //                }
-                .frame(minWidth: 800, minHeight: 500)
+                .frame(minWidth: 500, minHeight: 300)
         }
     }
 }

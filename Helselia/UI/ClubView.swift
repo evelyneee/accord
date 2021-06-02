@@ -4,12 +4,6 @@
 //
 //  Created by evelyn on 2020-11-27.
 //
-// SNOWFLAKES
-// Structure: TIMESTAMP MESSAGE USER CHANNEL
-//
-// Root Number
-// 999999999999
-// aka 12x the number 9
 
 
 import SwiftUI
