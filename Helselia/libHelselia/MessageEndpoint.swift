@@ -50,6 +50,8 @@ public class parseMessages {
     }
 }
 
+#warning("rewrite this shit you lazy bitch (evelyn)")
+
 struct ImageWithURL: View {
     
     @ObservedObject var imageLoader: ImageLoaderAndCache

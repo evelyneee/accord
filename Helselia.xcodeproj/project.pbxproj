@@ -40,7 +40,6 @@
 /* Begin PBXFileReference section */
 		320BEAA7258D40CE000CC1E2 /* IssueCreationUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueCreationUI.swift; sourceTree = "<group>"; };
 		32291D3925F565B300881B5F /* MessageEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
-		3261380A25FD576500DCAA51 /* HelseliaiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelseliaiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719525EBB17B00550BA5 /* Structures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
@@ -61,13 +60,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3261380725FD576500DCAA51 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		32F4C954256D7D3300343BB3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -110,7 +102,6 @@
 			isa = PBXGroup;
 			children = (
 				32F4C957256D7D3300343BB3 /* Helselia.app */,
-				3261380A25FD576500DCAA51 /* HelseliaiOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -147,23 +138,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3261380925FD576500DCAA51 /* HelseliaiOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3261382C25FD576800DCAA51 /* Build configuration list for PBXNativeTarget "HelseliaiOS" */;
-			buildPhases = (
-				3261380625FD576500DCAA51 /* Sources */,
-				3261380725FD576500DCAA51 /* Frameworks */,
-				3261380825FD576500DCAA51 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = HelseliaiOS;
-			productName = HelseliaiOS;
-			productReference = 3261380A25FD576500DCAA51 /* HelseliaiOS.app */;
-			productType = "com.apple.product-type.application";
-		};
 		32F4C956256D7D3300343BB3 /* Helselia */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 32F4C97D256D7D3500343BB3 /* Build configuration list for PBXNativeTarget "Helselia" */;
@@ -191,9 +165,6 @@
 				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1230;
 				TargetAttributes = {
-					3261380925FD576500DCAA51 = {
-						CreatedOnToolsVersion = 12.5;
-					};
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
 					};
@@ -213,19 +184,11 @@
 			projectRoot = "";
 			targets = (
 				32F4C956256D7D3300343BB3 /* Helselia */,
-				3261380925FD576500DCAA51 /* HelseliaiOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		3261380825FD576500DCAA51 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		32F4C955256D7D3300343BB3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -238,13 +201,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		3261380625FD576500DCAA51 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		32F4C953256D7D3300343BB3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -268,53 +224,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		3261382D25FD576800DCAA51 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"HelseliaiOS/Preview Content\"";
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = HelseliaiOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = althio.HelseliaiOS;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		3261382E25FD576800DCAA51 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"HelseliaiOS/Preview Content\"";
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = HelseliaiOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = althio.HelseliaiOS;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		32F4C97B256D7D3500343BB3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -478,15 +387,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3261382C25FD576800DCAA51 /* Build configuration list for PBXNativeTarget "HelseliaiOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				3261382D25FD576800DCAA51 /* Debug */,
-				3261382E25FD576800DCAA51 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		32F4C952256D7D3300343BB3 /* Build configuration list for PBXProject "Helselia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

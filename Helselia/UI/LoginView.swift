@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State var username: String = "ebel@helselia.dev"
-    @State private var passcode: String = "ebelanger27"
+    @State var username: String = ""
+    @State private var passcode: String = ""
     @Environment(\.presentationMode) var shown
     var body: some View {
         VStack {
@@ -26,12 +26,10 @@ struct LoginView: View {
                 }
                 
             }) {
-                
+                HStack {
+                    Text("Login")
+                }
             }
-        }
-        .onAppear {
-            let response = net.login(username: username, password: passcode)
-            print(response)
         }
         .padding()
     }

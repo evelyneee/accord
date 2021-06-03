@@ -8,7 +8,7 @@
 
 import Foundation
 
-let debug = true
+let debug = false
 
 struct socketPayload {
     var op: Int
@@ -47,12 +47,7 @@ public class NetworkHandling {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
         }
         if json == false && type == .POST {
-            let bodyParameters = [
-                "email": "ebel@helselia.dev",
-                "password": "ebelanger27",
-            ]
             let bodyString = (bodyObject as? [String:String] ?? [:]).queryParameters
-            print(bodyString)
             request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
@@ -73,7 +68,6 @@ public class NetworkHandling {
                 if data != Data() {
                     do {
                         returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                        print(returnArray)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                     }

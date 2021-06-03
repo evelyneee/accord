@@ -15,7 +15,7 @@ struct HelseliaApp: App {
             ContentView()
                 .sheet(isPresented: $modalIsPresented) {
                     LoginView()
-                        .frame(width: 450, height: 300)
+                        .frame(width: 450, height: 200)
                 }
                 .frame(minWidth: 500, minHeight: 300)
         }

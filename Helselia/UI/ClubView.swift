@@ -60,6 +60,7 @@ struct ClubView: View {
     @State var userID = 999999999999
     @State var channelID = 999999999999
     @State var data: [[String:Any]] = []
+    @State var pfps: [Any] = []
 //    actual view begins here
     func refresh() {
         data = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: true, type: .GET, bodyObject: [:])
@@ -74,11 +75,18 @@ struct ClubView: View {
 //                chat view
                 List(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                     HStack {
-                        Image("pfp").resizable()
-                            .frame(maxWidth: 33, maxHeight: 33)
-                            .clipShape(Circle())
-                            .padding(.horizontal, 5)
-                            .scaledToFill()
+                        if let imageURL = pfps[index] as? String {
+                            ImageWithURL(imageURL)
+                                .frame(maxWidth: 33, maxHeight: 33)
+                                .padding(.horizontal, 5)
+                                .clipShape(Circle())
+                        } else {
+                            Image("pfp").resizable()
+                                .frame(maxWidth: 33, maxHeight: 33)
+                                .padding(.horizontal, 5)
+                                .clipShape(Circle())
+                                .scaledToFill()
+                        }
                         VStack(alignment: .leading) {
                             HStack {
                                 Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
@@ -146,6 +154,7 @@ struct ClubView: View {
         .onAppear {
             if token != "" {
                 refresh()
+                pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
             }
         }
     }
