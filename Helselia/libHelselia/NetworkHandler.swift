@@ -8,7 +8,7 @@
 
 import Foundation
 
-let debug = false
+let debug = true
 
 struct socketPayload {
     var op: Int

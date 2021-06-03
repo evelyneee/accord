@@ -107,7 +107,9 @@ struct ClubView: View {
                         }
                         Spacer()
                         Button(action: {
-                            print("cock")
+                            print("https://constanze.live/api/v1/channels/177711870931767299/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])")
+                            net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .DELETE, bodyObject: [:])
+                            refresh()
                         }) {
                             Image(systemName: "trash")
                         }
