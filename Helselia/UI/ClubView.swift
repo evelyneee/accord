@@ -49,7 +49,8 @@ struct ClubView: View {
     
     
 //    main variables for chat, will be migrated to backendClient later
-    
+    @Binding var clubID: String
+    @Binding var channelID: String
     @State var chatTextFieldContents: String = ""
     @State var username = backendUsername
     @State public var ChannelKey = 1
@@ -57,8 +58,6 @@ struct ClubView: View {
 //    message storing vars
     
     @State var MaxChannelNumber = 0
-    @State var userID = 999999999999
-    @State var channelID = 999999999999
     @State var data: [[String:Any]] = []
     @State var pfps: [Any] = []
 //    actual view begins here

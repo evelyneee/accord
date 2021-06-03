@@ -9,26 +9,20 @@ import SwiftUI
 
 struct ContentView: View {
     @State public var selection: Int?
+    @State var clubs: [[String:Any]] = []
     var body: some View {
         NavigationView {
             List {
                 Spacer()
-                NavigationLink(destination: ClubView(), tag: 0, selection: self.$selection) {
-                    HStack {
-                        Image(systemName: "captions.bubble.fill")
-                            .imageScale(.small)
-                        Text("Swift")
-                            .fontWeight(.semibold)
-                            .font(.title2)
-                    }
-                }
-                NavigationLink(destination: ClubView()) {
-                    HStack {
-                        Image(systemName: "captions.bubble.fill")
-                            .imageScale(.small)
-                        Text("Objective-C")
-                            .fontWeight(.semibold)
-                            .font(.title2)
+                ForEach(0..<clubs.count, id: \.self) { index in
+                    NavigationLink(destination: ClubView(clubID: Binding.constant(parser.getArray(forKey: "id", messageDictionary: clubs)[index] as! String), channelID: Binding.constant("177711870931767299")), tag: (index + 1), selection: self.$selection) {
+                        HStack {
+                            Image(systemName: "captions.bubble.fill")
+                                .imageScale(.small)
+                            Text(parser.getArray(forKey: "name", messageDictionary: clubs)[index] as! String)
+                                .fontWeight(.semibold)
+                                .font(.title2)
+                        }
                     }
                 }
                 Divider()
@@ -40,17 +34,6 @@ struct ContentView: View {
                             .fontWeight(.semibold)
                             .font(.title2)
                     }
-                }
-                ForEach(0..<issueContainer.count, id: \.self) { issueIdentifier in
-                    NavigationLink(
-                        destination: ClubView(),
-                        label: {
-                            Image(systemName: "questionmark.circle.fill")
-                            Text(issueContainer[issueIdentifier])
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                        })
-                        .padding(.leading, 5)
                 }
                 Divider()
                 NavigationLink(destination: HomeView()) {
@@ -78,6 +61,8 @@ struct ContentView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onAppear {
             self.selection = 0
+            clubs = net.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .GET, bodyObject: [:])
+            print(clubs)
         }
     }
 }

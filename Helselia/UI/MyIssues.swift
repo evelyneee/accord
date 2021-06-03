@@ -30,19 +30,6 @@ struct MyIssues: View {
                 .buttonStyle(BorderlessButtonStyle())
                 .padding()
             }
-            NavigationView {
-                List(0..<issueContainer.count, id: \.self) { issueIdentifier in
-                    NavigationLink(
-                        destination: ClubView(),
-                        label: {
-                            Image(systemName: "questionmark.circle.fill")
-                            Text(issueContainer[issueIdentifier])
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
-                }
-            }
             Spacer()
         }
 
