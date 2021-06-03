@@ -22,6 +22,7 @@ struct LoginView: View {
                 let response = net.login(username: username, password: passcode)
                 if let rettoken = response as? String {
                     token = rettoken
+                    UserDefaults.standard.set(token, forKey: "token")
                     self.shown.wrappedValue.dismiss()
                 }
                 
@@ -30,6 +31,7 @@ struct LoginView: View {
                     Text("Login")
                 }
             }
+            .keyboardShortcut(.defaultAction)
         }
         .padding()
     }

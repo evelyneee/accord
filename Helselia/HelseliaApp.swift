@@ -9,10 +9,15 @@ import SwiftUI
 
 @main
 struct HelseliaApp: App {
-    @State private var modalIsPresented: Bool = true
+    @State private var modalIsPresented: Bool = false
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    if token == nil {
+                        modalIsPresented = true
+                    }
+                }
                 .sheet(isPresented: $modalIsPresented) {
                     LoginView()
                         .frame(width: 450, height: 200)

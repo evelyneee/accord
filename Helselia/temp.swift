@@ -39,6 +39,6 @@ public var refLinks: [String: String] = [:]
 
 var issueContainer: [String] = []
 
-public var token = ""
+public var token = UserDefaults.standard.string(forKey: "token")
 
 

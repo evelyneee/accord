@@ -97,7 +97,7 @@ struct SettingsView: View {
 
         }
         .onAppear {
-            usernameSettings = token
+            usernameSettings = (token ?? "")
             showPFP = enablePFP
         }
         .frame(minWidth: 400, minHeight: 300)

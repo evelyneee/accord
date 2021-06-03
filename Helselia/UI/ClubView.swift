@@ -64,6 +64,7 @@ struct ClubView: View {
 //    actual view begins here
     func refresh() {
         data = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: true, type: .GET, bodyObject: [:])
+        pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
     }
     let timer = Timer.publish(every: 1, on: .current, in: .common).autoconnect()
     var body: some View {
@@ -127,7 +128,7 @@ struct ClubView: View {
             }
             .padding(.leading, 25.0)
             
-//            the controls part, easy
+//            the controls
             
             HStack(alignment: .bottom) {
                 TextField("What's up?", text: $chatTextFieldContents)
@@ -137,12 +138,14 @@ struct ClubView: View {
 //                where messages are sent
                 
                 Button(action: {
+                    var tempTextField = chatTextFieldContents
+                    chatTextFieldContents = ""
                     DispatchQueue.main.async {
-                        _ = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"])
+                        _ = net.request(url: "https://constanze.live/api/v1/channels/177711870931767299/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["content":"\(String(tempTextField))"])
 
                         print("done")
                         refresh()
-                        chatTextFieldContents = ""
+                        tempTextField = ""
                     }
                 }) {
                     Image(systemName: "paperplane.fill")
@@ -154,9 +157,9 @@ struct ClubView: View {
             .padding()
         }
         .onAppear {
-            if token != "" {
+            if token != nil {
+                print("token found \(token)")
                 refresh()
-                pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
             }
         }
     }
