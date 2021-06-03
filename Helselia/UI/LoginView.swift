@@ -10,6 +10,7 @@ import SwiftUI
 struct LoginView: View {
     @State var username: String = "ebel@helselia.dev"
     @State private var passcode: String = "ebelanger27"
+    @Environment(\.presentationMode) var shown
     var body: some View {
         VStack {
             Text("Login to Helselia")
@@ -18,11 +19,19 @@ struct LoginView: View {
             TextField("Username or Email", text: $username)
             TextField("Password", text: $passcode)
             Button(action: {
-                let response = net.request(url: "https://constanze.live/api/v1/auth/login", token: nil, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["email":username, "password":passcode])
-                print(response)
+                let response = net.login(username: username, password: passcode)
+                if let rettoken = response as? String {
+                    token = rettoken
+                    self.shown.wrappedValue.dismiss()
+                }
+                
             }) {
                 
             }
+        }
+        .onAppear {
+            let response = net.login(username: username, password: passcode)
+            print(response)
         }
         .padding()
     }

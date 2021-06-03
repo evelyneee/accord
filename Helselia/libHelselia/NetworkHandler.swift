@@ -110,27 +110,66 @@ public class NetworkHandling {
             return returnArray
         }
     }
-    func checkConnection() -> Bool {
-        var ret: Bool = false
+    func login(username: String, password: String) -> String {
+        var completion: Bool = false
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
-        var request = URLRequest(url: (URL(string: "https://constanze.live/api/v1/auth/login") ?? URL(string: "#"))!)
+        var request = URLRequest(url: (URL(string: "https://constanze.live/api/v1/auth/login") ?? URL(string: "#")!))
+        var retData: Data?
+        
         request.httpMethod = "POST"
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", forHTTPHeaderField: "Cookie")
+
+        // Form URL-Encoded Body
+        let bodyObject: [String : Any] = [
+            "email": username,
+            "password": password
+        ]
+        
+        request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+        var token: String = ""
+        
+        // ends here
+        
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
-                let statusCode = (response as! HTTPURLResponse).statusCode
                 // Success
-                ret = true
-                print("URL Session Task Succeeded: HTTP \(statusCode)")
+                print("success \(Date())")
+                let statusCode = (response as! HTTPURLResponse).statusCode
+                if data != Data() {
+                    do {
+                        let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                        print(returnArray)
+                        if let checktoken = returnArray["token"] as? String {
+                            token = checktoken
+                        }
+                    } catch {
+                        print("error at serializing: \(error.localizedDescription)")
+                    }
+                } else {
+                }
+                if debug {
+                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print(request.allHTTPHeaderFields)
+                    print(request.httpBody)
+                }
             }
             else {
-                // Failure
-                ret = false
+                print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
-        task.resume()
-        session.finishTasksAndInvalidate()
-        return ret
+        print("starting \(Date())")
+        while completion == false {
+            task.resume()
+            session.finishTasksAndInvalidate()
+            if token != "" {
+                completion = true
+                print("returned properly \(Date())")
+                print(token)
+                return token
+            }
+        }
     }
 }
 

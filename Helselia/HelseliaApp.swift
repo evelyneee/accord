@@ -13,10 +13,10 @@ struct HelseliaApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-//                .sheet(isPresented: $modalIsPresented) {
-//                    LoginView()
-//                        .frame(width: 450, height: 300)
-//                }
+                .sheet(isPresented: $modalIsPresented) {
+                    LoginView()
+                        .frame(width: 450, height: 300)
+                }
                 .frame(minWidth: 500, minHeight: 300)
         }
     }

@@ -144,7 +144,9 @@ struct ClubView: View {
             .padding()
         }
         .onAppear {
-            refresh()
+            if token != "" {
+                refresh()
+            }
         }
     }
 }
