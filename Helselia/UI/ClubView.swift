@@ -43,6 +43,12 @@ extension Dictionary {
     }
 }
 
+extension Collection where Indices.Iterator.Element == Index {
+   public subscript(safe index: Index) -> Iterator.Element? {
+     return (startIndex <= index && index < endIndex) ? self[index] : nil
+   }
+}
+
 // the messaging view concept
 
 struct ClubView: View {
@@ -62,16 +68,15 @@ struct ClubView: View {
     @State var pfps: [Any] = []
 //    actual view begins here
     func refresh() {
-        net.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: true, type: .GET, bodyObject: [:]) { success, array in
+        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
             if success == true {
                 data = array ?? []
                 pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
             }
         }
     }
-    let timer = Timer.publish(every: 1, on: .current, in: .common).autoconnect()
+    let timer = Timer.publish(every: 3, on: .current, in: .common).autoconnect()
     var body: some View {
-        
 //      chat view
         VStack(alignment: .leading) {
             Spacer()
@@ -79,19 +84,11 @@ struct ClubView: View {
 //                chat view
                 List(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                     HStack {
-                        if !(pfps.isEmpty) {
-                            if let imageURL = pfps[index] as? String {
-                                ImageWithURL(imageURL)
-                                    .frame(maxWidth: 33, maxHeight: 33)
-                                    .padding(.horizontal, 5)
-                                    .clipShape(Circle())
-                            } else {
-                                Image("pfp").resizable()
-                                    .frame(maxWidth: 33, maxHeight: 33)
-                                    .padding(.horizontal, 5)
-                                    .clipShape(Circle())
-                                    .scaledToFill()
-                            }
+                        if let imageURL = pfps[safe: index] as? String {
+                            ImageWithURL(imageURL)
+                                .frame(maxWidth: 33, maxHeight: 33)
+                                .padding(.horizontal, 5)
+                                .clipShape(Circle())
                         } else {
                             Image("pfp").resizable()
                                 .frame(maxWidth: 33, maxHeight: 33)
@@ -120,7 +117,7 @@ struct ClubView: View {
                         Spacer()
                         Button(action: {
                             print("https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])")
-                            net.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .DELETE, bodyObject: [:]) {success, array in }
+                            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
                             refresh()
                         }) {
                             Image(systemName: "trash")
@@ -152,7 +149,7 @@ struct ClubView: View {
                     var tempTextField = chatTextFieldContents
                     chatTextFieldContents = ""
                     DispatchQueue.main.async {
-                        net.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .POST, bodyObject: ["content":"\(String(tempTextField))"]) {success, array in
+                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(tempTextField))"]) {success, array in
                             switch success {
                             case true:
                                 refresh()
@@ -166,11 +163,17 @@ struct ClubView: View {
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
+                .frame(width: 0, height: 0)
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(BorderlessButtonStyle())
-                .foregroundColor(Color.white)
+                .foregroundColor(Color.clear)
             }
             .padding()
+            .onReceive(timer) { time in
+                DispatchQueue.main.async {
+                    refresh()
+                }
+            }
         }
         .onAppear {
             if token != "" {
@@ -180,5 +183,6 @@ struct ClubView: View {
                 }
             }
         }
+
     }
 }

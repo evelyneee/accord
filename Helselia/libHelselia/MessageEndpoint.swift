@@ -17,23 +17,34 @@ enum club {
 final class ClubManager {
     static var shared = ClubManager()
     func getClub(clubid: String, type: club) -> [Any] {
-        let club = net.requestData(url: "https://constanze.live/api/v1/clubs/\(clubid)", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .GET, bodyObject: [:])
+        var completion: Bool = false
         var returnArray: [Any] = []
-        do {
-            let clubArray = try JSONSerialization.jsonObject(with: club ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
-            for item in clubArray.keys {
-                if item == "channels" {
-                    if let channel = clubArray[item] as? Array<Dictionary<String, Any>> {
-                        if type == .id {
-                            returnArray.append(channel[0]["id"])
-                            return returnArray
+        net.requestData(url: "https://constanze.live/api/v1/clubs/\(clubid)", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+            if let gooddata = data {
+                do {
+                    let clubArray = try JSONSerialization.jsonObject(with: gooddata, options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                    for item in clubArray.keys {
+                        if item == "channels" {
+                            if let channel = clubArray[item] as? Array<Dictionary<String, Any>> {
+                                if type == .id {
+                                    returnArray.append(channel[0]["id"])
+                                    print(returnArray)
+                                }
+                            }
                         }
                     }
+                } catch {
+                    
                 }
             }
-        } catch {
         }
-        return ["loss"]
+        while completion == false {
+            if returnArray.isEmpty == false {
+                completion = true
+                print("returned properly \(Date())")
+                return returnArray
+            }
+        }
     }
 }
 

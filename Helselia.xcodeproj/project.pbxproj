@@ -22,6 +22,7 @@
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
+		A89BE728266AD10E007B0CBF /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE727266AD10E007B0CBF /* Profile.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -57,6 +58,7 @@
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Helselia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Helselia.entitlements; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		A89BE727266AD10E007B0CBF /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
+				A89BE727266AD10E007B0CBF /* Profile.swift */,
 				32AA719525EBB17B00550BA5 /* Structures.swift */,
 				32291D3925F565B300881B5F /* MessageEndpoint.swift */,
 			);
@@ -208,6 +211,7 @@
 				32F3743025733D8100ADB7E6 /* MyIssues.swift in Sources */,
 				32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
+				A89BE728266AD10E007B0CBF /* Profile.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ClubView.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,

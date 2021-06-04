@@ -22,21 +22,28 @@ struct ProfileView: View {
         VStack {
             HStack(alignment: .top) {
 //                pfp
-                Image("pfp").resizable()
-                    .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
-                    .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .padding(.trailing, 6.0)
+                if let imageURL = "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id")[0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar")[0]  as? String ?? "").png" {
+                    ImageWithURL(imageURL)
+                        .frame(width: 50, height: 50)
+                        .clipShape(Circle())
+                        .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                } else {
+                    Image("pfp").resizable()
+                        .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
+                        .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .padding(.trailing, 6.0)
+                }
+
                 
 //                bio/description
                 
                 VStack(alignment: .leading) {
-                    Text(token ?? "no token found :/")
+                    Text(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "")
                         .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                         .font(.title2)
-                    Text("Pronouns: \(pronouns)")
-                    Text("Languages: \(usedLanguages)")
+                    Text("Email: \(ProfileManager.shared.getSelfProfile(key: "email")[0] as? String ?? "")")
                 }
                 Spacer()
                 Button(action: {

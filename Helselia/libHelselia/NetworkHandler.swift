@@ -19,8 +19,9 @@ struct socketPayload {
     }
 }
 
-public class NetworkHandling {
-    func request(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
+final class NetworkHandling {
+    static var shared = NetworkHandling()
+    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -50,7 +51,6 @@ public class NetworkHandling {
             request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
-        request.addValue(Cookie ?? "", forHTTPHeaderField: "Cookie")
         if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
@@ -89,8 +89,7 @@ public class NetworkHandling {
         task.resume()
         return completion(false, nil)
     }
-    func requestData(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> Data {
-        var completion: Bool = false
+    func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -120,21 +119,25 @@ public class NetworkHandling {
             request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
-        request.addValue(Cookie ?? "", forHTTPHeaderField: "Cookie")
         if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
-        }
-        
+        }        
         // ends here
         
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
-                if data != Data() {
-                    retData = data
+                if let data = data {
+                    do {
+                        print(data, "deez")
+                        return completion(true, data)
+                    } catch {
+                        print("error at serializing: \(error.localizedDescription)")
+                        return
+                    }
                 } else {
                 }
                 if debug {
@@ -148,23 +151,8 @@ public class NetworkHandling {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
-        if type == .GET {
-            print("starting \(Date())")
-            while completion == false {
-                task.resume()
-                session.finishTasksAndInvalidate()
-                if let data = retData as? Data {
-                    completion = true
-                    print("returned properly \(Date())")
-                    return data
-                }
-            }
-        } else {
-            task.resume()
-            session.finishTasksAndInvalidate()
-            sleep(1)
-            return (retData ?? Data())
-        }
+        task.resume()
+        return completion(false, nil)
     }
     func login(username: String, password: String) -> String {
         var completion: Bool = false

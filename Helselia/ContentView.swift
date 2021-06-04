@@ -70,7 +70,7 @@ struct ContentView: View {
             self.selection = 0
             print(token)
             if (token != "") {
-                net.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .GET, bodyObject: [:]) { success, array in
+                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                     if success == true {
                         clubs = array ?? []
                     }
