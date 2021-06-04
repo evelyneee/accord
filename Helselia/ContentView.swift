@@ -10,18 +10,25 @@ import SwiftUI
 struct ContentView: View {
     @State public var selection: Int?
     @State var clubs: [[String:Any]] = []
+    @State var channels: [Any] = []
     var body: some View {
         NavigationView {
             List {
                 Spacer()
-                ForEach(0..<clubs.count, id: \.self) { index in
-                    NavigationLink(destination: ClubView(clubID: Binding.constant(parser.getArray(forKey: "id", messageDictionary: clubs)[index] as! String), channelID: Binding.constant("177711870931767299")), tag: (index + 1), selection: self.$selection) {
-                        HStack {
-                            Image(systemName: "captions.bubble.fill")
-                                .imageScale(.small)
-                            Text(parser.getArray(forKey: "name", messageDictionary: clubs)[index] as! String)
-                                .fontWeight(.semibold)
-                                .font(.title2)
+                if (token != "") {
+                    ForEach(0..<clubs.count, id: \.self) { index in
+                        NavigationLink(destination: ClubView(clubID: Binding.constant(parser.getArray(forKey: "id", messageDictionary: clubs)[index] as! String), channelID: Binding.constant(ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs)[index] as! String), type: .id)[0] as! String)), tag: (index + 1), selection: self.$selection) {
+                            HStack {
+                                Image(systemName: "captions.bubble.fill")
+                                    .imageScale(.small)
+                                Text(parser.getArray(forKey: "name", messageDictionary: clubs)[index] as! String)
+                                    .fontWeight(.semibold)
+                                    .font(.title2)
+                            }
+                            .onAppear {
+                                let club = ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs)[index] as! String), type: .id)
+                                print(club[0], parser.getArray(forKey: "name", messageDictionary: clubs)[index] as! String)
+                            }
                         }
                     }
                 }
@@ -61,14 +68,15 @@ struct ContentView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onAppear {
             self.selection = 0
-            clubs = net.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .GET, bodyObject: [:])
-            print(clubs)
+            print(token)
+            if (token != "") {
+                net.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, Cookie: "__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", json: false, type: .GET, bodyObject: [:]) { success, array in
+                    if success == true {
+                        clubs = array ?? []
+                    }
+                }
+                print(clubs)
+            }
         }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }

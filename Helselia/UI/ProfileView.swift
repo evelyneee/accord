@@ -72,6 +72,11 @@ struct ProfileView: View {
                 }
             }
             .padding()
+            Button(action: {
+                UserDefaults.standard.set("", forKey: "token")
+            }) {
+                Text("log out")
+            }
             
             LazyVGrid(columns: columns, alignment: .center) {
                 ForEach(referenceLinks.sorted(by: >), id: \.key) { key, link in

@@ -20,8 +20,7 @@ struct socketPayload {
 }
 
 public class NetworkHandling {
-    func request(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> [[String:Any]] {
-        var completion: Bool = false
+    func request(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -60,19 +59,83 @@ public class NetworkHandling {
         
         // ends here
         
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+            if (error == nil) {
+                // Success
+                print("success \(Date())")
+                let statusCode = (response as! HTTPURLResponse).statusCode
+                if let data = data {
+                    do {
+                        returnArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        return completion(true, returnArray)
+                    } catch {
+                        print("error at serializing: \(error.localizedDescription)")
+                        return
+                    }
+                } else {
+                    returnArray = [["Code":statusCode]]
+                }
+                if debug {
+                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print(request.allHTTPHeaderFields)
+                    print(request.url)
+                    print(bodyObject)
+                }
+            }
+            else {
+                print("URL Session Task Failed: %@", error!.localizedDescription);
+            }
+        })
+        task.resume()
+        return completion(false, nil)
+    }
+    func requestData(url: String, token: String?, Cookie: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) -> Data {
+        var completion: Bool = false
+        let sessionConfig = URLSessionConfiguration.default
+        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
+        var retData: Data?
+        
+        // setup of the request
+        switch type {
+        case .GET:
+            request.httpMethod = "GET"
+        case .POST:
+            request.httpMethod = "POST"
+        case .PATCH:
+            request.httpMethod = "PATCH"
+        case .DELETE:
+            request.httpMethod = "DELETE"
+        case .PUT:
+            request.httpMethod = "PUT"
+        }
+        
+        // helselia specific stuff starts here
+        
+        if token != nil {
+            request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
+        }
+        if json == false && type == .POST {
+            let bodyString = (bodyObject as? [String:String] ?? [:]).queryParameters
+            request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        }
+        request.addValue(Cookie ?? "", forHTTPHeaderField: "Cookie")
+        if type == .POST && json == true {
+            request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+        }
+        
+        // ends here
+        
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
                 // Success
                 print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if data != Data() {
-                    do {
-                        returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                    } catch {
-                        print("error at serializing: \(error.localizedDescription)")
-                    }
+                    retData = data
                 } else {
-                    returnArray = [["Code":statusCode]]
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
@@ -90,18 +153,17 @@ public class NetworkHandling {
             while completion == false {
                 task.resume()
                 session.finishTasksAndInvalidate()
-                if !(returnArray.isEmpty) {
+                if let data = retData as? Data {
                     completion = true
                     print("returned properly \(Date())")
-                    print(retData)
-                    return returnArray
+                    return data
                 }
             }
         } else {
             task.resume()
             session.finishTasksAndInvalidate()
             sleep(1)
-            return returnArray
+            return (retData ?? Data())
         }
     }
     func login(username: String, password: String) -> String {

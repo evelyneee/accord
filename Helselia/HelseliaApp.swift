@@ -14,7 +14,7 @@ struct HelseliaApp: App {
         WindowGroup {
             ContentView()
                 .onAppear {
-                    if token == nil {
+                    if token == "" {
                         modalIsPresented = true
                     }
                 }
