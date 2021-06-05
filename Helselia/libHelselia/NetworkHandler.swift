@@ -10,15 +10,6 @@ import Foundation
 
 let debug = true
 
-struct socketPayload {
-    var op: Int
-    struct d {
-        var os: String
-        var browser: String
-        var type: String
-    }
-}
-
 final class NetworkHandling {
     static var shared = NetworkHandling()
     func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
@@ -201,124 +192,9 @@ final class NetworkHandling {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
+        task.resume()
         return completion(false, nil)
     }
-}
-
-class WebSocket: NSObject, URLSessionWebSocketDelegate {
-    
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("Web Socket did connect")
-    }
-    
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("Web Socket did disconnect")
-    }
-}
-
-final class WebSocketHandler {
-    static var shared = WebSocketHandler()
-    func newMessage() -> Bool {
-        let webSocketDelegate = WebSocket()
-        let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
-        let url = URL(string: "wss://gateway.constanze.live")!
-        let webSocketTask = session.webSocketTask(with: url)
-        webSocketTask.resume()
-        func ping() {
-          webSocketTask.sendPing { error in
-            if let error = error {
-              print("Error when sending PING \(error)")
-            } else {
-                print("Web Socket connection is alive")
-                DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                    ping()
-                }
-            }
-          }
-        }
-        func receive() -> String {
-            var rettext = ""
-            webSocketTask.receive { result in
-                switch result {
-                    case .success(let message):
-                        switch message {
-                        case .data(let data):
-                            print("Data received \(data)")
-                        case .string(let text):
-                            print("Text received \(text)")
-                        @unknown default:
-                            print("unknown")
-                        }
-                case .failure(let error):
-                    print("Error when receiving")
-                }
-            }
-            return rettext
-        }
-        func close() {
-            let reason = "Closing connection".data(using: .utf8)
-            webSocketTask.cancel(with: .goingAway, reason: reason)
-        }
-        func checkConnection() -> Bool {
-            var retValue: Bool = false {
-                didSet {
-                    print("set that \(retValue)")
-                }
-            }
-            var completion: Bool = false
-            var retDict: [String:Any] = [:]
-            webSocketTask.receive { result in
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .data(let data):
-                        print("Data received \(data)")
-                        retValue = false
-                    case .string(let text):
-                        print(text)
-                        if let data = text.data(using: String.Encoding.utf8) {
-                            do {
-                                retDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
-                                for item in retDict.keys {
-                                    if item == "t" {
-                                        if let _ = retDict["t"] as? NSNull {
-                                            retValue = false
-                                            completion = true
-                                        } else {
-                                            retValue = true
-                                            completion = true
-                                        }
-                                        print(type(of: retDict["t"]))
-                                    }
-                                }
-                            } catch let error as NSError {
-                                print(error)
-                            }
-                        }
-                    @unknown default:
-                        print("unknown")
-                        retValue = false
-                    }
-                case .failure(let error):
-                    print("Error when receiving")
-                    retValue = false
-                }
-            }
-            while completion == false {
-                if completion == true {
-                    return retValue
-                } else {
-                    sleep(0)
-                }
-            }
-            return retValue
-        }
-        return checkConnection()
-    }
-}
-
-protocol URLQueryParameterStringConvertible {
-    var queryParameters: String {get}
 }
 
 extension Dictionary : URLQueryParameterStringConvertible {

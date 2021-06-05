@@ -11,6 +11,7 @@ struct ProfileView: View {
     @State public var showingDetail = false
     @Environment(\.openURL) var openURL
     @State var referenceLinks: [String: String] = [:]
+    @State var profileData: Data? = Data()
     private var columns: [GridItem] = [
         GridItem(.fixed(100), spacing: 16),
         GridItem(.fixed(100), spacing: 16),
@@ -22,16 +23,15 @@ struct ProfileView: View {
         VStack {
             HStack(alignment: .top) {
 //                pfp
-                if let imageURL = "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id")[0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar")[0]  as? String ?? "").png" {
+                if let imageURL = "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: profileData)[safe: 0]  as? String ?? "").png" {
                     ImageWithURL(imageURL)
                         .frame(width: 50, height: 50)
                         .clipShape(Circle())
                         .shadow(radius: 10)
                 } else {
-                    Image("pfp").resizable()
+                    Color.gray
                         .clipShape(Circle())
                         .shadow(radius: 10)
-                        .scaledToFill()
                         .frame(width: 50, height: 50)
                         .padding(.trailing, 6.0)
                 }
@@ -40,16 +40,16 @@ struct ProfileView: View {
 //                bio/description
                 
                 VStack(alignment: .leading) {
-                    if ProfileManager.shared.getSelfProfile(key: "verified")[0] as? Bool == true {
-                        Text("\(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "") 􀇻")
+                    if ProfileManager.shared.getSelfProfile(key: "verified", data: profileData)[safe: 0] as? Bool == true {
+                        Text("\(ProfileManager.shared.getSelfProfile(key: "username", data: profileData)[safe: 0] as? String ?? "") 􀇻")
                             .fontWeight(.bold)
                             .font(.title2)
                     } else {
-                        Text(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "")
+                        Text(ProfileManager.shared.getSelfProfile(key: "username", data: profileData)[safe: 0] as? String ?? "")
                             .fontWeight(.bold)
                             .font(.title2)
                     }
-                    Text("Email: \(ProfileManager.shared.getSelfProfile(key: "email")[0] as? String ?? "")")
+                    Text("Email: \(ProfileManager.shared.getSelfProfile(key: "email", data: profileData)[safe: 0] as? String ?? "")")
                 }
                 Spacer()
                 Button(action: {
@@ -111,6 +111,11 @@ struct ProfileView: View {
             Spacer()
         }.onAppear {
             referenceLinks = refLinks
+            net.requestData(url: "https://constanze.live/api/v1/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+                if (completion) {
+                    profileData = data
+                }
+            }
         }
     }
 }

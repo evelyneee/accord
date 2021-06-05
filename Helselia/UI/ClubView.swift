@@ -66,6 +66,8 @@ struct ClubView: View {
     @State var MaxChannelNumber = 0
     @State var data: [[String:Any]] = []
     @State var pfps: [Any] = []
+    @State var allUsers: [String] = []
+    
 //    actual view begins here
     func refresh() {
         NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
@@ -163,23 +165,23 @@ struct ClubView: View {
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
-                .frame(width: 0, height: 0)
+                .frame(width: 5, height: 5)
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(BorderlessButtonStyle())
-                .foregroundColor(Color.clear)
+                .foregroundColor(Color.white)
             }
             .padding()
-            .onReceive(timer) { time in
-                DispatchQueue.main.async {
-                    refresh()
-                }
+        }
+        .onReceive(timer) { time in
+            DispatchQueue.main.async {
+                refresh()
             }
         }
         .onAppear {
             if token != "" {
-                print("token found \(token)")
                 DispatchQueue.main.async {
                     refresh()
+                    WebSocketHandler.shared.newMessage(opcode: 2)
                 }
             }
         }

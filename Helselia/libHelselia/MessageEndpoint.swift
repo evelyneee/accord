@@ -89,8 +89,6 @@ public class parseMessages {
     }
 }
 
-#warning("rewrite this shit you lazy bitch (evelyn)")
-
 struct ImageWithURL: View {
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
@@ -100,9 +98,15 @@ struct ImageWithURL: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(named: "sad")) ?? NSImage())
+        #if os(iOS)
+        Image(uiImage: (UIImage(data: self.imageLoader.imageData) ?? UIImage(named: "")) ?? UIImage())
               .resizable()
               .clipped()
+        #else
+        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(named: "")) ?? NSImage())
+              .resizable()
+              .clipped()
+        #endif
     }
 }
 
@@ -112,19 +116,21 @@ class ImageLoaderAndCache: ObservableObject {
     
     init(imageURL: String) {
         let cache = URLCache.shared
-        let request = URLRequest(url: (URL(string: imageURL) ?? URL(string: "https://nitroless.quiprr.dev/frrtx.png"))!, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 60.0)
-        if let data = cache.cachedResponse(for: request)?.data {
-            self.imageData = data
-        } else {
-            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                if let data = data, let response = response {
-                let cachedData = CachedURLResponse(response: response, data: data)
-                                    cache.storeCachedResponse(cachedData, for: request)
-                    DispatchQueue.main.async {
-                        self.imageData = data
+        if let url = URL(string: imageURL) as? URL {
+            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
+            if let data = cache.cachedResponse(for: request)?.data {
+                self.imageData = data
+            } else {
+                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                    if let data = data, let response = response {
+                    let cachedData = CachedURLResponse(response: response, data: data)
+                                        cache.storeCachedResponse(cachedData, for: request)
+                        DispatchQueue.main.async {
+                            self.imageData = data
+                        }
                     }
-                }
-            }).resume()
+                }).resume()
+            }
         }
     }
 }
