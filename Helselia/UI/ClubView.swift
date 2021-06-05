@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import AppKit
 
 // styles and structs and vars
 
@@ -70,10 +71,12 @@ struct ClubView: View {
     
 //    actual view begins here
     func refresh() {
-        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
-            if success == true {
-                data = array ?? []
-                pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+        DispatchQueue.global(qos: .background).async {
+            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+                if success == true {
+                    data = array ?? []
+                    pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                }
             }
         }
     }
@@ -139,15 +142,15 @@ struct ClubView: View {
             .padding(.leading, 25.0)
             
 //            the controls
-            
-            HStack(alignment: .bottom) {
-                TextField("What's up?", text: $chatTextFieldContents)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(EdgeInsets())
+
+            HStack {
 
 //                where messages are sent
-                
+                BorderlessTextField(placeholder: "What's up?", text: $chatTextFieldContents, isFocus: Binding.constant(true))
+                    .cornerRadius(5)
+                    .padding(EdgeInsets())
                 Button(action: {
+                    print(chatTextFieldContents, "lol")
                     var tempTextField = chatTextFieldContents
                     chatTextFieldContents = ""
                     DispatchQueue.main.async {
@@ -165,26 +168,62 @@ struct ClubView: View {
                 }) {
                     Image(systemName: "paperplane.fill")
                 }
-                .frame(width: 5, height: 5)
+                .frame(width: 0, height: 0)
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(BorderlessButtonStyle())
-                .foregroundColor(Color.white)
+                .foregroundColor(Color.clear)
             }
             .padding()
         }
         .onReceive(timer) { time in
-            DispatchQueue.main.async {
-                refresh()
+            DispatchQueue.global(qos: .background).async {
+                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+                    if success == true {
+                        data = array ?? []
+                    }
+                }
             }
         }
         .onAppear {
             if token != "" {
                 DispatchQueue.main.async {
                     refresh()
-                    WebSocketHandler.shared.newMessage(opcode: 2)
                 }
             }
         }
 
+    }
+}
+
+struct BorderlessTextField: NSViewRepresentable {
+    let placeholder: String
+    @Binding var text: String
+    @Binding var isFocus: Bool
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    func makeNSView(context: Context) -> NSTextField {
+        let textField = NSTextField()
+        textField.placeholderString = placeholder
+        textField.delegate = context.coordinator
+        textField.focusRingType = .none
+        textField.bezelStyle = NSTextField.BezelStyle.roundedBezel
+        return textField
+    }
+    func updateNSView(_ nsView: NSTextField, context: Context) {
+        nsView.stringValue = text
+    }
+    class Coordinator: NSObject, NSTextFieldDelegate {
+        let parent: BorderlessTextField
+        init(_ textField: BorderlessTextField) {
+            self.parent = textField
+        }
+        func controlTextDidEndEditing(_ obj: Notification) {
+            self.parent.isFocus = false
+        }
+        func controlTextDidChange(_ obj: Notification) {
+            guard let textField = obj.object as? NSTextField else { return }
+            self.parent.text = textField.stringValue
+        }
     }
 }

@@ -65,25 +65,7 @@ struct ProfileView: View {
                 .buttonStyle(CoolButtonStyle())
             }
             .padding()
-            
-//            stats view
-            
-            VStack(alignment: .leading) {
-                Text("My Stats")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                List {
-                    Text("Joined: December 2020")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    Text("Open Issues: \(issueContainer.count)")
-                        .fontWeight(.bold)
-                        .font(.title3)
-                    Text("Total Issues: \(totalIssues)")
-                        .fontWeight(.bold)
-                        .font(.title3)
-                }
-            }
+                    
             .padding()
             Button(action: {
                 UserDefaults.standard.set("", forKey: "token")
@@ -110,7 +92,6 @@ struct ProfileView: View {
             
             Spacer()
         }.onAppear {
-            referenceLinks = refLinks
             net.requestData(url: "https://constanze.live/api/v1/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data

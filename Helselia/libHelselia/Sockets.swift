@@ -38,7 +38,7 @@ final class WebSocketHandler {
               print("Error when sending PING \(error)")
             } else {
                 print("Web Socket connection is alive")
-                DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
                     ping()
                 }
             }
