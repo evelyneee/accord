@@ -154,8 +154,7 @@ final class NetworkHandling {
         task.resume()
         return completion(false, nil)
     }
-    func login(username: String, password: String) -> String {
-        var completion: Bool = false
+    func login(username: String, password: String, _ completion: @escaping ((_ success: Bool, _ rettoken: String?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: "https://constanze.live/api/v1/auth/login") ?? URL(string: "#")!))
@@ -163,7 +162,6 @@ final class NetworkHandling {
         
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.addValue("__cfduid=d9ee4b332e29b7a9b1e0befca2ac718461620217863", forHTTPHeaderField: "Cookie")
 
         // Form URL-Encoded Body
         let bodyObject: [String : Any] = [
@@ -186,7 +184,7 @@ final class NetworkHandling {
                         let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
                         print(returnArray)
                         if let checktoken = returnArray["token"] as? String {
-                            token = checktoken
+                            return completion(true, checktoken)
                         }
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
@@ -203,17 +201,7 @@ final class NetworkHandling {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
-        print("starting \(Date())")
-        while completion == false {
-            task.resume()
-            session.finishTasksAndInvalidate()
-            if token != "" {
-                completion = true
-                print("returned properly \(Date())")
-                print(token)
-                return token
-            }
-        }
+        return completion(false, nil)
     }
 }
 
@@ -228,7 +216,8 @@ class WebSocket: NSObject, URLSessionWebSocketDelegate {
     }
 }
 
-public class WebSocketHandler {
+final class WebSocketHandler {
+    static var shared = WebSocketHandler()
     func newMessage() -> Bool {
         let webSocketDelegate = WebSocket()
         let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())

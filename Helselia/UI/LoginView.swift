@@ -19,11 +19,13 @@ struct LoginView: View {
             TextField("Username or Email", text: $username)
             TextField("Password", text: $passcode)
             Button(action: {
-                let response = NetworkHandling.shared.login(username: username, password: passcode)
-                if let rettoken = response as? String {
-                    token = rettoken
-                    UserDefaults.standard.set(token, forKey: "token")
-                    self.shown.wrappedValue.dismiss()
+                NetworkHandling.shared.login(username: username, password: passcode) { success, rettoken in
+                    if (success) {
+                        token = rettoken ?? ""
+                        UserDefaults.standard.set(token, forKey: "token")
+                        self.shown.wrappedValue.dismiss()
+                    }
+
                 }
                 
             }) {

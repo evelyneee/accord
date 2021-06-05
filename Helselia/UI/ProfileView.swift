@@ -26,11 +26,11 @@ struct ProfileView: View {
                     ImageWithURL(imageURL)
                         .frame(width: 50, height: 50)
                         .clipShape(Circle())
-                        .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                        .shadow(radius: 10)
                 } else {
                     Image("pfp").resizable()
-                        .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
-                        .shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                        .clipShape(Circle())
+                        .shadow(radius: 10)
                         .scaledToFill()
                         .frame(width: 50, height: 50)
                         .padding(.trailing, 6.0)
@@ -40,9 +40,15 @@ struct ProfileView: View {
 //                bio/description
                 
                 VStack(alignment: .leading) {
-                    Text(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "")
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                        .font(.title2)
+                    if ProfileManager.shared.getSelfProfile(key: "verified")[0] as? Bool == true {
+                        Text("\(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "") 􀇻")
+                            .fontWeight(.bold)
+                            .font(.title2)
+                    } else {
+                        Text(ProfileManager.shared.getSelfProfile(key: "username")[0] as? String ?? "")
+                            .fontWeight(.bold)
+                            .font(.title2)
+                    }
                     Text("Email: \(ProfileManager.shared.getSelfProfile(key: "email")[0] as? String ?? "")")
                 }
                 Spacer()
