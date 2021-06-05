@@ -26,7 +26,6 @@ struct SettingsView: View {
                     Spacer()
                     Button(action: {
                         self.presentationMode.wrappedValue.dismiss()
-                        enablePFP = showPFP
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title)
@@ -48,41 +47,6 @@ struct SettingsView: View {
                     .padding()
                     .toggleStyle(SwitchToggleStyle())
                 }
-                HStack(alignment: .top) {
-                    TextField("Token", text: $usernameSettings)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button(action: {
-                        token = usernameSettings
-                    }, label: {
-                        Text("Set")
-                            .fontWeight(.bold)
-                    })
-                }
-                .padding()
-                HStack(alignment: .top) {
-                    TextField("Pronouns", text: $pronounSettings)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button(action: {
-                        pronouns = pronounSettings
-                    }, label: {
-                        Text("Set")
-                            .fontWeight(.bold)
-                    })
-                }
-                .padding()
-                HStack {
-                    Text("References")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding()
-                    Button(action: {
-                        if refLinks.count < 3 {
-                            refLinks[referenceTitle] = referenceLink
-                        }
-                    }, label: {
-                        Text("Set")
-                    })
-                }
 
                 HStack(alignment: .top) {
                     TextField("Title of link", text: $referenceTitle)
@@ -98,7 +62,6 @@ struct SettingsView: View {
         }
         .onAppear {
             usernameSettings = (token ?? "")
-            showPFP = enablePFP
         }
         .frame(minWidth: 400, minHeight: 300)
     }

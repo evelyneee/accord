@@ -11,8 +11,6 @@ import AppKit
 
 // styles and structs and vars
 
-var InputMsgIndex: Int = 0
-var root: Int = 999999999999
 let messages = NetworkHandling()
 let net = NetworkHandling()
 let parser = parseMessages()
@@ -59,7 +57,6 @@ struct ClubView: View {
     @Binding var clubID: String
     @Binding var channelID: String
     @State var chatTextFieldContents: String = ""
-    @State var username = backendUsername
     @State public var ChannelKey = 1
     
 //    message storing vars

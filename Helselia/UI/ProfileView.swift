@@ -53,7 +53,6 @@ struct ProfileView: View {
                 }
                 Spacer()
                 Button(action: {
-                    refLinks = referenceLinks
                     self.showingDetail.toggle()
                 }) {
                     Image(systemName: "gearshape.fill")
