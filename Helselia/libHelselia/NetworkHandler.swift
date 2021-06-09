@@ -12,7 +12,7 @@ let debug = true
 
 final class NetworkHandling {
     static var shared = NetworkHandling()
-    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
+    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) async {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -57,8 +57,9 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     do {
-                        returnArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                        return completion(true, returnArray)
+                        async {
+                            return await completion(true, try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]())
+                        }
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                         return
@@ -78,7 +79,9 @@ final class NetworkHandling {
             }
         })
         task.resume()
-        return completion(false, nil)
+        async {
+            return await completion(false, nil)
+        }
     }
     func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
@@ -196,25 +199,3 @@ final class NetworkHandling {
         return completion(false, nil)
     }
 }
-
-extension Dictionary : URLQueryParameterStringConvertible {
-    var queryParameters: String {
-        var parts: [String] = []
-        for (key, value) in self {
-            let part = String(format: "%@=%@",
-                String(describing: key).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!,
-                String(describing: value).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
-            parts.append(part as String)
-        }
-        return parts.joined(separator: "&")
-    }
-    
-}
-
-extension URL {
-    func appendingQueryParameters(_ parametersDictionary : Dictionary<String, String>) -> URL {
-        let URLString : String = String(format: "%@?%@", self.absoluteString, parametersDictionary.queryParameters)
-        return URL(string: URLString)!
-    }
-}
-

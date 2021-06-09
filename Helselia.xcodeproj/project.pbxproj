@@ -14,7 +14,6 @@
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
 		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
-		32F2BB2B25FEC0230070C872 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C963256D7D3500343BB3 /* Info.plist */; };
 		32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F37415257302C300ADB7E6 /* ProfileView.swift */; };
 		32F3742F25733D8100ADB7E6 /* ClubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742A25733D8000ADB7E6 /* ClubView.swift */; };
 		32F3743025733D8100ADB7E6 /* MyIssues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742B25733D8000ADB7E6 /* MyIssues.swift */; };
@@ -22,10 +21,9 @@
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
+		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A89BE728266AD10E007B0CBF /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE727266AD10E007B0CBF /* Profile.swift */; };
 		A89BE734266AFC18007B0CBF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A89BE733266AFC18007B0CBF /* Assets.xcassets */; };
-		A89BE742266AFC18007B0CBF /* Helselia_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE741266AFC18007B0CBF /* Helselia_iOSTests.swift */; };
-		A89BE74D266AFC18007B0CBF /* Helselia_iOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE74C266AFC18007B0CBF /* Helselia_iOSUITests.swift */; };
 		A89BE777266B0A9A007B0CBF /* HelseliaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* HelseliaApp.swift */; };
 		A89BE778266B0A9F007B0CBF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		A89BE779266B0AAA007B0CBF /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
@@ -93,16 +91,13 @@
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Helselia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Helselia.entitlements; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Helselia/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A89BE727266AD10E007B0CBF /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		A89BE72D266AFC14007B0CBF /* Helselia-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Helselia-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A89BE733266AFC18007B0CBF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A89BE738266AFC18007B0CBF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A89BE73D266AFC18007B0CBF /* Helselia-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Helselia-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A89BE741266AFC18007B0CBF /* Helselia_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helselia_iOSTests.swift; sourceTree = "<group>"; };
-		A89BE743266AFC18007B0CBF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A89BE748266AFC18007B0CBF /* Helselia-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Helselia-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A89BE74C266AFC18007B0CBF /* Helselia_iOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helselia_iOSUITests.swift; sourceTree = "<group>"; };
-		A89BE74E266AFC18007B0CBF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A89BE758266AFC7F007B0CBF /* Helselia-iOS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "Helselia-iOS.entitlements"; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -165,8 +160,6 @@
 			children = (
 				32F4C959256D7D3300343BB3 /* Helselia */,
 				A89BE72E266AFC14007B0CBF /* Helselia-iOS */,
-				A89BE740266AFC18007B0CBF /* Helselia-iOSTests */,
-				A89BE74B266AFC18007B0CBF /* Helselia-iOSUITests */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -188,6 +181,7 @@
 			children = (
 				32F4C95A256D7D3300343BB3 /* HelseliaApp.swift */,
 				32F4C95C256D7D3300343BB3 /* ContentView.swift */,
+				A8922500266ED88B00FEA21C /* Extensions.swift */,
 				32AA719225EAEEF700550BA5 /* libHelselia */,
 				A8FA9A9B266823B4003710A4 /* UI */,
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
@@ -206,24 +200,6 @@
 				A89BE738266AFC18007B0CBF /* Info.plist */,
 			);
 			path = "Helselia-iOS";
-			sourceTree = "<group>";
-		};
-		A89BE740266AFC18007B0CBF /* Helselia-iOSTests */ = {
-			isa = PBXGroup;
-			children = (
-				A89BE741266AFC18007B0CBF /* Helselia_iOSTests.swift */,
-				A89BE743266AFC18007B0CBF /* Info.plist */,
-			);
-			path = "Helselia-iOSTests";
-			sourceTree = "<group>";
-		};
-		A89BE74B266AFC18007B0CBF /* Helselia-iOSUITests */ = {
-			isa = PBXGroup;
-			children = (
-				A89BE74C266AFC18007B0CBF /* Helselia_iOSUITests.swift */,
-				A89BE74E266AFC18007B0CBF /* Info.plist */,
-			);
-			path = "Helselia-iOSUITests";
 			sourceTree = "<group>";
 		};
 		A8FA9A9B266823B4003710A4 /* UI */ = {
@@ -321,7 +297,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1230;
+				LastUpgradeCheck = 1300;
 				TargetAttributes = {
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
@@ -365,7 +341,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32F2BB2B25FEC0230070C872 /* Info.plist in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -410,6 +385,7 @@
 				3278609F2590222B00EBEF23 /* HomeView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
+				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				3207A24425867586006C2665 /* temp.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				320BEAA8258D40CE000CC1E2 /* IssueCreationUI.swift in Sources */,
@@ -442,7 +418,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A89BE742266AFC18007B0CBF /* Helselia_iOSTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,7 +425,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A89BE74D266AFC18007B0CBF /* Helselia_iOSUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -521,10 +495,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -576,7 +550,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
@@ -601,7 +575,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = althio.Helselia;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -623,7 +597,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = althio.Helselia;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -652,7 +626,7 @@
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -677,7 +651,7 @@
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

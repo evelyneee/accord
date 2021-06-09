@@ -7,7 +7,11 @@
 
 
 import SwiftUI
+#if os(iOS)
+import UIKit
+#else
 import AppKit
+#endif
 
 // styles and structs and vars
 
@@ -26,50 +30,22 @@ struct CoolButtonStyle: ButtonStyle {
     }
 }
 
-// button style extension
-
-extension Button {
-    func coolButtonStyle() -> some View {
-        self.buttonStyle(CoolButtonStyle())
-    }
-}
-
-extension Dictionary {
-    mutating func switchKey(fromKey: Key, toKey: Key) {
-        if let entry = removeValue(forKey: fromKey) {
-            self[toKey] = entry
-        }
-    }
-}
-
-extension Collection where Indices.Iterator.Element == Index {
-   public subscript(safe index: Index) -> Iterator.Element? {
-     return (startIndex <= index && index < endIndex) ? self[index] : nil
-   }
-}
-
 // the messaging view concept
 
 struct ClubView: View {
     
     
-//    main variables for chat, will be migrated to backendClient later
     @Binding var clubID: String
     @Binding var channelID: String
     @State var chatTextFieldContents: String = ""
-    @State public var ChannelKey = 1
-    
-//    message storing vars
-    
-    @State var MaxChannelNumber = 0
     @State var data: [[String:Any]] = []
     @State var pfps: [Any] = []
     @State var allUsers: [String] = []
     
 //    actual view begins here
     func refresh() {
-        DispatchQueue.global(qos: .background).async {
-            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+        async {
+            await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
                     pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
@@ -118,8 +94,10 @@ struct ClubView: View {
                         }
                         Spacer()
                         Button(action: {
+                            async {
+                                await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
+                            }
                             print("https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])")
-                            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
                             refresh()
                         }) {
                             Image(systemName: "trash")
@@ -138,48 +116,20 @@ struct ClubView: View {
             }
             .padding(.leading, 25.0)
             
-//            the controls
-
-            HStack {
-
-//                where messages are sent
-                BorderlessTextField(placeholder: "What's up?", text: $chatTextFieldContents, isFocus: Binding.constant(true))
-                    .cornerRadius(5)
-                    .padding(EdgeInsets())
-                Button(action: {
-                    print(chatTextFieldContents, "lol")
-                    var tempTextField = chatTextFieldContents
-                    chatTextFieldContents = ""
-                    DispatchQueue.main.async {
-                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(tempTextField))"]) {success, array in
-                            switch success {
-                            case true:
-                                refresh()
-                            case false:
-                                print("whoop")
-                            }
-                        }
-                        print("done")
-                        tempTextField = ""
-                    }
-                }) {
-                    Image(systemName: "paperplane.fill")
-                }
-                .frame(width: 0, height: 0)
-                .keyboardShortcut(.defaultAction)
-                .buttonStyle(BorderlessButtonStyle())
-                .foregroundColor(Color.clear)
-            }
-            .padding()
+            ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID)
         }
         .onReceive(timer) { time in
-            DispatchQueue.global(qos: .background).async {
-                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+            async {
+                await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                     if success == true {
                         data = array ?? []
                     }
                 }
             }
+        }
+        .onReceiveNotifs(Notification.Name(rawValue: "logged_in")) { _ in
+            print("logged in")
+            refresh()
         }
         .onAppear {
             if token != "" {
@@ -187,11 +137,70 @@ struct ClubView: View {
                     refresh()
                 }
             }
+            if #available(macOS 12.0, *) {
+                async {
+                    print("uwu")
+                }
+            }
         }
 
     }
 }
 
+struct ChatControls: View {
+    @Binding var chatTextFieldContents: String
+    @Binding var data: [[String:Any]]
+    @State var pfps: [Any] = []
+    @Binding var channelID: String
+    func refresh() {
+        async {
+            await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+                if success == true {
+                    data = array ?? []
+                    pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                }
+            }
+        }
+    }
+    var body: some View {
+        HStack {
+
+            #if os(iOS)
+            TextField("What's up?", text: $chatTextFieldContents)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(EdgeInsets())
+            #else
+            BorderlessTextField(placeholder: "What's up?", text: $chatTextFieldContents, isFocus: Binding.constant(false))
+                .cornerRadius(5)
+                .padding(EdgeInsets())
+            #endif
+            Button(action: {
+                async {
+                    await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) {success, array in
+                        switch success {
+                        case true:
+                            refresh()
+                            chatTextFieldContents = ""
+                        case false:
+                            print("whoop")
+                        }
+                    }
+                    print("done")
+                }
+            }) {
+                Image(systemName: "paperplane.fill")
+            }
+            .frame(width: 0, height: 0)
+            .keyboardShortcut(.defaultAction)
+            .buttonStyle(BorderlessButtonStyle())
+            .foregroundColor(Color.clear)
+            .opacity(0)
+        }
+        .padding()
+    }
+}
+
+#if os(macOS)
 struct BorderlessTextField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
@@ -224,3 +233,5 @@ struct BorderlessTextField: NSViewRepresentable {
         }
     }
 }
+#endif
+

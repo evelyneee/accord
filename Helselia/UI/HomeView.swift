@@ -6,9 +6,6 @@
 //
 
 import SwiftUI
-extension Color {
-    static let featuredColor = Color("FeaturedShadow")
-}
 
 struct HomeView: View {
     @State var topics: [[String: String]] = [["name": "Tabs", "imageName": "FeaturedTab"], ["name": "List Views", "imageName": "listviews"]]

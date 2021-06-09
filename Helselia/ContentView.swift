@@ -70,12 +70,25 @@ struct ContentView: View {
             self.selection = 0
             print(token)
             if (token != "") {
-                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
-                    if success == true {
-                        clubs = array ?? []
+                async {
+                    await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                        if success == true {
+                            clubs = array ?? []
+                        }
                     }
                 }
                 print(clubs)
+            }
+        }
+        .onReceiveNotifs(Notification.Name(rawValue: "logged_in")) { _ in
+            print("logged in")
+            async {
+                await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                    if success == true {
+                        print(clubs)
+                        clubs = array ?? []
+                    }
+                }
             }
         }
     }
