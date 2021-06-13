@@ -12,12 +12,23 @@ struct ContentView: View {
     @State public var selection: Int?
     @State var clubs: [[String:Any]] = []
     @State var channels: [Any] = []
+    @State var modalIsPresented: Bool = false {
+        didSet {
+            DispatchQueue.main.async {
+                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                    if success == true {
+                        clubs = array ?? []
+                    }
+                }
+            }
+        }
+    }
     
     var body: some View {
         NavigationView {
             List {
                 Spacer()
-                if (token != "") {
+                if !(clubs.isEmpty) {
                     ForEach(0..<clubs.count, id: \.self) { index in
                         Section(header: Text((parser.getArray(forKey: "name", messageDictionary: clubs)[index]) as? String ?? "")) {
                             ForEach(Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .id) as? [String] ?? []).enumerated()), id: \.offset) { offset, channel in
@@ -73,6 +84,21 @@ struct ContentView: View {
             .listStyle(SidebarListStyle())
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
+        .sheet(isPresented: $modalIsPresented) {
+            LoginView()
+                .onDisappear(perform: {
+                    print("there")
+                    DispatchQueue.main.async {
+                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                            if success == true {
+                                clubs = array ?? []
+                            }
+                        }
+                    }
+                })
+                .frame(width: 450, height: 200)
+
+        }
         .onAppear {
             print(token)
             if (token != "") {
@@ -83,18 +109,8 @@ struct ContentView: View {
                         }
                     }
                 }
-                print(clubs)
-            }
-        }
-        .onReceiveNotifs(Notification.Name(rawValue: "logged_in")) { _ in
-            print("logged in")
-            DispatchQueue.main.async {
-                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
-                    if success == true {
-                        print(clubs)
-                        clubs = array ?? []
-                    }
-                }
+            } else {
+                modalIsPresented = true
             }
         }
     }

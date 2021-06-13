@@ -24,11 +24,7 @@ struct LoginView: View {
                         token = rettoken ?? ""
                         UserDefaults.standard.set(token, forKey: "token")
                         self.shown.wrappedValue.dismiss()
-                        DispatchQueue.main.async {
-                            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "logged_in"), object: nil)
-                        }
                     }
-
                 }
                 
             }) {
