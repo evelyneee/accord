@@ -8,46 +8,6 @@
 import Foundation
 import SwiftUI
 
-enum club {
-    case id
-    case name
-    case members
-}
-
-final class ClubManager {
-    static var shared = ClubManager()
-    func getClub(clubid: String, type: club) -> [Any] {
-        var completion: Bool = false
-        var returnArray: [Any] = []
-        net.requestData(url: "https://constanze.live/api/v1/clubs/\(clubid)", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
-            if let gooddata = data {
-                do {
-                    let clubArray = try JSONSerialization.jsonObject(with: gooddata, options: .mutableContainers) as? [String:Any] ?? [String:Any]()
-                    for item in clubArray.keys {
-                        if item == "channels" {
-                            if let channel = clubArray[item] as? Array<Dictionary<String, Any>> {
-                                if type == .id {
-                                    returnArray.append(channel[0]["id"])
-                                    print(returnArray)
-                                }
-                            }
-                        }
-                    }
-                } catch {
-                    
-                }
-            }
-        }
-        while completion == false {
-            if returnArray.isEmpty == false {
-                completion = true
-                print("returned properly \(Date())")
-                return returnArray
-            }
-        }
-    }
-}
-
 public class parseMessages {
     func getItem(forKey: String, secondary: Bool, secondaryItem: String, messageDictionary: [[String:Any]], position: Int) -> Any {
         var returnItem: Any = ""

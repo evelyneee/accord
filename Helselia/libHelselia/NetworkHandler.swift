@@ -12,7 +12,7 @@ let debug = true
 
 final class NetworkHandling {
     static var shared = NetworkHandling()
-    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) async {
+    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
@@ -57,9 +57,9 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     do {
-                        async {
-                            return await completion(true, try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]())
-                        }
+                        returnArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        print(returnArray)
+                        return completion(true, returnArray)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                         return
@@ -79,9 +79,7 @@ final class NetworkHandling {
             }
         })
         task.resume()
-        async {
-            return await completion(false, nil)
-        }
+        return completion(false, nil)
     }
     func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
@@ -116,7 +114,7 @@ final class NetworkHandling {
         if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
-        }        
+        }
         // ends here
         
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in

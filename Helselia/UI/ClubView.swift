@@ -35,7 +35,6 @@ struct CoolButtonStyle: ButtonStyle {
 struct ClubView: View {
     
     
-    @Binding var clubID: String
     @Binding var channelID: String
     @State var chatTextFieldContents: String = ""
     @State var data: [[String:Any]] = []
@@ -44,8 +43,8 @@ struct ClubView: View {
     
 //    actual view begins here
     func refresh() {
-        async {
-            await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+        DispatchQueue.main.async {
+            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
                     pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
@@ -94,8 +93,8 @@ struct ClubView: View {
                         }
                         Spacer()
                         Button(action: {
-                            async {
-                                await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
+                            DispatchQueue.main.async {
+                                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
                             }
                             print("https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])")
                             refresh()
@@ -119,8 +118,8 @@ struct ClubView: View {
             ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID)
         }
         .onReceive(timer) { time in
-            async {
-                await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+            DispatchQueue.main.async {
+                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                     if success == true {
                         data = array ?? []
                     }
@@ -137,13 +136,7 @@ struct ClubView: View {
                     refresh()
                 }
             }
-            if #available(macOS 12.0, *) {
-                async {
-                    print("uwu")
-                }
-            }
         }
-
     }
 }
 
@@ -153,8 +146,8 @@ struct ChatControls: View {
     @State var pfps: [Any] = []
     @Binding var channelID: String
     func refresh() {
-        async {
-            await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+        DispatchQueue.main.async {
+            NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
                     pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
@@ -175,8 +168,8 @@ struct ChatControls: View {
                 .padding(EdgeInsets())
             #endif
             Button(action: {
-                async {
-                    await NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) {success, array in
+                DispatchQueue.main.async {
+                    NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
                         switch success {
                         case true:
                             refresh()
