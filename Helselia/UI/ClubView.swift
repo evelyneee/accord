@@ -7,11 +7,6 @@
 
 
 import SwiftUI
-#if os(iOS)
-import UIKit
-#else
-import AppKit
-#endif
 
 // styles and structs and vars
 
@@ -34,8 +29,8 @@ struct CoolButtonStyle: ButtonStyle {
 
 struct ClubView: View {
     
-    
     @Binding var channelID: String
+    @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
     @State var data: [[String:Any]] = []
     @State var pfps: [Any] = []
@@ -55,87 +50,96 @@ struct ClubView: View {
     let timer = Timer.publish(every: 3, on: .current, in: .common).autoconnect()
     var body: some View {
 //      chat view
-        VStack(alignment: .leading) {
+        ZStack(alignment: .bottom) {
             Spacer()
-            HStack {
+            ZStack {
 //                chat view
-                List(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
-                    HStack {
-                        if pfpShown {
-                            if let imageURL = pfps[safe: index] as? String {
-                                ImageWithURL(imageURL)
-                                    .frame(maxWidth: 33, maxHeight: 33)
-                                    .padding(.horizontal, 5)
-                                    .clipShape(Circle())
-                            } else {
-                                Image("pfp").resizable()
-                                    .frame(maxWidth: 33, maxHeight: 33)
-                                    .padding(.horizontal, 5)
-                                    .clipShape(Circle())
-                                    .scaledToFill()
-                            }
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
-                                        .fontWeight(.bold)
-                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
-                                        Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
-                                            .foregroundColor(Color.secondary)
-                                    }
-                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
-                                        Text("Bot")
-                                            .fontWeight(.semibold)
-                                            .padding(2)
-                                            .background(Color.pink)
-                                            .cornerRadius(2)
-                                    }
-                                }
-                                Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
-                            }
-                        } else {
+                List {
+                    LazyVStack {
+                        Spacer().frame(height: 40)
+                        ForEach(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                             HStack {
-                                HStack {
-                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
-                                        .fontWeight(.bold)
-                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
-                                        Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
-                                            .foregroundColor(Color.secondary)
+                                if pfpShown {
+                                    if let imageURL = pfps[safe: index] as? String {
+                                        ImageWithURL(imageURL)
+                                            .frame(maxWidth: 33, maxHeight: 33)
+                                            .padding(.horizontal, 5)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Image("pfp").resizable()
+                                            .frame(maxWidth: 33, maxHeight: 33)
+                                            .padding(.horizontal, 5)
+                                            .clipShape(Circle())
+                                            .scaledToFill()
                                     }
-                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
-                                        Text("Bot")
-                                            .fontWeight(.semibold)
-                                            .padding(2)
-                                            .background(Color.pink)
-                                            .cornerRadius(2)
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
+                                                .fontWeight(.bold)
+                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
+                                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
+                                                    .foregroundColor(Color.secondary)
+                                            }
+                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
+                                                Text("Bot")
+                                                    .fontWeight(.semibold)
+                                                    .padding(2)
+                                                    .background(Color.pink)
+                                                    .cornerRadius(2)
+                                            }
+                                        }
+                                        Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
+                                    }
+                                } else {
+                                    HStack {
+                                        HStack {
+                                            Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
+                                                .fontWeight(.bold)
+                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
+                                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
+                                                    .foregroundColor(Color.secondary)
+                                            }
+                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
+                                                Text("Bot")
+                                                    .fontWeight(.semibold)
+                                                    .padding(2)
+                                                    .background(Color.pink)
+                                                    .cornerRadius(2)
+                                            }
+                                        }
+                                        Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
                                     }
                                 }
-                                Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
+                                Spacer()
+                                Button(action: {
+                                    DispatchQueue.main.async {
+                                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
+                                    }
+                                    refresh()
+                                }) {
+                                    Image(systemName: "trash")
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
                             }
+                            .rotationEffect(.radians(.pi))
+                            .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
-                        Spacer()
-                        Button(action: {
-                            DispatchQueue.main.async {
-                                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
-                            }
-                            refresh()
-                        }) {
-                            Image(systemName: "trash")
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
                     }
-                    .rotationEffect(.radians(.pi))
-                    .scaleEffect(x: -1, y: 1, anchor: .center)
                 }
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1, y: 1, anchor: .center)
                 .padding([.leading, .top], -25.0)
-                .padding(.bottom, -9.0)
-                
+                .padding(.bottom, 30)
                 
             }
             .padding(.leading, 25.0)
-            
-            ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID)
+            HStack {
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message \(channelName)"))
+                    .padding(15)
+                    .background(VisualEffectView(material: NSVisualEffectView.Material.appearanceBased, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                    .cornerRadius(15)
+            }
+            .padding()
         }
         .onReceive(timer) { time in
             DispatchQueue.main.async {
@@ -165,6 +169,7 @@ struct ChatControls: View {
     @Binding var data: [[String:Any]]
     @State var pfps: [Any] = []
     @Binding var channelID: String
+    @Binding var chatText: String
     func refresh() {
         DispatchQueue.main.async {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
@@ -177,16 +182,8 @@ struct ChatControls: View {
     }
     var body: some View {
         HStack {
-
-            #if os(iOS)
-            TextField("What's up?", text: $chatTextFieldContents)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(EdgeInsets())
-            #else
-            BorderlessTextField(placeholder: "What's up?", text: $chatTextFieldContents, isFocus: Binding.constant(false))
-                .cornerRadius(5)
-                .padding(EdgeInsets())
-            #endif
+            TextField(chatText, text: $chatTextFieldContents)
+                .textFieldStyle(PlainTextFieldStyle())
             Button(action: {
                 DispatchQueue.main.async {
                     NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
@@ -208,42 +205,24 @@ struct ChatControls: View {
             .foregroundColor(Color.clear)
             .opacity(0)
         }
-        .padding()
     }
 }
 
-#if os(macOS)
-struct BorderlessTextField: NSViewRepresentable {
-    let placeholder: String
-    @Binding var text: String
-    @Binding var isFocus: Bool
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+    
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let visualEffectView = NSVisualEffectView()
+        visualEffectView.material = material
+        visualEffectView.blendingMode = blendingMode
+        visualEffectView.state = NSVisualEffectView.State.active
+        visualEffectView.shadow?.shadowBlurRadius = 20
+        return visualEffectView
     }
-    func makeNSView(context: Context) -> NSTextField {
-        let textField = NSTextField()
-        textField.placeholderString = placeholder
-        textField.delegate = context.coordinator
-        textField.focusRingType = .none
-        textField.bezelStyle = NSTextField.BezelStyle.roundedBezel
-        return textField
-    }
-    func updateNSView(_ nsView: NSTextField, context: Context) {
-        nsView.stringValue = text
-    }
-    class Coordinator: NSObject, NSTextFieldDelegate {
-        let parent: BorderlessTextField
-        init(_ textField: BorderlessTextField) {
-            self.parent = textField
-        }
-        func controlTextDidEndEditing(_ obj: Notification) {
-            self.parent.isFocus = false
-        }
-        func controlTextDidChange(_ obj: Notification) {
-            guard let textField = obj.object as? NSTextField else { return }
-            self.parent.text = textField.stringValue
-        }
+
+    func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
+        visualEffectView.material = material
+        visualEffectView.blendingMode = blendingMode
     }
 }
-#endif
-

@@ -23,7 +23,6 @@ struct ContentView: View {
             }
         }
     }
-    
     var body: some View {
         NavigationView {
             List {
@@ -33,13 +32,15 @@ struct ContentView: View {
                         Section(header: Text((parser.getArray(forKey: "name", messageDictionary: clubs)[index]) as? String ?? "")) {
                             ForEach(Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .id) as? [String] ?? []).enumerated()), id: \.offset) { offset, channel in
                                 if let channelid = channel as? String {
-                                    NavigationLink(destination: ClubView(channelID: Binding.constant(channelid)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
-                                        HStack {
-                                            Image(systemName: "captions.bubble.fill")
-                                                .imageScale(.small)
-                                            Text((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .name) as? [String] ?? [])[offset])
-                                                .fontWeight(.semibold)
-                                                .font(.title2)
+                                    if let channelName = Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .name) as? [String] ?? []))[offset] as? String {
+                                        NavigationLink(destination: ClubView(channelID: Binding.constant(channelid), channelName:     Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
+                                            HStack {
+                                                Image(systemName: "captions.bubble.fill")
+                                                    .imageScale(.small)
+                                                Text(channelName)
+                                                    .fontWeight(.semibold)
+                                                    .font(.title2)
+                                            }
                                         }
                                     }
                                 }
