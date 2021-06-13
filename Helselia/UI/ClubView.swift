@@ -61,42 +61,62 @@ struct ClubView: View {
 //                chat view
                 List(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                     HStack {
-                        if let imageURL = pfps[safe: index] as? String {
-                            ImageWithURL(imageURL)
-                                .frame(maxWidth: 33, maxHeight: 33)
-                                .padding(.horizontal, 5)
-                                .clipShape(Circle())
-                        } else {
-                            Image("pfp").resizable()
-                                .frame(maxWidth: 33, maxHeight: 33)
-                                .padding(.horizontal, 5)
-                                .clipShape(Circle())
-                                .scaledToFill()
-                        }
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
-                                    .fontWeight(.bold)
-                                if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
-                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
-                                        .foregroundColor(Color.secondary)
-                                }
-                                if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
-                                    Text("Bot")
-                                        .fontWeight(.semibold)
-                                        .padding(2)
-                                        .background(Color.pink)
-                                        .cornerRadius(2)
-                                }
+                        if pfpShown {
+                            if let imageURL = pfps[safe: index] as? String {
+                                ImageWithURL(imageURL)
+                                    .frame(maxWidth: 33, maxHeight: 33)
+                                    .padding(.horizontal, 5)
+                                    .clipShape(Circle())
+                            } else {
+                                Image("pfp").resizable()
+                                    .frame(maxWidth: 33, maxHeight: 33)
+                                    .padding(.horizontal, 5)
+                                    .clipShape(Circle())
+                                    .scaledToFill()
                             }
-                            Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
+                            VStack(alignment: .leading) {
+                                HStack {
+                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
+                                        .fontWeight(.bold)
+                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
+                                        Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
+                                            .foregroundColor(Color.secondary)
+                                    }
+                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
+                                        Text("Bot")
+                                            .fontWeight(.semibold)
+                                            .padding(2)
+                                            .background(Color.pink)
+                                            .cornerRadius(2)
+                                    }
+                                }
+                                Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
+                            }
+                        } else {
+                            HStack {
+                                HStack {
+                                    Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
+                                        .fontWeight(.bold)
+                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
+                                        Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
+                                            .foregroundColor(Color.secondary)
+                                    }
+                                    if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
+                                        Text("Bot")
+                                            .fontWeight(.semibold)
+                                            .padding(2)
+                                            .background(Color.pink)
+                                            .cornerRadius(2)
+                                    }
+                                }
+                                Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
+                            }
                         }
                         Spacer()
                         Button(action: {
                             DispatchQueue.main.async {
                                 NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
                             }
-                            print("https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])")
                             refresh()
                         }) {
                             Image(systemName: "trash")
@@ -178,7 +198,6 @@ struct ChatControls: View {
                             print("whoop")
                         }
                     }
-                    print("done")
                 }
             }) {
                 Image(systemName: "paperplane.fill")

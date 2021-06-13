@@ -58,7 +58,6 @@ final class NetworkHandling {
                 if let data = data {
                     do {
                         returnArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
-                        print(returnArray)
                         return completion(true, returnArray)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
@@ -71,7 +70,6 @@ final class NetworkHandling {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields)
                     print(request.url)
-                    print(bodyObject)
                 }
             }
             else {
@@ -124,7 +122,6 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     do {
-                        print(data, "deez")
                         return completion(true, data)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
@@ -136,7 +133,6 @@ final class NetworkHandling {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields)
                     print(request.url)
-                    print(bodyObject)
                 }
             }
             else {
@@ -174,7 +170,6 @@ final class NetworkHandling {
                 if data != Data() {
                     do {
                         let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
-                        print(returnArray)
                         if let checktoken = returnArray["token"] as? String {
                             return completion(true, checktoken)
                         }

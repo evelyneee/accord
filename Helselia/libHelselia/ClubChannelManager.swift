@@ -56,31 +56,4 @@ final class ClubManager {
             }
         }
     }
-//    func getChannel(channelid: String, type: channel) -> [Any] {
-//        var completion: Bool = false
-//        var returnArray: [Any] = []
-//        net.requestData(url: "https://constanze.live/api/v1/channels/\(channelid)", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
-//            if let gooddata = data {
-//                do {
-//                    let channelArray = try JSONSerialization.jsonObject(with: gooddata, options: .mutableContainers) as? [String:Any] ?? [String:Any]()
-//                    print(channelArray)
-//                    for item in channelArray.keys {
-//                        if type == .name {
-//                            returnArray.append(channel[0]["id"])
-//                            print(returnArray)
-//                        }
-//                    }
-//                } catch {
-//
-//                }
-//            }
-//        }
-//        while completion == false {
-//            if returnArray.isEmpty == false {
-//                completion = true
-//                print("returned properly \(Date())")
-//                return returnArray
-//            }
-//        }
-//    }
 }

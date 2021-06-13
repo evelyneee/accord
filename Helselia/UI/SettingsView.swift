@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State var showingSettings = true
-    @State public var showPFP = true
+    @State public var showPFP = (UserDefaults.standard.bool(forKey: "pfpShown") ?? true)
     @State var usernameSettings: String = ""
     @State var pronounSettings: String = ""
     @State var referenceTitle: String = ""
@@ -44,6 +44,10 @@ struct SettingsView: View {
                     Spacer()
                     Toggle(isOn: $showPFP) {
                     }
+                    .onDisappear(perform: {
+                        UserDefaults.standard.set(showPFP, forKey: "pfpShown")
+                        pfpShown = (UserDefaults.standard.bool(forKey: "pfpShown") ?? true)
+                    })
                     .padding()
                     .toggleStyle(SwitchToggleStyle())
                 }
@@ -59,9 +63,6 @@ struct SettingsView: View {
             }
             Spacer()
 
-        }
-        .onAppear {
-            usernameSettings = (token ?? "")
         }
         .frame(minWidth: 400, minHeight: 300)
     }

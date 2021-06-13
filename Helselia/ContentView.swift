@@ -42,9 +42,6 @@ struct ContentView: View {
                                                 .font(.title2)
                                         }
                                     }
-                                    .onAppear {
-                                        print(channel)
-                                    }
                                 }
                             }
                         }
@@ -87,7 +84,6 @@ struct ContentView: View {
         .sheet(isPresented: $modalIsPresented) {
             LoginView()
                 .onDisappear(perform: {
-                    print("there")
                     DispatchQueue.main.async {
                         NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                             if success == true {
@@ -100,7 +96,6 @@ struct ContentView: View {
 
         }
         .onAppear {
-            print(token)
             if (token != "") {
                 DispatchQueue.main.async {
                     NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in

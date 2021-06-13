@@ -35,7 +35,6 @@ struct IssueCreationUI: View {
             Spacer()
             Button(action: {
                 issueContainer.append(issueTitle)
-                print("submitted")
                 self.presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Submit")

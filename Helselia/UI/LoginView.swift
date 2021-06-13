@@ -22,6 +22,7 @@ struct LoginView: View {
                 NetworkHandling.shared.login(username: username, password: passcode) { success, rettoken in
                     if (success) {
                         token = rettoken ?? ""
+                        UserDefaults.standard.set("true", forKey: "pfpShown")
                         UserDefaults.standard.set(token, forKey: "token")
                         self.shown.wrappedValue.dismiss()
                     }
