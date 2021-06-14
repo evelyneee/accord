@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import Combine
 
 // styles and structs and vars
 
@@ -42,7 +43,9 @@ struct ClubView: View {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
-                    pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                    if pfpShown {
+                        pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                    }
                 }
             }
         }
@@ -56,7 +59,7 @@ struct ClubView: View {
 //                chat view
                 List {
                     LazyVStack {
-                        Spacer().frame(height: 40)
+                        Spacer().frame(height: 75)
                         ForEach(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                             HStack {
                                 if pfpShown {
@@ -129,7 +132,6 @@ struct ClubView: View {
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1, y: 1, anchor: .center)
                 .padding([.leading, .top], -25.0)
-                .padding(.bottom, 30)
                 
             }
             .padding(.leading, 25.0)
@@ -138,6 +140,26 @@ struct ClubView: View {
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.appearanceBased, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
                     .cornerRadius(15)
+                #if os(iOS)
+                Button(action: {
+                    print("aa")
+                    DispatchQueue.main.async {
+                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
+                            switch success {
+                            case true:
+                                refresh()
+                                chatTextFieldContents = ""
+                            case false:
+                                print("whoop")
+                            }
+                        }
+                    }
+                }) {
+                    Image(systemName: "paperplane.fill")
+                }
+                .frame(width: 5, height: 5)
+                .ButtonStyle(BorderlessButtonStyle())
+                #endif
             }
             .padding()
         }
@@ -182,9 +204,8 @@ struct ChatControls: View {
     }
     var body: some View {
         HStack {
-            TextField(chatText, text: $chatTextFieldContents)
-                .textFieldStyle(PlainTextFieldStyle())
-            Button(action: {
+            TextField(chatText, text: $chatTextFieldContents, onCommit: {
+                print("aa")
                 DispatchQueue.main.async {
                     NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
                         switch success {
@@ -196,14 +217,8 @@ struct ChatControls: View {
                         }
                     }
                 }
-            }) {
-                Image(systemName: "paperplane.fill")
-            }
-            .frame(width: 0, height: 0)
-            .keyboardShortcut(.defaultAction)
-            .buttonStyle(BorderlessButtonStyle())
-            .foregroundColor(Color.clear)
-            .opacity(0)
+            })
+                .textFieldStyle(PlainTextFieldStyle())
         }
     }
 }
