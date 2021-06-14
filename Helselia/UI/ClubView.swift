@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import AppKit
 
 // styles and structs and vars
 
@@ -34,7 +35,7 @@ struct ClubView: View {
     @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
     @State var data: [[String:Any]] = []
-    @State var pfps: [Any] = []
+    @State var pfps: [String:NSImage] = [:]
     @State var allUsers: [String] = []
     
 //    actual view begins here
@@ -43,9 +44,7 @@ struct ClubView: View {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
-                    if pfpShown {
-                        pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
-                    }
+                    pfps = ImageHandling.shared.getAllProfilePictures(array: array ?? [])
                 }
             }
         }
@@ -63,18 +62,11 @@ struct ClubView: View {
                         ForEach(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                             HStack {
                                 if pfpShown {
-                                    if let imageURL = pfps[safe: index] as? String {
-                                        ImageWithURL(imageURL)
-                                            .frame(maxWidth: 33, maxHeight: 33)
-                                            .padding(.horizontal, 5)
-                                            .clipShape(Circle())
-                                    } else {
-                                        Image("pfp").resizable()
-                                            .frame(maxWidth: 33, maxHeight: 33)
-                                            .padding(.horizontal, 5)
-                                            .clipShape(Circle())
-                                            .scaledToFill()
-                                    }
+                                    Image(nsImage: pfps[(parser.getArray(forKey: "user_id", messageDictionary: data)[safe: index] as! String)] ?? NSImage()).resizable()
+                                        .frame(maxWidth: 33, maxHeight: 33)
+                                        .scaledToFit()
+                                        .padding(.horizontal, 5)
+                                        .clipShape(Circle())
                                     VStack(alignment: .leading) {
                                         HStack {
                                             Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
@@ -101,6 +93,9 @@ struct ClubView: View {
                                             if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
                                                 Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
                                                     .foregroundColor(Color.secondary)
+                                                    .onAppear(perform: {
+                                                        print(pfps)
+                                                    })
                                             }
                                             if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
                                                 Text("Bot")
@@ -110,6 +105,7 @@ struct ClubView: View {
                                                     .cornerRadius(2)
                                             }
                                         }
+
                                         Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
                                     }
                                 }
@@ -123,6 +119,7 @@ struct ClubView: View {
                                     Image(systemName: "trash")
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
+                                
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
@@ -131,7 +128,7 @@ struct ClubView: View {
                 }
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1, y: 1, anchor: .center)
-                .padding([.leading, .top], -25.0)
+                .padding(.leading, -25.0)
                 
             }
             .padding(.leading, 25.0)
@@ -165,16 +162,8 @@ struct ClubView: View {
         }
         .onReceive(timer) { time in
             DispatchQueue.main.async {
-                NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
-                    if success == true {
-                        data = array ?? []
-                    }
-                }
+                refresh()
             }
-        }
-        .onReceiveNotifs(Notification.Name(rawValue: "logged_in")) { _ in
-            print("logged in")
-            refresh()
         }
         .onAppear {
             if token != "" {
@@ -197,7 +186,9 @@ struct ChatControls: View {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
-                    pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                    if pfpShown {
+                        pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
+                    }
                 }
             }
         }

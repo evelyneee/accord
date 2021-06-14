@@ -42,6 +42,8 @@ public class parseMessages {
                     }
                 } else if forKey == "avatar" && item == "author" {
                     returnItem.append("https://cdn.constanze.live/avatars/\((message[item] as! Dictionary<String, Any>)["id"] ?? "error")/\((message[item] as! Dictionary<String, Any>)["avatar"] ?? "error").png")
+                } else if forKey == "user_id" && item == "author" {
+                    returnItem.append((message[item] as! Dictionary<String, Any>)["id"] ?? "error")
                 }
             }
         }
