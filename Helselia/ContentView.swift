@@ -33,7 +33,7 @@ struct ContentView: View {
                             ForEach(Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .id) as? [String] ?? []).enumerated()), id: \.offset) { offset, channel in
                                 if let channelid = channel as? String {
                                     if let channelName = Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .name) as? [String] ?? []))[offset] as? String {
-                                        NavigationLink(destination: ClubView(channelID: Binding.constant(channelid), channelName:     Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
+                                        NavigationLink(destination: ClubView(channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
                                             HStack {
                                                 Image(systemName: "captions.bubble.fill")
                                                     .imageScale(.small)
