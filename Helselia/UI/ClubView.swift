@@ -37,6 +37,7 @@ struct ClubView: View {
     @State var data: [[String:Any]] = []
     @State var pfps: [String:NSImage] = [:]
     @State var allUsers: [String] = []
+    @State var sending: Bool = false
     
 //    actual view begins here
     func refresh() {
@@ -59,6 +60,48 @@ struct ClubView: View {
                 List {
                     LazyVStack {
                         Spacer().frame(height: 75)
+                        if (sending) {
+                            if let temp = chatTextFieldContents {
+                                HStack {
+                                    if pfpShown {
+                                        Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                            .frame(maxWidth: 33, maxHeight: 33)
+                                            .scaledToFit()
+                                            .padding(.horizontal, 5)
+                                            .clipShape(Circle())
+                                        VStack(alignment: .leading) {
+                                            HStack {
+                                                if let author = "\(username)" {
+                                                    Text((author as? String ?? ""))
+                                                        .fontWeight(.bold)
+                                                    Text("#0000")
+                                                        .foregroundColor(Color.secondary)
+                                                }
+                                            }
+                                            Text(temp)
+                                        }
+                                    } else {
+                                        HStack {
+                                            HStack {
+                                                if let author = "\(username)" {
+                                                    Text((author as? String ?? ""))
+                                                        .fontWeight(.bold)
+                                                    Text("#0000")
+                                                        .foregroundColor(Color.secondary)
+                                                }
+                                            }
+
+                                            Text(temp)
+                                        }
+                                    }
+                                    Spacer()
+                                    
+                                }
+                                .rotationEffect(.radians(.pi))
+                                .scaleEffect(x: -1, y: 1, anchor: .center)
+                                .opacity(0.75)
+                            }
+                        }
                         ForEach(0..<parser.getArray(forKey: "content", messageDictionary: data).count, id: \.self) { index in
                             HStack {
                                 if pfpShown {
@@ -69,19 +112,12 @@ struct ClubView: View {
                                         .clipShape(Circle())
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            if let author = parser.getArray(forKey: "author", messageDictionary: data) {
-                                                Text((author[index] as? String ?? "").dropLast(5))
+                                            if let author = parser.getArray(forKey: "author", messageDictionary: data)[index] {
+                                                Text((author as? String ?? "").dropLast(5))
                                                     .fontWeight(.bold)
-                                                if (author[index] as? String ?? "").suffix(5) != "#0000" {
-                                                    Text((author[index] as? String ?? "").suffix(5))
+                                                if (author as? String ?? "").suffix(5) != "#0000" {
+                                                    Text((author as? String ?? "").suffix(5))
                                                         .foregroundColor(Color.secondary)
-                                                }
-                                                if (author[index] as? String ?? "").suffix(5) == "#0000" {
-                                                    Text("Bot")
-                                                        .fontWeight(.semibold)
-                                                        .padding(2)
-                                                        .background(Color.pink)
-                                                        .cornerRadius(2)
                                                 }
                                             }
                                         }
@@ -90,19 +126,12 @@ struct ClubView: View {
                                 } else {
                                     HStack {
                                         HStack {
-                                            if let author = parser.getArray(forKey: "author", messageDictionary: data) {
-                                                Text((author[index] as? String ?? "").dropLast(5))
+                                            if let author = parser.getArray(forKey: "author", messageDictionary: data)[index] {
+                                                Text((author as? String ?? "").dropLast(5))
                                                     .fontWeight(.bold)
-                                                if (author[index] as? String ?? "").suffix(5) != "#0000" {
-                                                    Text((author[index] as? String ?? "").suffix(5))
+                                                if (author as? String ?? "").suffix(5) != "#0000" {
+                                                    Text((author as? String ?? "").suffix(5))
                                                         .foregroundColor(Color.secondary)
-                                                }
-                                                if (author[index] as? String ?? "").suffix(5) == "#0000" {
-                                                    Text("Bot")
-                                                        .fontWeight(.semibold)
-                                                        .padding(2)
-                                                        .background(Color.pink)
-                                                        .cornerRadius(2)
                                                 }
                                             }
                                         }
@@ -149,7 +178,7 @@ struct ClubView: View {
             }
             .padding(.leading, 25.0)
             HStack {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message \(channelName)"))
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message \(channelName)"), sending: $sending)
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.appearanceBased, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
                     .cornerRadius(15)
@@ -193,14 +222,18 @@ struct ClubView: View {
 
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
+    @State var textFieldContents: String = ""
     @Binding var data: [[String:Any]]
     @State var pfps: [String : NSImage] = [:]
     @Binding var channelID: String
     @Binding var chatText: String
+    @Binding var sending: Bool
     func refresh() {
         DispatchQueue.main.async {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
+                    sending = false
+                    chatTextFieldContents = textFieldContents
                     data = array ?? []
                     pfps = ImageHandling.shared.getAllProfilePictures(array: array ?? [])
                 }
@@ -209,13 +242,15 @@ struct ChatControls: View {
     }
     var body: some View {
         HStack {
-            TextField(chatText, text: $chatTextFieldContents, onCommit: {
+            TextField(chatText, text: $textFieldContents, onCommit: {
+                chatTextFieldContents = textFieldContents
+                sending = true
                 DispatchQueue.main.async {
                     NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
                         switch success {
                         case true:
+                            textFieldContents = ""
                             refresh()
-                            chatTextFieldContents = ""
                         case false:
                             print("whoop")
                         }
