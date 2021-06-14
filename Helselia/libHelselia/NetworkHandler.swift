@@ -57,7 +57,7 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     do {
-                        returnArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String:Any]] ?? [[String:Any]]()
+                        returnArray = try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] ?? [[String:Any]]()
                         return completion(true, returnArray)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
