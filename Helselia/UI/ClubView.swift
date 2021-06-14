@@ -244,12 +244,13 @@ struct ChatControls: View {
         HStack {
             TextField(chatText, text: $textFieldContents, onCommit: {
                 chatTextFieldContents = textFieldContents
+                let temp = textFieldContents
+                textFieldContents = ""
                 sending = true
                 DispatchQueue.main.async {
-                    NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
+                    NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
                         switch success {
                         case true:
-                            textFieldContents = ""
                             refresh()
                         case false:
                             print("whoop")
