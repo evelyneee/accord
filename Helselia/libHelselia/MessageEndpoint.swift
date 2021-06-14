@@ -8,7 +8,8 @@
 import Foundation
 import SwiftUI
 
-public class parseMessages {
+final class ParseMessages {
+    static var shared = ParseMessages()
     func getItem(forKey: String, secondary: Bool, secondaryItem: String, messageDictionary: [[String:Any]], position: Int) -> Any {
         var returnItem: Any = ""
         for item in messageDictionary[position].keys {

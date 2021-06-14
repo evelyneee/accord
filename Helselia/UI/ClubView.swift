@@ -14,7 +14,7 @@ import AppKit
 
 let messages = NetworkHandling()
 let net = NetworkHandling()
-let parser = parseMessages()
+let parser = ParseMessages()
 
 struct CoolButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
@@ -113,9 +113,11 @@ struct ClubView: View {
                                 Spacer()
                                 Button(action: {
                                     DispatchQueue.main.async {
-                                        NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])", token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
+                                        let i = "https://constanze.live/api/v1/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[index])"
+                                        let index2 = index
+                                        data.remove(at: index2)
+                                        NetworkHandling.shared.request(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) {success, array in }
                                     }
-                                    refresh()
                                 }) {
                                     Image(systemName: "trash")
                                 }
