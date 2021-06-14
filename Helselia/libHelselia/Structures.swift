@@ -17,7 +17,6 @@ public class requests {
     }
 }
 
-/*
 public struct Message: Hashable {
     struct author {
         var avatar: URL
@@ -57,4 +56,3 @@ public struct Message: Hashable {
     var tts: Bool
     var type: Int
 }
-*/

@@ -16,7 +16,6 @@ final class NetworkHandling {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        var retData: Data?
         
         // setup of the request
         switch type {
@@ -68,8 +67,8 @@ final class NetworkHandling {
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
-                    print(request.allHTTPHeaderFields)
-                    print(request.url)
+                    print(request.allHTTPHeaderFields as Any)
+                    print(request.url as Any)
                 }
             }
             else {
@@ -83,7 +82,6 @@ final class NetworkHandling {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        var retData: Data?
         
         // setup of the request
         switch type {
@@ -121,18 +119,13 @@ final class NetworkHandling {
                 print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
-                    do {
-                        return completion(true, data)
-                    } catch {
-                        print("error at serializing: \(error.localizedDescription)")
-                        return
-                    }
+                    return completion(true, data)
                 } else {
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
-                    print(request.allHTTPHeaderFields)
-                    print(request.url)
+                    print(request.allHTTPHeaderFields as Any)
+                    print(request.url as Any)
                 }
             }
             else {
@@ -146,7 +139,6 @@ final class NetworkHandling {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: "https://constanze.live/api/v1/auth/login") ?? URL(string: "#")!))
-        var retData: Data?
         
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -158,7 +150,6 @@ final class NetworkHandling {
         ]
         
         request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
-        var token: String = ""
         
         // ends here
         
@@ -180,8 +171,8 @@ final class NetworkHandling {
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
-                    print(request.allHTTPHeaderFields)
-                    print(request.httpBody)
+                    print(request.allHTTPHeaderFields as Any)
+                    print(request.httpBody as Any)
                 }
             }
             else {

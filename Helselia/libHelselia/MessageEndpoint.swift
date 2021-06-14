@@ -79,7 +79,7 @@ class ImageLoaderAndCache: ObservableObject {
     
     init(imageURL: String) {
         let cache = URLCache.shared
-        if let url = URL(string: imageURL) as? URL {
+        if let url = URL(string: imageURL) {
             let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
             if let data = cache.cachedResponse(for: request)?.data {
                 self.imageData = data

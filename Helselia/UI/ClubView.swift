@@ -72,7 +72,7 @@ struct ClubView: View {
                                         VStack(alignment: .leading) {
                                             HStack {
                                                 if let author = "\(username)" {
-                                                    Text((author as? String ?? ""))
+                                                    Text(author)
                                                         .fontWeight(.bold)
                                                     Text("#0000")
                                                         .foregroundColor(Color.secondary)
@@ -84,7 +84,7 @@ struct ClubView: View {
                                         HStack {
                                             HStack {
                                                 if let author = "\(username)" {
-                                                    Text((author as? String ?? ""))
+                                                    Text(author)
                                                         .fontWeight(.bold)
                                                     Text("#0000")
                                                         .foregroundColor(Color.secondary)

@@ -10,7 +10,6 @@ import Foundation
 final class ProfileManager {
     static var shared = ProfileManager()
     func getSelfProfile(key: String, data: Data?) -> [Any] {
-        var completion: Bool = false
         var returnArray: [Any] = []
 
         if let gooddata = data {
@@ -18,7 +17,7 @@ final class ProfileManager {
                 let profile = try JSONSerialization.jsonObject(with: gooddata, options: .mutableContainers) as? [String:Any] ?? [String:Any]()
                 for items in profile.keys {
                     if items == key {
-                        returnArray.append(profile[items])
+                        returnArray.append(profile[items] as Any)
                     }
                 }
             } catch {

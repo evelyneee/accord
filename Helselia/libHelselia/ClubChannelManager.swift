@@ -32,12 +32,12 @@ final class ClubManager {
                             if let channel = clubArray[item] as? Array<Dictionary<String, Any>> {
                                 if type == .id {
                                     for i in 0..<(clubArray[item] as? [[String:Any]] ?? []).count {
-                                        returnArray.append(channel[i]["id"])
+                                        returnArray.append(channel[i]["id"] as Any)
                                     }
                                 }
                                 if type == .name {
                                     for i in 0..<(clubArray[item] as? [[String:Any]] ?? []).count {
-                                        returnArray.append(channel[i]["name"])
+                                        returnArray.append(channel[i]["name"] as Any)
                                     }
                                 }
                             }

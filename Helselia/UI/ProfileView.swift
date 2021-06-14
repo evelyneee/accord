@@ -95,7 +95,7 @@ struct ProfileView: View {
                 if (completion) {
                     profileData = data
                     user_id = ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? ""
-                    _ = net.requestData(url: "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: profileData)[safe: 0]  as? String ?? "").png", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                    net.requestData(url: "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: profileData)[safe: 0]  as? String ?? "").png", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                 }
             }
         }

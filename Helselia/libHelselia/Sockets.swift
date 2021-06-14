@@ -17,19 +17,16 @@ final class WebSocketHandler {
         webSocketTask.resume()
         send()
         ping()
-        receive()
+        _ = receive()
         func send() {
-            do {
-                let packet: [String : Any] = ["op":2, "d":["token":token, "properties": ["os":"macOS", "browser":"", "device":""]]]
-                let jsonPacket = try! JSONSerialization.data(withJSONObject: packet, options: [])
-                let message = URLSessionWebSocketTask.Message.data(jsonPacket)
-                webSocketTask.send(message) { error in
-                    print("sent", message)
-                    if let error = error {
-                        print("WebSocket sending error: \(error)")
-                    }
+            let packet: [String : Any] = ["op":2, "d":["token":token, "properties": ["os":"macOS", "browser":"", "device":""]]]
+            let jsonPacket = try! JSONSerialization.data(withJSONObject: packet, options: [])
+            let message = URLSessionWebSocketTask.Message.data(jsonPacket)
+            webSocketTask.send(message) { error in
+                print("sent", message)
+                if let error = error {
+                    print("WebSocket sending error: \(error)")
                 }
-            } catch {
             }
         }
         func ping() {
@@ -45,7 +42,7 @@ final class WebSocketHandler {
           }
         }
         func receive() -> String {
-            var rettext = ""
+            let rettext = ""
             webSocketTask.receive { result in
                 switch result {
                     case .success(let message):
@@ -58,7 +55,7 @@ final class WebSocketHandler {
                             print("unknown")
                         }
                 case .failure(let error):
-                    print("Error when receiving")
+                    print("Error when receiving \(error)")
                 }
             }
             return rettext
@@ -73,7 +70,7 @@ final class WebSocketHandler {
                     print("set that \(retValue)")
                 }
             }
-            var completion: Bool = false
+            var _: Bool = false
             var retDict: [String:Any] = [:]
             webSocketTask.receive { result in
                 switch result {
@@ -87,7 +84,7 @@ final class WebSocketHandler {
                         if let data = text.data(using: String.Encoding.utf8) {
                             do {
                                 retDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
-                                print((retDict["d"] as? [String:Any] ?? [:])["clubs"])
+                                print((retDict["d"] as? [String:Any] ?? [:])["clubs"] as Any)
                             } catch let error as NSError {
                                 print(error)
                             }
@@ -97,7 +94,7 @@ final class WebSocketHandler {
                         retValue = false
                     }
                 case .failure(let error):
-                    print("Error when receiving")
+                    print("Error when receiving \(error)")
                     retValue = false
                 }
             }

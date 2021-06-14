@@ -4,7 +4,6 @@
 //
 //  Created by evelyn on 2020-11-24.
 //
-// (ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs)), type: .id) as? [String] ?? [])
 
 import SwiftUI
 
@@ -31,8 +30,8 @@ struct ContentView: View {
                     ForEach(0..<clubs.count, id: \.self) { index in
                         Section(header: Text((parser.getArray(forKey: "name", messageDictionary: clubs)[index]) as? String ?? "")) {
                             ForEach(Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .id) as? [String] ?? []).enumerated()), id: \.offset) { offset, channel in
-                                if let channelid = channel as? String {
-                                    if let channelName = Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .name) as? [String] ?? []))[offset] as? String {
+                                if let channelid = channel {
+                                    if let channelName = Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[index], type: .name) as? [String] ?? []))[offset] {
                                         NavigationLink(destination: ClubView(channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
                                             HStack {
                                                 Image(systemName: "captions.bubble.fill")
@@ -107,7 +106,7 @@ struct ContentView: View {
                     net.requestData(url: "https://constanze.live/api/v1/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
                             user_id = ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? ""
-                            _ = net.requestData(url: "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: data)[safe: 0]  as? String ?? "").png", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                            net.requestData(url: "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: data)[safe: 0]  as? String ?? "").png", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                             username = ProfileManager.shared.getSelfProfile(key: "username", data: data)[safe: 0]  as? String ?? ""
                         }
                     }
