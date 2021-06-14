@@ -69,18 +69,20 @@ struct ClubView: View {
                                         .clipShape(Circle())
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
-                                                .fontWeight(.bold)
-                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
-                                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
-                                                    .foregroundColor(Color.secondary)
-                                            }
-                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
-                                                Text("Bot")
-                                                    .fontWeight(.semibold)
-                                                    .padding(2)
-                                                    .background(Color.pink)
-                                                    .cornerRadius(2)
+                                            if let author = parser.getArray(forKey: "author", messageDictionary: data) {
+                                                Text((author[index] as? String ?? "").dropLast(5))
+                                                    .fontWeight(.bold)
+                                                if (author[index] as? String ?? "").suffix(5) != "#0000" {
+                                                    Text((author[index] as? String ?? "").suffix(5))
+                                                        .foregroundColor(Color.secondary)
+                                                }
+                                                if (author[index] as? String ?? "").suffix(5) == "#0000" {
+                                                    Text("Bot")
+                                                        .fontWeight(.semibold)
+                                                        .padding(2)
+                                                        .background(Color.pink)
+                                                        .cornerRadius(2)
+                                                }
                                             }
                                         }
                                         Text(parser.getArray(forKey: "content", messageDictionary: data)[index] as? String ?? "")
@@ -88,21 +90,20 @@ struct ClubView: View {
                                 } else {
                                     HStack {
                                         HStack {
-                                            Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").dropLast(5))
-                                                .fontWeight(.bold)
-                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) != "#0000" {
-                                                Text((parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5))
-                                                    .foregroundColor(Color.secondary)
-                                                    .onAppear(perform: {
-                                                        print(pfps)
-                                                    })
-                                            }
-                                            if (parser.getArray(forKey: "author", messageDictionary: data)[index] as? String ?? "").suffix(5) == "#0000" {
-                                                Text("Bot")
-                                                    .fontWeight(.semibold)
-                                                    .padding(2)
-                                                    .background(Color.pink)
-                                                    .cornerRadius(2)
+                                            if let author = parser.getArray(forKey: "author", messageDictionary: data) {
+                                                Text((author[index] as? String ?? "").dropLast(5))
+                                                    .fontWeight(.bold)
+                                                if (author[index] as? String ?? "").suffix(5) != "#0000" {
+                                                    Text((author[index] as? String ?? "").suffix(5))
+                                                        .foregroundColor(Color.secondary)
+                                                }
+                                                if (author[index] as? String ?? "").suffix(5) == "#0000" {
+                                                    Text("Bot")
+                                                        .fontWeight(.semibold)
+                                                        .padding(2)
+                                                        .background(Color.pink)
+                                                        .cornerRadius(2)
+                                                }
                                             }
                                         }
 
@@ -121,6 +122,19 @@ struct ClubView: View {
                                 .buttonStyle(BorderlessButtonStyle())
                                 
                             }
+                            .rotationEffect(.radians(.pi))
+                            .scaleEffect(x: -1, y: 1, anchor: .center)
+                        }
+                        if data.isEmpty == false {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("This is the beginning of #\(channelName)")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                }
+                                Spacer()
+                            }
+                            .padding()
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
@@ -178,7 +192,7 @@ struct ClubView: View {
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
     @Binding var data: [[String:Any]]
-    @State var pfps: [Any] = []
+    @State var pfps: [String : NSImage] = [:]
     @Binding var channelID: String
     @Binding var chatText: String
     func refresh() {
@@ -186,9 +200,7 @@ struct ChatControls: View {
             NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                 if success == true {
                     data = array ?? []
-                    if pfpShown {
-                        pfps = parser.getArray(forKey: "avatar", messageDictionary: data)
-                    }
+                    pfps = ImageHandling.shared.getAllProfilePictures(array: array ?? [])
                 }
             }
         }
@@ -196,7 +208,6 @@ struct ChatControls: View {
     var body: some View {
         HStack {
             TextField(chatText, text: $chatTextFieldContents, onCommit: {
-                print("aa")
                 DispatchQueue.main.async {
                     NetworkHandling.shared.request(url: "https://constanze.live/api/v1/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(chatTextFieldContents))"]) { success, array in
                         switch success {
