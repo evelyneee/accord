@@ -9,7 +9,7 @@ import Foundation
 
 final class WebSocketHandler {
     static var shared = WebSocketHandler()
-    func newMessage(opcode: Int) -> [String:Any] {
+    func newMessage(opcode: Int, item: String, _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let webSocketDelegate = WebSocket()
         let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
         let url = URL(string: "wss://gateway.constanze.live")!
@@ -17,7 +17,7 @@ final class WebSocketHandler {
         webSocketTask.resume()
         send()
         ping()
-        _ = receive()
+        _ = checkConnection() {success, array in print(array)}
         func send() {
             let packet: [String : Any] = ["op":2, "d":["token":token, "properties": ["os":"macOS", "browser":"", "device":""]]]
             let jsonPacket = try! JSONSerialization.data(withJSONObject: packet, options: [])
@@ -64,14 +64,14 @@ final class WebSocketHandler {
             let reason = "Closing connection".data(using: .utf8)
             webSocketTask.cancel(with: .goingAway, reason: reason)
         }
-        func checkConnection() -> [String:Any] {
+        func checkConnection(_ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
             var retValue: Bool = false {
                 didSet {
                     print("set that \(retValue)")
                 }
             }
             var _: Bool = false
-            var retDict: [String:Any] = [:]
+            var retDict: [[String:Any]] = []
             webSocketTask.receive { result in
                 switch result {
                 case .success(let message):
@@ -83,10 +83,13 @@ final class WebSocketHandler {
                         print(text)
                         if let data = text.data(using: String.Encoding.utf8) {
                             do {
-                                retDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
-                                print((retDict["d"] as? [String:Any] ?? [:])["clubs"] as Any)
+                                let tempretDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
+                                retDict = ((tempretDict["d"] as? [String:Any] ?? [:])["clubs"] as? [[String:Any]]) ?? []
+                                return completion(true, retDict)
+
                             } catch let error as NSError {
                                 print(error)
+                                return completion(false, nil)
                             }
                         }
                     @unknown default:
@@ -98,9 +101,15 @@ final class WebSocketHandler {
                     retValue = false
                 }
             }
-            return retDict
+            print(retDict)
+            return completion(false, nil)
         }
-        return checkConnection()
+
+        checkConnection() { success, array in
+            if success {
+                return completion(true, array)
+            }
+        }
     }
 }
 

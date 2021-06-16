@@ -74,7 +74,7 @@ struct ClubView: View {
                                                 if let author = "\(username)" {
                                                     Text(author)
                                                         .fontWeight(.bold)
-                                                    Text("#0000")
+                                                    Text("#\(discriminator)")
                                                         .foregroundColor(Color.secondary)
                                                 }
                                             }
@@ -86,7 +86,7 @@ struct ClubView: View {
                                                 if let author = "\(username)" {
                                                     Text(author)
                                                         .fontWeight(.bold)
-                                                    Text("#0000")
+                                                    Text("#\(discriminator)")
                                                         .foregroundColor(Color.secondary)
                                                 }
                                             }

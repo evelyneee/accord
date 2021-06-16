@@ -11,6 +11,7 @@ struct ContentView: View {
     @State public var selection: Int?
     @State var clubs: [[String:Any]] = []
     @State var channels: [Any] = []
+    @State var status: statusIndicators?
     @State var modalIsPresented: Bool = false {
         didSet {
             DispatchQueue.main.async {
@@ -76,6 +77,21 @@ struct ContentView: View {
                             .font(.title2)
                     }
                 }
+                Spacer()
+                HStack {
+                    ZStack(alignment: .bottomTrailing) {
+                        Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                            .scaledToFit()
+                            .clipShape(Circle())
+                            .frame(width: 30, height: 30)
+                        Circle()
+                            .foregroundColor(Color.green.opacity(0.75))
+                            .frame(width: 10, height: 10)
+                    }
+
+                    Text("\(username)#\(discriminator)")
+                    Spacer()
+                }
             }
             .frame(minWidth: 160, maxWidth: 350)
             .listStyle(SidebarListStyle())
@@ -98,19 +114,22 @@ struct ContentView: View {
         .onAppear {
             if (token != "") {
                 DispatchQueue.main.async {
-                    NetworkHandling.shared.request(url: "https://constanze.live/api/v1/users/@me/clubs", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
-                        if success == true {
-                            clubs = array ?? []
-                        }
-                    }
                     net.requestData(url: "https://constanze.live/api/v1/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
                             user_id = ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? ""
                             net.requestData(url: "https://cdn.constanze.live/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: data)[safe: 0]  as? String ?? "").png", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                             username = ProfileManager.shared.getSelfProfile(key: "username", data: data)[safe: 0]  as? String ?? ""
+                            discriminator = ProfileManager.shared.getSelfProfile(key: "discriminator", data: data)[safe: 0]  as? String ?? ""
                         }
                     }
+                    
                 }
+                WebSocketHandler.shared.newMessage(opcode: 2, item: "clubs")  { success, array in
+                    if !(array?.isEmpty ?? true) {
+                        clubs = array ?? []
+                    }
+                }
+                print(clubs)
             } else {
                 modalIsPresented = true
             }

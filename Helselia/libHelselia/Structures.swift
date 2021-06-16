@@ -17,6 +17,12 @@ public class requests {
     }
 }
 
+enum statusIndicators {
+    case online
+    case dnd
+    case idle
+}
+
 public struct Message: Hashable {
     struct author {
         var avatar: URL
