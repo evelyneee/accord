@@ -1,0 +1,23 @@
+version: "Apple Swift version 5.5 (swiftlang-1300.0.19.104 clang-1300.0.18.4)"
+options: "a4a403bdde4144706e008de51b2a7e16294521111299e750d5f9535b87782b48"
+build_start_time: [1623714259, 849975109]
+build_end_time: [1623714274, 587881088]
+inputs:
+  "/Users/evelyn/Documents/Helselia/Helselia/ContentView.swift": [1623713103, 124776363]
+  "/Users/evelyn/Documents/Helselia/Helselia/Extensions.swift": [1623106043, 201444864]
+  "/Users/evelyn/Documents/Helselia/Helselia/HelseliaApp.swift": [1623713990, 522193670]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/ClubView.swift": [1623713256, 340066909]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/HomeView.swift": [1623106043, 221369504]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/IssueCreationUI.swift": [1623603940, 884278774]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/LoginView.swift": [1623604517, 545434713]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/MyIssues.swift": [1622755571, 10423183]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/ProfileView.swift": [1623712964, 947738409]
+  "/Users/evelyn/Documents/Helselia/Helselia/UI/SettingsView.swift": [1623712964, 932140350]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/ClubChannelManager.swift": [1623713055, 684220314]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/ImageHandling.swift": [1623713019, 927244424]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/MessageEndpoint.swift": [1623713103, 107151508]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/NetworkHandler.swift": [1623713191, 40617942]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/Profile.swift": [1623713103, 68970203]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/Sockets.swift": [1623713305, 224069356]
+  "/Users/evelyn/Documents/Helselia/Helselia/libHelselia/Structures.swift": [1623714235, 630544185]
+  "/Users/evelyn/Documents/Helselia/Helselia/temp.swift": [1623713191, 8989810]
