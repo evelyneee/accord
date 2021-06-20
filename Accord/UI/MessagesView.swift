@@ -1,6 +1,6 @@
 //
-//  discordlib.swift
-//  Discord
+//  MessagesView.swift
+//  Accord
 //
 //  Created by evelyn
 //

@@ -22,20 +22,54 @@ struct AnyEncodable : Encodable {
 final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
     static var shared = WebSocketHandler()
     var connected = false
+    var session_id: String? = nil
+    var seq: Int? = nil
+    var heartbeat_interval: Int? = nil
+    var requests: Int = 0 {
+        didSet {
+            print("currently: ", requests)
+        }
+    }
     class func newMessage(opcode: Int, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
         let webSocketDelegate = WebSocketHandler()
         let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
         let url = URL(string: "wss://gateway.discord.gg")!
         let webSocketTask = session.webSocketTask(with: url)
         webSocketTask.maximumMessageSize = 999999999
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            print("fucking released")
+            WebSocketHandler.shared.requests = 0
+            receive()
+        }
         if !(WebSocketHandler.shared.connected) {
             webSocketTask.resume()
             initialReception()
             authenticate()
             ping()
+            receive()
             WebSocketHandler.shared.connected = true
         } else {
             print("already connected, continuing")
+        }
+        func reconnect() {
+            webSocketTask.resume()
+            let packet: [String:AnyEncodable] = [
+                "op":AnyEncodable(Int(6)),
+                "d":AnyEncodable([
+                    "token":AnyEncodable(token),
+                    "session_id":AnyEncodable(String(WebSocketHandler.shared.session_id ?? "")),
+                    "seq":AnyEncodable(Int(WebSocketHandler.shared.seq ?? 0))
+                ] as [String:AnyEncodable])
+            ]
+            if let jsonData = try? JSONEncoder().encode(packet),
+               let jsonString: String = String(data: jsonData, encoding: .utf8) {
+                webSocketTask.send(.string(jsonString)) { error in
+                    if let error = error {
+                        print("WebSocket sending error: \(error)")
+                    }
+                }
+            }
+
         }
         func authenticate() {
             let packet: [String:AnyEncodable] = [
@@ -54,20 +88,11 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
             if let jsonData = try? JSONEncoder().encode(packet),
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 webSocketTask.send(.string(jsonString)) { error in
-                    DispatchQueue.global().async {
-                        receive()
-                    }
-                    checkConnection() {success, array in
-                        if success {
-                            return completion(true, array)
-                        }
-                    }
                     if let error = error {
                         print("WebSocket sending error: \(error)")
                     }
                 }
             }
-
         }
         func send(opcode: Int) {
             let packet: [String:AnyEncodable] = [
@@ -89,27 +114,81 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                     }
                 }
             }
-
+        }
+        func heartbeat() {
+            if WebSocketHandler.shared.requests >= 49 {
+                return
+            }
+            let packet: [String:AnyEncodable] = [
+                "op":AnyEncodable(1),
+                "d":AnyEncodable(WebSocketHandler.shared.seq)
+            ]
+            if let jsonData = try? JSONEncoder().encode(packet),
+               let jsonString: String = String(data: jsonData, encoding: .utf8) {
+                webSocketTask.send(.string(jsonString)) { error in
+                    if let error = error {
+                        print("WebSocket sending error: \(error)")
+                    }
+                    print("heartbeat")
+                    WebSocketHandler.shared.requests += 1
+                    DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
+                        heartbeat()
+                    })
+                }
+            }
         }
         func ping() {
+            if WebSocketHandler.shared.requests >= 49 {
+                return
+            }
             webSocketTask.sendPing { error in
+                WebSocketHandler.shared.requests += 1
                 if let error = error {
                     print("Error when sending PING \(error)")
                 } else {
                     print("Web Socket connection is alive")
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                        ping()
-                    }
+                    sleep(3)
+                    ping()
                 }
             }
         }
         func initialReception() {
+            if WebSocketHandler.shared.requests >= 49 {
+                return
+            }
             webSocketTask.receive { result in
-                
+                WebSocketHandler.shared.requests += 1
+                switch result {
+                case .success(let message):
+                    switch message {
+                    case .data(let data):
+                        break
+                    case .string(let text):
+                        if let data = text.data(using: String.Encoding.utf8) {
+                            let hello = decodePayload(payload: data)
+                            WebSocketHandler.shared.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
+                            print(WebSocketHandler.shared.heartbeat_interval, "INTERVAL")
+                            
+                            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
+                                heartbeat()
+                            })
+                            
+                        }
+                    @unknown default:
+                        print("unknown")
+                        break
+                    }
+                case .failure(let error):
+                    print("Error when init receiving \(error)")
+                }
             }
         }
         func receive() {
+            if WebSocketHandler.shared.requests >= 49 {
+                return
+            }
             webSocketTask.receive { result in
+                WebSocketHandler.shared.requests += 1
                 switch result {
                     case .success(let message):
                         switch message {
@@ -117,11 +196,28 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                             print("Data received \(data)")
                         case .string(let text):
                             if let data = text.data(using: String.Encoding.utf8) {
-                                switch decodePayload(payload: data)["t"] as? String ?? "" {
+                                let payload = decodePayload(payload: data)
+                                if payload["s"] as? Int != nil {
+                                    WebSocketHandler.shared.seq = payload["s"] as? Int
+                                } else {
+                                    if (payload["op"] as? Int ?? 0) != 11 {
+                                        print(payload)
+                                        print("RECONNECT")
+                                        reconnect()
+                                        sleep(2)
+                                    } else {
+                                        print("HEARTBEAT SUCCESSFUL")
+                                    }
+                                }
+                                print(WebSocketHandler.shared.session_id, WebSocketHandler.shared.seq, "DETAILS")
+                                switch payload["t"] as? String ?? "" {
                                 case "READY":
-                                    let data = decodePayload(payload: data)["d"] as! [String: Any]
+                                    let data = payload["d"] as! [String: Any]
                                     let user = data["user"] as! [String: Any]
                                     print("Gateway ready (\(data["v"] as! Int), \(user["username"] as! String)#\(user["discriminator"] as! String))")
+                                    WebSocketHandler.shared.session_id = data["session_id"] as? String
+                                    completion(true, data)
+                                    break
 //                                    self.clubs = data["clubs"] as? [[String: Any]]
 
                                 // MARK: Channel Event Handlers
@@ -156,7 +252,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
 
                                 // MARK: Message Event Handlers
                                 case "MESSAGE_CREATE":
-                                    let data = decodePayload(payload: data)["d"] as! [String: Any]
+                                    let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: data)
@@ -164,7 +260,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     }
                                     break
                                 case "MESSAGE_UPDATE":
-                                    let data = decodePayload(payload: data)["d"] as! [String: Any]
+                                    let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "EditedMessageIn\(channelid)"), object: nil, userInfo: data)
@@ -172,7 +268,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     }
                                     break
                                 case "MESSAGE_DELETE":
-                                    let data = decodePayload(payload: data)["d"] as! [String: Any]
+                                    let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "DeletedMessageIn\(channelid)"), object: nil, userInfo: data)
@@ -187,7 +283,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                 // MARK: Presence Event Handlers
                                 case "PRESENCE_UPDATE": break
                                 case "TYPING_START":
-                                    let data = decodePayload(payload: data)["d"] as! [String: Any]
+                                    let data = payload["d"] as! [String: Any]
                                     print("notified", data, "TYPING")
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
@@ -212,8 +308,11 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                             print("unknown")
                         }
                 case .failure(let error):
-                    print("Error when receiving \(error)")
-                    break
+                    print("Error when receiving loop \(error)")
+                    print("RECONNECT")
+                    reconnect()
+                    sleep(2)
+                    receive()
                 }
             }
         }
@@ -252,7 +351,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         retValue = false
                     }
                 case .failure(let error):
-                    print("Error when receiving \(error)")
+                    print("Error when receiving massive \(error)")
                     retValue = false
                 }
             }
@@ -272,6 +371,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
         func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
             print("Web Socket did disconnect")
         }
+        
     }
 }
 

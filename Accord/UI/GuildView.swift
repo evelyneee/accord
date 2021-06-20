@@ -36,7 +36,6 @@ struct GuildView: View {
     @State var chatTextFieldContents: String = ""
     @State var data: [[String:Any]] = []
     @State var pfps: [String:NSImage] = [:]
-    @State var allUsers: [String] = []
     @State var sending: Bool = false
     @State var typing: [String] = []
 //    actual view begins here

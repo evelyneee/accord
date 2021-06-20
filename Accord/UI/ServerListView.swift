@@ -1,6 +1,6 @@
 //
 //  ServerListView.swift
-//  Discord
+//  Accord
 //
 //  Created by evelyn on 2021-06-18.
 //
@@ -57,6 +57,7 @@ struct ServerListView: View {
                 }
                 .frame(width: 80)
                 .buttonStyle(PlainButtonStyle())
+                Divider()
                 if selectedServer == nil {
                     VStack {
                         Text("Connecting...")
@@ -66,7 +67,10 @@ struct ServerListView: View {
                         .onAppear(perform: {
                             DispatchQueue.main.async {
                                 net.request(url: "https://discordapp.com/api/users/@me/channels", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
-                                    privateChannels = array ?? []
+                                    if success {
+                                        privateChannels = array ?? []
+                                        PrivateMessages.shared.reorderPMs(array: privateChannels)
+                                    }
                                 }
                             }
                         })

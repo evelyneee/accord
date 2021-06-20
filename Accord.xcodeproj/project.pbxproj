@@ -24,7 +24,7 @@
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
-		A8CD4CA2267D206E00E2C4F1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */; };
+		A8CD4CA2267D206E00E2C4F1 /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 /* End PBXBuildFile section */
 
@@ -64,7 +64,7 @@
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/discordlib/Keychain.swift; sourceTree = SOURCE_ROOT; };
-		A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageView.swift; path = Accord/UI/MessageView.swift; sourceTree = SOURCE_ROOT; };
+		A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessagesView.swift; path = Accord/UI/MessagesView.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -140,7 +140,7 @@
 			children = (
 				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
 				32F3742A25733D8000ADB7E6 /* GuildView.swift */,
-				A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */,
+				A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */,
 				A88A3D14265B22C4003AE08F /* LoginView.swift */,
 				3278609E2590222B00EBEF23 /* HomeView.swift */,
 				32F37415257302C300ADB7E6 /* ProfileView.swift */,
@@ -231,7 +231,7 @@
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
-				A8CD4CA2267D206E00E2C4F1 /* MessageView.swift in Sources */,
+				A8CD4CA2267D206E00E2C4F1 /* MessagesView.swift in Sources */,
 				3278609F2590222B00EBEF23 /* HomeView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,

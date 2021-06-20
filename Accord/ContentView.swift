@@ -55,16 +55,16 @@ struct ContentView: View {
         }
         .onAppear {
             if (token != "") {
-                DispatchQueue.main.async {
-                    WebSocketHandler.newMessage(opcode: 2) { success, array in
-                         if !(array?.isEmpty ?? true) {
-                             socketOut = array ?? [:]
-                             clubs = array?["guilds"] as? [[String:Any]] ?? []
-                             DispatchQueue.main.async {
-                                 NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
-                             }
+                WebSocketHandler.newMessage(opcode: 2) { success, array in
+                     if !(array?.isEmpty ?? true) {
+                         socketOut = array ?? [:]
+                         clubs = array?["guilds"] as? [[String:Any]] ?? []
+                         DispatchQueue.main.async {
+                             NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }
-                    }
+                     }
+                }
+                DispatchQueue.main.async {
                     net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
                             let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
