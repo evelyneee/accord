@@ -7,6 +7,8 @@
 
 import Foundation
 
+#warning("TODO: Rewrite ProfileManager")
+
 final class ProfileManager {
     static var shared = ProfileManager()
     func getSelfProfile(key: String, data: Data?) -> [Any] {

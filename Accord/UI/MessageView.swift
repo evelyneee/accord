@@ -187,6 +187,9 @@ struct MessageCellView: View {
             }
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
+            .onAppear(perform: {
+                pfps = ImageHandling.shared.getAllProfilePictures(array: data)
+            })
         }
 
     }

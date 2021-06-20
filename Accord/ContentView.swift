@@ -5,13 +5,6 @@
 //  Created by evelyn on 2020-11-24.
 //
 
-/*
- IMPORTANT
- guild-positions in socket
- private_channels for dms in socket
- */
-
-
 import SwiftUI
 
 struct ContentView: View {
@@ -20,24 +13,14 @@ struct ContentView: View {
     @State var socketOut: [String:Any] = [:]
     @State var channels: [Any] = []
     @State var status: statusIndicators?
-    @State var modalIsPresented: Bool = false {
-        didSet {
-            DispatchQueue.main.async {
-                NetworkHandling.shared.request(url: "\(rootURL)/users/@me/\(clubsorguilds)", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
-                    if success == true {
-                        clubs = array ?? []
-                    }
-                }
-            }
-        }
-    }
+    @State var modalIsPresented: Bool = false
     var body: some View {
         ServerListView(clubs: $clubs, full: $socketOut)
         .sheet(isPresented: $modalIsPresented) {
             LoginView()
                 .onDisappear(perform: {
                     DispatchQueue.main.async {
-                        NetworkHandling.shared.request(url: "\(rootURL)/users/@me/\(clubsorguilds)", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                        NetworkHandling.shared.request(url: "\(rootURL)/users/@me/guilds", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                             if success == true {
                                 clubs = array ?? []
                             }

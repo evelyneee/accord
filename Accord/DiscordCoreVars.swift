@@ -12,8 +12,6 @@ import Foundation
 public let rootURL: String = "https://discord.com/api/v9"
 public let gatewayURL: String = "wss://gateway.discord.gg"
 public let cdnURL: String = "https://cdn.discordapp.com"
-public let clubsorguilds: String = "guilds"
-// wss://gateway.discord.gg
 public var user_id: String = ""
 public var avatar: Data = Data()
 public var pfpShown: Bool = UserDefaults.standard.bool(forKey: "pfpShown")

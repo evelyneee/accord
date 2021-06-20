@@ -67,22 +67,15 @@ final class ImageHandling {
         }
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
-            let cache = URLCache.shared
             if let url = URL(string: url) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
-                if let data = cache.cachedResponse(for: request)?.data {
-                    returnArray[String(userid)] = UIImage(data: data)
-                } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                        if let data = data, let response = response {
-                        let cachedData = CachedURLResponse(response: response, data: data)
-                                            cache.storeCachedResponse(cachedData, for: request)
-                            DispatchQueue.main.async {
-                                returnArray[String(userid)] = UIImage(data: data)
-                            }
+                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                    if let data = data {
+                        DispatchQueue.main.async {
+                            returnArray[String(userid)] = UIImage(data: data)
                         }
-                    }).resume()
-                }
+                    }
+                }).resume()
             }
         }
         return returnArray

@@ -18,10 +18,10 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
-		A85D3FDE2677A681002327AD /* ImageHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* ImageHandling.swift */; };
-		A874C04A267658A8006E7F52 /* ClubChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* ClubChannelManager.swift */; };
+		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
+		A874C04A267658A8006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A874C04B2676BB7F006E7F52 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
-		A874C04C2676BB98006E7F52 /* ClubChannelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* ClubChannelManager.swift */; };
+		A874C04C2676BB98006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A89BE728266AD10E007B0CBF /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE727266AD10E007B0CBF /* Profile.swift */; };
@@ -37,8 +37,8 @@
 		A89BE783266B0AD8007B0CBF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
 		A89BE784266B0ADB007B0CBF /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
-		A8CD4C9F267CF9EB00E2C4F1 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* KeychainManager.swift */; };
-		A8CD4CA0267CF9EB00E2C4F1 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* KeychainManager.swift */; };
+		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
+		A8CD4CA0267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA2267D206E00E2C4F1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8CD4CAB267E108300E2C4F1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA7267E108300E2C4F1 /* MessageView.swift */; };
@@ -96,8 +96,8 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
-		A85D3FDD2677A681002327AD /* ImageHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageHandling.swift; sourceTree = "<group>"; };
-		A874C049267658A8006E7F52 /* ClubChannelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClubChannelManager.swift; sourceTree = "<group>"; };
+		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
+		A874C049267658A8006E7F52 /* Guilds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guilds.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A89BE727266AD10E007B0CBF /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
@@ -108,7 +108,7 @@
 		A89BE748266AFC18007B0CBF /* Accord-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Accord-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A89BE758266AFC7F007B0CBF /* Accord-iOS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "Accord-iOS.entitlements"; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
-		A8CD4C9E267CF9EB00E2C4F1 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainManager.swift; path = Accord/discordlib/KeychainManager.swift; sourceTree = SOURCE_ROOT; };
+		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/discordlib/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageView.swift; path = Accord/UI/MessageView.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA7267E108300E2C4F1 /* MessageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
@@ -158,9 +158,9 @@
 				A89BE727266AD10E007B0CBF /* Profile.swift */,
 				32AA719525EBB17B00550BA5 /* Structures.swift */,
 				32291D3925F565B300881B5F /* MessageEndpoint.swift */,
-				A85D3FDD2677A681002327AD /* ImageHandling.swift */,
-				A874C049267658A8006E7F52 /* ClubChannelManager.swift */,
-				A8CD4C9E267CF9EB00E2C4F1 /* KeychainManager.swift */,
+				A85D3FDD2677A681002327AD /* Images.swift */,
+				A874C049267658A8006E7F52 /* Guilds.swift */,
+				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
 			);
 			path = discordlib;
 			sourceTree = "<group>";
@@ -403,11 +403,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */,
-				A85D3FDE2677A681002327AD /* ImageHandling.swift in Sources */,
+				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
-				A8CD4C9F267CF9EB00E2C4F1 /* KeychainManager.swift in Sources */,
+				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A89BE728266AD10E007B0CBF /* Profile.swift in Sources */,
-				A874C04A267658A8006E7F52 /* ClubChannelManager.swift in Sources */,
+				A874C04A267658A8006E7F52 /* Guilds.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
@@ -443,9 +443,9 @@
 				A8CD4CAC267E108300E2C4F1 /* GuildView.swift in Sources */,
 				A89BE779266B0AAA007B0CBF /* NetworkHandler.swift in Sources */,
 				A8CD4CAF267E11EA00E2C4F1 /* Sockets.swift in Sources */,
-				A8CD4CA0267CF9EB00E2C4F1 /* KeychainManager.swift in Sources */,
+				A8CD4CA0267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8CD4CB1267E152D00E2C4F1 /* ServerListView.swift in Sources */,
-				A874C04C2676BB98006E7F52 /* ClubChannelManager.swift in Sources */,
+				A874C04C2676BB98006E7F52 /* Guilds.swift in Sources */,
 				A89BE783266B0AD8007B0CBF /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

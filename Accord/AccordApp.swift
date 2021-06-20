@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+/// "This could use a UIKit/AppKit lifecycle"
+
 @main
 struct AccordApp: App {
     var body: some Scene {

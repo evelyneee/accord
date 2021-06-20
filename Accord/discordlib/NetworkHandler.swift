@@ -31,7 +31,7 @@ final class NetworkHandling {
             request.httpMethod = "PUT"
         }
         
-        // helselia specific stuff starts here
+        // discord specific stuff
         
         if token != nil {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
@@ -46,9 +46,7 @@ final class NetworkHandling {
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
         var returnArray: [[String:Any]] = []
-        
-        // ends here
-        
+                
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success

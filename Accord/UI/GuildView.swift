@@ -102,9 +102,6 @@ struct ClubView: View {
                             }
                         }
                         MessageCellView(clubID: $clubID, data: $data, pfps: $pfps, channelID: $channelID)
-                            .onAppear {
-                                pfps = ImageHandling.shared.getAllProfilePictures(array: data)
-                            }
                         if data.isEmpty == false {
                             HStack {
                                 VStack(alignment: .leading) {
@@ -164,6 +161,7 @@ struct ClubView: View {
                     NetworkHandling.shared.request(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
                         if success == true {
                             data = array ?? []
+                            
                         }
                     }
                 }
