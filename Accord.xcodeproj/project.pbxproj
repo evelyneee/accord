@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
-		32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* MessageEndpoint.swift */; };
+		32291D3A25F565B300881B5F /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* Messages.swift */; };
 		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
@@ -20,51 +20,13 @@
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
 		A874C04A267658A8006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
-		A874C04B2676BB7F006E7F52 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
-		A874C04C2676BB98006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
-		A89BE728266AD10E007B0CBF /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE727266AD10E007B0CBF /* Profile.swift */; };
-		A89BE734266AFC18007B0CBF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A89BE733266AFC18007B0CBF /* Assets.xcassets */; };
-		A89BE777266B0A9A007B0CBF /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
-		A89BE778266B0A9F007B0CBF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
-		A89BE779266B0AAA007B0CBF /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
-		A89BE77A266B0ABF007B0CBF /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE727266AD10E007B0CBF /* Profile.swift */; };
-		A89BE77B266B0AC2007B0CBF /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
-		A89BE77E266B0AC9007B0CBF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
-		A89BE77F266B0ACC007B0CBF /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
-		A89BE782266B0AD5007B0CBF /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F37415257302C300ADB7E6 /* ProfileView.swift */; };
-		A89BE783266B0AD8007B0CBF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
-		A89BE784266B0ADB007B0CBF /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
-		A8CD4CA0267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA2267D206E00E2C4F1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
-		A8CD4CAB267E108300E2C4F1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA7267E108300E2C4F1 /* MessageView.swift */; };
-		A8CD4CAC267E108300E2C4F1 /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA8267E108300E2C4F1 /* GuildView.swift */; };
-		A8CD4CAD267E108300E2C4F1 /* MessageEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA9267E108300E2C4F1 /* MessageEndpoint.swift */; };
-		A8CD4CAE267E108300E2C4F1 /* ImageHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CAA267E108300E2C4F1 /* ImageHandling.swift */; };
-		A8CD4CAF267E11EA00E2C4F1 /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
-		A8CD4CB1267E152D00E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CB0267E152D00E2C4F1 /* ServerListView.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		A89BE73E266AFC18007B0CBF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 32F4C94F256D7D3300343BB3 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A89BE72C266AFC14007B0CBF;
-			remoteInfo = "Helselia-iOS";
-		};
-		A89BE749266AFC18007B0CBF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 32F4C94F256D7D3300343BB3 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A89BE72C266AFC14007B0CBF;
-			remoteInfo = "Helselia-iOS";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		32ADD59925839980008D1715 /* Embed App Extensions */ = {
@@ -80,7 +42,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		32291D3925F565B300881B5F /* MessageEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
+		32291D3925F565B300881B5F /* Messages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719525EBB17B00550BA5 /* Structures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
@@ -100,47 +62,14 @@
 		A874C049267658A8006E7F52 /* Guilds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guilds.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
-		A89BE727266AD10E007B0CBF /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
-		A89BE72D266AFC14007B0CBF /* Accord-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Accord-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A89BE733266AFC18007B0CBF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A89BE738266AFC18007B0CBF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A89BE73D266AFC18007B0CBF /* Accord-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Accord-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A89BE748266AFC18007B0CBF /* Accord-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Accord-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A89BE758266AFC7F007B0CBF /* Accord-iOS.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "Accord-iOS.entitlements"; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/discordlib/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA1267D206E00E2C4F1 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessageView.swift; path = Accord/UI/MessageView.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/ServerListView.swift; sourceTree = SOURCE_ROOT; };
-		A8CD4CA7267E108300E2C4F1 /* MessageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
-		A8CD4CA8267E108300E2C4F1 /* GuildView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
-		A8CD4CA9267E108300E2C4F1 /* MessageEndpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageEndpoint.swift; sourceTree = "<group>"; };
-		A8CD4CAA267E108300E2C4F1 /* ImageHandling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageHandling.swift; sourceTree = "<group>"; };
-		A8CD4CB0267E152D00E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		32F4C954256D7D3300343BB3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE72A266AFC14007B0CBF /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE73A266AFC18007B0CBF /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE745266AFC18007B0CBF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -155,9 +84,8 @@
 			children = (
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
 				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
-				A89BE727266AD10E007B0CBF /* Profile.swift */,
 				32AA719525EBB17B00550BA5 /* Structures.swift */,
-				32291D3925F565B300881B5F /* MessageEndpoint.swift */,
+				32291D3925F565B300881B5F /* Messages.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
 				A874C049267658A8006E7F52 /* Guilds.swift */,
 				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
@@ -178,7 +106,6 @@
 			isa = PBXGroup;
 			children = (
 				32F4C959256D7D3300343BB3 /* Accord */,
-				A89BE72E266AFC14007B0CBF /* Accord-iOS */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -188,9 +115,6 @@
 			isa = PBXGroup;
 			children = (
 				32F4C957256D7D3300343BB3 /* Accord.app */,
-				A89BE72D266AFC14007B0CBF /* Accord-iOS.app */,
-				A89BE73D266AFC18007B0CBF /* Accord-iOSTests.xctest */,
-				A89BE748266AFC18007B0CBF /* Accord-iOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -209,21 +133,6 @@
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
 			);
 			path = Accord;
-			sourceTree = "<group>";
-		};
-		A89BE72E266AFC14007B0CBF /* Accord-iOS */ = {
-			isa = PBXGroup;
-			children = (
-				A8CD4CB0267E152D00E2C4F1 /* ServerListView.swift */,
-				A8CD4CA8267E108300E2C4F1 /* GuildView.swift */,
-				A8CD4CAA267E108300E2C4F1 /* ImageHandling.swift */,
-				A8CD4CA9267E108300E2C4F1 /* MessageEndpoint.swift */,
-				A8CD4CA7267E108300E2C4F1 /* MessageView.swift */,
-				A89BE758266AFC7F007B0CBF /* Accord-iOS.entitlements */,
-				A89BE733266AFC18007B0CBF /* Assets.xcassets */,
-				A89BE738266AFC18007B0CBF /* Info.plist */,
-			);
-			path = "Accord-iOS";
 			sourceTree = "<group>";
 		};
 		A8FA9A9B266823B4003710A4 /* UI */ = {
@@ -263,59 +172,6 @@
 			productReference = 32F4C957256D7D3300343BB3 /* Accord.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A89BE72C266AFC14007B0CBF /* Accord-iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A89BE74F266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOS" */;
-			buildPhases = (
-				A89BE729266AFC14007B0CBF /* Sources */,
-				A89BE72A266AFC14007B0CBF /* Frameworks */,
-				A89BE72B266AFC14007B0CBF /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Accord-iOS";
-			productName = "Helselia-iOS";
-			productReference = A89BE72D266AFC14007B0CBF /* Accord-iOS.app */;
-			productType = "com.apple.product-type.application";
-		};
-		A89BE73C266AFC18007B0CBF /* Accord-iOSTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A89BE752266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOSTests" */;
-			buildPhases = (
-				A89BE739266AFC18007B0CBF /* Sources */,
-				A89BE73A266AFC18007B0CBF /* Frameworks */,
-				A89BE73B266AFC18007B0CBF /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A89BE73F266AFC18007B0CBF /* PBXTargetDependency */,
-			);
-			name = "Accord-iOSTests";
-			productName = "Helselia-iOSTests";
-			productReference = A89BE73D266AFC18007B0CBF /* Accord-iOSTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		A89BE747266AFC18007B0CBF /* Accord-iOSUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A89BE755266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOSUITests" */;
-			buildPhases = (
-				A89BE744266AFC18007B0CBF /* Sources */,
-				A89BE745266AFC18007B0CBF /* Frameworks */,
-				A89BE746266AFC18007B0CBF /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A89BE74A266AFC18007B0CBF /* PBXTargetDependency */,
-			);
-			name = "Accord-iOSUITests";
-			productName = "Helselia-iOSUITests";
-			productReference = A89BE748266AFC18007B0CBF /* Accord-iOSUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -327,17 +183,6 @@
 				TargetAttributes = {
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
-					};
-					A89BE72C266AFC14007B0CBF = {
-						CreatedOnToolsVersion = 12.5;
-					};
-					A89BE73C266AFC18007B0CBF = {
-						CreatedOnToolsVersion = 12.5;
-						TestTargetID = A89BE72C266AFC14007B0CBF;
-					};
-					A89BE747266AFC18007B0CBF = {
-						CreatedOnToolsVersion = 12.5;
-						TestTargetID = A89BE72C266AFC14007B0CBF;
 					};
 				};
 			};
@@ -357,9 +202,6 @@
 			projectRoot = "";
 			targets = (
 				32F4C956256D7D3300343BB3 /* Accord */,
-				A89BE72C266AFC14007B0CBF /* Accord-iOS */,
-				A89BE73C266AFC18007B0CBF /* Accord-iOSTests */,
-				A89BE747266AFC18007B0CBF /* Accord-iOSUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -373,28 +215,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A89BE72B266AFC14007B0CBF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A89BE734266AFC18007B0CBF /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE73B266AFC18007B0CBF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE746266AFC18007B0CBF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -402,11 +222,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32291D3A25F565B300881B5F /* MessageEndpoint.swift in Sources */,
+				32291D3A25F565B300881B5F /* Messages.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
-				A89BE728266AD10E007B0CBF /* Profile.swift in Sources */,
 				A874C04A267658A8006E7F52 /* Guilds.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
@@ -424,60 +243,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A89BE729266AFC14007B0CBF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A89BE77F266B0ACC007B0CBF /* HomeView.swift in Sources */,
-				A8CD4CAE267E108300E2C4F1 /* ImageHandling.swift in Sources */,
-				A89BE77B266B0AC2007B0CBF /* Structures.swift in Sources */,
-				A89BE782266B0AD5007B0CBF /* ProfileView.swift in Sources */,
-				A89BE784266B0ADB007B0CBF /* DiscordCoreVars.swift in Sources */,
-				A89BE778266B0A9F007B0CBF /* ContentView.swift in Sources */,
-				A8CD4CAD267E108300E2C4F1 /* MessageEndpoint.swift in Sources */,
-				A89BE77A266B0ABF007B0CBF /* Profile.swift in Sources */,
-				A89BE777266B0A9A007B0CBF /* AccordApp.swift in Sources */,
-				A874C04B2676BB7F006E7F52 /* Extensions.swift in Sources */,
-				A8CD4CAB267E108300E2C4F1 /* MessageView.swift in Sources */,
-				A89BE77E266B0AC9007B0CBF /* LoginView.swift in Sources */,
-				A8CD4CAC267E108300E2C4F1 /* GuildView.swift in Sources */,
-				A89BE779266B0AAA007B0CBF /* NetworkHandler.swift in Sources */,
-				A8CD4CAF267E11EA00E2C4F1 /* Sockets.swift in Sources */,
-				A8CD4CA0267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
-				A8CD4CB1267E152D00E2C4F1 /* ServerListView.swift in Sources */,
-				A874C04C2676BB98006E7F52 /* Guilds.swift in Sources */,
-				A89BE783266B0AD8007B0CBF /* SettingsView.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE739266AFC18007B0CBF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A89BE744266AFC18007B0CBF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		A89BE73F266AFC18007B0CBF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A89BE72C266AFC14007B0CBF /* Accord-iOS */;
-			targetProxy = A89BE73E266AFC18007B0CBF /* PBXContainerItemProxy */;
-		};
-		A89BE74A266AFC18007B0CBF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A89BE72C266AFC14007B0CBF /* Accord-iOS */;
-			targetProxy = A89BE749266AFC18007B0CBF /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		32F4C97B256D7D3500343BB3 /* Debug */ = {
@@ -601,7 +367,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Helselia/Helselia.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -623,7 +389,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Helselia/Helselia.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -637,152 +403,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		A89BE750266AFC18007B0CBF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Accord-iOS/Accord-iOS.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Accord-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,6";
-			};
-			name = Debug;
-		};
-		A89BE751266AFC18007B0CBF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Accord-iOS/Accord-iOS.entitlements";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Accord-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,6";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		A89BE753266AFC18007B0CBF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				INFOPLIST_FILE = "Helselia-iOSTests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "me.evelyn.Helselia-iOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Helselia-iOS.app/Helselia-iOS";
-			};
-			name = Debug;
-		};
-		A89BE754266AFC18007B0CBF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				INFOPLIST_FILE = "Helselia-iOSTests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "me.evelyn.Helselia-iOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Helselia-iOS.app/Helselia-iOS";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		A89BE756266AFC18007B0CBF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				INFOPLIST_FILE = "Helselia-iOSUITests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "me.evelyn.Helselia-iOSUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Helselia-iOS";
-			};
-			name = Debug;
-		};
-		A89BE757266AFC18007B0CBF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
-				INFOPLIST_FILE = "Helselia-iOSUITests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "me.evelyn.Helselia-iOSUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Helselia-iOS";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -803,33 +423,6 @@
 			buildConfigurations = (
 				32F4C97E256D7D3500343BB3 /* Debug */,
 				32F4C97F256D7D3500343BB3 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A89BE74F266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A89BE750266AFC18007B0CBF /* Debug */,
-				A89BE751266AFC18007B0CBF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A89BE752266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOSTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A89BE753266AFC18007B0CBF /* Debug */,
-				A89BE754266AFC18007B0CBF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A89BE755266AFC18007B0CBF /* Build configuration list for PBXNativeTarget "Accord-iOSUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A89BE756266AFC18007B0CBF /* Debug */,
-				A89BE757266AFC18007B0CBF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

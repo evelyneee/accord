@@ -1,6 +1,6 @@
 //
 //  ProfileView.swift
-//  Helselia
+//  Accord
 //
 //  Created by evelyn on 2020-11-28.
 //
@@ -12,6 +12,7 @@ struct ProfileView: View {
     @Environment(\.openURL) var openURL
     @State var referenceLinks: [String: String] = [:]
     @State var profileData: Data? = Data()
+    @State var profile: [String:Any] = [:]
     private var columns: [GridItem] = [
         GridItem(.fixed(100), spacing: 16),
         GridItem(.fixed(100), spacing: 16),
@@ -23,7 +24,7 @@ struct ProfileView: View {
         VStack {
             HStack(alignment: .top) {
 //                pfp
-                if let imageURL = "https://cdn.discordapp.com/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: profileData)[safe: 0]  as? String ?? "").png?size=80" {
+                if let imageURL = "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256" {
                     ImageWithURL(imageURL)
                         .frame(width: 50, height: 50)
                         .clipShape(Circle())
@@ -35,21 +36,15 @@ struct ProfileView: View {
                         .frame(width: 50, height: 50)
                         .padding(.trailing, 6.0)
                 }
-
                 
 //                bio/description
                 
                 VStack(alignment: .leading) {
-                    if ProfileManager.shared.getSelfProfile(key: "verified", data: profileData)[safe: 0] as? Bool == true {
-                        Text("\(ProfileManager.shared.getSelfProfile(key: "username", data: profileData)[safe: 0] as? String ?? "") 􀇻")
-                            .fontWeight(.bold)
-                            .font(.title2)
-                    } else {
-                        Text(ProfileManager.shared.getSelfProfile(key: "username", data: profileData)[safe: 0] as? String ?? "")
-                            .fontWeight(.bold)
-                            .font(.title2)
-                    }
-                    Text("Email: \(ProfileManager.shared.getSelfProfile(key: "email", data: profileData)[safe: 0] as? String ?? "")")
+                    Text(profile["username"] as? String ?? "")
+                        .fontWeight(.bold)
+                        .font(.title2)
+                    Text("Email: \(profile["email"] as? String ?? "")")
+
                 }
                 Spacer()
                 Button(action: {
@@ -63,8 +58,6 @@ struct ProfileView: View {
                 }
                 .buttonStyle(CoolButtonStyle())
             }
-            .padding()
-                    
             .padding()
             Button(action: {
                 UserDefaults.standard.set("", forKey: "token")
@@ -94,8 +87,9 @@ struct ProfileView: View {
             net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data
-                    user_id = ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? ""
-                    net.requestData(url: "https://cdn.discordapp.com/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: profileData)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: profileData)[safe: 0]  as? String ?? "").png?size=80", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                    profile = try! JSONSerialization.jsonObject(with: profileData ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                    user_id = profile["id"] as? String ?? ""
+                    net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
                 }
             }
         }

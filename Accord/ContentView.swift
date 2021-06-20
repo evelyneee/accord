@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Helselia
+//  Accord
 //
 //  Created by evelyn on 2020-11-24.
 //
@@ -40,10 +40,11 @@ struct ContentView: View {
                     }
                     net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
-                            user_id = ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? ""
-                            net.requestData(url: "https://cdn.discordapp.com/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: data)[safe: 0]  as? String ?? "").png?size=80", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
-                            username = ProfileManager.shared.getSelfProfile(key: "username", data: data)[safe: 0]  as? String ?? ""
-                            discriminator = ProfileManager.shared.getSelfProfile(key: "discriminator", data: data)[safe: 0]  as? String ?? ""
+                            let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                            user_id = profile["id"] as? String ?? ""
+                            net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                            username = profile["username"] as? String ?? ""
+                            discriminator = profile["discriminator"] as? String ?? ""
                         }
                     }
                 }
@@ -66,10 +67,11 @@ struct ContentView: View {
                     }
                     net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
-                            user_id = ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? ""
-                            net.requestData(url: "https://cdn.discordapp.com/avatars/\(ProfileManager.shared.getSelfProfile(key: "id", data: data)[safe: 0]  as? String ?? "")/\(ProfileManager.shared.getSelfProfile(key: "avatar", data: data)[safe: 0]  as? String ?? "").png?size=80", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
-                            username = ProfileManager.shared.getSelfProfile(key: "username", data: data)[safe: 0]  as? String ?? ""
-                            discriminator = ProfileManager.shared.getSelfProfile(key: "discriminator", data: data)[safe: 0]  as? String ?? ""
+                            let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                            user_id = profile["id"] as? String ?? ""
+                            net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                            username = profile["username"] as? String ?? ""
+                            discriminator = profile["discriminator"] as? String ?? ""
                         }
                     }
                     

@@ -77,7 +77,7 @@ struct ServerListView: View {
                 } else if selectedServer == 999 {
                     HStack {
                         List(0..<privateChannels.count, id: \.self) { index in
-                            NavigationLink(destination: ClubView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") as! String)), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
+                            NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
                                 HStack {
                                     Text(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", "))
                                         .fontWeight(.medium)
@@ -89,10 +89,10 @@ struct ServerListView: View {
                     }
                 } else {
                     if clubs.isEmpty == false {
-                        List(Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .id) as? [String] ?? []).compactMap{ $0 }.enumerated()), id: \.offset) { offset, channel in
+                        List(Array((GuildManager.shared.getGuild(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .id) as? [String] ?? []).compactMap{ $0 }.enumerated()), id: \.offset) { offset, channel in
                            if let channelid = channel {
-                               if let channelName = Array((ClubManager.shared.getClub(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .name) as? [String] ?? []))[safe: offset] {
-                                   NavigationLink(destination: ClubView(clubID: Binding.constant((parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0]), channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
+                               if let channelName = Array((GuildManager.shared.getGuild(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .name) as? [String] ?? []))[safe: offset] {
+                                   NavigationLink(destination: GuildView(clubID: Binding.constant((parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0]), channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
                                        HStack {
                                            Text("\(channelName)")
                                                .fontWeight(.medium)

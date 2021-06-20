@@ -1,6 +1,6 @@
 //
-//  ClubChannelManager.swift
-//  Helselia
+//  Guilds.swift
+//  Accord
 //
 //  Created by evelyn on 2021-06-13.
 //
@@ -18,10 +18,10 @@ enum channel {
     case name
 }
 
-final class ClubManager {
-    static var shared = ClubManager()
-    var currentClub: String = ""
-    func getClub(clubid: String, array: [[String:Any]], type: club) -> [Any] {
+final class GuildManager {
+    static var shared = GuildManager()
+    var currentGuild: String = ""
+    func getGuild(clubid: String, array: [[String:Any]], type: club) -> [Any] {
         var _: [Any] = []
 
         _ = false

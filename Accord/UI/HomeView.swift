@@ -1,6 +1,6 @@
 //
 //  HomeView.swift
-//  Helselia
+//  Accord
 //
 //  Created by Évelyne Bélanger on 2020-12-20.
 //

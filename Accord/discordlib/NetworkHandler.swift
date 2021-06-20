@@ -1,6 +1,6 @@
 //
 //  NetworkHandler.swift
-//  Helselia
+//  Accord
 //
 //  Created by evelyn on 2021-02-27.
 //
@@ -95,7 +95,7 @@ final class NetworkHandling {
             request.httpMethod = "PUT"
         }
         
-        // helselia specific stuff starts here
+        // Accord specific stuff starts here
         
         if token != nil {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")

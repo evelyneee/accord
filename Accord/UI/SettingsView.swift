@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  Helselia
+//  Accord
 //
 //  Created by evelyn on 2020-12-08.
 //

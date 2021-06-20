@@ -1,17 +1,13 @@
 //
-//  ClubView.swift
-//  Helselia
+//  GuildView.swift
+//  Accord
 //
 //  Created by evelyn on 2020-11-27.
 //
 
 
 import SwiftUI
-#if os(macOS)
 import AppKit
-#else
-import UIKit
-#endif
 
 // styles and structs and vars
 
@@ -33,7 +29,7 @@ struct CoolButtonStyle: ButtonStyle {
 // the messaging view concept
 
 
-struct ClubView: View {
+struct GuildView: View {
     @Binding var clubID: String
     @Binding var channelID: String
     @Binding var channelName: String
@@ -208,7 +204,6 @@ struct ChatControls: View {
     }
 }
 
-#if os(macOS)
 struct VisualEffectView: NSViewRepresentable {
     let material: NSVisualEffectView.Material
     let blendingMode: NSVisualEffectView.BlendingMode
@@ -227,23 +222,3 @@ struct VisualEffectView: NSViewRepresentable {
         visualEffectView.blendingMode = blendingMode
     }
 }
-#else
-struct VisualEffectView: UIViewRepresentable {
-    let material: UIVisualEffectView.Material
-    let blendingMode: UIVisualEffectView.BlendingMode
-    
-    func makeUIView(context: Context) -> UIVisualEffectView {
-        let visualEffectView = UIVisualEffectView()
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-        visualEffectView.state = UIVisualEffectView.State.active
-        visualEffectView.shadow?.shadowBlurRadius = 20
-        return visualEffectView
-    }
-
-    func updateUIView(_ visualEffectView: UIVisualEffectView, context: Context) {
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-    }
-}
-#endif

@@ -41,7 +41,7 @@ struct MessageCellView: View {
                 }
                 HStack(alignment: .top) {
                     if pfpShown {
-                        Image(nsImage: pfps[(parser.getArray(forKey: "user_id", messageDictionary: data)[safe: offset] as! String)] ?? NSImage()).resizable()
+                        Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
                             .frame(width: 33, height: 33)
                             .scaledToFit()
                             .padding(.horizontal, 5)
@@ -81,6 +81,9 @@ struct MessageCellView: View {
                             }) {
                                 Text("Copy")
                             }
+                            .onAppear {
+                                print(pfps, (data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? "")
+                            }
 
                             Button(action: {
                                 NSPasteboard.general.clearContents()
@@ -106,7 +109,7 @@ struct MessageCellView: View {
                         }
                     } else {
                         HStack {
-                            Image(nsImage: pfps[(parser.getArray(forKey: "user_id", messageDictionary: data)[safe: offset] as! String)] ?? NSImage()).resizable()
+                            Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
                                 .frame(width: 15, height: 15)
                                 .scaledToFit()
                                 .padding(.horizontal, 5)
@@ -188,7 +191,9 @@ struct MessageCellView: View {
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
             .onAppear(perform: {
-                pfps = ImageHandling.shared.getAllProfilePictures(array: data)
+                DispatchQueue.main.async {
+                    pfps = ImageHandling.shared.getAllProfilePictures(array: data)
+                }
             })
         }
 

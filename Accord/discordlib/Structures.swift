@@ -1,6 +1,6 @@
 //
 //  Structures.swift
-//  Helselia
+//  Accord
 //
 //  Created by evelyn on 2021-02-28.
 //
@@ -61,4 +61,11 @@ public struct Message: Hashable {
     var timestamp: String
     var tts: Bool
     var type: Int
+}
+
+struct Profile {
+    var id: String
+    var username: String
+    var avatar: Data?
+    var discriminator: String
 }

@@ -1,12 +1,11 @@
 //
-//  ImageHandling.swift
-//  Helselia
+//  Images.swift
+//  Accord
 //
 //  Created by evelyn on 2021-06-14.
 //
 
 import Foundation
-#if os(macOS)
 import AppKit
 
 final class ImageHandling {
@@ -47,39 +46,4 @@ final class ImageHandling {
         return returnArray
     }
 }
-#else
-import UIKit
 
-final class ImageHandling {
-    static var shared = ImageHandling()
-    func getAllProfilePictures(array: [[String:Any]]) -> [String:UIImage] {
-        let pfpURLs = parser.getArray(forKey: "avatar", messageDictionary: array)
-        var singleURLs: [String] = []
-        var returnArray: [String:UIImage] = [:]
-        for url in pfpURLs {
-            if let urlstr = url as? String {
-                if !(singleURLs.contains(urlstr)) {
-                    if !(urlstr.contains("<null>")) {
-                        singleURLs.append(urlstr)
-                    }
-                }
-            }
-        }
-        for url in singleURLs {
-            let userid = String((String(url.dropFirst(35))).prefix(18))
-            if let url = URL(string: url) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
-                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                    if let data = data {
-                        DispatchQueue.main.async {
-                            returnArray[String(userid)] = UIImage(data: data)
-                        }
-                    }
-                }).resume()
-            }
-        }
-        return returnArray
-    }
-}
-
-#endif

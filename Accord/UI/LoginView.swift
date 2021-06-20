@@ -1,6 +1,6 @@
 //
 //  LoginView.swift
-//  Helselia
+//  Accord
 //
 //  Created by Évelyne on 2021-05-23.
 //
@@ -17,7 +17,7 @@ struct LoginView: View {
                 .fontWeight(.bold)
             TextField("Token", text: $token)
             Button(action: {
-                KeychainManager.save(key: "token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                _ = KeychainManager.save(key: "token", data: token.data(using: String.Encoding.utf8) ?? Data())
                 token = String(decoding: KeychainManager.load(key: "token") ?? Data(), as: UTF8.self)
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(name: Notification.Name(rawValue: "logged_in"), object: nil)
@@ -33,11 +33,5 @@ struct LoginView: View {
             .keyboardShortcut(.defaultAction)
         }
         .padding()
-    }
-}
-
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
     }
 }
