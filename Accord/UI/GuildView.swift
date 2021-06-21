@@ -13,7 +13,6 @@ import AppKit
 
 let messages = NetworkHandling()
 let net = NetworkHandling()
-let parser = ParseMessages()
 
 struct CoolButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {

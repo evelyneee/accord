@@ -8,27 +8,6 @@
 import Foundation
 import SwiftUI
 
-final class ParseMessages {
-    static var shared = ParseMessages()
-    
-    func getArray(forKey: String, messageDictionary: [[String:Any]]) -> [Any] {
-        var returnItem: [Any] = []
-        for message in messageDictionary {
-            switch forKey {
-            case "author":
-                returnItem.append("\((message["author"] as? Dictionary<String, Any> ?? [:])["username"] ?? "error")#\((message["author"] as? Dictionary<String, Any> ?? [:])["discriminator"] ?? "0000")" )
-            case "avatar":
-                returnItem.append("https://cdn.discordapp.com/avatars/\((message["author"] as? Dictionary<String, Any> ?? [:])["id"] as? String ?? "")/\((message["author"] as? Dictionary<String, Any> ?? [:])["avatar"] as? String ?? "").png?size=80")
-            case "user_id":
-                returnItem.append((message["author"] as? Dictionary<String, Any> ?? [:])["id"] ?? "error")
-            default:
-                returnItem.append(message[forKey] ?? "")
-            }
-        }
-        return returnItem
-    }
-}
-
 final class PrivateMessages {
     static var shared = PrivateMessages()
     func reorderPMs(array: [[String:Any]]) -> [[String:Any]] {

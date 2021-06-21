@@ -25,11 +25,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
     var session_id: String? = nil
     var seq: Int? = nil
     var heartbeat_interval: Int? = nil
-    var requests: Int = 0 {
-        didSet {
-            print("currently: ", requests)
-        }
-    }
+    var requests: Int = 0
     class func newMessage(opcode: Int, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
         let webSocketDelegate = WebSocketHandler()
         let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
@@ -37,7 +33,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
         let webSocketTask = session.webSocketTask(with: url)
         webSocketTask.maximumMessageSize = 999999999
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            print("fucking released")
             WebSocketHandler.shared.requests = 0
             receive()
         }
@@ -167,8 +162,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         if let data = text.data(using: String.Encoding.utf8) {
                             let hello = decodePayload(payload: data)
                             WebSocketHandler.shared.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
-                            print(WebSocketHandler.shared.heartbeat_interval, "INTERVAL")
-                            
                             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
                                 heartbeat()
                             })
@@ -201,7 +194,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     WebSocketHandler.shared.seq = payload["s"] as? Int
                                 } else {
                                     if (payload["op"] as? Int ?? 0) != 11 {
-                                        print(payload)
                                         print("RECONNECT")
                                         reconnect()
                                         sleep(2)
@@ -209,7 +201,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                         print("HEARTBEAT SUCCESSFUL")
                                     }
                                 }
-                                print(WebSocketHandler.shared.session_id, WebSocketHandler.shared.seq, "DETAILS")
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
                                     let data = payload["d"] as! [String: Any]
@@ -284,7 +275,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                 case "PRESENCE_UPDATE": break
                                 case "TYPING_START":
                                     let data = payload["d"] as! [String: Any]
-                                    print("notified", data, "TYPING")
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "TypingStartIn\(channelid)"), object: nil, userInfo: data)
@@ -321,11 +311,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
             webSocketTask.cancel(with: .goingAway, reason: reason)
         }
         func checkConnection(_ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
-            var retValue: Bool = false {
-                didSet {
-                    print("set that \(retValue)")
-                }
-            }
+            var retValue: Bool = false
             var _: Bool = false
             var retDict: [String:Any] = [:]
             webSocketTask.receive { result in

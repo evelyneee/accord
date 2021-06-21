@@ -15,7 +15,7 @@ struct MessageCellView: View {
     @Binding var channelID: String
     @State var collapsed: [Int] = []
     var body: some View {
-        ForEach(Array((parser.getArray(forKey: "content", messageDictionary: data) as? [String] ?? []).enumerated()), id: \.offset) { offset, content in
+        ForEach(Array((data.map { $0["content"] } as? [String] ?? []).enumerated()), id: \.offset) { offset, content in
             VStack(alignment: .leading) {
                 if let reply = data[offset]["referenced_message"] as? [String:Any] {
                     HStack {
@@ -34,8 +34,11 @@ struct MessageCellView: View {
                         }
                         if #available(macOS 12.0, *) {
                             Text(try! AttributedString(markdown: reply["content"] as? String ?? ""))
+                                .lineLimit(1)
                         } else {
                             Text(reply["content"] as? String ?? "")
+                                .lineLimit(1)
+
                         }
                     }
                 }
@@ -48,8 +51,8 @@ struct MessageCellView: View {
                             .clipShape(Circle())
                         VStack(alignment: .leading) {
                             HStack {
-                                if let author = parser.getArray(forKey: "author", messageDictionary: data)[offset] {
-                                    Text((author as? String ?? "").dropLast(5))
+                                if let author = (data[offset]["author"] as? [String:Any] ?? [:])["username"] as? String {
+                                    Text(author)
                                         .fontWeight(.semibold)
                                 }
                             }
@@ -69,44 +72,46 @@ struct MessageCellView: View {
                         }) {
                             Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                         if (collapsed.contains(offset)) {
                             Button(action: {
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(content, forType: .string)
-                                if collapsed.contains(offset) {
-                                    collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                } else {
-                                    collapsed.append(offset)
+                                DispatchQueue.main.async {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(content, forType: .string)
+                                    if collapsed.contains(offset) {
+                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                    } else {
+                                        collapsed.append(offset)
+                                    }
                                 }
                             }) {
                                 Text("Copy")
                             }
-                            .onAppear {
-                                print(pfps, (data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? "")
-                            }
-
+                            .buttonStyle(BorderlessButtonStyle())
                             Button(action: {
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString("https://canary.discord.com/channels/\(clubID)/\(channelID)/\(parser.getArray(forKey: "id", messageDictionary: data)[offset])", forType: .string)
-                                if collapsed.contains(offset) {
-                                    collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                } else {
-                                    collapsed.append(offset)
+                                DispatchQueue.main.async {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\((data.map { $0["id"] as? String ?? "" })[offset])", forType: .string)
+                                    if collapsed.contains(offset) {
+                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                    } else {
+                                        collapsed.append(offset)
+                                    }
                                 }
                             }) {
                                 Text("Copy Message Link")
                             }
+                            .buttonStyle(BorderlessButtonStyle())
                         }
                         Button(action: {
                             DispatchQueue.main.async {
-                                let i = "\(rootURL)/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[offset])"
-                                let index2 = offset
-                                data.remove(at: index2)
+                                let i = "\(rootURL)/channels/\(channelID)/messages/\((data.map { $0["id"] as? String ?? "" })[offset])"
                                 NetworkHandling.shared.requestData(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                             }
                         }) {
                             Image(systemName: "trash")
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                     } else {
                         HStack {
                             Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
@@ -115,9 +120,9 @@ struct MessageCellView: View {
                                 .padding(.horizontal, 5)
                                 .clipShape(Circle())
                             HStack {
-                                if let author = parser.getArray(forKey: "author", messageDictionary: data)[offset] {
-                                    Text((author as? String ?? "").dropLast(5))
-                                        .fontWeight(.bold)
+                                if let author = (data[offset]["author"] as? [String:Any] ?? [:])["username"] as? String {
+                                    Text(author)
+                                        .fontWeight(.semibold)
                                 }
                             }
 
@@ -136,55 +141,62 @@ struct MessageCellView: View {
                             }) {
                                 Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
                             }
+                            .buttonStyle(BorderlessButtonStyle())
                             if (collapsed.contains(offset)) {
                                 Button(action: {
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(content, forType: .string)
-                                    if collapsed.contains(offset) {
-                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                    } else {
-                                        collapsed.append(offset)
+                                    DispatchQueue.main.async {
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString(content, forType: .string)
+                                        if collapsed.contains(offset) {
+                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                        } else {
+                                            collapsed.append(offset)
+                                        }
                                     }
                                 }) {
                                     Text("Copy")
                                 }
-
+                                .buttonStyle(BorderlessButtonStyle())
                                 Button(action: {
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString("https://canary.discord.com/channels/\(clubID)/\(channelID)/\(parser.getArray(forKey: "id", messageDictionary: data)[offset])", forType: .string)
-                                    if collapsed.contains(offset) {
-                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                    } else {
-                                        collapsed.append(offset)
+                                    DispatchQueue.main.async {
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\((data.map { $0["id"] as? String ?? "" })[offset])", forType: .string)
+                                        if collapsed.contains(offset) {
+                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                        } else {
+                                            collapsed.append(offset)
+                                        }
                                     }
                                 }) {
                                     Text("Copy Message Link")
                                 }
+                                .buttonStyle(BorderlessButtonStyle())
                             }
                             Button(action: {
                                 DispatchQueue.main.async {
-                                    let i = "\(rootURL)/channels/\(channelID)/messages/\(parser.getArray(forKey: "id", messageDictionary: data)[offset])"
-                                    let index2 = offset
-                                    data.remove(at: index2)
+                                    let i = "\(rootURL)/channels/\(channelID)/messages/\((data.map { $0["id"] as? String ?? "" })[offset])"
                                     NetworkHandling.shared.requestData(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                 }
                             }) {
                                 Image(systemName: "trash")
                             }
+                            .buttonStyle(BorderlessButtonStyle())
 
                         }
                     }
                 }
                 .id(offset)
-                if let attachment = parser.getArray(forKey: "attachments", messageDictionary: data)[offset] as? [[String:Any]] {
+                if let attachment = data[offset]["attachments"] as? [[String:Any]] {
                     if attachment.isEmpty == false {
                         HStack {
                             ForEach(0..<attachment.count, id: \.self) { index in
                                 Attachment(attachment[index]["url"] as! String)
                                     .frame(maxWidth: 400, maxHeight: 300)
+                                    .cornerRadius(10)
                             }
+                            Spacer()
                         }
-                        .padding()
+                        .padding(.horizontal, 45)
                     }
                 }
             }

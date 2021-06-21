@@ -50,7 +50,6 @@ final class NetworkHandling {
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
-                print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     do {
@@ -114,7 +113,6 @@ final class NetworkHandling {
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
-                print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     return completion(true, data)
@@ -154,7 +152,6 @@ final class NetworkHandling {
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
                 // Success
-                print("success \(Date())")
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if data != Data() {
                     do {

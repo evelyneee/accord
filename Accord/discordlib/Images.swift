@@ -11,7 +11,10 @@ import AppKit
 final class ImageHandling {
     static var shared = ImageHandling()
     func getAllProfilePictures(array: [[String:Any]]) -> [String:NSImage] {
-        let pfpURLs = parser.getArray(forKey: "avatar", messageDictionary: array)
+        let pfpURLs = array.map {
+            "https://cdn.discordapp.com/avatars/\(($0["author"] as? [String:Any] ?? [:])["id"] ?? "")/\(($0["author"] as? [String:Any] ?? [:])["avatar"] ?? "").png?size=80"
+        }
+        print(pfpURLs)
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:]
         for url in pfpURLs {

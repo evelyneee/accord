@@ -93,10 +93,10 @@ struct ServerListView: View {
                     }
                 } else {
                     if clubs.isEmpty == false {
-                        List(Array((GuildManager.shared.getGuild(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .id) as? [String] ?? []).compactMap{ $0 }.enumerated()), id: \.offset) { offset, channel in
+                        List(Array((GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .id) as? [String] ?? []).compactMap{ $0 }.enumerated()), id: \.offset) { offset, channel in
                            if let channelid = channel {
-                               if let channelName = Array((GuildManager.shared.getGuild(clubid: (parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0], array: clubs, type: .name) as? [String] ?? []))[safe: offset] {
-                                   NavigationLink(destination: GuildView(clubID: Binding.constant((parser.getArray(forKey: "id", messageDictionary: clubs) as? [String] ?? [])[selectedServer ?? 0]), channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
+                               if let channelName = Array((GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .name) as? [String] ?? []))[safe: offset] {
+                                   NavigationLink(destination: GuildView(clubID: Binding.constant((clubs[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channelid), channelName: Binding.constant(channelName)), tag: (Int(channelid) ?? 0), selection: self.$selection) {
                                        HStack {
                                            Text("\(channelName)")
                                                .fontWeight(.medium)
@@ -119,7 +119,6 @@ struct ServerListView: View {
                 let element = clubs[clubIDs.firstIndex(of: item)!]
                 clubTemp.insert(element, at: index)
             }
-            print(clubs)
             clubs = clubTemp
             selectedServer = 0
             DispatchQueue.main.async {
