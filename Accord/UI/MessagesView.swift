@@ -73,14 +73,13 @@ struct MessageCellView: View {
                                         Text(author)
                                             .fontWeight(.semibold)
                                     }
-
                                 }
                             }
                             if let author = (data[offset]["author"] as? [String:Any] ?? [:])["username"] as? String {
                                 if offset != data.count - 1 {
                                     if author == ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
                                         FancyTextView(text: Binding.constant(content))
-                                            .padding(.leading, 53)
+                                            .padding(.leading, 50)
                                     } else {
                                         FancyTextView(text: Binding.constant(content))
                                     }
@@ -254,18 +253,12 @@ struct MessageCellView: View {
             }
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
-            .onAppear(perform: {
-                DispatchQueue.main.async {
-                    pfps = ImageHandling.shared.getAllProfilePictures(array: data)
-                }
-            })
         }
-
+        .onAppear(perform: {
+            DispatchQueue.main.async {
+                pfps = ImageHandling.shared.getAllProfilePictures(array: data)
+            }
+        })
     }
 }
 
-extension Collection {
-    public subscript(safe index: Index) -> Iterator.Element? {
-        return (startIndex <= index && index < endIndex) ? self[index] : nil
-    }
-}

@@ -85,6 +85,7 @@ public extension String {
 
         return results
     }
+    
     func slice(from: String, to: String) -> String? {
         return (range(of: from)?.upperBound).flatMap { substringFrom in
             (range(of: to, range: substringFrom..<endIndex)?.lowerBound).map { substringTo in
@@ -92,6 +93,7 @@ public extension String {
             }
         }
     }
+    
     func indexInt(of char: Character) -> Int? {
         return firstIndex(of: char)?.utf16Offset(in: self)
     }
