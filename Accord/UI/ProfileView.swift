@@ -64,24 +64,6 @@ struct ProfileView: View {
             }) {
                 Text("log out")
             }
-            
-            LazyVGrid(columns: columns, alignment: .center) {
-                ForEach(referenceLinks.sorted(by: >), id: \.key) { key, link in
-                    Button(action: {
-                        guard let url = URL(string: referenceLinks[key] ?? "") else { return }
-                        openURL(url)
-                    }, label: {
-                        HStack {
-                            Image(systemName: "link")
-                            Divider()
-                            Text(key)
-                        }
-                    })
-                    .buttonStyle(BorderlessButtonStyle())
-                }
-            }
-            .padding()
-            
             Spacer()
         }.onAppear {
             net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in

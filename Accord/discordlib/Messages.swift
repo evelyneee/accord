@@ -61,3 +61,40 @@ class ImageLoaderAndCache: ObservableObject {
         }
     }
 }
+
+
+func getImage(url: String) -> Data {
+    var ret: Data = Data()
+    net.requestData(url: url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+        if (success) {
+            ret = data ?? Data()
+        }
+    }
+    return ret
+}
+
+func sendRequest(url: String) -> Data? {
+    let session = URLSession.shared
+    var dataReceived: Data?
+    let sem = DispatchSemaphore(value: 0)
+    if let url = URL(string: url) {
+        let request = URLRequest(url: url)
+        let task = session.dataTask(with: request) { data, response, error in
+            defer { sem.signal() }
+
+            if let error = error {
+                return
+            }
+            dataReceived = data as Data?
+        }
+
+        task.resume()
+
+        // This line will wait until the semaphore has been signaled
+        // which will be once the data task has completed
+        sem.wait(timeout: DispatchTime.distantFuture)
+        return dataReceived
+    } else {
+        return Data()
+    }
+}

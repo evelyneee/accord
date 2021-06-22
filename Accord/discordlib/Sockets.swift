@@ -249,6 +249,10 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: data)
                                         }
                                     }
+                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""} as? [String] ?? []).contains(user_id) {
+                                        print("NOTIFICATION SENDING NOW")
+                                        showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                    }
                                     break
                                 case "MESSAGE_UPDATE":
                                     let data = payload["d"] as! [String: Any]
@@ -300,9 +304,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 case .failure(let error):
                     print("Error when receiving loop \(error)")
                     print("RECONNECT")
-                    reconnect()
-                    sleep(2)
-                    receive()
+                    fatalError("[Accord] Aborting to prevent ratelimit or ban. ")
                 }
             }
         }

@@ -21,6 +21,30 @@ enum channel {
 final class GuildManager {
     static var shared = GuildManager()
     var currentGuild: String = ""
+    func calculateDistance(array: [String], one: String, two: String) -> Int {
+        if let firstindex = array.firstIndex(where: {$0 == one}),
+            let secondIndex = array.firstIndex(where: {$0 == two}) {
+            return ((secondIndex - firstindex) + array.count) % array.count
+        } else {
+            // One or both inputs not part of the array
+            return -1
+        }
+    }
+    func channelCount(array: [[String:Any]], index: Int) -> [String:[String]] {
+        print(array, "HERE")
+        var returnArray: [String:[String]] = [:]
+        for channel in array {
+            if (channel["type"] as? Int ?? 2) != 4 {
+                var currentArray = returnArray[channel["parent_id"] as? String ?? ""]
+                if currentArray == nil {
+                    currentArray = []
+                }
+                currentArray?.append(channel["id"] as? String ?? "")
+                returnArray[channel["parent_id"] as? String ?? ""] = currentArray
+            }
+        }
+        return returnArray
+    }
     func getGuild(clubid: String, array: [[String:Any]], type: club) -> [Any] {
         var _: [Any] = []
 

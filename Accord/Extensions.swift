@@ -22,12 +22,6 @@ extension Dictionary {
     }
 }
 
-extension Collection where Indices.Iterator.Element == Index {
-   public subscript(safe index: Index) -> Iterator.Element? {
-     return (startIndex <= index && index < endIndex) ? self[index] : nil
-   }
-}
-
 extension Dictionary {
     var queryParameters: String {
         var parts: [String] = []
@@ -62,4 +56,28 @@ extension View {
 
 extension Color {
     static let featuredColor = Color("FeaturedShadow")
+}
+
+
+func resize(image: NSImage, w: Int, h: Int) -> NSImage {
+    var destSize = NSMakeSize(CGFloat(w), CGFloat(h))
+    var newImage = NSImage(size: destSize)
+    newImage.lockFocus()
+    image.draw(in: NSMakeRect(0, 0, destSize.width, destSize.height), from: NSMakeRect(0, 0, image.size.width, image.size.height), operation: NSCompositingOperation.sourceOver, fraction: CGFloat(1))
+    newImage.unlockFocus()
+    newImage.size = destSize
+    return newImage
+}
+
+func showNotification(title: String, subtitle: String) -> Void {
+            let notification = NSUserNotification()
+            notification.title = title
+            notification.subtitle = subtitle
+            notification.soundName = NSUserNotificationDefaultSoundName
+            NSUserNotificationCenter.default.deliver(notification)
+}
+
+func userNotificationCenter(_ center: NSUserNotificationCenter,
+                                         shouldPresent notification: NSUserNotification) -> Bool {
+        return true
 }
