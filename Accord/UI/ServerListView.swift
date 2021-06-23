@@ -68,7 +68,11 @@ struct ServerListView: View {
                             DispatchQueue.main.async {
                                 net.request(url: "https://discordapp.com/api/users/@me/channels", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                                     if success {
-                                        privateChannels = array ?? []
+                                        guard array != nil else {
+                                            return
+                                        }
+                                        
+                                        privateChannels = array!.sorted { $0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? "" }
                                     }
                                 }
                             }
