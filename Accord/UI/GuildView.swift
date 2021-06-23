@@ -164,6 +164,13 @@ struct GuildView: View {
     }
 }
 
+extension NSTextField {
+    open override var focusRingType: NSFocusRingType {
+        get { .none }
+        set { }
+    }
+}
+
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
     @State var textFieldContents: String = ""
