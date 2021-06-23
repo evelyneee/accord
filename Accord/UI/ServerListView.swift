@@ -83,15 +83,35 @@ struct ServerListView: View {
                     ProfileView()
                 } else if selectedServer == 999 {
                     HStack {
-                        List(0..<privateChannels.count, id: \.self) { index in
-                            NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
-                                HStack {
-                                    Text(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", "))
-                                        .fontWeight(.medium)
-                                        .font(.title3)
+                        List {
+                            Text("Messages")
+                                .fontWeight(.bold)
+                                .font(.title2)
+                            Divider()
+                            ForEach(0..<privateChannels.count, id: \.self) { index in
+                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
+                                    HStack {
+                                        if let recipients = privateChannels[index]["recipients"] as? [[String:Any]] {
+                                            if recipients.count != 1 {
+                                                Attachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index]["id"] as? String ?? "")/\(privateChannels[index]["icon"] as? String ?? "").png")
+                                                    .clipShape(Circle())
+                                                    .frame(width: 25, height: 25)
+                                                Text(privateChannels[index]["name"] as? String ?? "")
+                                                    .onAppear {
+                                                        print(privateChannels[index])
+                                                    }
+                                            } else {
+                                                Attachment("https://cdn.discordapp.com/avatars/\(recipients[0]["id"] as? String ?? "")/\(recipients[0]["avatar"] as? String ?? "").png")
+                                                    .clipShape(Circle())
+                                                    .frame(width: 25, height: 25)
+                                                Text(recipients[0]["username"] as? String ?? "")
+                                            }
+                                        }
+                                    }
                                 }
+                                .buttonStyle(BorderlessButtonStyle())
                             }
-                            .buttonStyle(BorderlessButtonStyle())
+
                         }
                     }
                 } else {
@@ -107,9 +127,8 @@ struct ServerListView: View {
                                                         if let channelName = Array((GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .name) as? [String] ?? []))[(GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .id) as? [String] ?? []).firstIndex(of: channel[offset])!] {
                                                             NavigationLink(destination: GuildView(clubID: Binding.constant((clubs[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
                                                                 HStack {
+                                                                    Image(systemName: "number")
                                                                     Text(channelName)
-                                                                        .fontWeight(.medium)
-                                                                        .font(.title3)
                                                                 }
                                                             }
                                                             .buttonStyle(BorderlessButtonStyle())
@@ -143,9 +162,3 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }
-/*
- ForEach(GuildManager.shared.channelCount(array: clubs[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0).enumerated(), id: \.offset) { offset, channel in
-
-
- }
- */
