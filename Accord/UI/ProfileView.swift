@@ -69,7 +69,7 @@ struct ProfileView: View {
             net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data
-                    profile = try! JSONSerialization.jsonObject(with: profileData ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                    profile = try! JSONSerialization.jsonObject(with: profileData ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
                     user_id = profile["id"] as? String ?? ""
                     net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
                 }

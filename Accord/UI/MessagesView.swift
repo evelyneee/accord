@@ -10,62 +10,62 @@ import Foundation
 
 struct MessageCellView: View {
     @Binding var clubID: String
-    @Binding var data: [[String:Any]]
+    @Binding var data: [Message]
     @Binding var pfps: [String:NSImage]
     @Binding var channelID: String
     @State var collapsed: [Int] = []
     var body: some View {
-        ForEach(Array((data.map { $0["content"] } as? [String] ?? []).enumerated()), id: \.offset) { offset, content in
-            VStack(alignment: .leading) {
-                if let reply = data[offset]["referenced_message"] as? [String:Any] {
-                    HStack {
-                        Spacer().frame(width: 50)
-                        Text("replying to ")
-                            .foregroundColor(.secondary)
-                        Image(nsImage: pfps[(reply["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
-                            .frame(width: 15, height: 15)
-                            .scaledToFit()
-                            .clipShape(Circle())
+        ForEach(0..<data.count, id: \.self) { index in
+            if let message = data[index] {
+                VStack(alignment: .leading) {
+                    if let reply = message.referenced_message {
                         HStack {
-                            if let author = (reply["author"] as? [String:Any] ?? [:])["username"] as? String {
-                                Text(author)
-                                    .fontWeight(.bold)
+                            Spacer().frame(width: 50)
+                            Text("replying to ")
+                                .foregroundColor(.secondary)
+                            Image(nsImage: pfps[reply.author.id ?? ""] ?? NSImage()).resizable()
+                                .frame(width: 15, height: 15)
+                                .scaledToFit()
+                                .clipShape(Circle())
+                            HStack {
+                                if let author = reply.author.username as? String {
+                                    Text(author)
+                                        .fontWeight(.bold)
+                                }
+                            }
+                            if #available(macOS 12.0, *) {
+                                Text(try! AttributedString(markdown: reply.content))
+                                    .lineLimit(0)
+                            } else {
+                                Text(reply.content)
+                                    .lineLimit(0)
+
                             }
                         }
-                        if #available(macOS 12.0, *) {
-                            Text(try! AttributedString(markdown: reply["content"] as? String ?? ""))
-                                .lineLimit(0)
-                        } else {
-                            Text(reply["content"] as? String ?? "")
-                                .lineLimit(0)
-
-                        }
                     }
-                }
-                HStack(alignment: .top) {
-                    if let author = (data[offset]["author"] as? [String:Any] ?? [:])["username"] as? String {
-                        if pfpShown {
-                            if let author = (data[offset]["author"] as? [String:Any] ?? [:])["username"] as? String {
-                                if offset != data.count - 1 {
-                                    if author != ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
-                                        Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
+                    HStack(alignment: .top) {
+                        if let author = message.author.username as? String {
+                            if pfpShown {
+                                VStack {
+                                    if index != data.count - 1 {
+                                        if author != (data[Int(index + 1)].author.username ?? "") {
+                                            Image(nsImage: pfps[message.author.id ?? ""] ?? NSImage()).resizable()
+                                                .frame(width: 33, height: 33)
+                                                .scaledToFit()
+                                                .padding(.horizontal, 5)
+                                                .clipShape(Circle())
+                                        }
+                                    } else {
+                                        Image(nsImage: pfps[message.author.id ?? ""] ?? NSImage()).resizable()
                                             .frame(width: 33, height: 33)
                                             .scaledToFit()
                                             .padding(.horizontal, 5)
                                             .clipShape(Circle())
                                     }
-                                } else {
-                                    Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                        .frame(width: 33, height: 33)
-                                        .scaledToFit()
-                                        .padding(.horizontal, 5)
-                                        .clipShape(Circle())
                                 }
-                            }
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    if offset != data.count - 1 {
-                                        if author != ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
+                                VStack(alignment: .leading) {
+                                    if index != data.count - 1 {
+                                        if author != (data[Int(index + 1)].author.username ?? "") {
                                             Text(author)
                                                 .fontWeight(.semibold)
                                         }
@@ -73,126 +73,28 @@ struct MessageCellView: View {
                                         Text(author)
                                             .fontWeight(.semibold)
                                     }
-                                }
-                                if offset != data.count - 1 {
-                                    if author == ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
-                                        FancyTextView(text: Binding.constant(content))
-                                            .padding(.leading, 50)
-                                    } else {
-                                        FancyTextView(text: Binding.constant(content))
-                                    }
-                                } else {
-                                    FancyTextView(text: Binding.constant(content))
-                                }
-                            }
-                            Spacer()
-                            Button(action: {
-                                if collapsed.contains(offset) {
-                                    collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                } else {
-                                    collapsed.append(offset)
-                                }
-                            }) {
-                                Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            if (collapsed.contains(offset)) {
-                                Button(action: {
-                                    DispatchQueue.main.async {
-                                        NSPasteboard.general.clearContents()
-                                        NSPasteboard.general.setString(content, forType: .string)
-                                        if collapsed.contains(offset) {
-                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                        } else {
-                                            collapsed.append(offset)
-                                        }
-                                    }
-                                }) {
-                                    Text("Copy")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                Button(action: {
-                                    DispatchQueue.main.async {
-                                        NSPasteboard.general.clearContents()
-                                        NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\((data.map { $0["id"] as? String ?? "" })[offset])", forType: .string)
-                                        if collapsed.contains(offset) {
-                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                        } else {
-                                            collapsed.append(offset)
-                                        }
-                                    }
-                                }) {
-                                    Text("Copy Message Link")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                            }
-                            Button(action: {
-                                DispatchQueue.main.async {
-                                    let i = "\(rootURL)/channels/\(channelID)/messages/\((data.map { $0["id"] as? String ?? "" })[offset])"
-                                    NetworkHandling.shared.requestData(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
-                                }
-                            }) {
-                                Image(systemName: "trash")
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                        } else {
-                            HStack {
-                                if offset != data.count - 1 {
-                                    if author != ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
-                                        Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                            .frame(width: 15, height: 15)
-                                            .scaledToFit()
-                                            .padding(.horizontal, 5)
-                                            .clipShape(Circle())
-                                    }
-                                } else {
-                                    Image(nsImage: pfps[(data[offset]["author"] as? [String:Any] ?? [:])["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                        .frame(width: 15, height: 15)
-                                        .scaledToFit()
-                                        .padding(.horizontal, 5)
-                                        .clipShape(Circle())
-                                }
-                                HStack {
-                                    if offset != data.count - 1 {
-                                        if author != ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
-                                            Text(author)
-                                                .fontWeight(.semibold)
-                                        }
-                                    } else {
-                                        Text(author)
-                                            .fontWeight(.semibold)
-                                    }
-                                }
-                                if offset != data.count - 1 {
-                                    if author == ((data[Int(offset + 1)]["author"] as? [String:Any] ?? [:])["username"] as? String ?? "") {
-                                        FancyTextView(text: Binding.constant(content))
-                                            .padding(.leading, 53)
-                                    } else {
-                                        FancyTextView(text: Binding.constant(content))
-                                    }
-                                } else {
-                                    FancyTextView(text: Binding.constant(content))
+                                    FancyTextView(text: Binding.constant(message.content))
                                 }
                                 Spacer()
                                 Button(action: {
-                                    if collapsed.contains(offset) {
-                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                    if collapsed.contains(index) {
+                                        collapsed.remove(at: collapsed.firstIndex(of: index)!)
                                     } else {
-                                        collapsed.append(offset)
+                                        collapsed.append(index)
                                     }
                                 }) {
-                                    Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                    Image(systemName: ((collapsed.contains(index)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
-                                if (collapsed.contains(offset)) {
+                                if (collapsed.contains(index)) {
                                     Button(action: {
                                         DispatchQueue.main.async {
                                             NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString(content, forType: .string)
-                                            if collapsed.contains(offset) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                            NSPasteboard.general.setString(message.content, forType: .string)
+                                            if collapsed.contains(index) {
+                                                collapsed.remove(at: collapsed.firstIndex(of: index)!)
                                             } else {
-                                                collapsed.append(offset)
+                                                collapsed.append(index)
                                             }
                                         }
                                     }) {
@@ -202,11 +104,11 @@ struct MessageCellView: View {
                                     Button(action: {
                                         DispatchQueue.main.async {
                                             NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\((data.map { $0["id"] as? String ?? "" })[offset])", forType: .string)
-                                            if collapsed.contains(offset) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                            NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\(message.id)", forType: .string)
+                                            if collapsed.contains(index) {
+                                                collapsed.remove(at: collapsed.firstIndex(of: index)!)
                                             } else {
-                                                collapsed.append(offset)
+                                                collapsed.append(index)
                                             }
                                         }
                                     }) {
@@ -216,42 +118,29 @@ struct MessageCellView: View {
                                 }
                                 Button(action: {
                                     DispatchQueue.main.async {
-                                        let i = "\(rootURL)/channels/\(channelID)/messages/\((data.map { $0["id"] as? String ?? "" })[offset])"
+                                        let i = "\(rootURL)/channels/\(channelID)/messages/\(message.id)"
                                         NetworkHandling.shared.requestData(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                     }
                                 }) {
                                     Image(systemName: "trash")
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
-
                             }
                         }
                     }
 
                 }
-                .id(offset)
-                if let attachment = data[offset]["attachments"] as? [[String:Any]] {
-                    if attachment.isEmpty == false {
-                        HStack {
-                            ForEach(0..<attachment.count, id: \.self) { index in
-                                Attachment(attachment[index]["url"] as! String)
-                                    .cornerRadius(5)
-                                    .frame(maxWidth: 400, maxHeight: 300)
-                            }
-                            Spacer()
-                        }
-                        .padding(.horizontal, 45)
-                    }
-                }
+                .rotationEffect(.radians(.pi))
+                .scaleEffect(x: -1, y: 1, anchor: .center)
             }
-            .rotationEffect(.radians(.pi))
-            .scaleEffect(x: -1, y: 1, anchor: .center)
         }
         .onAppear(perform: {
             DispatchQueue.main.async {
                 pfps = ImageHandling.shared.getAllProfilePictures(array: data)
+                print(data, "HERE")
             }
         })
     }
 }
+
 

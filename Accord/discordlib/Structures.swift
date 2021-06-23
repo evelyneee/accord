@@ -23,44 +23,69 @@ enum statusIndicators {
     case idle
 }
 
-public struct Message: Hashable {
-    struct author {
-        var avatar: URL
-        var bot: Bool
-        var discriminator: String
-        var id: String
-        var username: String
-    }
-    var channel_id: String
-    var club_id: String
-    var content: String
-    var edited_timestamps: Bool
-    struct embeds {
-        struct author {
-            var iconURL: URL
-            var name: String
-            var proxy_icon_url: URL
-            var url: URL
-        }
-        var color: Int
-        var embedContent: String
-        var title: String
-        enum type {
-            case rich
-            case video
-            case image
-        }
-    }
+struct User: Decodable {
     var id: String
-    var mention_everyone: Bool
-    var mentions_roles: [String]
-    var mentions: [String]
-    var nonce: Int
-    var pinned: Bool
-    var reactions: [String: String]
+    var username: String
+    var discriminator: String
+    var avatar: String?
+    var bot: Bool?
+    var system: Bool?
+    var mfa_enabled: Bool?
+    var locale: String?
+    var verified: Bool?
+    var email: String?
+    var flags: Int?
+    var premium_type: Int?
+    var public_flags: Int?
+}
+
+struct GatewayMessage: Decodable {
+    var d: Message?
+}
+
+struct Message: Decodable {
+    var author: User
+    var channel_id: String
+    var guild_id: String?
+    var content: String
+    var edited_timestamps: Bool?
+    var id: String
+    var mention_everyone: Bool?
+    var mentions: [User]
+    var nonce: String?
+    var pinned: Bool?
     var timestamp: String
     var tts: Bool
     var type: Int
+    var referenced_message: Reply?
+}
+
+struct Reply: Decodable {
+    var author: User
+    var channel_id: String
+    var guild_id: String?
+    var content: String
+    var edited_timestamps: Bool?
+    var id: String
+    var mention_everyone: Bool?
+    var mentions: [User]
+    var nonce: Int?
+    var pinned: Bool?
+    var timestamp: String
+    var tts: Bool
+    var type: Int
+    var attachments: [AttachedFiles]
+}
+
+struct AttachedFiles: Decodable {
+    var id: String
+    var filename: String
+    var content_type: String
+    var size: Int
+    var url: String
+    var proxy_url: String
+    var height: Int?
+    var width: Int?
 }
 
 struct Profile {

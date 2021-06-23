@@ -188,8 +188,8 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         case .data(let data):
                             print("Data received \(data)")
                         case .string(let text):
-                            if let data = text.data(using: String.Encoding.utf8) {
-                                let payload = decodePayload(payload: data)
+                            if let textData = text.data(using: String.Encoding.utf8) {
+                                let payload = decodePayload(payload: textData)
                                 if payload["s"] as? Int != nil {
                                     WebSocketHandler.shared.seq = payload["s"] as? Int
                                 } else {
@@ -246,7 +246,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: data)
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
                                         }
                                     }
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""} as? [String] ?? []).contains(user_id) {

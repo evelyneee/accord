@@ -155,7 +155,7 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if data != Data() {
                     do {
-                        let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: .mutableContainers) as? [String:Any] ?? [String:Any]()
+                        let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
                         if let checktoken = returnArray["token"] as? String {
                             return completion(true, checktoken)
                         }

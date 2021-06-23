@@ -10,18 +10,16 @@ import AppKit
 
 final class ImageHandling {
     static var shared = ImageHandling()
-    func getAllProfilePictures(array: [[String:Any]]) -> [String:NSImage] {
+    func getAllProfilePictures(array: [Message]) -> [String:NSImage] {
         let pfpURLs = array.map {
-            "https://cdn.discordapp.com/avatars/\(($0["author"] as? [String:Any] ?? [:])["id"] ?? "")/\(($0["author"] as? [String:Any] ?? [:])["avatar"] ?? "").png?size=80"
+            "https://cdn.discordapp.com/avatars/\($0.author.id ?? "")/\($0.author.avatar ?? "").png?size=80"
         }
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:]
         for url in pfpURLs {
-            if let urlstr = url as? String {
-                if !(singleURLs.contains(urlstr)) {
-                    if !(urlstr.contains("<null>")) {
-                        singleURLs.append(urlstr)
-                    }
+            if !(singleURLs.contains(url)) {
+                if !(url.contains("<null>")) {
+                    singleURLs.append(url)
                 }
             }
         }

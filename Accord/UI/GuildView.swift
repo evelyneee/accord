@@ -33,7 +33,7 @@ struct GuildView: View {
     @Binding var channelID: String
     @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
-    @State var data: [[String:Any]] = []
+    @State var data: [Message] = []
     @State var pfps: [String:NSImage] = [:]
     @State var sending: Bool = false
     @State var typing: [String] = []
@@ -130,33 +130,42 @@ struct GuildView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
                 sending = false
-                data.insert(notif.userInfo as? [String:Any] ?? [:], at: 0)
+                let encoder = JSONEncoder()
+                data.insert(try! JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data).d!, at: 0)
+
+                // data.insert(notif.userInfo as? [String:Any] ?? [:], at: 0)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
-            typing.append(notif.userInfo?["user_id"] as? String ?? "")
+            // typing.append(notif.userInfo?["user_id"] as? String ?? "")
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
-                let currentUIDDict = data.map { $0["id"] }
-                data[(currentUIDDict as? [String] ?? []).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as? String ?? "error") ?? 0] = notif.userInfo as? [String:Any] ?? [:]
+                let currentUIDDict = data.map { $0.id }
+                // data[(currentUIDDict as? [String] ?? []).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as? String ?? "error") ?? 0] = notif.userInfo as? [String:Any] ?? [:]
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
-                let currentUIDDict = data.map { $0["id"] }
-                data.remove(at: (currentUIDDict as! [String]).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as! String) ?? 0)
+                let currentUIDDict = data.map { $0.id }
+                // data.remove(at: (currentUIDDict as! [String]).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as! String) ?? 0)
             }
         }
         .onAppear {
             if token != "" {
                 print("NewMessageIn\(channelID)")
                 DispatchQueue.main.async {
-                    NetworkHandling.shared.request(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, array in
+                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
                         if success == true {
-                            data = array ?? []
-                            
+                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
                         }
+                    }
+                }
+                net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in
+                    print("request")
+                    if let data = data {
+                        let user = try! JSONDecoder().decode(User.self, from: data)
+                        print(user.username, "HEYYY")
                     }
                 }
             }
@@ -174,7 +183,7 @@ extension NSTextField {
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
     @State var textFieldContents: String = ""
-    @Binding var data: [[String:Any]]
+    @Binding var data: [Message]
     @State var pfps: [String : NSImage] = [:]
     @Binding var channelID: String
     @Binding var chatText: String
@@ -227,3 +236,6 @@ struct VisualEffectView: NSViewRepresentable {
         visualEffectView.blendingMode = blendingMode
     }
 }
+
+
+extension Array: Decodable where Element: Decodable {}
