@@ -54,7 +54,7 @@ public func matches(for regex: String, in text: String) -> [String] {
             String(text[Range($0.range, in: text)!])
         }
     } catch let error {
-        print("invalid regex: \(error.localizedDescription)")
+        print("invalid regex \(error.localizedDescription)")
         return []
     }
 }
@@ -65,7 +65,7 @@ public extension String {
 
         var regex: NSRegularExpression
         do {
-            regex = try NSRegularExpression(pattern: pattern, options: [])
+            regex = try NSRegularExpression(pattern: pattern, options: [] )
         } catch {
             return results
         }
@@ -75,11 +75,9 @@ public extension String {
 
         let lastRangeIndex = match.numberOfRanges - 1
         guard lastRangeIndex >= 1 else { return results }
-        print(matches)
         for i in 1...lastRangeIndex {
             let capturedGroupIndex = match.range(at: i)
             let matchedString = (self as NSString).substring(with: capturedGroupIndex)
-            print(matchedString)
             results.append(matchedString)
         }
 

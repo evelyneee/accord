@@ -11,7 +11,6 @@ import Foundation
 struct MessageCellView: View {
     @Binding var clubID: String
     @Binding var data: [Message]
-    @Binding var pfps: [String:NSImage]
     @Binding var channelID: String
     @State var collapsed: [Int] = []
     var body: some View {
@@ -23,9 +22,9 @@ struct MessageCellView: View {
                             Spacer().frame(width: 50)
                             Text("replying to ")
                                 .foregroundColor(.secondary)
-                            Image(nsImage: pfps[reply.author.id ?? ""] ?? NSImage()).resizable()
+                            Attachment("https://cdn.discordapp.com/avatars/\(reply.author.id )/\(reply.author.avatar ?? "").png?size=80")
                                 .frame(width: 15, height: 15)
-                                .scaledToFit()
+                                .padding(.horizontal, 5)
                                 .clipShape(Circle())
                             HStack {
                                 if let author = reply.author.username as? String {
@@ -49,31 +48,33 @@ struct MessageCellView: View {
                                 VStack {
                                     if index != data.count - 1 {
                                         if author != (data[Int(index + 1)].author.username ?? "") {
-                                            Image(nsImage: pfps[message.author.id ?? ""] ?? NSImage()).resizable()
+                                            Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
                                                 .frame(width: 33, height: 33)
-                                                .scaledToFit()
                                                 .padding(.horizontal, 5)
                                                 .clipShape(Circle())
                                         }
                                     } else {
-                                        Image(nsImage: pfps[message.author.id ?? ""] ?? NSImage()).resizable()
+                                        Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
                                             .frame(width: 33, height: 33)
-                                            .scaledToFit()
                                             .padding(.horizontal, 5)
                                             .clipShape(Circle())
                                     }
                                 }
                                 VStack(alignment: .leading) {
                                     if index != data.count - 1 {
-                                        if author != (data[Int(index + 1)].author.username ?? "") {
+                                        if author == (data[Int(index + 1)].author.username ?? "") {
+                                            FancyTextView(text: Binding.constant(message.content))
+                                                .padding(.leading, 50)
+                                        } else {
                                             Text(author)
                                                 .fontWeight(.semibold)
+                                            FancyTextView(text: Binding.constant(message.content))
                                         }
                                     } else {
                                         Text(author)
                                             .fontWeight(.semibold)
+                                        FancyTextView(text: Binding.constant(message.content))
                                     }
-                                    FancyTextView(text: Binding.constant(message.content))
                                 }
                                 Spacer()
                                 Button(action: {
@@ -128,18 +129,24 @@ struct MessageCellView: View {
                             }
                         }
                     }
-
+                    if let attachment = message.attachments {
+                        if attachment.isEmpty == false {
+                            HStack {
+                                ForEach(0..<attachment.count, id: \.self) { index in
+                                    Attachment(attachment[index].url)
+                                        .cornerRadius(5)
+                                        .frame(maxWidth: 400, maxHeight: 300)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal, 45)
+                        }
+                    }
                 }
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1, y: 1, anchor: .center)
             }
         }
-        .onAppear(perform: {
-            DispatchQueue.main.async {
-                pfps = ImageHandling.shared.getAllProfilePictures(array: data)
-                print(data, "HERE")
-            }
-        })
     }
 }
 

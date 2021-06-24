@@ -34,13 +34,9 @@ struct GuildView: View {
     @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
     @State var data: [Message] = []
-    @State var pfps: [String:NSImage] = [:]
     @State var sending: Bool = false
     @State var typing: [String] = []
 //    actual view begins here
-    func refresh() {
-        pfps = ImageHandling.shared.getAllProfilePictures(array: data)
-    }
     let timer = Timer.publish(every: 5, on: .current, in: .common).autoconnect()
     var body: some View {
 //      chat view
@@ -95,7 +91,7 @@ struct GuildView: View {
                                 .opacity(0.75)
                             }
                         }
-                        MessageCellView(clubID: $clubID, data: $data, pfps: $pfps, channelID: $channelID)
+                        MessageCellView(clubID: $clubID, data: $data, channelID: $channelID)
                         if data.isEmpty == false {
                             HStack {
                                 VStack(alignment: .leading) {
@@ -130,8 +126,11 @@ struct GuildView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
                 sending = false
-                let encoder = JSONEncoder()
-                data.insert(try! JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data).d!, at: 0)
+                if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
+                    if let message = gatewayMessage.d {
+                        data.insert(message, at: 0)
+                    }
+                }
 
                 // data.insert(notif.userInfo as? [String:Any] ?? [:], at: 0)
             }
@@ -142,22 +141,31 @@ struct GuildView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
                 let currentUIDDict = data.map { $0.id }
-                // data[(currentUIDDict as? [String] ?? []).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as? String ?? "error") ?? 0] = notif.userInfo as? [String:Any] ?? [:]
+                if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
+                    if let message = gatewayMessage.d {
+                        data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
+                    }
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
                 let currentUIDDict = data.map { $0.id }
-                // data.remove(at: (currentUIDDict as! [String]).firstIndex(of: (notif.userInfo as? [String:Any] ?? [:])["id"] as! String) ?? 0)
+                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) as? GatewayDeletedMessage {
+                    if let message = gatewayMessage.d {
+                        data.remove(at: (currentUIDDict).firstIndex(of: message.id) ?? 0)
+                    }
+                }
             }
         }
         .onAppear {
             if token != "" {
-                print("NewMessageIn\(channelID)")
                 DispatchQueue.main.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
                         if success == true {
-                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
+                            if let data = try? JSONDecoder().decode([Message].self, from: data!) {
+                                self.data = data
+                            }
                         }
                     }
                 }

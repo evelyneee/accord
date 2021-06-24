@@ -43,6 +43,14 @@ struct GatewayMessage: Decodable {
     var d: Message?
 }
 
+struct GatewayDeletedMessage: Decodable {
+    var d: DeletedMessage?
+}
+
+struct DeletedMessage: Decodable {
+    var id: String
+}
+
 struct Message: Decodable {
     var author: User
     var channel_id: String
@@ -57,6 +65,7 @@ struct Message: Decodable {
     var timestamp: String
     var tts: Bool
     var type: Int
+    var attachments: [AttachedFiles]
     var referenced_message: Reply?
 }
 

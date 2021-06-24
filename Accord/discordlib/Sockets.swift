@@ -61,6 +61,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 webSocketTask.send(.string(jsonString)) { error in
                     if let error = error {
                         print("WebSocket sending error: \(error)")
+                        fatalError("[Accord] Aborting to prevent ratelimit or ban. ")
                     }
                 }
             }
@@ -249,7 +250,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
                                         }
                                     }
-                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""} as? [String] ?? []).contains(user_id) {
+                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""} ?? []).contains(user_id) {
                                         print("NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
                                     }
@@ -258,7 +259,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "EditedMessageIn\(channelid)"), object: nil, userInfo: data)
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "EditedMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
                                         }
                                     }
                                     break
@@ -266,7 +267,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "DeletedMessageIn\(channelid)"), object: nil, userInfo: data)
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "DeletedMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
                                         }
                                     }
                                     break
@@ -304,7 +305,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 case .failure(let error):
                     print("Error when receiving loop \(error)")
                     print("RECONNECT")
-                    fatalError("[Accord] Aborting to prevent ratelimit or ban. ")
+                    reconnect()
                 }
             }
         }

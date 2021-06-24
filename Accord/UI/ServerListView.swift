@@ -149,11 +149,13 @@ struct ServerListView: View {
             guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
             let clubIDs = clubs.map { $0["id"] } as! [String]
             var clubTemp: [[String:Any]] = []
-            for (index, item) in guildOrder.enumerated() {
-                let element = clubs[clubIDs.firstIndex(of: item)!]
-                clubTemp.insert(element, at: index)
+            /*for (index, item) in guildOrder.enumerated() {
+                if let first = clubIDs.firstIndex(of: item) {
+                    let element = clubs[first]
+                    clubTemp.insert(element, at: index)
+                }
             }
-            clubs = clubTemp
+            clubs = clubTemp*/
             selectedServer = 0
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
