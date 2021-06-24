@@ -32,7 +32,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
         let url = URL(string: "wss://gateway.discord.gg")!
         let webSocketTask = session.webSocketTask(with: url)
         webSocketTask.maximumMessageSize = 999999999
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared.requests = 0
             receive()
         }

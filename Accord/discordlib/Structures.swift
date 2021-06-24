@@ -89,7 +89,7 @@ struct Reply: Decodable {
 struct AttachedFiles: Decodable {
     var id: String
     var filename: String
-    var content_type: String
+    var content_type: String?
     var size: Int
     var url: String
     var proxy_url: String

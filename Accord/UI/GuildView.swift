@@ -163,9 +163,7 @@ struct GuildView: View {
                 DispatchQueue.main.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
                         if success == true {
-                            if let data = try? JSONDecoder().decode([Message].self, from: data!) {
-                                self.data = data
-                            }
+                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
                         }
                     }
                 }
