@@ -36,85 +36,176 @@ struct GuildView: View {
     @State var data: [Message] = []
     @State var sending: Bool = false
     @State var typing: [String] = []
+    @State var collapsed: [Int] = []
 //    actual view begins here
     let timer = Timer.publish(every: 5, on: .current, in: .common).autoconnect()
     var body: some View {
 //      chat view
         ZStack(alignment: .bottom) {
             Spacer()
-            ZStack {
-//                chat view
-                List {
-                    LazyVStack {
-                        Spacer().frame(height: 75)
-                        if (sending) && chatTextFieldContents != "" {
-                            if let temp = chatTextFieldContents {
-                                HStack {
-                                    if pfpShown {
+            List {
+                LazyVStack {
+                    Spacer().frame(height: 75)
+                    if (sending) && chatTextFieldContents != "" {
+                        if let temp = chatTextFieldContents {
+                            HStack {
+                                if pfpShown {
+                                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                        .frame(maxWidth: 33, maxHeight: 33)
+                                        .scaledToFit()
+                                        .padding(.horizontal, 5)
+                                        .clipShape(Circle())
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            if let author = "\(username)" {
+                                                Text(author)
+                                                    .fontWeight(.semibold)
+                                            }
+                                        }
+                                        Text(temp)
+                                    }
+                                } else {
+                                    HStack {
                                         Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                            .frame(maxWidth: 33, maxHeight: 33)
+                                            .frame(maxWidth: 15, maxHeight: 15)
                                             .scaledToFit()
                                             .padding(.horizontal, 5)
                                             .clipShape(Circle())
-                                        VStack(alignment: .leading) {
-                                            HStack {
-                                                if let author = "\(username)" {
-                                                    Text(author)
-                                                        .fontWeight(.semibold)
-                                                }
-                                            }
-                                            Text(temp)
-                                        }
-                                    } else {
                                         HStack {
-                                            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                                .frame(maxWidth: 15, maxHeight: 15)
-                                                .scaledToFit()
-                                                .padding(.horizontal, 5)
-                                                .clipShape(Circle())
-                                            HStack {
-                                                if let author = "\(username)" {
-                                                    Text(author)
-                                                        .fontWeight(.bold)
+                                            if let author = "\(username)" {
+                                                Text(author)
+                                                    .fontWeight(.bold)
 
-                                                }
                                             }
-
-                                            Text(temp)
                                         }
+
+                                        Text(temp)
                                     }
-                                    Spacer()
-                                    
-                                }
-                                .rotationEffect(.radians(.pi))
-                                .scaleEffect(x: -1, y: 1, anchor: .center)
-                                .opacity(0.75)
-                            }
-                        }
-                        MessageCellView(clubID: $clubID, data: $data, channelID: $channelID)
-                        if data.isEmpty == false {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("This is the beginning of #\(channelName)")
-                                        .font(.title2)
-                                        .fontWeight(.bold)
                                 }
                                 Spacer()
+                                
                             }
-                            .padding(.vertical)
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
+                            .opacity(0.75)
                         }
                     }
+                    ForEach(0..<data.count, id: \.self) { index in
+                        if let message = data[index] {
+                            VStack(alignment: .leading) {
+                                if let reply = message.referenced_message {
+                                    HStack {
+                                        Spacer().frame(width: 50)
+                                        Text("replying to ")
+                                            .foregroundColor(.secondary)
+                                        Attachment("https://cdn.discordapp.com/avatars/\(reply.author.id )/\(reply.author.avatar ?? "").png?size=80")
+                                            .frame(width: 15, height: 15)
+                                            .padding(.horizontal, 5)
+                                            .clipShape(Circle())
+                                        HStack {
+                                            if let author = reply.author.username {
+                                                Text(author)
+                                                    .fontWeight(.bold)
+                                            }
+                                        }
+                                        if #available(macOS 12.0, *) {
+                                            Text(try! AttributedString(markdown: reply.content))
+                                                .lineLimit(0)
+                                        } else {
+                                            Text(reply.content)
+                                                .lineLimit(0)
+
+                                        }
+                                    }
+                                }
+                                HStack(alignment: .top) {
+                                    if let author = message.author.username as? String {
+                                        if pfpShown {
+                                            VStack {
+                                                if index != data.count - 1 {
+                                                    if author != (data[Int(index + 1)].author.username) {
+                                                        Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
+                                                            .frame(width: 33, height: 33)
+                                                            .padding(.horizontal, 5)
+                                                            .clipShape(Circle())
+                                                    }
+                                                } else {
+                                                    Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
+                                                        .frame(width: 33, height: 33)
+                                                        .padding(.horizontal, 5)
+                                                        .clipShape(Circle())
+                                                }
+                                            }
+                                            VStack(alignment: .leading) {
+                                                if index != data.count - 1 {
+                                                    if author == (data[Int(index + 1)].author.username) {
+                                                        FancyTextView(text: Binding.constant(message.content))
+                                                            .padding(.leading, 50)
+                                                    } else {
+                                                        Text(author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: Binding.constant(message.content))
+                                                    }
+                                                } else {
+                                                    Text(author)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: Binding.constant(message.content))
+                                                }
+                                            }
+                                            Spacer()
+                                            Button(action: {
+                                                DispatchQueue.main.async {
+                                                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(message.id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                                }
+                                            }) {
+                                                Image(systemName: "trash")
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+
+                                        }
+                                    }
+                                }
+                                if let attachment = message.attachments {
+                                    if attachment.isEmpty == false {
+                                        HStack {
+                                            ForEach(0..<attachment.count, id: \.self) { index in
+                                                if String((attachment[index].content_type ?? "").prefix(6)) == "image/" {
+                                                    Attachment(attachment[index].url)
+                                                        .cornerRadius(5)
+                                                }
+
+                                            }
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal, 45)
+                                        .frame(maxWidth: 400, maxHeight: 300)
+                                    }
+
+                                }
+                            }
+                            .rotationEffect(.radians(.pi))
+                            .scaleEffect(x: -1, y: 1, anchor: .center)
+
+                        }
+                    }
+                    if data.isEmpty == false {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("This is the beginning of #\(channelName)")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical)
+                        .rotationEffect(.radians(.pi))
+                        .scaleEffect(x: -1, y: 1, anchor: .center)
+                    }
                 }
-                .rotationEffect(.radians(.pi))
-                .scaleEffect(x: -1, y: 1, anchor: .center)
-                .padding(.leading, -25.0)
-                
             }
-            .padding(.leading, 25.0)
+            .rotationEffect(.radians(.pi))
+            .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
-//                Text("\((typing.map { "\($0)" }.joined(separator: ", "))) are typing...")
                 ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
@@ -122,6 +213,25 @@ struct GuildView: View {
             }
             .padding()
 
+        }
+        .onAppear {
+            ImageHandling.shared.cache.removeAllCachedResponses()
+            if token != "" {
+                DispatchQueue.main.async {
+                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
+                        if success == true {
+                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
+                        }
+                    }
+                }
+                net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in
+                    print("request")
+                    if let data = data {
+                        let user = try! JSONDecoder().decode(User.self, from: data)
+                        print(user.username, "HEYYY")
+                    }
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
@@ -131,12 +241,7 @@ struct GuildView: View {
                         data.insert(message, at: 0)
                     }
                 }
-
-                // data.insert(notif.userInfo as? [String:Any] ?? [:], at: 0)
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
-            // typing.append(notif.userInfo?["user_id"] as? String ?? "")
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
             DispatchQueue.main.async {
@@ -154,24 +259,6 @@ struct GuildView: View {
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) as? GatewayDeletedMessage {
                     if let message = gatewayMessage.d {
                         data.remove(at: (currentUIDDict).firstIndex(of: message.id) ?? 0)
-                    }
-                }
-            }
-        }
-        .onAppear {
-            if token != "" {
-                DispatchQueue.main.async {
-                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
-                        if success == true {
-                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
-                        }
-                    }
-                }
-                net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in
-                    print("request")
-                    if let data = data {
-                        let user = try! JSONDecoder().decode(User.self, from: data)
-                        print(user.username, "HEYYY")
                     }
                 }
             }
@@ -245,3 +332,15 @@ struct VisualEffectView: NSViewRepresentable {
 
 
 extension Array: Decodable where Element: Decodable {}
+
+func showWindow(clubID: String, channelID: String, channelName: String) {
+    var windowRef: NSWindow
+    windowRef = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
+        styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
+        backing: .buffered, defer: false)
+    windowRef.contentView = NSHostingView(rootView: GuildView(clubID: Binding.constant(clubID), channelID: Binding.constant(channelID), channelName: Binding.constant(channelName)))
+    windowRef.minSize = NSSize(width: 500, height: 300)
+    windowRef.isReleasedWhenClosed = false
+    windowRef.makeKeyAndOrderFront(nil)
+}

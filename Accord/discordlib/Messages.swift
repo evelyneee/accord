@@ -26,7 +26,7 @@ struct ImageWithURL: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(named: "")) ?? NSImage())
+        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
               .resizable()
               .clipped()
     }
@@ -41,10 +41,14 @@ struct Attachment: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(named: "")) ?? NSImage())
+        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
               .resizable()
               .scaledToFit()
+              .onDisappear {
+                  self.imageLoader.imageData = Data()
+              }
     }
+
 }
 
 class ImageLoaderAndCache: ObservableObject {

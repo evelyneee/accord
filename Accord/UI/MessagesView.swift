@@ -13,6 +13,7 @@ struct MessageCellView: View {
     @Binding var data: [Message]
     @Binding var channelID: String
     @State var collapsed: [Int] = []
+    @Binding var sending: Bool
     var body: some View {
         ForEach(0..<data.count, id: \.self) { index in
             if let message = data[index] {
@@ -89,29 +90,17 @@ struct MessageCellView: View {
                                 .buttonStyle(BorderlessButtonStyle())
                                 if (collapsed.contains(index)) {
                                     Button(action: {
-                                        DispatchQueue.main.async {
-                                            NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString(message.content, forType: .string)
-                                            if collapsed.contains(index) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: index)!)
-                                            } else {
-                                                collapsed.append(index)
-                                            }
-                                        }
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString(message.content, forType: .string)
+                                        collapsed.remove(at: collapsed.firstIndex(of: index)!)
                                     }) {
                                         Text("Copy")
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                     Button(action: {
-                                        DispatchQueue.main.async {
-                                            NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\(message.id)", forType: .string)
-                                            if collapsed.contains(index) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: index)!)
-                                            } else {
-                                                collapsed.append(index)
-                                            }
-                                        }
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\(message.id)", forType: .string)
+                                        collapsed.remove(at: collapsed.firstIndex(of: index)!)
                                     }) {
                                         Text("Copy Message Link")
                                     }
@@ -119,13 +108,13 @@ struct MessageCellView: View {
                                 }
                                 Button(action: {
                                     DispatchQueue.main.async {
-                                        let i = "\(rootURL)/channels/\(channelID)/messages/\(message.id)"
-                                        NetworkHandling.shared.requestData(url: i, token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                        NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(message.id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                     }
                                 }) {
                                     Image(systemName: "trash")
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
+
                             }
                         }
                     }
@@ -135,11 +124,11 @@ struct MessageCellView: View {
                                 ForEach(0..<attachment.count, id: \.self) { index in
                                     Attachment(attachment[index].url)
                                         .cornerRadius(5)
-                                        .frame(maxWidth: 400, maxHeight: 300)
                                 }
                                 Spacer()
                             }
                             .padding(.horizontal, 45)
+                            .frame(maxWidth: 400, maxHeight: 300)
                         }
                     }
                 }
@@ -147,6 +136,7 @@ struct MessageCellView: View {
                 .scaleEffect(x: -1, y: 1, anchor: .center)
             }
         }
+
     }
 }
 

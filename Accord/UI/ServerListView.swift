@@ -97,14 +97,23 @@ struct ServerListView: View {
                                                     .clipShape(Circle())
                                                     .frame(width: 25, height: 25)
                                                 Text(privateChannels[index]["name"] as? String ?? "")
-                                                    .onAppear {
-                                                        print(privateChannels[index])
-                                                    }
+                                                Spacer()
+                                                Button(action: {
+                                                    showWindow(clubID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
+                                                }) {
+                                                    Image(systemName: "arrow.up.right.circle")
+                                                }
                                             } else {
                                                 Attachment("https://cdn.discordapp.com/avatars/\(recipients[0]["id"] as? String ?? "")/\(recipients[0]["avatar"] as? String ?? "").png")
                                                     .clipShape(Circle())
                                                     .frame(width: 25, height: 25)
                                                 Text(recipients[0]["username"] as? String ?? "")
+                                                Spacer()
+                                                Button(action: {
+                                                    showWindow(clubID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
+                                                }) {
+                                                    Image(systemName: "arrow.up.right.circle")
+                                                }
                                             }
                                         }
                                     }
@@ -129,9 +138,16 @@ struct ServerListView: View {
                                                                 HStack {
                                                                     Image(systemName: "number")
                                                                     Text(channelName)
+                                                                    Spacer()
+                                                                    Button(action: {
+                                                                        showWindow(clubID: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), channelID: channel[offset], channelName: channelName)
+                                                                    }) {
+                                                                        Image(systemName: "arrow.up.right.circle")
+                                                                    }
                                                                 }
                                                             }
                                                             .buttonStyle(BorderlessButtonStyle())
+
                                                         }
                                                     }
                                                 }
@@ -164,3 +180,4 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }
+

@@ -23,7 +23,7 @@ enum statusIndicators {
     case idle
 }
 
-struct User: Decodable {
+struct User: Decodable, Identifiable {
     var id: String
     var username: String
     var discriminator: String
@@ -39,19 +39,20 @@ struct User: Decodable {
     var public_flags: Int?
 }
 
-struct GatewayMessage: Decodable {
+struct GatewayMessage: Decodable {    
     var d: Message?
 }
+
 
 struct GatewayDeletedMessage: Decodable {
     var d: DeletedMessage?
 }
 
-struct DeletedMessage: Decodable {
+struct DeletedMessage: Decodable, Identifiable {
     var id: String
 }
 
-struct Message: Decodable {
+struct Message: Decodable, Identifiable {
     var author: User
     var channel_id: String
     var guild_id: String?
@@ -69,7 +70,7 @@ struct Message: Decodable {
     var referenced_message: Reply?
 }
 
-struct Reply: Decodable {
+struct Reply: Decodable, Identifiable {
     var author: User
     var channel_id: String
     var guild_id: String?
@@ -86,7 +87,7 @@ struct Reply: Decodable {
     var attachments: [AttachedFiles]
 }
 
-struct AttachedFiles: Decodable {
+struct AttachedFiles: Decodable, Identifiable {
     var id: String
     var filename: String
     var content_type: String?

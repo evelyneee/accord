@@ -47,6 +47,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
             print("already connected, continuing")
         }
         func reconnect() {
+            sleep(10)
             webSocketTask.resume()
             let packet: [String:AnyEncodable] = [
                 "op":AnyEncodable(Int(6)),

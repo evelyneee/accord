@@ -9,6 +9,7 @@ import Foundation
 import AppKit
 
 final class ImageHandling {
+    let cache = URLCache.shared
     static var shared = ImageHandling()
     func getAllProfilePictures(array: [Message]) -> [String:NSImage] {
         let pfpURLs = array.map {
@@ -25,7 +26,6 @@ final class ImageHandling {
         }
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
-            let cache = URLCache.shared
             if let url = URL(string: url) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
                 if let data = cache.cachedResponse(for: request)?.data {
@@ -34,7 +34,7 @@ final class ImageHandling {
                     URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
-                                            cache.storeCachedResponse(cachedData, for: request)
+                            self.cache.storeCachedResponse(cachedData, for: request)
                             DispatchQueue.main.async {
                                 returnArray[String(userid)] = NSImage(data: data)
                             }

@@ -60,7 +60,7 @@ struct ProfileView: View {
             }
             .padding()
             Button(action: {
-                UserDefaults.standard.set("", forKey: "token")
+                _ = KeychainManager.save(key: "token", data: String("").data(using: String.Encoding.utf8) ?? Data())
             }) {
                 Text("log out")
             }

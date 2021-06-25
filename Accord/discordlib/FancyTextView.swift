@@ -45,7 +45,6 @@ public func getTextArray(splitText: [String]) -> [Text] {
 
 
 public func matches(for regex: String, in text: String) -> [String] {
-
     do {
         let regex = try NSRegularExpression(pattern: regex)
         let results = regex.matches(in: text,
