@@ -52,7 +52,11 @@ struct DeletedMessage: Decodable, Identifiable {
     var id: String
 }
 
-struct Message: Decodable, Identifiable {
+struct Message: Decodable, Identifiable, Equatable {
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var author: User
     var channel_id: String
     var guild_id: String?

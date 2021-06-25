@@ -89,7 +89,7 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if let recipients = privateChannels[index]["recipients"] as? [[String:Any]] {
                                             if recipients.count != 1 {
@@ -134,7 +134,7 @@ struct ServerListView: View {
                                                 if let channel = channels[key] {
                                                     ForEach(0..<channel.count, id: \.self) { offset in
                                                         if let channelName = Array((GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .name) as? [String] ?? []))[(GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .id) as? [String] ?? []).firstIndex(of: channel[offset])!] {
-                                                            NavigationLink(destination: GuildView(clubID: Binding.constant((clubs[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
+                                                            NavigationLink(destination: GuildView(clubID: Binding.constant((clubs[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)).equatable(), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
                                                                 HStack {
                                                                     Image(systemName: "number")
                                                                     Text(channelName)

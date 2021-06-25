@@ -29,6 +29,7 @@ struct HomeView: View {
 }
 
 struct TopicTabs: View {
+    
     var image: String
     var name: String
     @State var hovering: Bool = false

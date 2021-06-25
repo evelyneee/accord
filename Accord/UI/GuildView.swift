@@ -28,7 +28,11 @@ struct CoolButtonStyle: ButtonStyle {
 // the messaging view concept
 
 
-struct GuildView: View {
+struct GuildView: View, Equatable {
+    static func == (lhs: GuildView, rhs: GuildView) -> Bool {
+        return lhs.data == rhs.data
+    }
+    
     @Binding var clubID: String
     @Binding var channelID: String
     @Binding var channelName: String
@@ -185,7 +189,6 @@ struct GuildView: View {
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
-
                         }
                     }
                     if data.isEmpty == false {
@@ -274,13 +277,18 @@ extension NSTextField {
 }
 
 struct ChatControls: View {
-    @Binding var chatTextFieldContents: String
+    @Binding var chatTextFieldContents: String {
+        didSet {
+            print(chatTextFieldContents)
+        }
+    }
     @State var textFieldContents: String = ""
     @Binding var data: [Message]
     @State var pfps: [String : NSImage] = [:]
     @Binding var channelID: String
     @Binding var chatText: String
     @Binding var sending: Bool
+    @State var nitroless = false
     func refresh() {
         DispatchQueue.main.async {
             sending = false
@@ -289,24 +297,37 @@ struct ChatControls: View {
     }
     var body: some View {
         HStack {
-            TextField(chatText, text: $textFieldContents, onCommit: {
-                chatTextFieldContents = textFieldContents
-                let temp = textFieldContents
-                textFieldContents = ""
-                sending = true
-                DispatchQueue.main.async {
-                    NetworkHandling.shared.request(url: "\(rootURL)/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
-                        switch success {
-                        case true:
-                            break
-                        case false:
-                            print("whoop")
-                            break
+            ZStack(alignment: .trailing) {
+                TextField(chatText, text: $textFieldContents, onCommit: {
+                    chatTextFieldContents = textFieldContents
+                    let temp = textFieldContents
+                    textFieldContents = ""
+                    sending = true
+                    DispatchQueue.main.async {
+                        NetworkHandling.shared.request(url: "\(rootURL)/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
+                            switch success {
+                            case true:
+                                break
+                            case false:
+                                print("whoop")
+                                break
+                            }
                         }
                     }
+                })
+                    .textFieldStyle(PlainTextFieldStyle())
+                Button(action: {
+                    nitroless.toggle()
+                }) {
+                    Image(systemName: "rectangle.grid.3x2.fill")
                 }
-            })
-                .textFieldStyle(PlainTextFieldStyle())
+                .buttonStyle(BorderlessButtonStyle())
+                .popover(isPresented: $nitroless, content: {
+                    NitrolessView(chatText: $chatTextFieldContents)
+                        .frame(width: 300, height: 400)
+                })
+            }
+
         }
     }
 }

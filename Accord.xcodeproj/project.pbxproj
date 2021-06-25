@@ -20,6 +20,8 @@
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85C02B7268158D300A40114 /* FancyTextView.swift */; };
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
+		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
+		A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE632686709A00B244BE /* NitrolessStructures.swift */; };
 		A874C04A267658A8006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
@@ -61,6 +63,8 @@
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
 		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/discordlib/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
+		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
 		A874C049267658A8006E7F52 /* Guilds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guilds.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
@@ -127,6 +131,7 @@
 				32F4C95A256D7D3300343BB3 /* AccordApp.swift */,
 				32F4C95C256D7D3300343BB3 /* ContentView.swift */,
 				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				A864BE5926866FDF00B244BE /* Nitroless */,
 				32AA719225EAEEF700550BA5 /* discordlib */,
 				A8FA9A9B266823B4003710A4 /* UI */,
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
@@ -135,6 +140,23 @@
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		A864BE5926866FDF00B244BE /* Nitroless */ = {
+			isa = PBXGroup;
+			children = (
+				A864BE622686708700B244BE /* NitrolessBackend */,
+				A864BE5D2686700300B244BE /* MainView.swift */,
+			);
+			path = Nitroless;
+			sourceTree = "<group>";
+		};
+		A864BE622686708700B244BE /* NitrolessBackend */ = {
+			isa = PBXGroup;
+			children = (
+				A864BE632686709A00B244BE /* NitrolessStructures.swift */,
+			);
+			path = NitrolessBackend;
 			sourceTree = "<group>";
 		};
 		A8FA9A9B266823B4003710A4 /* UI */ = {
@@ -241,6 +263,8 @@
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
+				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
+				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
