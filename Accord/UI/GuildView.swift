@@ -27,6 +27,7 @@ struct CoolButtonStyle: ButtonStyle {
 
 // the messaging view concept
 
+let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
 struct GuildView: View, Equatable {
     static func == (lhs: GuildView, rhs: GuildView) -> Bool {
@@ -41,6 +42,7 @@ struct GuildView: View, Equatable {
     @State var sending: Bool = false
     @State var typing: [String] = []
     @State var collapsed: [Int] = []
+    @State var pfpArray: [String:NSImage] = [:]
 //    actual view begins here
     let timer = Timer.publish(every: 5, on: .current, in: .common).autoconnect()
     var body: some View {
@@ -97,7 +99,7 @@ struct GuildView: View, Equatable {
                     ForEach(0..<data.count, id: \.self) { index in
                         if let message = data[index] {
                             VStack(alignment: .leading) {
-                                if let reply = message.referenced_message {
+                                if let reply = data[index].referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
                                         Text("replying to ")
@@ -123,51 +125,52 @@ struct GuildView: View, Equatable {
                                     }
                                 }
                                 HStack(alignment: .top) {
-                                    if let author = message.author.username as? String {
-                                        if pfpShown {
-                                            VStack {
-                                                if index != data.count - 1 {
-                                                    if author != (data[Int(index + 1)].author.username) {
-                                                        Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
-                                                            .frame(width: 33, height: 33)
-                                                            .padding(.horizontal, 5)
-                                                            .clipShape(Circle())
-                                                    }
-                                                } else {
-                                                    Attachment("https://cdn.discordapp.com/avatars/\(message.author.id )/\(message.author.avatar ?? "").png?size=80")
+                                    if pfpShown {
+                                        VStack {
+                                            if index != data.count - 1 {
+                                                if data[index].author.username != (data[Int(index + 1)].author.username) {
+                                                    Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
+                                                        .scaledToFit()
                                                         .frame(width: 33, height: 33)
                                                         .padding(.horizontal, 5)
                                                         .clipShape(Circle())
                                                 }
+                                            } else {
+                                                Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 33, height: 33)
+                                                    .padding(.horizontal, 5)
+                                                    .clipShape(Circle())
                                             }
-                                            VStack(alignment: .leading) {
-                                                if index != data.count - 1 {
-                                                    if author == (data[Int(index + 1)].author.username) {
-                                                        FancyTextView(text: Binding.constant(message.content))
-                                                            .padding(.leading, 50)
-                                                    } else {
-                                                        Text(author)
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: Binding.constant(message.content))
-                                                    }
-                                                } else {
-                                                    Text(author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: Binding.constant(message.content))
-                                                }
-                                            }
-                                            Spacer()
-                                            Button(action: {
-                                                DispatchQueue.main.async {
-                                                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(message.id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
-                                                }
-                                            }) {
-                                                Image(systemName: "trash")
-                                            }
-                                            .buttonStyle(BorderlessButtonStyle())
-
                                         }
+                                        VStack(alignment: .leading) {
+                                            if index != data.count - 1 {
+                                                if data[index].author.username == (data[Int(index + 1)].author.username) {
+                                                    FancyTextView(text: $data[index].content)
+                                                        .padding(.leading, 50)
+                                                } else {
+                                                    Text(data[index].author.username)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[index].content)
+                                                }
+                                            } else {
+                                                Text(data[index].author.username)
+                                                    .fontWeight(.semibold)
+                                                FancyTextView(text: $data[index].content)
+                                            }
+                                        }
+                                        Spacer()
+                                        Button(action: {
+                                            DispatchQueue.main.async {
+                                                NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                            }
+                                        }) {
+                                            Image(systemName: "trash")
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+
                                     }
+
                                 }
                                 if let attachment = message.attachments {
                                     if attachment.isEmpty == false {
@@ -218,26 +221,26 @@ struct GuildView: View, Equatable {
 
         }
         .onAppear {
-            ImageHandling.shared.cache.removeAllCachedResponses()
             if token != "" {
-                DispatchQueue.main.async {
+                concurrentQueue.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
                         if success == true {
                             self.data = try! JSONDecoder().decode([Message].self, from: data!)
+                            ImageHandling.shared.getProfilePictures(array: self.data) { success, pfps in
+                                if success {
+                                    pfpArray = pfps
+                                    print(pfpArray)
+                                }
+                            }
                         }
                     }
+
                 }
-                net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in
-                    print("request")
-                    if let data = data {
-                        let user = try! JSONDecoder().decode(User.self, from: data)
-                        print(user.username, "HEYYY")
-                    }
-                }
+
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
-            DispatchQueue.main.async {
+            concurrentQueue.async {
                 sending = false
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
                     if let message = gatewayMessage.d {
@@ -247,17 +250,18 @@ struct GuildView: View, Equatable {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
-            DispatchQueue.main.async {
+            concurrentQueue.async {
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
                     if let message = gatewayMessage.d {
                         data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
                     }
                 }
+
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
-            DispatchQueue.main.async {
+            concurrentQueue.async {
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) as? GatewayDeletedMessage {
                     if let message = gatewayMessage.d {

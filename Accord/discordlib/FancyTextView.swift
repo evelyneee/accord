@@ -10,11 +10,26 @@ import SwiftUI
 
 struct FancyTextView: View {
     @Binding var text: String
+    @State var textArray: [Text] = []
     var body: some View {
         HStack {
             if let splitText = text.components(separatedBy: " ") {
                 HStack(spacing: 0) {
-                    getTextArray(splitText: splitText).reduce(Text(""), +)
+                    if textArray.isEmpty {
+                        Text(text)
+                    } else {
+                        textArray.reduce(Text(""), +)
+                    }
+                }
+                .onAppear {
+                    concurrentQueue.async {
+                        textArray = getTextArray(splitText: splitText)
+                    }
+                }
+                .onChange(of: text) { newValue in
+                    print("SET")
+                    textArray = []
+                    textArray = getTextArray(splitText: text.components(separatedBy: " "))
                 }
             }
         }

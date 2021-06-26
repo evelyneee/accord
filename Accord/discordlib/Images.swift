@@ -11,12 +11,21 @@ import AppKit
 final class ImageHandling {
     let cache = URLCache.shared
     static var shared = ImageHandling()
-    func getAllProfilePictures(array: [Message]) -> [String:NSImage] {
+    func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
         let pfpURLs = array.map {
             "https://cdn.discordapp.com/avatars/\($0.author.id )/\($0.author.avatar ?? "").png?size=80"
         }
+        print(pfpURLs)
         var singleURLs: [String] = []
-        var returnArray: [String:NSImage] = [:]
+        var returnArray: [String:NSImage] = [:] {
+            didSet {
+                print("DONE \(returnArray.count)")
+                if returnArray.count == singleURLs.count {
+                    completion(true, returnArray)
+                    print("DONE")
+                }
+            }
+        }
         for url in pfpURLs {
             if !(singleURLs.contains(url)) {
                 if !(url.contains("<null>")) {
@@ -35,15 +44,12 @@ final class ImageHandling {
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
                             self.cache.storeCachedResponse(cachedData, for: request)
-                            DispatchQueue.main.async {
-                                returnArray[String(userid)] = NSImage(data: data)
-                            }
+                            returnArray[String(userid)] = NSImage(data: data)
                         }
                     }).resume()
                 }
             }
         }
-        return returnArray
     }
 }
 
