@@ -158,7 +158,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 switch result {
                 case .success(let message):
                     switch message {
-                    case .data(let data):
+                    case .data(_):
                         break
                     case .string(let text):
                         if let data = text.data(using: String.Encoding.utf8) {
@@ -251,7 +251,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
                                         }
                                     }
-                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""} ?? []).contains(user_id) {
+                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
                                         print("NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
                                     }
@@ -315,20 +315,17 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
             webSocketTask.cancel(with: .goingAway, reason: reason)
         }
         func checkConnection(_ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
-            var retValue: Bool = false
-            var _: Bool = false
-            var retDict: [String:Any] = [:]
             webSocketTask.receive { result in
                 switch result {
                 case .success(let message):
                     switch message {
-                    case .data(let data):
-                        retValue = false
+                    case .data(_):
+                        break
                     case .string(let text):
                         if let data = text.data(using: String.Encoding.utf8) {
                             do {
                                 let tempretDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
-                                retDict = (tempretDict["d"] as? [String:Any] ?? [:])
+                                let retDict = (tempretDict["d"] as? [String:Any] ?? [:])
                                 return completion(true, retDict)
 
                             } catch let error as NSError {
@@ -338,11 +335,9 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         }
                     @unknown default:
                         print("unknown")
-                        retValue = false
                     }
                 case .failure(let error):
                     print("Error when receiving massive \(error)")
-                    retValue = false
                 }
             }
             return completion(false, nil)
@@ -350,9 +345,9 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
         func decodePayload(payload: Data) -> [String: Any] {
             do {
                 return try JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any] ?? [:]
-            } catch let error as NSError {
+            } catch {
+                return [:]
             }
-            return [:]
         }
         func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
             print("Web Socket did connect")

@@ -125,51 +125,48 @@ struct GuildView: View, Equatable {
                                     }
                                 }
                                 HStack(alignment: .top) {
-                                    if pfpShown {
-                                        VStack {
-                                            if index != data.count - 1 {
-                                                if data[index].author.username != (data[Int(index + 1)].author.username) {
-                                                    Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 33, height: 33)
-                                                        .padding(.horizontal, 5)
-                                                        .clipShape(Circle())
-                                                }
-                                            } else {
+                                    VStack {
+                                        if index != data.count - 1 {
+                                            if data[index].author.username != (data[Int(index + 1)].author.username) {
                                                 Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
                                                     .scaledToFit()
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
+                                        } else {
+                                            Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
+                                                .scaledToFit()
+                                                .frame(width: 33, height: 33)
+                                                .padding(.horizontal, 5)
+                                                .clipShape(Circle())
                                         }
-                                        VStack(alignment: .leading) {
-                                            if index != data.count - 1 {
-                                                if data[index].author.username == (data[Int(index + 1)].author.username) {
-                                                    FancyTextView(text: $data[index].content)
-                                                        .padding(.leading, 50)
-                                                } else {
-                                                    Text(data[index].author.username)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[index].content)
-                                                }
+                                    }
+                                    VStack(alignment: .leading) {
+                                        if index != data.count - 1 {
+                                            if data[index].author.username == (data[Int(index + 1)].author.username) {
+                                                FancyTextView(text: $data[index].content)
+                                                    .padding(.leading, 50)
                                             } else {
                                                 Text(data[index].author.username)
                                                     .fontWeight(.semibold)
                                                 FancyTextView(text: $data[index].content)
                                             }
+                                        } else {
+                                            Text(data[index].author.username)
+                                                .fontWeight(.semibold)
+                                            FancyTextView(text: $data[index].content)
                                         }
-                                        Spacer()
-                                        Button(action: {
-                                            DispatchQueue.main.async {
-                                                NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
-                                            }
-                                        }) {
-                                            Image(systemName: "trash")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-
                                     }
+                                    Spacer()
+                                    Button(action: {
+                                        DispatchQueue.main.async {
+                                            NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                        }
+                                    }) {
+                                        Image(systemName: "trash")
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
 
                                 }
                                 if let attachment = message.attachments {
@@ -263,7 +260,7 @@ struct GuildView: View, Equatable {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
             concurrentQueue.async {
                 let currentUIDDict = data.map { $0.id }
-                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) as? GatewayDeletedMessage {
+                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) {
                     if let message = gatewayMessage.d {
                         data.remove(at: (currentUIDDict).firstIndex(of: message.id) ?? 0)
                     }

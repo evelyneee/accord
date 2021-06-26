@@ -60,8 +60,8 @@ extension Color {
 
 
 func resize(image: NSImage, w: Int, h: Int) -> NSImage {
-    var destSize = NSMakeSize(CGFloat(w), CGFloat(h))
-    var newImage = NSImage(size: destSize)
+    let destSize = NSMakeSize(CGFloat(w), CGFloat(h))
+    let newImage = NSImage(size: destSize)
     newImage.lockFocus()
     image.draw(in: NSMakeRect(0, 0, destSize.width, destSize.height), from: NSMakeRect(0, 0, image.size.width, image.size.height), operation: NSCompositingOperation.sourceOver, fraction: CGFloat(1))
     newImage.unlockFocus()

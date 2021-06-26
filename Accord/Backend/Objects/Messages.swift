@@ -8,15 +8,6 @@
 import Foundation
 import SwiftUI
 
-final class PrivateMessages {
-    static var shared = PrivateMessages()
-    func reorderPMs(array: [[String:Any]]) -> [[String:Any]] {
-        print(array[0])
-        print("PMS")
-        return []
-    }
-}
-
 struct ImageWithURL: View {
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
