@@ -214,7 +214,7 @@ struct GuildView: View, Equatable {
             VStack(alignment: .leading) {
                 ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
                     .padding(15)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                     .cornerRadius(15)
             }
             .padding()
@@ -238,7 +238,7 @@ struct GuildView: View, Equatable {
                 }
 
             }
-        }
+        } /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
             concurrentQueue.async {
                 sending = false
@@ -273,6 +273,8 @@ struct GuildView: View, Equatable {
     }
 }
 
+// Hide the TextField Focus Ring on Big Sur
+
 extension NSTextField {
     open override var focusRingType: NSFocusRingType {
         get { .none }
@@ -281,11 +283,7 @@ extension NSTextField {
 }
 
 struct ChatControls: View {
-    @Binding var chatTextFieldContents: String {
-        didSet {
-            print(chatTextFieldContents)
-        }
-    }
+    @Binding var chatTextFieldContents: String 
     @State var textFieldContents: String = ""
     @Binding var data: [Message]
     @State var pfps: [String : NSImage] = [:]

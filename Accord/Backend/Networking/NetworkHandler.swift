@@ -8,7 +8,7 @@
 
 import Foundation
 
-let debug = true
+let debug = false
 
 final class NetworkHandling {
     static var shared = NetworkHandling()
@@ -45,28 +45,25 @@ final class NetworkHandling {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-        var returnArray: [[String:Any]] = []
                 
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
-                if let data = data {
-                    do {
-                        returnArray = try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] ?? [[String:Any]]()
-                        return completion(true, returnArray)
-                    } catch {
-                        print("error at serializing: \(error.localizedDescription)")
-                        return
-                    }
-                } else {
-                    returnArray = [["Code":statusCode]]
-                }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.url as Any)
                 }
+                if let data = data {
+                    do {
+                        return completion(true, try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] ?? [[String:Any]]())
+                    } catch {
+                        print("error at serializing: \(error.localizedDescription)")
+                        return
+                    }
+                }
+
             }
             else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
@@ -108,7 +105,6 @@ final class NetworkHandling {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-        // ends here
         
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
@@ -116,7 +112,6 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if let data = data {
                     return completion(true, data)
-                } else {
                 }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
@@ -146,9 +141,7 @@ final class NetworkHandling {
         ]
         
         request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
-        
-        // ends here
-        
+                
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
                 // Success

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		32291D3A25F565B300881B5F /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* Messages.swift */; };
-		3278609F2590222B00EBEF23 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278609E2590222B00EBEF23 /* HomeView.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
 		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
@@ -27,7 +26,6 @@
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
-		A8CD4CA2267D206E00E2C4F1 /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 /* End PBXBuildFile section */
 
@@ -46,7 +44,6 @@
 
 /* Begin PBXFileReference section */
 		32291D3925F565B300881B5F /* Messages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
-		3278609E2590222B00EBEF23 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32AA719525EBB17B00550BA5 /* Structures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
 		32ADD5882583997F008D1715 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -61,7 +58,7 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
-		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/discordlib/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
+		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/UI/Chat/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
@@ -69,9 +66,8 @@
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
-		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/discordlib/Keychain.swift; sourceTree = SOURCE_ROOT; };
-		A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MessagesView.swift; path = Accord/UI/MessagesView.swift; sourceTree = SOURCE_ROOT; };
-		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/ServerListView.swift; sourceTree = SOURCE_ROOT; };
+		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = "Accord/Backend/Keychain and Caching/Keychain.swift"; sourceTree = SOURCE_ROOT; };
+		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = "Accord/UI/Core Views/ServerListView.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,18 +81,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		32AA719225EAEEF700550BA5 /* discordlib */ = {
+		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
-				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
-				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
-				32AA719525EBB17B00550BA5 /* Structures.swift */,
-				32291D3925F565B300881B5F /* Messages.swift */,
-				A85D3FDD2677A681002327AD /* Images.swift */,
-				A874C049267658A8006E7F52 /* Guilds.swift */,
-				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
+				A82521392687ABD40073F640 /* Objects */,
+				A82521382687ABC50073F640 /* Networking */,
+				A825213A2687ABE40073F640 /* Keychain and Caching */,
 			);
-			path = discordlib;
+			path = Backend;
 			sourceTree = "<group>";
 		};
 		32ADD5872583997E008D1715 /* Frameworks */ = {
@@ -131,15 +123,70 @@
 				32F4C95A256D7D3300343BB3 /* AccordApp.swift */,
 				32F4C95C256D7D3300343BB3 /* ContentView.swift */,
 				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */,
 				A864BE5926866FDF00B244BE /* Nitroless */,
-				32AA719225EAEEF700550BA5 /* discordlib */,
+				32AA719225EAEEF700550BA5 /* Backend */,
 				A8FA9A9B266823B4003710A4 /* UI */,
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
-				32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		A82521352687AB250073F640 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				A85C02B7268158D300A40114 /* FancyTextView.swift */,
+				32F3742A25733D8000ADB7E6 /* GuildView.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		A82521362687AB390073F640 /* Core Views */ = {
+			isa = PBXGroup;
+			children = (
+				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
+				A88A3D14265B22C4003AE08F /* LoginView.swift */,
+			);
+			path = "Core Views";
+			sourceTree = "<group>";
+		};
+		A82521372687AB780073F640 /* Profile Tab */ = {
+			isa = PBXGroup;
+			children = (
+				32F37415257302C300ADB7E6 /* ProfileView.swift */,
+				32DC838A257FA71B004520AE /* SettingsView.swift */,
+			);
+			path = "Profile Tab";
+			sourceTree = "<group>";
+		};
+		A82521382687ABC50073F640 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
+				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		A82521392687ABD40073F640 /* Objects */ = {
+			isa = PBXGroup;
+			children = (
+				32AA719525EBB17B00550BA5 /* Structures.swift */,
+				32291D3925F565B300881B5F /* Messages.swift */,
+				A85D3FDD2677A681002327AD /* Images.swift */,
+				A874C049267658A8006E7F52 /* Guilds.swift */,
+			);
+			path = Objects;
+			sourceTree = "<group>";
+		};
+		A825213A2687ABE40073F640 /* Keychain and Caching */ = {
+			isa = PBXGroup;
+			children = (
+				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
+			);
+			path = "Keychain and Caching";
 			sourceTree = "<group>";
 		};
 		A864BE5926866FDF00B244BE /* Nitroless */ = {
@@ -162,14 +209,9 @@
 		A8FA9A9B266823B4003710A4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				A85C02B7268158D300A40114 /* FancyTextView.swift */,
-				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
-				32F3742A25733D8000ADB7E6 /* GuildView.swift */,
-				A8CD4CA1267D206E00E2C4F1 /* MessagesView.swift */,
-				A88A3D14265B22C4003AE08F /* LoginView.swift */,
-				3278609E2590222B00EBEF23 /* HomeView.swift */,
-				32F37415257302C300ADB7E6 /* ProfileView.swift */,
-				32DC838A257FA71B004520AE /* SettingsView.swift */,
+				A82521372687AB780073F640 /* Profile Tab */,
+				A82521362687AB390073F640 /* Core Views */,
+				A82521352687AB250073F640 /* Chat */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -256,8 +298,6 @@
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
-				A8CD4CA2267D206E00E2C4F1 /* MessagesView.swift in Sources */,
-				3278609F2590222B00EBEF23 /* HomeView.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
