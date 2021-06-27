@@ -29,10 +29,7 @@ struct CoolButtonStyle: ButtonStyle {
 
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
-struct GuildView: View, Equatable {
-    static func == (lhs: GuildView, rhs: GuildView) -> Bool {
-        return lhs.data == rhs.data
-    }
+struct GuildView: View {
     
     @Binding var clubID: String
     @Binding var channelID: String
@@ -54,59 +51,41 @@ struct GuildView: View, Equatable {
                     Spacer().frame(height: 75)
                     if (sending) && chatTextFieldContents != "" {
                         if let temp = chatTextFieldContents {
-                            HStack {
-                                if pfpShown {
-                                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                        .frame(maxWidth: 33, maxHeight: 33)
-                                        .scaledToFit()
-                                        .padding(.horizontal, 5)
-                                        .clipShape(Circle())
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            if let author = "\(username)" {
-                                                Text(author)
-                                                    .fontWeight(.semibold)
-                                            }
-                                        }
-                                        Text(temp)
-                                    }
-                                } else {
-                                    HStack {
-                                        Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                            .frame(maxWidth: 15, maxHeight: 15)
-                                            .scaledToFit()
-                                            .padding(.horizontal, 5)
-                                            .clipShape(Circle())
-                                        HStack {
-                                            if let author = "\(username)" {
-                                                Text(author)
-                                                    .fontWeight(.bold)
-
-                                            }
-                                        }
-
-                                        Text(temp)
-                                    }
+                            HStack(alignment: .top) {
+                                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                    .scaledToFit()
+                                    .frame(width: 33, height: 33)
+                                    .padding(.horizontal, 5)
+                                    .clipShape(Circle())
+                                VStack(alignment: .leading) {
+                                    Text(username)
+                                        .fontWeight(.semibold)
+                                    Text(temp)
                                 }
                                 Spacer()
-                                
+                                Button(action: {
+                                }) {
+                                    Image(systemName: "trash")
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
                             .opacity(0.75)
+
                         }
                     }
-                    ForEach(0..<data.count, id: \.self) { index in
-                        if let message = data[index] {
+                    ForEach(data, id: \.self) { message in
+                        if let index = data.firstIndex(of: message) {
                             VStack(alignment: .leading) {
-                                if let reply = data[index].referenced_message {
+                                if let reply = message.referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
                                         Text("replying to ")
                                             .foregroundColor(.secondary)
                                         Attachment("https://cdn.discordapp.com/avatars/\(reply.author.id )/\(reply.author.avatar ?? "").png?size=80")
                                             .frame(width: 15, height: 15)
-                                            .padding(.horizontal, 5)
                                             .clipShape(Circle())
                                         HStack {
                                             if let author = reply.author.username {
@@ -127,15 +106,15 @@ struct GuildView: View, Equatable {
                                 HStack(alignment: .top) {
                                     VStack {
                                         if index != data.count - 1 {
-                                            if data[index].author.username != (data[Int(index + 1)].author.username) {
-                                                Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
+                                            if message.author.username != (data[Int(index + 1)].author.username) {
+                                                Image(nsImage: pfpArray[message.author.id] ?? NSImage()).resizable()
                                                     .scaledToFit()
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
                                         } else {
-                                            Image(nsImage: pfpArray[data[index].author.id] ?? NSImage()).resizable()
+                                            Image(nsImage: pfpArray[message.author.id] ?? NSImage()).resizable()
                                                 .scaledToFit()
                                                 .frame(width: 33, height: 33)
                                                 .padding(.horizontal, 5)
@@ -144,16 +123,16 @@ struct GuildView: View, Equatable {
                                     }
                                     VStack(alignment: .leading) {
                                         if index != data.count - 1 {
-                                            if data[index].author.username == (data[Int(index + 1)].author.username) {
+                                            if message.author.username == (data[Int(index + 1)].author.username) {
                                                 FancyTextView(text: $data[index].content)
                                                     .padding(.leading, 50)
                                             } else {
-                                                Text(data[index].author.username)
+                                                Text(message.author.username)
                                                     .fontWeight(.semibold)
                                                 FancyTextView(text: $data[index].content)
                                             }
                                         } else {
-                                            Text(data[index].author.username)
+                                            Text(message.author.username)
                                                 .fontWeight(.semibold)
                                             FancyTextView(text: $data[index].content)
                                         }
@@ -161,7 +140,7 @@ struct GuildView: View, Equatable {
                                     Spacer()
                                     Button(action: {
                                         DispatchQueue.main.async {
-                                            NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                            NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(message.id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                         }
                                     }) {
                                         Image(systemName: "trash")
@@ -190,6 +169,7 @@ struct GuildView: View, Equatable {
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
+
                     }
                     if data.isEmpty == false {
                         HStack {
@@ -222,13 +202,18 @@ struct GuildView: View, Equatable {
                 concurrentQueue.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
                         if success == true {
-                            self.data = try! JSONDecoder().decode([Message].self, from: data!)
-                            ImageHandling.shared.getProfilePictures(array: self.data) { success, pfps in
-                                if success {
-                                    pfpArray = pfps
-                                    print(pfpArray)
+                            do {
+                                self.data = try JSONDecoder().decode([Message].self, from: data!)
+                                ImageHandling.shared.getProfilePictures(array: self.data) { success, pfps in
+                                    if success {
+                                        pfpArray = pfps
+                                        print(pfpArray)
+                                    }
                                 }
+                            } catch {
+                                
                             }
+
                         }
                     }
 
@@ -266,6 +251,11 @@ struct GuildView: View, Equatable {
                     }
                 }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
+            typing.append(notif.userInfo!["id"] as! String)
+            print(notif.userInfo)
+            print("TYPING")
         }
     }
 }

@@ -229,7 +229,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                 case "GUILD_MEMBER_ADD": break
                                 case "GUILD_MEMBER_REMOVE": break
                                 case "GUILD_MEMBER_UPDATE": break
-                                case "GUILD_MEMBERS_CHUNK": break // In response to opcode 8 (club request members)
+                                case "GUILD_MEMBERS_CHUNK": break
                                 case "GUILD_ROLE_CREATE": break
                                 case "GUILD_ROLE_UPDATE": break
                                 case "GUILD_ROLE_DELETE": break
@@ -280,6 +280,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                                 // MARK: Presence Event Handlers
                                 case "PRESENCE_UPDATE": break
                                 case "TYPING_START":
+                                    print("notified", "TYPING")
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {

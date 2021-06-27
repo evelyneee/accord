@@ -23,7 +23,7 @@ enum statusIndicators {
     case idle
 }
 
-struct User: Decodable, Identifiable {
+struct User: Decodable, Identifiable, Hashable {
     var id: String
     var username: String
     var discriminator: String
@@ -52,11 +52,7 @@ struct DeletedMessage: Decodable, Identifiable {
     var id: String
 }
 
-struct Message: Decodable, Identifiable, Equatable {
-    static func == (lhs: Message, rhs: Message) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
+struct Message: Decodable, Identifiable, Hashable {
     var author: User
     var channel_id: String
     var guild_id: String?
@@ -74,7 +70,7 @@ struct Message: Decodable, Identifiable, Equatable {
     var referenced_message: Reply?
 }
 
-struct Reply: Decodable, Identifiable {
+struct Reply: Decodable, Identifiable, Hashable {
     var author: User
     var channel_id: String
     var guild_id: String?
@@ -91,7 +87,7 @@ struct Reply: Decodable, Identifiable {
     var attachments: [AttachedFiles]
 }
 
-struct AttachedFiles: Decodable, Identifiable {
+struct AttachedFiles: Decodable, Identifiable, Hashable {
     var id: String
     var filename: String
     var content_type: String?

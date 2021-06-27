@@ -60,6 +60,7 @@ struct ContentView: View {
                          socketOut = array ?? [:]
                          clubs = array?["guilds"] as? [[String:Any]] ?? []
                          DispatchQueue.main.async {
+                             RoleManager.shared.arrangeRoleColors(clubs: clubs)
                              NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }
                      }

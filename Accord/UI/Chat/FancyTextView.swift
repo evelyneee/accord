@@ -27,7 +27,6 @@ struct FancyTextView: View {
                     }
                 }
                 .onChange(of: text) { newValue in
-                    print("SET")
                     textArray = []
                     textArray = getTextArray(splitText: text.components(separatedBy: " "))
                 }

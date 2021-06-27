@@ -5,7 +5,6 @@
 //  Created by evelyn on 2021-02-27.
 //
 
-
 import Foundation
 
 let debug = false
@@ -60,7 +59,7 @@ final class NetworkHandling {
                         return completion(true, try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] ?? [[String:Any]]())
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
-                        return
+                        return completion(false, nil)
                     }
                 }
 
