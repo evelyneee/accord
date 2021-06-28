@@ -48,7 +48,7 @@ struct GuildView: View {
             Spacer()
             List {
                 LazyVStack {
-                    Spacer().frame(height: 75)
+                    Spacer().frame(height: 93)
                     if (sending) && chatTextFieldContents != "" {
                         if let temp = chatTextFieldContents {
                             HStack(alignment: .top) {
@@ -189,15 +189,41 @@ struct GuildView: View {
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
-                    .padding(15)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                    .cornerRadius(15)
+                if !(typing.isEmpty) {
+                    if #available(macOS 12.0, *) {
+                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                            .padding(4)
+                            .background(.thickMaterial) // blurred background
+                            .cornerRadius(5)
+                    } else {
+                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
+                    }
+                }
+                if #available(macOS 12.0, *) {
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                        .padding(15)
+                        .background(.thickMaterial) // blurred background
+                        .cornerRadius(15)
+                } else {
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                        .padding(15)
+                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                        .cornerRadius(15)
+                }
             }
             .padding()
 
         }
         .onAppear {
+            WebSocketHandler.shared.subscribe(clubID, channelID)
+            WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) {success, users in
+                if success {
+                    print(users)
+                }
+            }
             if token != "" {
                 concurrentQueue.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
@@ -211,14 +237,10 @@ struct GuildView: View {
                                     }
                                 }
                             } catch {
-                                
                             }
-
                         }
                     }
-
                 }
-
             }
         } /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
@@ -253,9 +275,14 @@ struct GuildView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
-            typing.append(notif.userInfo!["id"] as! String)
             print(notif.userInfo)
             print("TYPING")
+            if !(typing.contains((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")) {
+                typing.append((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")
+                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                    typing.remove(at: typing.firstIndex(of: (notif.userInfo ?? [:])["user_id"] as? String ?? "") ?? 0)
+                })
+            }
         }
     }
 }

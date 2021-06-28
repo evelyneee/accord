@@ -16,7 +16,11 @@ struct FancyTextView: View {
             if let splitText = text.components(separatedBy: " ") {
                 HStack(spacing: 0) {
                     if textArray.isEmpty {
-                        Text(text)
+                        if #available(macOS 12.0, *) {
+                            Text(try! AttributedString(markdown: text))
+                        } else {
+                            Text(text)
+                        }
                     } else {
                         textArray.reduce(Text(""), +)
                     }

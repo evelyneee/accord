@@ -39,6 +39,19 @@ struct User: Decodable, Identifiable, Hashable {
     var public_flags: Int?
 }
 
+struct GuildMemberChunkResponse: Decodable {
+    var d: GuildMemberChunk
+}
+
+struct GuildMemberChunk: Decodable {
+    var guild_id: String?
+    var members: [GuildMember]?
+}
+
+struct GuildMember: Decodable {
+    var user: User
+}
+
 struct GatewayMessage: Decodable {    
     var d: Message?
 }

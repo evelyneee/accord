@@ -26,29 +26,33 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
     var seq: Int? = nil
     var heartbeat_interval: Int? = nil
     var requests: Int = 0
-    class func newMessage(opcode: Int, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
-        let webSocketDelegate = WebSocketHandler()
-        let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
-        let url = URL(string: "wss://gateway.discord.gg")!
-        let webSocketTask = session.webSocketTask(with: url)
-        webSocketTask.maximumMessageSize = 999999999
+    let session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+    let ClassWebSocketTask: URLSessionWebSocketTask!
+
+    init(url: URL? = URL(string: "wss://gateway.discord.gg")) {
+        ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg")!)
+        ClassWebSocketTask.resume()
+        ClassWebSocketTask.maximumMessageSize = 999999999
+        print("Socket initiated")
+    }
+    
+    class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
+        let webSocketTask = WebSocketHandler.shared.ClassWebSocketTask!
         let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared.requests = 0
-            receive()
         }
+        
         if !(WebSocketHandler.shared.connected) {
-            webSocketTask.resume()
             initialReception()
             authenticate()
-            ping()
             receive()
             WebSocketHandler.shared.connected = true
         } else {
             print("already connected, continuing")
         }
+        
         func reconnect() {
             sleep(10)
-            webSocketTask.resume()
             let packet: [String:AnyEncodable] = [
                 "op":AnyEncodable(Int(6)),
                 "d":AnyEncodable([
@@ -65,8 +69,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         fatalError("[Accord] Aborting to prevent ratelimit or ban. ")
                     }
                 }
-            }
-
+            } 
         }
         func authenticate() {
             let packet: [String:AnyEncodable] = [
@@ -76,8 +79,8 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                     "capabilities":AnyEncodable(125),
                     "compress":AnyEncodable(false),
                     "properties": AnyEncodable([
-                        "os":AnyEncodable("Windows"),
-                        "browser":AnyEncodable("Firefox"),
+                        "os":AnyEncodable("macOS"),
+                        "browser":AnyEncodable("Discord Client"),
                         "device":AnyEncodable("")
                     ] as [String:AnyEncodable])
                 ] as [String:AnyEncodable])
@@ -134,6 +137,8 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 }
             }
         }
+
+
         func ping() {
             if WebSocketHandler.shared.requests >= 49 {
                 return
@@ -341,7 +346,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                     print("Error when receiving massive \(error)")
                 }
             }
-            return completion(false, nil)
         }
         func decodePayload(payload: Data) -> [String: Any] {
             do {
@@ -350,17 +354,87 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 return [:]
             }
         }
-        func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-            print("Web Socket did connect")
-        }
-                
-        func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-            print("Web Socket did disconnect")
-        }
         
     }
+    func subscribe(_ guild: String, _ channel: String) {
+        let packet: [String:Any] = [
+            "op":14,
+            "d": [
+                "guild_id":guild,
+                "typing":true,
+                "activities":true,
+                "threads":false,
+                "members":[],
+                "channels": [
+                    channel: [["0", "99"]]
+                ],
+            ]
+        ]
+        print(guild, channel)
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ClassWebSocketTask.send(.string(jsonString)) { error in
+                print("SENT \(jsonString)")
+                if let error = error {
+                    print("WebSocket sending error: \(error)")
+                }
+            }
+        }
+    }
+    func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [User]) -> Void)) {
+        let packet: [String:Any] = [
+            "op":8,
+            "d": [
+                "limit":0,
+                "user_ids":ids,
+                "guild_id":guild
+            ]
+        ]
+        var ret: [User] = []
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ClassWebSocketTask.send(.string(jsonString)) { error in
+                print("SENT \(jsonString)")
+                self.ClassWebSocketTask.receive { result in
+                    switch result {
+                    case .success(let message):
+                        switch message {
+                        case .data(_):
+                            break
+                        case .string(let text):
+                            print(text)
+                            if let data = text.data(using: String.Encoding.utf8) {
+                                let chunk = try! JSONDecoder().decode(GuildMemberChunkResponse.self, from: data)
+                                return completion(true, chunk.d.members!.compactMap { $0.user })
+                            }
+                        @unknown default:
+                            print("unknown")
+                            break
+                        }
+                    case .failure(let error):
+                        print("Error when init receiving \(error)")
+                    }
+                }
+                if let error = error {
+                    print("WebSocket sending error: \(error)")
+                }
+            }
+        }
+        return completion(false, [])
+    }
+
 }
 
 protocol URLQueryParameterStringConvertible {
     var queryParameters: String {get}
+}
+
+class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
+    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        print("Web Socket did connect")
+    }
+            
+    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+        print("Web Socket did disconnect")
+    }
 }

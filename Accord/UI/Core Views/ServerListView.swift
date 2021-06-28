@@ -162,7 +162,7 @@ struct ServerListView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
-            let clubIDs = clubs.map { $0["id"] } as! [String]
+            /*let clubIDs = clubs.map { $0["id"] } as! [String]
             var clubTemp: [[String:Any]] = []
             for (index, item) in guildOrder.enumerated() {
                 if let first = clubIDs.firstIndex(of: item) {
@@ -170,7 +170,7 @@ struct ServerListView: View {
                     clubTemp.insert(element, at: index)
                 }
             }
-            clubs = clubTemp
+            clubs = clubTemp*/
             selectedServer = 0
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
