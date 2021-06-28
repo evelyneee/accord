@@ -50,6 +50,7 @@ struct GuildMemberChunk: Decodable {
 
 struct GuildMember: Decodable {
     var user: User
+    var nick: String?
 }
 
 struct GatewayMessage: Decodable {    

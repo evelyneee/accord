@@ -404,8 +404,9 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                         case .string(let text):
                             print(text)
                             if let data = text.data(using: String.Encoding.utf8) {
-                                let chunk = try! JSONDecoder().decode(GuildMemberChunkResponse.self, from: data)
-                                return completion(true, chunk.d.members!.compactMap { $0.user })
+                                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: data) else { break }
+                                guard let users = chunk.d.members else { return }
+                                return completion(true, users.compactMap { $0.user })
                             }
                         @unknown default:
                             print("unknown")

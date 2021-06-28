@@ -190,17 +190,41 @@ struct GuildView: View {
             .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
                 if !(typing.isEmpty) {
-                    if #available(macOS 12.0, *) {
-                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                            .padding(4)
-                            .background(.thickMaterial) // blurred background
-                            .cornerRadius(5)
+                    if typing.count == 1 {
+                        if var typingText = "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." {
+                            VStack {
+                                if #available(macOS 12.0, *) {
+                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                                        .padding(4)
+                                        .background(.thickMaterial) // blurred background
+                                        .cornerRadius(5)
+                                } else {
+                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                                        .padding(4)
+                                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                        .cornerRadius(5)
+                                }
+                            }
+                        }
                     } else {
-                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
+                        if var typingText = "\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing..." {
+                            VStack {
+                                if #available(macOS 12.0, *) {
+                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                        .padding(4)
+                                        .background(.thickMaterial) // blurred background
+                                        .cornerRadius(5)
+                                } else {
+                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                        .padding(4)
+                                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                        .cornerRadius(5)
+                                }
+                            }
+                        }
                     }
+
+
                 }
                 if #available(macOS 12.0, *) {
                     ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
@@ -218,8 +242,10 @@ struct GuildView: View {
 
         }
         .onAppear {
-            WebSocketHandler.shared.subscribe(clubID, channelID)
-            WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) {success, users in
+            if clubID != "@me" {
+                WebSocketHandler.shared.subscribe(clubID, channelID)
+            }
+            WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) { success, users in
                 if success {
                     print(users)
                 }
@@ -277,12 +303,32 @@ struct GuildView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
             print(notif.userInfo)
             print("TYPING")
-            if !(typing.contains((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")) {
-                typing.append((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")
-                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                    typing.remove(at: typing.firstIndex(of: (notif.userInfo ?? [:])["user_id"] as? String ?? "") ?? 0)
-                })
-            }
+            concurrentQueue.async {
+                if !(typing.contains((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")) {
+                    print("BAD OK")
+                    if let member = ((notif.userInfo as? [AnyHashable:Any] ?? [:])["member"]) as? [String:Any] {
+                        print("OK")
+                        let memberData = try! JSONSerialization.data(withJSONObject: member, options: .prettyPrinted)
+                        let memberDecodable = try! JSONDecoder().decode(GuildMember.self, from: memberData)
+                        if let nick = memberDecodable.nick {
+                            typing.append(nick)
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                                typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
+                            })
+                        } else {
+                            typing.append(memberDecodable.user.username)
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                                typing.remove(at: typing.firstIndex(of: memberDecodable.user.username) ?? 0)
+                            })
+                        }
+                    } else {
+                        typing.append((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                            typing.remove(at: typing.firstIndex(of: (notif.userInfo ?? [:])["user_id"] as? String ?? "") ?? 0)
+                        })
+                    }
+                }
+            } 
         }
     }
 }
