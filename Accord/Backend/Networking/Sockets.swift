@@ -19,17 +19,19 @@ struct AnyEncodable : Encodable {
     }
 }
 
-final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
+final class WebSocketHandler {
     static var shared = WebSocketHandler()
     var connected = false
     var session_id: String? = nil
     var seq: Int? = nil
     var heartbeat_interval: Int? = nil
     var requests: Int = 0
-    let session = URLSession(configuration: .default, delegate: nil, delegateQueue: nil)
+    let webSocketDelegate = WebSocketDelegate()
+    let session: URLSession
     let ClassWebSocketTask: URLSessionWebSocketTask!
 
     init(url: URL? = URL(string: "wss://gateway.discord.gg")) {
+        session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: nil)
         ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg")!)
         ClassWebSocketTask.resume()
         ClassWebSocketTask.maximumMessageSize = 999999999
@@ -66,7 +68,6 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 webSocketTask.send(.string(jsonString)) { error in
                     if let error = error {
                         print("WebSocket sending error: \(error)")
-                        fatalError("[Accord] Aborting to prevent ratelimit or ban. ")
                     }
                 }
             } 
@@ -368,7 +369,7 @@ final class WebSocketHandler: NSObject, URLSessionWebSocketDelegate {
                 "channels": [
                     channel: [["0", "99"]]
                 ],
-            ]
+            ],
         ]
         print(guild, channel)
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
@@ -437,5 +438,37 @@ class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
             
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("Web Socket did disconnect")
+        let reason = String(decoding: reason ?? Data(), as: UTF8.self)
+        print("Error from Discord: \(reason)")
+        switch closeCode {
+        case .invalid:
+            fatalError("Socket closed because payload was invalid")
+        case .normalClosure:
+            print("Socket closed because connection was closed")
+        case .goingAway:
+            print("Socket closed because connection was closed")
+        case .protocolError:
+            print("Socket closed because there was a protocol error")
+        case .unsupportedData:
+            print("Socket closed input/output data was unsupported")
+        case .noStatusReceived:
+            print("Socket closed no status was received")
+        case .abnormalClosure:
+            print("Socket closed, there was an abnormal closure")
+        case .invalidFramePayloadData:
+            print("Socket closed the frame data was invalid")
+        case .policyViolation:
+            print("Socket closed: Policy violation")
+        case .messageTooBig:
+            print("Socket closed because the message was too big")
+        case .mandatoryExtensionMissing:
+            print("Socket closed because an extension was missing")
+        case .internalServerError:
+            fatalError("Socket closed because there was an internal server error")
+        case .tlsHandshakeFailure:
+            print("Socket closed because the tls handshake failed")
+        @unknown default:
+            print("Socket closed for unknown reason")
+        }
     }
 }

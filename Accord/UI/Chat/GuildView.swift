@@ -243,13 +243,15 @@ struct GuildView: View {
         }
         .onAppear {
             if clubID != "@me" {
+                print(clubID)
                 WebSocketHandler.shared.subscribe(clubID, channelID)
-            }
-            WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) { success, users in
-                if success {
-                    print(users)
+                WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) { success, users in
+                    if success {
+                        print(users)
+                    }
                 }
             }
+
             if token != "" {
                 concurrentQueue.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in

@@ -170,7 +170,7 @@ struct ServerListView: View {
                     clubTemp.insert(element, at: index)
                 }
             }
-            clubs = clubTemp
+            clubs = clubTemp 
             selectedServer = 0
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
