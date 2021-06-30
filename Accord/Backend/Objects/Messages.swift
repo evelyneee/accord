@@ -45,13 +45,23 @@ struct Attachment: View {
 class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()
-    
+    let cache = URLCache.shared
+
     init(imageURL: String) {
-        net.requestData(url: imageURL, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
-            if success {
-                DispatchQueue.main.async {
-                    self.imageData = data ?? Data()
-                }
+        if let url = URL(string: imageURL) {
+            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+            if let data = cache.cachedResponse(for: request)?.data {
+                self.imageData = data 
+            } else {
+                URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                    if let data = data, let response = response {
+                    let cachedData = CachedURLResponse(response: response, data: data)
+                        self?.cache.storeCachedResponse(cachedData, for: request)
+                        DispatchQueue.main.async {
+                            self?.imageData = data 
+                        }
+                    }
+                }).resume()
             }
         }
     }

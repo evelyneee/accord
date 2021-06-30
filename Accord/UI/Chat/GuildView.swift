@@ -30,7 +30,6 @@ struct CoolButtonStyle: ButtonStyle {
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
 struct GuildView: View {
-    
     @Binding var clubID: String
     @Binding var channelID: String
     @Binding var channelName: String
@@ -41,9 +40,10 @@ struct GuildView: View {
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
 //    actual view begins here
-    let timer = Timer.publish(every: 5, on: .current, in: .common).autoconnect()
+    @ObservedObject var model: ViewModel = ViewModel()
     var body: some View {
 //      chat view
+        
         ZStack(alignment: .bottom) {
             Spacer()
             List {
@@ -76,19 +76,19 @@ struct GuildView: View {
 
                         }
                     }
-                    ForEach(data, id: \.self) { message in
-                        if let index = data.firstIndex(of: message) {
+                    ForEach(0..<data.count, id: \.self) { index in
+                        if true {
                             VStack(alignment: .leading) {
-                                if let reply = message.referenced_message {
+                                if let reply = data[index].referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
                                         Text("replying to ")
                                             .foregroundColor(.secondary)
-                                        Attachment("https://cdn.discordapp.com/avatars/\(reply.author.id )/\(reply.author.avatar ?? "").png?size=80")
+                                        Attachment("https://cdn.discordapp.com/avatars/\(reply.author?.id ?? "")/\(reply.author?.avatar ?? "").png?size=80")
                                             .frame(width: 15, height: 15)
                                             .clipShape(Circle())
                                         HStack {
-                                            if let author = reply.author.username {
+                                            if let author = reply.author?.username {
                                                 Text(author)
                                                     .fontWeight(.bold)
                                             }
@@ -106,15 +106,15 @@ struct GuildView: View {
                                 HStack(alignment: .top) {
                                     VStack {
                                         if index != data.count - 1 {
-                                            if message.author.username != (data[Int(index + 1)].author.username) {
-                                                Image(nsImage: pfpArray[message.author.id] ?? NSImage()).resizable()
+                                            if data[index].author?.username ?? "" != (data[Int(index + 1)].author?.username ?? "") {
+                                                Image(nsImage: pfpArray[data[index].author?.id ?? ""] ?? NSImage()).resizable()
                                                     .scaledToFit()
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
                                         } else {
-                                            Image(nsImage: pfpArray[message.author.id] ?? NSImage()).resizable()
+                                            Image(nsImage: pfpArray[data[index].author?.id ?? ""] ?? NSImage()).resizable()
                                                 .scaledToFit()
                                                 .frame(width: 33, height: 33)
                                                 .padding(.horizontal, 5)
@@ -122,25 +122,27 @@ struct GuildView: View {
                                         }
                                     }
                                     VStack(alignment: .leading) {
-                                        if index != data.count - 1 {
-                                            if message.author.username == (data[Int(index + 1)].author.username) {
-                                                FancyTextView(text: $data[index].content)
-                                                    .padding(.leading, 50)
+                                        if let author = data[index].author?.username as? String {
+                                            if index != (data.count - 1) {
+                                                if author == (data[Int(index + 1)].author?.username as? String ?? "") {
+                                                    FancyTextView(text: $data[index].content)
+                                                        .padding(.leading, 50)
+                                                } else {
+                                                    Text(author)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[index].content)
+                                                }
                                             } else {
-                                                Text(message.author.username)
+                                                Text(author)
                                                     .fontWeight(.semibold)
                                                 FancyTextView(text: $data[index].content)
                                             }
-                                        } else {
-                                            Text(message.author.username)
-                                                .fontWeight(.semibold)
-                                            FancyTextView(text: $data[index].content)
                                         }
                                     }
                                     Spacer()
                                     Button(action: {
                                         DispatchQueue.main.async {
-                                            NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(message.id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
+                                            NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                         }
                                     }) {
                                         Image(systemName: "trash")
@@ -148,12 +150,12 @@ struct GuildView: View {
                                     .buttonStyle(BorderlessButtonStyle())
 
                                 }
-                                if let attachment = message.attachments {
+                                if let attachment = data[index].attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
                                             ForEach(0..<attachment.count, id: \.self) { index in
-                                                if String((attachment[index].content_type ?? "").prefix(6)) == "image/" {
-                                                    Attachment(attachment[index].url)
+                                                if String((attachment[index]?.content_type ?? "").prefix(6)) == "image/" {
+                                                    Attachment(attachment[index]?.url ?? "")
                                                         .cornerRadius(5)
                                                 }
 
@@ -171,6 +173,7 @@ struct GuildView: View {
                         }
 
                     }
+
                     if data.isEmpty == false {
                         HStack {
                             VStack(alignment: .leading) {
@@ -191,21 +194,20 @@ struct GuildView: View {
             VStack(alignment: .leading) {
                 if !(typing.isEmpty) {
                     if typing.count == 1 {
-                        if var typingText = "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." {
-                            VStack {
-                                if #available(macOS 12.0, *) {
-                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                                        .padding(4)
-                                        .background(.thickMaterial) // blurred background
-                                        .cornerRadius(5)
-                                } else {
-                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                                        .padding(4)
-                                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                        .cornerRadius(5)
-                                }
+                        VStack {
+                            if #available(macOS 12.0, *) {
+                                Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                                    .padding(4)
+                                    .background(.thickMaterial) // blurred background
+                                    .cornerRadius(5)
+                            } else {
+                                Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                                    .padding(4)
+                                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                    .cornerRadius(5)
                             }
                         }
+
                     } else {
                         if var typingText = "\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing..." {
                             VStack {
@@ -227,12 +229,12 @@ struct GuildView: View {
 
                 }
                 if #available(macOS 12.0, *) {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
                         .padding(15)
                         .background(.thickMaterial) // blurred background
                         .cornerRadius(15)
                 } else {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, data: $data, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
                         .padding(15)
                         .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                         .cornerRadius(15)
@@ -242,23 +244,18 @@ struct GuildView: View {
 
         }
         .onAppear {
+            data = []
             if clubID != "@me" {
-                print(clubID)
-                WebSocketHandler.shared.subscribe(clubID, channelID)
-                WebSocketHandler.shared.getMembers(ids: ["700707501493977198"], guild: clubID) { success, users in
-                    if success {
-                        print(users)
-                    }
-                }
+                WebSocketHandler.shared?.subscribe(clubID, channelID)
             }
 
             if token != "" {
                 concurrentQueue.async {
-                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, data in
+                    NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                         if success == true {
                             do {
-                                self.data = try JSONDecoder().decode([Message].self, from: data!)
-                                ImageHandling.shared.getProfilePictures(array: self.data) { success, pfps in
+                                self.data = try JSONDecoder().decode([Message].self, from: rawData!)
+                                ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
                                     if success {
                                         pfpArray = pfps
                                         print(pfpArray)
@@ -270,7 +267,9 @@ struct GuildView: View {
                     }
                 }
             }
-        } /* Run everything into a separate queue so it doesn't clog the main thread */
+        }
+
+        /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
             concurrentQueue.async {
                 sending = false
@@ -303,12 +302,10 @@ struct GuildView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
-            print(notif.userInfo)
-            print("TYPING")
             concurrentQueue.async {
-                if !(typing.contains((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")) {
+                if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
                     print("BAD OK")
-                    if let member = ((notif.userInfo as? [AnyHashable:Any] ?? [:])["member"]) as? [String:Any] {
+                    if let member = ((notif.userInfo ?? [:])["member"]) as? [String:Any] {
                         print("OK")
                         let memberData = try! JSONSerialization.data(withJSONObject: member, options: .prettyPrinted)
                         let memberDecodable = try! JSONDecoder().decode(GuildMember.self, from: memberData)
@@ -318,13 +315,13 @@ struct GuildView: View {
                                 typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
                             })
                         } else {
-                            typing.append(memberDecodable.user.username)
+                            typing.append(memberDecodable.user?.username ?? "")
                             DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                typing.remove(at: typing.firstIndex(of: memberDecodable.user.username) ?? 0)
+                                typing.remove(at: typing.firstIndex(of: memberDecodable.user?.username ?? "") ?? 0)
                             })
                         }
                     } else {
-                        typing.append((notif.userInfo as? [AnyHashable:Any] ?? [:])["user_id"] as? String ?? "")
+                        typing.append((notif.userInfo ?? [:])["user_id"] as? String ?? "")
                         DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
                             typing.remove(at: typing.firstIndex(of: (notif.userInfo ?? [:])["user_id"] as? String ?? "") ?? 0)
                         })
@@ -347,7 +344,6 @@ extension NSTextField {
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String 
     @State var textFieldContents: String = ""
-    @Binding var data: [Message]
     @State var pfps: [String : NSImage] = [:]
     @Binding var channelID: String
     @Binding var chatText: String
@@ -364,11 +360,14 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onCommit: {
                     chatTextFieldContents = textFieldContents
-                    let temp = textFieldContents
+                    var temp = textFieldContents
                     textFieldContents = ""
                     sending = true
                     DispatchQueue.main.async {
-                        NetworkHandling.shared.request(url: "\(rootURL)/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
+                        if temp == "/shrug" {
+                            temp = #"¯\_(ツ)_/¯"#
+                        }
+                        NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
                             switch success {
                             case true:
                                 break
@@ -428,4 +427,10 @@ func showWindow(clubID: String, channelID: String, channelName: String) {
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
     windowRef.makeKeyAndOrderFront(nil)
+}
+
+class ViewModel: ObservableObject {
+    deinit {
+        print("ViewModel deinit ")
+    }
 }

@@ -10,7 +10,7 @@ import Foundation
 let debug = false
 
 final class NetworkHandling {
-    static var shared = NetworkHandling()
+    static var shared: NetworkHandling? = NetworkHandling()
     func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
@@ -45,7 +45,7 @@ final class NetworkHandling {
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
                 
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
@@ -101,11 +101,11 @@ final class NetworkHandling {
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
         if type == .POST && json == true {
-            request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
         
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
@@ -125,21 +125,32 @@ final class NetworkHandling {
         task.resume()
         return completion(false, nil)
     }
-    func login(username: String, password: String, _ completion: @escaping ((_ success: Bool, _ rettoken: String?) -> Void)) {
+    func login(username: String, password: String, captcha: String = "", _ completion: @escaping ((_ success: Bool, _ rettoken: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
-        var request = URLRequest(url: (URL(string: "https://discordapp.com/api/v8/auth/login") ?? URL(string: "#")!))
+        var request = URLRequest(url: (URL(string: "https://discord.com/api/v9/auth/login") ?? URL(string: "#")!))
         
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-
+        if captcha == "" {
+            let bodyObject: [String : Any] = [
+                "email": username,
+                "password": password,
+                "undelete": false
+            ]
+            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+        } else {
+            let bodyObject: [String : Any] = [
+                "email": username,
+                "password": password,
+                "captcha_key": captcha,
+                "undelete": false
+            ]
+            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+        }
         // Form URL-Encoded Body
-        let bodyObject: [String : Any] = [
-            "email": username,
-            "password": password
-        ]
+
         
-        request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
                 
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
@@ -147,10 +158,7 @@ final class NetworkHandling {
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if data != Data() {
                     do {
-                        let returnArray = try JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
-                        if let checktoken = returnArray["token"] as? String {
-                            return completion(true, checktoken)
-                        }
+                        return completion(true, data)
                     } catch {
                         print("error at serializing: \(error.localizedDescription)")
                     }

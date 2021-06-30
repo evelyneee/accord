@@ -20,7 +20,7 @@ struct ContentView: View {
             LoginView()
                 .onDisappear(perform: {
                     DispatchQueue.main.async {
-                        NetworkHandling.shared.request(url: "\(rootURL)/users/@me/guilds", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                        NetworkHandling.shared?.request(url: "\(rootURL)/users/@me/guilds", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                             if success == true {
                                 clubs = array ?? []
                             }
@@ -58,7 +58,7 @@ struct ContentView: View {
                          socketOut = array ?? [:]
                          clubs = array?["guilds"] as? [[String:Any]] ?? []
                          DispatchQueue.main.async {
-                             RoleManager.shared.arrangeRoleColors(clubs: clubs)
+                             RoleManager.shared?.arrangeRoleColors(clubs: clubs)
                              NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }
                      }

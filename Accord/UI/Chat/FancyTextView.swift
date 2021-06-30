@@ -46,9 +46,17 @@ public func getTextArray(splitText: [String]) -> [Text] {
         if (text.prefix(2) == "<:" || text.prefix(2) == #"\<:"# || text.prefix(2) == "<a:") && text.suffix(1) == ">" {
             for id in text.capturedGroups(withRegex: #"<:\w+:(\d+)>"#) {
                 if let _ = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
-                    textArray.append(Text("\(Image(nsImage: resize(image: NSImage(data: sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())!, w: 15, h: 15)))"))
+                    if splitText.count == 1 {
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                    } else {
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                    }
                 }
             }
+        } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
+            textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+        } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
+            textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
         } else {
             if #available(macOS 12.0, *) {
                 textArray.append(Text(try! AttributedString(markdown: "\(text)")))

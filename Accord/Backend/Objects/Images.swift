@@ -9,11 +9,11 @@ import Foundation
 import AppKit
 
 final class ImageHandling {
-    let cache = URLCache.shared
-    static var shared = ImageHandling()
+    static var shared: ImageHandling? = ImageHandling()
+    let cache: URLCache? = URLCache.shared
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
         let pfpURLs = array.map {
-            "https://cdn.discordapp.com/avatars/\($0.author.id )/\($0.author.avatar ?? "").png?size=80"
+            "https://cdn.discordapp.com/avatars/\($0.author?.id ?? "")/\($0.author?.avatar ?? "").png?size=128"
         }
         print(pfpURLs)
         var singleURLs: [String] = []
@@ -36,20 +36,23 @@ final class ImageHandling {
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 20.0)
-                if let data = cache.cachedResponse(for: request)?.data {
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                    URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
-                            self.cache.storeCachedResponse(cachedData, for: request)
+                            self?.cache?.storeCachedResponse(cachedData, for: request)
                             returnArray[String(userid)] = NSImage(data: data)
                         }
                     }).resume()
                 }
             }
         }
+    }
+    deinit {
+        print("IF THIS NEVER SHOWS, FUCK")
     }
 }
 
