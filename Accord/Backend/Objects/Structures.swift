@@ -23,7 +23,7 @@ enum statusIndicators {
     case idle
 }
 
-class User: Decodable, Identifiable {
+struct User: Decodable, Identifiable {
     var id: String
     var username: String
     var discriminator: String
@@ -39,34 +39,34 @@ class User: Decodable, Identifiable {
     var public_flags: Int?
 }
 
-class GuildMemberChunkResponse: Decodable {
+struct GuildMemberChunkResponse: Decodable {
     var d: GuildMemberChunk?
 }
 
-class GuildMemberChunk: Decodable {
+struct GuildMemberChunk: Decodable {
     var guild_id: String?
     var members: [GuildMember?]
 }
 
-class GuildMember: Decodable {
+struct GuildMember: Decodable {
     var user: User?
     var nick: String?
 }
 
-class GatewayMessage: Decodable {
+struct GatewayMessage: Decodable {
     var d: Message?
 }
 
 
-class GatewayDeletedMessage: Decodable {
+struct GatewayDeletedMessage: Decodable {
     var d: DeletedMessage?
 }
 
-class DeletedMessage: Decodable {
+struct DeletedMessage: Decodable {
     var id: String
 }
 
-class Message: Decodable {
+struct Message: Decodable {
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -82,12 +82,9 @@ class Message: Decodable {
     var type: Int
     var attachments: [AttachedFiles?]
     var referenced_message: Reply?
-    deinit {
-        print(content, "deallocated")
-    }
 }
 
-class Reply: Decodable {
+struct Reply: Decodable {
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -104,7 +101,7 @@ class Reply: Decodable {
     var attachments: [AttachedFiles?]
 }
 
-class AttachedFiles: Decodable, Identifiable {
+struct AttachedFiles: Decodable, Identifiable {
     var id: String
     var filename: String
     var content_type: String?

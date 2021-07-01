@@ -73,7 +73,7 @@ struct LoginView: View {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let ticket = returnArray["ticket"] as? String {
                                 sleep(2)
-                                net.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
                                     if success {
                                         print("log in kek")
                                         print(String(decoding: data_login!, as: UTF8.self))

@@ -14,6 +14,7 @@ struct ServerListView: View {
     @State var selectedServer: Int? = nil
     @State var privateChannels: [[String:Any]] = []
     @State var guildOrder: [String] = []
+    @State var guildIcons: [String:NSImage] = [:]
     var body: some View {
         NavigationView {
             HStack(spacing: 0, content: {
@@ -29,15 +30,14 @@ struct ServerListView: View {
                     })
                     Divider()
                     ForEach(0..<clubs.count, id: \.self) { index in
-                        ZStack {
-                            ImageWithURL("https://cdn.discordapp.com/icons/\(clubs[index]["id"] as? String ?? "")/\(clubs[index]["icon"] as? String ?? "")")
-                        }
-                        .frame(width: 45, height: 45)
-                        .clipShape(Circle())
-                        .onTapGesture(count: 1, perform: {
-                            selectedServer = index
-                            print(clubs[index]["icon"] as? String ?? "")
-                        })
+                        Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                            .frame(width: 45, height: 45)
+                            .clipShape(Circle())
+                            .scaledToFit()
+                            .onTapGesture(count: 1, perform: {
+                                selectedServer = index
+                                
+                            })
 
                     }
                     Divider()
@@ -65,7 +65,7 @@ struct ServerListView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
                             DispatchQueue.main.async {
-                                net.request(url: "https://discordapp.com/api/users/@me/channels", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                                NetworkHandling.shared?.request(url: "https://discordapp.com/api/users/@me/channels", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
                                     if success {
                                         guard array != nil else {
                                             return
@@ -161,6 +161,12 @@ struct ServerListView: View {
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
+            ImageHandling.shared?.getServerIcons(array: clubs) { success, icons in
+                if success {
+                    guildIcons = icons
+                    print(guildIcons, "ICONS")
+                }
+            }
             guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
             for i in 0..<clubs.count {
                 clubs[i]["emojis"] = nil

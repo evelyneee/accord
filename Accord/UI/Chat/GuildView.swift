@@ -8,11 +8,9 @@
 
 import SwiftUI
 import AppKit
+import AVKit
 
 // styles and structs and vars
-
-let messages = NetworkHandling()
-let net = NetworkHandling()
 
 struct CoolButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
@@ -40,7 +38,6 @@ struct GuildView: View {
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
 //    actual view begins here
-    @ObservedObject var model: ViewModel = ViewModel()
     var body: some View {
 //      chat view
         
@@ -84,7 +81,8 @@ struct GuildView: View {
                                         Spacer().frame(width: 50)
                                         Text("replying to ")
                                             .foregroundColor(.secondary)
-                                        Attachment("https://cdn.discordapp.com/avatars/\(reply.author?.id ?? "")/\(reply.author?.avatar ?? "").png?size=80")
+                                        Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
+                                            .scaledToFit()
                                             .frame(width: 15, height: 15)
                                             .clipShape(Circle())
                                         HStack {
@@ -141,6 +139,46 @@ struct GuildView: View {
                                     }
                                     Spacer()
                                     Button(action: {
+                                        if collapsed.contains(index) {
+                                            collapsed.remove(at: collapsed.firstIndex(of: index)!)
+                                        } else {
+                                            collapsed.append(index)
+                                        }
+                                    }) {
+                                        Image(systemName: ((collapsed.contains(index)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                    if (collapsed.contains(index)) {
+                                        Button(action: {
+                                            DispatchQueue.main.async {
+                                                NSPasteboard.general.clearContents()
+                                                NSPasteboard.general.setString(data[index].content, forType: .string)
+                                                if collapsed.contains(index) {
+                                                    collapsed.remove(at: collapsed.firstIndex(of: index)!)
+                                                } else {
+                                                    collapsed.append(index)
+                                                }
+                                            }
+                                        }) {
+                                            Text("Copy")
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                        Button(action: {
+                                            DispatchQueue.main.async {
+                                                NSPasteboard.general.clearContents()
+                                                NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\(data[index].id)", forType: .string)
+                                                if collapsed.contains(index) {
+                                                    collapsed.remove(at: collapsed.firstIndex(of: index)!)
+                                                } else {
+                                                    collapsed.append(index)
+                                                }
+                                            }
+                                        }) {
+                                            Text("Copy Message Link")
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                    }
+                                    Button(action: {
                                         DispatchQueue.main.async {
                                             NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
                                         }
@@ -153,19 +191,12 @@ struct GuildView: View {
                                 if let attachment = data[index].attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
-                                            ForEach(0..<attachment.count, id: \.self) { index in
-                                                if String((attachment[index]?.content_type ?? "").prefix(6)) == "image/" {
-                                                    Attachment(attachment[index]?.url ?? "")
-                                                        .cornerRadius(5)
-                                                }
-
-                                            }
+                                            AttachmentView(media: $data[index].attachments)
                                             Spacer()
                                         }
                                         .padding(.horizontal, 45)
                                         .frame(maxWidth: 400, maxHeight: 300)
                                     }
-
                                 }
                             }
                             .rotationEffect(.radians(.pi))
@@ -254,7 +285,7 @@ struct GuildView: View {
                     NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                         if success == true {
                             do {
-                                self.data = try JSONDecoder().decode([Message].self, from: rawData!)
+                                data = try JSONDecoder().decode([Message].self, from: rawData!)
                                 ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
                                     if success {
                                         pfpArray = pfps
@@ -271,6 +302,7 @@ struct GuildView: View {
 
         /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
+            print("\(channelName) is being updated")
             concurrentQueue.async {
                 sending = false
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
@@ -281,6 +313,7 @@ struct GuildView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
+            print("\(channelName) is being updated")
             concurrentQueue.async {
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
@@ -292,6 +325,7 @@ struct GuildView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
+            print("\(channelName) is being updated")
             concurrentQueue.async {
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) {
@@ -429,8 +463,3 @@ func showWindow(clubID: String, channelID: String, channelName: String) {
     windowRef.makeKeyAndOrderFront(nil)
 }
 
-class ViewModel: ObservableObject {
-    deinit {
-        print("ViewModel deinit ")
-    }
-}

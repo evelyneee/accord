@@ -37,11 +37,11 @@ struct ContentView: View {
                          clubs = (array?["guilds"] ?? []) as! [[String : Any]]
                      }
                 }
-                net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+                NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                     if (completion) {
                         let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
                         user_id = profile["id"] as? String ?? ""
-                        net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                        NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                         username = profile["username"] as? String ?? ""
                         discriminator = profile["discriminator"] as? String ?? ""
                     }
@@ -64,11 +64,11 @@ struct ContentView: View {
                      }
                 }
                 DispatchQueue.main.async {
-                    net.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+                    NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
                             let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
                             user_id = profile["id"] as? String ?? ""
-                            net.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                            NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                             username = profile["username"] as? String ?? ""
                             discriminator = profile["discriminator"] as? String ?? ""
                         }

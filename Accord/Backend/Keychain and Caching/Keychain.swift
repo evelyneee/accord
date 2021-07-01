@@ -40,6 +40,9 @@ final class KeychainManager {
         let swiftString: String = cfStr as String
         return swiftString
     }
+    deinit {
+        print("login done")
+    }
 }
 
 extension Data {

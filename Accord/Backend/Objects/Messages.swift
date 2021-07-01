@@ -8,6 +8,9 @@
 import Foundation
 import SwiftUI
 
+let cache: URLCache? = URLCache.shared
+let imageQueue = DispatchQueue(label: "ImageQueue")
+
 struct ImageWithURL: View {
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
@@ -17,7 +20,7 @@ struct ImageWithURL: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
+        Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
               .resizable()
               .clipped()
     }
@@ -32,11 +35,11 @@ struct Attachment: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: self.imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
+        Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
               .resizable()
               .scaledToFit()
               .onDisappear {
-                  self.imageLoader.imageData = Data()
+                  imageLoader.imageData = Data()
               }
     }
 
@@ -45,32 +48,40 @@ struct Attachment: View {
 class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()
-    let cache = URLCache.shared
 
     init(imageURL: String) {
-        if let url = URL(string: imageURL) {
-            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-            if let data = cache.cachedResponse(for: request)?.data {
-                self.imageData = data 
-            } else {
-                URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
-                    if let data = data, let response = response {
-                    let cachedData = CachedURLResponse(response: response, data: data)
-                        self?.cache.storeCachedResponse(cachedData, for: request)
-                        DispatchQueue.main.async {
-                            self?.imageData = data 
-                        }
+        imageQueue.async {
+            if let url = URL(string: imageURL) {
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
+                    DispatchQueue.main.async {
+                        self.imageData = data
                     }
-                }).resume()
+                } else {
+                    URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                        if let data = data, let response = response {
+                        let cachedData = CachedURLResponse(response: response, data: data)
+                            cache?.storeCachedResponse(cachedData, for: request)
+                            DispatchQueue.main.async {
+                                self?.imageData = data
+                            }
+                        }
+                    }).resume()
+                }
             }
         }
+
+    }
+    
+    deinit {
+        print("unloaded image")
     }
 }
 
 
 func getImage(url: String) -> Data {
     var ret: Data = Data()
-    net.requestData(url: url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+    NetworkHandling.shared?.requestData(url: url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
         if (success) {
             ret = data ?? Data()
         }
