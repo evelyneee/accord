@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+public var roleColors: [String:Int] = [:]
+
 struct ServerListView: View {
     @Binding var clubs: [[String:Any]]
     @Binding var full: [String:Any]
@@ -180,24 +182,36 @@ struct ServerListView: View {
                     print(guildIcons, "ICONS")
                 }
             }
-            guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
-            for i in 0..<clubs.count {
-                clubs[i]["emojis"] = nil
-                clubs[i]["members"] = nil
-                clubs[i]["threads"] = nil
-            }
-            full = [:]
-            let clubIDs = clubs.map { $0["id"] } as! [String]
-            var clubTemp: [[String:Any]] = []
-            for item in guildOrder {
-                if let first = clubIDs.firstIndex(of: item) {
-                    let element = clubs[first]
-                    clubTemp.append(element)
+            if sortByMostRecent {
+                let mostRecentClubs: [String:String] = [:]
+                for club in clubs {
+                    if let channels = club["channels"] as? [[String:Any]] {
+                        let lastMessageID = (club["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]
+                    }
                 }
+                clubs.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
+            } else {
+                guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
+                for i in 0..<clubs.count {
+                    clubs[i]["emojis"] = nil
+                    clubs[i]["members"] = nil
+                    clubs[i]["threads"] = nil
+                }
+                full = [:]
+                let clubIDs = clubs.map { $0["id"] } as! [String]
+                var clubTemp: [[String:Any]] = []
+                for item in guildOrder {
+                    if let first = clubIDs.firstIndex(of: item) {
+                        let element = clubs[first]
+                        clubTemp.append(element)
+                    }
+                }
+                clubs = clubTemp
             }
-            clubs = clubTemp 
             selectedServer = 0
             print("cleaned up")
+            roleColors = (RoleManager.shared?.arrangeRoleColors(clubs: clubs))!
+            print(roleColors)
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
             }
@@ -206,8 +220,4 @@ struct ServerListView: View {
     }
 }
 
-extension Collection where Indices.Iterator.Element == Index {
-    subscript (exist index: Index) -> Iterator.Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
+

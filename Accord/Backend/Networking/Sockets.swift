@@ -209,6 +209,7 @@ final class WebSocketHandler {
                                         print("HEARTBEAT SUCCESSFUL")
                                     }
                                 }
+                                print(payload["t"])
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
                                     let data = payload["d"] as! [String: Any]
@@ -234,7 +235,11 @@ final class WebSocketHandler {
                                 case "GUILD_MEMBER_ADD": break
                                 case "GUILD_MEMBER_REMOVE": break
                                 case "GUILD_MEMBER_UPDATE": break
-                                case "GUILD_MEMBERS_CHUNK": break
+                                case "GUILD_MEMBERS_CHUNK":
+                                    DispatchQueue.main.async {
+                                        NotificationCenter.default.post(name: Notification.Name(rawValue: "MemberChunk"), object: nil, userInfo: ["users":textData])
+                                    }
+                                    break
                                 case "GUILD_ROLE_CREATE": break
                                 case "GUILD_ROLE_UPDATE": break
                                 case "GUILD_ROLE_DELETE": break
@@ -381,7 +386,27 @@ final class WebSocketHandler {
             }
         }
     }
-    func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [User]) -> Void)) {
+    func reconnect() {
+        sleep(10)
+        let packet: [String:AnyEncodable] = [
+            "op":AnyEncodable(Int(6)),
+            "d":AnyEncodable([
+                "token":AnyEncodable(token),
+                "session_id":AnyEncodable(String(WebSocketHandler.shared?.session_id ?? "")),
+                "seq":AnyEncodable(Int(WebSocketHandler.shared?.seq ?? 0))
+            ] as [String:AnyEncodable])
+        ]
+        if let jsonData = try? JSONEncoder().encode(packet),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ClassWebSocketTask?.send(.string(jsonString)) { error in
+                if let error = error {
+                    print("WebSocket sending error: \(error)")
+                }
+                return
+            }
+        }
+    }
+    func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [GuildMember?]) -> Void)) {
         let packet: [String:Any] = [
             "op":8,
             "d": [
@@ -390,41 +415,33 @@ final class WebSocketHandler {
                 "guild_id":guild
             ]
         ]
-        DispatchQueue.main.sync { [weak self] in
-            if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
-               let jsonString: String = String(data: jsonData, encoding: .utf8) {
-                self?.ClassWebSocketTask.send(.string(jsonString)) { error in
-                    print("SENT \(jsonString)")
-                    self?.ClassWebSocketTask.receive { result in
-                        switch result {
-                        case .success(let message):
-                            switch message {
-                            case .data(_):
-                                break
-                            case .string(let text):
-                                print(text)
-                                if let data = text.data(using: String.Encoding.utf8) {
-                                    guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: data) else { break }
-                                    guard let users = chunk.d?.members else { return }
-                                    return completion(true, users.compactMap { $0?.user })
-                                }
-                            @unknown default:
-                                print("unknown")
-                                break
-                            }
-                        case .failure(let error):
-                            print("Error when init receiving \(error)")
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            self.ClassWebSocketTask.send(.string(jsonString)) { error in
+                print("SENT \(jsonString)")
+                self.ClassWebSocketTask.receive { result in
+                    switch result {
+                    case .success(let message):
+                        switch message {
+                        case .data(_):
+                            break
+                        case .string(let text):
+                            print(text, "MEMBER CHUNK")
+                            break
+                        @unknown default:
+                            print("unknown")
+                            break
                         }
+                    case .failure(let error):
+                        print("Error when init receiving \(error)")
                     }
-                    if let error = error {
-                        print("WebSocket sending error: \(error)")
-                    }
+                }
+                if let error = error {
+                    print("WebSocket sending error: \(error)")
                 }
             }
         }
-        return completion(false, [])
     }
-
 }
 
 protocol URLQueryParameterStringConvertible {

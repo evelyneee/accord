@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State var showingSettings = true
     @State public var showPFP = UserDefaults.standard.bool(forKey: "pfpShown")
+    @State public var sortByMostRecent = UserDefaults.standard.bool(forKey: "pfpShown")
     @State var usernameSettings: String = ""
     @State var pronounSettings: String = ""
     @State var referenceTitle: String = ""
@@ -47,6 +48,19 @@ struct SettingsView: View {
                     .onDisappear(perform: {
                         UserDefaults.standard.set(showPFP, forKey: "pfpShown")
                         pfpShown = UserDefaults.standard.bool(forKey: "pfpShown")
+                    })
+                    .padding()
+                    .toggleStyle(SwitchToggleStyle())
+                }
+                HStack(alignment: .top) {
+                    Text("Sort servers by recent messages")
+                        .padding()
+                    Spacer()
+                    Toggle(isOn: $sortByMostRecent) {
+                    }
+                    .onDisappear(perform: {
+                        UserDefaults.standard.set(sortByMostRecent, forKey: "sortByMostRecent")
+                        sortByMostRecent = UserDefaults.standard.bool(forKey: "sortByMostRecent")
                     })
                     .padding()
                     .toggleStyle(SwitchToggleStyle())

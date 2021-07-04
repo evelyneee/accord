@@ -37,6 +37,43 @@ extension URL {
     }
 }
 
+extension String  {
+    func conformsTo(_ pattern: String) -> Bool {
+        return NSPredicate(format:"SELF MATCHES %@", pattern).evaluate(with: self)
+    }
+}
+
+extension NSColor {
+    convenience init(hex: Int, alpha: Float) {
+        self.init(
+            calibratedRed: CGFloat((hex & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((hex & 0xFF00) >> 8) / 255.0,
+            blue: CGFloat((hex & 0xFF)) / 255.0,
+            alpha: 1.0
+        )
+    }
+    
+    convenience init(hex: String, alpha: Float) {
+        // Handle two types of literals: 0x and # prefixed
+        var cleanedString = ""
+        if hex.hasPrefix("0x") {
+            cleanedString = String(hex[hex.index(cleanedString.startIndex, offsetBy: 2)...hex.endIndex])
+        } else if hex.hasPrefix("#") {
+            cleanedString = String(hex[hex.index(cleanedString.startIndex, offsetBy: 1)...hex.endIndex])
+        }
+        
+        // Ensure it only contains valid hex characters 0
+        let validHexPattern = "[a-fA-F0-9]+"
+        if cleanedString.conformsTo(validHexPattern) {
+            var value: UInt32 = 0
+            Scanner(string: cleanedString).scanHexInt32(&value)
+            self.init(hex: Int(value), alpha: 1)
+        } else {
+            fatalError("Unable to parse color?")
+        }
+    }
+}
+
 extension View {
     func onReceiveNotifs(_ name: Notification.Name,
                    center: NotificationCenter = .default,
@@ -48,22 +85,9 @@ extension View {
     }
 }
 
-extension Color {
-    static let featuredColor = Color("FeaturedShadow")
-}
-
-extension Binding {
-    
-    /// When the `Binding`'s `wrappedValue` changes, the given closure is executed.
-    /// - Parameter closure: Chunk of code to execute whenever the value changes.
-    /// - Returns: New `Binding`.
-    func onUpdate(_ closure: @escaping () -> Void) -> Binding<Value> {
-        Binding(get: {
-            wrappedValue
-        }, set: { newValue in
-            wrappedValue = newValue
-            closure()
-        })
+public extension Collection where Indices.Iterator.Element == Index {
+    subscript (exist index: Index) -> Iterator.Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }
 

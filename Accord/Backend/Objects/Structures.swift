@@ -40,6 +40,7 @@ class User: Decodable, Identifiable {
 }
 
 class GuildMemberChunkResponse: Decodable {
+    var t: String
     var d: GuildMemberChunk?
 }
 
@@ -51,6 +52,7 @@ class GuildMemberChunk: Decodable {
 class GuildMember: Decodable {
     var user: User?
     var nick: String?
+    var roles: [String]
 }
 
 class GatewayMessage: Decodable {
@@ -68,6 +70,7 @@ class DeletedMessage: Decodable {
 
 class Message: Decodable {
     var author: User?
+    var nick: String?
     var channel_id: String
     var guild_id: String?
     var content: String

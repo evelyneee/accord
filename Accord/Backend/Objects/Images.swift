@@ -11,6 +11,7 @@ import AppKit
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
+
         let pfpURLs = array.map {
             "https://cdn.discordapp.com/avatars/\($0.author?.id ?? "")/\($0.author?.avatar ?? "").png?size=80"
         }
@@ -31,6 +32,9 @@ final class ImageHandling {
                     singleURLs.append(url)
                 }
             }
+        }
+        let _ = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { timer in
+            return completion(true, returnArray)
         }
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
@@ -97,6 +101,9 @@ final class ImageHandling {
                     singleURLs.append(url)
                 }
             }
+        }
+        let _ = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { timer in
+            return completion(true, returnArray)
         }
         print(singleURLs)
         for url in singleURLs {

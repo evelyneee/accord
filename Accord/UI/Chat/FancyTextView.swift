@@ -13,28 +13,37 @@ struct FancyTextView: View {
     @State var textArray: [Text] = []
     var body: some View {
         HStack {
-            if let splitText = text.components(separatedBy: " ") {
-                HStack(spacing: 0) {
-                    if textArray.isEmpty {
-                        if #available(macOS 12.0, *) {
-                            Text(try! AttributedString(markdown: text))
+            if text.contains("`") {
+                if #available(macOS 12.0, *) {
+                    Text(try! AttributedString(markdown: text))
+                } else {
+                    Text(text)
+                }
+            } else {
+                if let splitText = text.components(separatedBy: " ") {
+                    HStack(spacing: 0) {
+                        if textArray.isEmpty {
+                            if #available(macOS 12.0, *) {
+                                Text(try! AttributedString(markdown: text))
+                            } else {
+                                Text(text)
+                            }
                         } else {
-                            Text(text)
+                            textArray.reduce(Text(""), +)
                         }
-                    } else {
-                        textArray.reduce(Text(""), +)
                     }
-                }
-                .onAppear {
-                    DispatchQueue.main.async {
-                        textArray = getTextArray(splitText: splitText)
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            textArray = getTextArray(splitText: splitText)
 
+                        }
+                    }
+                    .onChange(of: text) { newValue in
+                        textArray = []
+                        textArray = getTextArray(splitText: text.components(separatedBy: " "))
                     }
                 }
-                .onChange(of: text) { newValue in
-                    textArray = []
-                    textArray = getTextArray(splitText: text.components(separatedBy: " "))
-                }
+
             }
         }
     }

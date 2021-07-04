@@ -5,7 +5,6 @@
 //  Created by evelyn on 2020-11-27.
 //
 
-
 import SwiftUI
 import AppKit
 import AVKit
@@ -25,6 +24,7 @@ struct CoolButtonStyle: ButtonStyle {
 
 // the messaging view concept
 
+let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
 struct GuildView: View {
     @Binding var clubID: String
@@ -36,8 +36,8 @@ struct GuildView: View {
     @State var typing: [String] = []
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
-    let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
-
+    @State var nicks: [String:String] = [:]
+    @State var roles: [String:[String]] = [:]
 //    actual view begins here
     var body: some View {
 //      chat view
@@ -87,9 +87,14 @@ struct GuildView: View {
                                             .frame(width: 15, height: 15)
                                             .clipShape(Circle())
                                         HStack {
-                                            if let author = reply.author?.username {
-                                                Text(author)
+                                            if let nick = nicks[reply.author?.id ?? ""] {
+                                                Text(nick)
                                                     .fontWeight(.bold)
+                                            } else {
+                                                if let author = reply.author?.username {
+                                                    Text(author)
+                                                        .fontWeight(.bold)
+                                                }
                                             }
                                         }
                                         if #available(macOS 12.0, *) {
@@ -127,20 +132,34 @@ struct GuildView: View {
                                                     FancyTextView(text: $data[index].content)
                                                         .padding(.leading, 50)
                                                 } else {
-                                                    Text(author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[index].content)
+                                                    if roles.isEmpty {
+                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[index].content)
+                                                    } else {
+                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                            .foregroundColor(Color(NSColor.init(hex: (roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] ?? 0), alpha: 1)))
+                                                        FancyTextView(text: $data[index].content)
+                                                    }
+
                                                 }
                                             } else {
-                                                Text(author)
-                                                    .fontWeight(.semibold)
-                                                FancyTextView(text: $data[index].content)
+                                                if roles.isEmpty {
+                                                    Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[index].content)
+                                                } else {
+                                                    Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                        .fontWeight(.semibold)
+                                                        .foregroundColor(Color(NSColor.init(hex: (roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] ?? 0), alpha: 1)))
+                                                    FancyTextView(text: $data[index].content)
+                                                }
                                             }
                                         }
                                     }
                                     Spacer()
                                 }
-
                                 if let attachment = data[index].attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
@@ -154,11 +173,8 @@ struct GuildView: View {
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
-
                         }
-
                     }
-
                     if data.isEmpty == false {
                         HStack {
                             VStack(alignment: .leading) {
@@ -198,11 +214,13 @@ struct GuildView: View {
                             VStack {
                                 if #available(macOS 12.0, *) {
                                     Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                        .lineLimit(0)
                                         .padding(4)
                                         .background(.thickMaterial) // blurred background
                                         .cornerRadius(5)
                                 } else {
                                     Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                        .lineLimit(0)
                                         .padding(4)
                                         .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                                         .cornerRadius(5)
@@ -247,11 +265,21 @@ struct GuildView: View {
                                             print(pfpArray)
                                         }
                                     }
+                                    let allUserIDs = data.map { $0.author?.id ?? "" }
+                                    WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: clubID) { success, users in
+                                        if success {
+                                            for person in users {
+                                                nicks[(person?.user?.id as? String ?? "")] = person?.nick ?? ""
+                                            }
+                                            print(nicks, "NICKS")
+                                        }
+                                    }
                                 }
                             } catch {
                             }
                         }
                     }
+
                 }
             }
         }
@@ -268,6 +296,22 @@ struct GuildView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MemberChunk"))) { notif in
+            print("\(channelName) is being updated")
+            concurrentQueue.async {
+                print("received user chunk \(notif.userInfo)")
+                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["users"] as! Data) else { return }
+                guard let users = chunk.d?.members else { return }
+                for person in users {
+                    if let nickname = person?.nick {
+                        nicks[(person?.user?.id as? String ?? "")] = nickname
+                        roles[(person?.user?.id as? String ?? "")] = person?.roles ?? []
+                    }
+                }
+                print(roleColors)
+                print(nicks, roles, "NICKS")
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
             print("\(channelName) is being updated")
             concurrentQueue.async {
@@ -277,7 +321,6 @@ struct GuildView: View {
                         data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
                     }
                 }
-
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
@@ -403,6 +446,12 @@ func showWindow(clubID: String, channelID: String, channelName: String) {
     windowRef.contentView = NSHostingView(rootView: GuildView(clubID: Binding.constant(clubID), channelID: Binding.constant(channelID), channelName: Binding.constant(channelName)))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
+    windowRef.title = "\(channelName) - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }
 
+public extension Collection where Indices.Iterator.Element == Index {
+    subscript (safe index: Index) -> Iterator.Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
