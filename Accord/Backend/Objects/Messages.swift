@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 
 let cache: URLCache? = URLCache.shared
-let imageQueue = DispatchQueue(label: "ImageQueue")
 
 struct ImageWithURL: View {
     
@@ -35,7 +34,7 @@ struct Attachment: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
+        Image(nsImage: (NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0))))
               .resizable()
               .scaledToFit()
               .onDisappear {
@@ -48,17 +47,18 @@ struct Attachment: View {
 class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()
+    let imageQueue = DispatchQueue(label: "ImageQueue")
 
     init(imageURL: String) {
-        imageQueue.async {
+        imageQueue.async { [weak self] in
             if let url = URL(string: imageURL) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
                 if let data = cache?.cachedResponse(for: request)?.data {
                     DispatchQueue.main.async {
-                        self.imageData = data
+                        self?.imageData = data
                     }
                 } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
                             cache?.storeCachedResponse(cachedData, for: request)
@@ -87,30 +87,4 @@ func getImage(url: String) -> Data {
         }
     }
     return ret
-}
-
-func sendRequest(url: String) -> Data? {
-    let session = URLSession.shared
-    var dataReceived: Data?
-    let sem = DispatchSemaphore(value: 0)
-    if let url = URL(string: url) {
-        let request = URLRequest(url: url)
-        let task = session.dataTask(with: request) { data, response, error in
-            defer { sem.signal() }
-
-            if let error = error {
-                return
-            }
-            dataReceived = data as Data?
-        }
-
-        task.resume()
-
-        // This line will wait until the semaphore has been signaled
-        // which will be once the data task has completed
-        sem.wait(timeout: DispatchTime.distantFuture)
-        return dataReceived
-    } else {
-        return Data()
-    }
 }

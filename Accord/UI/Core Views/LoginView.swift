@@ -81,6 +81,7 @@ struct LoginView: View {
                                             if let checktoken = loginReturnArray["token"] as? String {
                                                 _ = KeychainManager.save(key: "token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                                                 token = String(decoding: KeychainManager.load(key: "token") ?? Data(), as: UTF8.self)
+                                                captcha = false
                                                 self.shown.wrappedValue.dismiss()
                                             }
                                         }

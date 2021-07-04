@@ -8,12 +8,6 @@
 import Foundation
 import SwiftUI
 
-extension Button {
-    func coolButtonStyle() -> some View {
-        self.buttonStyle(CoolButtonStyle())
-    }
-}
-
 extension Dictionary {
     mutating func switchKey(fromKey: Key, toKey: Key) {
         if let entry = removeValue(forKey: fromKey) {
@@ -58,6 +52,20 @@ extension Color {
     static let featuredColor = Color("FeaturedShadow")
 }
 
+extension Binding {
+    
+    /// When the `Binding`'s `wrappedValue` changes, the given closure is executed.
+    /// - Parameter closure: Chunk of code to execute whenever the value changes.
+    /// - Returns: New `Binding`.
+    func onUpdate(_ closure: @escaping () -> Void) -> Binding<Value> {
+        Binding(get: {
+            wrappedValue
+        }, set: { newValue in
+            wrappedValue = newValue
+            closure()
+        })
+    }
+}
 
 extension NSImage {
 
@@ -181,3 +189,68 @@ func userNotificationCenter(_ center: NSUserNotificationCenter,
                                          shouldPresent notification: NSUserNotification) -> Bool {
         return true
 }
+
+// For KeychainManager
+
+extension Data {
+
+    init<T>(from value: T) {
+        var value = value
+        self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
+    }
+
+    func to<T>(type: T.Type) -> T {
+        return self.withUnsafeBytes { $0.load(as: T.self) }
+    }
+}
+
+// For regex
+
+public extension String {
+    func capturedGroups(withRegex pattern: String) -> [String] {
+        var results = [String]()
+        
+        var regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern, options: [] )
+        } catch {
+            return results
+        }
+        let matches = regex.matches(in: self, options: [], range: NSRange(location:0, length: self.count))
+
+        guard let match = matches.first else { return results }
+
+        let lastRangeIndex = match.numberOfRanges - 1
+        guard lastRangeIndex >= 1 else { return results }
+        for i in 1...lastRangeIndex {
+            let capturedGroupIndex = match.range(at: i)
+            let matchedString = (self as NSString).substring(with: capturedGroupIndex)
+            results.append(matchedString)
+        }
+
+        return results
+    }
+    
+    func slice(from: String, to: String) -> String? {
+        return (range(of: from)?.upperBound).flatMap { substringFrom in
+            (range(of: to, range: substringFrom..<endIndex)?.lowerBound).map { substringTo in
+                String(self[substringFrom..<substringTo])
+            }
+        }
+    }
+    
+    func indexInt(of char: Character) -> Int? {
+        return firstIndex(of: char)?.utf16Offset(in: self)
+    }
+}
+
+// Hide the TextField Focus Ring on Big Sur
+
+extension NSTextField {
+    open override var focusRingType: NSFocusRingType {
+        get { .none }
+        set { }
+    }
+}
+
+extension Array: Decodable where Element: Decodable {}

@@ -23,7 +23,7 @@ enum statusIndicators {
     case idle
 }
 
-struct User: Decodable, Identifiable {
+class User: Decodable, Identifiable {
     var id: String
     var username: String
     var discriminator: String
@@ -39,34 +39,34 @@ struct User: Decodable, Identifiable {
     var public_flags: Int?
 }
 
-struct GuildMemberChunkResponse: Decodable {
+class GuildMemberChunkResponse: Decodable {
     var d: GuildMemberChunk?
 }
 
-struct GuildMemberChunk: Decodable {
+class GuildMemberChunk: Decodable {
     var guild_id: String?
     var members: [GuildMember?]
 }
 
-struct GuildMember: Decodable {
+class GuildMember: Decodable {
     var user: User?
     var nick: String?
 }
 
-struct GatewayMessage: Decodable {
+class GatewayMessage: Decodable {
     var d: Message?
 }
 
 
-struct GatewayDeletedMessage: Decodable {
+class GatewayDeletedMessage: Decodable {
     var d: DeletedMessage?
 }
 
-struct DeletedMessage: Decodable {
+class DeletedMessage: Decodable {
     var id: String
 }
 
-struct Message: Decodable {
+class Message: Decodable {
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -84,7 +84,7 @@ struct Message: Decodable {
     var referenced_message: Reply?
 }
 
-struct Reply: Decodable {
+class Reply: Decodable {
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -101,7 +101,11 @@ struct Reply: Decodable {
     var attachments: [AttachedFiles?]
 }
 
-struct AttachedFiles: Decodable, Identifiable {
+class AttachedFiles: Decodable, Identifiable, Equatable {
+    static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var id: String
     var filename: String
     var content_type: String?

@@ -8,6 +8,12 @@
 import SwiftUI
 import AppKit
 
+func print(_ item: @autoclosure () -> Any, separator: String = " ", terminator: String = "\n") {
+    #if DEBUG
+    Swift.print(item(), separator: separator, terminator: terminator)
+    #endif
+}
+
 @main
 struct AccordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

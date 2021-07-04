@@ -36,6 +36,7 @@ struct ProfileView: View {
                         .frame(width: 50, height: 50)
                         .padding(.trailing, 6.0)
                 }
+
                 
 //                bio/description
                 

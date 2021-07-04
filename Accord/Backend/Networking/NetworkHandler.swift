@@ -108,15 +108,16 @@ final class NetworkHandling {
         let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
-                let statusCode = (response as! HTTPURLResponse).statusCode
-                if let data = data {
-                    return completion(true, data)
-                }
                 if debug {
+                    let statusCode = (response as! HTTPURLResponse).statusCode
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.url as Any)
                 }
+                if let data = data {
+                    return completion(true, data)
+                }
+
             }
             else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
@@ -156,19 +157,15 @@ final class NetworkHandling {
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
-                if data != Data() {
-                    do {
-                        return completion(true, data)
-                    } catch {
-                        print("error at serializing: \(error.localizedDescription)")
-                    }
-                } else {
-                }
                 if debug {
                     print("URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.httpBody as Any)
                 }
+                if data != Data() {
+                    return completion(true, data)
+                }
+
             }
             else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);

@@ -25,7 +25,6 @@ struct CoolButtonStyle: ButtonStyle {
 
 // the messaging view concept
 
-let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
 struct GuildView: View {
     @Binding var clubID: String
@@ -37,6 +36,8 @@ struct GuildView: View {
     @State var typing: [String] = []
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
+    let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
+
 //    actual view begins here
     var body: some View {
 //      chat view
@@ -138,69 +139,22 @@ struct GuildView: View {
                                         }
                                     }
                                     Spacer()
-                                    Button(action: {
-                                        if collapsed.contains(index) {
-                                            collapsed.remove(at: collapsed.firstIndex(of: index)!)
-                                        } else {
-                                            collapsed.append(index)
-                                        }
-                                    }) {
-                                        Image(systemName: ((collapsed.contains(index)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    if (collapsed.contains(index)) {
-                                        Button(action: {
-                                            DispatchQueue.main.async {
-                                                NSPasteboard.general.clearContents()
-                                                NSPasteboard.general.setString(data[index].content, forType: .string)
-                                                if collapsed.contains(index) {
-                                                    collapsed.remove(at: collapsed.firstIndex(of: index)!)
-                                                } else {
-                                                    collapsed.append(index)
-                                                }
-                                            }
-                                        }) {
-                                            Text("Copy")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        Button(action: {
-                                            DispatchQueue.main.async {
-                                                NSPasteboard.general.clearContents()
-                                                NSPasteboard.general.setString("https://discord.com/channels/\(clubID)/\(channelID)/\(data[index].id)", forType: .string)
-                                                if collapsed.contains(index) {
-                                                    collapsed.remove(at: collapsed.firstIndex(of: index)!)
-                                                } else {
-                                                    collapsed.append(index)
-                                                }
-                                            }
-                                        }) {
-                                            Text("Copy Message Link")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                    }
-                                    Button(action: {
-                                        DispatchQueue.main.async {
-                                            NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages/\(data[index].id)", token: token, json: false, type: .DELETE, bodyObject: [:]) { success, array in }
-                                        }
-                                    }) {
-                                        Image(systemName: "trash")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-
                                 }
+
                                 if let attachment = data[index].attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
                                             AttachmentView(media: $data[index].attachments)
                                             Spacer()
                                         }
-                                        .padding(.horizontal, 45)
                                         .frame(maxWidth: 400, maxHeight: 300)
+                                        .padding(.leading, 50)
                                     }
                                 }
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
+
                         }
 
                     }
@@ -286,10 +240,12 @@ struct GuildView: View {
                         if success == true {
                             do {
                                 data = try JSONDecoder().decode([Message].self, from: rawData!)
-                                ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
-                                    if success {
-                                        pfpArray = pfps
-                                        print(pfpArray)
+                                DispatchQueue.main.async {
+                                    ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
+                                        if success {
+                                            pfpArray = pfps
+                                            print(pfpArray)
+                                        }
                                     }
                                 }
                             } catch {
@@ -326,12 +282,11 @@ struct GuildView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
             print("\(channelName) is being updated")
-            concurrentQueue.async {
-                let currentUIDDict = data.map { $0.id }
-                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) {
-                    if let message = gatewayMessage.d {
-                        data.remove(at: (currentUIDDict).firstIndex(of: message.id) ?? 0)
-                    }
+            let currentUIDDict = data.map { $0.id }
+            if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) {
+                if let message = gatewayMessage.d {
+                    print(data.indices, (currentUIDDict).firstIndex(of: message.id), "DELETED")
+                    data.remove(at: (((currentUIDDict).firstIndex(of: message.id) ?? 0)))
                 }
             }
         }
@@ -363,15 +318,6 @@ struct GuildView: View {
                 }
             } 
         }
-    }
-}
-
-// Hide the TextField Focus Ring on Big Sur
-
-extension NSTextField {
-    open override var focusRingType: NSFocusRingType {
-        get { .none }
-        set { }
     }
 }
 
@@ -447,9 +393,6 @@ struct VisualEffectView: NSViewRepresentable {
         visualEffectView.blendingMode = blendingMode
     }
 }
-
-
-extension Array: Decodable where Element: Decodable {}
 
 func showWindow(clubID: String, channelID: String, channelName: String) {
     var windowRef: NSWindow

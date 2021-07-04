@@ -26,8 +26,9 @@ struct FancyTextView: View {
                     }
                 }
                 .onAppear {
-                    concurrentQueue.async {
+                    DispatchQueue.main.async {
                         textArray = getTextArray(splitText: splitText)
+
                     }
                 }
                 .onChange(of: text) { newValue in
@@ -47,16 +48,16 @@ public func getTextArray(splitText: [String]) -> [Text] {
             for id in text.capturedGroups(withRegex: #"<:\w+:(\d+)>"#) {
                 if let _ = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
                     if splitText.count == 1 {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                     } else {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                     }
                 }
             }
         } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
-            textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+            textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
         } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
-            textArray.append(Text("\(Image(nsImage: (NSImage(data: sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+            textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
         } else {
             if #available(macOS 12.0, *) {
                 textArray.append(Text(try! AttributedString(markdown: "\(text)")))
@@ -84,40 +85,3 @@ public func matches(for regex: String, in text: String) -> [String] {
     }
 }
 
-public extension String {
-    func capturedGroups(withRegex pattern: String) -> [String] {
-        var results = [String]()
-
-        var regex: NSRegularExpression
-        do {
-            regex = try NSRegularExpression(pattern: pattern, options: [] )
-        } catch {
-            return results
-        }
-        let matches = regex.matches(in: self, options: [], range: NSRange(location:0, length: self.count))
-
-        guard let match = matches.first else { return results }
-
-        let lastRangeIndex = match.numberOfRanges - 1
-        guard lastRangeIndex >= 1 else { return results }
-        for i in 1...lastRangeIndex {
-            let capturedGroupIndex = match.range(at: i)
-            let matchedString = (self as NSString).substring(with: capturedGroupIndex)
-            results.append(matchedString)
-        }
-
-        return results
-    }
-    
-    func slice(from: String, to: String) -> String? {
-        return (range(of: from)?.upperBound).flatMap { substringFrom in
-            (range(of: to, range: substringFrom..<endIndex)?.lowerBound).map { substringTo in
-                String(self[substringFrom..<substringTo])
-            }
-        }
-    }
-    
-    func indexInt(of char: Character) -> Int? {
-        return firstIndex(of: char)?.utf16Offset(in: self)
-    }
-}

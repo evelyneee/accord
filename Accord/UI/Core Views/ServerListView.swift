@@ -30,14 +30,27 @@ struct ServerListView: View {
                     })
                     Divider()
                     ForEach(0..<clubs.count, id: \.self) { index in
-                        Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
-                            .frame(width: 45, height: 45)
-                            .clipShape(Circle())
-                            .scaledToFit()
-                            .onTapGesture(count: 1, perform: {
-                                selectedServer = index
-                                
-                            })
+                        if (selectedServer ?? 0) == index {
+                            Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                                .frame(width: 45, height: 45)
+                                .cornerRadius(15)
+                                .scaledToFit()
+                                .onTapGesture(count: 1, perform: {
+                                    withAnimation {
+                                        selectedServer = index
+                                    }
+                                })
+                        } else {
+                            Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                                .frame(width: 45, height: 45)
+                                .cornerRadius(23.5)
+                                .scaledToFit()
+                                .onTapGesture(count: 1, perform: {
+                                    withAnimation {
+                                        selectedServer = index
+                                    }
+                                })
+                        }
 
                     }
                     Divider()
@@ -176,11 +189,10 @@ struct ServerListView: View {
             full = [:]
             let clubIDs = clubs.map { $0["id"] } as! [String]
             var clubTemp: [[String:Any]] = []
-            for (index, item) in guildOrder.enumerated() {
+            for item in guildOrder {
                 if let first = clubIDs.firstIndex(of: item) {
                     let element = clubs[first]
-                    print(element)
-                    clubTemp.insert(element, at: index)
+                    clubTemp.append(element)
                 }
             }
             clubs = clubTemp 
@@ -194,3 +206,8 @@ struct ServerListView: View {
     }
 }
 
+extension Collection where Indices.Iterator.Element == Index {
+    subscript (exist index: Index) -> Iterator.Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}

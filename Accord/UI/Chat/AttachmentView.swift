@@ -7,21 +7,25 @@
 
 import SwiftUI
 import AVKit
+import Combine
 
 struct AttachmentView: View {
     @Binding var media: [AttachedFiles?]
     var body: some View {
         VStack {
             ForEach(0..<media.count, id: \.self) { index in
-                if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
-                    Attachment((media[index]?.url)!)
-                        .cornerRadius(5)
-                } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
-                    VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
-                        .frame(width: 400, height: 300)
-                        .padding(.horizontal, 45)
-                        .cornerRadius(5)
+                VStack {
+                    if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
+                        Attachment(media[index]!.url)
+                            .cornerRadius(5)
+                    } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
+                        VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
+                            .frame(width: 400, height: 300)
+                            .padding(.horizontal, 45)
+                            .cornerRadius(5)
+                    }
                 }
+
             }
         }
     }

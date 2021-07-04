@@ -217,7 +217,6 @@ final class WebSocketHandler {
                                     WebSocketHandler.shared?.session_id = data["session_id"] as? String
                                     completion(true, data)
                                     break
-//                                    self.clubs = data["clubs"] as? [[String: Any]]
 
                                 // MARK: Channel Event Handlers
                                 case "CHANNEL_CREATE": break
@@ -391,34 +390,35 @@ final class WebSocketHandler {
                 "guild_id":guild
             ]
         ]
-        var ret: [User] = []
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            self.ClassWebSocketTask.send(.string(jsonString)) { [weak self] error in
-                print("SENT \(jsonString)")
-                self?.ClassWebSocketTask.receive { result in
-                    switch result {
-                    case .success(let message):
-                        switch message {
-                        case .data(_):
-                            break
-                        case .string(let text):
-                            print(text)
-                            if let data = text.data(using: String.Encoding.utf8) {
-                                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: data) else { break }
-                                guard let users = chunk.d?.members else { return }
-                                return completion(true, users.compactMap { $0?.user })
+        DispatchQueue.main.sync { [weak self] in
+            if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+               let jsonString: String = String(data: jsonData, encoding: .utf8) {
+                self?.ClassWebSocketTask.send(.string(jsonString)) { error in
+                    print("SENT \(jsonString)")
+                    self?.ClassWebSocketTask.receive { result in
+                        switch result {
+                        case .success(let message):
+                            switch message {
+                            case .data(_):
+                                break
+                            case .string(let text):
+                                print(text)
+                                if let data = text.data(using: String.Encoding.utf8) {
+                                    guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: data) else { break }
+                                    guard let users = chunk.d?.members else { return }
+                                    return completion(true, users.compactMap { $0?.user })
+                                }
+                            @unknown default:
+                                print("unknown")
+                                break
                             }
-                        @unknown default:
-                            print("unknown")
-                            break
+                        case .failure(let error):
+                            print("Error when init receiving \(error)")
                         }
-                    case .failure(let error):
-                        print("Error when init receiving \(error)")
                     }
-                }
-                if let error = error {
-                    print("WebSocket sending error: \(error)")
+                    if let error = error {
+                        print("WebSocket sending error: \(error)")
+                    }
                 }
             }
         }
@@ -445,8 +445,10 @@ class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
             fatalError("Socket closed because payload was invalid")
         case .normalClosure:
             print("Socket closed because connection was closed")
+            fatalError(reason)
         case .goingAway:
             print("Socket closed because connection was closed")
+            fatalError(reason)
         case .protocolError:
             print("Socket closed because there was a protocol error")
         case .unsupportedData:
