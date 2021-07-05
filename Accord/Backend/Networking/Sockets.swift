@@ -237,7 +237,7 @@ final class WebSocketHandler {
                                 case "GUILD_MEMBER_UPDATE": break
                                 case "GUILD_MEMBERS_CHUNK":
                                     DispatchQueue.main.async {
-                                        NotificationCenter.default.post(name: Notification.Name(rawValue: "MemberChunk"), object: nil, userInfo: ["users":textData])
+                                        NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["MemberChunk":textData])
                                     }
                                     break
                                 case "GUILD_ROLE_CREATE": break
@@ -258,7 +258,7 @@ final class WebSocketHandler {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "NewMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["NewMessageIn\(channelid)":textData])
                                         }
                                     }
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
@@ -270,7 +270,7 @@ final class WebSocketHandler {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "EditedMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["EditedMessageIn\(channelid)":textData])
                                         }
                                     }
                                     break
@@ -278,7 +278,7 @@ final class WebSocketHandler {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "DeletedMessageIn\(channelid)"), object: nil, userInfo: ["data":textData])
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["DeletedMessageIn\(channelid)":textData])
                                         }
                                     }
                                     break
@@ -294,7 +294,7 @@ final class WebSocketHandler {
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "TypingStartIn\(channelid)"), object: nil, userInfo: data)
+                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["TypingStartIn\(channelid)":data])
                                             print("notified", data, "TYPING")
                                         }
                                     }

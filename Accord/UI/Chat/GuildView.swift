@@ -308,81 +308,84 @@ struct GuildView: View {
         }
 
         /* Run everything into a separate queue so it doesn't clog the main thread */
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewMessageIn\(channelID)"))) { notif in
-            print("\(channelName) is being updated")
-            concurrentQueue.async {
-                sending = false
-                if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
-                    if let message = gatewayMessage.d {
-                        data.insert(message, at: 0)
-                    }
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MemberChunk"))) { notif in
-            print("\(channelName) is being updated")
-            concurrentQueue.async {
-                print("received user chunk \(notif.userInfo)")
-                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["users"] as! Data) else { return }
-                guard let users = chunk.d?.members else { return }
-                for person in users {
-                    if let nickname = person?.nick {
-                        nicks[(person?.user?.id as? String ?? "")] = nickname
-                        roles[(person?.user?.id as? String ?? "")] = person?.roles ?? []
-                    }
-                }
-                print(roleColors)
-                print(nicks, roles, "NICKS")
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("EditedMessageIn\(channelID)"))) { notif in
-            print("\(channelName) is being updated")
-            concurrentQueue.async {
-                let currentUIDDict = data.map { $0.id }
-                if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["data"] as! Data) {
-                    if let message = gatewayMessage.d {
-                        data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
-                    }
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DeletedMessageIn\(channelID)"))) { notif in
-            print("\(channelName) is being updated")
-            let currentUIDDict = data.map { $0.id }
-            if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["data"] as! Data) {
-                if let message = gatewayMessage.d {
-                    print(data.indices, (currentUIDDict).firstIndex(of: message.id), "DELETED")
-                    data.remove(at: (((currentUIDDict).firstIndex(of: message.id) ?? 0)))
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TypingStartIn\(channelID)"))) { notif in
-            concurrentQueue.async {
-                if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
-                    print("BAD OK")
-                    if let member = ((notif.userInfo ?? [:])["member"]) as? [String:Any] {
-                        print("OK")
-                        guard let memberData = try? JSONSerialization.data(withJSONObject: member, options: .prettyPrinted) else { return }
-                        guard let memberDecodable = try? JSONDecoder().decode(GuildMember.self, from: memberData) else { return }
-                        if let nick = memberDecodable.nick {
-                            typing.append(nick)
-                            DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
-                            })
-                        } else {
-                            typing.append(memberDecodable.user?.username ?? "")
-                            DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                typing.remove(at: typing.firstIndex(of: memberDecodable.user?.username ?? "") ?? 0)
-                            })
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("update"))) { notif in
+            switch ((Array((notif.userInfo as! [String:Any]).keys))[0]) as! String {
+            case "NewMessageIn\(channelID)":
+                print("\(channelName) is being updated")
+                concurrentQueue.async {
+                    sending = false
+                    if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["NewMessageIn\(channelID)"] as! Data) {
+                        if let message = gatewayMessage.d {
+                            data.insert(message, at: 0)
                         }
-                    } else {
-                        typing.append((notif.userInfo ?? [:])["user_id"] as? String ?? "")
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                            typing.remove(at: typing.firstIndex(of: (notif.userInfo ?? [:])["user_id"] as? String ?? "") ?? 0)
-                        })
                     }
                 }
-            } 
+                break
+            case "MemberChunk":
+                print("\(channelName) is being updated")
+                concurrentQueue.async {
+                    print("received user chunk \(notif.userInfo)")
+                    guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["MemberChunk"] as! Data) else { return }
+                    guard let users = chunk.d?.members else { return }
+                    for person in users {
+                        if let nickname = person?.nick {
+                            nicks[(person?.user?.id as? String ?? "")] = nickname
+                            roles[(person?.user?.id as? String ?? "")] = person?.roles ?? []
+                        }
+                    }
+                    print(roleColors)
+                    print(nicks, roles, "NICKS")
+                }
+                break
+            case "EditedMessageIn\(channelID)":
+                print("\(channelName) is being updated")
+                concurrentQueue.async {
+                    let currentUIDDict = data.map { $0.id }
+                    if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) {
+                        if let message = gatewayMessage.d {
+                            data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
+                        }
+                    }
+                }
+                break
+            case "DeletedMessageIn\(channelID)":
+                print("\(channelName) is being updated")
+                let currentUIDDict = data.map { $0.id }
+                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["DeletedMessageIn\(channelID)"] as! Data) {
+                    if let message = gatewayMessage.d {
+                        print(data.indices, (currentUIDDict).firstIndex(of: message.id), "DELETED")
+                        if let index = (currentUIDDict).firstIndex(of: message.id) {
+                            data.remove(at: index)
+                        }
+                        break
+                    }
+                }
+            case "TypingStartIn\(channelID)":
+                concurrentQueue.async {
+                    if let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] {
+                        if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
+                            print("BAD OK")
+                            print("OK")
+                            guard let memberData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted) else { return }
+                            guard let memberDecodable = try? JSONDecoder().decode(GuildMember.self, from: memberData) else { return }
+                            if let nick = memberDecodable.nick {
+                                typing.append(nick)
+                                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                                    typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
+                                })
+                            } else {
+                                typing.append(memberDecodable.user?.username ?? "")
+                                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                                    typing.remove(at: typing.firstIndex(of: memberDecodable.user?.username ?? "") ?? 0)
+                                })
+                            }
+                        }
+                    }
+                }
+                break
+            default:
+                break
+            }
         }
     }
 }
