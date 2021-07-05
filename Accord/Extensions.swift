@@ -43,8 +43,27 @@ extension String  {
     }
 }
 
+public extension NSColor {
+    static func color(from int: Int) -> NSColor? {
+        let hex = String(format: "%06X", int)
+        let r, g, b: CGFloat
+        if hex.count == 6 {
+            let scanner = Scanner(string: hex)
+            var hexNumber: UInt64 = 0
+            if scanner.scanHexInt64(&hexNumber) {
+                r = CGFloat((hexNumber & 0xFF0000) >> 16) / 255
+                g = CGFloat((hexNumber & 0xFF00) >> 8) / 255
+                b = CGFloat(hexNumber & 0xFF) / 255
+                return NSColor(calibratedRed: r, green: g, blue: b, alpha: 1)
+            }
+        }
+        return nil
+    }
+}
+
 extension NSColor {
     convenience init(hex: Int, alpha: Float) {
+        print(hex, "HEX")
         self.init(
             calibratedRed: CGFloat((hex & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((hex & 0xFF00) >> 8) / 255.0,

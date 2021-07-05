@@ -61,7 +61,7 @@ struct ProfileView: View {
             }
             .padding()
             Button(action: {
-                _ = KeychainManager.save(key: "token", data: String("").data(using: String.Encoding.utf8) ?? Data())
+                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: String("").data(using: String.Encoding.utf8) ?? Data())
             }) {
                 Text("log out")
             }
@@ -70,7 +70,7 @@ struct ProfileView: View {
             NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data
-                    profile = try! JSONSerialization.jsonObject(with: profileData ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
+                    profile = (try? JSONSerialization.jsonObject(with: profileData ?? Data(), options: []) as? [String:Any] ?? [String:Any]()) ?? [:]
                     user_id = profile["id"] as? String ?? ""
                     NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
                 }

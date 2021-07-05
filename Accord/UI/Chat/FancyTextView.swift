@@ -10,7 +10,7 @@ import SwiftUI
 
 struct FancyTextView: View {
     @Binding var text: String
-    @State var textArray: [Text] = []
+    @State var textElement: Text? = nil
     var body: some View {
         HStack {
             if text.contains("`") {
@@ -20,30 +20,25 @@ struct FancyTextView: View {
                     Text(text)
                 }
             } else {
-                if let splitText = text.components(separatedBy: " ") {
-                    HStack(spacing: 0) {
-                        if textArray.isEmpty {
-                            if #available(macOS 12.0, *) {
-                                Text(try! AttributedString(markdown: text))
-                            } else {
-                                Text(text)
-                            }
+                HStack(spacing: 0) {
+                    if let textView = textElement {
+                        textView
+                    } else {
+                        if #available(macOS 12.0, *) {
+                            Text(try! AttributedString(markdown: text))
                         } else {
-                            textArray.reduce(Text(""), +)
+                            Text(text)
                         }
-                    }
-                    .onAppear {
-                        DispatchQueue.main.async {
-                            textArray = getTextArray(splitText: splitText)
-
-                        }
-                    }
-                    .onChange(of: text) { newValue in
-                        textArray = []
-                        textArray = getTextArray(splitText: text.components(separatedBy: " "))
                     }
                 }
-
+                .onAppear {
+                    DispatchQueue.main.async {
+                        textElement = getTextArray(splitText: text.components(separatedBy: " ")).reduce(Text(""), +)
+                    }
+                }
+                .onChange(of: text) { newValue in
+                    textElement = getTextArray(splitText: text.components(separatedBy: " ")).reduce(Text(""), +)
+                }
             }
         }
     }

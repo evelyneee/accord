@@ -16,17 +16,51 @@ struct AttachmentView: View {
             ForEach(0..<media.count, id: \.self) { index in
                 VStack {
                     if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
-                        Attachment(media[index]!.url)
-                            .cornerRadius(5)
+                        HStack(alignment: .top) {
+                            Attachment(media[index]!.url)
+                                .cornerRadius(5)
+                            Button(action: {
+                                attachmentWindows(url: media[index]!.url, name: media[index]?.filename ?? "", width: media[index]?.width, height: media[index]?.height)
+                            }) {
+                                Image(systemName: "arrow.up.right.circle")
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
-                        VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
-                            .frame(width: 400, height: 300)
-                            .padding(.horizontal, 45)
-                            .cornerRadius(5)
+                        HStack(alignment: .top) {
+                            VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
+                                .frame(width: 400, height: 300)
+                                .padding(.horizontal, 45)
+                                .cornerRadius(5)
+                            Button(action: {
+                                attachmentWindows(player: AVPlayer(url: URL(string: (media[index]?.url)!)!), name: media[index]?.filename ?? "", width: media[index]?.width, height: media[index]?.height)
+                            }) {
+                                Image(systemName: "arrow.up.right.circle")
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     }
                 }
 
             }
         }
     }
+}
+
+func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String, width: Int? = nil, height: Int? = nil) {
+    var windowRef: NSWindow
+    windowRef = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: CGFloat(width ?? 0), height: CGFloat(height ?? 0)),
+        styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
+        backing: .buffered, defer: false)
+    if player != nil {
+        windowRef.contentView = NSHostingView(rootView: VideoPlayer(player: player!).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).padding(.horizontal, 45).cornerRadius(5))
+    }
+    if url != nil {
+        windowRef.contentView = NSHostingView(rootView: Attachment(url ?? "").frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).cornerRadius(5))
+    }
+    windowRef.minSize = NSSize(width: CGFloat(width ?? 0), height: CGFloat(height ?? 0))
+    windowRef.isReleasedWhenClosed = false
+    windowRef.title = name
+    windowRef.makeKeyAndOrderFront(nil)
 }

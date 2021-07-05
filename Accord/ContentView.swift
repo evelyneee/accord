@@ -31,15 +31,19 @@ struct ContentView: View {
 
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("logged_in"))) { obj in
-            DispatchQueue.main.async {
-                WebSocketHandler.newMessage(opcode: 2) { success, array in
-                     if !(array?.isEmpty ?? true) {
-                         clubs = (array?["guilds"] ?? []) as! [[String : Any]]
+            WebSocketHandler.newMessage(opcode: 2) { success, array in
+                 if !(array?.isEmpty ?? true) {
+                     socketOut = array ?? [:]
+                     clubs = array?["guilds"] as? [[String:Any]] ?? []
+                     DispatchQueue.main.async {
+                         NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                      }
-                }
+                 }
+            }
+            DispatchQueue.main.async {
                 NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                     if (completion) {
-                        let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
+                        guard let profile = try? JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]() else { return }
                         user_id = profile["id"] as? String ?? ""
                         NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                         username = profile["username"] as? String ?? ""
@@ -58,7 +62,6 @@ struct ContentView: View {
                          socketOut = array ?? [:]
                          clubs = array?["guilds"] as? [[String:Any]] ?? []
                          DispatchQueue.main.async {
-                             RoleManager.shared?.arrangeRoleColors(clubs: clubs)
                              NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }
                      }
@@ -66,7 +69,7 @@ struct ContentView: View {
                 DispatchQueue.main.async {
                     NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
-                            let profile = try! JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]()
+                            guard let profile = try? JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String:Any] ?? [String:Any]() else { return }
                             user_id = profile["id"] as? String ?? ""
                             NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                             username = profile["username"] as? String ?? ""

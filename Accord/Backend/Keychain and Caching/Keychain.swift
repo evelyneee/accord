@@ -20,7 +20,8 @@ final class KeychainManager {
             kSecClass as String       : kSecClassGenericPassword,
             kSecAttrAccount as String : key,
             kSecReturnData as String  : kCFBooleanTrue!,
-            kSecMatchLimit as String  : kSecMatchLimitOne ] as [String : Any]
+            kSecMatchLimit as String  : kSecMatchLimitOne
+        ] as [String : Any]
 
         var dataTypeRef: AnyObject? = nil
 

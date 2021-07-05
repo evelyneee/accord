@@ -16,4 +16,4 @@ public var pfpShown: Bool = UserDefaults.standard.bool(forKey: "pfpShown")
 public var sortByMostRecent: Bool = UserDefaults.standard.bool(forKey: "sortByMostRecent")
 public var username: String = ""
 public var discriminator: String = ""
-public var token: String = String(decoding: KeychainManager.load(key: "token") ?? Data(), as: UTF8.self)
+public var token: String = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)

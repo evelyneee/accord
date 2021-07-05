@@ -33,8 +33,8 @@ struct LoginView: View {
                     if success {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let checktoken = returnArray["token"] as? String {
-                                _ = KeychainManager.save(key: "token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                token = String(decoding: KeychainManager.load(key: "token") ?? Data(), as: UTF8.self)
+                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.shown.wrappedValue.dismiss()
                             } else {
                                 let captchaKey = returnArray["captcha_sitekey"]!
@@ -79,8 +79,8 @@ struct LoginView: View {
                                         print(String(decoding: data_login!, as: UTF8.self))
                                         if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
                                             if let checktoken = loginReturnArray["token"] as? String {
-                                                _ = KeychainManager.save(key: "token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                                token = String(decoding: KeychainManager.load(key: "token") ?? Data(), as: UTF8.self)
+                                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                                token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                                 captcha = false
                                                 self.shown.wrappedValue.dismiss()
                                             }

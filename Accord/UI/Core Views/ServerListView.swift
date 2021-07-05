@@ -21,15 +21,27 @@ struct ServerListView: View {
         NavigationView {
             HStack(spacing: 0, content: {
                 List {
-                    ZStack {
-                        Color.primary.colorInvert()
-                        Image(systemName: "bubble.left.fill")
+                    if (selectedServer ?? 0) == 999 {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "bubble.left.fill")
+                        }
+                        .frame(width: 45, height: 45)
+                        .cornerRadius(15)
+                        .onTapGesture(count: 1, perform: {
+                            selectedServer = 999
+                        })
+                    } else {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "bubble.left.fill")
+                        }
+                        .frame(width: 45, height: 45)
+                        .cornerRadius(23.5)
+                        .onTapGesture(count: 1, perform: {
+                            selectedServer = 999
+                        })
                     }
-                    .frame(width: 45, height: 45)
-                    .clipShape(Circle())
-                    .onTapGesture(count: 1, perform: {
-                        selectedServer = 999
-                    })
                     Divider()
                     ForEach(0..<clubs.count, id: \.self) { index in
                         if (selectedServer ?? 0) == index {

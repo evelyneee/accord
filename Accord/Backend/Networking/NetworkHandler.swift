@@ -42,7 +42,7 @@ final class NetworkHandling {
         }
         if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
         }
                 
         let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
@@ -102,7 +102,7 @@ final class NetworkHandling {
         }
         if type == .POST && json == true {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
         }
         
         let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
@@ -139,7 +139,7 @@ final class NetworkHandling {
                 "password": password,
                 "undelete": false
             ]
-            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
         } else {
             let bodyObject: [String : Any] = [
                 "email": username,
@@ -147,7 +147,7 @@ final class NetworkHandling {
                 "captcha_key": captcha,
                 "undelete": false
             ]
-            request.httpBody = try! JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
         }
         // Form URL-Encoded Body
 

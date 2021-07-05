@@ -38,6 +38,7 @@ struct GuildView: View {
     @State var pfpArray: [String:NSImage] = [:]
     @State var nicks: [String:String] = [:]
     @State var roles: [String:[String]] = [:]
+    @Environment(\.colorScheme) var colorScheme
 //    actual view begins here
     var body: some View {
 //      chat view
@@ -137,10 +138,17 @@ struct GuildView: View {
                                                             .fontWeight(.semibold)
                                                         FancyTextView(text: $data[index].content)
                                                     } else {
-                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                            .foregroundColor(Color(NSColor.init(hex: (roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] ?? 0), alpha: 1)))
-                                                        FancyTextView(text: $data[index].content)
+                                                        if let roleColor = roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
+                                                            Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[index].content)
+                                                        } else {
+                                                            Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[index].content)
+                                                        }
+
                                                     }
 
                                                 }
@@ -150,10 +158,16 @@ struct GuildView: View {
                                                         .fontWeight(.semibold)
                                                     FancyTextView(text: $data[index].content)
                                                 } else {
-                                                    Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                        .foregroundColor(Color(NSColor.init(hex: (roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] ?? 0), alpha: 1)))
-                                                    FancyTextView(text: $data[index].content)
+                                                    if let roleColor = roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
+                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[index].content)
+                                                    } else {
+                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[index].content)
+                                                    }
                                                 }
                                             }
                                         }
@@ -195,7 +209,7 @@ struct GuildView: View {
             VStack(alignment: .leading) {
                 if !(typing.isEmpty) {
                     if typing.count == 1 {
-                        VStack {
+                        if channelID != "@me" {
                             if #available(macOS 12.0, *) {
                                 Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
                                     .padding(4)
@@ -207,25 +221,32 @@ struct GuildView: View {
                                     .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                                     .cornerRadius(5)
                             }
-                        }
-
-                    } else {
-                        if var typingText = "\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing..." {
-                            VStack {
-                                if #available(macOS 12.0, *) {
-                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                                        .lineLimit(0)
-                                        .padding(4)
-                                        .background(.thickMaterial) // blurred background
-                                        .cornerRadius(5)
-                                } else {
-                                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                                        .lineLimit(0)
-                                        .padding(4)
-                                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                        .cornerRadius(5)
-                                }
+                        } else {
+                            if #available(macOS 12.0, *) {
+                                Text("\(channelName) is typing...")
+                                    .padding(4)
+                                    .background(.thickMaterial) // blurred background
+                                    .cornerRadius(5)
+                            } else {
+                                Text("\(channelName) is typing...")
+                                    .padding(4)
+                                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                    .cornerRadius(5)
                             }
+                        }
+                    } else {
+                        if #available(macOS 12.0, *) {
+                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                .lineLimit(0)
+                                .padding(4)
+                                .background(.thickMaterial) // blurred background
+                                .cornerRadius(5)
+                        } else {
+                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                .lineLimit(0)
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
                         }
                     }
 
@@ -265,13 +286,15 @@ struct GuildView: View {
                                             print(pfpArray)
                                         }
                                     }
-                                    let allUserIDs = data.map { $0.author?.id ?? "" }
-                                    WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: clubID) { success, users in
-                                        if success {
-                                            for person in users {
-                                                nicks[(person?.user?.id as? String ?? "")] = person?.nick ?? ""
+                                    if clubID != "@me" {
+                                        let allUserIDs = data.map { $0.author?.id ?? "" }
+                                        WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: clubID) { success, users in
+                                            if success {
+                                                for person in users {
+                                                    nicks[(person?.user?.id ?? "")] = person?.nick ?? ""
+                                                }
+                                                print(nicks, "NICKS")
                                             }
-                                            print(nicks, "NICKS")
                                         }
                                     }
                                 }
@@ -339,8 +362,8 @@ struct GuildView: View {
                     print("BAD OK")
                     if let member = ((notif.userInfo ?? [:])["member"]) as? [String:Any] {
                         print("OK")
-                        let memberData = try! JSONSerialization.data(withJSONObject: member, options: .prettyPrinted)
-                        let memberDecodable = try! JSONDecoder().decode(GuildMember.self, from: memberData)
+                        guard let memberData = try? JSONSerialization.data(withJSONObject: member, options: .prettyPrinted) else { return }
+                        guard let memberDecodable = try? JSONDecoder().decode(GuildMember.self, from: memberData) else { return }
                         if let nick = memberDecodable.nick {
                             typing.append(nick)
                             DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
