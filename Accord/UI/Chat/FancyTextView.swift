@@ -52,16 +52,68 @@ public func getTextArray(splitText: [String]) -> [Text] {
             for id in text.capturedGroups(withRegex: #"<:\w+:(\d+)>"#) {
                 if let _ = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
                     if splitText.count == 1 {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                        if let url = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
+                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                            if let data = cache?.cachedResponse(for: request)?.data {
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                            } else {
+                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                    if let data = data, let response = response {
+                                    let cachedData = CachedURLResponse(response: response, data: data)
+                                        cache?.storeCachedResponse(cachedData, for: request)
+                                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                    }
+                                }).resume()
+                            }
+                        }
                     } else {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: "https://cdn.discordapp.com/emojis/\(id).png") ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                        if let url = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
+                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                            if let data = cache?.cachedResponse(for: request)?.data {
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                            } else {
+                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                    if let data = data, let response = response {
+                                    let cachedData = CachedURLResponse(response: response, data: data)
+                                        cache?.storeCachedResponse(cachedData, for: request)
+                                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                                    }
+                                }).resume()
+                            }
+                        }
                     }
                 }
             }
         } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
-            textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+            if let url = URL(string: text) {
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
+                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                } else {
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                        if let data = data, let response = response {
+                        let cachedData = CachedURLResponse(response: response, data: data)
+                            cache?.storeCachedResponse(cachedData, for: request)
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                        }
+                    }).resume()
+                }
+            }
         } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
-            textArray.append(Text("\(Image(nsImage: (NSImage(data: ImageHandling.shared?.sendRequest(url: text) ?? Data())?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+            if let url = URL(string: text) {
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
+                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                } else {
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                        if let data = data, let response = response {
+                        let cachedData = CachedURLResponse(response: response, data: data)
+                            cache?.storeCachedResponse(cachedData, for: request)
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                        }
+                    }).resume()
+                }
+            }
         } else {
             if #available(macOS 12.0, *) {
                 textArray.append(Text(try! AttributedString(markdown: "\(text)")))

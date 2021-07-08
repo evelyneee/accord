@@ -126,6 +126,54 @@ final class NetworkHandling {
         task.resume()
         return completion(false, nil)
     }
+    func emptyRequest(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) {
+        let sessionConfig = URLSessionConfiguration.default
+        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
+        
+        // setup of the request
+        switch type {
+        case .GET:
+            request.httpMethod = "GET"
+        case .POST:
+            request.httpMethod = "POST"
+        case .PATCH:
+            request.httpMethod = "PATCH"
+        case .DELETE:
+            request.httpMethod = "DELETE"
+        case .PUT:
+            request.httpMethod = "PUT"
+        }
+        
+        // Accord specific stuff starts here
+        
+        if token != nil {
+            request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
+        }
+        if json == false && type == .POST {
+            let bodyString = (bodyObject as? [String:String] ?? [:]).queryParameters
+            request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        }
+        if type == .POST && json == true {
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+        }
+        
+        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
+            if (error == nil) {
+                if let data = data {
+                    return
+                }
+
+            }
+            else {
+                print("URL Session Task Failed: %@", error!.localizedDescription);
+            }
+        })
+        task.resume()
+    }
+
     func login(username: String, password: String, captcha: String = "", _ completion: @escaping ((_ success: Bool, _ rettoken: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)

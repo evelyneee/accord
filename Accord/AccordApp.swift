@@ -8,9 +8,17 @@
 import SwiftUI
 import AppKit
 
-func print(_ item: @autoclosure () -> Any, separator: String = " ", terminator: String = "\n") {
+public func print(_ object: Any...) {
     #if DEBUG
-    Swift.print(item(), separator: separator, terminator: terminator)
+    for item in object {
+        Swift.print(item)
+    }
+    #endif
+}
+
+public func print(_ object: Any) {
+    #if DEBUG
+    Swift.print(object)
     #endif
 }
 

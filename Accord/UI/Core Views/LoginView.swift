@@ -91,7 +91,6 @@ struct LoginView: View {
                         }
                     }
                 }
-
             }
             .keyboardShortcut(.defaultAction)
         }
@@ -134,13 +133,10 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
     }
     
     func updateNSView(_ nsView: WKWebView, context: Context) {
+    
     }
     
-    
     typealias NSViewType = WKWebView
-    
-
-
 }
 
 class ScriptHandler: NSObject, WKScriptMessageHandler {

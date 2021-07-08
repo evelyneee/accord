@@ -7,12 +7,30 @@
 
 import Foundation
 import SwiftUI
+import Cocoa
 
 extension Dictionary {
     mutating func switchKey(fromKey: Key, toKey: Key) {
         if let entry = removeValue(forKey: fromKey) {
             self[toKey] = entry
         }
+    }
+}
+
+class cuteWindow: NSWindow {
+    override func close() {
+        self.contentView?.viewWillStartLiveResize()
+        for value in 0..<100 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + CGFloat(CGFloat(value) / 500), execute: {
+                self.alphaValue = CGFloat(CGFloat(100.0 - CGFloat(value)) / 100.0)
+                self.setContentSize(NSSize(width: self.frame.width - CGFloat(CGFloat(value) / 45), height: self.frame.height - CGFloat(CGFloat(value) / 45)))
+                self.contentView?.setFrameSize(NSSize(width: self.frame.width - CGFloat(CGFloat(value) / 45), height: self.frame.height - CGFloat(CGFloat(value) / 45)))
+                if value == 99 {
+                    super.close()
+                }
+            })
+        }
+        print("done")
     }
 }
 

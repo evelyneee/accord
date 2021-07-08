@@ -26,6 +26,11 @@ struct CoolButtonStyle: ButtonStyle {
 
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 
+let net = NetworkHandling()
+private func deleteMessage(_ channelID: String, _ id: String) {
+    net.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(id)", token: token, json: false, type: .DELETE, bodyObject: [:])
+}
+
 struct GuildView: View {
     @Binding var clubID: String
     @Binding var channelID: String
@@ -40,6 +45,7 @@ struct GuildView: View {
     @State var roles: [String:[String]] = [:]
     @Environment(\.colorScheme) var colorScheme
 //    actual view begins here
+
     var body: some View {
 //      chat view
         
@@ -81,8 +87,6 @@ struct GuildView: View {
                                 if let reply = data[index].referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
-                                        Text("replying to ")
-                                            .foregroundColor(.secondary)
                                         Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
                                             .scaledToFit()
                                             .frame(width: 15, height: 15)
@@ -265,10 +269,8 @@ struct GuildView: View {
                 }
             }
             .padding()
-
         }
         .onAppear {
-            data = []
             if clubID != "@me" {
                 WebSocketHandler.shared?.subscribe(clubID, channelID)
             }
@@ -293,7 +295,6 @@ struct GuildView: View {
                                                 for person in users {
                                                     nicks[(person?.user?.id ?? "")] = person?.nick ?? ""
                                                 }
-                                                print(nicks, "NICKS")
                                             }
                                         }
                                     }
@@ -302,7 +303,6 @@ struct GuildView: View {
                             }
                         }
                     }
-
                 }
             }
         }
@@ -311,7 +311,6 @@ struct GuildView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("update"))) { notif in
             switch ((Array((notif.userInfo as! [String:Any]).keys))[0]) as! String {
             case "NewMessageIn\(channelID)":
-                print("\(channelName) is being updated")
                 concurrentQueue.async {
                     sending = false
                     if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["NewMessageIn\(channelID)"] as! Data) {
@@ -322,9 +321,7 @@ struct GuildView: View {
                 }
                 break
             case "MemberChunk":
-                print("\(channelName) is being updated")
                 concurrentQueue.async {
-                    print("received user chunk \(notif.userInfo)")
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["MemberChunk"] as! Data) else { return }
                     guard let users = chunk.d?.members else { return }
                     for person in users {
@@ -333,8 +330,6 @@ struct GuildView: View {
                             roles[(person?.user?.id as? String ?? "")] = person?.roles ?? []
                         }
                     }
-                    print(roleColors)
-                    print(nicks, roles, "NICKS")
                 }
                 break
             case "EditedMessageIn\(channelID)":
@@ -364,8 +359,6 @@ struct GuildView: View {
                 concurrentQueue.async {
                     if let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] {
                         if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
-                            print("BAD OK")
-                            print("OK")
                             guard let memberData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted) else { return }
                             guard let memberDecodable = try? JSONDecoder().decode(GuildMember.self, from: memberData) else { return }
                             if let nick = memberDecodable.nick {
@@ -463,9 +456,91 @@ struct VisualEffectView: NSViewRepresentable {
     }
 }
 
+struct NativeButton: NSViewRepresentable {
+
+    var title: String? = ""
+    var image: NSImage? = nil
+    let action: () -> Void
+
+    init(
+        _ title: String? = "",
+        image: NSImage? = nil,
+        keyEquivalent: KeyEquivalent? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.title = title
+        self.image = image ?? NSImage()
+        self.action = action
+    }
+
+    func makeNSView(context: NSViewRepresentableContext<Self>) -> NSButton {
+        if let buttonImage = image {
+            let button = NSButton(
+                image: buttonImage, target: nil, action: nil
+            )
+            button.isBordered = false
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.setContentHuggingPriority(.defaultHigh, for: .vertical)
+            button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+            return button
+        } else {
+            let button = NSButton(title: "", target: nil, action: nil)
+            button.title = self.title ?? ""
+            button.isBordered = false
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.setContentHuggingPriority(.defaultHigh, for: .vertical)
+            button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+            return button
+        }
+
+    }
+
+    func updateNSView(_ nsView: NSButton, context: NSViewRepresentableContext<Self>) {
+        if title == nil {
+            nsView.title = title ?? ""
+        }
+
+        nsView.onAction { _ in
+            self.action()
+        }
+    }
+}
+
+private var controlActionClosureProtocolAssociatedObjectKey: UInt8 = 0
+
+protocol ControlActionClosureProtocol: NSObjectProtocol {
+    var target: AnyObject? { get set }
+    var action: Selector? { get set }
+}
+
+private final class ActionTrampoline<T>: NSObject {
+    let action: (T) -> Void
+
+    init(action: @escaping (T) -> Void) {
+        self.action = action
+    }
+
+    @objc
+    func action(sender: AnyObject) {
+        action(sender as! T)
+    }
+}
+
+extension ControlActionClosureProtocol {
+    func onAction(_ action: @escaping (Self) -> Void) {
+        let trampoline = ActionTrampoline(action: action)
+        self.target = trampoline
+        self.action = #selector(ActionTrampoline<Self>.action(sender:))
+        objc_setAssociatedObject(self, &controlActionClosureProtocolAssociatedObjectKey, trampoline, .OBJC_ASSOCIATION_RETAIN)
+    }
+}
+
+extension NSControl: ControlActionClosureProtocol {}
+
+
 func showWindow(clubID: String, channelID: String, channelName: String) {
     var windowRef: NSWindow
-    windowRef = NSWindow(
+    windowRef = cuteWindow(
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false)

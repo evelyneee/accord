@@ -19,12 +19,6 @@ struct AttachmentView: View {
                         HStack(alignment: .top) {
                             Attachment(media[index]!.url)
                                 .cornerRadius(5)
-                            Button(action: {
-                                attachmentWindows(url: media[index]!.url, name: media[index]?.filename ?? "", width: media[index]?.width, height: media[index]?.height)
-                            }) {
-                                Image(systemName: "arrow.up.right.circle")
-                            }
-                            .buttonStyle(.borderless)
                         }
                     } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
                         HStack(alignment: .top) {
@@ -32,12 +26,7 @@ struct AttachmentView: View {
                                 .frame(width: 400, height: 300)
                                 .padding(.horizontal, 45)
                                 .cornerRadius(5)
-                            Button(action: {
-                                attachmentWindows(player: AVPlayer(url: URL(string: (media[index]?.url)!)!), name: media[index]?.filename ?? "", width: media[index]?.width, height: media[index]?.height)
-                            }) {
-                                Image(systemName: "arrow.up.right.circle")
-                            }
-                            .buttonStyle(.borderless)
+
                         }
                     }
                 }
@@ -64,3 +53,4 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
     windowRef.title = name
     windowRef.makeKeyAndOrderFront(nil)
 }
+
