@@ -19,9 +19,12 @@ struct ImageWithURL: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
-              .resizable()
-              .clipped()
+        HStack {
+            Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
+                  .resizable()
+                  .clipped()
+        }
+
     }
 }
 

@@ -28,6 +28,8 @@
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
+		A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */; };
+		A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89845402698C3FD00B1C9DB /* GifManager.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
 		A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC5253268DF5AD00B7823E /* AttachmentView.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
@@ -73,6 +75,8 @@
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
+		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
+		A89845402698C3FD00B1C9DB /* GifManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifManager.swift; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = "Accord/Backend/Keychain and Caching/Keychain.swift"; sourceTree = SOURCE_ROOT; };
@@ -199,6 +203,8 @@
 		A825213A2687ABE40073F640 /* Keychain and Caching */ = {
 			isa = PBXGroup;
 			children = (
+				A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */,
+				A89845402698C3FD00B1C9DB /* GifManager.swift */,
 				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
 			);
 			path = "Keychain and Caching";
@@ -314,7 +320,9 @@
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
+				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
+				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,

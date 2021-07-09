@@ -9,16 +9,63 @@ import SwiftUI
 import AVKit
 import Combine
 
-struct AttachmentView: View {
+struct AttachmentView: View, Equatable {
+    static func == (lhs: AttachmentView, rhs: AttachmentView) -> Bool {
+        return lhs.media == rhs.media
+    }
+    
     @Binding var media: [AttachedFiles?]
+    @State var currentImage: NSImage = NSImage()
+    @State var animatedImages: [NSImage]? = []
+    @State var counterValue: Int = 0
+    @State var duration: Double = 0
+    @State var setinterval: Double = 1
+    @State var value: Int = 0
+    @State var timer: Timer?
     var body: some View {
         VStack {
             ForEach(0..<media.count, id: \.self) { index in
                 VStack {
                     if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
                         HStack(alignment: .top) {
-                            Attachment(media[index]!.url)
-                                .cornerRadius(5)
+                            if (media[index]?.content_type ?? "") == "image/gif" {
+                                if animatedImages?.count != 0 {
+                                    Image(nsImage: animatedImages?[value % (animatedImages?.count ?? 1)] ?? NSImage()).resizable()
+                                        .scaledToFit()
+                                        .frame(width: 400, height: 300)
+
+                                } else {
+                                    Text("...")
+                                        .onAppear {
+                                            DispatchQueue.main.async {
+                                                currentImage = NSImage()
+                                                NetworkHandling.shared?.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+                                                    if success,
+                                                          let data = data,
+                                                       let amyGif = Gif(data: data) {
+                                                        DispatchQueue.main.async {
+                                                            animatedImages = amyGif.animatedImages
+                                                            duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
+                                                            setinterval = Double(duration / Double(animatedImages?.count ?? 1))
+                                                            print(Double(duration / Double(animatedImages?.count ?? 1)))
+                                                            self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
+                                                                if self.setinterval != 0 {
+                                                                    print(value)
+                                                                    (self.value) += 1 % animatedImages!.count
+                                                                }
+                                                            }
+                                                            print(animatedImages, "ANIM")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                }
+
+                            } else {
+                                Attachment(media[index]!.url)
+                                    .cornerRadius(5)
+                            }
                         }
                     } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
                         HStack(alignment: .top) {

@@ -8,6 +8,20 @@
 import Foundation
 import SwiftUI
 
+final class GifServer {
+    static var shared = GifServer()
+    init(_ a: Bool = false) {
+        print("innit")
+        index = 0
+    }
+    var timer: Timer? = Timer(timeInterval: Double(0.05), repeats: true) { time in
+        GifServer.shared.index += 1 % 20
+        print("TRIGG")
+        print(GifServer.shared.index)
+    }
+    var index: Int = 0
+}
+
 struct FancyTextView: View {
     @Binding var text: String
     @State var textElement: Text? = nil
@@ -48,7 +62,7 @@ public func getTextArray(splitText: [String], members: [String:String] = [:]) ->
     var textArray: [Text] = []
     print(members, "CHANNEL MEMBERS 2")
     for text in splitText {
-        if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {
+        if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">" {
             if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png") {
                 print(emoteURL, "EMOTE URL")
                 if splitText.count == 1 {
@@ -79,6 +93,55 @@ public func getTextArray(splitText: [String], members: [String:String] = [:]) ->
                     }
                 }
             }
+        } else if (text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {
+            guard let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).gif") else { break }
+            if splitText.count == 1 {
+                let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
+                    if let amyGif = Gif(data: data) {
+                        DispatchQueue.main.async {
+                            let animatedImages: [NSImage] = amyGif.animatedImages!
+                            print(animatedImages)
+                            let duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
+                            let gifServer = GifServer()
+                            textArray.append(Text("\(Image(nsImage: animatedImages[GifServer.shared.index % (animatedImages.count)] ).resizable())"))
+                            print(Double(duration / Double(animatedImages.count )))
+                        }
+                    }
+                } else {
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                        if let data = data, let response = response {
+                        let cachedData = CachedURLResponse(response: response, data: data)
+                            cache?.storeCachedResponse(cachedData, for: request)
+                            if let amyGif = Gif(data: data) {
+                                DispatchQueue.main.async {
+                                    let animatedImages: [NSImage] = amyGif.animatedImages!
+                                    print(animatedImages)
+                                    let duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
+                                    let gifServer = GifServer.init()
+                                    textArray.append(Text("\(Image(nsImage: animatedImages[gifServer.index % (animatedImages.count)] ).resizable())"))
+                                    print(Double(duration / Double(animatedImages.count )))
+                                }
+                            }
+                        }
+                    }).resume()
+                }
+                
+            } else {
+                let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                if let data = cache?.cachedResponse(for: request)?.data {
+                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                } else {
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                        if let data = data, let response = response {
+                        let cachedData = CachedURLResponse(response: response, data: data)
+                            cache?.storeCachedResponse(cachedData, for: request)
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                        }
+                    }).resume()
+                }
+            }
+
         } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
             if let url = URL(string: text) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
@@ -138,4 +201,3 @@ public func matches(for regex: String, in text: String) -> [String] {
         return []
     }
 }
-

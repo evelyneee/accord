@@ -36,7 +36,11 @@ private func deleteMessage(_ channelID: String, _ id: String) {
     net.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(id)", token: token, json: false, type: .DELETE, bodyObject: [:])
 }
 
-struct GuildView: View {
+struct GuildView: View, Equatable {
+    static func == (lhs: GuildView, rhs: GuildView) -> Bool {
+        return lhs.data == rhs.data
+    }
+    
     @Binding var clubID: String
     @Binding var channelID: String
     @Binding var channelName: String
@@ -49,7 +53,6 @@ struct GuildView: View {
     @State var nicks: [String:String] = [:]
     @State var roles: [String:[String]] = [:]
     @State var members: [String:String] = [:]
-    @Environment(\.colorScheme) var colorScheme
 //    actual view begins here
 
     var body: some View {
@@ -175,7 +178,7 @@ struct GuildView: View {
                                 if let attachment = message.attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
-                                            AttachmentView(media: $data[offset].attachments)
+                                            AttachmentView(media: $data[offset].attachments).equatable()
                                             Spacer()
                                         }
                                         .frame(maxWidth: 400, maxHeight: 300)
