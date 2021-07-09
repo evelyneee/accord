@@ -11,6 +11,7 @@ import SwiftUI
 struct FancyTextView: View {
     @Binding var text: String
     @State var textElement: Text? = nil
+    @Binding var channelID: String
     var body: some View {
         HStack {
             if text.contains("`") {
@@ -23,21 +24,19 @@ struct FancyTextView: View {
                 HStack(spacing: 0) {
                     if let textView = textElement {
                         textView
+                    } else if #available(macOS 12.0, *) {
+                        Text(try! AttributedString(markdown: text))
                     } else {
-                        if #available(macOS 12.0, *) {
-                            Text(try! AttributedString(markdown: text))
-                        } else {
-                            Text(text)
-                        }
+                        Text(text)
                     }
                 }
                 .onAppear {
                     DispatchQueue.main.async {
-                        textElement = getTextArray(splitText: text.components(separatedBy: " ")).reduce(Text(""), +)
+                        textElement = getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:]).reduce(Text(""), +)
                     }
                 }
                 .onChange(of: text) { newValue in
-                    textElement = getTextArray(splitText: text.components(separatedBy: " ")).reduce(Text(""), +)
+                    textElement = getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:]).reduce(Text(""), +)
                 }
             }
         }
@@ -45,42 +44,38 @@ struct FancyTextView: View {
 }
 
 
-public func getTextArray(splitText: [String]) -> [Text] {
+public func getTextArray(splitText: [String], members: [String:String] = [:]) -> [Text] {
     var textArray: [Text] = []
+    print(members, "CHANNEL MEMBERS 2")
     for text in splitText {
-        if (text.prefix(2) == "<:" || text.prefix(2) == #"\<:"# || text.prefix(2) == "<a:") && text.suffix(1) == ">" {
-            for id in text.capturedGroups(withRegex: #"<:\w+:(\d+)>"#) {
-                if let _ = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
-                    if splitText.count == 1 {
-                        if let url = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
-                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                            if let data = cache?.cachedResponse(for: request)?.data {
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                            } else {
-                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                    if let data = data, let response = response {
-                                    let cachedData = CachedURLResponse(response: response, data: data)
-                                        cache?.storeCachedResponse(cachedData, for: request)
-                                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                                    }
-                                }).resume()
-                            }
-                        }
+        if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {
+            if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png") {
+                print(emoteURL, "EMOTE URL")
+                if splitText.count == 1 {
+                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    if let data = cache?.cachedResponse(for: request)?.data {
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                     } else {
-                        if let url = URL(string: "https://cdn.discordapp.com/emojis/\(id).png") {
-                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                            if let data = cache?.cachedResponse(for: request)?.data {
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                            } else {
-                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                    if let data = data, let response = response {
-                                    let cachedData = CachedURLResponse(response: response, data: data)
-                                        cache?.storeCachedResponse(cachedData, for: request)
-                                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                                    }
-                                }).resume()
+                        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                            if let data = data, let response = response {
+                            let cachedData = CachedURLResponse(response: response, data: data)
+                                cache?.storeCachedResponse(cachedData, for: request)
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                             }
-                        }
+                        }).resume()
+                    }
+                } else {
+                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    if let data = cache?.cachedResponse(for: request)?.data {
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                    } else {
+                        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                            if let data = data, let response = response {
+                            let cachedData = CachedURLResponse(response: response, data: data)
+                                cache?.storeCachedResponse(cachedData, for: request)
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                            }
+                        }).resume()
                     }
                 }
             }
@@ -114,6 +109,9 @@ public func getTextArray(splitText: [String]) -> [Text] {
                     }).resume()
                 }
             }
+        } else if (text.prefix(3) == "<@!" || text.prefix(4) == #"\<@!"# || text.prefix(2) == "<@") && text.suffix(1) == ">" && members != [:] {
+            textArray.append(Text("@\(members[String(text.dropLast().suffix(18))] ?? "Unknown User")").underline().foregroundColor(Color.blue))
+            textArray.append(Text(" "))
         } else {
             if #available(macOS 12.0, *) {
                 textArray.append(Text(try! AttributedString(markdown: "\(text)")))

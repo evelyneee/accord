@@ -26,29 +26,31 @@
       "size" : "128x128"
     },
     {
+      "filename" : "icontest3-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
+      "filename" : "icontest3.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "HelseliaIcon@0.5x-1.png",
+      "filename" : "icontest@256.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "HelseliaIcon@0.5x.png",
+      "filename" : "icontest@256-1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "HelseliaIcon-1.png",
+      "filename" : "icontest@1024.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

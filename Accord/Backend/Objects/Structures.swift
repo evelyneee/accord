@@ -68,7 +68,11 @@ class DeletedMessage: Decodable {
     var id: String
 }
 
-class Message: Decodable {
+class Message: Decodable, Equatable, Identifiable, Hashable {
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var author: User?
     var nick: String?
     var channel_id: String
@@ -85,9 +89,17 @@ class Message: Decodable {
     var type: Int
     var attachments: [AttachedFiles?]
     var referenced_message: Reply?
+    
+    var hashValue: Int {
+        return id.hashValue
+    }
 }
 
-class Reply: Decodable {
+class Reply: Decodable, Equatable, Identifiable, Hashable {
+    static func == (lhs: Reply, rhs: Reply) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -102,9 +114,13 @@ class Reply: Decodable {
     var tts: Bool
     var type: Int
     var attachments: [AttachedFiles?]
+    
+    var hashValue: Int {
+        return id.hashValue
+    }
 }
 
-class AttachedFiles: Decodable, Identifiable, Equatable {
+class AttachedFiles: Decodable, Identifiable, Equatable, Hashable {
     static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {
         return lhs.id == rhs.id
     }
@@ -117,6 +133,31 @@ class AttachedFiles: Decodable, Identifiable, Equatable {
     var proxy_url: String
     var height: Int?
     var width: Int?
+    
+    var hashValue: Int {
+        return id.hashValue
+    }
+}
+
+class DiscordEmote: Decodable, Identifiable, Hashable, Equatable {
+    static func == (lhs: DiscordEmote, rhs: DiscordEmote) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    var id: String
+    var name: String
+    var user: User?
+    var managed: Bool?
+    var animated: Bool?
+    var available: Bool?
+    var hashValue: Int {
+        return id.hashValue
+    }
+}
+
+class Guild: Decodable {
+    var id: String
+    var name: String
 }
 
 /*

@@ -11,6 +11,11 @@ import AVKit
 
 // styles and structs and vars
 
+final class ChannelMembers {
+    static var shared = ChannelMembers()
+    var channelMembers: [String:[String:String]] = [:]
+}
+
 struct CoolButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
@@ -43,6 +48,7 @@ struct GuildView: View {
     @State var pfpArray: [String:NSImage] = [:]
     @State var nicks: [String:String] = [:]
     @State var roles: [String:[String]] = [:]
+    @State var members: [String:String] = [:]
     @Environment(\.colorScheme) var colorScheme
 //    actual view begins here
 
@@ -68,12 +74,6 @@ struct GuildView: View {
                                     Text(temp)
                                 }
                                 Spacer()
-                                Button(action: {
-                                }) {
-                                    Image(systemName: "trash")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
@@ -81,10 +81,10 @@ struct GuildView: View {
 
                         }
                     }
-                    ForEach(0..<data.count, id: \.self) { index in
-                        if true {
-                            VStack(alignment: .leading) {
-                                if let reply = data[index].referenced_message {
+                    ForEach(Array((data ?? []).enumerated()), id: \.offset) { offset, message in
+                        if data.contains(data[offset]) {
+                            LazyVStack(alignment: .leading) {
+                                if let reply = message.referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
                                         Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
@@ -108,22 +108,21 @@ struct GuildView: View {
                                         } else {
                                             Text(reply.content)
                                                 .lineLimit(0)
-
                                         }
                                     }
                                 }
                                 HStack(alignment: .top) {
                                     VStack {
-                                        if index != data.count - 1 {
-                                            if data[index].author?.username ?? "" != (data[Int(index + 1)].author?.username ?? "") {
-                                                Image(nsImage: pfpArray[data[index].author?.id ?? ""] ?? NSImage()).resizable()
+                                        if offset != data.count - 1 {
+                                            if message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "") {
+                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
                                                     .scaledToFit()
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
                                         } else {
-                                            Image(nsImage: pfpArray[data[index].author?.id ?? ""] ?? NSImage()).resizable()
+                                            Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
                                                 .scaledToFit()
                                                 .frame(width: 33, height: 33)
                                                 .padding(.horizontal, 5)
@@ -131,67 +130,63 @@ struct GuildView: View {
                                         }
                                     }
                                     VStack(alignment: .leading) {
-                                        if let author = data[index].author?.username as? String {
-                                            if index != (data.count - 1) {
-                                                if author == (data[Int(index + 1)].author?.username as? String ?? "") {
-                                                    FancyTextView(text: $data[index].content)
-                                                        .padding(.leading, 50)
+                                        if let author = message.author?.username as? String {
+                                            if offset != (data.count - 1) {
+                                                if author == (data[Int(offset + 1)].author?.username as? String ?? "") {
+                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                        .padding(.leading, 51)
+                                                } else if roles.isEmpty {
+                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                 } else {
-                                                    if roles.isEmpty {
-                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                    if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
+                                                        Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[index].content)
+                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     } else {
-                                                        if let roleColor = roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
-                                                            Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                                .fontWeight(.semibold)
-                                                            FancyTextView(text: $data[index].content)
-                                                        } else {
-                                                            Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                                .fontWeight(.semibold)
-                                                            FancyTextView(text: $data[index].content)
-                                                        }
-
+                                                        Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     }
 
                                                 }
                                             } else {
                                                 if roles.isEmpty {
-                                                    Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
+                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[index].content)
+                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
+                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                        .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                 } else {
-                                                    if let roleColor = roleColors[(roles[data[index].author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
-                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[index].content)
-                                                    } else {
-                                                        Text(nicks[data[index].author?.id as? String ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[index].content)
-                                                    }
+                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                        .fontWeight(.semibold)
+                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                 }
                                             }
                                         }
                                     }
                                     Spacer()
                                 }
-                                if let attachment = data[index].attachments {
+                                if let attachment = message.attachments {
                                     if attachment.isEmpty == false {
                                         HStack {
-                                            AttachmentView(media: $data[index].attachments)
+                                            AttachmentView(media: $data[offset].attachments)
                                             Spacer()
                                         }
                                         .frame(maxWidth: 400, maxHeight: 300)
-                                        .padding(.leading, 50)
+                                        .padding(.leading, 52)
                                     }
                                 }
                             }
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
+
                     }
                     if data.isEmpty == false {
                         HStack {
@@ -214,29 +209,15 @@ struct GuildView: View {
                 if !(typing.isEmpty) {
                     if typing.count == 1 {
                         if channelID != "@me" {
-                            if #available(macOS 12.0, *) {
-                                Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                                    .padding(4)
-                                    .background(.thickMaterial) // blurred background
-                                    .cornerRadius(5)
-                            } else {
-                                Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                                    .padding(4)
-                                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                    .cornerRadius(5)
-                            }
+                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
                         } else {
-                            if #available(macOS 12.0, *) {
-                                Text("\(channelName) is typing...")
-                                    .padding(4)
-                                    .background(.thickMaterial) // blurred background
-                                    .cornerRadius(5)
-                            } else {
-                                Text("\(channelName) is typing...")
-                                    .padding(4)
-                                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                    .cornerRadius(5)
-                            }
+                            Text("\(channelName) is typing...")
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
                         }
                     } else {
                         if #available(macOS 12.0, *) {
@@ -273,8 +254,9 @@ struct GuildView: View {
         .onAppear {
             if clubID != "@me" {
                 WebSocketHandler.shared?.subscribe(clubID, channelID)
+            } else {
+                ChannelMembers.shared.channelMembers[channelID] = members
             }
-
             if token != "" {
                 concurrentQueue.async {
                     NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
@@ -324,6 +306,8 @@ struct GuildView: View {
                 concurrentQueue.async {
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["MemberChunk"] as! Data) else { return }
                     guard let users = chunk.d?.members else { return }
+                    ChannelMembers.shared.channelMembers[channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user!.id }, users.compactMap { $0?.nick ?? $0!.user?.username }))
+                    print(ChannelMembers.shared.channelMembers[channelID], "CHANNEL MEMBERS")
                     for person in users {
                         if let nickname = person?.nick {
                             nicks[(person?.user?.id as? String ?? "")] = nickname
@@ -391,6 +375,8 @@ struct ChatControls: View {
     @Binding var chatText: String
     @Binding var sending: Bool
     @State var nitroless = false
+    @State var emotes = false
+    @State var temporaryText = ""
     func refresh() {
         DispatchQueue.main.async {
             sending = false
@@ -421,18 +407,36 @@ struct ChatControls: View {
                     }
                 })
                     .textFieldStyle(PlainTextFieldStyle())
-                Button(action: {
-                    nitroless.toggle()
-                }) {
-                    Image(systemName: "rectangle.grid.3x2.fill")
-                }
-                .buttonStyle(BorderlessButtonStyle())
-                .popover(isPresented: $nitroless, content: {
-                    NitrolessView(chatText: $chatTextFieldContents)
-                        .frame(width: 300, height: 400)
-                })
-            }
 
+                HStack {
+                    Button(action: {
+                        nitroless.toggle()
+                    }) {
+                        Image(systemName: "rectangle.grid.3x2.fill")
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    .popover(isPresented: $nitroless, content: {
+                        NitrolessView(chatText: $chatTextFieldContents)
+                            .frame(width: 300, height: 400)
+                    })
+                    Button(action: {
+                        emotes.toggle()
+                    }) {
+                        Text("🥺")
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    .popover(isPresented: $emotes, content: {
+                        EmotesView(chatText: $temporaryText)
+                            .frame(width: 300, height: 400)
+                    })
+                    .onChange(of: temporaryText) { newValue in
+                        textFieldContents = newValue
+                    }
+                    .onChange(of: textFieldContents) { newValue in
+                        temporaryText = newValue
+                    }
+                }
+            }
         }
     }
 }
@@ -550,7 +554,6 @@ func showWindow(clubID: String, channelID: String, channelName: String) {
     windowRef.title = "\(channelName) - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }
-
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil

@@ -13,6 +13,7 @@ struct ProfileView: View {
     @State var referenceLinks: [String: String] = [:]
     @State var profileData: Data? = Data()
     @State var profile: [String:Any] = [:]
+    @State var text: [String] = ["test"]
     private var columns: [GridItem] = [
         GridItem(.fixed(100), spacing: 16),
         GridItem(.fixed(100), spacing: 16),
@@ -20,7 +21,6 @@ struct ProfileView: View {
     ]
     var body: some View {
 //        profile views
-        
         VStack {
             HStack(alignment: .top) {
 //                pfp

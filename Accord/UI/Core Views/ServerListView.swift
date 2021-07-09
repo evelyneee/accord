@@ -9,6 +9,11 @@ import SwiftUI
 
 public var roleColors: [String:Int] = [:]
 
+final class AllEmotes {
+    static var shared = AllEmotes()
+    var allEmotes: [String:[DiscordEmote]] = [:]
+}
+
 struct ServerListView: View {
     @Binding var clubs: [[String:Any]]
     @Binding var full: [String:Any]
@@ -97,7 +102,6 @@ struct ServerListView: View {
                                         guard array != nil else {
                                             return
                                         }
-                                        
                                         privateChannels = array!.sorted { $0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? "" }
                                     }
                                 }
@@ -115,7 +119,7 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") ), members: Dictionary(uniqueKeysWithValues: zip(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["id"] as? String ?? "") }), ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") })))), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if let recipients = privateChannels[index]["recipients"] as? [[String:Any]] {
                                             if recipients.count != 1 {
@@ -204,18 +208,13 @@ struct ServerListView: View {
                 clubs.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
             } else {
                 guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
-                for i in 0..<clubs.count {
-                    clubs[i]["emojis"] = nil
-                    clubs[i]["members"] = nil
-                    clubs[i]["threads"] = nil
-                }
+
                 full = [:]
                 let clubIDs = clubs.map { $0["id"] } as! [String]
                 var clubTemp: [[String:Any]] = []
                 for item in guildOrder {
                     if let first = clubIDs.firstIndex(of: item) {
-                        let element = clubs[first]
-                        clubTemp.append(element)
+                        clubTemp.append(clubs[first])
                     }
                 }
                 clubs = clubTemp
@@ -224,6 +223,13 @@ struct ServerListView: View {
             print("cleaned up")
             roleColors = (RoleManager.shared?.arrangeRoleColors(clubs: clubs))!
             print(roleColors)
+            for i in 0..<clubs.count {
+                clubs[i]["members"] = nil
+                clubs[i]["threads"] = nil
+                print("\(clubs[i]["id"] as! String)$\(clubs[i]["name"] as! String)")
+                AllEmotes.shared.allEmotes["\(clubs[i]["id"] as! String)$\(clubs[i]["name"] as! String)"] = try! JSONDecoder().decode([DiscordEmote].self, from: (try! JSONSerialization.data(withJSONObject: (clubs[i]["emojis"] as! [[String:Any]]), options: [])))
+                print(AllEmotes.shared.allEmotes)
+            }
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
             }

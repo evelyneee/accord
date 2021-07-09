@@ -209,7 +209,6 @@ final class WebSocketHandler {
                                         print("HEARTBEAT SUCCESSFUL")
                                     }
                                 }
-                                print(payload["t"])
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
                                     let data = payload["d"] as! [String: Any]
@@ -290,12 +289,10 @@ final class WebSocketHandler {
                                 // MARK: Presence Event Handlers
                                 case "PRESENCE_UPDATE": break
                                 case "TYPING_START":
-                                    print("notified", "TYPING")
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
                                         DispatchQueue.main.async {
                                             NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["TypingStartIn\(channelid)":data])
-                                            print("notified", data, "TYPING")
                                         }
                                     }
                                     break
@@ -375,11 +372,9 @@ final class WebSocketHandler {
                 ],
             ],
         ]
-        print(guild, channel)
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask.send(.string(jsonString)) { error in
-                print("SENT \(jsonString)")
                 if let error = error {
                     print("WebSocket sending error: \(error)")
                 }
