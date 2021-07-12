@@ -43,7 +43,7 @@ final class ImageHandling {
                 if let data = cache?.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
                             cache?.storeCachedResponse(cachedData, for: request)
@@ -56,7 +56,6 @@ final class ImageHandling {
         return completion(false, [:])
     }
     func sendRequest(url: String) -> Data? {
-        let session = URLSession.shared
         var dataReceived: Data?
         let sem = DispatchSemaphore(value: 0)
         if let url = URL(string: url) {
@@ -65,7 +64,7 @@ final class ImageHandling {
                 dataReceived = data as Data?
                 sem.signal()
             } else {
-                URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                     if let data = data, let response = response {
                     let cachedData = CachedURLResponse(response: response, data: data)
                         cache?.storeCachedResponse(cachedData, for: request)
@@ -76,7 +75,7 @@ final class ImageHandling {
             }
             // This line will wait until the semaphore has been signaled
             // which will be once the data task has completed
-            sem.wait(timeout: DispatchTime.now() + 5)
+            _ = sem.wait(timeout: DispatchTime.now() + 5)
             return dataReceived
         } else {
             return Data()
@@ -113,7 +112,7 @@ final class ImageHandling {
                 if let data = cache?.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { [weak self] (data, response, error) in
+                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
                             cache?.storeCachedResponse(cachedData, for: request)

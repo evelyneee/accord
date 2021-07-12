@@ -11,14 +11,16 @@ import SwiftUI
 struct EmotesView: View {
     @State var searchenabled = true
     var columns: [GridItem] = [
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1),
-        GridItem(spacing: 1)
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0),
+        GridItem(spacing: 0)
     ]
     @Binding var chatText: String
     @State var SearchText: String = ""
@@ -38,8 +40,8 @@ struct EmotesView: View {
                                         chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                     }) {
                                         VStack {
-                                            Attachment("https://cdn.discordapp.com/emojis/\(emote.id)")
-                                                .frame(width: 20, height: 20)
+                                            HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)")
+                                                .frame(width: 25, height: 25)
                                         }
                                         .frame(width: 30, height: 30)
                                     }

@@ -37,13 +37,13 @@ final class WebSocketHandler {
         ClassWebSocketTask.maximumMessageSize = 999999999
         print("Socket initiated")
     }
-    
+
     class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
         let webSocketTask = WebSocketHandler.shared?.ClassWebSocketTask!
         let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared?.requests = 0
         }
-        
+
         if !(WebSocketHandler.shared?.connected ?? false) {
             initialReception()
             authenticate()
@@ -52,13 +52,13 @@ final class WebSocketHandler {
         } else {
             print("already connected, continuing")
         }
-        
+
         func reconnect() {
             sleep(10)
             let packet: [String:AnyEncodable] = [
                 "op":AnyEncodable(Int(6)),
                 "d":AnyEncodable([
-                    "token":AnyEncodable(token),
+                    "token":AnyEncodable(AccordCoreVars.shared.token),
                     "session_id":AnyEncodable(String(WebSocketHandler.shared?.session_id ?? "")),
                     "seq":AnyEncodable(Int(WebSocketHandler.shared?.seq ?? 0))
                 ] as [String:AnyEncodable])
@@ -70,13 +70,13 @@ final class WebSocketHandler {
                         print("WebSocket sending error: \(error)")
                     }
                 }
-            } 
+            }
         }
         func authenticate() {
             let packet: [String:AnyEncodable] = [
                 "op":AnyEncodable(2),
                 "d":AnyEncodable([
-                    "token":AnyEncodable(token),
+                    "token":AnyEncodable(AccordCoreVars.shared.token),
                     "capabilities":AnyEncodable(125),
                     "compress":AnyEncodable(false),
                     "properties": AnyEncodable([
@@ -173,7 +173,7 @@ final class WebSocketHandler {
                             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared?.heartbeat_interval ?? 0), execute: {
                                 heartbeat()
                             })
-                            
+
                         }
                     @unknown default:
                         print("unknown")
@@ -356,7 +356,7 @@ final class WebSocketHandler {
                 return [:]
             }
         }
-        
+
     }
     func subscribe(_ guild: String, _ channel: String) {
         let packet: [String:Any] = [
@@ -386,7 +386,7 @@ final class WebSocketHandler {
         let packet: [String:AnyEncodable] = [
             "op":AnyEncodable(Int(6)),
             "d":AnyEncodable([
-                "token":AnyEncodable(token),
+                "token":AnyEncodable(AccordCoreVars.shared.token),
                 "session_id":AnyEncodable(String(WebSocketHandler.shared?.session_id ?? "")),
                 "seq":AnyEncodable(Int(WebSocketHandler.shared?.seq ?? 0))
             ] as [String:AnyEncodable])
@@ -447,7 +447,7 @@ class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("Web Socket did connect")
     }
-            
+
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)

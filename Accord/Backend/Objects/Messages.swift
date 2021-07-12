@@ -47,6 +47,30 @@ struct Attachment: View {
 
 }
 
+struct HoveredAttachment: View {
+    
+    @ObservedObject var imageLoader: ImageLoaderAndCache
+    @State var hovering = false
+    
+    init(_ url: String) {
+        imageLoader = ImageLoaderAndCache(imageURL: url)
+    }
+
+    var body: some View {
+        Image(nsImage: (NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0))))
+              .resizable()
+              .scaledToFit()
+              .padding(2)
+              .background(hovering ? Color.gray.opacity(0.75).cornerRadius(1) : Color.clear.cornerRadius(0))
+              .onDisappear {
+                  imageLoader.imageData = Data()
+              }
+              .onHover(perform: { _ in
+                  hovering.toggle()
+              })
+    }
+}
+
 class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()

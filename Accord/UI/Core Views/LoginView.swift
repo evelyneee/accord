@@ -34,13 +34,12 @@ struct LoginView: View {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let checktoken = returnArray["token"] as? String {
                                 _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.shown.wrappedValue.dismiss()
                             } else {
                                 let captchaKey = returnArray["captcha_sitekey"]!
-                                self.captchaVCKey = captchaKey as! String
+                                self.captchaVCKey = captchaKey as? String ?? ""
                                 captchaPublicKey = captchaVCKey!
-                                print(captchaVCKey)
                                 captcha = true
                             }
                         }
@@ -54,7 +53,7 @@ struct LoginView: View {
                 }
             }
             .sheet(isPresented: $captcha, content: {
-                if let key = captchaPublicKey as? String {
+                if let key = captchaPublicKey {
                     CaptchaViewControllerSwiftUI(token: key)
                         .frame(width: 800, height: 800)
                         .onAppear(perform: {
@@ -65,7 +64,7 @@ struct LoginView: View {
                 }
             })
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
-                self.captchaPayload = notif.userInfo?["key"] as! String
+                self.captchaPayload = notif.userInfo?["key"] as? String ?? ""
                 print(twofactor, captchaPayload!)
                 sleep(2)
                 NetworkHandling.shared?.login(username: email, password: password, captcha: captchaPayload!) { success, array in
@@ -80,7 +79,7 @@ struct LoginView: View {
                                         if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
                                             if let checktoken = loginReturnArray["token"] as? String {
                                                 _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                                token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                                 captcha = false
                                                 self.shown.wrappedValue.dismiss()
                                             }

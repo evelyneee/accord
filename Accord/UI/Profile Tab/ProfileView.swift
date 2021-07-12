@@ -24,8 +24,11 @@ struct ProfileView: View {
         VStack {
             HStack(alignment: .top) {
 //                pfp
-                if let imageURL = "https://cdn.discordapp.com/emojis/859492685915488256.gif" {
-                    GifView(url: Binding.constant("https://cdn.discordapp.com/emojis/859492685915488256.gif"))
+                if let imageURL = "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256" {
+                    ImageWithURL(imageURL)
+                        .frame(width: 50, height: 50)
+                        .clipShape(Circle())
+                        .shadow(radius: 10)
                 } else {
                     Color.gray
                         .clipShape(Circle())
@@ -64,12 +67,12 @@ struct ProfileView: View {
             }
             Spacer()
         }.onAppear {
-            NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+            NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data
                     profile = (try? JSONSerialization.jsonObject(with: profileData ?? Data(), options: []) as? [String:Any] ?? [String:Any]()) ?? [:]
                     user_id = profile["id"] as? String ?? ""
-                    NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
+                    NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
                 }
             }
         }

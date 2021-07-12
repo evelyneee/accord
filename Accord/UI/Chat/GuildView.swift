@@ -33,7 +33,7 @@ let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurr
 
 let net = NetworkHandling()
 private func deleteMessage(_ channelID: String, _ id: String) {
-    net.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(id)", token: token, json: false, type: .DELETE, bodyObject: [:])
+    net.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(id)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
 }
 
 struct GuildView: View, Equatable {
@@ -84,112 +84,113 @@ struct GuildView: View, Equatable {
 
                         }
                     }
-                    ForEach(Array((data ?? []).enumerated()), id: \.offset) { offset, message in
-                        if data.contains(data[offset]) {
-                            LazyVStack(alignment: .leading) {
-                                if let reply = message.referenced_message {
-                                    HStack {
-                                        Spacer().frame(width: 50)
-                                        Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
-                                            .scaledToFit()
-                                            .frame(width: 15, height: 15)
-                                            .clipShape(Circle())
+                    ForEach(Array((data)), id: \.self) { message in
+                        if let offset = data.firstIndex(of: message) {
+                            if data.contains(data[offset]) {
+                                LazyVStack(alignment: .leading) {
+                                    if let reply = message.referenced_message {
                                         HStack {
-                                            if let nick = nicks[reply.author?.id ?? ""] {
-                                                Text(nick)
-                                                    .fontWeight(.bold)
-                                            } else {
-                                                if let author = reply.author?.username {
-                                                    Text(author)
+                                            Spacer().frame(width: 50)
+                                            Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
+                                                .scaledToFit()
+                                                .frame(width: 15, height: 15)
+                                                .clipShape(Circle())
+                                            HStack {
+                                                if let nick = nicks[reply.author?.id ?? ""] {
+                                                    Text(nick)
                                                         .fontWeight(.bold)
+                                                } else {
+                                                    if let author = reply.author?.username {
+                                                        Text(author)
+                                                            .fontWeight(.bold)
+                                                    }
                                                 }
                                             }
-                                        }
-                                        if #available(macOS 12.0, *) {
-                                            Text(try! AttributedString(markdown: reply.content))
-                                                .lineLimit(0)
-                                        } else {
-                                            Text(reply.content)
-                                                .lineLimit(0)
+                                            if #available(macOS 12.0, *) {
+                                                Text(try! AttributedString(markdown: reply.content))
+                                                    .lineLimit(0)
+                                            } else {
+                                                Text(reply.content)
+                                                    .lineLimit(0)
+                                            }
                                         }
                                     }
-                                }
-                                HStack(alignment: .top) {
-                                    VStack {
-                                        if offset != data.count - 1 {
-                                            if message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "") {
+                                    HStack(alignment: .top) {
+                                        VStack {
+                                            if offset != data.count - 1 {
+                                                if message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "") {
+                                                    Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 33, height: 33)
+                                                        .padding(.horizontal, 5)
+                                                        .clipShape(Circle())
+                                                }
+                                            } else {
                                                 Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
                                                     .scaledToFit()
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
-                                        } else {
-                                            Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
-                                                .scaledToFit()
-                                                .frame(width: 33, height: 33)
-                                                .padding(.horizontal, 5)
-                                                .clipShape(Circle())
                                         }
-                                    }
-                                    VStack(alignment: .leading) {
-                                        if let author = message.author?.username as? String {
-                                            if offset != (data.count - 1) {
-                                                if author == (data[Int(offset + 1)].author?.username as? String ?? "") {
-                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                        .padding(.leading, 51)
-                                                } else if roles.isEmpty {
-                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                        VStack(alignment: .leading) {
+                                            if let author = message.author?.username {
+                                                if offset != (data.count - 1) {
+                                                    if author == (data[Int(offset + 1)].author?.username ?? "") {
+                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                            .padding(.leading, 51)
+                                                    } else if roles.isEmpty {
+                                                        Text(nicks[message.author?.id ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                    } else {
+                                                        if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""] {
+                                                            Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                        } else {
+                                                            Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                        }
+
+                                                    }
                                                 } else {
-                                                    if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
-                                                        Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                    if roles.isEmpty {
+                                                        Text(nicks[message.author?.id ?? ""] ?? author)
+                                                            .fontWeight(.semibold)
+                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                    } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""] {
+                                                        Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     } else {
-                                                        Text(nicks[message.author?.id as? String ?? ""] ?? author)
+                                                        Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .fontWeight(.semibold)
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     }
-
-                                                }
-                                            } else {
-                                                if roles.isEmpty {
-                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] as? String ?? ""] {
-                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
-                                                        .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                } else {
-                                                    Text(nicks[message.author?.id as? String ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                 }
                                             }
                                         }
+                                        Spacer()
                                     }
-                                    Spacer()
-                                }
-                                if let attachment = message.attachments {
-                                    if attachment.isEmpty == false {
-                                        HStack {
-                                            AttachmentView(media: $data[offset].attachments).equatable()
-                                            Spacer()
+                                    if let attachment = message.attachments {
+                                        if attachment.isEmpty == false {
+                                            HStack {
+                                                AttachmentView(media: $data[offset].attachments).equatable()
+                                                Spacer()
+                                            }
+                                            .frame(maxWidth: 400, maxHeight: 300)
+                                            .padding(.leading, 52)
                                         }
-                                        .frame(maxWidth: 400, maxHeight: 300)
-                                        .padding(.leading, 52)
                                     }
                                 }
+                                .rotationEffect(.radians(.pi))
+                                .scaleEffect(x: -1, y: 1, anchor: .center)
                             }
-                            .rotationEffect(.radians(.pi))
-                            .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
-
                     }
                     if data.isEmpty == false {
                         HStack {
@@ -260,9 +261,9 @@ struct GuildView: View, Equatable {
             } else {
                 ChannelMembers.shared.channelMembers[channelID] = members
             }
-            if token != "" {
+            if AccordCoreVars.shared.token != "" {
                 concurrentQueue.async {
-                    NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
+                    NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                         if success == true {
                             do {
                                 data = try JSONDecoder().decode([Message].self, from: rawData!)
@@ -278,7 +279,7 @@ struct GuildView: View, Equatable {
                                         WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: clubID) { success, users in
                                             if success {
                                                 for person in users {
-                                                    nicks[(person?.user?.id ?? "")] = person?.nick ?? ""
+                                                    nicks[(person?.user.id ?? "")] = person?.nick ?? ""
                                                 }
                                             }
                                         }
@@ -294,7 +295,7 @@ struct GuildView: View, Equatable {
 
         /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("update"))) { notif in
-            switch ((Array((notif.userInfo as! [String:Any]).keys))[0]) as! String {
+            switch ((Array((notif.userInfo as! [String:Any]).keys))[0]) {
             case "NewMessageIn\(channelID)":
                 concurrentQueue.async {
                     sending = false
@@ -309,12 +310,11 @@ struct GuildView: View, Equatable {
                 concurrentQueue.async {
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["MemberChunk"] as! Data) else { return }
                     guard let users = chunk.d?.members else { return }
-                    ChannelMembers.shared.channelMembers[channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user!.id }, users.compactMap { $0?.nick ?? $0!.user?.username }))
-                    print(ChannelMembers.shared.channelMembers[channelID], "CHANNEL MEMBERS")
+                    ChannelMembers.shared.channelMembers[channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
                     for person in users {
                         if let nickname = person?.nick {
-                            nicks[(person?.user?.id as? String ?? "")] = nickname
-                            roles[(person?.user?.id as? String ?? "")] = person?.roles ?? []
+                            nicks[(person?.user.id ?? "")] = nickname
+                            roles[(person?.user.id ?? "")] = person?.roles ?? []
                         }
                     }
                 }
@@ -335,7 +335,6 @@ struct GuildView: View, Equatable {
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["DeletedMessageIn\(channelID)"] as! Data) {
                     if let message = gatewayMessage.d {
-                        print(data.indices, (currentUIDDict).firstIndex(of: message.id), "DELETED")
                         if let index = (currentUIDDict).firstIndex(of: message.id) {
                             data.remove(at: index)
                         }
@@ -343,20 +342,25 @@ struct GuildView: View, Equatable {
                     }
                 }
             case "TypingStartIn\(channelID)":
+                print("typing 1")
                 concurrentQueue.async {
                     if let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] {
+                        print("typing 2")
                         if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
-                            guard let memberData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted) else { return }
-                            guard let memberDecodable = try? JSONDecoder().decode(GuildMember.self, from: memberData) else { return }
-                            if let nick = memberDecodable.nick {
+                            print("typing 3")
+                            let memberData = try! JSONSerialization.data(withJSONObject: packet, options: [])
+                            let memberDecodable = try! JSONDecoder().decode(TypingEvent.self, from: memberData)
+                            if let nick = memberDecodable.member.nick {
+                                print("typing 4", nick)
                                 typing.append(nick)
                                 DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
                                     typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
                                 })
                             } else {
-                                typing.append(memberDecodable.user?.username ?? "")
+                                print("typing 4", memberDecodable.member.user.username )
+                                typing.append(memberDecodable.member.user.username )
                                 DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                    typing.remove(at: typing.firstIndex(of: memberDecodable.user?.username ?? "") ?? 0)
+                                    typing.remove(at: typing.firstIndex(of: memberDecodable.member.user.username ) ?? 0)
                                 })
                             }
                         }
@@ -398,7 +402,7 @@ struct ChatControls: View {
                         if temp == "/shrug" {
                             temp = #"¯\_(ツ)_/¯"#
                         }
-                        NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
+                        NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
                             switch success {
                             case true:
                                 break
@@ -557,6 +561,7 @@ func showWindow(clubID: String, channelID: String, channelName: String) {
     windowRef.title = "\(channelName) - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }
+
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil

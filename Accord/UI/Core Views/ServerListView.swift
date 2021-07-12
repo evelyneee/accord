@@ -97,7 +97,7 @@ struct ServerListView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
                             DispatchQueue.main.async {
-                                NetworkHandling.shared?.request(url: "https://discordapp.com/api/users/@me/channels", token: token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                                NetworkHandling.shared?.request(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, array in
                                     if success {
                                         guard array != nil else {
                                             return
@@ -199,12 +199,6 @@ struct ServerListView: View {
                 }
             }
             if sortByMostRecent {
-                let mostRecentClubs: [String:String] = [:]
-                for club in clubs {
-                    if let channels = club["channels"] as? [[String:Any]] {
-                        let lastMessageID = (club["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]
-                    }
-                }
                 clubs.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
             } else {
                 guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []

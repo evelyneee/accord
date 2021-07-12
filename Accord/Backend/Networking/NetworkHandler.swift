@@ -15,7 +15,7 @@ final class NetworkHandling {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        
+
         // setup of the request
         switch type {
         case .GET:
@@ -29,9 +29,9 @@ final class NetworkHandling {
         case .PUT:
             request.httpMethod = "PUT"
         }
-        
+
         // discord specific stuff
-        
+
         if token != nil {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
         }
@@ -42,10 +42,10 @@ final class NetworkHandling {
         }
         if type == .POST && json == true {
             request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-                
-        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
+
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
@@ -61,21 +61,23 @@ final class NetworkHandling {
                         print("error at serializing: \(error.localizedDescription)")
                         return completion(false, nil)
                     }
+                } else {
+                    return completion(false, nil)
                 }
 
             }
             else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
+                return completion(false, nil)
             }
         })
         task.resume()
-        return completion(false, nil)
     }
     func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        
+
         // setup of the request
         switch type {
         case .GET:
@@ -89,9 +91,9 @@ final class NetworkHandling {
         case .PUT:
             request.httpMethod = "PUT"
         }
-        
+
         // Accord specific stuff starts here
-        
+
         if token != nil {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
         }
@@ -102,10 +104,10 @@ final class NetworkHandling {
         }
         if type == .POST && json == true {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-        
-        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
+
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 if debug {
@@ -116,21 +118,23 @@ final class NetworkHandling {
                 }
                 if let data = data {
                     return completion(true, data)
+                } else {
+                    return completion(false, nil)
                 }
 
             }
             else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
+                return completion(false, nil)
             }
         })
         task.resume()
-        return completion(false, nil)
     }
     func emptyRequest(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
-        
+
         // setup of the request
         switch type {
         case .GET:
@@ -144,9 +148,9 @@ final class NetworkHandling {
         case .PUT:
             request.httpMethod = "PUT"
         }
-        
+
         // Accord specific stuff starts here
-        
+
         if token != nil {
             request.addValue(token ?? "", forHTTPHeaderField: "Authorization")
         }
@@ -157,17 +161,13 @@ final class NetworkHandling {
         }
         if type == .POST && json == true {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-        
-        let task = session.dataTask(with: request, completionHandler: { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
-            if (error == nil) {
-                if let data = data {
-                    return
-                }
 
-            }
-            else {
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+            if (error == nil) && (data != nil) {
+                return
+            } else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
@@ -178,7 +178,7 @@ final class NetworkHandling {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: "https://discord.com/api/v9/auth/login") ?? URL(string: "#")!))
-        
+
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         if captcha == "" {
@@ -187,7 +187,7 @@ final class NetworkHandling {
                 "password": password,
                 "undelete": false
             ]
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         } else {
             let bodyObject: [String : Any] = [
                 "email": username,
@@ -195,12 +195,12 @@ final class NetworkHandling {
                 "captcha_key": captcha,
                 "undelete": false
             ]
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: []) ?? Data()
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
         // Form URL-Encoded Body
 
-        
-                
+
+
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
             if (error == nil) {
                 // Success
@@ -212,14 +212,13 @@ final class NetworkHandling {
                 }
                 if data != Data() {
                     return completion(true, data)
+                } else {
+                    return completion(false, nil)
                 }
-
-            }
-            else {
+            } else {
                 print("URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
         task.resume()
-        return completion(false, nil)
     }
 }

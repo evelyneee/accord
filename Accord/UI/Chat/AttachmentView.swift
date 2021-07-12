@@ -54,7 +54,6 @@ struct AttachmentView: View, Equatable {
                                                                     (self.value) += 1 % animatedImages!.count
                                                                 }
                                                             }
-                                                            print(animatedImages, "ANIM")
                                                         }
                                                     }
                                                 }

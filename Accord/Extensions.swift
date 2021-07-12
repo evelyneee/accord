@@ -102,8 +102,8 @@ extension NSColor {
         // Ensure it only contains valid hex characters 0
         let validHexPattern = "[a-fA-F0-9]+"
         if cleanedString.conformsTo(validHexPattern) {
-            var value: UInt32 = 0
-            Scanner(string: cleanedString).scanHexInt32(&value)
+            var value: UInt64 = 0
+            Scanner(string: cleanedString).scanHexInt64(&value)
             self.init(hex: Int(value), alpha: 1)
         } else {
             fatalError("Unable to parse color?")
@@ -253,18 +253,6 @@ func userNotificationCenter(_ center: NSUserNotificationCenter,
 
 // For KeychainManager
 
-extension Data {
-
-    init<T>(from value: T) {
-        var value = value
-        self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
-    }
-
-    func to<T>(type: T.Type) -> T {
-        return self.withUnsafeBytes { $0.load(as: T.self) }
-    }
-}
-
 // For regex
 
 public extension String {
@@ -313,5 +301,3 @@ extension NSTextField {
         set { }
     }
 }
-
-extension Array: Decodable where Element: Decodable {}

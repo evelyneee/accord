@@ -49,10 +49,16 @@ class GuildMemberChunk: Decodable {
     var members: [GuildMember?]
 }
 
+class TypingEvent: Decodable {
+    var channel_id: String
+    var guild_id: String
+    var member: GuildMember
+}
+
 class GuildMember: Decodable {
-    var user: User?
+    var user: User
     var nick: String?
-    var roles: [String]
+    var roles: [String]?
 }
 
 class GatewayMessage: Decodable {
@@ -90,8 +96,8 @@ class Message: Decodable, Equatable, Identifiable, Hashable {
     var attachments: [AttachedFiles?]
     var referenced_message: Reply?
     
-    var hashValue: Int {
-        return id.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -115,8 +121,8 @@ class Reply: Decodable, Equatable, Identifiable, Hashable {
     var type: Int
     var attachments: [AttachedFiles?]
     
-    var hashValue: Int {
-        return id.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -134,8 +140,8 @@ class AttachedFiles: Decodable, Identifiable, Equatable, Hashable {
     var height: Int?
     var width: Int?
     
-    var hashValue: Int {
-        return id.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -150,8 +156,8 @@ class DiscordEmote: Decodable, Identifiable, Hashable, Equatable {
     var managed: Bool?
     var animated: Bool?
     var available: Bool?
-    var hashValue: Int {
-        return id.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
