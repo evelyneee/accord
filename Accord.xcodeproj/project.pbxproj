@@ -255,7 +255,6 @@
 				32F4C954256D7D3300343BB3 /* Frameworks */,
 				32F4C955256D7D3300343BB3 /* Resources */,
 				32ADD59925839980008D1715 /* Embed App Extensions */,
-				49F29FAA26A0A41800C1205A /* ShellScript */,
 				49F29FAB26A0A44900C1205A /* ShellScript */,
 			);
 			buildRules = (
@@ -316,25 +315,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		49F29FAA26A0A41800C1205A /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(EXECUTABLE_PATH)",
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/zsh --login";
-			shellScript = "ldid \"-S${SRCROOT}/${TARGET_NAME}/Entitlements.entitlements\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		49F29FAB26A0A44900C1205A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
