@@ -1,4 +1,6 @@
 .DS_Store
-build
-deb/Applications/Accord.app
-deb-arm64/Applications/Accord.app
+
+**/*.xcworkspace/**/xcuserdata/
+**/*.xcodeproj/**/xcuserdata/
+
+/build/
