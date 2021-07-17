@@ -1,8 +1,9 @@
-Package: com.johnnyappleseed.appletrees
-Name: AppleTrees
+Package: me.evelyn.accord
+Name: Accord
 Version: 1.0.0
-Maintainer: Johnny Appleseed
-Description: Apple trees for all!
-Architecture: iphoneos-arm
-Depends: firmware (>= 13.0)
-Section: Applications
+Priority: optional
+Maintainer: Evelyn
+Architecture: darwin-amd64
+Depends:
+Section: Apps
+Description: A discord client for macOS Big Sur and higher.

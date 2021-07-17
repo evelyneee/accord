@@ -337,7 +337,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/zsh --login";
-			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\nmkdir -p \"./layout/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"${FULL_PRODUCT_NAME_NO_EXTENSION}.deb\"\nrm -rf \"./layout\"\n";
+			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\nmkdir -p \"./layout/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"me.evelyn.accord_1.0_darwin-amd64.deb\"\nrm -rf \"./layout\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout-arm64\"\nmkdir -p \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control-arm64\" \"./layout-arm64/DEBIAN/control\"\nmkdir -p \"./layout-arm64/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout-arm64/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout-arm64\" \"me.evelyn.accord_1.0_darwin-arm64.deb\"\nrm -rf \"./layout-arm64\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

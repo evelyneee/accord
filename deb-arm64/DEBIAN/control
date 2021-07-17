@@ -1,9 +1,0 @@
-Package: me.evelyn.accord
-Name: Accord
-Version: 1.0.0
-Priority: optional
-Maintainer: Evelyn
-Architecture: darwin-arm64
-Depends:
-Section: Apps
-Description: A discord client for macOS Big Sur and higher.
