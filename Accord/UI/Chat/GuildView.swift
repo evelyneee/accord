@@ -129,12 +129,6 @@ struct GuildView: View, Equatable {
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
-                                            } else {
-                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 33, height: 33)
-                                                    .padding(.horizontal, 5)
-                                                    .clipShape(Circle())
                                             }
                                         }
                                         VStack(alignment: .leading) {
