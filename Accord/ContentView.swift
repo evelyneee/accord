@@ -9,20 +9,20 @@ import SwiftUI
 
 struct ContentView: View {
     @State public var selection: Int?
-    @State var clubs: [[String:Any]] = []
+    @State var guilds: [[String:Any]] = []
     @State var socketOut: [String:Any] = [:]
     @State var channels: [Any] = []
     @State var status: statusIndicators?
     @State var modalIsPresented: Bool = false
     var body: some View {
-        ServerListView(clubs: $clubs, full: $socketOut)
+        ServerListView(guilds: $guilds, full: $socketOut)
         .sheet(isPresented: $modalIsPresented) {
             LoginView()
                 .onDisappear(perform: {
                     DispatchQueue.main.async {
                         NetworkHandling.shared?.request(url: "\(rootURL)/users/@me/guilds", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, array in
                             if success == true {
-                                clubs = array ?? []
+                                guilds = array ?? []
                             }
                         }
                     }
@@ -34,7 +34,7 @@ struct ContentView: View {
             WebSocketHandler.newMessage(opcode: 2) { success, array in
                  if !(array?.isEmpty ?? true) {
                      socketOut = array ?? [:]
-                     clubs = array?["guilds"] as? [[String:Any]] ?? []
+                     guilds = array?["guilds"] as? [[String:Any]] ?? []
                      DispatchQueue.main.async {
                          NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                      }
@@ -60,7 +60,7 @@ struct ContentView: View {
                 WebSocketHandler.newMessage(opcode: 2) { success, array in
                      if !(array?.isEmpty ?? false) {
                          socketOut = array ?? [:]
-                         clubs = array?["guilds"] as? [[String:Any]] ?? []
+                         guilds = array?["guilds"] as? [[String:Any]] ?? []
                          DispatchQueue.main.async {
                              NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }

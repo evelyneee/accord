@@ -15,7 +15,7 @@ final class AllEmotes {
 }
 
 struct ServerListView: View {
-    @Binding var clubs: [[String:Any]]
+    @Binding var guilds: [[String:Any]]
     @Binding var full: [String:Any]
     @State var selection: Int? = nil
     @State var selectedServer: Int? = nil
@@ -34,7 +34,9 @@ struct ServerListView: View {
                         .frame(width: 45, height: 45)
                         .cornerRadius(15)
                         .onTapGesture(count: 1, perform: {
-                            selectedServer = 999
+                            DispatchQueue.main.async {
+                                selectedServer = 999
+                            }
                         })
                     } else {
                         ZStack {
@@ -44,29 +46,36 @@ struct ServerListView: View {
                         .frame(width: 45, height: 45)
                         .cornerRadius(23.5)
                         .onTapGesture(count: 1, perform: {
-                            selectedServer = 999
+                            DispatchQueue.main.async {
+                                selectedServer = 999
+                            }
                         })
                     }
                     Divider()
-                    ForEach(0..<clubs.count, id: \.self) { index in
+                    // MARK: Guild icon UI
+                    ForEach(0..<guilds.count, id: \.self) { index in
                         if (selectedServer ?? 0) == index {
-                            Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                            Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
                                 .frame(width: 45, height: 45)
                                 .cornerRadius(15)
                                 .scaledToFit()
                                 .onTapGesture(count: 1, perform: {
                                     withAnimation {
-                                        selectedServer = index
+                                        DispatchQueue.main.async {
+                                            selectedServer = index
+                                        }
                                     }
                                 })
                         } else {
-                            Image(nsImage: guildIcons[clubs[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                            Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
                                 .frame(width: 45, height: 45)
                                 .cornerRadius(23.5)
                                 .scaledToFit()
                                 .onTapGesture(count: 1, perform: {
                                     withAnimation {
-                                        selectedServer = index
+                                        DispatchQueue.main.async {
+                                            selectedServer = index
+                                        }
                                     }
                                 })
                         }
@@ -83,7 +92,9 @@ struct ServerListView: View {
                             .frame(width: 10, height: 10)
                     }
                     .onTapGesture(count: 1, perform: {
-                        selectedServer = 9999
+                        DispatchQueue.main.async {
+                            selectedServer = 9999
+                        }
                     })
                 }
                 .frame(width: 80)
@@ -119,7 +130,7 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: GuildView(clubID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") ), members: Dictionary(uniqueKeysWithValues: zip(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["id"] as? String ?? "") }), ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") })))).equatable(), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") ), members: Dictionary(uniqueKeysWithValues: zip(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["id"] as? String ?? "") }), ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") })))).equatable(), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if let recipients = privateChannels[index]["recipients"] as? [[String:Any]] {
                                             if recipients.count != 1 {
@@ -129,7 +140,7 @@ struct ServerListView: View {
                                                 Text(privateChannels[index]["name"] as? String ?? "")
                                                 Spacer()
                                                 Button(action: {
-                                                    showWindow(clubID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
+                                                    showWindow(guildID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
                                                 }) {
                                                     Image(systemName: "arrow.up.right.circle")
                                                 }
@@ -140,7 +151,7 @@ struct ServerListView: View {
                                                 Text(recipients[0]["username"] as? String ?? "")
                                                 Spacer()
                                                 Button(action: {
-                                                    showWindow(clubID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
+                                                    showWindow(guildID: "@me", channelID: privateChannels[index]["id"] as! String, channelName: ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") )
                                                 }) {
                                                     Image(systemName: "arrow.up.right.circle")
                                                 }
@@ -154,23 +165,23 @@ struct ServerListView: View {
                         }
                     }
                 } else {
-                    if clubs.isEmpty == false {
+                    if guilds.isEmpty == false {
                         List {
-                            if let sectionArray = Array(GuildManager.shared.channelCount(array: clubs[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0).keys).sorted() {
+                            if let sectionArray = Array(GuildManager.shared.channelCount(array: guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0).keys).sorted() {
                                 ForEach(sectionArray, id: \.self) { key in
-                                    if let channels = GuildManager.shared.channelCount(array: clubs[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0) {
-                                        if let sectionName = ((clubs[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["name"]  as! String })[((clubs[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["id"] as! String }).firstIndex(of: key) as? Int ?? 0] {
+                                    if let channels = GuildManager.shared.channelCount(array: guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0) {
+                                        if let sectionName = ((guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["name"]  as! String })[((guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["id"] as! String }).firstIndex(of: key) as? Int ?? 0] {
                                             Section(header: Text(sectionName)) {
                                                 if let channel = channels[key] {
                                                     ForEach(0..<channel.count, id: \.self) { offset in
-                                                        if let channelName = Array((GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .name) as? [String] ?? []))[(GuildManager.shared.getGuild(clubid: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), array: clubs, type: .id) as? [String] ?? []).firstIndex(of: channel[offset])!] {
-                                                            NavigationLink(destination: GuildView(clubID: Binding.constant((clubs[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)).equatable(), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
+                                                        if let channelName = Array((GuildManager.shared.getGuild(guildid: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), array: guilds, type: .name) as? [String] ?? []))[(GuildManager.shared.getGuild(guildid: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), array: guilds, type: .id) as? [String] ?? []).firstIndex(of: channel[offset])!] {
+                                                            NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)).equatable(), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
                                                                 HStack {
                                                                     Image(systemName: "number")
                                                                     Text(channelName)
                                                                     Spacer()
                                                                     Button(action: {
-                                                                        showWindow(clubID: (clubs[selectedServer ?? 0]["id"] as? String ?? ""), channelID: channel[offset], channelName: channelName)
+                                                                        showWindow(guildID: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), channelID: channel[offset], channelName: channelName)
                                                                     }) {
                                                                         Image(systemName: "arrow.up.right.circle")
                                                                     }
@@ -192,36 +203,36 @@ struct ServerListView: View {
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
-            ImageHandling.shared?.getServerIcons(array: clubs) { success, icons in
+            ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
                 if success {
                     guildIcons = icons
                     print(guildIcons, "ICONS")
                 }
             }
             if sortByMostRecent {
-                clubs.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
+                guilds.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
             } else {
                 guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
 
                 full = [:]
-                let clubIDs = clubs.map { $0["id"] } as! [String]
-                var clubTemp: [[String:Any]] = []
+                let guildIDs = guilds.map { $0["id"] } as! [String]
+                var guildTemp: [[String:Any]] = []
                 for item in guildOrder {
-                    if let first = clubIDs.firstIndex(of: item) {
-                        clubTemp.append(clubs[first])
+                    if let first = guildIDs.firstIndex(of: item) {
+                        guildTemp.append(guilds[first])
                     }
                 }
-                clubs = clubTemp
+                guilds = guildTemp
             }
             selectedServer = 0
-            print("cleaned up")
-            roleColors = (RoleManager.shared?.arrangeRoleColors(clubs: clubs))!
+            print("[Accord] cleaned up")
+            roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
             print(roleColors)
-            for i in 0..<clubs.count {
-                clubs[i]["members"] = nil
-                clubs[i]["threads"] = nil
-                print("\(clubs[i]["id"] as! String)$\(clubs[i]["name"] as! String)")
-                AllEmotes.shared.allEmotes["\(clubs[i]["id"] as! String)$\(clubs[i]["name"] as! String)"] = try! JSONDecoder().decode([DiscordEmote].self, from: (try! JSONSerialization.data(withJSONObject: (clubs[i]["emojis"] as! [[String:Any]]), options: [])))
+            for i in 0..<guilds.count {
+                guilds[i]["members"] = nil
+                guilds[i]["threads"] = nil
+                print("[Accord] \(guilds[i]["id"] as! String)$\(guilds[i]["name"] as! String)")
+                AllEmotes.shared.allEmotes["\(guilds[i]["id"] as! String)$\(guilds[i]["name"] as! String)"] = try! JSONDecoder().decode([DiscordEmote].self, from: (try! JSONSerialization.data(withJSONObject: (guilds[i]["emojis"] as! [[String:Any]]), options: [])))
                 print(AllEmotes.shared.allEmotes)
             }
             DispatchQueue.main.async {

@@ -11,12 +11,12 @@ import SwiftUI
 final class GifServer {
     static var shared = GifServer()
     init(_ a: Bool = false) {
-        print("innit")
+        print("[Accord] innit")
         index = 0
     }
     var timer: Timer? = Timer(timeInterval: Double(0.05), repeats: true) { time in
         GifServer.shared.index += 1 % 20
-        print("TRIGG")
+        print("[Accord] TRIGG")
         print(GifServer.shared.index)
     }
     var index: Int = 0
@@ -198,7 +198,7 @@ final class TextStuff {
                 String(text[Range($0.range, in: text)!])
             }
         } catch let error {
-            print("invalid regex \(error.localizedDescription)")
+            print("[Accord] invalid regex \(error.localizedDescription)")
             return []
         }
     }

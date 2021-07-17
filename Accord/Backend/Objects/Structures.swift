@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 public class requests {
     enum requestTypes {
@@ -51,8 +52,8 @@ class GuildMemberChunk: Decodable {
 
 class TypingEvent: Decodable {
     var channel_id: String
-    var guild_id: String
-    var member: GuildMember
+    var guild_id: String?
+    var member: GuildMember?
 }
 
 class GuildMember: Decodable {
@@ -98,6 +99,13 @@ class Message: Decodable, Equatable, Identifiable, Hashable {
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+    func delete() {
+        if user_id == id {
+            NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/\(id)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
+        } else {
+            print("[Accord] Deleting other's messages is not yet supported")
+        }
     }
 }
 

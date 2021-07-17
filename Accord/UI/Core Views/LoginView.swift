@@ -27,7 +27,7 @@ struct LoginView: View {
             TextField("Password", text: $password)
             TextField("2fa code", text: $twofactor)
             Button(action: {
-                print("logging in")
+                print("[Accord] logging in")
                 NetworkHandling.shared?.login(username: email, password: password) { success, array in
 
                     if success {
@@ -74,7 +74,7 @@ struct LoginView: View {
                                 sleep(2)
                                 NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
                                     if success {
-                                        print("log in kek")
+                                        print("[Accord] log in kek")
                                         print(String(decoding: data_login!, as: UTF8.self))
                                         if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
                                             if let checktoken = loginReturnArray["token"] as? String {

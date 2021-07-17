@@ -24,6 +24,8 @@
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
 		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
 		A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE632686709A00B244BE /* NitrolessStructures.swift */; };
+		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
+		A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */; };
 		A874C04A267658A8006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
@@ -71,6 +73,8 @@
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
+		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
+		A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewRedesign.swift; sourceTree = "<group>"; };
 		A874C049267658A8006E7F52 /* Guilds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guilds.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
@@ -170,13 +174,15 @@
 			path = "Core Views";
 			sourceTree = "<group>";
 		};
-		A82521372687AB780073F640 /* Profile Tab */ = {
+		A82521372687AB780073F640 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
 				32F37415257302C300ADB7E6 /* ProfileView.swift */,
 				32DC838A257FA71B004520AE /* SettingsView.swift */,
+				A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */,
+				A869085C269DDCE400F13CAD /* PopoverProfileView.swift */,
 			);
-			path = "Profile Tab";
+			path = Profile;
 			sourceTree = "<group>";
 		};
 		A82521382687ABC50073F640 /* Networking */ = {
@@ -230,7 +236,7 @@
 		A8FA9A9B266823B4003710A4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				A82521372687AB780073F640 /* Profile Tab */,
+				A82521372687AB780073F640 /* Profile */,
 				A82521362687AB390073F640 /* Core Views */,
 				A82521352687AB250073F640 /* Chat */,
 			);
@@ -320,6 +326,7 @@
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
+				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
@@ -329,6 +336,7 @@
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
+				A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,

@@ -19,9 +19,9 @@ final class ImageHandling {
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
             didSet {
-                print("DONE \(returnArray.count)")
+                print("[Accord] DONE \(returnArray.count)")
                 if returnArray.count == singleURLs.count {
-                    print("GOODBYE \(returnArray.count)")
+                    print("[Accord] GOODBYE \(returnArray.count)")
                     return completion(true, returnArray)
                 }
             }
@@ -88,9 +88,9 @@ final class ImageHandling {
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
             didSet {
-                print("DONE \(returnArray.count)")
+                print("[Accord] DONE \(returnArray.count)")
                 if returnArray.count == singleURLs.count {
-                    print("GOODBYE \(returnArray.count)")
+                    print("[Accord] GOODBYE \(returnArray.count)")
                 }
             }
         }
@@ -128,10 +128,10 @@ final class ImageHandling {
     }
 
     init(_ empty:Bool = false) {
-        print("loaded pfpmanager")
+        print("[Accord] loaded pfpmanager")
     }
     deinit {
-        print("IF THIS NEVER SHOWS, FUCK")
+        print("[Accord] IF THIS NEVER SHOWS, FUCK")
     }
 }
 

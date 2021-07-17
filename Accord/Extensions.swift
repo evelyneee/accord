@@ -30,7 +30,7 @@ class cuteWindow: NSWindow {
                 }
             })
         }
-        print("done")
+        print("[Accord] done")
     }
 }
 

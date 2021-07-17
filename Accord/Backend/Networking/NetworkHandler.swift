@@ -11,6 +11,8 @@ let debug = false
 
 final class NetworkHandling {
     static var shared: NetworkHandling? = NetworkHandling()
+
+    // etf encoding
     func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
@@ -50,7 +52,7 @@ final class NetworkHandling {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if debug {
-                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print("[Accord] URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.url as Any)
                 }
@@ -58,7 +60,7 @@ final class NetworkHandling {
                     do {
                         return completion(true, try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] ?? [[String:Any]]())
                     } catch {
-                        print("error at serializing: \(error.localizedDescription)")
+                        print("[Accord] error at serializing: \(error.localizedDescription)")
                         return completion(false, nil)
                     }
                 } else {
@@ -67,7 +69,7 @@ final class NetworkHandling {
 
             }
             else {
-                print("URL Session Task Failed: %@", error!.localizedDescription);
+                print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
                 return completion(false, nil)
             }
         })
@@ -112,7 +114,7 @@ final class NetworkHandling {
                 // Success
                 if debug {
                     let statusCode = (response as! HTTPURLResponse).statusCode
-                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print("[Accord] URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.url as Any)
                 }
@@ -124,7 +126,7 @@ final class NetworkHandling {
 
             }
             else {
-                print("URL Session Task Failed: %@", error!.localizedDescription);
+                print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
                 return completion(false, nil)
             }
         })
@@ -168,7 +170,7 @@ final class NetworkHandling {
             if (error == nil) && (data != nil) {
                 return
             } else {
-                print("URL Session Task Failed: %@", error!.localizedDescription);
+                print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
         task.resume()
@@ -206,7 +208,7 @@ final class NetworkHandling {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
                 if debug {
-                    print("URL Session Task Succeeded: HTTP \(statusCode)")
+                    print("[Accord] URL Session Task Succeeded: HTTP \(statusCode)")
                     print(request.allHTTPHeaderFields as Any)
                     print(request.httpBody as Any)
                 }
@@ -216,7 +218,7 @@ final class NetworkHandling {
                     return completion(false, nil)
                 }
             } else {
-                print("URL Session Task Failed: %@", error!.localizedDescription);
+                print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
             }
         })
         task.resume()

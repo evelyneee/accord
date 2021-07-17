@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum club {
+enum guild {
     case id
     case name
     case members
@@ -45,14 +45,14 @@ final class GuildManager {
         }
         return returnArray
     }
-    func getGuild(clubid: String, array: [[String:Any]], type: club) -> [Any] {
+    func getGuild(guildid: String, array: [[String:Any]], type: guild) -> [Any] {
         var _: [Any] = []
 
         _ = false
         switch type {
         case .id:
             for (_, guild) in array.enumerated() {
-                if (guild["id"] as! String) == clubid {
+                if (guild["id"] as! String) == guildid {
                     let ids = (guild["channels"] as? [[String:Any]] ?? []).compactMap { elem -> Any? in
                         if (elem["type"] as? Int ?? 2) != 4 {
                             return elem["id"]
@@ -66,7 +66,7 @@ final class GuildManager {
             }
         case .name:
             for (_, guild) in array.enumerated() {
-                if (guild["id"] as! String) == clubid {
+                if (guild["id"] as! String) == guildid {
                     let names = (guild["channels"] as? [[String:Any]] ?? []).compactMap { elem -> Any? in
                         if (elem["type"] as? Int ?? 2) != 4 {
                             return elem["name"]

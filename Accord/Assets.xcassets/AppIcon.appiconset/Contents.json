@@ -26,31 +26,31 @@
       "size" : "128x128"
     },
     {
-      "filename" : "icontest3-1.png",
+      "filename" : "Accord@0.25x-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "icontest3.png",
+      "filename" : "Accord@0.25x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "icontest@256.png",
+      "filename" : "Accord@0.5x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "icontest@256-1.png",
+      "filename" : "Accord@0.5x-1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "icontest@1024.png",
+      "filename" : "Accord@1x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

@@ -9,11 +9,7 @@ import SwiftUI
 import AVKit
 import Combine
 
-struct AttachmentView: View, Equatable {
-    static func == (lhs: AttachmentView, rhs: AttachmentView) -> Bool {
-        return lhs.media == rhs.media
-    }
-    
+struct AttachmentView: View {
     @Binding var media: [AttachedFiles?]
     @State var currentImage: NSImage = NSImage()
     @State var animatedImages: [NSImage]? = []
@@ -22,6 +18,7 @@ struct AttachmentView: View, Equatable {
     @State var setinterval: Double = 1
     @State var value: Int = 0
     @State var timer: Timer?
+    let attachmentQueue = DispatchQueue(label: "AttachmentQueue")
     var body: some View {
         VStack {
             ForEach(0..<media.count, id: \.self) { index in
@@ -37,7 +34,7 @@ struct AttachmentView: View, Equatable {
                                 } else {
                                     Text("...")
                                         .onAppear {
-                                            DispatchQueue.main.async {
+                                            attachmentQueue.async {
                                                 currentImage = NSImage()
                                                 NetworkHandling.shared?.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
                                                     if success,
@@ -78,7 +75,11 @@ struct AttachmentView: View, Equatable {
                 }
 
             }
+            .onChange(of: media) { newValue in
+                media = newValue
+            }
         }
+        
     }
 }
 

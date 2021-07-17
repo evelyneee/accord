@@ -82,6 +82,7 @@ class ImageLoaderAndCache: ObservableObject {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
                 if let data = cache?.cachedResponse(for: request)?.data {
                     DispatchQueue.main.async {
+                        print("cached")
                         self?.imageData = data
                     }
                 } else {
@@ -90,6 +91,7 @@ class ImageLoaderAndCache: ObservableObject {
                         let cachedData = CachedURLResponse(response: response, data: data)
                             cache?.storeCachedResponse(cachedData, for: request)
                             DispatchQueue.main.async {
+                                print("network")
                                 self?.imageData = data
                             }
                         }
@@ -101,7 +103,7 @@ class ImageLoaderAndCache: ObservableObject {
     }
     
     deinit {
-        print("unloaded image")
+        print("[Accord] unloaded image")
     }
 }
 

@@ -42,7 +42,7 @@ final class KeychainManager {
         return swiftString
     }
     deinit {
-        print("login done")
+        print("[Accord] login done")
     }
 }
 

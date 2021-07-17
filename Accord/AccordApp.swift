@@ -22,6 +22,16 @@ public func print(_ object: Any) {
     #endif
 }
 
+public func releaseModePrint(_ object: Any...) {
+    for item in object {
+        Swift.print(item)
+    }
+}
+
+public func releaseModePrint(_ object: Any) {
+    Swift.print(object)
+}
+
 @main
 struct AccordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

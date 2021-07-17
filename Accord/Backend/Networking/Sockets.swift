@@ -35,7 +35,7 @@ final class WebSocketHandler {
         ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg")!)
         ClassWebSocketTask.resume()
         ClassWebSocketTask.maximumMessageSize = 999999999
-        print("Socket initiated")
+        releaseModePrint("[Accord] Socket initiated")
     }
 
     class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
@@ -50,7 +50,7 @@ final class WebSocketHandler {
             receive()
             WebSocketHandler.shared?.connected = true
         } else {
-            print("already connected, continuing")
+            print("[Accord] already connected, continuing")
         }
 
         func reconnect() {
@@ -67,7 +67,7 @@ final class WebSocketHandler {
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 webSocketTask?.send(.string(jsonString)) { error in
                     if let error = error {
-                        print("WebSocket sending error: \(error)")
+                        print("[Accord] WebSocket sending error: \(error)")
                     }
                 }
             }
@@ -90,7 +90,7 @@ final class WebSocketHandler {
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 webSocketTask?.send(.string(jsonString)) { error in
                     if let error = error {
-                        print("WebSocket sending error: \(error)")
+                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
                     }
                 }
             }
@@ -111,7 +111,7 @@ final class WebSocketHandler {
                 webSocketTask?.send(.string(jsonString)) { error in
                     receive()
                     if let error = error {
-                        print("WebSocket sending error: \(error)")
+                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
                     }
                 }
             }
@@ -128,9 +128,9 @@ final class WebSocketHandler {
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 webSocketTask?.send(.string(jsonString)) { error in
                     if let error = error {
-                        print("WebSocket sending error: \(error)")
+                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
                     }
-                    print("heartbeat")
+                    print("[Accord] heartbeat")
                     WebSocketHandler.shared?.requests += 1
                     DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared?.heartbeat_interval ?? 0), execute: {
                         heartbeat()
@@ -147,9 +147,9 @@ final class WebSocketHandler {
             webSocketTask?.sendPing { error in
                 WebSocketHandler.shared?.requests += 1
                 if let error = error {
-                    print("Error when sending PING \(error)")
+                    releaseModePrint("[Accord] Error when sending PING \(error)")
                 } else {
-                    print("Web Socket connection is alive")
+                    print("[Accord] Web Socket connection is alive")
                     sleep(3)
                     ping()
                 }
@@ -176,11 +176,11 @@ final class WebSocketHandler {
 
                         }
                     @unknown default:
-                        print("unknown")
+                        print("[Accord] unknown")
                         break
                     }
                 case .failure(let error):
-                    print("Error when init receiving \(error)")
+                    print("[Accord] Error when init receiving \(error)")
                 }
             }
         }
@@ -194,7 +194,7 @@ final class WebSocketHandler {
                     case .success(let message):
                         switch message {
                         case .data(let data):
-                            print("Data received \(data)")
+                            print("[Accord] Data received \(data)")
                         case .string(let text):
                             if let textData = text.data(using: String.Encoding.utf8) {
                                 let payload = decodePayload(payload: textData)
@@ -202,18 +202,18 @@ final class WebSocketHandler {
                                     WebSocketHandler.shared?.seq = payload["s"] as? Int
                                 } else {
                                     if (payload["op"] as? Int ?? 0) != 11 {
-                                        print("RECONNECT")
+                                        print("[Accord] RECONNECT")
                                         reconnect()
                                         sleep(2)
                                     } else {
-                                        print("HEARTBEAT SUCCESSFUL")
+                                        print("[Accord] HEARTBEAT SUCCESSFUL")
                                     }
                                 }
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
                                     let data = payload["d"] as! [String: Any]
                                     let user = data["user"] as! [String: Any]
-                                    print("Gateway ready (\(data["v"] as! Int), \(user["username"] as! String)#\(user["discriminator"] as! String))")
+                                    releaseModePrint("[Accord] Gateway ready (\(data["v"] as! Int), \(user["username"] as! String)#\(user["discriminator"] as! String))")
                                     WebSocketHandler.shared?.session_id = data["session_id"] as? String
                                     completion(true, data)
                                     break
@@ -225,7 +225,7 @@ final class WebSocketHandler {
                                 case "CHANNEL_PINS_UPDATE": break
 
                                 // MARK: Guild Event Handlers
-                                case "GUILD_CREATE": print("something was created"); break
+                                case "GUILD_CREATE": print("[Accord] something was created"); break
                                 case "GUILD_UPDATE": break
                                 case "GUILD_DELETE": break
                                 case "GUILD_BAN_ADD": break
@@ -261,7 +261,7 @@ final class WebSocketHandler {
                                         }
                                     }
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
-                                        print("NOTIFICATION SENDING NOW")
+                                        print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
                                     }
                                     break
@@ -281,10 +281,10 @@ final class WebSocketHandler {
                                         }
                                     }
                                     break
-                                case "MESSAGE_REACTION_ADD": print("something was created"); break
-                                case "MESSAGE_REACTION_REMOVE": print("something was created"); break
-                                case "MESSAGE_REACTION_REMOVE_ALL": print("something was created"); break
-                                case "MESSAGE_REACTION_REMOVE_EMOJI": print("something was created"); break
+                                case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
+                                case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
+                                case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
+                                case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
 
                                 // MARK: Presence Event Handlers
                                 case "PRESENCE_UPDATE": break
@@ -309,11 +309,11 @@ final class WebSocketHandler {
                             }
                             receive() // call back the function, creating a loop
                         @unknown default:
-                            print("unknown")
+                            print("[Accord] unknown")
                         }
                 case .failure(let error):
-                    print("Error when receiving loop \(error)")
-                    print("RECONNECT")
+                    print("[Accord] Error when receiving loop \(error)")
+                    print("[Accord] RECONNECT")
                     reconnect()
                 }
             }
@@ -342,10 +342,10 @@ final class WebSocketHandler {
                             }
                         }
                     @unknown default:
-                        print("unknown")
+                        print("[Accord] unknown")
                     }
                 case .failure(let error):
-                    print("Error when receiving massive \(error)")
+                    print("[Accord] Error when receiving massive \(error)")
                 }
             }
         }
@@ -376,7 +376,7 @@ final class WebSocketHandler {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask.send(.string(jsonString)) { error in
                 if let error = error {
-                    print("WebSocket sending error: \(error)")
+                    print("[Accord] WebSocket sending error: \(error)")
                 }
             }
         }
@@ -395,7 +395,7 @@ final class WebSocketHandler {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask?.send(.string(jsonString)) { error in
                 if let error = error {
-                    print("WebSocket sending error: \(error)")
+                    print("[Accord] WebSocket sending error: \(error)")
                 }
                 return
             }
@@ -413,7 +413,7 @@ final class WebSocketHandler {
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             self.ClassWebSocketTask.send(.string(jsonString)) { error in
-                print("SENT \(jsonString)")
+                print("[Accord] SENT \(jsonString)")
                 self.ClassWebSocketTask.receive { result in
                     switch result {
                     case .success(let message):
@@ -424,15 +424,15 @@ final class WebSocketHandler {
                             print(text, "MEMBER CHUNK")
                             break
                         @unknown default:
-                            print("unknown")
+                            print("[Accord] unknown")
                             break
                         }
                     case .failure(let error):
-                        print("Error when init receiving \(error)")
+                        print("[Accord] Error when init receiving \(error)")
                     }
                 }
                 if let error = error {
-                    print("WebSocket sending error: \(error)")
+                    print("[Accord] WebSocket sending error: \(error)")
                 }
             }
         }
@@ -445,44 +445,44 @@ protocol URLQueryParameterStringConvertible {
 
 class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("Web Socket did connect")
+        print("[Accord] Web Socket did connect")
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("Web Socket did disconnect")
+        print("[Accord] Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
-        print("Error from Discord: \(reason)")
+        print("[Accord] Error from Discord: \(reason)")
         switch closeCode {
         case .invalid:
             fatalError("Socket closed because payload was invalid")
         case .normalClosure:
-            print("Socket closed because connection was closed")
+            print("[Accord] Socket closed because connection was closed")
             fatalError(reason)
         case .goingAway:
-            print("Socket closed because connection was closed")
+            print("[Accord] Socket closed because connection was closed")
             fatalError(reason)
         case .protocolError:
-            print("Socket closed because there was a protocol error")
+            print("[Accord] Socket closed because there was a protocol error")
         case .unsupportedData:
-            print("Socket closed input/output data was unsupported")
+            print("[Accord] Socket closed input/output data was unsupported")
         case .noStatusReceived:
-            print("Socket closed no status was received")
+            print("[Accord] Socket closed no status was received")
         case .abnormalClosure:
-            print("Socket closed, there was an abnormal closure")
+            print("[Accord] Socket closed, there was an abnormal closure")
         case .invalidFramePayloadData:
-            print("Socket closed the frame data was invalid")
+            print("[Accord] Socket closed the frame data was invalid")
         case .policyViolation:
-            print("Socket closed: Policy violation")
+            print("[Accord] Socket closed: Policy violation")
         case .messageTooBig:
-            print("Socket closed because the message was too big")
+            print("[Accord] Socket closed because the message was too big")
         case .mandatoryExtensionMissing:
-            print("Socket closed because an extension was missing")
+            print("[Accord] Socket closed because an extension was missing")
         case .internalServerError:
             fatalError("Socket closed because there was an internal server error")
         case .tlsHandshakeFailure:
-            print("Socket closed because the tls handshake failed")
+            print("[Accord] Socket closed because the tls handshake failed")
         @unknown default:
-            print("Socket closed for unknown reason")
+            print("[Accord] Socket closed for unknown reason")
         }
     }
 }

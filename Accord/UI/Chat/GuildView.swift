@@ -37,11 +37,13 @@ private func deleteMessage(_ channelID: String, _ id: String) {
 }
 
 struct GuildView: View, Equatable {
+    
+    // MARK: Equatable protocol
     static func == (lhs: GuildView, rhs: GuildView) -> Bool {
         return lhs.data == rhs.data
     }
     
-    @Binding var clubID: String
+    @Binding var guildID: String
     @Binding var channelID: String
     @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
@@ -63,6 +65,7 @@ struct GuildView: View, Equatable {
             List {
                 LazyVStack {
                     Spacer().frame(height: 93)
+                    // MARK: Sending animation
                     if (sending) && chatTextFieldContents != "" {
                         if let temp = chatTextFieldContents {
                             HStack(alignment: .top) {
@@ -84,7 +87,10 @@ struct GuildView: View, Equatable {
 
                         }
                     }
+                    // Loop through Message objects.
+                    // MARK: Message loop
                     ForEach(Array((data)), id: \.self) { message in
+                        /// get index of message (fixes the index out of range)
                         if let offset = data.firstIndex(of: message) {
                             if data.contains(data[offset]) {
                                 LazyVStack(alignment: .leading) {
@@ -117,14 +123,12 @@ struct GuildView: View, Equatable {
                                     }
                                     HStack(alignment: .top) {
                                         VStack {
-                                            if offset != data.count - 1 {
-                                                if message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "") {
-                                                    Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 33, height: 33)
-                                                        .padding(.horizontal, 5)
-                                                        .clipShape(Circle())
-                                                }
+                                            if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
+                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 33, height: 33)
+                                                    .padding(.horizontal, 5)
+                                                    .clipShape(Circle())
                                             } else {
                                                 Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
                                                     .scaledToFit()
@@ -176,15 +180,13 @@ struct GuildView: View, Equatable {
                                         }
                                         Spacer()
                                     }
-                                    if let attachment = message.attachments {
-                                        if attachment.isEmpty == false {
-                                            HStack {
-                                                AttachmentView(media: $data[offset].attachments).equatable()
-                                                Spacer()
-                                            }
-                                            .frame(maxWidth: 400, maxHeight: 300)
-                                            .padding(.leading, 52)
+                                    if message.attachments.isEmpty == false {
+                                        HStack {
+                                            AttachmentView(media: $data[offset].attachments)
+                                            Spacer()
                                         }
+                                        .frame(maxWidth: 400, maxHeight: 300)
+                                        .padding(.leading, 52)
                                     }
                                 }
                                 .rotationEffect(.radians(.pi))
@@ -210,36 +212,24 @@ struct GuildView: View, Equatable {
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
-                if !(typing.isEmpty) {
-                    if typing.count == 1 {
-                        if channelID != "@me" {
-                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                                .padding(4)
-                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                .cornerRadius(5)
-                        } else {
-                            Text("\(channelName) is typing...")
-                                .padding(4)
-                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                .cornerRadius(5)
-                        }
+                if typing.count == 1 && !(typing.isEmpty) {
+                    if channelID != "@me" {
+                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
                     } else {
-                        if #available(macOS 12.0, *) {
-                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                                .lineLimit(0)
-                                .padding(4)
-                                .background(.thickMaterial) // blurred background
-                                .cornerRadius(5)
-                        } else {
-                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                                .lineLimit(0)
-                                .padding(4)
-                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                                .cornerRadius(5)
-                        }
+                        Text("\(channelName) is typing...")
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
                     }
-
-
+                } else if !(typing.isEmpty) {
+                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                        .lineLimit(0)
+                        .padding(4)
+                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                        .cornerRadius(5)
                 }
                 if #available(macOS 12.0, *) {
                     ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
@@ -256,8 +246,8 @@ struct GuildView: View, Equatable {
             .padding()
         }
         .onAppear {
-            if clubID != "@me" {
-                WebSocketHandler.shared?.subscribe(clubID, channelID)
+            if guildID != "@me" {
+                WebSocketHandler.shared?.subscribe(guildID, channelID)
             } else {
                 ChannelMembers.shared.channelMembers[channelID] = members
             }
@@ -274,9 +264,9 @@ struct GuildView: View, Equatable {
                                             print(pfpArray)
                                         }
                                     }
-                                    if clubID != "@me" {
+                                    if guildID != "@me" {
                                         let allUserIDs = data.map { $0.author?.id ?? "" }
-                                        WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: clubID) { success, users in
+                                        WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: guildID) { success, users in
                                             if success {
                                                 for person in users {
                                                     nicks[(person?.user.id ?? "")] = person?.nick ?? ""
@@ -320,7 +310,7 @@ struct GuildView: View, Equatable {
                 }
                 break
             case "EditedMessageIn\(channelID)":
-                print("\(channelName) is being updated")
+                print("[Accord] \(channelName) is being updated")
                 concurrentQueue.async {
                     let currentUIDDict = data.map { $0.id }
                     if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) {
@@ -331,7 +321,7 @@ struct GuildView: View, Equatable {
                 }
                 break
             case "DeletedMessageIn\(channelID)":
-                print("\(channelName) is being updated")
+                print("[Accord] \(channelName) is being updated")
                 let currentUIDDict = data.map { $0.id }
                 if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["DeletedMessageIn\(channelID)"] as! Data) {
                     if let message = gatewayMessage.d {
@@ -342,25 +332,25 @@ struct GuildView: View, Equatable {
                     }
                 }
             case "TypingStartIn\(channelID)":
-                print("typing 1")
+                print("[Accord] typing 1")
                 concurrentQueue.async {
                     if let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] {
-                        print("typing 2")
+                        print("[Accord] typing 2")
                         if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
-                            print("typing 3")
+                            print("[Accord] typing 3")
                             let memberData = try! JSONSerialization.data(withJSONObject: packet, options: [])
                             let memberDecodable = try! JSONDecoder().decode(TypingEvent.self, from: memberData)
-                            if let nick = memberDecodable.member.nick {
-                                print("typing 4", nick)
+                            if let nick = memberDecodable.member?.nick {
+                                print("[Accord] typing 4", nick)
                                 typing.append(nick)
                                 DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
                                     typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
                                 })
                             } else {
-                                print("typing 4", memberDecodable.member.user.username )
-                                typing.append(memberDecodable.member.user.username )
+                                print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
+                                typing.append(memberDecodable.member?.user.username ?? "")
                                 DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                    typing.remove(at: typing.firstIndex(of: memberDecodable.member.user.username ) ?? 0)
+                                    typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
                                 })
                             }
                         }
@@ -407,7 +397,7 @@ struct ChatControls: View {
                             case true:
                                 break
                             case false:
-                                print("whoop")
+                                print("[Accord] whoop")
                                 break
                             }
                         }
@@ -548,14 +538,21 @@ extension ControlActionClosureProtocol {
 
 extension NSControl: ControlActionClosureProtocol {}
 
+/// Guild popout window
+/// Add parameters to show up
+/// - guildID
+/// - channelID
+/// - channelName
+/// TODO: Add better animation
 
-func showWindow(clubID: String, channelID: String, channelName: String) {
+
+func showWindow(guildID: String, channelID: String, channelName: String) {
     var windowRef: NSWindow
     windowRef = cuteWindow(
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false)
-    windowRef.contentView = NSHostingView(rootView: GuildView(clubID: Binding.constant(clubID), channelID: Binding.constant(channelID), channelName: Binding.constant(channelName)))
+    windowRef.contentView = NSHostingView(rootView: GuildView(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), channelName: Binding.constant(channelName)))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
     windowRef.title = "\(channelName) - Accord"
