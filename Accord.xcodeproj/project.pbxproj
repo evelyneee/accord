@@ -17,6 +17,7 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
+		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A825213C2688A1800073F640 /* Roles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A825213B2688A1800073F640 /* Roles.swift */; };
@@ -66,6 +67,9 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
+		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
+		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
+		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A825213B2688A1800073F640 /* Roles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Roles.swift; path = Accord/Backend/Objects/Roles.swift; sourceTree = SOURCE_ROOT; };
@@ -133,6 +137,8 @@
 			isa = PBXGroup;
 			children = (
 				32F4C957256D7D3300343BB3 /* Accord.app */,
+				49F29FAE26A0A52900C1205A /* Accord */,
+				49F29FAF26A0A53B00C1205A /* Accord.deb */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -150,6 +156,7 @@
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
+				49F29FAC26A0A47300C1205A /* control */,
 			);
 			path = Accord;
 			sourceTree = "<group>";
@@ -254,6 +261,7 @@
 				32F4C954256D7D3300343BB3 /* Frameworks */,
 				32F4C955256D7D3300343BB3 /* Resources */,
 				32ADD59925839980008D1715 /* Embed App Extensions */,
+				49F29FAB26A0A44900C1205A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -305,11 +313,34 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49F29FAD26A0A47300C1205A /* control in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		49F29FAB26A0A44900C1205A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FULL_PRODUCT_NAME)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/zsh --login";
+			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\nmkdir -p \"./layout/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"${FULL_PRODUCT_NAME_NO_EXTENSION}.deb\"\nrm -rf \"./layout\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		32F4C953256D7D3300343BB3 /* Sources */ = {

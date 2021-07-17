@@ -1,0 +1,8 @@
+Package: com.johnnyappleseed.appletrees
+Name: AppleTrees
+Version: 1.0.0
+Maintainer: Johnny Appleseed
+Description: Apple trees for all!
+Architecture: iphoneos-arm
+Depends: firmware (>= 13.0)
+Section: Applications
