@@ -22,7 +22,7 @@ struct ContentView: View {
                     DispatchQueue.main.async {
                         NetworkHandling.shared?.request(url: "\(rootURL)/users/@me/guilds", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, array in
                             if success == true {
-                                guilds = array ?? []
+                                guilds = array!
                             }
                         }
                     }

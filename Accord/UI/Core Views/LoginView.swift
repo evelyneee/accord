@@ -29,7 +29,6 @@ struct LoginView: View {
             Button(action: {
                 print("[Accord] logging in")
                 NetworkHandling.shared?.login(username: email, password: password) { success, array in
-
                     if success {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let checktoken = returnArray["token"] as? String {

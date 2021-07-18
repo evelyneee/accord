@@ -203,7 +203,7 @@ final class NetworkHandling {
 
 
 
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
+        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
@@ -220,7 +220,6 @@ final class NetworkHandling {
             } else {
                 print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
             }
-        })
-        task.resume()
+        }).resume()
     }
 }
