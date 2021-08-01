@@ -78,18 +78,24 @@ class ImageLoaderAndCache: ObservableObject {
 
     init(imageURL: String) {
         imageQueue.async { [weak self] in
+            let config = URLSessionConfiguration.default
+            config.urlCache = cache
+            let session = URLSession(configuration: config)
+            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
+            let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
             if let url = URL(string: imageURL) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                if let data = cache?.cachedResponse(for: request)?.data {
+                if let data = cache.cachedResponse(for: request)?.data {
                     DispatchQueue.main.async {
                         print("cached")
                         self?.imageData = data
                     }
                 } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                    session.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
-                            cache?.storeCachedResponse(cachedData, for: request)
+                            cache.storeCachedResponse(cachedData, for: request)
                             DispatchQueue.main.async {
                                 print("network")
                                 self?.imageData = data

@@ -17,6 +17,19 @@ extension Dictionary {
     }
 }
 
+public extension NSImage {
+
+    func decodedImage() -> NSImage {
+        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        let size = CGSize(width: cgImage?.width ?? 40, height: cgImage?.height ?? 40)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: cgImage!.bytesPerRow, space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        context?.draw(cgImage!, in: CGRect(origin: .zero, size: size))
+        guard let decodedImage = context?.makeImage() else { return self }
+        return NSImage(cgImage: decodedImage, size: NSSize(width: cgImage?.width ?? 40, height: cgImage?.height ?? 40))
+    }
+}
+
 class cuteWindow: NSWindow {
     override func close() {
         self.contentView?.viewWillStartLiveResize()

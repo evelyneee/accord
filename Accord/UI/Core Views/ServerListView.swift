@@ -68,9 +68,9 @@ struct ServerListView: View {
                                 })
                         } else {
                             Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                                .scaledToFit()
                                 .frame(width: 45, height: 45)
                                 .cornerRadius(23.5)
-                                .scaledToFit()
                                 .onTapGesture(count: 1, perform: {
                                     withAnimation {
                                         DispatchQueue.main.async {
@@ -98,7 +98,8 @@ struct ServerListView: View {
                     })
                 }
                 .frame(width: 80)
-                .buttonStyle(PlainButtonStyle())
+                .listStyle(SidebarListStyle())
+                .buttonStyle(BorderlessButtonStyle())
                 Divider()
                 if selectedServer == nil {
                     VStack {

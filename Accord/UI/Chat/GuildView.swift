@@ -89,7 +89,7 @@ struct GuildView: View, Equatable {
                     }
                     // Loop through Message objects.
                     // MARK: Message loop
-                    ForEach(Array((data)), id: \.self) { message in
+                    ForEach(Array((data)), id: \.id) { message in
                         /// get index of message (fixes the index out of range)
                         if let offset = data.firstIndex(of: message) {
                             if data.contains(data[offset]) {
@@ -183,6 +183,7 @@ struct GuildView: View, Equatable {
                                         .padding(.leading, 52)
                                     }
                                 }
+                                .id(message.id)
                                 .rotationEffect(.radians(.pi))
                                 .scaleEffect(x: -1, y: 1, anchor: .center)
                             }
