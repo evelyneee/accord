@@ -14,6 +14,7 @@ struct LoginView: View {
     @State var email: String = ""
     @State var password: String = ""
     @State var twofactor: String = ""
+    @State var token: String = ""
     @State var captcha: Bool = false
     @State var captchaVCKey: String?
     @State var captchaPayload: String?
@@ -26,25 +27,55 @@ struct LoginView: View {
             TextField("Email", text: $email)
             TextField("Password", text: $password)
             TextField("2fa code", text: $twofactor)
+            Text("Login with token instead")
+                .font(.title3)
+                .fontWeight(.semibold)
+            TextField("token", text: $token)
             Button(action: {
-                print("[Accord] logging in")
-                NetworkHandling.shared?.login(username: email, password: password) { success, array in
-                    if success {
-                        if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
-                            if let checktoken = returnArray["token"] as? String {
-                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                self.shown.wrappedValue.dismiss()
-                            } else {
-                                let captchaKey = returnArray["captcha_sitekey"]!
-                                self.captchaVCKey = captchaKey as? String ?? ""
-                                captchaPublicKey = captchaVCKey!
-                                captcha = true
+                if token != "" {
+                    _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                    AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    self.shown.wrappedValue.dismiss()
+                } else {
+                    NetworkHandling.shared?.login(username: email, password: password) { success, array in
+                        if success {
+                            if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
+                                if let checktoken = returnArray["token"] as? String {
+                                    _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                    AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                    self.shown.wrappedValue.dismiss()
+                                } else {
+                                    print("[Login debug] Captcha demanded \(returnArray)")
+                                    if let captchaKey = returnArray["captcha_sitekey"] {
+                                        self.captchaVCKey = captchaKey as? String ?? ""
+                                        captchaPublicKey = captchaVCKey!
+                                        captcha = true
+                                    } else if let ticket = returnArray["ticket"] as? String {
+                                        print("[Login debug] Got ticket")
+                                        sleep(2)
+                                        NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                            if success {
+                                                print("[Accord] log in kek")
+                                                print(String(decoding: data_login!, as: UTF8.self))
+                                                if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
+                                                    if let checktoken = loginReturnArray["token"] as? String {
+                                                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                                        captcha = false
+                                                        self.shown.wrappedValue.dismiss()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        }
 
+                        }
                     }
+
                 }
+                print("[Accord] logging in")
                 
             }) {
                 HStack {
@@ -70,6 +101,7 @@ struct LoginView: View {
                     if success {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let ticket = returnArray["ticket"] as? String {
+                                print("[Login debug] Got ticket")
                                 sleep(2)
                                 NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
                                     if success {
@@ -122,7 +154,6 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
             webView.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
         ])
-        print(siteKey, "HUH")
         if siteKey != "" {
             print(generateHTML(self.siteKey), siteKey)
             webView.loadHTMLString(generateHTML(self.siteKey), baseURL: URL(string: "https://discord.com")!)

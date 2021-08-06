@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public var roleColors: [String:Int] = [:]
+public var roleColors: [String:(Int, Int)] = [:]
 
 final class AllEmotes {
     static var shared = AllEmotes()
@@ -82,6 +82,33 @@ struct ServerListView: View {
 
                     }
                     Divider()
+                    #if DEBUG
+                    if (selectedServer ?? 0) == 1111 {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "ant")
+                        }
+                        .frame(width: 45, height: 45)
+                        .cornerRadius(15)
+                        .onTapGesture(count: 1, perform: {
+                            DispatchQueue.main.async {
+                                selectedServer = 1111
+                            }
+                        })
+                    } else {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "ant")
+                        }
+                        .frame(width: 45, height: 45)
+                        .cornerRadius(23.5)
+                        .onTapGesture(count: 1, perform: {
+                            DispatchQueue.main.async {
+                                selectedServer = 1111
+                            }
+                        })
+                    }
+                    #endif
                     ZStack(alignment: .bottomTrailing) {
                         Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
                             .scaledToFit()
@@ -128,7 +155,7 @@ struct ServerListView: View {
                         List {
                             Text("Messages")
                                 .fontWeight(.bold)
-                                .font(.title2)
+                                .font(.title2) 
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
                                 NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index]["id"] as! String), channelName: Binding.constant(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") }).map{ "\($0)" }.joined(separator: ", ") ), members: Dictionary(uniqueKeysWithValues: zip(((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["id"] as? String ?? "") }), ((privateChannels[index]["recipients"] as? [[String:Any]] ?? []).map { ($0["username"] as? String ?? "") })))).equatable(), tag: (Int(privateChannels[index]["id"] as! String) ?? 0), selection: self.$selection) {
@@ -165,6 +192,14 @@ struct ServerListView: View {
 
                         }
                     }
+                } else if (selectedServer ?? 0) == 1111 {
+                    #if DEBUG
+                    List(logs, id: \.self) { log in
+                        Text(log)
+                            .font(.system(.body, design: .monospaced))
+                    }
+                    .background(Color.primary.colorInvert())
+                    #endif
                 } else {
                     if guilds.isEmpty == false {
                         List {

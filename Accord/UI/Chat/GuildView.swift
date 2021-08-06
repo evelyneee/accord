@@ -66,26 +66,23 @@ struct GuildView: View, Equatable {
                 LazyVStack {
                     Spacer().frame(height: 93)
                     // MARK: Sending animation
-                    if (sending) && chatTextFieldContents != "" {
-                        if let temp = chatTextFieldContents {
-                            HStack(alignment: .top) {
-                                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                    .scaledToFit()
-                                    .frame(width: 33, height: 33)
-                                    .padding(.horizontal, 5)
-                                    .clipShape(Circle())
-                                VStack(alignment: .leading) {
-                                    Text(username)
-                                        .fontWeight(.semibold)
-                                    Text(temp)
-                                }
-                                Spacer()
+                    if (sending) && chatTextFieldContents != "", let temp = chatTextFieldContents {
+                        HStack(alignment: .top) {
+                            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                .scaledToFit()
+                                .frame(width: 33, height: 33)
+                                .padding(.horizontal, 5)
+                                .clipShape(Circle())
+                            VStack(alignment: .leading) {
+                                Text(username)
+                                    .fontWeight(.semibold)
+                                Text(temp)
                             }
-                            .rotationEffect(.radians(.pi))
-                            .scaleEffect(x: -1, y: 1, anchor: .center)
-                            .opacity(0.75)
-
+                            Spacer()
                         }
+                        .rotationEffect(.radians(.pi))
+                        .scaleEffect(x: -1, y: 1, anchor: .center)
+                        .opacity(0.75)
                     }
                     // Loop through Message objects.
                     // MARK: Message loop
@@ -131,8 +128,8 @@ struct GuildView: View, Equatable {
                                                     .clipShape(Circle())
                                             }
                                         }
-                                        VStack(alignment: .leading) {
-                                            if let author = message.author?.username {
+                                        if let author = message.author?.username {
+                                            VStack(alignment: .leading) {
                                                 if offset != (data.count - 1) {
                                                     if author == (data[Int(offset + 1)].author?.username ?? "") {
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
@@ -142,9 +139,9 @@ struct GuildView: View, Equatable {
                                                             .fontWeight(.semibold)
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     } else {
-                                                        if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""] {
+                                                        if let roleColor = roleColors[(roles[message.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
                                                             Text(nicks[message.author?.id ?? ""] ?? author)
-                                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                                .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                                                                 .fontWeight(.semibold)
                                                             FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                         } else {
@@ -159,7 +156,7 @@ struct GuildView: View, Equatable {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .fontWeight(.semibold)
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                    } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""] {
+                                                    } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""]?.0 {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
@@ -170,6 +167,7 @@ struct GuildView: View, Equatable {
                                                         FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                     }
                                                 }
+
                                             }
                                         }
                                         Spacer()
@@ -208,17 +206,10 @@ struct GuildView: View, Equatable {
             .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
                 if typing.count == 1 && !(typing.isEmpty) {
-                    if channelID != "@me" {
-                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing...")
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
-                    } else {
-                        Text("\(channelName) is typing...")
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
-                    }
+                    Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
+                        .padding(4)
+                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                        .cornerRadius(5)
                 } else if !(typing.isEmpty) {
                     Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
                         .lineLimit(0)
@@ -299,13 +290,30 @@ struct GuildView: View, Equatable {
                     for person in users {
                         if let nickname = person?.nick {
                             nicks[(person?.user.id ?? "")] = nickname
-                            roles[(person?.user.id ?? "")] = person?.roles ?? []
+                            var rolesTemp: [String] = []
+                            for _ in 0..<100 {
+                                rolesTemp.append("empty")
+                            }
+                            for role in (person?.roles as! [String]) {
+                                let index = roleColors[role]?.1 ?? 0
+                                print(index)
+                                rolesTemp[roleColors[role]?.1 ?? 0] = role
+                            }
+                            rolesTemp = rolesTemp.compactMap { role -> String? in
+                                if role == "empty" {
+                                    return nil
+                                } else {
+                                    return role
+                                }
+                            }
+                            rolesTemp = rolesTemp.reversed()
+                            roles[(person?.user.id ?? "")] = rolesTemp
                         }
                     }
                 }
                 break
             case "EditedMessageIn\(channelID)":
-                print("[Accord] \(channelName) is being updated")
+                print("[Accord] \(channelName) was being updated")
                 concurrentQueue.async {
                     let currentUIDDict = data.map { $0.id }
                     if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) {
@@ -344,7 +352,7 @@ struct GuildView: View, Equatable {
                             } else {
                                 print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
                                 typing.append(memberDecodable.member?.user.username ?? "")
-                                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                                DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
                                     typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
                                 })
                             }
@@ -408,7 +416,7 @@ struct ChatControls: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .popover(isPresented: $nitroless, content: {
-                        NitrolessView(chatText: $chatTextFieldContents)
+                        NitrolessView(chatText: $chatTextFieldContents).equatable()
                             .frame(width: 300, height: 400)
                     })
                     Button(action: {
@@ -418,7 +426,7 @@ struct ChatControls: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .popover(isPresented: $emotes, content: {
-                        EmotesView(chatText: $temporaryText)
+                        EmotesView(chatText: $temporaryText).equatable()
                             .frame(width: 300, height: 400)
                     })
                     .onChange(of: temporaryText) { newValue in

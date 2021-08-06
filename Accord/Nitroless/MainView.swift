@@ -28,7 +28,11 @@ struct EmoteButton: ButtonStyle {
 }
 
 // actual view
-struct NitrolessView: View {
+struct NitrolessView: View, Equatable {
+    static func == (lhs: NitrolessView, rhs: NitrolessView) -> Bool {
+        return true
+    }
+    
     @State var searchenabled = true
     var columns: [GridItem] = [
         GridItem(spacing: 1),

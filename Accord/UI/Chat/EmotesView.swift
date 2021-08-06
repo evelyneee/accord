@@ -8,7 +8,11 @@
 import SwiftUI
 
 // actual view
-struct EmotesView: View {
+struct EmotesView: View, Equatable {
+    static func == (lhs: EmotesView, rhs: EmotesView) -> Bool {
+        return true
+    }
+    
     @State var searchenabled = true
     var columns: [GridItem] = [
         GridItem(spacing: 0),
@@ -40,7 +44,7 @@ struct EmotesView: View {
                                         chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                     }) {
                                         VStack {
-                                            HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)")
+                                            HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()
                                                 .frame(width: 25, height: 25)
                                         }
                                         .frame(width: 30, height: 30)

@@ -5,12 +5,19 @@
 //  Created by evelyn on 2020-11-24.
 //
 
+import Foundation
 import SwiftUI
 import AppKit
+
+/// Use this variable to add a token to override keychain.
+let tokenOverride = ""
+
+public var logs: [String] = []
 
 public func print(_ object: Any...) {
     #if DEBUG
     for item in object {
+        logs.append(String(describing: item))
         Swift.print(item)
     }
     #endif
@@ -18,6 +25,7 @@ public func print(_ object: Any...) {
 
 public func print(_ object: Any) {
     #if DEBUG
+    logs.append(String(describing: object))
     Swift.print(object)
     #endif
 }
@@ -38,6 +46,11 @@ struct AccordApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear(perform: {
+                    if tokenOverride != "" {
+                        AccordCoreVars.init(tokenOverride)
+                    }
+                })
         }
     }
 }

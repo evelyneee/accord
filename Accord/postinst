@@ -1,0 +1,2 @@
+xattr -sc /opt/procursus/Applications/Accord.app/Contents/MacOS/Accord
+ln -s "/opt/procursus/Applications/Accord.app" "/Applications/Accord.app"

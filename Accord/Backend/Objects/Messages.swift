@@ -10,7 +10,11 @@ import SwiftUI
 
 let cache: URLCache? = URLCache.shared
 
-struct ImageWithURL: View {
+struct ImageWithURL: View, Equatable {
+    static func == (lhs: ImageWithURL, rhs: ImageWithURL) -> Bool {
+        return true
+    }
+    
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
 
@@ -28,7 +32,11 @@ struct ImageWithURL: View {
     }
 }
 
-struct Attachment: View {
+struct Attachment: View, Equatable {
+    static func == (lhs: Attachment, rhs: Attachment) -> Bool {
+        return true
+    }
+    
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
 
@@ -37,7 +45,7 @@ struct Attachment: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0))))
+        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
               .resizable()
               .scaledToFit()
               .onDisappear {
@@ -47,7 +55,11 @@ struct Attachment: View {
 
 }
 
-struct HoveredAttachment: View {
+struct HoveredAttachment: View, Equatable {
+    
+    static func == (lhs: HoveredAttachment, rhs: HoveredAttachment) -> Bool {
+        return true
+    }
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
     @State var hovering = false
@@ -57,7 +69,7 @@ struct HoveredAttachment: View {
     }
 
     var body: some View {
-        Image(nsImage: (NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0))))
+        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
               .resizable()
               .scaledToFit()
               .padding(2)

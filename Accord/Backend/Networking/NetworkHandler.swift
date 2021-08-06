@@ -12,7 +12,6 @@ let debug = false
 final class NetworkHandling {
     static var shared: NetworkHandling? = NetworkHandling()
 
-    // etf encoding
     func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let sessionConfig = URLSessionConfiguration.default
         let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
@@ -109,7 +108,7 @@ final class NetworkHandling {
             request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
 
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+        session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 if debug {
@@ -129,8 +128,7 @@ final class NetworkHandling {
                 print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
                 return completion(false, nil)
             }
-        })
-        task.resume()
+        }).resume()
     }
     func emptyRequest(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) {
         let sessionConfig = URLSessionConfiguration.default

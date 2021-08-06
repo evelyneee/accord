@@ -66,32 +66,31 @@ final class TextStuff {
             if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">" {
                 if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png") {
                     print(emoteURL, "EMOTE URL")
-                    if splitText.count == 1 {
-                        let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                        if let data = cache?.cachedResponse(for: request)?.data {
+                    let config = URLSessionConfiguration.default
+                    config.urlCache = cache
+                    let session = URLSession(configuration: config)
+                    let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+                    let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
+                    let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
+                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    if let data = cache.cachedResponse(for: request)?.data {
+                        if splitText.count == 1 {
                             textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                         } else {
-                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                if let data = data, let response = response {
-                                let cachedData = CachedURLResponse(response: response, data: data)
-                                    cache?.storeCachedResponse(cachedData, for: request)
-                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                                }
-                            }).resume()
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                         }
                     } else {
-                        let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                        if let data = cache?.cachedResponse(for: request)?.data {
-                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                        } else {
-                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                if let data = data, let response = response {
-                                let cachedData = CachedURLResponse(response: response, data: data)
-                                    cache?.storeCachedResponse(cachedData, for: request)
+                        session.dataTask(with: request, completionHandler: { (data, response, error) in
+                            if let data = data, let response = response {
+                            let cachedData = CachedURLResponse(response: response, data: data)
+                                cache.storeCachedResponse(cachedData, for: request)
+                                if splitText.count <= 3 {
+                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                } else {
                                     textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                                 }
-                            }).resume()
-                        }
+                            }
+                        }).resume()
                     }
                 }
             } else if (text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {

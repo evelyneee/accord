@@ -337,7 +337,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/zsh --login";
-			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\nmkdir -p \"./layout/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"me.evelyn.accord_1.0_darwin-amd64.deb\"\nrm -rf \"./layout\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout-arm64\"\nmkdir -p \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control-arm64\" \"./layout-arm64/DEBIAN/control\"\nmkdir -p \"./layout-arm64/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout-arm64/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout-arm64\" \"me.evelyn.accord_1.0_darwin-arm64.deb\"\nrm -rf \"./layout-arm64\"\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
+			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\nrm -rf \"${FULL_PRODUCT_NAME}/Contents/PkgInfo\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/postinst\" \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/prerm\" \"./layout/DEBIAN\"\n\nmkdir -p \"./layout/opt/procursus/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/opt/procursus/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"me.evelyn.accord_1.0.0_darwin-amd64.deb\"\nrm -rf \"./layout\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout-arm64\"\nmkdir -p \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control-arm64\" \"./layout-arm64/DEBIAN/control\"\n\ncp -a \"${SRCROOT}/${TARGET_NAME}/postinst\" \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/prerm\" \"./layout-arm64/DEBIAN\"\n\nmkdir -p \"./layout-arm64/opt/procursus/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout-arm64/opt/procursus/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout-arm64\" \"me.evelyn.accord_1.0.0_darwin-arm64.deb\"\nrm -rf \"./layout-arm64\"\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -504,6 +504,9 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DEVELOPMENT_TEAM = UUGF4RZ8S8;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -511,6 +514,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -526,6 +530,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DEVELOPMENT_TEAM = UUGF4RZ8S8;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -533,6 +541,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

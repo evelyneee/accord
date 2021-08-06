@@ -80,9 +80,13 @@ final class WebSocketHandler {
                     "capabilities":AnyEncodable(125),
                     "compress":AnyEncodable(false),
                     "properties": AnyEncodable([
-                        "os":AnyEncodable("macOS"),
+                        "os":AnyEncodable("Mac OS X"),
                         "browser":AnyEncodable("Discord Client"),
-                        "device":AnyEncodable("")
+                        "release_channel":AnyEncodable("canary"),
+                        "client_version":AnyEncodable("0.0.273"),
+                        "os_version":AnyEncodable("21.0.0"),
+                        "os_arch":AnyEncodable("x64"),
+                        "system-locale":AnyEncodable("en-US"),
                     ] as [String:AnyEncodable])
                 ] as [String:AnyEncodable])
             ]
@@ -312,7 +316,7 @@ final class WebSocketHandler {
                             print("[Accord] unknown")
                         }
                 case .failure(let error):
-                    print("[Accord] Error when receiving loop \(error)")
+                    releaseModePrint("[Accord] Error when receiving loop \(error)")
                     print("[Accord] RECONNECT")
                     reconnect()
                 }
@@ -376,7 +380,7 @@ final class WebSocketHandler {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask.send(.string(jsonString)) { error in
                 if let error = error {
-                    print("[Accord] WebSocket sending error: \(error)")
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
                 }
             }
         }
@@ -395,7 +399,7 @@ final class WebSocketHandler {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask?.send(.string(jsonString)) { error in
                 if let error = error {
-                    print("[Accord] WebSocket sending error: \(error)")
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
                 }
                 return
             }
@@ -432,7 +436,7 @@ final class WebSocketHandler {
                     }
                 }
                 if let error = error {
-                    print("[Accord] WebSocket sending error: \(error)")
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
                 }
             }
         }
@@ -445,44 +449,46 @@ protocol URLQueryParameterStringConvertible {
 
 class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("[Accord] Web Socket did connect")
+        releaseModePrint("[Accord] Web Socket did connect")
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("[Accord] Web Socket did disconnect")
+        releaseModePrint("[Accord] Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
         print("[Accord] Error from Discord: \(reason)")
+        // MARK: WebSocket close codes.
         switch closeCode {
         case .invalid:
-            fatalError("Socket closed because payload was invalid")
+            Swift.fatalError("Socket closed because payload was invalid")
         case .normalClosure:
-            print("[Accord] Socket closed because connection was closed")
-            fatalError(reason)
+            releaseModePrint("[Accord] Socket closed because connection was closed")
+            Swift.fatalError(reason)
         case .goingAway:
-            print("[Accord] Socket closed because connection was closed")
-            fatalError(reason)
+            releaseModePrint("[Accord] Socket closed because connection was closed")
+            Swift.fatalError(reason)
         case .protocolError:
-            print("[Accord] Socket closed because there was a protocol error")
+            releaseModePrint("[Accord] Socket closed because there was a protocol error")
         case .unsupportedData:
-            print("[Accord] Socket closed input/output data was unsupported")
+            releaseModePrint("[Accord] Socket closed input/output data was unsupported")
         case .noStatusReceived:
-            print("[Accord] Socket closed no status was received")
+            releaseModePrint("[Accord] Socket closed no status was received")
         case .abnormalClosure:
-            print("[Accord] Socket closed, there was an abnormal closure")
+            releaseModePrint("[Accord] Socket closed, there was an abnormal closure")
         case .invalidFramePayloadData:
-            print("[Accord] Socket closed the frame data was invalid")
+            releaseModePrint("[Accord] Socket closed the frame data was invalid")
         case .policyViolation:
-            print("[Accord] Socket closed: Policy violation")
+            releaseModePrint("[Accord] Socket closed: Policy violation")
         case .messageTooBig:
-            print("[Accord] Socket closed because the message was too big")
+            releaseModePrint("[Accord] Socket closed because the message was too big")
         case .mandatoryExtensionMissing:
             print("[Accord] Socket closed because an extension was missing")
         case .internalServerError:
-            fatalError("Socket closed because there was an internal server error")
+            Swift.fatalError("Socket closed because there was an internal server error")
         case .tlsHandshakeFailure:
-            print("[Accord] Socket closed because the tls handshake failed")
+            releaseModePrint("[Accord] Socket closed because the tls handshake failed")
         @unknown default:
-            print("[Accord] Socket closed for unknown reason")
+            releaseModePrint("[Accord] Socket closed for unknown reason")
         }
     }
 }
+
