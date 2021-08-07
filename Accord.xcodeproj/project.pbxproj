@@ -37,6 +37,7 @@
 		A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC5253268DF5AD00B7823E /* AttachmentView.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
+		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -89,6 +90,7 @@
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = "Accord/Backend/Keychain and Caching/Keychain.swift"; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = "Accord/UI/Core Views/ServerListView.swift"; sourceTree = SOURCE_ROOT; };
+		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +189,7 @@
 				32F37415257302C300ADB7E6 /* ProfileView.swift */,
 				32DC838A257FA71B004520AE /* SettingsView.swift */,
 				A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */,
+				A8DE781926BF1532004AC30C /* AccountManagerView.swift */,
 				A869085C269DDCE400F13CAD /* PopoverProfileView.swift */,
 			);
 			path = Profile;
@@ -368,6 +371,7 @@
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */,
+				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,

@@ -46,6 +46,7 @@ struct AccordApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(darkMode ? .dark : nil)
                 .onAppear(perform: {
                     if tokenOverride != "" {
                         AccordCoreVars.init(tokenOverride)

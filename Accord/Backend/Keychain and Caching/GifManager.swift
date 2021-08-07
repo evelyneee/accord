@@ -41,5 +41,3 @@ final class Gif: NSImage {
         return NSImage(cgImage: downScaledImage, size: CGSize(width: 40, height: 40))
     }
 }
- // pngData is written to disk or other processing
-

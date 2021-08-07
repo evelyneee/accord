@@ -19,6 +19,29 @@ struct AnyEncodable : Encodable {
     }
 }
 
+final class Notifications {
+    static var shared = Notifications()
+    final var notifications: [(String, String)] = [] {
+        didSet {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "Notification"), object: nil, userInfo: ["info":(self.notifications.first) ?? [:]])
+            }
+        }
+    }
+    final var privateChannels: [String] = [] {
+        didSet {
+            print("private", privateChannels)
+        }
+    }
+    final func clearNotifications(forSet: (String, String)) {
+        for (i, notif) in notifications.enumerated() {
+            if notif == forSet {
+                notifications.remove(at: i)
+            }
+        }
+    }
+}
+
 final class WebSocketHandler {
     static var shared: WebSocketHandler? = WebSocketHandler()
     var connected = false
@@ -267,6 +290,11 @@ final class WebSocketHandler {
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                        Notifications.shared.notifications.append((data["guild_id"] as! String, data["channel_id"] as! String))
+                                    } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
+                                        print("[Accord] NOTIFICATION SENDING NOW")
+                                        showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                        Notifications.shared.notifications.append(("@me", data["channel_id"] as! String))
                                     }
                                     break
                                 case "MESSAGE_UPDATE":

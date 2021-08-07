@@ -22,6 +22,8 @@ struct ServerListView: View {
     @State var privateChannels: [[String:Any]] = []
     @State var guildOrder: [String] = []
     @State var guildIcons: [String:NSImage] = [:]
+    @State var pings: [(String, String)] = []
+    @State var stuffSelection: Int? = nil
     var body: some View {
         NavigationView {
             HStack(spacing: 0, content: {
@@ -54,11 +56,11 @@ struct ServerListView: View {
                     Divider()
                     // MARK: Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
-                        if (selectedServer ?? 0) == index {
+                        ZStack(alignment: .bottomTrailing) {
                             Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                .frame(width: 45, height: 45)
-                                .cornerRadius(15)
                                 .scaledToFit()
+                                .frame(width: 45, height: 45)
+                                .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
                                 .onTapGesture(count: 1, perform: {
                                     withAnimation {
                                         DispatchQueue.main.async {
@@ -66,18 +68,18 @@ struct ServerListView: View {
                                         }
                                     }
                                 })
-                        } else {
-                            Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                .scaledToFit()
-                                .frame(width: 45, height: 45)
-                                .cornerRadius(23.5)
-                                .onTapGesture(count: 1, perform: {
-                                    withAnimation {
-                                        DispatchQueue.main.async {
-                                            selectedServer = index
-                                        }
-                                    }
-                                })
+                            if (pings.map { $0.0 }).contains(guilds[index]["id"] as? String ?? "") {
+                                ZStack {
+                                    Circle()
+                                        .foregroundColor(Color.red)
+                                        .frame(width: 15, height: 15)
+                                    Text(String(describing: pings.filter { $0.0 == guilds[index]["id"] as? String ?? ""}.count))
+                                        .foregroundColor(Color.white)
+                                        .fontWeight(.semibold)
+                                }
+
+                            } else {
+                            }
                         }
 
                     }
@@ -142,6 +144,7 @@ struct ServerListView: View {
                                             return
                                         }
                                         privateChannels = array!.sorted { $0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? "" }
+                                        Notifications.shared.privateChannels = array!.map { $0["id"] as! String }
                                     }
                                 }
                             }
@@ -149,7 +152,14 @@ struct ServerListView: View {
                     }
 
                 } else if selectedServer == 9999 {
-                    ProfileView()
+                    List {
+                        NavigationLink(destination: ProfileView(), tag: 0, selection: self.$stuffSelection) {
+                            Text("Profile")
+                        }
+                        NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
+                            Text("Settings")
+                        }
+                    }
                 } else if selectedServer == 999 {
                     HStack {
                         List {
@@ -275,6 +285,10 @@ struct ServerListView: View {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
+            pings.append((notif.userInfo as! [String:Any])["info"] as! (String, String))
+        }
+
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }

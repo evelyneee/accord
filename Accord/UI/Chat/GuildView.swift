@@ -84,9 +84,8 @@ struct GuildView: View, Equatable {
                         .scaleEffect(x: -1, y: 1, anchor: .center)
                         .opacity(0.75)
                     }
-                    // Loop through Message objects.
                     // MARK: Message loop
-                    ForEach(Array((data)), id: \.id) { message in
+                    ForEach(Array(data), id: \.id) { message in
                         /// get index of message (fixes the index out of range)
                         if let offset = data.firstIndex(of: message) {
                             if data.contains(data[offset]) {
@@ -186,6 +185,8 @@ struct GuildView: View, Equatable {
                                 .scaleEffect(x: -1, y: 1, anchor: .center)
                             }
                         }
+
+
                     }
                     if data.isEmpty == false {
                         HStack {
@@ -275,11 +276,9 @@ struct GuildView: View, Equatable {
             case "NewMessageIn\(channelID)":
                 concurrentQueue.async {
                     sending = false
-                    if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["NewMessageIn\(channelID)"] as! Data) {
-                        if let message = gatewayMessage.d {
-                            data.insert(message, at: 0)
-                        }
-                    }
+                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["NewMessageIn\(channelID)"] as! Data) else { return }
+                    guard let message = gatewayMessage.d else { return }
+                    data.insert(message, at: 0)
                 }
                 break
             case "MemberChunk":
@@ -288,27 +287,24 @@ struct GuildView: View, Equatable {
                     guard let users = chunk.d?.members else { return }
                     ChannelMembers.shared.channelMembers[channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
                     for person in users {
-                        if let nickname = person?.nick {
-                            nicks[(person?.user.id ?? "")] = nickname
-                            var rolesTemp: [String] = []
-                            for _ in 0..<100 {
-                                rolesTemp.append("empty")
-                            }
-                            for role in (person?.roles as! [String]) {
-                                let index = roleColors[role]?.1 ?? 0
-                                print(index)
-                                rolesTemp[roleColors[role]?.1 ?? 0] = role
-                            }
-                            rolesTemp = rolesTemp.compactMap { role -> String? in
-                                if role == "empty" {
-                                    return nil
-                                } else {
-                                    return role
-                                }
-                            }
-                            rolesTemp = rolesTemp.reversed()
-                            roles[(person?.user.id ?? "")] = rolesTemp
+                        let nickname = person?.nick ?? person?.user.username ?? ""
+                        nicks[(person?.user.id ?? "")] = nickname
+                        var rolesTemp: [String] = []
+                        for _ in 0..<100 {
+                            rolesTemp.append("empty")
                         }
+                        for role in (person?.roles ?? []) {
+                            rolesTemp[roleColors[role]?.1 ?? 0] = role
+                        }
+                        rolesTemp = rolesTemp.compactMap { role -> String? in
+                            if role == "empty" {
+                                return nil
+                            } else {
+                                return role
+                            }
+                        }
+                        rolesTemp = rolesTemp.reversed()
+                        roles[(person?.user.id ?? "")] = rolesTemp
                     }
                 }
                 break
@@ -316,47 +312,41 @@ struct GuildView: View, Equatable {
                 print("[Accord] \(channelName) was being updated")
                 concurrentQueue.async {
                     let currentUIDDict = data.map { $0.id }
-                    if let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) {
-                        if let message = gatewayMessage.d {
-                            data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
-                        }
-                    }
+                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) else { return }
+                    guard let message = gatewayMessage.d else { return }
+                    data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
                 }
                 break
             case "DeletedMessageIn\(channelID)":
                 print("[Accord] \(channelName) is being updated")
                 let currentUIDDict = data.map { $0.id }
-                if let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["DeletedMessageIn\(channelID)"] as! Data) {
-                    if let message = gatewayMessage.d {
-                        if let index = (currentUIDDict).firstIndex(of: message.id) {
-                            data.remove(at: index)
-                        }
-                        break
-                    }
-                }
+                guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: notif.userInfo!["DeletedMessageIn\(channelID)"] as! Data) else { return }
+                guard let message = gatewayMessage.d else { return }
+                guard let index = (currentUIDDict).firstIndex(of: message.id) else { return }
+                data.remove(at: index)
+                break
             case "TypingStartIn\(channelID)":
                 print("[Accord] typing 1")
                 concurrentQueue.async {
-                    if let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] {
-                        print("[Accord] typing 2")
-                        if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
-                            print("[Accord] typing 3")
-                            let memberData = try! JSONSerialization.data(withJSONObject: packet, options: [])
-                            let memberDecodable = try! JSONDecoder().decode(TypingEvent.self, from: memberData)
-                            if let nick = memberDecodable.member?.nick {
-                                print("[Accord] typing 4", nick)
-                                typing.append(nick)
-                                DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                                    typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
-                                })
-                            } else {
-                                print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
-                                typing.append(memberDecodable.member?.user.username ?? "")
-                                DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
-                                    typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
-                                })
-                            }
+                    guard let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] else { return }
+                    print("[Accord] typing 2")
+                    if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
+                        print("[Accord] typing 3")
+                        let memberData = try! JSONSerialization.data(withJSONObject: packet, options: [])
+                        let memberDecodable = try! JSONDecoder().decode(TypingEvent.self, from: memberData)
+                        guard let nick = memberDecodable.member?.nick else {
+                            print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
+                            typing.append(memberDecodable.member?.user.username ?? "")
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
+                                typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
+                            })
+                            return
                         }
+                        print("[Accord] typing 4", nick)
+                        typing.append(nick)
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                            typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
+                        })
                     }
                 }
                 break

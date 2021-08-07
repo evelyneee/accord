@@ -197,9 +197,6 @@ final class NetworkHandling {
             ]
             request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
-        // Form URL-Encoded Body
-
-
 
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             if (error == nil) {

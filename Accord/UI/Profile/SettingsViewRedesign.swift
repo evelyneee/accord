@@ -11,7 +11,10 @@ import SwiftUI
 struct SettingsViewRedesign: View {
     @State var bioText: String = " "
     @State var username: String = "test user"
-    @Binding var user: User
+    @State var profilePictures: Bool = pfpShown
+    @State var recent: Bool = sortByMostRecent
+    @State var dark: Bool = darkMode
+    @State var user = AccordCoreVars.shared.user!
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
@@ -25,7 +28,7 @@ struct SettingsViewRedesign: View {
                             Text("Email")
                                 .font(.title3)
                                 .fontWeight(.bold)
-                            Text(user.email ?? "")
+                            Text(user.email ?? "No email found")
                         }
                         .padding(.bottom, 10)
                         VStack(alignment: .leading) {
@@ -85,7 +88,7 @@ struct SettingsViewRedesign: View {
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Toggle(isOn: Binding.constant(true)) {
+                        Toggle(isOn: $profilePictures) {
                         }
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
@@ -97,7 +100,7 @@ struct SettingsViewRedesign: View {
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Toggle(isOn: Binding.constant(true)) {
+                        Toggle(isOn: $recent) {
                         }
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
@@ -109,10 +112,24 @@ struct SettingsViewRedesign: View {
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Toggle(isOn: Binding.constant(true)) {
+                        Toggle(isOn: $dark) {
                         }
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
+                    }
+                    Divider()
+                    HStack(alignment: .top) {
+                        Text("Log out")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Spacer()
+                        Button(action: {
+                            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: String("").data(using: String.Encoding.utf8) ?? Data())
+                        }) {
+                            Text("log out")
+                        }
+                        .padding()
                     }
                 }
                 .padding(5)
@@ -120,6 +137,14 @@ struct SettingsViewRedesign: View {
                 .cornerRadius(15)
                 .padding()
             }
+            .onDisappear(perform: {
+                darkMode = self.dark
+                sortByMostRecent = self.recent
+                pfpShown = self.profilePictures
+                UserDefaults.standard.set(darkMode, forKey: "darkMode")
+                UserDefaults.standard.set(sortByMostRecent, forKey: "sortByMostRecent")
+                UserDefaults.standard.set(pfpShown, forKey: "pfpShown")
+            })
 
 
         }

@@ -14,6 +14,7 @@ public var user_id: String = ""
 public var avatar: Data = Data()
 public var pfpShown: Bool = UserDefaults.standard.bool(forKey: "pfpShown")
 public var sortByMostRecent: Bool = UserDefaults.standard.bool(forKey: "sortByMostRecent")
+public var darkMode: Bool = UserDefaults.standard.bool(forKey: "darkMode")
 public var username: String = ""
 public var discriminator: String = ""
 
@@ -29,4 +30,5 @@ final class AccordCoreVars {
     }
     
     public var token: String = ""
+    public var user: User?
 }
