@@ -8,7 +8,9 @@
 import Foundation
 import SwiftUI
 
-let cache: URLCache? = URLCache.shared
+let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
+let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
 
 struct ImageWithURL: View, Equatable {
     static func == (lhs: ImageWithURL, rhs: ImageWithURL) -> Bool {
@@ -45,7 +47,7 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
+        Image(nsImage: NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0)))
               .resizable()
               .scaledToFit()
               .onDisappear {
@@ -93,9 +95,7 @@ class ImageLoaderAndCache: ObservableObject {
             let config = URLSessionConfiguration.default
             config.urlCache = cache
             let session = URLSession(configuration: config)
-            let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
-            let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
+
             if let url = URL(string: imageURL) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
                 if let data = cache.cachedResponse(for: request)?.data {

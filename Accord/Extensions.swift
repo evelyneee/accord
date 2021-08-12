@@ -124,17 +124,6 @@ extension NSColor {
     }
 }
 
-extension View {
-    func onReceiveNotifs(_ name: Notification.Name,
-                   center: NotificationCenter = .default,
-                   object: AnyObject? = nil,
-                   perform action: @escaping (Notification) -> Void) -> some View {
-        self.onReceive(
-            center.publisher(for: name, object: object), perform: action
-        )
-    }
-}
-
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (exist index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil

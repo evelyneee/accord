@@ -97,7 +97,7 @@ final class TextStuff {
                 guard let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).gif") else { break }
                 if splitText.count == 1 {
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache?.cachedResponse(for: request)?.data {
+                    if let data = cache.cachedResponse(for: request)?.data {
                         if let amyGif = Gif(data: data) {
                             DispatchQueue.main.async {
                                 let animatedImages: [NSImage] = amyGif.animatedImages!
@@ -112,7 +112,7 @@ final class TextStuff {
                         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
-                                cache?.storeCachedResponse(cachedData, for: request)
+                                cache.storeCachedResponse(cachedData, for: request)
                                 if let amyGif = Gif(data: data) {
                                     DispatchQueue.main.async {
                                         let animatedImages: [NSImage] = amyGif.animatedImages!
@@ -129,13 +129,13 @@ final class TextStuff {
                     
                 } else {
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache?.cachedResponse(for: request)?.data {
+                    if let data = cache.cachedResponse(for: request)?.data {
                         textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                     } else {
                         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
-                                cache?.storeCachedResponse(cachedData, for: request)
+                                cache.storeCachedResponse(cachedData, for: request)
                                 textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                             }
                         }).resume()
@@ -145,13 +145,13 @@ final class TextStuff {
             } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
                 if let url = URL(string: text) {
                     let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache?.cachedResponse(for: request)?.data {
+                    if let data = cache.cachedResponse(for: request)?.data {
                         textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                     } else {
                         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
-                                cache?.storeCachedResponse(cachedData, for: request)
+                                cache.storeCachedResponse(cachedData, for: request)
                                 textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                             }
                         }).resume()
@@ -160,13 +160,13 @@ final class TextStuff {
             } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
                 if let url = URL(string: text) {
                     let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache?.cachedResponse(for: request)?.data {
+                    if let data = cache.cachedResponse(for: request)?.data {
                         textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                     } else {
                         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
-                                cache?.storeCachedResponse(cachedData, for: request)
+                                cache.storeCachedResponse(cachedData, for: request)
                                 textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                             }
                         }).resume()

@@ -93,35 +93,38 @@ struct GuildView: View, Equatable {
                                     if let reply = message.referenced_message {
                                         HStack {
                                             Spacer().frame(width: 50)
-                                            Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
-                                                .scaledToFit()
+                                            Attachment("https://cdn.discordapp.com/avatars/\(reply.author?.id ?? "")/\(reply.author?.avatar ?? "").png?size=80")
                                                 .frame(width: 15, height: 15)
                                                 .clipShape(Circle())
-                                            HStack {
-                                                if let nick = nicks[reply.author?.id ?? ""] {
-                                                    Text(nick)
-                                                        .fontWeight(.bold)
+
+                                            if let roleColor = roleColors[(roles[reply.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
+                                                Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                                    .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                                    .fontWeight(.semibold)
+                                                if #available(macOS 12.0, *) {
+                                                    Text(try! AttributedString(markdown: reply.content))
+                                                        .lineLimit(0)
                                                 } else {
-                                                    if let author = reply.author?.username {
-                                                        Text(author)
-                                                            .fontWeight(.bold)
-                                                    }
+                                                    Text(reply.content)
+                                                        .lineLimit(0)
                                                 }
-                                            }
-                                            if #available(macOS 12.0, *) {
-                                                Text(try! AttributedString(markdown: reply.content))
-                                                    .lineLimit(0)
                                             } else {
-                                                Text(reply.content)
-                                                    .lineLimit(0)
+                                                Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                                    .fontWeight(.semibold)
+                                                if #available(macOS 12.0, *) {
+                                                    Text(try! AttributedString(markdown: reply.content))
+                                                        .lineLimit(0)
+                                                } else {
+                                                    Text(reply.content)
+                                                        .lineLimit(0)
+                                                }
                                             }
                                         }
                                     }
                                     HStack(alignment: .top) {
                                         VStack {
                                             if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
-                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
-                                                    .scaledToFit()
+                                                Attachment("https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80")
                                                     .frame(width: 33, height: 33)
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
@@ -234,7 +237,7 @@ struct GuildView: View, Equatable {
         }
         .onAppear {
             if guildID != "@me" {
-                WebSocketHandler.shared?.subscribe(guildID, channelID)
+                WebSocketHandler.shared.subscribe(guildID, channelID)
             } else {
                 ChannelMembers.shared.channelMembers[channelID] = members
             }
@@ -245,15 +248,9 @@ struct GuildView: View, Equatable {
                             do {
                                 data = try JSONDecoder().decode([Message].self, from: rawData!)
                                 DispatchQueue.main.async {
-                                    ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
-                                        if success {
-                                            pfpArray = pfps
-                                            print(pfpArray)
-                                        }
-                                    }
                                     if guildID != "@me" {
                                         let allUserIDs = data.map { $0.author?.id ?? "" }
-                                        WebSocketHandler.shared?.getMembers(ids: allUserIDs, guild: guildID) { success, users in
+                                        WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
                                             if success {
                                                 for person in users {
                                                     nicks[(person?.user.id ?? "")] = person?.nick ?? ""

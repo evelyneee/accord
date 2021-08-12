@@ -40,13 +40,13 @@ final class ImageHandling {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                if let data = cache?.cachedResponse(for: request)?.data {
+                if let data = cache.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {
                     URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
-                            cache?.storeCachedResponse(cachedData, for: request)
+                            cache.storeCachedResponse(cachedData, for: request)
                             returnArray[String(userid)] = NSImage(data: data)
                         }
                     }).resume()
@@ -58,28 +58,38 @@ final class ImageHandling {
     func sendRequest(url: String) -> Data? {
         var dataReceived: Data?
         let sem = DispatchSemaphore(value: 0)
+        let config = URLSessionConfiguration.default
+        config.urlCache = cache
+        let session = URLSession(configuration: config)
+        let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
+        let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
         if let url = URL(string: url) {
-            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 2.0)
-            if let data = cache?.cachedResponse(for: request)?.data {
-                dataReceived = data as Data?
-                sem.signal()
+            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+            if let data = cache.cachedResponse(for: request)?.data {
+                DispatchQueue.main.async {
+                    print("cached")
+                    dataReceived = data
+                    sem.signal()
+                }
             } else {
-                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                session.dataTask(with: request, completionHandler: { (data, response, error) in
                     if let data = data, let response = response {
                     let cachedData = CachedURLResponse(response: response, data: data)
-                        cache?.storeCachedResponse(cachedData, for: request)
-                        dataReceived = data as Data?
-                        sem.signal()
+                        cache.storeCachedResponse(cachedData, for: request)
+                        DispatchQueue.main.async {
+                            print(" havenwork")
+                            dataReceived = data
+                            sem.signal()
+                        }
                     }
                 }).resume()
             }
-            // This line will wait until the semaphore has been signaled
-            // which will be once the data task has completed
-            _ = sem.wait(timeout: DispatchTime.now() + 5)
-            return dataReceived
         } else {
-            return Data()
+            sem.signal()
         }
+        sem.wait()
+        return dataReceived
     }
     func getServerIcons(array: [[String:Any]], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
         let pfpURLs = array.compactMap {
@@ -109,13 +119,13 @@ final class ImageHandling {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 2.0)
-                if let data = cache?.cachedResponse(for: request)?.data {
+                if let data = cache.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {
                     URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
                         if let data = data, let response = response {
                         let cachedData = CachedURLResponse(response: response, data: data)
-                            cache?.storeCachedResponse(cachedData, for: request)
+                            cache.storeCachedResponse(cachedData, for: request)
                             returnArray[String(userid)] = NSImage(data: data)
                         }
                     }).resume()

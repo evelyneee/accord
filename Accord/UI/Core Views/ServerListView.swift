@@ -65,6 +65,9 @@ struct ServerListView: View {
                                     withAnimation {
                                         DispatchQueue.main.async {
                                             selectedServer = index
+                                            if let index = (pings.map { $0.0 }).firstIndex(of: guilds[index]["id"] as? String ?? "") {
+                                                pings.remove(at: index)
+                                            }
                                         }
                                     }
                                 })
@@ -201,6 +204,7 @@ struct ServerListView: View {
                             }
 
                         }
+                        .listStyle(SidebarListStyle())
                     }
                 } else if (selectedServer ?? 0) == 1111 {
                     #if DEBUG
@@ -234,7 +238,6 @@ struct ServerListView: View {
                                                                 }
                                                             }
                                                             .buttonStyle(BorderlessButtonStyle())
-
                                                         }
                                                     }
                                                 }
@@ -244,6 +247,7 @@ struct ServerListView: View {
                                 }
                             }
                         }
+                        .listStyle(SidebarListStyle())
                     }
                 }
             })
