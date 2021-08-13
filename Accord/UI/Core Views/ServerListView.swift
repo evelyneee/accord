@@ -57,8 +57,7 @@ struct ServerListView: View {
                     // MARK: Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
                         ZStack(alignment: .bottomTrailing) {
-                            Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
-                                .scaledToFit()
+                            Attachment("https://cdn.discordapp.com/icons/\(guilds[index]["id"] as? String ?? "")/\(guilds[index]["icon"] as? String ?? "").png?size=128")
                                 .frame(width: 45, height: 45)
                                 .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
                                 .onTapGesture(count: 1, perform: {
@@ -217,28 +216,36 @@ struct ServerListView: View {
                 } else {
                     if guilds.isEmpty == false {
                         List {
-                            if let sectionArray = Array(GuildManager.shared.channelCount(array: guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0).keys).sorted() {
-                                ForEach(sectionArray, id: \.self) { key in
-                                    if let channels = GuildManager.shared.channelCount(array: guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? [], index: 0) {
-                                        if let sectionName = ((guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["name"]  as! String })[((guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] ?? []).map { $0["id"] as! String }).firstIndex(of: key) as? Int ?? 0] {
-                                            Section(header: Text(sectionName)) {
-                                                if let channel = channels[key] {
-                                                    ForEach(0..<channel.count, id: \.self) { offset in
-                                                        if let channelName = Array((GuildManager.shared.getGuild(guildid: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), array: guilds, type: .name) as? [String] ?? []))[(GuildManager.shared.getGuild(guildid: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), array: guilds, type: .id) as? [String] ?? []).firstIndex(of: channel[offset])!] {
-                                                            NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel[offset]), channelName: Binding.constant(channelName)).equatable(), tag: (Int(channel[offset]) ?? 0), selection: self.$selection) {
-                                                                HStack {
-                                                                    Image(systemName: "number")
-                                                                    Text(channelName)
-                                                                    Spacer()
-                                                                    Button(action: {
-                                                                        showWindow(guildID: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), channelID: channel[offset], channelName: channelName)
-                                                                    }) {
-                                                                        Image(systemName: "arrow.up.right.circle")
-                                                                    }
+                            if let channels = guilds[selectedServer ?? 0]["channels"] as? [[String:Any]] {
+                                ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, section in
+                                    if section["type"] as! Int == 4 {
+                                        Section(header: Text(section["name"] as! String)) {
+                                            ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, channel in
+                                                if channel["type"] as! Int != 4 {
+                                                    if channel["parent_id"] as? String ?? "no" == section["id"] as! String {
+                                                        NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0]["id"] as? String ?? "")), channelID: Binding.constant(channel["id"] as! String), channelName: Binding.constant(channel["name"] as! String)).equatable(), tag: (Int(channel["id"] as! String) ?? 0), selection: self.$selection) {
+                                                            HStack {
+                                                                switch channel["type"] as! Int {
+                                                                case 0:
+                                                                    Image(systemName: "number") // normal channel
+                                                                case 2:
+                                                                    Image(systemName: "speaker.wave.2.fill") // voice chat
+                                                                case 5:
+                                                                    Image(systemName: "megaphone.fill") // announcement channel
+                                                                case 13:
+                                                                    Image(systemName: "person.2.fill") // stages
+                                                                default:
+                                                                    Image(systemName: "camera.metering.unknown") // unknown
+                                                                }
+                                                                Text(channel["name"] as! String)
+                                                                Spacer()
+                                                                Button(action: {
+                                                                }) {
+                                                                    Image(systemName: "arrow.up.right.circle")
                                                                 }
                                                             }
-                                                            .buttonStyle(BorderlessButtonStyle())
                                                         }
+                                                        .buttonStyle(BorderlessButtonStyle())
                                                     }
                                                 }
                                             }
@@ -253,12 +260,6 @@ struct ServerListView: View {
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
-            ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
-                if success {
-                    guildIcons = icons
-                    print(guildIcons, "ICONS")
-                }
-            }
             if sortByMostRecent {
                 guilds.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
             } else {
@@ -284,6 +285,7 @@ struct ServerListView: View {
                 print("[Accord] \(guilds[i]["id"] as! String)$\(guilds[i]["name"] as! String)")
                 AllEmotes.shared.allEmotes["\(guilds[i]["id"] as! String)$\(guilds[i]["name"] as! String)"] = try! JSONDecoder().decode([DiscordEmote].self, from: (try! JSONSerialization.data(withJSONObject: (guilds[i]["emojis"] as! [[String:Any]]), options: [])))
                 print(AllEmotes.shared.allEmotes)
+                (guilds[i]["channels"]) = (guilds[i]["channels"] as! [[String:Any]]).sorted(by: { $1["position"] as! Int > $0["position"] as! Int }) as Any
             }
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
@@ -296,5 +298,3 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }
-
-

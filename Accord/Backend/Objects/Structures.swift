@@ -24,6 +24,12 @@ enum statusIndicators {
     case idle
 }
 
+enum Nitro {
+    case none
+    case classic
+    case nitro
+}
+
 class User: Decodable, Identifiable {
     var id: String
     var username: String
@@ -38,6 +44,7 @@ class User: Decodable, Identifiable {
     var flags: Int?
     var premium_type: Int?
     var public_flags: Int?
+    
 }
 
 class GuildMemberChunkResponse: Decodable {

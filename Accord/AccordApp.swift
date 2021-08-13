@@ -49,7 +49,7 @@ struct AccordApp: App {
                 .preferredColorScheme(darkMode ? .dark : nil)
                 .onAppear(perform: {
                     if tokenOverride != "" {
-                        AccordCoreVars.init(tokenOverride)
+                        _ = AccordCoreVars.init(tokenOverride)
                     }
                 })
         }

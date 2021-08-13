@@ -18,7 +18,6 @@ extension Dictionary {
 }
 
 public extension NSImage {
-
     func decodedImage() -> NSImage {
         let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)
         let size = CGSize(width: cgImage?.width ?? 40, height: cgImage?.height ?? 40)
@@ -32,18 +31,7 @@ public extension NSImage {
 
 class cuteWindow: NSWindow {
     override func close() {
-        self.contentView?.viewWillStartLiveResize()
-        for value in 0..<100 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + CGFloat(CGFloat(value) / 500), execute: {
-                self.alphaValue = CGFloat(CGFloat(100.0 - CGFloat(value)) / 100.0)
-                self.setContentSize(NSSize(width: self.frame.width - CGFloat(CGFloat(value) / 45), height: self.frame.height - CGFloat(CGFloat(value) / 45)))
-                self.contentView?.setFrameSize(NSSize(width: self.frame.width - CGFloat(CGFloat(value) / 45), height: self.frame.height - CGFloat(CGFloat(value) / 45)))
-                if value == 99 {
-                    super.close()
-                }
-            })
-        }
-        print("[Accord] done")
+        super.close()
     }
 }
 

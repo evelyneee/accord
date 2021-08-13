@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 // actual view
 struct EmotesView: View, Equatable {
     static func == (lhs: EmotesView, rhs: EmotesView) -> Bool {
