@@ -58,16 +58,15 @@ struct NitrolessView: View, Equatable {
                     LazyVGrid(columns: columns) {
                         ForEach(Array(allEmotes.keys), id: \.self) { key in
                             Button(action: {
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")", forType: NSPasteboard.PasteboardType.string)
+                                chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
                             }) {
                                 VStack {
-                                    Attachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
+                                    HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
                                         .frame(width: 20, height: 20)
                                 }
                                 .frame(width: 30, height: 30)
                             }
-                            .buttonStyle(EmoteButton())
+                            .buttonStyle(BorderlessButtonStyle())
                         }
                     }
                 }

@@ -27,7 +27,7 @@ struct ContentView: View {
                         }
                     }
                 })
-                .frame(width: 450, height: 300)
+                .frame(width: 450, height: 350)
 
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("logged_in"))) { obj in

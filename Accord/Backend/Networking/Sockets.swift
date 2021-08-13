@@ -54,7 +54,21 @@ final class WebSocketHandler {
     let ClassWebSocketTask: URLSessionWebSocketTask!
 
     init(url: URL? = URL(string: "wss://gateway.discord.gg")) {
-        session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: nil)
+        let config = URLSessionConfiguration.default
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
         ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg")!)
         ClassWebSocketTask.resume()
         ClassWebSocketTask.maximumMessageSize = 999999999
@@ -289,7 +303,7 @@ final class WebSocketHandler {
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                        Notifications.shared.notifications.append((data["guild_id"] as! String, data["channel_id"] as! String))
+                                        Notifications.shared.notifications.append((data["guild_id"] as? String ?? "@me", data["channel_id"] as! String))
                                     } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)

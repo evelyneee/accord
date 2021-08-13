@@ -28,31 +28,18 @@ struct ServerListView: View {
         NavigationView {
             HStack(spacing: 0, content: {
                 List {
-                    if (selectedServer ?? 0) == 999 {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "bubble.left.fill")
-                        }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(15)
-                        .onTapGesture(count: 1, perform: {
-                            DispatchQueue.main.async {
-                                selectedServer = 999
-                            }
-                        })
-                    } else {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "bubble.left.fill")
-                        }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(23.5)
-                        .onTapGesture(count: 1, perform: {
-                            DispatchQueue.main.async {
-                                selectedServer = 999
-                            }
-                        })
+                    ZStack {
+                        Color.primary.colorInvert()
+                        Image(systemName: "bubble.left.fill")
                     }
+                    .frame(width: 45, height: 45)
+                    .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                    .onTapGesture(count: 1, perform: {
+                        DispatchQueue.main.async {
+                            privateChannels = privateChannels.sorted { $0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? "" }
+                            selectedServer = 999
+                        }
+                    })
                     Divider()
                     // MARK: Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
@@ -113,20 +100,18 @@ struct ServerListView: View {
                         })
                     }
                     #endif
-                    ZStack(alignment: .bottomTrailing) {
-                        Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                            .scaledToFit()
-                            .clipShape(Circle())
-                            .frame(width: 45, height: 45)
-                        Circle()
-                            .foregroundColor(Color.green.opacity(0.75))
-                            .frame(width: 10, height: 10)
-                    }
-                    .onTapGesture(count: 1, perform: {
-                        DispatchQueue.main.async {
-                            selectedServer = 9999
+                    NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
+                        ZStack(alignment: .bottomTrailing) {
+                            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                .scaledToFit()
+                                .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
+                                .frame(width: 45, height: 45)
+                            Circle()
+                                .foregroundColor(Color.green.opacity(0.75))
+                                .frame(width: 10, height: 10)
                         }
-                    })
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
                 .frame(width: 80)
                 .listStyle(SidebarListStyle())
@@ -153,15 +138,6 @@ struct ServerListView: View {
                         })
                     }
 
-                } else if selectedServer == 9999 {
-                    List {
-                        NavigationLink(destination: ProfileView(), tag: 0, selection: self.$stuffSelection) {
-                            Text("Profile")
-                        }
-                        NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
-                            Text("Settings")
-                        }
-                    }
                 } else if selectedServer == 999 {
                     HStack {
                         List {
@@ -255,6 +231,7 @@ struct ServerListView: View {
                             }
                         }
                         .listStyle(SidebarListStyle())
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             })

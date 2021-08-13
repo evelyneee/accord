@@ -17,6 +17,9 @@ public var sortByMostRecent: Bool = UserDefaults.standard.bool(forKey: "sortByMo
 public var darkMode: Bool = UserDefaults.standard.bool(forKey: "darkMode")
 public var username: String = ""
 public var discriminator: String = ""
+public var proxyIP: String? = UserDefaults.standard.string(forKey: "proxyIP")
+public var proxyPort: String? = UserDefaults.standard.string(forKey: "proxyPort")
+public var proxyEnabled: Bool = UserDefaults.standard.bool(forKey: "proxyEnabled")
 
 
 final class AccordCoreVars {

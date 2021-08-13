@@ -364,6 +364,8 @@ struct ChatControls: View {
     @State var nitroless = false
     @State var emotes = false
     @State var temporaryText = ""
+    @State var fileImport: Bool = false
+    @State var fileUpload: Data? = nil
     func refresh() {
         DispatchQueue.main.async {
             sending = false
@@ -373,7 +375,12 @@ struct ChatControls: View {
     var body: some View {
         HStack {
             ZStack(alignment: .trailing) {
-                TextField(chatText, text: $textFieldContents, onCommit: {
+                TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
+                    print("balls")
+                    if state == true {
+                        NetworkHandling.shared?.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                    }
+                }, onCommit: {
                     chatTextFieldContents = textFieldContents
                     var temp = textFieldContents
                     textFieldContents = ""
@@ -382,20 +389,43 @@ struct ChatControls: View {
                         if temp == "/shrug" {
                             temp = #"¯\_(ツ)_/¯"#
                         }
-                        NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
-                            switch success {
-                            case true:
-                                break
-                            case false:
-                                print("[Accord] whoop")
-                                break
+                        if fileUpload != nil {
+                            NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["payload_json":["content":"\(String(temp))"], "file":fileUpload as Any]) { success, array in
+                                switch success {
+                                case true:
+                                    print(array)
+                                    break
+                                case false:
+                                    print("[Accord] whoop")
+                                    break
+                                }
+                            }
+                        } else {
+                            NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
+                                switch success {
+                                case true:
+                                    break
+                                case false:
+                                    print("[Accord] whoop")
+                                    break
+                                }
                             }
                         }
+
                     }
                 })
                     .textFieldStyle(PlainTextFieldStyle())
-
+                    .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
+                        fileUpload = try! Data(contentsOf: try! result.get())
+                        print(fileUpload)
+                    }
                 HStack {
+                    Button(action: {
+                        fileImport.toggle()
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
                     Button(action: {
                         nitroless.toggle()
                     }) {
@@ -403,7 +433,7 @@ struct ChatControls: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .popover(isPresented: $nitroless, content: {
-                        NitrolessView(chatText: $chatTextFieldContents).equatable()
+                        NitrolessView(chatText: $temporaryText).equatable()
                             .frame(width: 300, height: 400)
                     })
                     Button(action: {

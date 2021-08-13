@@ -13,8 +13,21 @@ final class NetworkHandling {
     static var shared: NetworkHandling? = NetworkHandling()
 
     func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        let config = URLSessionConfiguration.default
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        let session = URLSession(configuration: config, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
 
         // setup of the request
@@ -75,8 +88,21 @@ final class NetworkHandling {
         task.resume()
     }
     func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        let config = URLSessionConfiguration.default
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        let session = URLSession(configuration: config, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
 
         // setup of the request
@@ -131,8 +157,21 @@ final class NetworkHandling {
         }).resume()
     }
     func emptyRequest(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any]) {
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        let config = URLSessionConfiguration.default
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        let session = URLSession(configuration: config, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: url) ?? URL(string: "#"))!)
 
         // setup of the request
@@ -175,8 +214,21 @@ final class NetworkHandling {
     }
 
     func login(username: String, password: String, captcha: String = "", _ completion: @escaping ((_ success: Bool, _ rettoken: Data?) -> Void)) {
-        let sessionConfig = URLSessionConfiguration.default
-        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+        let config = URLSessionConfiguration.default
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        let session = URLSession(configuration: config, delegate: nil, delegateQueue: nil)
         var request = URLRequest(url: (URL(string: "https://discord.com/api/v9/auth/login") ?? URL(string: "#")!))
 
         request.httpMethod = "POST"
@@ -198,7 +250,7 @@ final class NetworkHandling {
             request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
 
-        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+        session.dataTask(with: request, completionHandler: { (data, response, error) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
