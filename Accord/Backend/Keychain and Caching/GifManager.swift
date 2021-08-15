@@ -2,7 +2,7 @@
 //  GifManager.swift
 //  NitrolessiOS
 //
-//  Created by A W on 16/02/2021.
+//  Created by Amy While on 16/02/2021.
 //
 import Cocoa
 

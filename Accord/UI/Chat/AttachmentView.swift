@@ -44,7 +44,6 @@ struct AttachmentView: View {
                                                             animatedImages = amyGif.animatedImages
                                                             duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
                                                             setinterval = Double(duration / Double(animatedImages?.count ?? 1))
-                                                            print(Double(duration / Double(animatedImages?.count ?? 1)))
                                                             self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
                                                                 if self.setinterval != 0 {
                                                                     print(value)

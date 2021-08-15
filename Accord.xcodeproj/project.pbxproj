@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
-		32291D3A25F565B300881B5F /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32291D3925F565B300881B5F /* Messages.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
 		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
 		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
@@ -27,7 +26,6 @@
 		A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE632686709A00B244BE /* NitrolessStructures.swift */; };
 		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
 		A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */; };
-		A874C04A267658A8006E7F52 /* Guilds.swift in Sources */ = {isa = PBXBuildFile; fileRef = A874C049267658A8006E7F52 /* Guilds.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
@@ -350,13 +348,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32291D3A25F565B300881B5F /* Messages.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				A825213C2688A1800073F640 /* Roles.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
-				A874C04A267658A8006E7F52 /* Guilds.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,

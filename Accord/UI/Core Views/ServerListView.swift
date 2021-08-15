@@ -242,7 +242,6 @@ struct ServerListView: View {
             } else {
                 guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
 
-                full = [:]
                 let guildIDs = guilds.map { $0["id"] } as! [String]
                 var guildTemp: [[String:Any]] = []
                 for item in guildOrder {

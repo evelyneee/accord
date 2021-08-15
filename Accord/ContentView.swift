@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
     @State public var selection: Int?
     @State var guilds: [[String:Any]] = []
@@ -41,9 +42,6 @@ struct ContentView: View {
                  }
             }
 
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SETUP_DONE"))) { notif in
-            socketOut = [:]
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {

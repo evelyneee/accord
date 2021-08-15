@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import Cocoa
+import AppKit
 
 extension Dictionary {
     mutating func switchKey(fromKey: Key, toKey: Key) {

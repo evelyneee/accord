@@ -5,6 +5,8 @@
 //  Created by evelyn on 2021-06-13.
 //
 
+/// ‼️ Excluded from target ‼️
+
 import Foundation
 
 enum guild {

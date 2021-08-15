@@ -55,6 +55,7 @@ struct GuildView: View, Equatable {
     @State var nicks: [String:String] = [:]
     @State var roles: [String:[String]] = [:]
     @State var members: [String:String] = [:]
+    @State var replyingTo: Message? = nil
 //    actual view begins here
 
     var body: some View {
@@ -93,7 +94,8 @@ struct GuildView: View, Equatable {
                                     if let reply = message.referenced_message {
                                         HStack {
                                             Spacer().frame(width: 50)
-                                            Attachment("https://cdn.discordapp.com/avatars/\(reply.author?.id ?? "")/\(reply.author?.avatar ?? "").png?size=80")
+                                            Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
+                                                .scaledToFit()
                                                 .frame(width: 15, height: 15)
                                                 .clipShape(Circle())
 
@@ -124,8 +126,9 @@ struct GuildView: View, Equatable {
                                     HStack(alignment: .top) {
                                         VStack {
                                             if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
-                                                Attachment("https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80")
-                                                    .frame(width: 33, height: 33)
+                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: (pfpShown ? 33 : 15), height: (pfpShown ? 33 : 15))
                                                     .padding(.horizontal, 5)
                                                     .clipShape(Circle())
                                             }
@@ -151,7 +154,6 @@ struct GuildView: View, Equatable {
                                                                 .fontWeight(.semibold)
                                                             FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                         }
-
                                                     }
                                                 } else {
                                                     if roles.isEmpty {
@@ -173,6 +175,60 @@ struct GuildView: View, Equatable {
                                             }
                                         }
                                         Spacer()
+                                        Button(action: {
+                                            if collapsed.contains(offset) {
+                                                collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                            } else {
+                                                collapsed.append(offset)
+                                            }
+                                        }) {
+                                            Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                        if (collapsed.contains(offset)) {
+                                            Button(action: { [weak message] in
+                                                DispatchQueue.main.async {
+                                                    NSPasteboard.general.clearContents()
+                                                    NSPasteboard.general.setString(message?.content ?? "", forType: .string)
+                                                    if collapsed.contains(offset) {
+                                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                                    } else {
+                                                        collapsed.append(offset)
+                                                    }
+                                                }
+                                            }) {
+                                                Text("Copy")
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                            Button(action: { [weak message] in
+                                                DispatchQueue.main.async {
+                                                    NSPasteboard.general.clearContents()
+                                                    NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
+                                                    if collapsed.contains(offset) {
+                                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                                    } else {
+                                                        collapsed.append(offset)
+                                                    }
+                                                }
+                                            }) {
+                                                Text("Copy Message Link")
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                        }
+                                        Button(action: { [weak message] in
+                                            DispatchQueue.main.async {
+                                                replyingTo = message
+                                            }
+                                        }) {
+                                            Image(systemName: "arrowshape.turn.up.backward.fill")
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                        Button(action: { [weak message] in
+                                            message?.delete()
+                                        }) {
+                                            Image(systemName: "trash")
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
                                     }
                                     if message.attachments.isEmpty == false {
                                         HStack {
@@ -209,25 +265,33 @@ struct GuildView: View, Equatable {
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
             VStack(alignment: .leading) {
-                if typing.count == 1 && !(typing.isEmpty) {
-                    Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
-                        .padding(4)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                        .cornerRadius(5)
-                } else if !(typing.isEmpty) {
-                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                        .lineLimit(0)
-                        .padding(4)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                        .cornerRadius(5)
+                HStack {
+                    if typing.count == 1 && !(typing.isEmpty) {
+                        Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
+                    } else if !(typing.isEmpty) {
+                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                            .lineLimit(0)
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
+                    }
+                    if let replied = replyingTo {
+                        Text("replying to \(replied.author?.username ?? "")")
+                            .padding(4)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(5)
+                    }
                 }
                 if #available(macOS 12.0, *) {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
                         .padding(15)
                         .background(.thickMaterial) // blurred background
                         .cornerRadius(15)
                 } else {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending)
+                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
                         .padding(15)
                         .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                         .cornerRadius(15)
@@ -239,15 +303,17 @@ struct GuildView: View, Equatable {
             if guildID != "@me" {
                 WebSocketHandler.shared.subscribe(guildID, channelID)
             } else {
+                WebSocketHandler.shared.subscribeToDM(channelID)
                 ChannelMembers.shared.channelMembers[channelID] = members
             }
             if AccordCoreVars.shared.token != "" {
                 concurrentQueue.async {
+
                     NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                         if success == true {
                             do {
                                 data = try JSONDecoder().decode([Message].self, from: rawData!)
-                                DispatchQueue.main.async {
+                                concurrentQueue.async {
                                     if guildID != "@me" {
                                         let allUserIDs = data.map { $0.author?.id ?? "" }
                                         WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
@@ -258,6 +324,12 @@ struct GuildView: View, Equatable {
                                             }
                                         }
                                     }
+                                    ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
+                                         if success {
+                                             pfpArray = pfps
+                                             print(pfpArray)
+                                         }
+                                     }
                                 }
                             } catch {
                             }
@@ -361,6 +433,7 @@ struct ChatControls: View {
     @Binding var channelID: String
     @Binding var chatText: String
     @Binding var sending: Bool
+    @Binding var replyingTo: Message?
     @State var nitroless = false
     @State var emotes = false
     @State var temporaryText = ""
@@ -390,26 +463,15 @@ struct ChatControls: View {
                             temp = #"¯\_(ツ)_/¯"#
                         }
                         if fileUpload != nil {
-                            NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["payload_json":["content":"\(String(temp))"], "file":fileUpload as Any]) { success, array in
-                                switch success {
-                                case true:
-                                    print(array)
-                                    break
-                                case false:
-                                    print("[Accord] whoop")
-                                    break
-                                }
-                            }
+                            NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["payload_json":["content":"\(String(temp))"], "file":fileUpload as Any])
                         } else {
-                            NetworkHandling.shared?.request(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"]) { success, array in
-                                switch success {
-                                case true:
-                                    break
-                                case false:
-                                    print("[Accord] whoop")
-                                    break
-                                }
+                            if replyingTo != nil {
+                                NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
+                                replyingTo = nil
+                            } else {
+                                NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
                             }
+
                         }
 
                     }
@@ -417,7 +479,6 @@ struct ChatControls: View {
                     .textFieldStyle(PlainTextFieldStyle())
                     .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
                         fileUpload = try! Data(contentsOf: try! result.get())
-                        print(fileUpload)
                     }
                 HStack {
                     Button(action: {

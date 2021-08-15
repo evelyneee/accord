@@ -119,6 +119,7 @@ final class WebSocketHandler {
                         "os":AnyEncodable("Mac OS X"),
                         "browser":AnyEncodable("Discord Client"),
                         "release_channel":AnyEncodable("canary"),
+                        "client_build_number": AnyEncodable(93654),
                         "client_version":AnyEncodable("0.0.273"),
                         "os_version":AnyEncodable("21.0.0"),
                         "os_arch":AnyEncodable("x64"),
@@ -415,6 +416,22 @@ final class WebSocketHandler {
                 "channels": [
                     channel: [["0", "99"]]
                 ],
+            ],
+        ]
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ClassWebSocketTask.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+            }
+        }
+    }
+    func subscribeToDM(_ channel: String) {
+        let packet: [String:Any] = [
+            "op":13,
+            "d": [
+                "channel_id":channel
             ],
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),

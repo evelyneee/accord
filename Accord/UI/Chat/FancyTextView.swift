@@ -69,9 +69,7 @@ final class TextStuff {
                     let config = URLSessionConfiguration.default
                     config.urlCache = cache
                     let session = URLSession(configuration: config)
-                    let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-                    let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
-                    let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
+                    let cache = URLCache.shared
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
                     if let data = cache.cachedResponse(for: request)?.data {
                         if splitText.count == 1 {
