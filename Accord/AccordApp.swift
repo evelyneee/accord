@@ -13,6 +13,15 @@ import AppKit
 let tokenOverride = ""
 
 public var logs: [String] = []
+public var socketEvents: [[String:String]] = [] {
+    didSet {
+
+        #if DEBUG
+        #else
+        socketEvents.removeAll()
+        #endif
+    }
+}
 
 public func print(_ object: Any...) {
     #if DEBUG
@@ -56,7 +65,7 @@ struct AccordApp: App {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
     }

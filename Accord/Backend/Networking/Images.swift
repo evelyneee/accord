@@ -14,7 +14,7 @@ final class ImageHandling {
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
 
         let pfpURLs = array.map {
-            "https://cdn.discordapp.com/avatars/\($0.author?.id ?? "")/\($0.author?.avatar ?? "").png?size=80"
+            "https://cdn.discordapp.com/avatars/\($0.author!.id)/\($0.author?.avatar ?? "").png?size=80"
         }
         print(pfpURLs)
         var singleURLs: [String] = []
@@ -62,9 +62,6 @@ final class ImageHandling {
         let config = URLSessionConfiguration.default
         config.urlCache = cache
         let session = URLSession(configuration: config)
-        let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
-        let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
         if let url = URL(string: url) {
             let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
             if let data = cache.cachedResponse(for: request)?.data {
@@ -94,7 +91,7 @@ final class ImageHandling {
     }
     func getServerIcons(array: [[String:Any]], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
         let pfpURLs = array.compactMap {
-            "https://cdn.discordapp.com/icons/\($0["id"] ?? "")/\($0["icon"] ?? "")"
+            "https://cdn.discordapp.com/icons/\($0["id"] ?? "")/\($0["icon"] ?? "")?size=80"
         }
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
@@ -186,7 +183,7 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
+        Image(nsImage: NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0)))
               .resizable()
               .scaledToFit()
               .onDisappear {
@@ -224,7 +221,7 @@ struct HoveredAttachment: View, Equatable {
     }
 }
 
-class ImageLoaderAndCache: ObservableObject {
+final class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()
     let imageQueue = DispatchQueue(label: "ImageQueue")
@@ -265,12 +262,4 @@ class ImageLoaderAndCache: ObservableObject {
 }
 
 
-func getImage(url: String) -> Data {
-    var ret: Data = Data()
-    NetworkHandling.shared?.requestData(url: url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
-        if (success) {
-            ret = data ?? Data()
-        }
-    }
-    return ret
-}
+

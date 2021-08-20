@@ -28,7 +28,7 @@ final class Gif: NSImage {
         self.calculatedDuration = calculatedDuration
     }
     
-    public class func downsample(image: NSImage, to pointSize: CGSize) -> NSImage? {
+    public final class func downsample(image: NSImage, to pointSize: CGSize) -> NSImage? {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let data = image.tiffRepresentation as CFData?,
               let imageSource = CGImageSourceCreateWithData(data, imageSourceOptions) else { return nil }

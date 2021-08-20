@@ -166,7 +166,12 @@ extension NSImage {
         let newSize: NSSize
         let widthRatio  = targetSize.width / self.width
         let heightRatio = targetSize.height / self.height
-
+        
+        if targetSize.width >= self.width || targetSize.height >= self.height {
+            print("too small")
+            return self
+        }
+        
         if widthRatio > heightRatio {
             newSize = NSSize(width: floor(self.width * widthRatio),
                              height: floor(self.height * widthRatio))

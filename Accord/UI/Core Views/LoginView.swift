@@ -181,7 +181,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
     typealias NSViewType = WKWebView
 }
 
-class ScriptHandler: NSObject, WKScriptMessageHandler {
+final class ScriptHandler: NSObject, WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController,
                                    didReceive message: WKScriptMessage) {
         DispatchQueue.main.async {

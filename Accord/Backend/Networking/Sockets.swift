@@ -53,7 +53,7 @@ final class WebSocketHandler {
     let session: URLSession
     let ClassWebSocketTask: URLSessionWebSocketTask!
 
-    init(url: URL? = URL(string: "wss://gateway.discord.gg")) {
+    init(url: URL? = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")) {
         let config = URLSessionConfiguration.default
         if proxyEnabled {
             config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
@@ -61,7 +61,7 @@ final class WebSocketHandler {
             config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
             if let ip = proxyIP {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
             }
             if let port = proxyPort {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
@@ -75,7 +75,7 @@ final class WebSocketHandler {
         releaseModePrint("[Accord] Socket initiated")
     }
 
-    class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
+    final class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
         let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared.requests = 0
         }
@@ -90,7 +90,6 @@ final class WebSocketHandler {
         }
 
         func reconnect() {
-            sleep(10)
             let packet: [String:AnyEncodable] = [
                 "op":AnyEncodable(Int(6)),
                 "d":AnyEncodable([
@@ -127,6 +126,7 @@ final class WebSocketHandler {
                     ] as [String:AnyEncodable])
                 ] as [String:AnyEncodable])
             ]
+            socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
             if let jsonData = try? JSONEncoder().encode(packet),
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
@@ -138,15 +138,24 @@ final class WebSocketHandler {
         }
         func send(opcode: Int) {
             let packet: [String:AnyEncodable] = [
-                "op":AnyEncodable(opcode),
+                "op":AnyEncodable(2),
                 "d":AnyEncodable([
+                    "token":AnyEncodable(AccordCoreVars.shared.token),
+                    "capabilities":AnyEncodable(125),
+                    "compress":AnyEncodable(false),
                     "properties": AnyEncodable([
-                        "os":AnyEncodable("Windows"),
-                        "browser":AnyEncodable("Firefox"),
-                        "device":AnyEncodable("")
+                        "os":AnyEncodable("Mac OS X"),
+                        "browser":AnyEncodable("Discord Client"),
+                        "release_channel":AnyEncodable("canary"),
+                        "client_build_number": AnyEncodable(93654),
+                        "client_version":AnyEncodable("0.0.273"),
+                        "os_version":AnyEncodable("21.0.0"),
+                        "os_arch":AnyEncodable("x64"),
+                        "system-locale":AnyEncodable("en-US"),
                     ] as [String:AnyEncodable])
                 ] as [String:AnyEncodable])
             ]
+            socketEvents.append(["sent (op \(opcode)) ~>":String(describing: packet as [String:Any])])
             if let jsonData = try? JSONEncoder().encode(packet),
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
@@ -165,6 +174,7 @@ final class WebSocketHandler {
                 "op":AnyEncodable(1),
                 "d":AnyEncodable(WebSocketHandler.shared.seq)
             ]
+            socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
             if let jsonData = try? JSONEncoder().encode(packet),
                let jsonString: String = String(data: jsonData, encoding: .utf8) {
                 WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
@@ -250,6 +260,7 @@ final class WebSocketHandler {
                                         print("[Accord] HEARTBEAT SUCCESSFUL")
                                     }
                                 }
+                                socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
                                     let data = payload["d"] as! [String: Any]
@@ -404,7 +415,7 @@ final class WebSocketHandler {
         }
 
     }
-    func subscribe(_ guild: String, _ channel: String) {
+    final func subscribe(_ guild: String, _ channel: String) {
         let packet: [String:Any] = [
             "op":14,
             "d": [
@@ -412,12 +423,10 @@ final class WebSocketHandler {
                 "typing":true,
                 "activities":true,
                 "threads":false,
-                "members":[],
-                "channels": [
-                    channel: [["0", "99"]]
-                ],
+                "members":[]
             ],
         ]
+        socketEvents.append(["subscribe to channel (op 14) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask.send(.string(jsonString)) { error in
@@ -427,13 +436,14 @@ final class WebSocketHandler {
             }
         }
     }
-    func subscribeToDM(_ channel: String) {
+    final func subscribeToDM(_ channel: String) {
         let packet: [String:Any] = [
             "op":13,
             "d": [
                 "channel_id":channel
             ],
         ]
+        socketEvents.append(["subscribe to dm (op 13) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask.send(.string(jsonString)) { error in
@@ -443,7 +453,7 @@ final class WebSocketHandler {
             }
         }
     }
-    func reconnect() {
+    final func reconnect() {
         sleep(10)
         let packet: [String:AnyEncodable] = [
             "op":AnyEncodable(Int(6)),
@@ -463,7 +473,7 @@ final class WebSocketHandler {
             }
         }
     }
-    func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [GuildMember?]) -> Void)) {
+    final func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [GuildMember?]) -> Void)) {
         let packet: [String:Any] = [
             "op":8,
             "d": [
@@ -472,6 +482,7 @@ final class WebSocketHandler {
                 "guild_id":guild
             ]
         ]
+        socketEvents.append(["get members (op 8) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             self.ClassWebSocketTask.send(.string(jsonString)) { error in
@@ -505,7 +516,7 @@ protocol URLQueryParameterStringConvertible {
     var queryParameters: String {get}
 }
 
-class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
+final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         releaseModePrint("[Accord] Web Socket did connect")
     }
@@ -513,6 +524,9 @@ class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         releaseModePrint("[Accord] Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["WSError":reason])
+        }
         print("[Accord] Error from Discord: \(reason)")
         // MARK: WebSocket close codes.
         switch closeCode {

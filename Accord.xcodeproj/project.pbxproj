@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
-		32AA719625EBB17B00550BA5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719525EBB17B00550BA5 /* Structures.swift */; };
 		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
 		32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F37415257302C300ADB7E6 /* ProfileView.swift */; };
 		32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742A25733D8000ADB7E6 /* GuildView.swift */; };
@@ -19,7 +18,6 @@
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		A825213C2688A1800073F640 /* Roles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A825213B2688A1800073F640 /* Roles.swift */; };
 		A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85C02B7268158D300A40114 /* FancyTextView.swift */; };
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
 		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
@@ -32,6 +30,15 @@
 		A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */; };
 		A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89845402698C3FD00B1C9DB /* GifManager.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
+		A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8A14CC226CE9A29006C4AEC /* Roles.swift */; };
+		A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29526CB163B00E8FDC5 /* User.swift */; };
+		A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29726CB166C00E8FDC5 /* Events.swift */; };
+		A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29926CB169800E8FDC5 /* Message.swift */; };
+		A8B1F29C26CB16C400E8FDC5 /* Attachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29B26CB16C400E8FDC5 /* Attachments.swift */; };
+		A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */; };
+		A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F29F26CB16F500E8FDC5 /* Guild.swift */; };
+		A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F2A126CB171600E8FDC5 /* Enums.swift */; };
+		A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F2A326CB176900E8FDC5 /* Channel.swift */; };
 		A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC5253268DF5AD00B7823E /* AttachmentView.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
@@ -52,9 +59,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		32291D3925F565B300881B5F /* Messages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
-		32AA719525EBB17B00550BA5 /* Structures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
 		32ADD58A2583997F008D1715 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		32DC838A257FA71B004520AE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		32F37415257302C300ADB7E6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -71,20 +76,27 @@
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		A825213B2688A1800073F640 /* Roles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Roles.swift; path = Accord/Backend/Objects/Roles.swift; sourceTree = SOURCE_ROOT; };
 		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/UI/Chat/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
 		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
 		A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewRedesign.swift; sourceTree = "<group>"; };
-		A874C049267658A8006E7F52 /* Guilds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guilds.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
 		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
 		A89845402698C3FD00B1C9DB /* GifManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifManager.swift; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
+		A8A14CC226CE9A29006C4AEC /* Roles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Roles.swift; sourceTree = "<group>"; };
+		A8B1F29526CB163B00E8FDC5 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		A8B1F29726CB166C00E8FDC5 /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
+		A8B1F29926CB169800E8FDC5 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		A8B1F29B26CB16C400E8FDC5 /* Attachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachments.swift; sourceTree = "<group>"; };
+		A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emote.swift; sourceTree = "<group>"; };
+		A8B1F29F26CB16F500E8FDC5 /* Guild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guild.swift; sourceTree = "<group>"; };
+		A8B1F2A126CB171600E8FDC5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		A8B1F2A326CB176900E8FDC5 /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = "Accord/Backend/Keychain and Caching/Keychain.swift"; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = "Accord/UI/Core Views/ServerListView.swift"; sourceTree = SOURCE_ROOT; };
@@ -198,6 +210,7 @@
 			children = (
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
 				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
+				A85D3FDD2677A681002327AD /* Images.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -205,11 +218,15 @@
 		A82521392687ABD40073F640 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
-				A825213B2688A1800073F640 /* Roles.swift */,
-				32AA719525EBB17B00550BA5 /* Structures.swift */,
-				32291D3925F565B300881B5F /* Messages.swift */,
-				A85D3FDD2677A681002327AD /* Images.swift */,
-				A874C049267658A8006E7F52 /* Guilds.swift */,
+				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
+				A8B1F2A126CB171600E8FDC5 /* Enums.swift */,
+				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
+				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
+				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
+				A8B1F29B26CB16C400E8FDC5 /* Attachments.swift */,
+				A8B1F29926CB169800E8FDC5 /* Message.swift */,
+				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
+				A8B1F29526CB163B00E8FDC5 /* User.swift */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -348,22 +365,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
+				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
-				A825213C2688A1800073F640 /* Roles.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
+				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
+				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
+				A8B1F29C26CB16C400E8FDC5 /* Attachments.swift in Sources */,
 				32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */,
+				A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */,
+				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
-				32AA719625EBB17B00550BA5 /* Structures.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
+				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */,
@@ -371,6 +394,7 @@
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
+				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 			);
@@ -506,7 +530,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
+				DEVELOPMENT_TEAM = TT4NY6N9VL;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -533,7 +557,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = UUGF4RZ8S8;
+				DEVELOPMENT_TEAM = TT4NY6N9VL;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -8,7 +8,7 @@
 import SwiftUI
 import AppKit
 
-class Counter: ObservableObject {
+final class Counter: ObservableObject {
     var timer: Timer?
     
     @Published var value: Int = 0

@@ -62,4 +62,3 @@ struct EmotesView: View, Equatable {
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-

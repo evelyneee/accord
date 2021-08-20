@@ -21,6 +21,9 @@ struct ProfileView: View {
     ]
     var body: some View {
 //      profile views
+        ForEach(Array(text), id: \.self) { textForEach in
+            Text(textForEach)
+        }
         VStack {
             HStack(alignment: .top) {
 //              pfp

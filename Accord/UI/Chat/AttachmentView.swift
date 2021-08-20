@@ -22,54 +22,69 @@ struct AttachmentView: View {
     var body: some View {
         VStack {
             ForEach(0..<media.count, id: \.self) { index in
-                VStack {
-                    if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
-                        HStack(alignment: .top) {
-                            if (media[index]?.content_type ?? "") == "image/gif" {
-                                if animatedImages?.count != 0 {
-                                    Image(nsImage: animatedImages?[value % (animatedImages?.count ?? 1)] ?? NSImage()).resizable()
-                                        .scaledToFit()
-                                        .frame(width: 400, height: 300)
+                HStack(alignment: .top) {
+                    VStack {
+                        if String((media[index]?.content_type ?? "").prefix(6)) == "image/" {
+                            HStack(alignment: .top) {
+                                if (media[index]?.content_type ?? "") == "image/gif" {
+                                    if animatedImages?.count != 0 {
+                                        Image(nsImage: animatedImages?[value % (animatedImages?.count ?? 1)] ?? NSImage()).resizable()
+                                            .scaledToFit()
+                                            .frame(width: 400, height: 300)
 
-                                } else {
-                                    Text("...")
-                                        .onAppear {
-                                            attachmentQueue.async {
-                                                currentImage = NSImage()
-                                                NetworkHandling.shared?.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
-                                                    if success,
-                                                          let data = data,
-                                                       let amyGif = Gif(data: data) {
-                                                        DispatchQueue.main.async {
-                                                            animatedImages = amyGif.animatedImages
-                                                            duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
-                                                            setinterval = Double(duration / Double(animatedImages?.count ?? 1))
-                                                            self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
-                                                                if self.setinterval != 0 {
-                                                                    print(value)
-                                                                    (self.value) += 1 % animatedImages!.count
+                                    } else {
+                                        Text("...")
+                                            .onAppear {
+                                                attachmentQueue.async {
+                                                    currentImage = NSImage()
+                                                    NetworkHandling.shared?.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+                                                        if success,
+                                                              let data = data,
+                                                           let amyGif = Gif(data: data) {
+                                                            DispatchQueue.main.async {
+                                                                animatedImages = amyGif.animatedImages
+                                                                duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
+                                                                setinterval = Double(duration / Double(animatedImages?.count ?? 1))
+                                                                self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
+                                                                    if self.setinterval != 0 {
+                                                                        print(value)
+                                                                        (self.value) += 1 % animatedImages!.count
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                }
+                                    }
 
-                            } else {
-                                Attachment(media[index]!.url).equatable()
+                                } else {
+                                    Attachment(media[index]!.url).equatable()
+                                        .cornerRadius(5)
+                                }
+                            }
+                        } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
+                            HStack(alignment: .top) {
+                                VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
+                                    .frame(width: 400, height: 300)
+                                    .padding(.horizontal, 45)
                                     .cornerRadius(5)
+
                             }
                         }
-                    } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {
-                        HStack(alignment: .top) {
-                            VideoPlayer(player: AVPlayer(url: URL(string: (media[index]?.url)!)!))
-                                .frame(width: 400, height: 300)
-                                .padding(.horizontal, 45)
-                                .cornerRadius(5)
+                    }
 
+                    if let item = media[index] {
+                        Button(action: { [weak item] in
+                            if String((item?.content_type ?? "").prefix(6)) == "video/" {
+                                attachmentWindows(player: AVPlayer(url: URL(string: (item?.url)!)!), url: nil, name: (item?.filename)!, width: (item?.width)!, height: (item?.height)!)
+                            } else {
+                                attachmentWindows(player: nil, url: (item?.url)!, name: (item?.filename)!, width: (item?.width)!, height: (item?.height)!)
+                            }
+                        }) {
+                            Image(systemName: "arrow.up.forward.circle")
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
 

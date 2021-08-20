@@ -44,7 +44,8 @@ struct ServerListView: View {
                     // MARK: Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
                         ZStack(alignment: .bottomTrailing) {
-                            Attachment("https://cdn.discordapp.com/icons/\(guilds[index]["id"] as? String ?? "")/\(guilds[index]["icon"] as? String ?? "").png?size=128")
+                            Image(nsImage: guildIcons[guilds[index]["id"] as? String ?? ""] ?? NSImage()).resizable()
+                                .scaledToFit()
                                 .frame(width: 45, height: 45)
                                 .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
                                 .onTapGesture(count: 1, perform: {
@@ -73,33 +74,6 @@ struct ServerListView: View {
 
                     }
                     Divider()
-                    #if DEBUG
-                    if (selectedServer ?? 0) == 1111 {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "ant")
-                        }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(15)
-                        .onTapGesture(count: 1, perform: {
-                            DispatchQueue.main.async {
-                                selectedServer = 1111
-                            }
-                        })
-                    } else {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "ant")
-                        }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(23.5)
-                        .onTapGesture(count: 1, perform: {
-                            DispatchQueue.main.async {
-                                selectedServer = 1111
-                            }
-                        })
-                    }
-                    #endif
                     NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
                         ZStack(alignment: .bottomTrailing) {
                             Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
@@ -112,6 +86,17 @@ struct ServerListView: View {
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
+                    #if DEBUG
+                    NavigationLink(destination: SocketEventsDisplay(), tag: 2, selection: self.$stuffSelection) {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "ant")
+                        }
+                        .frame(width: 45, height: 45)
+                        .cornerRadius(15.0)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    #endif
                 }
                 .frame(width: 80)
                 .listStyle(SidebarListStyle())
@@ -181,14 +166,6 @@ struct ServerListView: View {
                         }
                         .listStyle(SidebarListStyle())
                     }
-                } else if (selectedServer ?? 0) == 1111 {
-                    #if DEBUG
-                    List(logs, id: \.self) { log in
-                        Text(log)
-                            .font(.system(.body, design: .monospaced))
-                    }
-                    .background(Color.primary.colorInvert())
-                    #endif
                 } else {
                     if guilds.isEmpty == false {
                         List {
@@ -216,6 +193,7 @@ struct ServerListView: View {
                                                                 Text(channel["name"] as! String)
                                                                 Spacer()
                                                                 Button(action: {
+                                                                    showWindow(guildID: (guilds[selectedServer ?? 0]["id"] as? String ?? ""), channelID: channel["id"] as! String, channelName: channel["name"] as! String)
                                                                 }) {
                                                                     Image(systemName: "arrow.up.right.circle")
                                                                 }
@@ -237,6 +215,11 @@ struct ServerListView: View {
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
+            ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
+                if success {
+                    guildIcons = icons
+                }
+            }
             if sortByMostRecent {
                 guilds.sort { ($0["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" > ($1["channels"] as? [[String:Any]] ?? []).sorted(by: {$0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? ""})[0]["last_message_id"] as? String ?? "" }
             } else {
@@ -265,6 +248,7 @@ struct ServerListView: View {
             }
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
+                full = [:]
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
@@ -274,3 +258,26 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }
+
+struct SocketEventsDisplay: View {
+    var body: some View {
+        List(0..<Array(socketEvents).count, id: \.self) { event in
+            if let event = socketEvents.reversed()[event] {
+                Divider()
+                VStack(alignment: .leading) {
+                    Text(Array(event.keys)[0])
+                        .fontWeight(.bold)
+                    Divider()
+                    Text(event[Array(event.keys)[0]] ?? "")
+                        .lineLimit(30)
+                        .font(.system(.body, design: .monospaced))
+                }
+                .rotationEffect(.radians(.pi))
+                .scaleEffect(x: -1, y: 1, anchor: .center)
+            }
+        }
+        .rotationEffect(.radians(.pi))
+        .scaleEffect(x: -1, y: 1, anchor: .center)
+    }
+}
+

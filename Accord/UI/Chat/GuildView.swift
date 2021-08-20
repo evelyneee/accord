@@ -30,11 +30,10 @@ struct CoolButtonStyle: ButtonStyle {
 // the messaging view concept
 
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
+let secondLoadQueue = DispatchQueue(label: "SecondLoadQueue", attributes: .concurrent)
+let webSocketQueue = DispatchQueue(label: "WebSocketQueue", attributes: .concurrent)
 
 let net = NetworkHandling()
-private func deleteMessage(_ channelID: String, _ id: String) {
-    net.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(id)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
-}
 
 struct GuildView: View, Equatable {
     
@@ -56,97 +55,122 @@ struct GuildView: View, Equatable {
     @State var roles: [String:[String]] = [:]
     @State var members: [String:String] = [:]
     @State var replyingTo: Message? = nil
+    @State var poppedUpUserProfile: Bool = false
+    @State var userPoppedUp: User? = nil
+    @State var error: String? = nil
 //    actual view begins here
 
     var body: some View {
 //      chat view
-        
-        ZStack(alignment: .bottom) {
-            Spacer()
-            List {
-                LazyVStack {
-                    Spacer().frame(height: 93)
-                    // MARK: Sending animation
-                    if (sending) && chatTextFieldContents != "", let temp = chatTextFieldContents {
-                        HStack(alignment: .top) {
-                            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                .scaledToFit()
-                                .frame(width: 33, height: 33)
-                                .padding(.horizontal, 5)
-                                .clipShape(Circle())
-                            VStack(alignment: .leading) {
-                                Text(username)
-                                    .fontWeight(.semibold)
-                                Text(temp)
+        ZStack(alignment: .topTrailing) {
+            ZStack(alignment: .bottom) {
+                Spacer()
+                List {
+                    LazyVStack {
+                        Spacer().frame(height: 93)
+                        // MARK: Sending animation
+                        if (sending) && chatTextFieldContents != "", let temp = chatTextFieldContents {
+                            HStack(alignment: .top) {
+                                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                    .scaledToFit()
+                                    .frame(width: 33, height: 33)
+                                    .padding(.horizontal, 5)
+                                    .clipShape(Circle())
+                                VStack(alignment: .leading) {
+                                    Text(username)
+                                        .fontWeight(.semibold)
+                                    Text(temp)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .rotationEffect(.radians(.pi))
+                            .scaleEffect(x: -1, y: 1, anchor: .center)
+                            .opacity(0.75)
                         }
-                        .rotationEffect(.radians(.pi))
-                        .scaleEffect(x: -1, y: 1, anchor: .center)
-                        .opacity(0.75)
-                    }
-                    // MARK: Message loop
-                    ForEach(Array(data), id: \.id) { message in
-                        /// get index of message (fixes the index out of range)
-                        if let offset = data.firstIndex(of: message) {
-                            if data.contains(data[offset]) {
-                                LazyVStack(alignment: .leading) {
-                                    if let reply = message.referenced_message {
-                                        HStack {
-                                            Spacer().frame(width: 50)
-                                            Image(nsImage: pfpArray[reply.author?.id ?? ""] ?? NSImage()).resizable()
-                                                .scaledToFit()
-                                                .frame(width: 15, height: 15)
-                                                .clipShape(Circle())
-
-                                            if let roleColor = roleColors[(roles[reply.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
-                                                Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                                                    .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
-                                                    .fontWeight(.semibold)
-                                                if #available(macOS 12.0, *) {
-                                                    Text(try! AttributedString(markdown: reply.content))
-                                                        .lineLimit(0)
-                                                } else {
-                                                    Text(reply.content)
-                                                        .lineLimit(0)
-                                                }
-                                            } else {
-                                                Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                                                    .fontWeight(.semibold)
-                                                if #available(macOS 12.0, *) {
-                                                    Text(try! AttributedString(markdown: reply.content))
-                                                        .lineLimit(0)
-                                                } else {
-                                                    Text(reply.content)
-                                                        .lineLimit(0)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    HStack(alignment: .top) {
-                                        VStack {
-                                            if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
-                                                Image(nsImage: pfpArray[message.author?.id ?? ""] ?? NSImage()).resizable()
+                        // MARK: Message loop
+                        ForEach(Array(data), id: \.id) { message in
+                            /// get index of message (fixes the index out of range)
+                            if let offset = data.firstIndex(of: message) {
+                                if data.contains(data[offset]) {
+                                    LazyVStack(alignment: .leading) {
+                                        if let reply = message.referenced_message {
+                                            HStack {
+                                                Spacer().frame(width: 50)
+                                                Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
                                                     .scaledToFit()
-                                                    .frame(width: (pfpShown ? 33 : 15), height: (pfpShown ? 33 : 15))
-                                                    .padding(.horizontal, 5)
+                                                    .frame(width: 15, height: 15)
                                                     .clipShape(Circle())
+
+                                                if let roleColor = roleColors[(roles[reply.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
+                                                    Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                                        .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                                        .fontWeight(.semibold)
+                                                    if #available(macOS 12.0, *) {
+                                                        Text(try! AttributedString(markdown: reply.content))
+                                                            .lineLimit(0)
+                                                    } else {
+                                                        Text(reply.content)
+                                                            .lineLimit(0)
+                                                    }
+                                                } else {
+                                                    Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                                        .fontWeight(.semibold)
+                                                    if #available(macOS 12.0, *) {
+                                                        Text(try! AttributedString(markdown: reply.content))
+                                                            .lineLimit(0)
+                                                    } else {
+                                                        Text(reply.content)
+                                                            .lineLimit(0)
+                                                    }
+                                                }
                                             }
                                         }
-                                        if let author = message.author?.username {
-                                            VStack(alignment: .leading) {
-                                                if offset != (data.count - 1) {
-                                                    if author == (data[Int(offset + 1)].author?.username ?? "") {
-                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                            .padding(.leading, 51)
-                                                    } else if roles.isEmpty {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                    } else {
-                                                        if let roleColor = roleColors[(roles[message.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
+                                        HStack(alignment: .top) {
+                                            VStack {
+                                                if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
+                                                    Button(action: { [weak message] in
+                                                        poppedUpUserProfile.toggle()
+                                                        userPoppedUp = message!.author!
+                                                    }) {
+                                                        Image(nsImage: NSImage(data: message.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                                            .scaledToFit()
+                                                            .frame(width: (pfpShown ? 33 : 15), height: (pfpShown ? 33 : 15))
+                                                            .padding(.horizontal, 5)
+                                                            .clipShape(Circle())
+                                                    }
+                                                    .buttonStyle(BorderlessButtonStyle())
+                                                }
+                                            }
+                                            if let author = message.author?.username {
+                                                VStack(alignment: .leading) {
+                                                    if offset != (data.count - 1) {
+                                                        if author == (data[Int(offset + 1)].author?.username ?? "") {
+                                                            FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                                .padding(.leading, 51)
+                                                        } else if roles.isEmpty {
                                                             Text(nicks[message.author?.id ?? ""] ?? author)
-                                                                .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                        } else {
+                                                            if let roleColor = roleColors[(roles[message.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
+                                                                Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                    .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                                                    .fontWeight(.semibold)
+                                                                FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                            } else {
+                                                                Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                    .fontWeight(.semibold)
+                                                                FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                            }
+                                                        }
+                                                    } else {
+                                                        if roles.isEmpty {
+                                                            Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                .fontWeight(.semibold)
+                                                            FancyTextView(text: $data[offset].content, channelID: $channelID)
+                                                        } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""]?.0 {
+                                                            Text(nicks[message.author?.id ?? ""] ?? author)
+                                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                                 .fontWeight(.semibold)
                                                             FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                         } else {
@@ -155,203 +179,252 @@ struct GuildView: View, Equatable {
                                                             FancyTextView(text: $data[offset].content, channelID: $channelID)
                                                         }
                                                     }
-                                                } else {
-                                                    if roles.isEmpty {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                    } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""]?.0 {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
-                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                    } else {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                        FancyTextView(text: $data[offset].content, channelID: $channelID)
-                                                    }
-                                                }
 
-                                            }
-                                        }
-                                        Spacer()
-                                        Button(action: {
-                                            if collapsed.contains(offset) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                            } else {
-                                                collapsed.append(offset)
-                                            }
-                                        }) {
-                                            Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        if (collapsed.contains(offset)) {
-                                            Button(action: { [weak message] in
-                                                DispatchQueue.main.async {
-                                                    NSPasteboard.general.clearContents()
-                                                    NSPasteboard.general.setString(message?.content ?? "", forType: .string)
-                                                    if collapsed.contains(offset) {
-                                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                                    } else {
-                                                        collapsed.append(offset)
-                                                    }
                                                 }
-                                            }) {
-                                                Text("Copy")
                                             }
-                                            .buttonStyle(BorderlessButtonStyle())
-                                            Button(action: { [weak message] in
-                                                DispatchQueue.main.async {
-                                                    NSPasteboard.general.clearContents()
-                                                    NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
-                                                    if collapsed.contains(offset) {
-                                                        collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                                    } else {
-                                                        collapsed.append(offset)
-                                                    }
-                                                }
-                                            }) {
-                                                Text("Copy Message Link")
-                                            }
-                                            .buttonStyle(BorderlessButtonStyle())
-                                        }
-                                        Button(action: { [weak message] in
-                                            DispatchQueue.main.async {
-                                                replyingTo = message
-                                            }
-                                        }) {
-                                            Image(systemName: "arrowshape.turn.up.backward.fill")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        Button(action: { [weak message] in
-                                            message?.delete()
-                                        }) {
-                                            Image(systemName: "trash")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                    }
-                                    if message.attachments.isEmpty == false {
-                                        HStack {
-                                            AttachmentView(media: $data[offset].attachments)
                                             Spacer()
+                                            Button(action: {
+                                                if collapsed.contains(offset) {
+                                                    collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                                } else {
+                                                    collapsed.append(offset)
+                                                }
+                                            }) {
+                                                Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                            if (collapsed.contains(offset)) {
+                                                Button(action: { [weak message] in
+                                                    DispatchQueue.main.async {
+                                                        NSPasteboard.general.clearContents()
+                                                        NSPasteboard.general.setString(message?.content ?? "", forType: .string)
+                                                        if collapsed.contains(offset) {
+                                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                                        } else {
+                                                            collapsed.append(offset)
+                                                        }
+                                                    }
+                                                }) {
+                                                    Text("Copy")
+                                                }
+                                                .buttonStyle(BorderlessButtonStyle())
+                                                Button(action: { [weak message] in
+                                                    DispatchQueue.main.async {
+                                                        NSPasteboard.general.clearContents()
+                                                        NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
+                                                        if collapsed.contains(offset) {
+                                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                                        } else {
+                                                            collapsed.append(offset)
+                                                        }
+                                                    }
+                                                }) {
+                                                    Text("Copy Message Link")
+                                                }
+                                                .buttonStyle(BorderlessButtonStyle())
+                                            }
+                                            Button(action: { [weak message] in
+                                                DispatchQueue.main.async {
+                                                    replyingTo = message
+                                                }
+                                            }) {
+                                                Image(systemName: "arrowshape.turn.up.backward.fill")
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                            Button(action: { [weak message] in
+                                                message!.delete()
+                                            }) {
+                                                Image(systemName: "trash")
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
                                         }
-                                        .frame(maxWidth: 400, maxHeight: 300)
-                                        .padding(.leading, 52)
+                                        if message.attachments.isEmpty == false {
+                                            HStack {
+                                                AttachmentView(media: $data[offset].attachments)
+                                                Spacer()
+                                            }
+                                            .frame(maxWidth: 400, maxHeight: 300)
+                                            .padding(.leading, 52)
+                                        }
                                     }
+                                    .id(message.id)
+                                    .rotationEffect(.radians(.pi))
+                                    .scaleEffect(x: -1, y: 1, anchor: .center)
                                 }
-                                .id(message.id)
-                                .rotationEffect(.radians(.pi))
-                                .scaleEffect(x: -1, y: 1, anchor: .center)
                             }
+
+
                         }
-
-
-                    }
-                    if data.isEmpty == false {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("This is the beginning of #\(channelName)")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
+                        if data.isEmpty == false {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("This is the beginning of #\(channelName)")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .padding(.vertical)
+                            .rotationEffect(.radians(.pi))
+                            .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
-                        .padding(.vertical)
-                        .rotationEffect(.radians(.pi))
-                        .scaleEffect(x: -1, y: 1, anchor: .center)
                     }
                 }
-            }
-            .rotationEffect(.radians(.pi))
-            .scaleEffect(x: -1, y: 1, anchor: .center)
-            VStack(alignment: .leading) {
-                HStack {
-                    if typing.count == 1 && !(typing.isEmpty) {
-                        Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
-                    } else if !(typing.isEmpty) {
-                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                            .lineLimit(0)
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
+                .rotationEffect(.radians(.pi))
+                .scaleEffect(x: -1, y: 1, anchor: .center)
+                VStack(alignment: .leading) {
+                    HStack {
+                        if typing.count == 1 && !(typing.isEmpty) {
+                            Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
+                        } else if !(typing.isEmpty) {
+                            Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
+                                .lineLimit(0)
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
+                        }
+                        if let replied = replyingTo {
+                            Text("replying to \(replied.author?.username ?? "")")
+                                .padding(4)
+                                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                                .cornerRadius(5)
+                        }
                     }
-                    if let replied = replyingTo {
-                        Text("replying to \(replied.author?.username ?? "")")
-                            .padding(4)
-                            .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                            .cornerRadius(5)
+                    if #available(macOS 12.0, *) {
+                        ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
+                            .padding(15)
+                            .background(Material.regular) // blurred background
+                            .cornerRadius(15)
+                    } else {
+                        ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
+                            .padding(15)
+                            .background(VisualEffectView(material: NSVisualEffectView.Material.sheet, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                            .cornerRadius(15)
                     }
                 }
-                if #available(macOS 12.0, *) {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
-                        .padding(15)
-                        .background(.thickMaterial) // blurred background
-                        .cornerRadius(15)
-                } else {
-                    ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
-                        .padding(15)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                        .cornerRadius(15)
-                }
+                .padding()
             }
-            .padding()
-        }
-        .onAppear {
-            if guildID != "@me" {
-                WebSocketHandler.shared.subscribe(guildID, channelID)
-            } else {
-                WebSocketHandler.shared.subscribeToDM(channelID)
-                ChannelMembers.shared.channelMembers[channelID] = members
-            }
-            if AccordCoreVars.shared.token != "" {
-                concurrentQueue.async {
+            .onAppear {
+                if AccordCoreVars.shared.token != "" {
+                    concurrentQueue.async {
+                        NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
+                            if success == true {
+                                do {
+                                    data = try JSONDecoder().decode([Message].self, from: rawData!)
+                                    secondLoadQueue.async {
+                                        if guildID != "@me" {
+                                            let allUserIDs = data.map { $0.author?.id ?? "" }
+                                            WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
+                                                if success {
+                                                    for person in users {
+                                                        nicks[(person?.user.id ?? "")] = person?.nick ?? ""
+                                                    }
+                                                }
+                                            }
 
-                    NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
-                        if success == true {
-                            do {
-                                data = try JSONDecoder().decode([Message].self, from: rawData!)
-                                concurrentQueue.async {
-                                    if guildID != "@me" {
-                                        let allUserIDs = data.map { $0.author?.id ?? "" }
-                                        WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
-                                            if success {
-                                                for person in users {
-                                                    nicks[(person?.user.id ?? "")] = person?.nick ?? ""
+                                        }
+                                        let authorArray = Array(NSOrderedSet(array: data.compactMap { $0.author! }))
+                                        for user in authorArray as! [User] {
+                                            if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
+                                                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                                                if let data = cache.cachedResponse(for: request)?.data {
+                                                    user.pfp = data
+                                                } else {
+                                                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                                        if let data = data, let response = response {
+                                                        let cachedData = CachedURLResponse(response: response, data: data)
+                                                            cache.storeCachedResponse(cachedData, for: request)
+                                                            user.pfp = data
+                                                        }
+                                                    }).resume()
+                                                }
+                                            }
+                                        }
+                                        let replyArray = Array(NSOrderedSet(array: data.compactMap { $0.referenced_message?.author }))
+                                        for user in replyArray as! [User] {
+                                            if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
+                                                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                                                if let data = cache.cachedResponse(for: request)?.data {
+                                                    user.pfp = data
+                                                } else {
+                                                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                                        if let data = data, let response = response {
+                                                        let cachedData = CachedURLResponse(response: response, data: data)
+                                                            cache.storeCachedResponse(cachedData, for: request)
+                                                            user.pfp = data
+                                                        }
+                                                    }).resume()
                                                 }
                                             }
                                         }
                                     }
-                                    ImageHandling.shared?.getProfilePictures(array: data) { success, pfps in
-                                         if success {
-                                             pfpArray = pfps
-                                             print(pfpArray)
-                                         }
-                                     }
+                                } catch {
                                 }
-                            } catch {
                             }
                         }
                     }
                 }
             }
+            if let error = error {
+                VStack(alignment: .leading) {
+                    Text("WebSocket was disconnected")
+                        .fontWeight(.bold)
+                    Text("Cause: \(error)")
+                }
+                .padding()
+                .background(Color.red)
+                .cornerRadius(10)
+                .padding()
+            }
         }
+
 
         /* Run everything into a separate queue so it doesn't clog the main thread */
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("update"))) { notif in
             switch ((Array((notif.userInfo as! [String:Any]).keys))[0]) {
             case "NewMessageIn\(channelID)":
-                concurrentQueue.async {
+                webSocketQueue.async {
                     sending = false
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["NewMessageIn\(channelID)"] as! Data) else { return }
                     guard let message = gatewayMessage.d else { return }
+                    if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80") {
+                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                        if let data = cache.cachedResponse(for: request)?.data {
+                            message.author?.pfp = data
+                        } else {
+                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                if let data = data, let response = response {
+                                let cachedData = CachedURLResponse(response: response, data: data)
+                                    cache.storeCachedResponse(cachedData, for: request)
+                                    message.author?.pfp = data
+                                }
+                            }).resume()
+                        }
+                    }
+                    if message.referenced_message != nil {
+                        if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.referenced_message?.author?.id ?? "")/\(message.referenced_message?.author?.avatar ?? "").png?size=80") {
+                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                            if let data = cache.cachedResponse(for: request)?.data {
+                                message.referenced_message?.author?.pfp = data
+                            } else {
+                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                    if let data = data, let response = response {
+                                    let cachedData = CachedURLResponse(response: response, data: data)
+                                        cache.storeCachedResponse(cachedData, for: request)
+                                        message.referenced_message?.author?.pfp = data
+                                    }
+                                }).resume()
+                            }
+                        }
+                    }
                     data.insert(message, at: 0)
                 }
                 break
             case "MemberChunk":
-                concurrentQueue.async {
+                webSocketQueue.async {
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: notif.userInfo!["MemberChunk"] as! Data) else { return }
                     guard let users = chunk.d?.members else { return }
                     ChannelMembers.shared.channelMembers[channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
@@ -379,7 +452,7 @@ struct GuildView: View, Equatable {
                 break
             case "EditedMessageIn\(channelID)":
                 print("[Accord] \(channelName) was being updated")
-                concurrentQueue.async {
+                webSocketQueue.async {
                     let currentUIDDict = data.map { $0.id }
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: notif.userInfo!["EditedMessageIn\(channelID)"] as! Data) else { return }
                     guard let message = gatewayMessage.d else { return }
@@ -396,7 +469,7 @@ struct GuildView: View, Equatable {
                 break
             case "TypingStartIn\(channelID)":
                 print("[Accord] typing 1")
-                concurrentQueue.async {
+                webSocketQueue.async {
                     guard let packet = (notif.userInfo ?? [:])["TypingStartIn\(channelID)"] else { return }
                     print("[Accord] typing 2")
                     if !(typing.contains((notif.userInfo ?? [:])["user_id"] as? String ?? "")) {
@@ -419,12 +492,15 @@ struct GuildView: View, Equatable {
                     }
                 }
                 break
+            case "WSError":
+                error = (notif.userInfo as! [String:Any])["WSError"] as? String ?? ""
             default:
                 break
             }
         }
     }
 }
+
 
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String 
@@ -477,6 +553,7 @@ struct ChatControls: View {
                     }
                 })
                     .textFieldStyle(PlainTextFieldStyle())
+                    .foregroundColor(Color.white)
                     .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
                         fileUpload = try! Data(contentsOf: try! result.get())
                     }
@@ -643,5 +720,18 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil
+    }
+}
+
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
+        }
     }
 }

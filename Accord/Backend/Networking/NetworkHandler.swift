@@ -12,7 +12,7 @@ let debug = false
 final class NetworkHandling {
     static var shared: NetworkHandling? = NetworkHandling()
 
-    func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
+    final func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let config = URLSessionConfiguration.default
         if proxyEnabled {
             config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
@@ -20,7 +20,7 @@ final class NetworkHandling {
             config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
             if let ip = proxyIP {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
             }
             if let port = proxyPort {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
@@ -87,7 +87,7 @@ final class NetworkHandling {
         })
         task.resume()
     }
-    func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
+    final func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let config = URLSessionConfiguration.default
         if proxyEnabled {
             config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
@@ -95,7 +95,7 @@ final class NetworkHandling {
             config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
             if let ip = proxyIP {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
             }
             if let port = proxyPort {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
@@ -164,7 +164,7 @@ final class NetworkHandling {
             config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
             if let ip = proxyIP {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
             }
             if let port = proxyPort {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
@@ -213,7 +213,7 @@ final class NetworkHandling {
         task.resume()
     }
 
-    func login(username: String, password: String, captcha: String = "", _ completion: @escaping ((_ success: Bool, _ rettoken: Data?) -> Void)) {
+    final func login(username: String, password: String, captcha: String = "", _ completion: @escaping ((_ success: Bool, _ rettoken: Data?) -> Void)) {
         let config = URLSessionConfiguration.default
         if proxyEnabled {
             config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
@@ -221,7 +221,7 @@ final class NetworkHandling {
             config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
             if let ip = proxyIP {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
             }
             if let port = proxyPort {
                 config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
