@@ -23,6 +23,8 @@ final class GifServer {
 
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
+
+
 struct FancyTextView: View {
     @Binding var text: String
     @State var textElement: Text? = nil

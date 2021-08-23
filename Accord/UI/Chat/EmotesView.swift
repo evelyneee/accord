@@ -41,8 +41,8 @@ struct EmotesView: View, Equatable {
                         Section(header: Text(key.components(separatedBy: "$")[1])) {
                             LazyVGrid(columns: columns) {
                                 ForEach((AllEmotes.shared.allEmotes[key] ?? []), id: \.self) { emote in
-                                    Button(action: {
-                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
+                                    Button(action: { [weak emote] in
+                                        chatText.append(contentsOf: "<\(emote?.animated ?? false ? "a" : ""):\(emote?.name ?? ""):\(emote?.id ?? "")>")
                                     }) {
                                         VStack {
                                             HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()

@@ -9,7 +9,7 @@ import Foundation
 
 final class RoleManager {
     static var shared: RoleManager? = RoleManager()
-    func arrangeRoleColors(guilds: [[String:Any]]) -> [String:(Int, Int)] {
+    final func arrangeRoleColors(guilds: [[String:Any]]) -> [String:(Int, Int)] {
         var returnArray: [String:(Int, Int)] = [:]
         for guild in guilds {
             if var roles = (guild["roles"] as? [[String:Any]]) {

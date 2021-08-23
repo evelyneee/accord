@@ -288,7 +288,7 @@ final class WebSocketHandler {
                                 case "GUILD_MEMBER_UPDATE": break
                                 case "GUILD_MEMBERS_CHUNK":
                                     DispatchQueue.main.async {
-                                        NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["MemberChunk":textData])
+                                        MessageController.shared.sendMemberChunk(msg: textData)
                                     }
                                     break
                                 case "GUILD_ROLE_CREATE": break
@@ -308,9 +308,7 @@ final class WebSocketHandler {
                                 case "MESSAGE_CREATE":
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
-                                        DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["NewMessageIn\(channelid)":textData])
-                                        }
+                                        MessageController.shared.sendMessage(msg: textData, channelID: channelid)
                                     }
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
@@ -325,17 +323,13 @@ final class WebSocketHandler {
                                 case "MESSAGE_UPDATE":
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
-                                        DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["EditedMessageIn\(channelid)":textData])
-                                        }
+                                        MessageController.shared.editMessage(msg: textData, channelID: channelid)
                                     }
                                     break
                                 case "MESSAGE_DELETE":
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
-                                        DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["DeletedMessageIn\(channelid)":textData])
-                                        }
+                                        MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
                                     }
                                     break
                                 case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
@@ -346,11 +340,10 @@ final class WebSocketHandler {
                                 // MARK: Presence Event Handlers
                                 case "PRESENCE_UPDATE": break
                                 case "TYPING_START":
+                                    print("typing")
                                     let data = payload["d"] as! [String: Any]
                                     if let channelid = data["channel_id"] as? String {
-                                        DispatchQueue.main.async {
-                                            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["TypingStartIn\(channelid)":data])
-                                        }
+                                        MessageController.shared.typing(msg: data, channelID: channelid)
                                     }
                                     break
                                 case "USER_UPDATE": break
@@ -513,7 +506,7 @@ final class WebSocketHandler {
 }
 
 protocol URLQueryParameterStringConvertible {
-    var queryParameters: String {get}
+    var queryParameters: String { get }
 }
 
 final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
@@ -524,9 +517,7 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         releaseModePrint("[Accord] Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "update"), object: nil, userInfo: ["WSError":reason])
-        }
+        MessageController.shared.sendWSError(msg: reason)
         print("[Accord] Error from Discord: \(reason)")
         // MARK: WebSocket close codes.
         switch closeCode {
