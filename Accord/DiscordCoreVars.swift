@@ -20,6 +20,7 @@ public var discriminator: String = ""
 public var proxyIP: String? = UserDefaults.standard.string(forKey: "proxyIP")
 public var proxyPort: String? = UserDefaults.standard.string(forKey: "proxyPort")
 public var proxyEnabled: Bool = UserDefaults.standard.bool(forKey: "proxyEnabled")
+public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors")
 
 
 final class AccordCoreVars {

@@ -69,11 +69,9 @@ struct AttachmentView: View {
                                     .frame(width: 400, height: 300)
                                     .padding(.horizontal, 45)
                                     .cornerRadius(5)
-
                             }
                         }
                     }
-
                     if let item = media[index] {
                         Button(action: { [weak item] in
                             if String((item?.content_type ?? "").prefix(6)) == "video/" {
@@ -87,13 +85,11 @@ struct AttachmentView: View {
                         .buttonStyle(BorderlessButtonStyle())
                     }
                 }
-
             }
             .onChange(of: media) { newValue in
                 media = newValue
             }
         }
-        
     }
 }
 

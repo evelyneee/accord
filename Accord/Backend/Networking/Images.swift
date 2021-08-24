@@ -89,9 +89,9 @@ final class ImageHandling {
         sem.wait()
         return dataReceived
     }
-    func getServerIcons(array: [[String:Any]], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
+    func getServerIcons(array: [Guild], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
         let pfpURLs = array.compactMap {
-            "https://cdn.discordapp.com/icons/\($0["id"] ?? "")/\($0["icon"] ?? "")?size=80"
+            "https://cdn.discordapp.com/icons/\($0.id)/\($0.icon ?? "")?size=80"
         }
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {

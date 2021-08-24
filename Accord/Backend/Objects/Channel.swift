@@ -40,7 +40,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     // var thread_metadata?
     // TODO: Thread member object
     // var member: User?
-    var default_auto_archive_duration: Int
+    var default_auto_archive_duration: Int?
     var permissions: String?
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)

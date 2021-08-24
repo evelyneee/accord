@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import UserNotifications
 
 extension Dictionary {
     mutating func switchKey(fromKey: Key, toKey: Key) {
@@ -73,7 +74,11 @@ public extension NSColor {
                 r = CGFloat((hexNumber & 0xFF0000) >> 16) / 255
                 g = CGFloat((hexNumber & 0xFF00) >> 8) / 255
                 b = CGFloat(hexNumber & 0xFF) / 255
-                return NSColor(calibratedRed: r, green: g, blue: b, alpha: 1)
+                if pastelColors {
+                    return NSColor(calibratedRed: r + 0.1, green: g + 0.1, blue: b + 0.1, alpha: 1)
+                } else {
+                    return NSColor(calibratedRed: r, green: g, blue: b, alpha: 1)
+                }
             }
         }
         return nil
@@ -181,48 +186,6 @@ extension NSImage {
         }
         return self.resize(withSize: newSize)
     }
-
-    // MARK: Cropping
-
-    /// Resize the image, to nearly fit the supplied cropping size
-    /// and return a cropped copy the image.
-    ///
-    /// - Parameter size: The size of the new image.
-    /// - Returns: The cropped image.
-    func crop(toSize targetSize: NSSize) -> NSImage? {
-        guard let resizedImage = self.resizeMaintainingAspectRatio(withSize: targetSize) else {
-            return nil
-        }
-        let x     = floor((resizedImage.width - targetSize.width) / 2)
-        let y     = floor((resizedImage.height - targetSize.height) / 2)
-        let frame = NSRect(x: x, y: y, width: targetSize.width, height: targetSize.height)
-
-        guard let representation = resizedImage.bestRepresentation(for: frame, context: nil, hints: nil) else {
-            return nil
-        }
-
-        let image = NSImage(size: targetSize,
-                            flipped: false,
-                            drawingHandler: { (destinationRect: NSRect) -> Bool in
-            return representation.draw(in: destinationRect)
-        })
-
-        return image
-    }
-
-    // MARK: Saving
-
-    /// Save the images PNG representation the the supplied file URL:
-    ///
-    /// - Parameter url: The file URL to save the png file to.
-    /// - Throws: An unwrappingPNGRepresentationFailed when the image has no png representation.
-    func savePngTo(url: URL) throws {
-        if let png = self.PNGRepresentation {
-            try png.write(to: url, options: .atomicWrite)
-        } else {
-            throw NSImageExtensionError.unwrappingPNGRepresentationFailed
-        }
-    }
 }
 
 
@@ -245,6 +208,12 @@ func userNotificationCenter(_ center: NSUserNotificationCenter,
                                          shouldPresent notification: NSUserNotification) -> Bool {
         return true
 }
+
+
+func clearAllNotifications() {
+    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+}
+
 
 // For KeychainManager
 

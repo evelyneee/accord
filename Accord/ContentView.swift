@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State public var selection: Int?
-    @State var guilds: [[String:Any]] = []
+    @State var guilds = [Guild]()
     @State var socketOut: [String:Any] = [:]
     @State var channels: [Any] = []
     @State var status: statusIndicators?
@@ -21,9 +21,9 @@ struct ContentView: View {
             LoginView()
                 .onDisappear(perform: {
                     DispatchQueue.main.async {
-                        NetworkHandling.shared?.request(url: "\(rootURL)/users/@me/guilds", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, array in
+                        NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me/guilds", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
                             if success == true {
-                                guilds = array!
+                                guilds = try! JSONDecoder().decode([Guild].self, from: rawData!)
                             }
                         }
                     }
@@ -32,10 +32,11 @@ struct ContentView: View {
 
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("logged_in"))) { obj in
-            WebSocketHandler.newMessage(opcode: 2) { success, array in
+            WebSocketHandler.connect(opcode: 2) { success, array in
                  if !(array?.isEmpty ?? true) {
                      socketOut = array ?? [:]
-                     guilds = array?["guilds"] as? [[String:Any]] ?? []
+                     
+                     guilds = try! JSONDecoder().decode([Guild].self, from: try! JSONSerialization.data(withJSONObject: array?["guilds"] as? [[String:Any]] ?? [], options: []))
                      DispatchQueue.main.async {
                          NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                      }
@@ -45,10 +46,10 @@ struct ContentView: View {
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {
-                WebSocketHandler.newMessage(opcode: 2) { success, array in
+                WebSocketHandler.connect(opcode: 2) { success, array in
                      if !(array?.isEmpty ?? false) {
                          socketOut = array ?? [:]
-                         guilds = array?["guilds"] as? [[String:Any]] ?? []
+                         guilds = try! JSONDecoder().decode([Guild].self, from: try! JSONSerialization.data(withJSONObject: array?["guilds"] as? [[String:Any]] ?? [], options: []))
                          DispatchQueue.main.async {
                              NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                          }

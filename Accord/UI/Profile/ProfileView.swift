@@ -57,8 +57,6 @@ struct ProfileView: View {
                     Image(systemName: "gearshape.fill")
                         .font(.title)
                         .padding()
-                }.sheet(isPresented: $showingDetail) {
-                    SettingsView()
                 }
                 .buttonStyle(CoolButtonStyle())
             }

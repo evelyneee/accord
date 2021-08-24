@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
-		32DC838B257FA71B004520AE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32DC838A257FA71B004520AE /* SettingsView.swift */; };
 		32F37416257302C300ADB7E6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F37415257302C300ADB7E6 /* ProfileView.swift */; };
 		32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742A25733D8000ADB7E6 /* GuildView.swift */; };
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
@@ -30,7 +29,7 @@
 		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
 		A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE632686709A00B244BE /* NitrolessStructures.swift */; };
 		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
-		A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */; };
+		A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsView.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
@@ -68,7 +67,6 @@
 /* Begin PBXFileReference section */
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32ADD58A2583997F008D1715 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		32DC838A257FA71B004520AE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		32F37415257302C300ADB7E6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		32F3742A25733D8000ADB7E6 /* GuildView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscordCoreVars.swift; sourceTree = "<group>"; };
@@ -95,7 +93,7 @@
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
 		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
-		A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewRedesign.swift; sourceTree = "<group>"; };
+		A869085E269F2A0A00F13CAD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
@@ -210,10 +208,9 @@
 		A82521372687AB780073F640 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				32DC838A257FA71B004520AE /* SettingsView.swift */,
 				32F37415257302C300ADB7E6 /* ProfileView.swift */,
 				A8DE781926BF1532004AC30C /* AccountManagerView.swift */,
-				A869085E269F2A0A00F13CAD /* SettingsViewRedesign.swift */,
+				A869085E269F2A0A00F13CAD /* SettingsView.swift */,
 				A869085C269DDCE400F13CAD /* PopoverProfileView.swift */,
 			);
 			path = Profile;
@@ -273,8 +270,8 @@
 		A864BE5926866FDF00B244BE /* Nitroless */ = {
 			isa = PBXGroup;
 			children = (
-				A864BE622686708700B244BE /* NitrolessBackend */,
 				A864BE5D2686700300B244BE /* MainView.swift */,
+				A864BE622686708700B244BE /* NitrolessBackend */,
 			);
 			path = Nitroless;
 			sourceTree = "<group>";
@@ -404,7 +401,6 @@
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
-				32DC838B257FA71B004520AE /* SettingsView.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
@@ -424,7 +420,7 @@
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
-				A869085F269F2A0A00F13CAD /* SettingsViewRedesign.swift in Sources */,
+				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
@@ -561,7 +557,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
@@ -587,7 +583,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;

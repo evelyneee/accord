@@ -75,121 +75,19 @@ final class WebSocketHandler {
         releaseModePrint("[Accord] Socket initiated")
     }
 
-    final class func newMessage(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
+    final class func connect(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
         let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared.requests = 0
         }
 
         if !(WebSocketHandler.shared.connected) {
-            initialReception()
-            authenticate()
+            WebSocketHandler.shared.initialReception()
+            WebSocketHandler.shared.authenticate()
             receive()
             WebSocketHandler.shared.connected = true
         } else {
             print("[Accord] already connected, continuing")
         }
-
-        func reconnect() {
-            let packet: [String:AnyEncodable] = [
-                "op":AnyEncodable(Int(6)),
-                "d":AnyEncodable([
-                    "token":AnyEncodable(AccordCoreVars.shared.token),
-                    "session_id":AnyEncodable(String(WebSocketHandler.shared.session_id ?? "")),
-                    "seq":AnyEncodable(Int(WebSocketHandler.shared.seq ?? 0))
-                ] as [String:AnyEncodable])
-            ]
-            if let jsonData = try? JSONEncoder().encode(packet),
-               let jsonString: String = String(data: jsonData, encoding: .utf8) {
-                WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                    if let error = error {
-                        print("[Accord] WebSocket sending error: \(error)")
-                    }
-                }
-            }
-        }
-        func authenticate() {
-            let packet: [String:AnyEncodable] = [
-                "op":AnyEncodable(2),
-                "d":AnyEncodable([
-                    "token":AnyEncodable(AccordCoreVars.shared.token),
-                    "capabilities":AnyEncodable(125),
-                    "compress":AnyEncodable(false),
-                    "properties": AnyEncodable([
-                        "os":AnyEncodable("Mac OS X"),
-                        "browser":AnyEncodable("Discord Client"),
-                        "release_channel":AnyEncodable("canary"),
-                        "client_build_number": AnyEncodable(93654),
-                        "client_version":AnyEncodable("0.0.273"),
-                        "os_version":AnyEncodable("21.0.0"),
-                        "os_arch":AnyEncodable("x64"),
-                        "system-locale":AnyEncodable("en-US"),
-                    ] as [String:AnyEncodable])
-                ] as [String:AnyEncodable])
-            ]
-            socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
-            if let jsonData = try? JSONEncoder().encode(packet),
-               let jsonString: String = String(data: jsonData, encoding: .utf8) {
-                WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                    if let error = error {
-                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    }
-                }
-            }
-        }
-        func send(opcode: Int) {
-            let packet: [String:AnyEncodable] = [
-                "op":AnyEncodable(2),
-                "d":AnyEncodable([
-                    "token":AnyEncodable(AccordCoreVars.shared.token),
-                    "capabilities":AnyEncodable(125),
-                    "compress":AnyEncodable(false),
-                    "properties": AnyEncodable([
-                        "os":AnyEncodable("Mac OS X"),
-                        "browser":AnyEncodable("Discord Client"),
-                        "release_channel":AnyEncodable("canary"),
-                        "client_build_number": AnyEncodable(93654),
-                        "client_version":AnyEncodable("0.0.273"),
-                        "os_version":AnyEncodable("21.0.0"),
-                        "os_arch":AnyEncodable("x64"),
-                        "system-locale":AnyEncodable("en-US"),
-                    ] as [String:AnyEncodable])
-                ] as [String:AnyEncodable])
-            ]
-            socketEvents.append(["sent (op \(opcode)) ~>":String(describing: packet as [String:Any])])
-            if let jsonData = try? JSONEncoder().encode(packet),
-               let jsonString: String = String(data: jsonData, encoding: .utf8) {
-                WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                    receive()
-                    if let error = error {
-                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    }
-                }
-            }
-        }
-        func heartbeat() {
-            if WebSocketHandler.shared.requests >= 49 {
-                return
-            }
-            let packet: [String:AnyEncodable] = [
-                "op":AnyEncodable(1),
-                "d":AnyEncodable(WebSocketHandler.shared.seq)
-            ]
-            socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
-            if let jsonData = try? JSONEncoder().encode(packet),
-               let jsonString: String = String(data: jsonData, encoding: .utf8) {
-                WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                    if let error = error {
-                        releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    }
-                    print("[Accord] heartbeat")
-                    WebSocketHandler.shared.requests += 1
-                    DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
-                        heartbeat()
-                    })
-                }
-            }
-        }
-
 
         func ping() {
             if WebSocketHandler.shared.requests >= 49 {
@@ -206,35 +104,6 @@ final class WebSocketHandler {
                 }
             }
         }
-        func initialReception() {
-            if WebSocketHandler.shared.requests >= 49 {
-                return
-            }
-            WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
-                WebSocketHandler.shared.requests += 1
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .data(_):
-                        break
-                    case .string(let text):
-                        if let data = text.data(using: String.Encoding.utf8) {
-                            let hello = decodePayload(payload: data)
-                            WebSocketHandler.shared.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
-                            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
-                                heartbeat()
-                            })
-
-                        }
-                    @unknown default:
-                        print("[Accord] unknown")
-                        break
-                    }
-                case .failure(let error):
-                    print("[Accord] Error when init receiving \(error)")
-                }
-            }
-        }
         func receive() {
             if WebSocketHandler.shared.requests >= 49 {
                 return
@@ -248,13 +117,13 @@ final class WebSocketHandler {
                             print("[Accord] Data received \(data)")
                         case .string(let text):
                             if let textData = text.data(using: String.Encoding.utf8) {
-                                let payload = decodePayload(payload: textData)
+                                let payload = WebSocketHandler.shared.decodePayload(payload: textData)
                                 if payload["s"] as? Int != nil {
                                     WebSocketHandler.shared.seq = payload["s"] as? Int
                                 } else {
                                     if (payload["op"] as? Int ?? 0) != 11 {
                                         print("[Accord] RECONNECT")
-                                        reconnect()
+                                        WebSocketHandler.shared.reconnect()
                                         sleep(2)
                                     } else {
                                         print("[Accord] HEARTBEAT SUCCESSFUL")
@@ -364,49 +233,130 @@ final class WebSocketHandler {
                 case .failure(let error):
                     releaseModePrint("[Accord] Error when receiving loop \(error)")
                     print("[Accord] RECONNECT")
-                    reconnect()
+                    WebSocketHandler.shared.reconnect()
                 }
             }
         }
-        func close() {
-            let reason = "Closing connection".data(using: .utf8)
-            WebSocketHandler.shared.ClassWebSocketTask!.cancel(with: .goingAway, reason: reason)
+    }
+    
+    // MARK: Decode payloads
+    func decodePayload(payload: Data) -> [String: Any] {
+        do {
+            return try JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any] ?? [:]
+        } catch {
+            return [:]
         }
-        func checkConnection(_ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
-            WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .data(_):
-                        break
-                    case .string(let text):
-                        if let data = text.data(using: String.Encoding.utf8) {
-                            do {
-                                let tempretDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] ?? [:]
-                                let retDict = (tempretDict["d"] as? [String:Any] ?? [:])
-                                return completion(true, retDict)
+    }
+    
+    // MARK: Initial WS setup
+    func initialReception() {
+        if self.requests >= 49 {
+            return
+        }
+        WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
+            WebSocketHandler.shared.requests += 1
+            switch result {
+            case .success(let message):
+                switch message {
+                case .data(_):
+                    break
+                case .string(let text):
+                    if let data = text.data(using: String.Encoding.utf8) {
+                        let hello = self.decodePayload(payload: data)
+                        WebSocketHandler.shared.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
+                        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
+                            WebSocketHandler.shared.heartbeat()
+                        })
 
-                            } catch let error as NSError {
-                                print(error)
-                                return completion(false, nil)
-                            }
-                        }
-                    @unknown default:
-                        print("[Accord] unknown")
                     }
-                case .failure(let error):
-                    print("[Accord] Error when receiving massive \(error)")
+                @unknown default:
+                    print("[Accord] unknown")
+                    break
+                }
+            case .failure(let error):
+                print("[Accord] Error when init receiving \(error)")
+            }
+        }
+    }
+    
+    // MARK: ACK
+    func heartbeat() {
+        if WebSocketHandler.shared.requests >= 49 {
+            return
+        }
+        let packet: [String:AnyEncodable] = [
+            "op":AnyEncodable(1),
+            "d":AnyEncodable(WebSocketHandler.shared.seq)
+        ]
+        socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONEncoder().encode(packet),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+                print("[Accord] heartbeat")
+                WebSocketHandler.shared.requests += 1
+                DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: { [weak self] in
+                    self?.heartbeat()
+                })
+            }
+        }
+    }
+    
+    // MARK: Authentication
+    func authenticate() {
+        let packet: [String:AnyEncodable] = [
+            "op":AnyEncodable(2),
+            "d":AnyEncodable([
+                "token":AnyEncodable(AccordCoreVars.shared.token),
+                "capabilities":AnyEncodable(125),
+                "compress":AnyEncodable(false),
+                "properties": AnyEncodable([
+                    "os":AnyEncodable("Mac OS X"),
+                    "browser":AnyEncodable("Discord Client"),
+                    "release_channel":AnyEncodable("canary"),
+                    "client_build_number": AnyEncodable(93654),
+                    "client_version":AnyEncodable("0.0.273"),
+                    "os_version":AnyEncodable("21.0.0"),
+                    "os_arch":AnyEncodable("x64"),
+                    "system-locale":AnyEncodable("en-US"),
+                ] as [String:AnyEncodable])
+            ] as [String:AnyEncodable])
+        ]
+        socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONEncoder().encode(packet),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
                 }
             }
         }
-        func decodePayload(payload: Data) -> [String: Any] {
-            do {
-                return try JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any] ?? [:]
-            } catch {
-                return [:]
+    }
+    
+    final func close() {
+        let reason = "Closing connection".data(using: .utf8)
+        ClassWebSocketTask!.cancel(with: .goingAway, reason: reason)
+    }
+    final func reconnect() {
+        let packet: [String:AnyEncodable] = [
+            "op":AnyEncodable(Int(6)),
+            "d":AnyEncodable([
+                "token":AnyEncodable(AccordCoreVars.shared.token),
+                "session_id":AnyEncodable(String(WebSocketHandler.shared.session_id ?? "")),
+                "seq":AnyEncodable(Int(WebSocketHandler.shared.seq ?? 0))
+            ] as [String:AnyEncodable])
+        ]
+        if let jsonData = try? JSONEncoder().encode(packet),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ClassWebSocketTask?.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+                return
             }
         }
-
     }
     final func subscribe(_ guild: String, _ channel: String) {
         let packet: [String:Any] = [
@@ -443,26 +393,6 @@ final class WebSocketHandler {
                 if let error = error {
                     releaseModePrint("[Accord] WebSocket sending error: \(error)")
                 }
-            }
-        }
-    }
-    final func reconnect() {
-        sleep(10)
-        let packet: [String:AnyEncodable] = [
-            "op":AnyEncodable(Int(6)),
-            "d":AnyEncodable([
-                "token":AnyEncodable(AccordCoreVars.shared.token),
-                "session_id":AnyEncodable(String(WebSocketHandler.shared.session_id ?? "")),
-                "seq":AnyEncodable(Int(WebSocketHandler.shared.seq ?? 0))
-            ] as [String:AnyEncodable])
-        ]
-        if let jsonData = try? JSONEncoder().encode(packet),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ClassWebSocketTask?.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                }
-                return
             }
         }
     }

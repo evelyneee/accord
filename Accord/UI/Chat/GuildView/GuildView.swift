@@ -120,7 +120,7 @@ struct GuildView: View, Equatable {
                                         }
                                         HStack(alignment: .top) {
                                             VStack {
-                                                if offset != data.count - 1 && (message.author?.username ?? "" != (data[Int(offset + 1)].author?.username ?? "")) {
+                                                if (message.author?.username ?? "" != (data[safe: Int(offset + 1)]?.author?.username ?? "")) {
                                                     Button(action: { [weak message] in
                                                         poppedUpUserProfile.toggle()
                                                         userPoppedUp = message!.author!
@@ -130,6 +130,7 @@ struct GuildView: View, Equatable {
                                                             .frame(width: (pfpShown ? 33 : 15), height: (pfpShown ? 33 : 15))
                                                             .padding(.horizontal, 5)
                                                             .clipShape(Circle())
+
                                                     }
                                                     .buttonStyle(BorderlessButtonStyle())
                                                 }
@@ -260,7 +261,7 @@ struct GuildView: View, Equatable {
             .onAppear {
                 if AccordCoreVars.shared.token != "" {
                     concurrentQueue.async {
-                        NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=100", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
+                        NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                             if success == true {
                                 // MARK: Channel setup after messages loaded.
                                 do {

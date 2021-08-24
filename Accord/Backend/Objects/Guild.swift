@@ -23,10 +23,10 @@ final class Guild: Decodable {
     var widget_enabled: Bool?
     var widget_channel_id: String?
     var verification_level: Int
-    var default_message_notification: Int
+    var default_message_notification: Int?
     var explicit_content_filter: Int
     // TODO: Role object
-    // var roles:
+    var roles: [Role]?
     var emojis: [DiscordEmote]
     // TODO: Guild features
     // var features:
@@ -68,5 +68,4 @@ final class Guild: Decodable {
     // TODO: Sticker object
     // var stickers?:
 }
-
 
