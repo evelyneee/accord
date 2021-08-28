@@ -81,7 +81,6 @@ final class NetworkHandling {
 
             }
             else {
-                print("[Accord] URL Session Task Failed: %@", error!.localizedDescription);
                 return completion(false, nil)
             }
         })

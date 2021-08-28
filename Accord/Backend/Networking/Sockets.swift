@@ -75,13 +75,14 @@ final class WebSocketHandler {
         releaseModePrint("[Accord] Socket initiated")
     }
 
-    final class func connect(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: [String:Any]?) -> Void)) {
+    final class func connect(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: GatewayD?) -> Void)) {
         let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             WebSocketHandler.shared.requests = 0
         }
 
         if !(WebSocketHandler.shared.connected) {
             WebSocketHandler.shared.initialReception()
+            ping()
             WebSocketHandler.shared.authenticate()
             receive()
             WebSocketHandler.shared.connected = true
@@ -97,10 +98,9 @@ final class WebSocketHandler {
                 WebSocketHandler.shared.requests += 1
                 if let error = error {
                     releaseModePrint("[Accord] Error when sending PING \(error)")
+                    return completion(false, nil)
                 } else {
                     print("[Accord] Web Socket connection is alive")
-                    sleep(3)
-                    ping()
                 }
             }
         }
@@ -132,11 +132,13 @@ final class WebSocketHandler {
                                 socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
                                 switch payload["t"] as? String ?? "" {
                                 case "READY":
-                                    let data = payload["d"] as! [String: Any]
-                                    let user = data["user"] as! [String: Any]
-                                    releaseModePrint("[Accord] Gateway ready (\(data["v"] as! Int), \(user["username"] as! String)#\(user["discriminator"] as! String))")
-                                    WebSocketHandler.shared.session_id = data["session_id"] as? String
-                                    completion(true, data)
+                                    let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                        in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                                    try! textData.write(to: path)
+                                    let structure = try! JSONDecoder().decode(GatewayStructure.self, from: textData)
+                                    releaseModePrint("[Accord] Gateway ready (\(structure.d.v), \(structure.d.user.username)#\(structure.d.user.discriminator))")
+                                    WebSocketHandler.shared.session_id = structure.d.session_id
+                                    completion(true, structure.d)
                                     break
 
                                 // MARK: Channel Event Handlers

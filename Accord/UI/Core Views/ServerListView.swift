@@ -16,7 +16,7 @@ final class AllEmotes {
 
 struct ServerListView: View {
     @Binding var guilds: [Guild]
-    @Binding var full: [String:Any]
+    @Binding var full: GatewayD?
     @State var selection: Int? = nil
     @State var selectedServer: Int? = nil
     @State var privateChannels = [Channel]()
@@ -28,6 +28,7 @@ struct ServerListView: View {
         NavigationView {
             HStack(spacing: 0, content: {
                 List {
+                    // MARK: - Messages button
                     ZStack {
                         Color.primary.colorInvert()
                         Image(systemName: "bubble.left.fill")
@@ -41,14 +42,16 @@ struct ServerListView: View {
                         }
                     })
                     Divider()
-                    // MARK: Guild icon UI
+                    // MARK: - Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
                         ZStack(alignment: .bottomTrailing) {
                             Button(action: {
                                 withAnimation {
-                                    selectedServer = index
-                                    if let index = (pings.map { $0.0 }).firstIndex(of: guilds[index].id) {
-                                        pings.remove(at: index)
+                                    DispatchQueue.main.async {
+                                        selectedServer = index
+                                        if let index = (pings.map { $0.0 }).firstIndex(of: guilds[index].id) {
+                                            pings.remove(at: index)
+                                        }
                                     }
                                 }
                             }) {
@@ -102,6 +105,7 @@ struct ServerListView: View {
                 .listStyle(SidebarListStyle())
                 .buttonStyle(BorderlessButtonStyle())
                 Divider()
+                // MARK: - Loading UI
                 if selectedServer == nil {
                     VStack {
                         Text("Connecting...")
@@ -109,7 +113,7 @@ struct ServerListView: View {
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
-                            DispatchQueue.main.async {
+                            concurrentQueue.async {
                                 NetworkHandling.shared?.requestData(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
                                     if success {
                                         guard let data = try? JSONDecoder().decode([Channel].self, from: rawData ?? Data()) else { return }
@@ -122,6 +126,7 @@ struct ServerListView: View {
                     }
 
                 } else if selectedServer == 999 {
+                    // MARK: - Private channels (DMs)
                     HStack {
                         List {
                             Text("Messages")
@@ -168,6 +173,7 @@ struct ServerListView: View {
                         .listStyle(SidebarListStyle())
                     }
                 } else {
+                    // MARK: - Guild channels
                     if guilds.isEmpty == false {
                         List {
                             if let channels = guilds[selectedServer ?? 0].channels {
@@ -224,7 +230,7 @@ struct ServerListView: View {
             if sortByMostRecent {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
             } else {
-                guildOrder = (full["user_settings"] as? [String:Any] ?? [:])["guild_positions"] as? [String] ?? []
+                guildOrder = full!.user_settings!.guild_positions
 
                 let guildIDs = guilds.map { $0.id }
                 var guildTemp = [Guild]()
@@ -246,7 +252,7 @@ struct ServerListView: View {
             }
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
-                full = [:]
+                full = nil
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
@@ -278,13 +284,3 @@ struct SocketEventsDisplay: View {
         .scaleEffect(x: -1, y: 1, anchor: .center)
     }
 }
-
-/*
-
-
-
-
-
- 
-
- */

@@ -188,7 +188,6 @@ extension NSImage {
     }
 }
 
-
 /// Exceptions for the image extension class.
 ///
 /// - creatingPngRepresentationFailed: Is thrown when the creation of the png representation failed.

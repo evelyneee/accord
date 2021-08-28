@@ -24,6 +24,10 @@
 		A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */; };
 		A82A060526D3F6DA007B9B27 /* GuildView+HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */; };
 		A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */; };
+		A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */; };
+		A82A062026D98193007B9B27 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A061F26D98193007B9B27 /* Settings.swift */; };
+		A82A062226D981B4007B9B27 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A062126D981B4007B9B27 /* Status.swift */; };
+		A82A062426D98259007B9B27 /* ReadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A062326D98259007B9B27 /* ReadState.swift */; };
 		A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85C02B7268158D300A40114 /* FancyTextView.swift */; };
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
 		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
@@ -88,6 +92,10 @@
 		A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsView.swift; sourceTree = "<group>"; };
 		A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+HeaderView.swift"; sourceTree = "<group>"; };
 		A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+SecondLoad.swift"; sourceTree = "<group>"; };
+		A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayStructure.swift; sourceTree = "<group>"; };
+		A82A061F26D98193007B9B27 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		A82A062126D981B4007B9B27 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
+		A82A062326D98259007B9B27 /* ReadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadState.swift; sourceTree = "<group>"; };
 		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/UI/Chat/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -230,6 +238,10 @@
 		A82521392687ABD40073F640 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
+				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
+				A82A061F26D98193007B9B27 /* Settings.swift */,
+				A82A062326D98259007B9B27 /* ReadState.swift */,
+				A82A062126D981B4007B9B27 /* Status.swift */,
 				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
 				A8B1F2A126CB171600E8FDC5 /* Enums.swift */,
 				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
@@ -392,6 +404,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */,
+				A82A062226D981B4007B9B27 /* Status.swift in Sources */,
 				A82A05F826D3F2D2007B9B27 /* GuildView+MsgSend.swift in Sources */,
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
@@ -399,6 +412,7 @@
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
+				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
@@ -420,10 +434,12 @@
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
+				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
+				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* GuildView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,

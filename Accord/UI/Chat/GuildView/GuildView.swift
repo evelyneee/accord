@@ -37,17 +37,18 @@ let net = NetworkHandling()
 
 struct GuildView: View, Equatable {
     
-    // MARK: Equatable protocol
+    // MARK: - Equatable protocol
     static func == (lhs: GuildView, rhs: GuildView) -> Bool {
         return lhs.data == rhs.data
     }
     
+    // MARK: - State-driven vars
     @Binding var guildID: String
     @Binding var channelID: String
     @Binding var channelName: String
     @State var chatTextFieldContents: String = ""
     /// The actual message array.
-    @State var data: [Message] = []
+    @State var data = [Message]()
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
     // Nicknames/Usernames of users typing
@@ -60,16 +61,15 @@ struct GuildView: View, Equatable {
     @State var roles: [String:[String]] = [:]
     // TODO: Add user popup view, done properly
     @State var poppedUpUserProfile: Bool = false
-    @State var userPoppedUp: User? = nil
+    @State var userPoppedUp: Int? = nil
     // WebSocket error
     @State var error: String? = nil
     // Mention users in replies
     @State var mention: Bool = true
     @State var replyingTo: Message? = nil
-//    actual view begins here
     
+    // MARK: - View body begins here
     var body: some View {
-//      chat view
         ZStack(alignment: .topTrailing) {
             ZStack(alignment: .bottom) {
                 Spacer()
@@ -83,9 +83,11 @@ struct GuildView: View, Equatable {
                         // MARK: Message loop
                         ForEach(Array(data), id: \.id) { message in
                             /// get index of message (fixes the index out of range)
+                            
                             if let offset = data.firstIndex(of: message) {
                                 if data.contains(data[offset]) {
                                     LazyVStack(alignment: .leading) {
+                                        // MARK: - Reply
                                         if let reply = message.referenced_message {
                                             HStack {
                                                 Spacer().frame(width: 50)
@@ -118,12 +120,14 @@ struct GuildView: View, Equatable {
                                                 }
                                             }
                                         }
+                                        // MARK: - The actual message
                                         HStack(alignment: .top) {
                                             VStack {
                                                 if (message.author?.username ?? "" != (data[safe: Int(offset + 1)]?.author?.username ?? "")) {
+
                                                     Button(action: { [weak message] in
                                                         poppedUpUserProfile.toggle()
-                                                        userPoppedUp = message!.author!
+                                                        userPoppedUp = offset
                                                     }) {
                                                         Image(nsImage: NSImage(data: message.author?.pfp ?? Data()) ?? NSImage()).resizable()
                                                             .scaledToFit()
@@ -133,6 +137,11 @@ struct GuildView: View, Equatable {
 
                                                     }
                                                     .buttonStyle(BorderlessButtonStyle())
+//                                                    .popover(isPresented: Binding.constant(true), content: {
+//                                                        if (userPoppedUp ?? 0 == offset) {
+//                                                            PopoverProfileView(user: Binding.constant(message.author!))
+//                                                        }
+//                                                    })
                                                 }
                                             }
                                             if let author = message.author?.username {
@@ -177,6 +186,7 @@ struct GuildView: View, Equatable {
                                                 }
                                             }
                                             Spacer()
+                                            // MARK: - Quick Actions
                                             Button(action: {
                                                 if collapsed.contains(offset) {
                                                     collapsed.remove(at: collapsed.firstIndex(of: offset)!)
@@ -232,6 +242,7 @@ struct GuildView: View, Equatable {
                                             }
                                             .buttonStyle(BorderlessButtonStyle())
                                         }
+                                        // MARK: - Attachments
                                         if message.attachments.isEmpty == false {
                                             HStack {
                                                 AttachmentView(media: $data[offset].attachments)

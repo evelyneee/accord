@@ -8,7 +8,7 @@
 import Foundation
 
 extension GuildView {
-    // MARK: Second stage of channel loading
+    // MARK: - Second stage of channel loading
     func performSecondStageLoad() {
         if guildID != "@me" {
             let allUserIDs = data.map { $0.author?.id ?? "" }
