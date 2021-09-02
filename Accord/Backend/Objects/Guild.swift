@@ -7,22 +7,26 @@
 
 import Foundation
 
-final class Guild: Decodable {
-    var id: String
-    var name: String
+final class Guild: Decodable, Equatable {
+    static func == (lhs: Guild, rhs: Guild) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    let id: String
+    let name: String
     var icon: String?
     var icon_hash: String?
-    var splash: String?
-    var discovery_splash: String?
+    // var splash: String?
+    // var discovery_splash: String?
     var owner: Bool?
     var owner_id: String
-    var permissions: String?
-    var region: String?
-    var afk_channel_id: String?
-    var afk_timeout: Int
-    var widget_enabled: Bool?
-    var widget_channel_id: String?
-    var verification_level: Int
+    // var permissions: String?
+    // var region: String?
+    // var afk_channel_id: String?
+    // var afk_timeout: Int
+    // var widget_enabled: Bool?
+    // var widget_channel_id: String?
+    // var verification_level: Int
     var default_message_notification: Int?
     var explicit_content_filter: Int
     // TODO: Role object
@@ -42,22 +46,22 @@ final class Guild: Decodable {
     var member_count: Int?
     // TODO: Voice state object
     // var voice_states: [VoiceState]
-    var members: [GuildMember]?
+    // var members: [GuildMember]?
     var channels: [Channel]?
     // TODO: Thread object
     // var threads: [Thread]?
     // TODO: PresenceUpdate object
     // var presences: [PresenceUpdate]?
-    var max_presences: Int?
-    var max_members: Int?
+    let max_presences: Int?
+    let max_members: Int?
     var vanity_url_code: String?
     var description: String?
     var banner: String?
-    var premium_tier: Int?
-    var premium_subscription_count: Int?
-    var preferred_locale: String?
-    var public_updates_channel_id: String?
-    var max_video_channel_users: Int?
+    // var premium_tier: Int?
+    // var premium_subscription_count: Int?
+    // var preferred_locale: String?
+    // var public_updates_channel_id: String?
+    // var max_video_channel_users: Int?
     var approximate_member_count: Int?
     var approximate_presence_count: Int?
     // TODO: Welcome Screen object
@@ -65,7 +69,6 @@ final class Guild: Decodable {
     var nsfw_level: Int
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
-    // TODO: Sticker object
-    // var stickers?:
+    var stickers: [Sticker]?
 }
 

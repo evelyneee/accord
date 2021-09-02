@@ -55,6 +55,8 @@ final class WebSocketHandler {
 
     init(url: URL? = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")) {
         let config = URLSessionConfiguration.default
+
+        // MARK: - SOCKS Proxy
         if proxyEnabled {
             config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
             config.connectionProxyDictionary = [AnyHashable: Any]()
@@ -69,9 +71,9 @@ final class WebSocketHandler {
             }
         }
         session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
-        ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg")!)
+        ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
+        ClassWebSocketTask.maximumMessageSize = 9999999999
         ClassWebSocketTask.resume()
-        ClassWebSocketTask.maximumMessageSize = 999999999
         releaseModePrint("[Accord] Socket initiated")
     }
 
@@ -240,7 +242,7 @@ final class WebSocketHandler {
             }
         }
     }
-    
+
     // MARK: Decode payloads
     func decodePayload(payload: Data) -> [String: Any] {
         do {
@@ -249,7 +251,7 @@ final class WebSocketHandler {
             return [:]
         }
     }
-    
+
     // MARK: Initial WS setup
     func initialReception() {
         if self.requests >= 49 {
@@ -280,7 +282,7 @@ final class WebSocketHandler {
             }
         }
     }
-    
+
     // MARK: ACK
     func heartbeat() {
         if WebSocketHandler.shared.requests >= 49 {
@@ -305,7 +307,7 @@ final class WebSocketHandler {
             }
         }
     }
-    
+
     // MARK: Authentication
     func authenticate() {
         let packet: [String:AnyEncodable] = [
@@ -336,7 +338,7 @@ final class WebSocketHandler {
             }
         }
     }
-    
+
     final func close() {
         let reason = "Closing connection".data(using: .utf8)
         ClassWebSocketTask!.cancel(with: .goingAway, reason: reason)
@@ -486,4 +488,3 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         }
     }
 }
-

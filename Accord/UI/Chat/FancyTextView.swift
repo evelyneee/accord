@@ -93,7 +93,7 @@ final class TextStuff {
                         }
                     }
                     let session = URLSession(configuration: config)
-                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
                     if let data = cache.cachedResponse(for: request)?.data {
                         if splitText.count == 1 {
                             textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
@@ -134,7 +134,7 @@ final class TextStuff {
                     }
                     let session = URLSession(configuration: config)
                     let cache = URLCache.shared
-                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
                     if let data = cache.cachedResponse(for: request)?.data {
                         if let amyGif = Gif(data: data) {
                             DispatchQueue.main.async {

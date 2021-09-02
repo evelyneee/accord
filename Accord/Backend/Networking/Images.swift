@@ -20,9 +20,7 @@ final class ImageHandling {
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
             didSet {
-                print("[Accord] DONE \(returnArray.count)")
                 if returnArray.count == singleURLs.count {
-                    print("[Accord] GOODBYE \(returnArray.count)")
                     return completion(true, returnArray)
                 }
             }
@@ -33,9 +31,6 @@ final class ImageHandling {
                     singleURLs.append(url)
                 }
             }
-        }
-        let _ = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { timer in
-            return completion(true, returnArray)
         }
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
@@ -96,9 +91,7 @@ final class ImageHandling {
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
             didSet {
-                print("[Accord] DONE \(returnArray.count)")
                 if returnArray.count == singleURLs.count {
-                    print("[Accord] GOODBYE \(returnArray.count)")
                 }
             }
         }
@@ -116,7 +109,7 @@ final class ImageHandling {
         for url in singleURLs {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 2.0)
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
                 if let data = cache.cachedResponse(for: request)?.data {
                     returnArray[String(userid)] = NSImage(data: data)
                 } else {

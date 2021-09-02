@@ -68,12 +68,12 @@ struct ProfileView: View {
             }
             Spacer()
         }.onAppear {
-            NetworkHandling.shared?.requestData(url: "\(rootURL)/users/@me", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { completion, data in
+            NetworkHandling.shared.requestData(url: "\(rootURL)/users/@me", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                 if (completion) {
                     profileData = data
                     profile = (try? JSONSerialization.jsonObject(with: profileData ?? Data(), options: []) as? [String:Any] ?? [String:Any]()) ?? [:]
                     user_id = profile["id"] as? String ?? ""
-                    NetworkHandling.shared?.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
+                    NetworkHandling.shared.requestData(url: "https://cdn.discordapp.com/avatars/\(profile["id"] as? String ?? "")/\(profile["avatar"] as? String ?? "").png?size=256", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() } }
                 }
             }
         }

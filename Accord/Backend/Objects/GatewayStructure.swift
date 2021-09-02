@@ -15,7 +15,7 @@ class GatewayStructure: Decodable {
 }
 
 class GatewayD: Decodable {
-    var v: Int
+    var v: Int?
     // var users: [User]?
     var user_settings: Settings?
     // var user_guild_settings: GuildSettings?

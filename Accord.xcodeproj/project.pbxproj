@@ -35,6 +35,8 @@
 		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
 		A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsView.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
+		A88CD70C26E05900007D979B /* prerm in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70A26E05900007D979B /* prerm */; };
+		A88CD70D26E05900007D979B /* postinst in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70B26E05900007D979B /* postinst */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
 		A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */; };
@@ -53,6 +55,7 @@
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
+		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -103,6 +106,8 @@
 		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
 		A869085E269F2A0A00F13CAD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		A88CD70A26E05900007D979B /* prerm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prerm; sourceTree = "<group>"; };
+		A88CD70B26E05900007D979B /* postinst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = postinst; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
 		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
@@ -121,6 +126,7 @@
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = "Accord/Backend/Keychain and Caching/Keychain.swift"; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = "Accord/UI/Core Views/ServerListView.swift"; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
+		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -189,6 +195,8 @@
 				32F4C963256D7D3500343BB3 /* Info.plist */,
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
 				49F29FAC26A0A47300C1205A /* control */,
+				A88CD70B26E05900007D979B /* postinst */,
+				A88CD70A26E05900007D979B /* prerm */,
 			);
 			path = Accord;
 			sourceTree = "<group>";
@@ -245,6 +253,7 @@
 				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
 				A8B1F2A126CB171600E8FDC5 /* Enums.swift */,
 				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
+				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
 				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
 				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
 				A8B1F29B26CB16C400E8FDC5 /* Attachments.swift */,
@@ -369,6 +378,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A88CD70D26E05900007D979B /* postinst in Resources */,
+				A88CD70C26E05900007D979B /* prerm in Resources */,
 				49F29FAD26A0A47300C1205A /* control in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
 			);
@@ -431,6 +442,7 @@
 				A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
+				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,

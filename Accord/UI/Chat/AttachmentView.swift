@@ -37,7 +37,7 @@ struct AttachmentView: View {
                                             .onAppear {
                                                 attachmentQueue.async {
                                                     currentImage = NSImage()
-                                                    NetworkHandling.shared?.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+                                                    NetworkHandling.shared.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
                                                         if success,
                                                               let data = data,
                                                            let amyGif = Gif(data: data) {

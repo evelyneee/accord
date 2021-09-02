@@ -14,6 +14,12 @@ final class AllEmotes {
     var allEmotes: [String:[DiscordEmote]] = [:]
 }
 
+func pingCount(guild: Guild) -> Int {
+    let intArray = guild.channels!.compactMap { $0.read_state?.mention_count }
+    return intArray.reduce(0, +)
+}
+
+
 struct ServerListView: View {
     @Binding var guilds: [Guild]
     @Binding var full: GatewayD?
@@ -37,7 +43,7 @@ struct ServerListView: View {
                     .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
                     .onTapGesture(count: 1, perform: {
                         DispatchQueue.main.async {
-                            /// privateChannels = privateChannels.sorted { $0["last_message_id"] as? String ?? "" > $1["last_message_id"] as? String ?? "" }
+                            privateChannels = privateChannels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                             selectedServer = 999
                         }
                     })
@@ -61,16 +67,16 @@ struct ServerListView: View {
                                     .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
                             }
                             .buttonStyle(BorderlessButtonStyle())
-                            if (pings.map { $0.0 }).contains(guilds[index].id) {
+                            if pingCount(guild: guilds[index]) != 0 {
                                 ZStack {
                                     Circle()
                                         .foregroundColor(Color.red)
                                         .frame(width: 15, height: 15)
-                                    Text(String(describing: pings.filter { $0.0 == guilds[index].id}.count))
+                                    Text(String(describing: pingCount(guild: guilds[index])))
                                         .foregroundColor(Color.white)
                                         .fontWeight(.semibold)
+                                        .font(.caption)
                                 }
-
                             } else {
                             }
                         }
@@ -114,7 +120,7 @@ struct ServerListView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
                             concurrentQueue.async {
-                                NetworkHandling.shared?.requestData(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
+                                NetworkHandling.shared.requestData(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
                                     if success {
                                         guard let data = try? JSONDecoder().decode([Channel].self, from: rawData ?? Data()) else { return }
                                         privateChannels = data.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
@@ -167,6 +173,7 @@ struct ServerListView: View {
                                     }
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
+
                             }
 
                         }
@@ -183,9 +190,9 @@ struct ServerListView: View {
                                             ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, channel in
                                                 if channel.type != 4 {
                                                     if channel.parent_id ?? "no" == section.id {
-                                                        NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0].id)), channelID: Binding.constant(channel.id), channelName: Binding.constant(channel.name ?? "")).equatable(), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                                                        NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0].id)), channelID: Binding.constant(channel.id), channelName: Binding.constant(channel.name ?? "")).equatable(), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
                                                             HStack {
-                                                                switch channel.type {
+                                                                switch channel!.type {
                                                                 case 0:
                                                                     Image(systemName: "number") // normal channel
                                                                 case 2:
@@ -197,16 +204,35 @@ struct ServerListView: View {
                                                                 default:
                                                                     Image(systemName: "camera.metering.unknown") // unknown
                                                                 }
-                                                                Text(channel.name ?? "")
+                                                                Text(channel?.name ?? "")
                                                                 Spacer()
+
                                                                 Button(action: {
-                                                                    showWindow(guildID: (guilds[selectedServer ?? 0].id), channelID: channel.id, channelName: channel.name ?? "")
+                                                                    channel?.read_state!.mention_count = 0
+                                                                }) {
+                                                                    if let readState = channel?.read_state {
+                                                                        if channel?.read_state?.mention_count != 0 {
+                                                                            ZStack {
+                                                                                Circle()
+                                                                                    .foregroundColor(Color.red)
+                                                                                    .frame(width: 15, height: 15)
+                                                                                Text(String(describing: channel?.read_state?.mention_count ?? 1))
+                                                                                    .foregroundColor(Color.white)
+                                                                                    .fontWeight(.semibold)
+                                                                                    .font(.caption)
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                Button(action: {
+                                                                    showWindow(guildID: (guilds[selectedServer ?? 0].id), channelID: channel?.id ?? "", channelName: channel?.name ?? "")
                                                                 }) {
                                                                     Image(systemName: "arrow.up.right.circle")
                                                                 }
                                                             }
                                                         }
                                                         .buttonStyle(BorderlessButtonStyle())
+
                                                     }
                                                 }
                                             }
@@ -227,6 +253,17 @@ struct ServerListView: View {
                     guildIcons = icons
                 }
             }
+            
+            let channelIDs = full?.read_state?.entries.map { $0.id }
+            for guild in 0..<guilds.count {
+                for channel in guilds[guild].channels! {
+                    if channel.type != 4 || channel.type != 13 || channel.type != 2  {
+                        if let index = channelIDs?.firstIndex(of: channel.id) {
+                            channel.read_state = full!.read_state!.entries[safe: index]
+                        }
+                    }
+                }
+            }
             if sortByMostRecent {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
             } else {
@@ -243,8 +280,9 @@ struct ServerListView: View {
             }
             selectedServer = 0
             print("[Accord] cleaned up")
-            roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
-            print(roleColors)
+            concurrentQueue.async {
+                roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
+            }
             for i in 0..<guilds.count {
                 AllEmotes.shared.allEmotes["\(guilds[i].id)$\(guilds[i].name)"] = guilds[i].emojis
 //                print(AllEmotes.shared.allEmotes)

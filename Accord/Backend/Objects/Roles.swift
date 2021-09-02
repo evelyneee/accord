@@ -33,7 +33,7 @@ final class Role: Decodable {
     var color: Int?
     var hoist: Bool
     var position: Int
-    var permissions: Int
+    var permissions: String?
     var managed: Bool
     var mentionable: Bool
 }

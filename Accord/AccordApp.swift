@@ -26,7 +26,6 @@ public var socketEvents: [[String:String]] = [] {
 public func print(_ object: Any...) {
     #if DEBUG
     for item in object {
-        logs.append(String(describing: item))
         Swift.print(item)
     }
     #endif
@@ -34,7 +33,6 @@ public func print(_ object: Any...) {
 
 public func print(_ object: Any) {
     #if DEBUG
-    logs.append(String(describing: object))
     Swift.print(object)
     #endif
 }

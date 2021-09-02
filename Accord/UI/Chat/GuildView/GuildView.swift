@@ -271,14 +271,16 @@ struct GuildView: View, Equatable {
             }
             .onAppear {
                 if AccordCoreVars.shared.token != "" {
+                    MessageController.shared.delegate = self
                     concurrentQueue.async {
-                        NetworkHandling.shared?.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
+                        NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                             if success == true {
-                                // MARK: Channel setup after messages loaded.
+                                // MARK: - Channel setup after messages loaded.
                                 do {
                                     data = try JSONDecoder().decode([Message].self, from: rawData!)
+                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(data.last?.id ?? "")/ack", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+
                                     // MARK: Making WebSocket messages receivable now
-                                    MessageController.shared.delegate = self
                                     secondLoadQueue.async {
                                         performSecondStageLoad()
                                     }
@@ -289,7 +291,7 @@ struct GuildView: View, Equatable {
                     }
                 }
             }
-            // MARK: WebSocket error display
+            // MARK: - WebSocket error display
             if let error = error {
                 VStack(alignment: .leading) {
                     Text("WebSocket was disconnected")
@@ -305,7 +307,7 @@ struct GuildView: View, Equatable {
     }
 }
 
-
+// MARK: - macOS Big Sur blur view
 
 struct VisualEffectView: NSViewRepresentable {
     let material: NSVisualEffectView.Material
@@ -326,6 +328,8 @@ struct VisualEffectView: NSViewRepresentable {
     }
 }
 
+// MARK: - Multi window
+
 func showWindow(guildID: String, channelID: String, channelName: String) {
     var windowRef: NSWindow
     windowRef = NSWindow(
@@ -338,6 +342,8 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
     windowRef.title = "\(channelName) - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }
+
+// prevent index out of range
 
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {

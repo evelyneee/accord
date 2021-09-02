@@ -40,4 +40,3 @@ class Settings: Decodable {
     var allow_accessibility_detection: Bool?
     var afk_timeout: Int?
 }
-

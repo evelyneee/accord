@@ -17,5 +17,5 @@ class ReadStateEntry: Decodable {
     var mention_count: Int
     var last_pin_timestamp: String
     var last_message_id: String
-    var id: String
+    var id: String // Channel ID
 }

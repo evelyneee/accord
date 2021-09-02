@@ -32,7 +32,7 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
                     if state == true {
-                        NetworkHandling.shared?.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                        NetworkHandling.shared.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
                     }
                 }, onCommit: {
                     chatTextFieldContents = textFieldContents
@@ -44,13 +44,13 @@ struct ChatControls: View {
                             temp = #"¯\_(ツ)_/¯"#
                         }
                         if fileUpload != nil {
-                            NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages",  token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["payload_json":["content":"\(String(temp))"], "file":fileUpload as Any])
+                            NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages",  token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["payload_json":["content":"\(String(temp))"], "file":fileUpload as Any])
                         } else {
                             if replyingTo != nil {
-                                NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
+                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
                                 replyingTo = nil
                             } else {
-                                NetworkHandling.shared?.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
+                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
                             }
 
                         }

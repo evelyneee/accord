@@ -1,2 +1,1 @@
-xattr -cr /opt/procursus/Applications/Accord.app
 ln -s "/opt/procursus/Applications/Accord.app" "/Applications/Accord.app"

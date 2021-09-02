@@ -75,7 +75,7 @@ struct NitrolessView: View, Equatable {
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            NetworkHandling.shared?.requestData(url: "https://assets.ebel.gay/nitrolessrepo/index.json", token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
+            NetworkHandling.shared.requestData(url: "https://assets.ebel.gay/nitrolessrepo/index.json", token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
                 if let data = data {
                     guard let emotes = try? JSONDecoder().decode(Repo.self, from: data).emotes else { return }
                     for emote in emotes {

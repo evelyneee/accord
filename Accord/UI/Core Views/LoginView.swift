@@ -52,7 +52,7 @@ struct LoginView: View {
                         AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                         self.shown.wrappedValue.dismiss()
                     } else {
-                        NetworkHandling.shared?.login(username: email, password: password) { success, array in
+                        NetworkHandling.shared.login(username: email, password: password) { success, array in
                             if success {
                                 if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                                     if let checktoken = returnArray["token"] as? String {
@@ -68,7 +68,7 @@ struct LoginView: View {
                                         } else if let ticket = returnArray["ticket"] as? String {
                                             print("[Login debug] Got ticket")
                                             sleep(2)
-                                            NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                            NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
                                                 if success {
                                                     print("[Accord] log in kek")
                                                     print(String(decoding: data_login!, as: UTF8.self))
@@ -111,13 +111,13 @@ struct LoginView: View {
                 self.captchaPayload = notif.userInfo?["key"] as? String ?? ""
                 print(twofactor, captchaPayload!)
                 sleep(2)
-                NetworkHandling.shared?.login(username: email, password: password, captcha: captchaPayload!) { success, array in
+                NetworkHandling.shared.login(username: email, password: password, captcha: captchaPayload!) { success, array in
                     if success {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
                             if let ticket = returnArray["ticket"] as? String {
                                 print("[Login debug] Got ticket")
                                 sleep(2)
-                                NetworkHandling.shared?.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
                                     if success {
                                         print("[Accord] log in kek")
                                         print(String(decoding: data_login!, as: UTF8.self))

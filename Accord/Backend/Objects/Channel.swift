@@ -22,18 +22,18 @@ final class Channel: Decodable, Identifiable, Hashable {
     var topic: String?
     var nsfw: Bool?
     var last_message_id: String?
-    var bitrate: Int?
-    var user_limit: Int?
-    var rate_limit_per_user: Int?
+    // var bitrate: Int?
+    // var user_limit: Int?
+    // var rate_limit_per_user: Int?
     var recipients: [User]?
     var icon: String?
     var owner_id: String?
-    var application_id: String?
+    // var application_id: String?
     var parent_id: String?
-    var last_pin_timestamp: String?
+    // var last_pin_timestamp: String?
     // TODO: ISO8601 timestamp
     //  var rtc_region: ?
-    var video_quality_mode: Int?
+    // var video_quality_mode: Int?
     var message_count: Int?
     var member_count: Int?
     // TODO: Thread metadata object
@@ -41,7 +41,9 @@ final class Channel: Decodable, Identifiable, Hashable {
     // TODO: Thread member object
     // var member: User?
     var default_auto_archive_duration: Int?
-    var permissions: String?
+    // var permissions: String?
+    
+    var read_state: ReadStateEntry?
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

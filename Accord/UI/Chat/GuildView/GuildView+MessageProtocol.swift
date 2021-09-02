@@ -17,7 +17,7 @@ extension GuildView: MessageControllerDelegate {
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
                 if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80") {
-                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
                     if let data = cache.cachedResponse(for: request)?.data {
                         message.author?.pfp = data
                     } else {
@@ -32,7 +32,7 @@ extension GuildView: MessageControllerDelegate {
                 }
                 if message.referenced_message != nil {
                     if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.referenced_message?.author?.id ?? "")/\(message.referenced_message?.author?.avatar ?? "").png?size=80") {
-                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
                         if let data = cache.cachedResponse(for: request)?.data {
                             message.referenced_message?.author?.pfp = data
                         } else {

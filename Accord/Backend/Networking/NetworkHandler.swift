@@ -10,7 +10,7 @@ import Foundation
 let debug = false
 
 final class NetworkHandling {
-    static var shared: NetworkHandling? = NetworkHandling()
+    static var shared: NetworkHandling = NetworkHandling()
 
     final func request(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ array: [[String:Any]]?) -> Void)) {
         let config = URLSessionConfiguration.default

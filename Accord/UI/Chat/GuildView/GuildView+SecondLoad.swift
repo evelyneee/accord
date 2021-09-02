@@ -24,7 +24,7 @@ extension GuildView {
         let authorArray = Array(NSOrderedSet(array: data.compactMap { $0.author! }))
         for user in authorArray as! [User] {
             if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
                 if let data = cache.cachedResponse(for: request)?.data {
                     user.pfp = data
                 } else {
@@ -41,7 +41,7 @@ extension GuildView {
         let replyArray = Array(NSOrderedSet(array: data.compactMap { $0.referenced_message?.author }))
         for user in replyArray as! [User] {
             if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
                 if let data = cache.cachedResponse(for: request)?.data {
                     user.pfp = data
                 } else {
