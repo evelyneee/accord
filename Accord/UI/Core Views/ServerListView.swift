@@ -185,21 +185,21 @@ struct ServerListView: View {
                         List {
                             if let channels = guilds[selectedServer ?? 0].channels {
                                 ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, section in
-                                    if section.type == 4 {
+                                    if section.type == .section {
                                         Section(header: Text(section.name ?? "")) {
                                             ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, channel in
-                                                if channel.type != 4 {
+                                                if channel.type != .section {
                                                     if channel.parent_id ?? "no" == section.id {
                                                         NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0].id)), channelID: Binding.constant(channel.id), channelName: Binding.constant(channel.name ?? "")).equatable(), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
                                                             HStack {
                                                                 switch channel!.type {
-                                                                case 0:
+                                                                case .normal:
                                                                     Image(systemName: "number") // normal channel
-                                                                case 2:
+                                                                case .voice:
                                                                     Image(systemName: "speaker.wave.2.fill") // voice chat
-                                                                case 5:
+                                                                case .guild_news:
                                                                     Image(systemName: "megaphone.fill") // announcement channel
-                                                                case 13:
+                                                                case .stage:
                                                                     Image(systemName: "person.2.fill") // stages
                                                                 default:
                                                                     Image(systemName: "camera.metering.unknown") // unknown
@@ -248,6 +248,7 @@ struct ServerListView: View {
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
+            MentionSender.shared.delegate = self
             ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
                 if success {
                     guildIcons = icons
@@ -257,7 +258,7 @@ struct ServerListView: View {
             let channelIDs = full?.read_state?.entries.map { $0.id }
             for guild in 0..<guilds.count {
                 for channel in guilds[guild].channels! {
-                    if channel.type != 4 || channel.type != 13 || channel.type != 2  {
+                    if channel.type != .section || channel.type != .stage || channel.type != .voice  {
                         if let index = channelIDs?.firstIndex(of: channel.id) {
                             channel.read_state = full!.read_state!.entries[safe: index]
                         }

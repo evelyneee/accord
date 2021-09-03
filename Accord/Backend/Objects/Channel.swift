@@ -13,7 +13,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     }
     
     var id: String
-    var type: Int
+    var type: ChannelType
     var guild_id: String?
     var position: Int?
     // TODO: Overwrite objects
@@ -47,5 +47,19 @@ final class Channel: Decodable, Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+enum ChannelType: Int, Decodable {
+    case normal = 0
+    case dm = 1
+    case voice = 2
+    case group_dm = 3
+    case section = 4
+    case guild_news = 5
+    case guild_store = 6
+    case guild_news_thread = 10
+    case guild_public_thread = 11
+    case guild_private_thread = 12
+    case stage = 13
 }
 

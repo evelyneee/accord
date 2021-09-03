@@ -37,6 +37,8 @@
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
 		A88CD70C26E05900007D979B /* prerm in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70A26E05900007D979B /* prerm */; };
 		A88CD70D26E05900007D979B /* postinst in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70B26E05900007D979B /* postinst */; };
+		A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88CD70E26E065F3007D979B /* MentionProtocol.swift */; };
+		A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
 		A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */; };
@@ -108,6 +110,8 @@
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A88CD70A26E05900007D979B /* prerm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prerm; sourceTree = "<group>"; };
 		A88CD70B26E05900007D979B /* postinst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = postinst; sourceTree = "<group>"; };
+		A88CD70E26E065F3007D979B /* MentionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionProtocol.swift; path = Accord/Backend/Networking/MentionProtocol.swift; sourceTree = SOURCE_ROOT; };
+		A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Mentions.swift"; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
 		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
@@ -216,6 +220,7 @@
 			isa = PBXGroup;
 			children = (
 				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
+				A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */,
 				A88A3D14265B22C4003AE08F /* LoginView.swift */,
 			);
 			path = "Core Views";
@@ -239,6 +244,7 @@
 				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
 				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
+				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -446,10 +452,12 @@
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
+				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
+				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,

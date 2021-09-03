@@ -186,11 +186,11 @@ final class WebSocketHandler {
                                     if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                        Notifications.shared.notifications.append((data["guild_id"] as? String ?? "@me", data["channel_id"] as! String))
+                                        MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
                                     } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
                                         print("[Accord] NOTIFICATION SENDING NOW")
                                         showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                        Notifications.shared.notifications.append(("@me", data["channel_id"] as! String))
+                                        MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
                                     }
                                     break
                                 case "MESSAGE_UPDATE":

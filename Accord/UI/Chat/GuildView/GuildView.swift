@@ -278,7 +278,7 @@ struct GuildView: View, Equatable {
                                 // MARK: - Channel setup after messages loaded.
                                 do {
                                     data = try JSONDecoder().decode([Message].self, from: rawData!)
-                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(data.last?.id ?? "")/ack", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(data.first?.id ?? "")/ack", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
 
                                     // MARK: Making WebSocket messages receivable now
                                     secondLoadQueue.async {
