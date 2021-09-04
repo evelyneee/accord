@@ -9,31 +9,16 @@ import SwiftUI
 import AppKit
 import AVKit
 
-// styles and structs and vars
-
 final class ChannelMembers {
     static var shared = ChannelMembers()
     var channelMembers: [String:[String:String]] = [:]
 }
 
-struct CoolButtonStyle: ButtonStyle {
-    func makeBody(configuration: Self.Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? CGFloat(0.85) : 1.0)
-            .rotationEffect(.degrees(configuration.isPressed ? 0.0 : 0))
-            .blur(radius: configuration.isPressed ? CGFloat(0.0) : 0)
-            .animation(Animation.spring(response: 0.35, dampingFraction: 0.35, blendDuration: 1))
-            .padding(.bottom, 3)
-    }
-}
-
-// the messaging view concept
+// MARK: - Threads
 
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 let secondLoadQueue = DispatchQueue(label: "SecondLoadQueue", attributes: .concurrent)
 let webSocketQueue = DispatchQueue(label: "WebSocketQueue", attributes: .concurrent)
-
-let net = NetworkHandling()
 
 struct GuildView: View, Equatable {
     
@@ -125,23 +110,22 @@ struct GuildView: View, Equatable {
                                             VStack {
                                                 if (message.author?.username ?? "" != (data[safe: Int(offset + 1)]?.author?.username ?? "")) {
 
-                                                    Button(action: { [weak message] in
+
+                                                    Button(action: {
                                                         poppedUpUserProfile.toggle()
                                                         userPoppedUp = offset
-                                                    }) {
-                                                        Image(nsImage: NSImage(data: message.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                                    }) { [weak message] in
+                                                        Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
                                                             .scaledToFit()
                                                             .frame(width: (pfpShown ? 33 : 15), height: (pfpShown ? 33 : 15))
                                                             .padding(.horizontal, 5)
                                                             .clipShape(Circle())
 
                                                     }
+                                                    .popover(isPresented: Binding.constant(userPoppedUp == offset), content: {
+                                                        PopoverProfileView(user: Binding.constant(message.author))
+                                                    })
                                                     .buttonStyle(BorderlessButtonStyle())
-//                                                    .popover(isPresented: Binding.constant(true), content: {
-//                                                        if (userPoppedUp ?? 0 == offset) {
-//                                                            PopoverProfileView(user: Binding.constant(message.author!))
-//                                                        }
-//                                                    })
                                                 }
                                             }
                                             if let author = message.author?.username {

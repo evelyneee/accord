@@ -21,7 +21,7 @@ public var proxyIP: String? = UserDefaults.standard.string(forKey: "proxyIP")
 public var proxyPort: String? = UserDefaults.standard.string(forKey: "proxyPort")
 public var proxyEnabled: Bool = UserDefaults.standard.bool(forKey: "proxyEnabled")
 public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors")
-
+public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "discordStockSettings")
 
 final class AccordCoreVars {
     static var shared = AccordCoreVars()

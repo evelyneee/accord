@@ -55,9 +55,6 @@ struct ServerListView: View {
                                 withAnimation {
                                     DispatchQueue.main.async {
                                         selectedServer = index
-                                        if let index = (pings.map { $0.0 }).firstIndex(of: guilds[index].id) {
-                                            pings.remove(at: index)
-                                        }
                                     }
                                 }
                             }) {
@@ -140,7 +137,7 @@ struct ServerListView: View {
                                 .font(.title2) 
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index].id), channelName: Binding.constant(((privateChannels[index].recipients!).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index].id), channelName: Binding.constant(((privateChannels[index].recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if privateChannels[index].recipients?.count != 1 {
                                             Attachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png")
@@ -211,12 +208,12 @@ struct ServerListView: View {
                                                                     channel?.read_state!.mention_count = 0
                                                                 }) {
                                                                     if let readState = channel?.read_state {
-                                                                        if channel?.read_state?.mention_count != 0 {
+                                                                        if readState.mention_count != 0 {
                                                                             ZStack {
                                                                                 Circle()
                                                                                     .foregroundColor(Color.red)
                                                                                     .frame(width: 15, height: 15)
-                                                                                Text(String(describing: channel?.read_state?.mention_count ?? 1))
+                                                                                Text(String(describing: readState.mention_count))
                                                                                     .foregroundColor(Color.white)
                                                                                     .fontWeight(.semibold)
                                                                                     .font(.caption)
@@ -249,18 +246,22 @@ struct ServerListView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             MentionSender.shared.delegate = self
+            privateChannels = full!.private_channels!
             ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
                 if success {
                     guildIcons = icons
                 }
             }
-            
-            let channelIDs = full?.read_state?.entries.map { $0.id }
-            for guild in 0..<guilds.count {
-                for channel in guilds[guild].channels! {
-                    if channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                        if let index = channelIDs?.firstIndex(of: channel.id) {
-                            channel.read_state = full!.read_state!.entries[safe: index]
+            let firstIndexQueue = DispatchQueue(label: "shitcode queue")
+            firstIndexQueue.async {
+                let readState = full!.read_state!
+                let channelIDs = readState.entries.map { $0.id }
+                for guild in 0..<guilds.count {
+                    for channel in guilds[guild].channels! {
+                        if channel.type != .section || channel.type != .stage || channel.type != .voice  {
+                            if let index = channelIDs.firstIndex(of: channel.id) {
+                                channel.read_state = readState.entries[safe: index]
+                            }
                         }
                     }
                 }

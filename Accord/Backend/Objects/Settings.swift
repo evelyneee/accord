@@ -10,7 +10,7 @@ import Foundation
 class Settings: Decodable {
     var view_nsfw_guilds: Bool?
     var timezone_offset: Int?
-    var theme: String
+    var theme: SyncedTheme
     var stream_notifications_enabled: Bool?
     var status: String
     var show_current_game: Bool?
@@ -39,4 +39,9 @@ class Settings: Decodable {
     var animate_emoji: Bool?
     var allow_accessibility_detection: Bool?
     var afk_timeout: Int?
+}
+
+enum SyncedTheme: String, Decodable {
+    case dark = "dark"
+    case light = "light"
 }

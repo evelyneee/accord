@@ -59,6 +59,7 @@ struct AccordApp: App {
                         _ = AccordCoreVars.init(tokenOverride)
                     }
                 })
+
         }
     }
 }

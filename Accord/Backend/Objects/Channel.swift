@@ -11,7 +11,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     var id: String
     var type: ChannelType
     var guild_id: String?
@@ -26,6 +26,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     // var user_limit: Int?
     // var rate_limit_per_user: Int?
     var recipients: [User]?
+    var recipient_ids: [String]?
     var icon: String?
     var owner_id: String?
     // var application_id: String?
@@ -42,7 +43,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     // var member: User?
     var default_auto_archive_duration: Int?
     // var permissions: String?
-    
+
     var read_state: ReadStateEntry?
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -62,4 +63,3 @@ enum ChannelType: Int, Decodable {
     case guild_private_thread = 12
     case stage = 13
 }
-

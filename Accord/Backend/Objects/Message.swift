@@ -36,6 +36,9 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     func delete() {
         NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/messages/\(id)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
     }
+    func edit(now: String) {
+        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/messages/\(id)", token: AccordCoreVars.shared.token, json: true, type: .PATCH, bodyObject: ["content":now])
+    }
 }
 
 final class Reply: Decodable, Equatable, Identifiable, Hashable {

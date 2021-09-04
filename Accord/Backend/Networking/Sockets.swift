@@ -28,11 +28,7 @@ final class Notifications {
             }
         }
     }
-    final var privateChannels: [String] = [] {
-        didSet {
-            print("private", privateChannels)
-        }
-    }
+    final var privateChannels: [String] = []
     final func clearNotifications(forSet: (String, String)) {
         for (i, notif) in notifications.enumerated() {
             if notif == forSet {
@@ -320,8 +316,8 @@ final class WebSocketHandler {
                     "os":AnyEncodable("Mac OS X"),
                     "browser":AnyEncodable("Discord Client"),
                     "release_channel":AnyEncodable("canary"),
-                    "client_build_number": AnyEncodable(93654),
-                    "client_version":AnyEncodable("0.0.273"),
+                    "client_build_number": AnyEncodable(96238),
+                    "client_version":AnyEncodable("0.0.276"),
                     "os_version":AnyEncodable("21.0.0"),
                     "os_arch":AnyEncodable("x64"),
                     "system-locale":AnyEncodable("en-US"),

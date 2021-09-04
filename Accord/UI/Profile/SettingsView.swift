@@ -19,6 +19,8 @@ struct SettingsViewRedesign: View {
     @State var proxyPort: String = ""
     @State var proxyEnable: Bool = proxyEnabled
     @State var pastel: Bool = pastelColors
+    @State var discordSettings: Bool = pastelColors
+
 
     var body: some View {
         List {
@@ -136,17 +138,15 @@ struct SettingsViewRedesign: View {
                     }
                     Divider()
                     HStack(alignment: .top) {
-                        Text("Log out")
+                        Text("Use stock discord settings")
                             .font(.title3)
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Button(action: {
-                            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: String("").data(using: String.Encoding.utf8) ?? Data())
-                        }) {
-                            Text("log out")
+                        Toggle(isOn: $discordSettings) {
                         }
                         .padding()
+                        .toggleStyle(SwitchToggleStyle())
                     }
 
                 }
@@ -210,6 +210,7 @@ struct SettingsViewRedesign: View {
                 sortByMostRecent = self.recent
                 pfpShown = self.profilePictures
                 pastelColors = pastel
+                discordStockSettings = discordSettings
                 UserDefaults.standard.set(darkMode, forKey: "darkMode")
                 UserDefaults.standard.set(sortByMostRecent, forKey: "sortByMostRecent")
                 UserDefaults.standard.set(pfpShown, forKey: "pfpShown")
@@ -217,6 +218,8 @@ struct SettingsViewRedesign: View {
                 UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                 UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                 UserDefaults.standard.set(self.proxyEnable, forKey: "proxyEnabled")
+                UserDefaults.standard.set(self.discordSettings, forKey: "discordStockSettings")
+
             })
 
 
