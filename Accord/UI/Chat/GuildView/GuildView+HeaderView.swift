@@ -16,7 +16,8 @@ extension GuildView {
                     .font(.title2)
                     .fontWeight(.bold)
                 Button("Load more messages") {
-                    concurrentQueue.async {
+                    let extraMessageLoadQueue = DispatchQueue(label: "Message Load Queue", attributes: .concurrent)
+                    extraMessageLoadQueue.async {
                         NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?before=\(data.last?.id ?? "")&limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                             if success == true {
                                 do {

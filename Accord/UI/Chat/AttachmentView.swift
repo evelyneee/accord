@@ -18,7 +18,7 @@ struct AttachmentView: View {
     @State var setinterval: Double = 1
     @State var value: Int = 0
     @State var timer: Timer?
-    let attachmentQueue = DispatchQueue(label: "AttachmentQueue")
+    let attachmentQueue = DispatchQueue(label: "AttachmentQueue", attributes: .concurrent)
     var body: some View {
         VStack {
             ForEach(0..<media.count, id: \.self) { index in

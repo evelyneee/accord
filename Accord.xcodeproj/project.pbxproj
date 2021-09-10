@@ -57,6 +57,7 @@
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
+		A8FC3C7626E956010008A2CE /* MessageGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* MessageGrouping.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -129,6 +130,7 @@
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
+		A8FC3C7526E956010008A2CE /* MessageGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageGrouping.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -281,6 +283,7 @@
 			isa = PBXGroup;
 			children = (
 				32F3742A25733D8000ADB7E6 /* GuildView.swift */,
+				A8FC3C7526E956010008A2CE /* MessageGrouping.swift */,
 				A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */,
 				A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */,
 				A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */,
@@ -431,6 +434,7 @@
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
+				A8FC3C7626E956010008A2CE /* MessageGrouping.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,

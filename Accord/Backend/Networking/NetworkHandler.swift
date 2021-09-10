@@ -59,7 +59,7 @@ final class NetworkHandling {
             request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         }
 
-        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
+        session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
             if (error == nil) {
                 // Success
                 let statusCode = (response as! HTTPURLResponse).statusCode
@@ -83,8 +83,7 @@ final class NetworkHandling {
             else {
                 return completion(false, nil)
             }
-        })
-        task.resume()
+        }).resume()
     }
     final func requestData(url: String, token: String?, json: Bool, type: requests.requestTypes, bodyObject: [String:Any], _ completion: @escaping ((_ success: Bool, _ data: Data?) -> Void)) {
         let config = URLSessionConfiguration.default
@@ -258,7 +257,7 @@ final class NetworkHandling {
                     print(request.allHTTPHeaderFields as Any)
                     print(request.httpBody as Any)
                 }
-                if data != Data() {
+                if let data = data {
                     return completion(true, data)
                 } else {
                     return completion(false, nil)

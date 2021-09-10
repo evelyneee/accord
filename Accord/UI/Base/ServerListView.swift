@@ -107,6 +107,7 @@ struct ServerListView: View {
                 .frame(width: 80)
                 .listStyle(SidebarListStyle())
                 .buttonStyle(BorderlessButtonStyle())
+                .padding(.top, 5)
                 Divider()
                 // MARK: - Loading UI
                 if selectedServer == nil {
@@ -116,7 +117,8 @@ struct ServerListView: View {
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
-                            concurrentQueue.async {
+                            let privChannelQueue = DispatchQueue(label: "Private Channel Loading Queue", attributes: .concurrent)
+                            privChannelQueue.async {
                                 NetworkHandling.shared.requestData(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
                                     if success {
                                         guard let data = try? JSONDecoder().decode([Channel].self, from: rawData ?? Data()) else { return }
@@ -176,6 +178,7 @@ struct ServerListView: View {
                         }
                         .listStyle(SidebarListStyle())
                     }
+                    .padding(.top, 5)
                 } else {
                     // MARK: - Guild channels
                     if guilds.isEmpty == false {
@@ -229,7 +232,6 @@ struct ServerListView: View {
                                                             }
                                                         }
                                                         .buttonStyle(BorderlessButtonStyle())
-
                                                     }
                                                 }
                                             }
@@ -240,24 +242,24 @@ struct ServerListView: View {
                         }
                         .listStyle(SidebarListStyle())
                         .buttonStyle(PlainButtonStyle())
+                        .padding(.top, 5)
                     }
                 }
             })
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             MentionSender.shared.delegate = self
-            privateChannels = full!.private_channels!
             ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
                 if success {
                     guildIcons = icons
                 }
             }
-            let firstIndexQueue = DispatchQueue(label: "shitcode queue")
+            let firstIndexQueue = DispatchQueue(label: "shitcode queue", attributes: .concurrent)
             firstIndexQueue.async {
                 let readState = full!.read_state!
                 let channelIDs = readState.entries.map { $0.id }
                 for guild in 0..<guilds.count {
-                    for channel in guilds[guild].channels! {
+                    for channel in guilds[safe: guild]?.channels ?? [] {
                         if channel.type != .section || channel.type != .stage || channel.type != .voice  {
                             if let index = channelIDs.firstIndex(of: channel.id) {
                                 channel.read_state = readState.entries[safe: index]

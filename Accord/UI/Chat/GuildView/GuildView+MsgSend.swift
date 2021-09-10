@@ -11,19 +11,44 @@ import SwiftUI
 extension GuildView {
     var sendingView: some View {
         return HStack(alignment: .top) {
-            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                .scaledToFit()
-                .frame(width: 33, height: 33)
-                .padding(.horizontal, 5)
-                .clipShape(Circle())
+            if data.first?.author?.id != user_id {
+                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                    .scaledToFit()
+                    .frame(width: 33, height: 33)
+                    .padding(.horizontal, 5)
+                    .clipShape(Circle())
+            }
             VStack(alignment: .leading) {
-                Text(username)
-                    .fontWeight(.semibold)
-                if let temp = chatTextFieldContents {
-                    Text(temp)
+                if data.first?.author?.id != user_id {
+                    Text(username)
+                        .fontWeight(.semibold)
+                    if let temp = chatTextFieldContents {
+                        Text(temp)
+                    }
+                } else {
+                    if let temp = chatTextFieldContents {
+                        Text(temp)
+                            .padding(.leading, 51)
+                    }
                 }
+
             }
             Spacer()
+            Button(action: {
+            }) {
+                Image(systemName: "arrow.left.circle.fill")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            Button(action: {
+            }) {
+                Image(systemName: "arrowshape.turn.up.backward.fill")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            Button(action: {
+            }) {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(BorderlessButtonStyle())
         }
         .rotationEffect(.radians(.pi))
         .scaleEffect(x: -1, y: 1, anchor: .center)

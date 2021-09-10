@@ -32,7 +32,9 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
                     if state == true {
-                        NetworkHandling.shared.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                        
+                        // NetworkHandling.shared.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                        
                     }
                 }, onCommit: {
                     chatTextFieldContents = textFieldContents

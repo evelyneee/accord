@@ -56,10 +56,10 @@ extension GuildView: MessageControllerDelegate {
             if channelID == self.channelID {
                 guard channelID != nil else { return }
                 if channelID! == self.channelID {
-                    let currentUIDDict = data.map { $0.id }
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
-                    data[(currentUIDDict).firstIndex(of: message.id) ?? 0] = message
+                    guard let index = fastIndexMessage(message.id, array: data) else { return }
+                    data[index] = message
                 }
             }
 
@@ -68,10 +68,9 @@ extension GuildView: MessageControllerDelegate {
     func deleteMessage(msg: Data, channelID: String?) {
         if channelID == self.channelID {
             webSocketQueue.async {
-                let currentUIDDict = data.map { $0.id }
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
-                guard let index = (currentUIDDict).firstIndex(of: message.id) else { return }
+                guard let index = fastIndexMessage(message.id, array: data) else { return }
                 data.remove(at: index)
             }
         }

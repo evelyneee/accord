@@ -10,7 +10,7 @@ import AppKit
 
 final class Counter: ObservableObject {
     var timer: Timer?
-    
+
     @Published var value: Int = 0
     @Published var setinterval: Double = 0 {
         didSet {
@@ -22,7 +22,7 @@ final class Counter: ObservableObject {
             }
         }
     }
-    
+
     init(interval: Double) {
         timer = Timer.scheduledTimer(withTimeInterval: setinterval, repeats: true) { _ in
             if self.setinterval != 0 {

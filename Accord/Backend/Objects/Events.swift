@@ -15,6 +15,22 @@ final class GuildMemberChunkResponse: Decodable {
 final class GuildMemberChunk: Decodable {
     var guild_id: String?
     var members: [GuildMember?]
+    var presences: [Presence]?
+}
+
+final class Presence: Decodable {
+    var user: User?
+    var guild_id: String
+    var status: UserStatus?
+    // var activities
+    //    client_status
+}
+
+enum UserStatus: String, Decodable {
+    case online = "online"
+    case dnd = "dnd"
+    case idle = "idle"
+    case offline = "offline"
 }
 
 final class TypingEvent: Decodable {

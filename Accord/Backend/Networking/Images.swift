@@ -217,7 +217,7 @@ struct HoveredAttachment: View, Equatable {
 final class ImageLoaderAndCache: ObservableObject {
     
     @Published var imageData = Data()
-    let imageQueue = DispatchQueue(label: "ImageQueue")
+    let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
 
     init(imageURL: String) {
         imageQueue.async { [weak self] in
