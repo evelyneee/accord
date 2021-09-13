@@ -108,6 +108,7 @@ extension GuildView: MessageControllerDelegate {
             guard let users = chunk.d?.members else { return }
             ChannelMembers.shared.channelMembers[self.channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
             for person in users {
+                WebSocketHandler.shared.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
                 let nickname = person?.nick ?? person?.user.username ?? ""
                 nicks[(person?.user.id ?? "")] = nickname
                 var rolesTemp: [String] = []

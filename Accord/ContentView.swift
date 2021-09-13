@@ -16,9 +16,6 @@ struct ContentView: View {
     @State var modalIsPresented: Bool = false
     var body: some View {
         ServerListView(guilds: $guilds, full: $socketOut)
-            .toolbar {
-                Text("")
-            }
         .sheet(isPresented: $modalIsPresented) {
             LoginView()
                 .onDisappear(perform: {
@@ -74,8 +71,10 @@ struct ContentView: View {
                 userLoadQueue.async {
                     NetworkHandling.shared.requestData(url: "\(rootURL)/users/@me", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { completion, data in
                         if (completion) {
-
-                            AccordCoreVars.shared.user = try! JSONDecoder().decode(User.self, from: data ?? Data())
+                            do {
+                                AccordCoreVars.shared.user = try JSONDecoder().decode(User.self, from: data ?? Data())
+                            } catch {
+                            }
                             user_id = AccordCoreVars.shared.user?.id ?? ""
                             NetworkHandling.shared.requestData(url: "https://cdn.discordapp.com/avatars/\(AccordCoreVars.shared.user?.id ?? "")/\(AccordCoreVars.shared.user?.avatar ?? "").png?size=256", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
                             username = AccordCoreVars.shared.user?.username ?? ""

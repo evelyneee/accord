@@ -186,6 +186,29 @@ struct Attachment: View, Equatable {
 
 }
 
+struct StockAttachment: View, Equatable {
+    static func == (lhs: StockAttachment, rhs: StockAttachment) -> Bool {
+        return true
+    }
+    
+    
+    @ObservedObject var imageLoader: ImageLoaderAndCache
+
+    init(_ url: String) {
+        imageLoader = ImageLoaderAndCache(imageURL: url)
+    }
+
+    var body: some View {
+        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
+              .resizable()
+              .scaledToFit()
+              .onDisappear {
+                  imageLoader.imageData = Data()
+              }
+    }
+
+}
+
 struct HoveredAttachment: View, Equatable {
     
     static func == (lhs: HoveredAttachment, rhs: HoveredAttachment) -> Bool {

@@ -11,15 +11,24 @@ extension GuildView {
     // MARK: - Second stage of channel loading
     func performSecondStageLoad() {
         if guildID != "@me" {
-            let allUserIDs = data.map { $0.author?.id ?? "" }
-            WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
-                if success {
-                    for person in users {
-                        nicks[(person?.user.id ?? "")] = person?.nick ?? ""
+            var allUserIDs = Array(NSOrderedSet(array: data.map { $0.author?.id ?? "" })) as! Array<String>
+            getCachedMemberChunk()
+            for (index, item) in allUserIDs.enumerated() {
+                if Array(WebSocketHandler.shared.cachedMemberRequest.keys).contains("\(guildID)$\(item)") {
+                    if Array<Int>(allUserIDs.indices).contains(index) {
+                        allUserIDs.remove(at: index)
                     }
                 }
             }
-            
+            if !(allUserIDs.isEmpty) {
+                WebSocketHandler.shared.getMembers(ids: allUserIDs, guild: guildID) { success, users in
+                    if success {
+                        for person in users {
+                            nicks[(person?.user.id ?? "")] = person?.nick ?? ""
+                        }
+                    }
+                }
+            }
         }
         let authorArray = Array(NSOrderedSet(array: data.compactMap { $0.author! }))
         for user in authorArray as! [User] {

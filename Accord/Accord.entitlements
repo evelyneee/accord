@@ -13,6 +13,7 @@
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)me.evelyn.accord</string>
+		<string>$(AppIdentifierPrefix)me.evelyn</string>
 	</array>
 </dict>
 </plist>

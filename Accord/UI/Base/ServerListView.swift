@@ -142,7 +142,7 @@ struct ServerListView: View {
                                 NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index].id), channelName: Binding.constant(((privateChannels[index].recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if privateChannels[index].recipients?.count != 1 {
-                                            Attachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png")
+                                            StockAttachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png")
                                                 .clipShape(Circle())
                                                 .frame(width: 25, height: 25)
                                             Text(privateChannels[index].name ?? "")
@@ -156,7 +156,7 @@ struct ServerListView: View {
                                             }
 
                                         } else {
-                                            Attachment("https://cdn.discordapp.com/avatars/\(privateChannels[index].recipients![0].id)/\(privateChannels[index].recipients![0].avatar ?? "").png")
+                                            StockAttachment("https://cdn.discordapp.com/avatars/\(privateChannels[index].recipients![0].id)/\(privateChannels[index].recipients![0].avatar ?? "").png")
                                                 .clipShape(Circle())
                                                 .frame(width: 25, height: 25)
                                             Text(privateChannels[index].recipients![0].username )
@@ -246,6 +246,21 @@ struct ServerListView: View {
                     }
                 }
             })
+        }
+        .toolbar {
+            if guilds != [] && selectedServer ?? 1000 <= guilds.count {
+                HStack {
+                    Text(guilds[selectedServer ?? 0].name)
+                        .fontWeight(.semibold)
+                    Image(nsImage: guildIcons[guilds[selectedServer ?? 0].id] ?? NSImage()).resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .cornerRadius(23.5)
+                }
+            } else if selectedServer == 999 {
+                Text("Direct Messages")
+                    .fontWeight(.semibold)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             MentionSender.shared.delegate = self

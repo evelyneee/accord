@@ -118,7 +118,11 @@ struct GuildView: View, Equatable {
                                                     if (message.author?.username ?? "" != (pastMessage.author?.username ?? "")) {
                                                         Button(action: {
                                                             poppedUpUserProfile.toggle()
-                                                            userPoppedUp = offset
+                                                            if userPoppedUp != nil {
+                                                                userPoppedUp = nil
+                                                            } else {
+                                                                userPoppedUp = offset
+                                                            }
                                                         }) { [weak message] in
                                                             Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
                                                                 .scaledToFit()
@@ -128,7 +132,7 @@ struct GuildView: View, Equatable {
 
                                                         }
                                                         .popover(isPresented: Binding.constant(userPoppedUp == offset), content: {
-                                                            PopoverProfileView(user: Binding.constant(message.author))
+                                                             PopoverProfileView(user: Binding.constant(message.author))
                                                         })
                                                         .buttonStyle(BorderlessButtonStyle())
                                                     }
@@ -269,13 +273,13 @@ struct GuildView: View, Equatable {
                 MessageController.shared.delegate = self
                 let GuildViewConcurrentQueue = DispatchQueue(label: "GuildViewQueue", attributes: .concurrent)
                 GuildViewConcurrentQueue.async {
-                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
+                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", referer: "\(rootURL)/channels/\(guildID)/\(channelID)", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
                         if success == true {
                             // MARK: - Channel setup after messages loaded.
                             do {
                                 data = try JSONDecoder().decode([Message].self, from: rawData!)
                                 // dump(makeMessageGroups(array: data))
-                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(data.first?.id ?? "")/ack", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(data.first?.id ?? "")/ack", referer: "\(rootURL)/channels/\(guildID)/\(channelID)", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
                                 // MARK: - Loading the rest of the channel + the roles
                                 let secondLoadQueue = DispatchQueue(label: "SecondLoadQueue", attributes: .concurrent)
                                 secondLoadQueue.async {

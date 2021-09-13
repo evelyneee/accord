@@ -48,7 +48,9 @@ final class WebSocketHandler {
     let webSocketDelegate = WebSocketDelegate()
     let session: URLSession
     let ClassWebSocketTask: URLSessionWebSocketTask!
-
+    
+    var cachedMemberRequest: [String:GuildMember] = [:]
+    
     init(url: URL? = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")) {
         let config = URLSessionConfiguration.default
 
@@ -134,7 +136,7 @@ final class WebSocketHandler {
                                                                         in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
                                     try! textData.write(to: path)
                                     let structure = try! JSONDecoder().decode(GatewayStructure.self, from: textData)
-                                    releaseModePrint("[Accord] Gateway ready (\(structure.d.v), \(structure.d.user.username)#\(structure.d.user.discriminator))")
+                                    releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
                                     WebSocketHandler.shared.session_id = structure.d.session_id
                                     completion(true, structure.d)
                                     break

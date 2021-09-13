@@ -59,7 +59,7 @@ struct AttachmentView: View {
                                     }
 
                                 } else {
-                                    Attachment(media[index]!.url).equatable()
+                                    StockAttachment(media[index]!.url).equatable()
                                         .cornerRadius(5)
                                 }
                             }
