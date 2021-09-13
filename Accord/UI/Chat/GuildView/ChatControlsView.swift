@@ -8,8 +8,6 @@
 import Foundation
 import SwiftUI
 
-
-
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
     @State var textFieldContents: String = ""

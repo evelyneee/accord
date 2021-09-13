@@ -45,7 +45,7 @@ final class WebSocketHandler {
     var seq: Int? = nil
     var heartbeat_interval: Int? = nil
     var requests: Int = 0
-    let webSocketDelegate = WebSocketDelegate()
+    let webSocketDelegate = WebSocketDelegate.shared
     let session: URLSession
     let ClassWebSocketTask: URLSessionWebSocketTask!
     
@@ -111,127 +111,127 @@ final class WebSocketHandler {
             WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
                 WebSocketHandler.shared.requests += 1
                 switch result {
-                    case .success(let message):
-                        switch message {
-                        case .data(let data):
-                            print("[Accord] Data received \(data)")
-                        case .string(let text):
-                            if let textData = text.data(using: String.Encoding.utf8) {
-                                let payload = WebSocketHandler.shared.decodePayload(payload: textData)
-                                if payload["s"] as? Int != nil {
-                                    WebSocketHandler.shared.seq = payload["s"] as? Int
+                case .success(let message):
+                    switch message {
+                    case .data(let data):
+                        print("[Accord] Data received \(data)")
+                    case .string(let text):
+                        if let textData = text.data(using: String.Encoding.utf8) {
+                            let payload = WebSocketHandler.shared.decodePayload(payload: textData)
+                            if payload["s"] as? Int != nil {
+                                WebSocketHandler.shared.seq = payload["s"] as? Int
+                            } else {
+                                if (payload["op"] as? Int ?? 0) != 11 {
+                                    print("[Accord] RECONNECT")
+                                    WebSocketHandler.shared.reconnect()
+                                    sleep(2)
                                 } else {
-                                    if (payload["op"] as? Int ?? 0) != 11 {
-                                        print("[Accord] RECONNECT")
-                                        WebSocketHandler.shared.reconnect()
-                                        sleep(2)
-                                    } else {
-                                        print("[Accord] HEARTBEAT SUCCESSFUL")
-                                    }
-                                }
-                                socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
-                                switch payload["t"] as? String ?? "" {
-                                case "READY":
-                                    let path = FileManager.default.urls(for: .cachesDirectory,
-                                                                        in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                                    try! textData.write(to: path)
-                                    let structure = try! JSONDecoder().decode(GatewayStructure.self, from: textData)
-                                    releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
-                                    WebSocketHandler.shared.session_id = structure.d.session_id
-                                    completion(true, structure.d)
-                                    break
-
-                                // MARK: Channel Event Handlers
-                                case "CHANNEL_CREATE": break
-                                case "CHANNEL_UPDATE": break
-                                case "CHANNEL_DELETE": break
-                                case "CHANNEL_PINS_UPDATE": break
-
-                                // MARK: Guild Event Handlers
-                                case "GUILD_CREATE": print("[Accord] something was created"); break
-                                case "GUILD_UPDATE": break
-                                case "GUILD_DELETE": break
-                                case "GUILD_BAN_ADD": break
-                                case "GUILD_BAN_REMOVE": break
-                                case "GUILD_EMOJIS_UPDATE": break
-                                case "GUILD_MEMBER_ADD": break
-                                case "GUILD_MEMBER_REMOVE": break
-                                case "GUILD_MEMBER_UPDATE": break
-                                case "GUILD_MEMBERS_CHUNK":
-                                    DispatchQueue.main.async {
-                                        MessageController.shared.sendMemberChunk(msg: textData)
-                                    }
-                                    break
-                                case "GUILD_ROLE_CREATE": break
-                                case "GUILD_ROLE_UPDATE": break
-                                case "GUILD_ROLE_DELETE": break
-
-                                // MARK: Integration Event Handlers
-                                case "INTEGRATION_CREATE": break
-                                case "INTEGRATION_UPDATE": break
-                                case "INTEGRATION_DELETE": break
-
-                                // MARK: Invite Event Handlers
-                                case "INVITE_CREATE": break
-                                case "INVITE_DELETE": break
-
-                                // MARK: Message Event Handlers
-                                case "MESSAGE_CREATE":
-                                    let data = payload["d"] as! [String: Any]
-                                    if let channelid = data["channel_id"] as? String {
-                                        MessageController.shared.sendMessage(msg: textData, channelID: channelid)
-                                    }
-                                    if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
-                                        print("[Accord] NOTIFICATION SENDING NOW")
-                                        showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                        MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
-                                    } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
-                                        print("[Accord] NOTIFICATION SENDING NOW")
-                                        showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                        MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
-                                    }
-                                    break
-                                case "MESSAGE_UPDATE":
-                                    let data = payload["d"] as! [String: Any]
-                                    if let channelid = data["channel_id"] as? String {
-                                        MessageController.shared.editMessage(msg: textData, channelID: channelid)
-                                    }
-                                    break
-                                case "MESSAGE_DELETE":
-                                    let data = payload["d"] as! [String: Any]
-                                    if let channelid = data["channel_id"] as? String {
-                                        MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
-                                    }
-                                    break
-                                case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
-                                case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
-                                case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
-                                case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
-
-                                // MARK: Presence Event Handlers
-                                case "PRESENCE_UPDATE": break
-                                case "TYPING_START":
-                                    print("typing")
-                                    let data = payload["d"] as! [String: Any]
-                                    if let channelid = data["channel_id"] as? String {
-                                        MessageController.shared.typing(msg: data, channelID: channelid)
-                                    }
-                                    break
-                                case "USER_UPDATE": break
-
-                                // MARK: Voice Event Handler
-                                case "VOICE_STATE_UPDATE": break
-                                case "VOICE_SERVER_UPDATE": break
-
-                                // MARK: Webhooks Event Handler
-                                case "WEBHOOKS_UPDATE": break
-                                default: break
+                                    print("[Accord] HEARTBEAT SUCCESSFUL")
                                 }
                             }
-                            receive() // call back the function, creating a loop
-                        @unknown default:
-                            print("[Accord] unknown")
+                            socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
+                            switch payload["t"] as? String ?? "" {
+                            case "READY":
+                                let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                    in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                                try! textData.write(to: path)
+                                let structure = try! JSONDecoder().decode(GatewayStructure.self, from: textData)
+                                releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
+                                WebSocketHandler.shared.session_id = structure.d.session_id
+                                completion(true, structure.d)
+                                break
+
+                            // MARK: Channel Event Handlers
+                            case "CHANNEL_CREATE": break
+                            case "CHANNEL_UPDATE": break
+                            case "CHANNEL_DELETE": break
+                            case "CHANNEL_PINS_UPDATE": break
+
+                            // MARK: Guild Event Handlers
+                            case "GUILD_CREATE": print("[Accord] something was created"); break
+                            case "GUILD_UPDATE": break
+                            case "GUILD_DELETE": break
+                            case "GUILD_BAN_ADD": break
+                            case "GUILD_BAN_REMOVE": break
+                            case "GUILD_EMOJIS_UPDATE": break
+                            case "GUILD_MEMBER_ADD": break
+                            case "GUILD_MEMBER_REMOVE": break
+                            case "GUILD_MEMBER_UPDATE": break
+                            case "GUILD_MEMBERS_CHUNK":
+                                DispatchQueue.main.async {
+                                    MessageController.shared.sendMemberChunk(msg: textData)
+                                }
+                                break
+                            case "GUILD_ROLE_CREATE": break
+                            case "GUILD_ROLE_UPDATE": break
+                            case "GUILD_ROLE_DELETE": break
+
+                            // MARK: Integration Event Handlers
+                            case "INTEGRATION_CREATE": break
+                            case "INTEGRATION_UPDATE": break
+                            case "INTEGRATION_DELETE": break
+
+                            // MARK: Invite Event Handlers
+                            case "INVITE_CREATE": break
+                            case "INVITE_DELETE": break
+
+                            // MARK: Message Event Handlers
+                            case "MESSAGE_CREATE":
+                                let data = payload["d"] as! [String: Any]
+                                if let channelid = data["channel_id"] as? String {
+                                    MessageController.shared.sendMessage(msg: textData, channelID: channelid)
+                                }
+                                if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
+                                    print("[Accord] NOTIFICATION SENDING NOW")
+                                    showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                    MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
+                                } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
+                                    print("[Accord] NOTIFICATION SENDING NOW")
+                                    showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                    MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
+                                }
+                                break
+                            case "MESSAGE_UPDATE":
+                                let data = payload["d"] as! [String: Any]
+                                if let channelid = data["channel_id"] as? String {
+                                    MessageController.shared.editMessage(msg: textData, channelID: channelid)
+                                }
+                                break
+                            case "MESSAGE_DELETE":
+                                let data = payload["d"] as! [String: Any]
+                                if let channelid = data["channel_id"] as? String {
+                                    MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
+                                }
+                                break
+                            case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
+                            case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
+                            case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
+                            case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
+
+                            // MARK: Presence Event Handlers
+                            case "PRESENCE_UPDATE": break
+                            case "TYPING_START":
+                                print("typing")
+                                let data = payload["d"] as! [String: Any]
+                                if let channelid = data["channel_id"] as? String {
+                                    MessageController.shared.typing(msg: data, channelID: channelid)
+                                }
+                                break
+                            case "USER_UPDATE": break
+
+                            // MARK: Voice Event Handler
+                            case "VOICE_STATE_UPDATE": break
+                            case "VOICE_SERVER_UPDATE": break
+
+                            // MARK: Webhooks Event Handler
+                            case "WEBHOOKS_UPDATE": break
+                            default: break
+                            }
                         }
+                        receive() // call back the function, creating a loop
+                    @unknown default:
+                        print("[Accord] unknown")
+                    }
                 case .failure(let error):
                     releaseModePrint("[Accord] Error when receiving loop \(error)")
                     print("[Accord] RECONNECT")
@@ -286,16 +286,18 @@ final class WebSocketHandler {
         if WebSocketHandler.shared.requests >= 49 {
             return
         }
-        let packet: [String:AnyEncodable] = [
-            "op":AnyEncodable(1),
-            "d":AnyEncodable(WebSocketHandler.shared.seq)
+        let packet: [String:Any] = [
+            "op":1,
+            "d":WebSocketHandler.shared.seq ?? 0
         ]
         socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONEncoder().encode(packet),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
                 if let error = error {
                     releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                    print("[Accord] RECONNECT")
+                    WebSocketHandler.shared.reconnect()
                 }
                 print("[Accord] heartbeat")
                 WebSocketHandler.shared.requests += 1
@@ -308,30 +310,32 @@ final class WebSocketHandler {
 
     // MARK: Authentication
     func authenticate() {
-        let packet: [String:AnyEncodable] = [
-            "op":AnyEncodable(2),
-            "d":AnyEncodable([
-                "token":AnyEncodable(AccordCoreVars.shared.token),
-                "capabilities":AnyEncodable(125),
-                "compress":AnyEncodable(false),
-                "properties": AnyEncodable([
-                    "os":AnyEncodable("Mac OS X"),
-                    "browser":AnyEncodable("Discord Client"),
-                    "release_channel":AnyEncodable("canary"),
-                    "client_build_number": AnyEncodable(96238),
-                    "client_version":AnyEncodable("0.0.276"),
-                    "os_version":AnyEncodable("21.0.0"),
-                    "os_arch":AnyEncodable("x64"),
-                    "system-locale":AnyEncodable("en-US"),
-                ] as [String:AnyEncodable])
-            ] as [String:AnyEncodable])
+        let packet: [String:Any] = [
+            "op":2,
+            "d":[
+                "token":AccordCoreVars.shared.token,
+                "capabilities":125,
+                "compress":false,
+                "properties": [
+                    "os":"Mac OS X",
+                    "browser":"Discord Client",
+                    "release_channel":"canary",
+                    "client_build_number": 96238,
+                    "client_version":"0.0.276",
+                    "os_version":"21.1.0",
+                    "os_arch":"x64",
+                    "system-locale":"en-US",
+                ]
+            ]
         ]
         socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONEncoder().encode(packet),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
                 if let error = error {
                     releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                    print("[Accord] RECONNECT")
+                    WebSocketHandler.shared.reconnect()
                 }
             }
         }
@@ -342,15 +346,15 @@ final class WebSocketHandler {
         ClassWebSocketTask!.cancel(with: .goingAway, reason: reason)
     }
     final func reconnect() {
-        let packet: [String:AnyEncodable] = [
-            "op":AnyEncodable(Int(6)),
-            "d":AnyEncodable([
-                "token":AnyEncodable(AccordCoreVars.shared.token),
-                "session_id":AnyEncodable(String(WebSocketHandler.shared.session_id ?? "")),
-                "seq":AnyEncodable(Int(WebSocketHandler.shared.seq ?? 0))
-            ] as [String:AnyEncodable])
+        let packet: [String:Any] = [
+            "op":6,
+            "d":[
+                "token":AccordCoreVars.shared.token,
+                "session_id":String(WebSocketHandler.shared.session_id ?? ""),
+                "seq":Int(WebSocketHandler.shared.seq ?? 0)
+            ]
         ]
-        if let jsonData = try? JSONEncoder().encode(packet),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ClassWebSocketTask?.send(.string(jsonString)) { error in
                 if let error = error {
@@ -442,11 +446,15 @@ protocol URLQueryParameterStringConvertible {
 }
 
 final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
+    static var shared = WebSocketDelegate()
+    var connected = false
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         releaseModePrint("[Accord] Web Socket did connect")
+        connected = true
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+        connected = false
         releaseModePrint("[Accord] Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
         MessageController.shared.sendWSError(msg: reason)

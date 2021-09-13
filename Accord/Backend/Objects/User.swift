@@ -26,4 +26,5 @@ final class User: Decodable, Identifiable {
     var nick: String?
     var roleColor: String?
     var pfp: Data?
+    func isMe() -> Bool { user_id == self.id }
 }

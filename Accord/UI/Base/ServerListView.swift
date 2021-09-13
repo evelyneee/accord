@@ -291,7 +291,7 @@ struct ServerListView: View {
                 let guildIDs = guilds.map { $0.id }
                 var guildTemp = [Guild]()
                 for item in guildOrder {
-                    if let first = guildIDs.firstIndex(of: item) {
+                    if let first = fastIndexGuild(item, array: guilds) {
                         guildTemp.append(guilds[first])
                     }
                 }
