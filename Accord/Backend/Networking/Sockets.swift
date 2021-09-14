@@ -185,7 +185,7 @@ final class WebSocketHandler {
                                     print("[Accord] NOTIFICATION SENDING NOW")
                                     showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
                                     MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
-                                } else if Notifications.shared.privateChannels.contains(data["id"] as! String) {
+                                } else if Notifications.shared.privateChannels.contains(data["channel_id"] as! String) && ((((payload["d"] as! [String: Any])["author"]) as! [String:Any])["id"] as? String ?? "") != user_id {
                                     print("[Accord] NOTIFICATION SENDING NOW")
                                     showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
                                     MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)

@@ -149,6 +149,23 @@ struct ServerListView: View {
                                             Spacer()
                                             if let channel = privateChannels[index] {
                                                 Button(action: { [weak channel] in
+                                                    channel?.read_state!.mention_count = 0
+                                                }) { [weak channel] in
+                                                    if let readState = channel?.read_state {
+                                                        if readState.mention_count != 0 {
+                                                            ZStack {
+                                                                Circle()
+                                                                    .foregroundColor(Color.red)
+                                                                    .frame(width: 15, height: 15)
+                                                                Text(String(describing: readState.mention_count))
+                                                                    .foregroundColor(Color.white)
+                                                                    .fontWeight(.semibold)
+                                                                    .font(.caption)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                Button(action: { [weak channel] in
                                                     showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: ((channel?.recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )
                                                 }) {
                                                     Image(systemName: "arrow.up.right.circle")
@@ -162,6 +179,23 @@ struct ServerListView: View {
                                             Text(privateChannels[index].recipients![0].username )
                                             Spacer()
                                             if let channel = privateChannels[index] {
+                                                Button(action: { [weak channel] in
+                                                    channel?.read_state!.mention_count = 0
+                                                }) { [weak channel] in
+                                                    if let readState = channel?.read_state {
+                                                        if readState.mention_count != 0 {
+                                                            ZStack {
+                                                                Circle()
+                                                                    .foregroundColor(Color.red)
+                                                                    .frame(width: 15, height: 15)
+                                                                Text(String(describing: readState.mention_count))
+                                                                    .foregroundColor(Color.white)
+                                                                    .fontWeight(.semibold)
+                                                                    .font(.caption)
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                                 Button(action: { [weak channel] in
                                                     showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: ((channel?.recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )
                                                 }) {
@@ -272,13 +306,19 @@ struct ServerListView: View {
             let firstIndexQueue = DispatchQueue(label: "shitcode queue", attributes: .concurrent)
             firstIndexQueue.async {
                 let readState = full!.read_state!
-                let channelIDs = readState.entries.map { $0.id }
                 for guild in 0..<guilds.count {
                     for channel in guilds[safe: guild]?.channels ?? [] {
                         if channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                            if let index = channelIDs.firstIndex(of: channel.id) {
+                            if let index = fastIndexEntries(channel.id, array: readState.entries) {
                                 channel.read_state = readState.entries[safe: index]
                             }
+                        }
+                    }
+                }
+                for channel in privateChannels {
+                    if channel.type != .section || channel.type != .stage || channel.type != .voice  {
+                        if let index = fastIndexEntries(channel.id, array: readState.entries) {
+                            channel.read_state = readState.entries[safe: index]
                         }
                     }
                 }
