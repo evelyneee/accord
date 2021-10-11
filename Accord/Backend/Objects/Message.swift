@@ -29,6 +29,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var type: Int
     var attachments: [AttachedFiles?]
     var referenced_message: Reply?
+    weak var lastMessage: Message?
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -39,6 +40,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     func edit(now: String) {
         NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/messages/\(id)", token: AccordCoreVars.shared.token, json: true, type: .PATCH, bodyObject: ["content":now])
     }
+    func isSameAuthor() -> Bool { lastMessage?.author?.id == self.author?.id }
 }
 
 final class Reply: Decodable, Equatable, Identifiable, Hashable {

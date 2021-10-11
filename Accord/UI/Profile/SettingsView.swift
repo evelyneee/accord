@@ -20,6 +20,7 @@ struct SettingsViewRedesign: View {
     @State var proxyEnable: Bool = proxyEnabled
     @State var pastel: Bool = pastelColors
     @State var discordSettings: Bool = pastelColors
+    @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
 
 
     var body: some View {
@@ -66,7 +67,7 @@ struct SettingsViewRedesign: View {
                     .padding()
                     Divider()
                     VStack(alignment: .leading) {
-                        Attachment("https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").png?size=256")
+                        Attachment("https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").png?size=256").equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)
@@ -102,6 +103,18 @@ struct SettingsViewRedesign: View {
                     }
                     Divider()
                     HStack(alignment: .top) {
+                        Text("Use stock discord settings")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Spacer()
+                        Toggle(isOn: $discordSettings) {
+                        }
+                        .padding()
+                        .toggleStyle(SwitchToggleStyle())
+                    }
+                    Divider()
+                    HStack(alignment: .top) {
                         Text("Sort servers by recent messages")
                             .font(.title3)
                             .fontWeight(.medium)
@@ -126,29 +139,27 @@ struct SettingsViewRedesign: View {
                     }
                     Divider()
                     HStack(alignment: .top) {
-                        Text("Pastel role colors")
+                        Text("Music platform")
                             .font(.title3)
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Toggle(isOn: $pastel) {
-                        }
+                        Picker(selection: $selectedPlatform, content: {
+                            Text("Amazon Music").tag(Platforms.amazonMusic)
+                            Text("Apple Music").tag(Platforms.appleMusic)
+                            Text("Deezer").tag(Platforms.deezer)
+                            Text("iTunes").tag(Platforms.itunes)
+                            Text("Napster").tag(Platforms.napster)
+                            Text("Pandora").tag(Platforms.pandora)
+                            Text("Soundcloud").tag(Platforms.soundcloud)
+                            Text("Spotify").tag(Platforms.spotify)
+                            Text("Tidal").tag(Platforms.tidal)
+                            Text("Youtube Music").tag(Platforms.youtubeMusic)
+                        }, label: {
+                        })
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
+                        .pickerStyle(MenuPickerStyle())
                     }
-                    Divider()
-                    HStack(alignment: .top) {
-                        Text("Use stock discord settings")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $discordSettings) {
-                        }
-                        .padding()
-                        .toggleStyle(SwitchToggleStyle())
-                    }
-
                 }
                 .padding(5)
                 .background(Color.black.opacity(0.25))
@@ -244,3 +255,4 @@ func report_memory() -> Int {
         return 0
     }
 }
+

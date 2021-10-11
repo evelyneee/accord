@@ -11,15 +11,14 @@ import SwiftUI
 extension GuildView {
     var sendingView: some View {
         return HStack(alignment: .top) {
-            if data.first?.author?.id != user_id {
+            if messages.first?.author?.id != user_id {
                 Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
                     .scaledToFit()
                     .frame(width: 33, height: 33)
-                    .padding(.horizontal, 5)
                     .clipShape(Circle())
             }
             VStack(alignment: .leading) {
-                if data.first?.author?.id != user_id {
+                if messages.first?.author?.id != user_id {
                     Text(username)
                         .fontWeight(.semibold)
                     if let temp = chatTextFieldContents {
@@ -28,7 +27,7 @@ extension GuildView {
                 } else {
                     if let temp = chatTextFieldContents {
                         Text(temp)
-                            .padding(.leading, 51)
+                            .padding(.leading, 41)
                     }
                 }
 

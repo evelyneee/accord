@@ -8,17 +8,6 @@
 import Foundation
 import Combine
 
-struct AnyEncodable : Encodable {
-    var value: Encodable
-    init(_ value: Encodable) {
-        self.value = value
-    }
-    func encode(to encoder: Encoder) throws {
-        let container = encoder.singleValueContainer()
-        try value.encode(to: container as! Encoder)
-    }
-}
-
 final class Notifications {
     static var shared = Notifications()
     final var notifications: [(String, String)] = [] {
@@ -33,409 +22,6 @@ final class Notifications {
         for (i, notif) in notifications.enumerated() {
             if notif == forSet {
                 notifications.remove(at: i)
-            }
-        }
-    }
-}
-
-final class WebSocketHandler {
-    static var shared: WebSocketHandler = WebSocketHandler()
-    var connected = false
-    var session_id: String? = nil
-    var seq: Int? = nil
-    var heartbeat_interval: Int? = nil
-    var requests: Int = 0
-    let webSocketDelegate = WebSocketDelegate.shared
-    let session: URLSession
-    let ClassWebSocketTask: URLSessionWebSocketTask!
-    
-    var cachedMemberRequest: [String:GuildMember] = [:]
-    
-    init(url: URL? = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")) {
-        let config = URLSessionConfiguration.default
-
-        // MARK: - SOCKS Proxy
-        if proxyEnabled {
-            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            config.connectionProxyDictionary = [AnyHashable: Any]()
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-            if let ip = proxyIP {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-            }
-            if let port = proxyPort {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-            }
-        }
-        session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
-        ClassWebSocketTask = session.webSocketTask(with: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
-        ClassWebSocketTask.maximumMessageSize = 9999999999
-        ClassWebSocketTask.resume()
-        releaseModePrint("[Accord] Socket initiated")
-    }
-
-    final class func connect(opcode: Int = 1, channel: String? = nil, guild: String? = nil, _ completion: @escaping ((_ success: Bool, _ array: GatewayD?) -> Void)) {
-        let _ = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            WebSocketHandler.shared.requests = 0
-        }
-
-        if !(WebSocketHandler.shared.connected) {
-            WebSocketHandler.shared.initialReception()
-            ping()
-            WebSocketHandler.shared.authenticate()
-            receive()
-            WebSocketHandler.shared.connected = true
-        } else {
-            print("[Accord] already connected, continuing")
-        }
-
-        func ping() {
-            if WebSocketHandler.shared.requests >= 49 {
-                return
-            }
-            WebSocketHandler.shared.ClassWebSocketTask!.sendPing { error in
-                WebSocketHandler.shared.requests += 1
-                if let error = error {
-                    releaseModePrint("[Accord] Error when sending PING \(error)")
-                    return completion(false, nil)
-                } else {
-                    print("[Accord] Web Socket connection is alive")
-                }
-            }
-        }
-        func receive() {
-            if WebSocketHandler.shared.requests >= 49 {
-                return
-            }
-            WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
-                WebSocketHandler.shared.requests += 1
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .data(let data):
-                        print("[Accord] Data received \(data)")
-                    case .string(let text):
-                        if let textData = text.data(using: String.Encoding.utf8) {
-                            let payload = WebSocketHandler.shared.decodePayload(payload: textData)
-                            if payload["s"] as? Int != nil {
-                                WebSocketHandler.shared.seq = payload["s"] as? Int
-                            } else {
-                                if (payload["op"] as? Int ?? 0) != 11 {
-                                    print("[Accord] RECONNECT")
-                                    WebSocketHandler.shared.reconnect()
-                                    sleep(2)
-                                } else {
-                                    print("[Accord] HEARTBEAT SUCCESSFUL")
-                                }
-                            }
-                            socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
-                            switch payload["t"] as? String ?? "" {
-                            case "READY":
-                                let path = FileManager.default.urls(for: .cachesDirectory,
-                                                                    in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                                try! textData.write(to: path)
-                                let structure = try! JSONDecoder().decode(GatewayStructure.self, from: textData)
-                                releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
-                                WebSocketHandler.shared.session_id = structure.d.session_id
-                                completion(true, structure.d)
-                                break
-
-                            // MARK: Channel Event Handlers
-                            case "CHANNEL_CREATE": break
-                            case "CHANNEL_UPDATE": break
-                            case "CHANNEL_DELETE": break
-                            case "CHANNEL_PINS_UPDATE": break
-
-                            // MARK: Guild Event Handlers
-                            case "GUILD_CREATE": print("[Accord] something was created"); break
-                            case "GUILD_UPDATE": break
-                            case "GUILD_DELETE": break
-                            case "GUILD_BAN_ADD": break
-                            case "GUILD_BAN_REMOVE": break
-                            case "GUILD_EMOJIS_UPDATE": break
-                            case "GUILD_MEMBER_ADD": break
-                            case "GUILD_MEMBER_REMOVE": break
-                            case "GUILD_MEMBER_UPDATE": break
-                            case "GUILD_MEMBERS_CHUNK":
-                                DispatchQueue.main.async {
-                                    MessageController.shared.sendMemberChunk(msg: textData)
-                                }
-                                break
-                            case "GUILD_ROLE_CREATE": break
-                            case "GUILD_ROLE_UPDATE": break
-                            case "GUILD_ROLE_DELETE": break
-
-                            // MARK: Integration Event Handlers
-                            case "INTEGRATION_CREATE": break
-                            case "INTEGRATION_UPDATE": break
-                            case "INTEGRATION_DELETE": break
-
-                            // MARK: Invite Event Handlers
-                            case "INVITE_CREATE": break
-                            case "INVITE_DELETE": break
-
-                            // MARK: Message Event Handlers
-                            case "MESSAGE_CREATE":
-                                let data = payload["d"] as! [String: Any]
-                                if let channelid = data["channel_id"] as? String {
-                                    MessageController.shared.sendMessage(msg: textData, channelID: channelid)
-                                }
-                                if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
-                                    print("[Accord] NOTIFICATION SENDING NOW")
-                                    showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                    MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
-                                } else if Notifications.shared.privateChannels.contains(data["channel_id"] as! String) && ((((payload["d"] as! [String: Any])["author"]) as! [String:Any])["id"] as? String ?? "") != user_id {
-                                    print("[Accord] NOTIFICATION SENDING NOW")
-                                    showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                    MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
-                                }
-                                break
-                            case "MESSAGE_UPDATE":
-                                let data = payload["d"] as! [String: Any]
-                                if let channelid = data["channel_id"] as? String {
-                                    MessageController.shared.editMessage(msg: textData, channelID: channelid)
-                                }
-                                break
-                            case "MESSAGE_DELETE":
-                                let data = payload["d"] as! [String: Any]
-                                if let channelid = data["channel_id"] as? String {
-                                    MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
-                                }
-                                break
-                            case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
-                            case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
-                            case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
-                            case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
-
-                            // MARK: Presence Event Handlers
-                            case "PRESENCE_UPDATE": break
-                            case "TYPING_START":
-                                print("typing")
-                                let data = payload["d"] as! [String: Any]
-                                if let channelid = data["channel_id"] as? String {
-                                    MessageController.shared.typing(msg: data, channelID: channelid)
-                                }
-                                break
-                            case "USER_UPDATE": break
-
-                            // MARK: Voice Event Handler
-                            case "VOICE_STATE_UPDATE": break
-                            case "VOICE_SERVER_UPDATE": break
-
-                            // MARK: Webhooks Event Handler
-                            case "WEBHOOKS_UPDATE": break
-                            default: break
-                            }
-                        }
-                        receive() // call back the function, creating a loop
-                    @unknown default:
-                        print("[Accord] unknown")
-                    }
-                case .failure(let error):
-                    releaseModePrint("[Accord] Error when receiving loop \(error)")
-                    print("[Accord] RECONNECT")
-                    WebSocketHandler.shared.reconnect()
-                }
-            }
-        }
-    }
-
-    // MARK: Decode payloads
-    func decodePayload(payload: Data) -> [String: Any] {
-        do {
-            return try JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any] ?? [:]
-        } catch {
-            return [:]
-        }
-    }
-
-    // MARK: Initial WS setup
-    func initialReception() {
-        if self.requests >= 49 {
-            return
-        }
-        WebSocketHandler.shared.ClassWebSocketTask!.receive { result in
-            WebSocketHandler.shared.requests += 1
-            switch result {
-            case .success(let message):
-                switch message {
-                case .data(_):
-                    break
-                case .string(let text):
-                    if let data = text.data(using: String.Encoding.utf8) {
-                        let hello = self.decodePayload(payload: data)
-                        WebSocketHandler.shared.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
-                        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: {
-                            WebSocketHandler.shared.heartbeat()
-                        })
-
-                    }
-                @unknown default:
-                    print("[Accord] unknown")
-                    break
-                }
-            case .failure(let error):
-                print("[Accord] Error when init receiving \(error)")
-            }
-        }
-    }
-
-    // MARK: ACK
-    func heartbeat() {
-        if WebSocketHandler.shared.requests >= 49 {
-            return
-        }
-        let packet: [String:Any] = [
-            "op":1,
-            "d":WebSocketHandler.shared.seq ?? 0
-        ]
-        socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    print("[Accord] RECONNECT")
-                    WebSocketHandler.shared.reconnect()
-                }
-                print("[Accord] heartbeat")
-                WebSocketHandler.shared.requests += 1
-                DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(WebSocketHandler.shared.heartbeat_interval ?? 0), execute: { [weak self] in
-                    self?.heartbeat()
-                })
-            }
-        }
-    }
-
-    // MARK: Authentication
-    func authenticate() {
-        let packet: [String:Any] = [
-            "op":2,
-            "d":[
-                "token":AccordCoreVars.shared.token,
-                "capabilities":125,
-                "compress":false,
-                "properties": [
-                    "os":"Mac OS X",
-                    "browser":"Discord Client",
-                    "release_channel":"canary",
-                    "client_build_number": 96238,
-                    "client_version":"0.0.276",
-                    "os_version":"21.1.0",
-                    "os_arch":"x64",
-                    "system-locale":"en-US",
-                ]
-            ]
-        ]
-        socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            WebSocketHandler.shared.ClassWebSocketTask!.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    print("[Accord] RECONNECT")
-                    WebSocketHandler.shared.reconnect()
-                }
-            }
-        }
-    }
-
-    final func close() {
-        let reason = "Closing connection".data(using: .utf8)
-        ClassWebSocketTask!.cancel(with: .goingAway, reason: reason)
-    }
-    final func reconnect() {
-        let packet: [String:Any] = [
-            "op":6,
-            "d":[
-                "token":AccordCoreVars.shared.token,
-                "session_id":String(WebSocketHandler.shared.session_id ?? ""),
-                "seq":Int(WebSocketHandler.shared.seq ?? 0)
-            ]
-        ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ClassWebSocketTask?.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                }
-                return
-            }
-        }
-    }
-    final func subscribe(_ guild: String, _ channel: String) {
-        let packet: [String:Any] = [
-            "op":14,
-            "d": [
-                "guild_id":guild,
-                "typing":true,
-                "activities":true,
-                "threads":false,
-                "members":[]
-            ],
-        ]
-        socketEvents.append(["subscribe to channel (op 14) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ClassWebSocketTask.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                }
-            }
-        }
-    }
-    final func subscribeToDM(_ channel: String) {
-        let packet: [String:Any] = [
-            "op":13,
-            "d": [
-                "channel_id":channel
-            ],
-        ]
-        socketEvents.append(["subscribe to dm (op 13) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ClassWebSocketTask.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                }
-            }
-        }
-    }
-    final func getMembers(ids: [String], guild: String, _ completion: @escaping ((_ success: Bool, _ users: [GuildMember?]) -> Void)) {
-        let packet: [String:Any] = [
-            "op":8,
-            "d": [
-                "limit":0,
-                "user_ids":ids,
-                "guild_id":guild
-            ]
-        ]
-        socketEvents.append(["get members (op 8) ~>":String(describing: packet as [String:Any])])
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            self.ClassWebSocketTask.send(.string(jsonString)) { error in
-                print("[Accord] SENT \(jsonString)")
-                self.ClassWebSocketTask.receive { result in
-                    switch result {
-                    case .success(let message):
-                        switch message {
-                        case .data(_):
-                            break
-                        case .string(let text):
-                            print(text, "MEMBER CHUNK")
-                            break
-                        @unknown default:
-                            print("[Accord] unknown")
-                            break
-                        }
-                    case .failure(let error):
-                        print("[Accord] Error when init receiving \(error)")
-                    }
-                }
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                }
             }
         }
     }
@@ -462,13 +48,13 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         // MARK: WebSocket close codes.
         switch closeCode {
         case .invalid:
-            Swift.fatalError("Socket closed because payload was invalid")
+            releaseModePrint("Socket closed because payload was invalid")
         case .normalClosure:
             releaseModePrint("[Accord] Socket closed because connection was closed")
-            Swift.fatalError(reason)
+            releaseModePrint(reason)
         case .goingAway:
             releaseModePrint("[Accord] Socket closed because connection was closed")
-            Swift.fatalError(reason)
+            releaseModePrint(reason)
         case .protocolError:
             releaseModePrint("[Accord] Socket closed because there was a protocol error")
         case .unsupportedData:
@@ -484,13 +70,371 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         case .messageTooBig:
             releaseModePrint("[Accord] Socket closed because the message was too big")
         case .mandatoryExtensionMissing:
-            print("[Accord] Socket closed because an extension was missing")
+            releaseModePrint("[Accord] Socket closed because an extension was missing")
         case .internalServerError:
-            Swift.fatalError("Socket closed because there was an internal server error")
+            releaseModePrint("Socket closed because there was an internal server error")
         case .tlsHandshakeFailure:
             releaseModePrint("[Accord] Socket closed because the tls handshake failed")
         @unknown default:
             releaseModePrint("[Accord] Socket closed for unknown reason")
+        }
+        #if DEBUG
+        fatalError("Socket Disconnected: \(reason) \(closeCode)")
+        #endif
+    }
+}
+
+
+final class WebSocket {
+    
+    var ws: URLSessionWebSocketTask!
+    let session: URLSession
+    let webSocketDelegate = WebSocketDelegate.shared
+    var session_id: String? = nil
+    var seq: Int? = nil
+    var heartbeat_interval: Int? = nil
+    var cachedMemberRequest: [String:GuildMember] = [:]
+    typealias completionBlock = ((_ value: Optional<GatewayD>) -> Void)
+    
+    // MARK: - init
+    init(url: URL?) {
+        var config = URLSessionConfiguration.default
+        
+        if proxyEnabled {
+            config = config.setProxy()
+        }
+        session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
+        ws = session.webSocketTask(with: url!)
+        ws.maximumMessageSize = 9999999999
+        ws.resume()
+        initialReception()
+        ping()
+        authenticate()
+        releaseModePrint("[Accord] Socket initiated")
+    }
+    
+    // MARK: - Ping
+    func ping() {
+        ws.sendPing { error in
+            if let error = error {
+                releaseModePrint("[Accord] Error when sending PING \(error)")
+            } else {
+                print("[Accord] Web Socket connection is alive")
+            }
+        }
+    }
+    
+    // MARK: Decode payloads
+    func decodePayload(payload: Data) -> [String: Any] {
+        do {
+            return try JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any] ?? [:]
+        } catch {
+            return [:]
+        }
+    }
+
+    // MARK: Initial WS setup
+    func initialReception() {
+        ws.receive { [weak self] result in
+            switch result {
+            case .success(let message):
+                switch message {
+                case .data(_):
+                    break
+                case .string(let text):
+                    if let data = text.data(using: String.Encoding.utf8) {
+                        let hello = self?.decodePayload(payload: data) ?? [:]
+                        self?.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
+                        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 0), execute: {
+                            self?.heartbeat()
+                        })
+
+                    }
+                @unknown default:
+                    print("[Accord] unknown")
+                    break
+                }
+            case .failure(let error):
+                print("[Accord] Error when init receiving \(error)")
+            }
+        }
+    }
+
+    // MARK: - Ready
+    func ready(_ completion: @escaping completionBlock) {
+        ws.receive { result in
+            switch result {
+            case .success(let message):
+                switch message {
+                case .data(_):
+                    break
+                case .string(let text):
+                    if let data = text.data(using: String.Encoding.utf8) {
+                        guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: data) else {
+                            return completion(nil)
+                        }
+                        self.receive()
+                        return completion(structure.d)
+                    }
+                @unknown default:
+                    print("[Accord] unknown")
+                    break
+                }
+            case .failure(let error):
+                print("[Accord] Error when init receiving \(error)")
+            }
+        }
+    }
+
+    
+    // MARK: ACK
+    func heartbeat() {
+        let packet: [String:Any] = [
+            "op":1,
+            "d":self.seq ?? 0
+        ]
+        socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ws.send(.string(jsonString)) { [weak self] error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                    print("[Accord] RECONNECT")
+                    self?.ws.resume()
+                    self?.reconnect()
+                }
+                print("[Accord] heartbeat")
+                DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 0), execute: {
+                    self?.heartbeat()
+                })
+            }
+        }
+    }
+
+    // MARK: Authentication
+    func authenticate() {
+        let packet: [String:Any] = [
+            "op":2,
+            "d":[
+                "token":AccordCoreVars.shared.token,
+                "capabilities":125,
+                "compress":false,
+                "properties": [
+                    "os":"Mac OS X",
+                    "browser":"Discord Client",
+                    "release_channel":"canary",
+                    "client_build_number": 97961,
+                    "client_version":"0.0.277",
+                    "os_version":"21.1.0",
+                    "os_arch":"x64",
+                    "system-locale":"en-US",
+                ]
+            ]
+        ]
+        socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ws.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                    print("[Accord] RECONNECT")
+                }
+            }
+        }
+    }
+
+    final func close() {
+        let reason = "Closing connection".data(using: .utf8)
+        ws.cancel(with: .goingAway, reason: reason)
+    }
+    final func reconnect() {
+        let packet: [String:Any] = [
+            "op":6,
+            "d":[
+                "token":AccordCoreVars.shared.token,
+                "session_id":String(self.session_id ?? ""),
+                "seq":Int(self.seq ?? 0)
+            ]
+        ]
+        print("RECONNECT SENDING", packet)
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
+            ws.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending reconnect error: \(error)")
+                }
+                return
+            }
+        }
+    }
+    final func subscribe(_ guild: String, _ channel: String) {
+        let packet: [String:Any] = [
+            "op":14,
+            "d": [
+                "guild_id":guild,
+                "typing":true,
+                "activities":true,
+                "threads":false,
+                "members":[]
+            ],
+        ]
+        socketEvents.append(["subscribe to channel (op 14) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ws.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+            }
+        }
+    }
+    final func subscribeToDM(_ channel: String) {
+        let packet: [String:Any] = [
+            "op":13,
+            "d": [
+                "channel_id":channel
+            ],
+        ]
+        socketEvents.append(["subscribe to dm (op 13) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ws.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+            }
+        }
+    }
+    
+    func getMembers(ids: [String], guild: String) {
+        let packet: [String:Any] = [
+            "op":8,
+            "d": [
+                "limit":0,
+                "user_ids":ids,
+                "guild_id":guild
+            ]
+        ]
+        socketEvents.append(["get members (op 8) ~>":String(describing: packet as [String:Any])])
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+           let jsonString: String = String(data: jsonData, encoding: .utf8) {
+            ws.send(.string(jsonString)) { error in
+                if let error = error {
+                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Receive
+    func receive() {
+        ws.receive { [weak self] result in
+            switch result {
+            case .success(let message):
+                switch message {
+                case .data(let data):
+                    print("[Accord] Data received \(data)")
+                case .string(let text):
+                    if let textData = text.data(using: String.Encoding.utf8) {
+                        let payload = self?.decodePayload(payload: textData) ?? [:]
+                        if payload["s"] as? Int != nil {
+                            self?.seq = payload["s"] as? Int
+                        } else {
+                            if (payload["op"] as? Int ?? 0) != 11 {
+                                print("[Accord] RECONNECT")
+                                self?.reconnect()
+                                sleep(2)
+                            } else {
+                                print("[Accord] Heartbeat successful")
+                            }
+                        }
+                        socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
+                        switch payload["t"] as? String ?? "" {
+                        case "READY":
+                            let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                            try! textData.write(to: path)
+                            guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: textData) else { break }
+                            releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
+                            self?.session_id = structure.d.session_id
+                            break
+
+                        // MARK: Channel Event Handlers
+                        case "CHANNEL_CREATE": break
+                        case "CHANNEL_UPDATE": break
+                        case "CHANNEL_DELETE": break
+
+                        // MARK: Guild Event Handlers
+                        case "GUILD_CREATE": print("[Accord] something was created"); break
+                        case "GUILD_DELETE": break
+                        case "GUILD_MEMBER_ADD": break
+                        case "GUILD_MEMBER_REMOVE": break
+                        case "GUILD_MEMBER_UPDATE": break
+                        case "GUILD_MEMBERS_CHUNK":
+                            DispatchQueue.main.async {
+                                MessageController.shared.sendMemberChunk(msg: textData)
+                            }
+                            break
+
+                        // MARK: Invite Event Handlers
+                        case "INVITE_CREATE": break
+                        case "INVITE_DELETE": break
+
+                        // MARK: Message Event Handlers
+                        case "MESSAGE_CREATE":
+                            let data = payload["d"] as! [String: Any]
+                            if let channelid = data["channel_id"] as? String {
+                                MessageController.shared.sendMessage(msg: textData, channelID: channelid)
+                            }
+                            if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
+                                print("[Accord] NOTIFICATION SENDING NOW")
+                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
+                            } else if Notifications.shared.privateChannels.contains(data["channel_id"] as! String) && ((((payload["d"] as! [String: Any])["author"]) as! [String:Any])["id"] as? String ?? "") != user_id {
+                                print("[Accord] NOTIFICATION SENDING NOW")
+                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
+                                MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
+                            }
+                            break
+                        case "MESSAGE_UPDATE":
+                            let data = payload["d"] as! [String: Any]
+                            if let channelid = data["channel_id"] as? String {
+                                MessageController.shared.editMessage(msg: textData, channelID: channelid)
+                            }
+                            break
+                        case "MESSAGE_DELETE":
+                            let data = payload["d"] as! [String: Any]
+                            if let channelid = data["channel_id"] as? String {
+                                MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
+                            }
+                            break
+                        case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
+                        case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
+                        case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
+                        case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
+
+                        // MARK: Presence Event Handlers
+                        case "PRESENCE_UPDATE": break
+                        case "TYPING_START":
+                            print("typing")
+                            let data = payload["d"] as! [String: Any]
+                            if let channelid = data["channel_id"] as? String {
+                                MessageController.shared.typing(msg: data, channelID: channelid)
+                            }
+                            break
+                        case "USER_UPDATE": break
+                        default: break
+                        }
+                    }
+                    self?.receive() // call back the function, creating a loop
+                @unknown default:
+                    print("[Accord] unknown")
+                }
+            case .failure(let error):
+                releaseModePrint("[Accord] Error when receiving loop \(error)")
+                print("[Accord] RECONNECT")
+            }
         }
     }
 }

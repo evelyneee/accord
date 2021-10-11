@@ -9,6 +9,10 @@ import Foundation
 import AppKit
 import SwiftUI
 
+struct AnyDecodable: Decodable {
+    let value: Bool
+}
+
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
@@ -16,7 +20,6 @@ final class ImageHandling {
         let pfpURLs = array.map {
             "https://cdn.discordapp.com/avatars/\($0.author!.id)/\($0.author?.avatar ?? "").png?size=80"
         }
-        print(pfpURLs)
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
             didSet {
@@ -35,17 +38,10 @@ final class ImageHandling {
         for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                if let data = cache.cachedResponse(for: request)?.data {
-                    returnArray[String(userid)] = NSImage(data: data)
-                } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                        if let data = data, let response = response {
-                        let cachedData = CachedURLResponse(response: response, data: data)
-                            cache.storeCachedResponse(cachedData, for: request)
-                            returnArray[String(userid)] = NSImage(data: data)
-                        }
-                    }).resume()
+                Networking<AnyDecodable>().image(url: url) { image in
+                    if let image = image {
+                        returnArray[String(userid)] = image
+                    }
                 }
             }
         }
@@ -58,10 +54,10 @@ final class ImageHandling {
         config.urlCache = cache
         let session = URLSession(configuration: config)
         if let url = URL(string: url) {
-            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+            var request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 30.0)
+            request.httpMethod = "GET"
             if let data = cache.cachedResponse(for: request)?.data {
                 DispatchQueue.main.async {
-                    print("cached")
                     dataReceived = data
                     sem.signal()
                 }
@@ -71,10 +67,11 @@ final class ImageHandling {
                     let cachedData = CachedURLResponse(response: response, data: data)
                         cache.storeCachedResponse(cachedData, for: request)
                         DispatchQueue.main.async {
-                            print(" havenwork")
                             dataReceived = data
                             sem.signal()
                         }
+                    } else  {
+                        print(error?.localizedDescription ?? "")
                     }
                 }).resume()
             }
@@ -86,7 +83,7 @@ final class ImageHandling {
     }
     func getServerIcons(array: [Guild], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
         let pfpURLs = array.compactMap {
-            "https://cdn.discordapp.com/icons/\($0.id)/\($0.icon ?? "")?size=80"
+            "https://cdn.discordapp.com/icons/\($0.id)/\($0.icon ?? "").png?size=80"
         }
         var singleURLs: [String] = []
         var returnArray: [String:NSImage] = [:] {
@@ -105,21 +102,13 @@ final class ImageHandling {
         let _ = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { timer in
             return completion(true, returnArray)
         }
-        print(singleURLs)
         for url in singleURLs {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                if let data = cache.cachedResponse(for: request)?.data {
-                    returnArray[String(userid)] = NSImage(data: data)
-                } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                        if let data = data, let response = response {
-                        let cachedData = CachedURLResponse(response: response, data: data)
-                            cache.storeCachedResponse(cachedData, for: request)
-                            returnArray[String(userid)] = NSImage(data: data)
-                        }
-                    }).resume()
+                Networking<AnyDecodable>().image(url: url) { image in
+                    if let image = image {
+                        returnArray[String(userid)] = image
+                    }
                 }
             }
             if url == singleURLs[singleURLs.count - 1] {
@@ -130,9 +119,6 @@ final class ImageHandling {
 
     init(_ empty:Bool = false) {
         print("[Accord] loaded pfpmanager")
-    }
-    deinit {
-        print("[Accord] IF THIS NEVER SHOWS, FUCK")
     }
 }
 
@@ -155,7 +141,7 @@ struct ImageWithURL: View, Equatable {
 
     var body: some View {
         HStack {
-            Image(nsImage: (NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0))))
+            Image(nsImage: imageLoader.image)
                   .resizable()
                   .clipped()
         }
@@ -176,12 +162,9 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: NSImage(data: imageLoader.imageData)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 400, height: 300)) ?? NSImage(size: NSSize(width: 0, height: 0)))
+        Image(nsImage: imageLoader.image)
               .resizable()
               .scaledToFit()
-              .onDisappear {
-                  imageLoader.imageData = Data()
-              }
     }
 
 }
@@ -199,12 +182,10 @@ struct StockAttachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
+        Image(nsImage: imageLoader.image)
               .resizable()
               .scaledToFit()
-              .onDisappear {
-                  imageLoader.imageData = Data()
-              }
+
     }
 
 }
@@ -223,57 +204,31 @@ struct HoveredAttachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: NSImage(data: imageLoader.imageData) ?? NSImage(size: NSSize(width: 0, height: 0)))
+        Image(nsImage: imageLoader.image)
               .resizable()
               .scaledToFit()
               .padding(2)
               .background(hovering ? Color.gray.opacity(0.75).cornerRadius(1) : Color.clear.cornerRadius(0))
-              .onDisappear {
-                  imageLoader.imageData = Data()
-              }
               .onHover(perform: { _ in
                   hovering.toggle()
               })
     }
 }
 
+let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
+
 final class ImageLoaderAndCache: ObservableObject {
     
-    @Published var imageData = Data()
-    let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
-
+    @Published var image = NSImage()
     init(imageURL: String) {
         imageQueue.async { [weak self] in
-            let config = URLSessionConfiguration.default
-            config.urlCache = cache
-            let session = URLSession(configuration: config)
-
-            if let url = URL(string: imageURL) {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                if let data = cache.cachedResponse(for: request)?.data {
-                    DispatchQueue.main.async {
-                        print("cached")
-                        self?.imageData = data
-                    }
-                } else {
-                    session.dataTask(with: request, completionHandler: { (data, response, error) in
-                        if let data = data, let response = response {
-                        let cachedData = CachedURLResponse(response: response, data: data)
-                            cache.storeCachedResponse(cachedData, for: request)
-                            DispatchQueue.main.async {
-                                print("network")
-                                self?.imageData = data
-                            }
-                        }
-                    }).resume()
+            Networking<AnyDecodable>().image(url: URL(string: imageURL)) { image in
+                guard let image = image else { self?.image = NSImage(); return }
+                DispatchQueue.main.async {
+                    self?.image = image
                 }
             }
         }
-
-    }
-    
-    deinit {
-        print("[Accord] unloaded image")
     }
 }
 

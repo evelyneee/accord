@@ -28,16 +28,16 @@ class Settings: Decodable {
     var friend_discovery_flags: Int?
     var explicit_content_filter: Int?
     var enable_tts_command: Bool?
-    var disable_games_tab: Bool?
+    // var disable_games_tab: Bool?
     var developer_mode: Bool?
     var detect_platform_accounts: Bool?
     var default_guilds_restricted: Bool?
     var custom_status: Status?
-    var convert_emoticons: Bool?
-    var contact_sync_enabled: Bool?
+    // var convert_emoticons: Bool?
+    // var contact_sync_enabled: Bool?
     var animate_stickers: Int?
     var animate_emoji: Bool?
-    var allow_accessibility_detection: Bool?
+    // var allow_accessibility_detection: Bool?
     var afk_timeout: Int?
 }
 

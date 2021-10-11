@@ -32,12 +32,12 @@ extension GuildView {
                 }
             }
             if #available(macOS 12.0, *) {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
                     .padding(15)
                     .background(Material.regular) // blurred background
                     .cornerRadius(15)
             } else {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo)
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: $channelID, chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sheet, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                     .cornerRadius(15)

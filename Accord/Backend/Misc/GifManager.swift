@@ -4,6 +4,7 @@
 //
 //  Created by Amy While on 16/02/2021.
 //
+
 import Cocoa
 
 final class Gif: NSImage {

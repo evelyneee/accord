@@ -54,6 +54,8 @@
 		A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F2A126CB171600E8FDC5 /* Enums.swift */; };
 		A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1F2A326CB176900E8FDC5 /* Channel.swift */; };
 		A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC5253268DF5AD00B7823E /* AttachmentView.swift */; };
+		A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C73D1126F5812D00CF0350 /* Songlink.swift */; };
+		A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C73D1326F583A000CF0350 /* SongLink.swift */; };
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
@@ -128,6 +130,8 @@
 		A8B1F2A126CB171600E8FDC5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		A8B1F2A326CB176900E8FDC5 /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
+		A8C73D1126F5812D00CF0350 /* Songlink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Songlink.swift; path = Accord/UI/Chat/GuildView/Songlink.swift; sourceTree = SOURCE_ROOT; };
+		A8C73D1326F583A000CF0350 /* SongLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongLink.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
@@ -242,10 +246,11 @@
 		A82521382687ABC50073F640 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
 				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
-				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
+				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
 				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
 			);
 			path = Networking;
@@ -254,6 +259,7 @@
 		A82521392687ABD40073F640 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
+				A8C73D1326F583A000CF0350 /* SongLink.swift */,
 				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
 				A82A061F26D98193007B9B27 /* Settings.swift */,
 				A82A062326D98259007B9B27 /* ReadState.swift */,
@@ -435,7 +441,9 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
+				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
+				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,

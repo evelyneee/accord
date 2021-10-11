@@ -17,9 +17,9 @@ extension GuildView {
         return messageDict[message]
     }
     func getCachedMemberChunk() {
-        let allUserIDs = Array(NSOrderedSet(array: data.map { $0.author?.id ?? "" })) as! Array<String>
+        let allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
         for user in allUserIDs {
-            if let person = WebSocketHandler.shared.cachedMemberRequest["\(guildID)$\(user)"] {
+            if let person = wss.cachedMemberRequest["\(guildID)$\(user)"] {
                 let nickname = person.nick ?? person.user.username
                 nicks[(person.user.id)] = nickname
                 var rolesTemp: [String] = []

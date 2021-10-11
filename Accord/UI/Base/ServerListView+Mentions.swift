@@ -10,17 +10,23 @@ import Foundation
 extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
         for i in guilds {
-            print("balls")
             if i.id == guild {
-                print("ok")
                 for i in i.channels! {
                     if i.id == channel {
-                        print("ok")
                         i.read_state?.mention_count += 1
                         break
                     }
                 }
             }
+        }
+    }
+    func deselect() {
+        selection = nil
+    }
+    func removeMentions(server: String) {
+        guard let guild = fastIndexGuild(server, array: guilds) else { return }
+        for channel in guilds[guild].channels! {
+            channel.read_state?.mention_count = 0
         }
     }
 }

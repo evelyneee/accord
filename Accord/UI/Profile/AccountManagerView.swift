@@ -39,8 +39,12 @@ struct AccountManagerView: View {
                 Text(account.username)
             }
             .onAppear(perform: {
-                let data = try! JSONSerialization.data(withJSONObject: jsonString, options: [])
-                accounts = try! JSONDecoder().decode([Account].self, from: data)
+                do {
+                    let data = try JSONSerialization.data(withJSONObject: jsonString, options: [])
+                    accounts = try JSONDecoder().decode([Account].self, from: data)
+                } catch {
+                    print(error.localizedDescription)
+                }
             })
         }
     }

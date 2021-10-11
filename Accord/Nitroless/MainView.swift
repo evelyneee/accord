@@ -61,7 +61,7 @@ struct NitrolessView: View, Equatable {
                                 chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
                             }) {
                                 VStack {
-                                    HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
+                                    HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
                                         .frame(width: 20, height: 20)
                                 }
                                 .frame(width: 30, height: 30)

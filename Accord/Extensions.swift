@@ -9,12 +9,30 @@ import Foundation
 import SwiftUI
 import AppKit
 import UserNotifications
+import ImageIO
 
 extension Dictionary {
     mutating func switchKey(fromKey: Key, toKey: Key) {
         if let entry = removeValue(forKey: fromKey) {
             self[toKey] = entry
         }
+    }
+}
+
+extension URLSessionConfiguration {
+    func setProxy() -> URLSessionConfiguration {
+        let config = self
+        config.connectionProxyDictionary = [AnyHashable: Any]()
+        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+        if let ip = proxyIP {
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+        }
+        if let port = proxyPort {
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+        }
+        return config
     }
 }
 
@@ -167,13 +185,13 @@ extension NSImage {
     ///
     /// - Parameter size: The target size of the image.
     /// - Returns: The resized image.
-    func resizeMaintainingAspectRatio(withSize targetSize: NSSize) -> NSImage? {
+    func downsample(withSize targetSize: NSSize) -> NSImage? {
         let newSize: NSSize
         let widthRatio  = targetSize.width / self.width
         let heightRatio = targetSize.height / self.height
         
         if targetSize.width >= self.width || targetSize.height >= self.height {
-            print("too small")
+            print("too small, cancelling", self.width, self.height)
             return self
         }
         
@@ -186,6 +204,28 @@ extension NSImage {
         }
         return self.resize(withSize: newSize)
     }
+//    func downsample(withSize pointSize: NSSize) -> NSImage? {
+//
+//        // Create an CGImageSource that represent an image
+//        let imageSource = CGImageSourceCreateWithData(self.tiffRepresentation! as CFData, nil)!
+//
+//        // Calculate the desired dimension
+//        let maxDimensionInPixels = max(pointSize.width, pointSize.height)
+//
+//        // Perform downsampling
+//        let downsampleOptions = [
+//            kCGImageSourceCreateThumbnailFromImageAlways: true,
+//            kCGImageSourceShouldCacheImmediately: true,
+//            kCGImageSourceCreateThumbnailWithTransform: true,
+//            kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels
+//        ] as CFDictionary
+//        guard let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) else {
+//            return nil
+//        }
+//
+//        // Return the downsampled image as UIImage
+//        return NSImage(cgImage: downsampledImage, size: pointSize)
+//    }
 }
 
 /// Exceptions for the image extension class.

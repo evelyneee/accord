@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
+
 public var roleColors: [String:(Int, Int)] = [:]
 
 final class AllEmotes {
@@ -21,7 +23,7 @@ func pingCount(guild: Guild) -> Int {
 
 
 struct ServerListView: View {
-    @Binding var guilds: [Guild]
+    @State var guilds = [Guild]()
     @Binding var full: GatewayD?
     @State var selection: Int? = nil
     @State var selectedServer: Int? = nil
@@ -42,7 +44,7 @@ struct ServerListView: View {
                     .frame(width: 45, height: 45)
                     .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
                     .onTapGesture(count: 1, perform: {
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { // jump back in main thread
                             privateChannels = privateChannels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                             selectedServer = 999
                         }
@@ -51,19 +53,22 @@ struct ServerListView: View {
                     // MARK: - Guild icon UI
                     ForEach(0..<guilds.count, id: \.self) { index in
                         ZStack(alignment: .bottomTrailing) {
-                            Button(action: {
-                                withAnimation {
-                                    DispatchQueue.main.async {
-                                        selectedServer = index
+                            if let guild = guilds[index] {
+                                Button(action: {
+                                    withAnimation {
+                                        DispatchQueue.main.async {
+                                            selectedServer = index
+                                        }
                                     }
+                                }) { [weak guild] in
+                                    Image(nsImage: guildIcons[guild?.id ?? ""] ?? NSImage()).resizable()
+                                        .scaledToFit()
+                                        .frame(width: 45, height: 45)
+                                        .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
                                 }
-                            }) {
-                                Image(nsImage: guildIcons[guilds[index].id] ?? NSImage()).resizable()
-                                    .scaledToFit()
-                                    .frame(width: 45, height: 45)
-                                    .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
+                                .buttonStyle(BorderlessButtonStyle())
                             }
-                            .buttonStyle(BorderlessButtonStyle())
+
                             if pingCount(guild: guilds[index]) != 0 {
                                 ZStack {
                                     Circle()
@@ -119,10 +124,9 @@ struct ServerListView: View {
                         .onAppear(perform: {
                             let privChannelQueue = DispatchQueue(label: "Private Channel Loading Queue", attributes: .concurrent)
                             privChannelQueue.async {
-                                NetworkHandling.shared.requestData(url: "https://discordapp.com/api/users/@me/channels", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, rawData in
-                                    if success {
-                                        guard let data = try? JSONDecoder().decode([Channel].self, from: rawData ?? Data()) else { return }
-                                        privateChannels = data.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
+                                Networking<[Channel]>().fetch(url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
+                                    if let channels = channels {
+                                        privateChannels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                                         Notifications.shared.privateChannels = privateChannels.map { $0.id }
                                     }
                                 }
@@ -142,7 +146,7 @@ struct ServerListView: View {
                                 NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index].id), channelName: Binding.constant(((privateChannels[index].recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
                                     HStack {
                                         if privateChannels[index].recipients?.count != 1 {
-                                            StockAttachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png")
+                                            StockAttachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png?size=80").equatable()
                                                 .clipShape(Circle())
                                                 .frame(width: 25, height: 25)
                                             Text(privateChannels[index].name ?? "")
@@ -173,7 +177,7 @@ struct ServerListView: View {
                                             }
 
                                         } else {
-                                            StockAttachment("https://cdn.discordapp.com/avatars/\(privateChannels[index].recipients![0].id)/\(privateChannels[index].recipients![0].avatar ?? "").png")
+                                            StockAttachment("https://cdn.discordapp.com/avatars/\(privateChannels[index].recipients![0].id)/\(privateChannels[index].recipients![0].avatar ?? "").png?size=80").equatable()
                                                 .clipShape(Circle())
                                                 .frame(width: 25, height: 25)
                                             Text(privateChannels[index].recipients![0].username )
@@ -217,11 +221,11 @@ struct ServerListView: View {
                     // MARK: - Guild channels
                     if guilds.isEmpty == false {
                         List {
-                            if let channels = guilds[selectedServer ?? 0].channels {
-                                ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, section in
+                            if let channels = guilds[selectedServer ?? 0].channels!.enumerated().reversed().reversed() {
+                                ForEach(channels, id: \.offset) { offset, section in
                                     if section.type == .section {
                                         Section(header: Text(section.name ?? "")) {
-                                            ForEach(Array(channels).enumerated().reversed().reversed(), id: \.offset) { offset, channel in
+                                            ForEach(channels, id: \.offset) { offset, channel in
                                                 if channel.type != .section {
                                                     if channel.parent_id ?? "no" == section.id {
                                                         NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0].id)), channelID: Binding.constant(channel.id), channelName: Binding.constant(channel.name ?? "")).equatable(), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
@@ -297,12 +301,16 @@ struct ServerListView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
-            MentionSender.shared.delegate = self
-            ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
-                if success {
-                    guildIcons = icons
+            self.guilds = full?.guilds ?? []
+            imageQueue.async {
+                ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
+                    if success {
+                        guildIcons = icons
+                    }
                 }
             }
+            MentionSender.shared.delegate = self
+
             let firstIndexQueue = DispatchQueue(label: "shitcode queue", attributes: .concurrent)
             firstIndexQueue.async {
                 let readState = full!.read_state!
@@ -315,6 +323,7 @@ struct ServerListView: View {
                         }
                     }
                 }
+                
                 for channel in privateChannels {
                     if channel.type != .section || channel.type != .stage || channel.type != .voice  {
                         if let index = fastIndexEntries(channel.id, array: readState.entries) {
@@ -327,8 +336,6 @@ struct ServerListView: View {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
             } else {
                 guildOrder = full!.user_settings!.guild_positions
-
-                let guildIDs = guilds.map { $0.id }
                 var guildTemp = [Guild]()
                 for item in guildOrder {
                     if let first = fastIndexGuild(item, array: guilds) {
@@ -338,7 +345,6 @@ struct ServerListView: View {
                 guilds = guildTemp
             }
             selectedServer = 0
-            print("[Accord] cleaned up")
             concurrentQueue.async {
                 roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
             }
@@ -381,3 +387,4 @@ struct SocketEventsDisplay: View {
         .scaleEffect(x: -1, y: 1, anchor: .center)
     }
 }
+

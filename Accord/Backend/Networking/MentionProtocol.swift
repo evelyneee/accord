@@ -9,6 +9,8 @@ import Foundation
 
 protocol MentionSenderDelegate {
     func addMention(guild: String, channel: String)
+    func deselect()
+    func removeMentions(server: String)
 }
 
 class MentionSender {
@@ -16,5 +18,11 @@ class MentionSender {
     public var delegate: MentionSenderDelegate?
     func addMention(guild: String, channel: String) {
         delegate?.addMention(guild: guild, channel: channel)
+    }
+    func deselect() {
+        delegate?.deselect()
+    }
+    func removeMentions(server: String) {
+        delegate?.removeMentions(server: server)
     }
 }

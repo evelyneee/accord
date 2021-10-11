@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 final class AttachedFiles: Decodable, Identifiable, Equatable, Hashable {
     static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {

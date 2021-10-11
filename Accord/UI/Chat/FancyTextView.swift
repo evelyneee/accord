@@ -9,14 +9,13 @@ import Foundation
 import SwiftUI
 
 final class GifServer {
-    static var shared = GifServer()
+    static var shared: GifServer? = GifServer()
     init(_ a: Bool = false) {
         print("[Accord] innit")
         index = 0
     }
     var timer: Timer? = Timer(timeInterval: Double(0.05), repeats: true) { time in
-        GifServer.shared.index += 1 % 20
-        print(GifServer.shared.index)
+        GifServer.shared?.index += 1 % 20
     }
     var index: Int = 0
 }
@@ -30,108 +29,103 @@ struct FancyTextView: View {
     @State var textElement: Text? = nil
     @Binding var channelID: String
     var body: some View {
-        HStack {
-            if text.contains("`") {
-                if #available(macOS 12.0, *) {
-                    Text(try! AttributedString(markdown: text))
-                } else {
-                    Text(text)
-                }
-            } else {
-                HStack(spacing: 0) {
-                    if let textView = textElement {
-                        textView
-                    } else if #available(macOS 12.0, *) {
+        VStack {
+            HStack {
+                if text.contains("`") {
+                    if #available(macOS 12.0, *) {
                         Text(try! AttributedString(markdown: text))
                     } else {
                         Text(text)
                     }
-                }
-                .onAppear {
-                    textQueue.async {
-                        let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:]).reduce(Text(""), +)
-                        DispatchQueue.main.async {
-                            textElement = text
+                } else {
+                    HStack(spacing: 0) {
+                        if let textView = textElement {
+                            textView
+                        } else if #available(macOS 12.0, *) {
+                            Text(try! AttributedString(markdown: text))
+                        } else {
+                            Text(text)
                         }
                     }
-                }
-                .onChange(of: text) { newValue in
-                    textQueue.async {
-                        let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:]).reduce(Text(""), +)
-                        DispatchQueue.main.async {
-                            textElement = text
+                    .onAppear {
+                        textQueue.async {
+                            let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:])
+                            DispatchQueue.main.async {
+                                textElement = text
+                            }
+                        }
+                    }
+                    .onChange(of: text) { newValue in
+                        textQueue.async {
+                            let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:])
+                            DispatchQueue.main.async {
+                                textElement = text
+                            }
                         }
                     }
                 }
             }
         }
+        .onDisappear(perform: {
+            GifServer.shared?.timer?.invalidate()
+            GifServer.shared = nil
+        })
     }
 }
 
 final class TextStuff {
     static var shared = TextStuff()
-    public func getTextArray(splitText: [String], members: [String:String] = [:]) -> [Text] {
+    public func getTextArray(splitText: [String], members: [String:String] = [:]) -> Text {
         var textArray: [Text] = []
-        print(members, "CHANNEL MEMBERS 2")
+        let config = URLSessionConfiguration.default
+        config.urlCache = cache
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
         for text in splitText {
+            if text.contains("spotify") {
+            }
             if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">" {
                 if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png") {
-                    print(emoteURL, "EMOTE URL")
-                    let config = URLSessionConfiguration.default
-                    config.urlCache = cache
-                    if proxyEnabled {
-                        config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                        config.connectionProxyDictionary = [AnyHashable: Any]()
-                        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-                        if let ip = proxyIP {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-                        }
-                        if let port = proxyPort {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-                        }
-                    }
                     let session = URLSession(configuration: config)
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
                     if let data = cache.cachedResponse(for: request)?.data {
                         if splitText.count == 1 {
-                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                         } else {
-                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                         }
                     } else {
+                        let sem = DispatchSemaphore(value: 0)
                         session.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
                                 cache.storeCachedResponse(cachedData, for: request)
                                 if splitText.count <= 3 {
-                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                    sem.signal()
                                 } else {
-                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                                    sem.signal()
                                 }
                             }
                         }).resume()
+                        sem.wait()
                     }
                 }
             } else if (text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {
                 guard let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).gif") else { break }
                 if splitText.count == 1 {
-                    let config = URLSessionConfiguration.default
-                    config.urlCache = cache
-                    if proxyEnabled {
-                        config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                        config.connectionProxyDictionary = [AnyHashable: Any]()
-                        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-                        if let ip = proxyIP {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-                        }
-                        if let port = proxyPort {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-                        }
-                    }
                     let session = URLSession(configuration: config)
                     let cache = URLCache.shared
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
@@ -142,7 +136,7 @@ final class TextStuff {
                                 print(animatedImages)
                                 let duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
                                 _ = GifServer()
-                                textArray.append(Text("\(Image(nsImage: animatedImages[GifServer.shared.index % (animatedImages.count)] ).resizable())"))
+                                textArray.append(Text("\(Image(nsImage: animatedImages[GifServer.shared?.index ?? 0 % (animatedImages.count)] ).resizable())"))
                                 print(Double(duration / Double(animatedImages.count )))
                             }
                         }
@@ -166,101 +160,61 @@ final class TextStuff {
                     }
                     
                 } else {
-                    let config = URLSessionConfiguration.default
-                    config.urlCache = cache
-                    if proxyEnabled {
-                        config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                        config.connectionProxyDictionary = [AnyHashable: Any]()
-                        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-                        if let ip = proxyIP {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-                        }
-                        if let port = proxyPort {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-                        }
-                    }
+
                     let session = URLSession(configuration: config)
                     let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    let sem = DispatchSemaphore(value: 0)
                     if let data = cache.cachedResponse(for: request)?.data {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
                     } else {
                         session.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
                                 cache.storeCachedResponse(cachedData, for: request)
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
+                                sem.signal()
                             }
                         }).resume()
+                        sem.wait()
                     }
                 }
 
-            } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
-                if let url = URL(string: text) {
-                    let config = URLSessionConfiguration.default
-                    config.urlCache = cache
-                    if proxyEnabled {
-                        config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                        config.connectionProxyDictionary = [AnyHashable: Any]()
-                        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-                        if let ip = proxyIP {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-                        }
-                        if let port = proxyPort {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-                        }
-                    }
-                    let session = URLSession(configuration: config)
-                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                    } else {
-                        session.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                            }
-                        }).resume()
-                    }
-                }
             } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
                 if let url = URL(string: text) {
-                    let config = URLSessionConfiguration.default
-                    config.urlCache = cache
-                    if proxyEnabled {
-                        config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-                        config.connectionProxyDictionary = [AnyHashable: Any]()
-                        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-                        if let ip = proxyIP {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-                        }
-                        if let port = proxyPort {
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-                        }
-                    }
                     let session = URLSession(configuration: config)
                     let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
                     if let data = cache.cachedResponse(for: request)?.data {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
                     } else {
+                        let sem = DispatchSemaphore(value: 0)
                         session.dataTask(with: request, completionHandler: { (data, response, error) in
                             if let data = data, let response = response {
                             let cachedData = CachedURLResponse(response: response, data: data)
                                 cache.storeCachedResponse(cachedData, for: request)
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.resizeMaintainingAspectRatio(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                                sem.signal()
                             }
                         }).resume()
+                        sem.wait()
                     }
                 }
             } else if (text.prefix(3) == "<@!" || text.prefix(4) == #"\<@!"# || text.prefix(2) == "<@") && text.suffix(1) == ">" && members != [:] {
                 textArray.append(Text("@\(members[String(text.dropLast().suffix(18))] ?? "Unknown User")").underline().foregroundColor(Color.blue))
                 textArray.append(Text(" "))
+            } else if text.prefix(31) == "https://open.spotify.com/track/" {
+                let sem = DispatchSemaphore(value: 0)
+                SongLink.shared.getSong(song: text) { song in
+                    if let song = song {
+                        if #available(macOS 12, *) {
+                            print("song")
+                            textArray.append(Text(try! AttributedString(markdown: song.linksByPlatform.appleMusic.url)))
+                        } else {
+                            textArray.append(Text(song.linksByPlatform.appleMusic.url))
+                        }
+                        sem.signal()
+                    }
+                }
+                sem.wait()
             } else {
                 if #available(macOS 12.0, *) {
                     textArray.append(Text(try! AttributedString(markdown: "\(text)")))
@@ -270,7 +224,7 @@ final class TextStuff {
                 }
             }
         }
-        return textArray
+        return textArray.reduce(Text(""), +)
     }
 
 
@@ -288,5 +242,108 @@ final class TextStuff {
         }
     }
 }
+ /*
+  else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
+      if let url = URL(string: text) {
+          let config = URLSessionConfiguration.default
+          config.urlCache = cache
+          if proxyEnabled {
+              config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+              config.connectionProxyDictionary = [AnyHashable: Any]()
+              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+              if let ip = proxyIP {
+                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+              }
+              if let port = proxyPort {
+                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+              }
+          }
+          let session = URLSession(configuration: config)
+          let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+          if let data = cache.cachedResponse(for: request)?.data {
+              textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+          } else {
+              session.dataTask(with: request, completionHandler: { (data, response, error) in
+                  if let data = data, let response = response {
+                  let cachedData = CachedURLResponse(response: response, data: data)
+                      cache.storeCachedResponse(cachedData, for: request)
+                      textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                  }
+              }).resume()
+          }
+      }
+  } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
+  if let url = URL(string: text) {
+      let config = URLSessionConfiguration.default
+      config.urlCache = cache
+      if proxyEnabled {
+          config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+          config.connectionProxyDictionary = [AnyHashable: Any]()
+          config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+          if let ip = proxyIP {
+              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+          }
+          if let port = proxyPort {
+              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+          }
+      }
+      let session = URLSession(configuration: config)
+      let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+      if let data = cache.cachedResponse(for: request)?.data {
+          textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+      } else {
+          session.dataTask(with: request, completionHandler: { (data, response, error) in
+              if let data = data, let response = response {
+              let cachedData = CachedURLResponse(response: response, data: data)
+                  cache.storeCachedResponse(cachedData, for: request)
+                  textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+              }
+          }).resume()
+      }
+  }
+}
+  */
 
+extension String {
+    public func marked() -> String {
+        let textArray = self.components(separatedBy: " ")
+        let config = URLSessionConfiguration.default
+        var returnString: String = ""
+        config.urlCache = cache
+        if proxyEnabled {
+            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+            config.connectionProxyDictionary = [AnyHashable: Any]()
+            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+            if let ip = proxyIP {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+            }
+            if let port = proxyPort {
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            }
+        }
+        for text in textArray {
+            if text.contains("spotify") {
+                print(text, "SPOTIFY")
+            }
+            if text.prefix(31) == "https://open.spotify.com/track/" {
+                let sem = DispatchSemaphore(value: 0)
+                SongLink.shared.getSong(song: text) { song in
+                    if let song = song {
+                        returnString.append(song.linksByPlatform.appleMusic.url)
+                        sem.signal()
+                    }
+                }
+                sem.wait()
+            }
+        }
+        print("returning")
+        return returnString
+    }
 
+}

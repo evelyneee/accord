@@ -6,10 +6,10 @@ final class KeychainManager {
     static var shared = KeychainManager()
     class func save(key: String, data: Data) -> OSStatus {
         let query = [
-            kSecClass as String       : kSecClassGenericPassword as String,
-            kSecAttrAccount as String : key,
-            kSecAttrAccessGroup as String: "group.evelyn.accord",
-            kSecValueData as String   : data ] as [String : Any]
+            kSecClass as String           : kSecClassGenericPassword as String,
+            kSecAttrAccount as String     : key,
+            kSecAttrAccessGroup as String : "me.evelyn.accord",
+            kSecValueData as String       : data ] as [String : Any]
 
         SecItemDelete(query as CFDictionary)
 

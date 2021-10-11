@@ -16,6 +16,7 @@ struct ChatControls: View {
     @Binding var chatText: String
     @Binding var sending: Bool
     @Binding var replyingTo: Message?
+    @Binding var editing: String?
     @State var nitroless = false
     @State var emotes = false
     @State var temporaryText = ""
@@ -23,12 +24,6 @@ struct ChatControls: View {
     @State var fileUpload: Data? = nil
     @State var fileUploadURL: URL? = nil
     @State var dragOver: Bool = false
-    func refresh() {
-        DispatchQueue.main.async {
-            sending = false
-            chatTextFieldContents = textFieldContents
-        }
-    }
     fileprivate func uploadFile(temp: String, url: URL? = nil) {
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
@@ -75,19 +70,26 @@ struct ChatControls: View {
                         if temp == "/shrug" {
                             temp = #"¯\_(ツ)_/¯"#
                         }
-                        if fileUpload != nil {
-                            uploadFile(temp: temp)
-                            fileUpload = nil
-                            fileUploadURL = nil
+                        if (editing != nil) {
+                            print(editing ?? "")
+                            NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")", token: AccordCoreVars.shared.token, json: true, type: .PATCH, bodyObject: ["content":"\(String(temp))"])
+                            editing = nil
                         } else {
-                            if replyingTo != nil {
-                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
-                                replyingTo = nil
+                            if fileUpload != nil {
+                                uploadFile(temp: temp)
+                                fileUpload = nil
+                                fileUploadURL = nil
                             } else {
-                                NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
-                            }
+                                if replyingTo != nil {
+                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
+                                    replyingTo = nil
+                                } else {
+                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
+                                }
 
+                            }
                         }
+
 
                     }
                 })
@@ -132,6 +134,7 @@ struct ChatControls: View {
                         Text("🥺")
                     }
                     .buttonStyle(BorderlessButtonStyle())
+                    .keyboardShortcut("e", modifiers: [.command])
                     .popover(isPresented: $emotes, content: {
                         EmotesView(chatText: $temporaryText).equatable()
                             .frame(width: 300, height: 400)

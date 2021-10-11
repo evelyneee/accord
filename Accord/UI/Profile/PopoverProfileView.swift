@@ -143,6 +143,9 @@ struct PopoverProfileView: View {
                 }
             }
             .frame(width: 290, height: 250)
+            .onDisappear {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "Dismiss"), object: nil)
+            }
         }
     }
 }

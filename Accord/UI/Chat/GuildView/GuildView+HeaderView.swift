@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+
 extension GuildView {
     var headerView: some View {
         return HStack {
@@ -18,49 +19,59 @@ extension GuildView {
                 Button("Load more messages") {
                     let extraMessageLoadQueue = DispatchQueue(label: "Message Load Queue", attributes: .concurrent)
                     extraMessageLoadQueue.async {
-                        NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?before=\(data.last?.id ?? "")&limit=50", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
-                            if success == true {
-                                do {
-                                    let newData = try JSONDecoder().decode([Message].self, from: rawData!)
-                                    print("cock and balls \(data.count)")
-                                    let authorArray = Array(NSOrderedSet(array: newData.compactMap { $0.author! }))
-                                    for user in authorArray as! [User] {
-                                        if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
-                                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                                            if let data = cache.cachedResponse(for: request)?.data {
-                                                user.pfp = data
-                                            } else {
-                                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                                    if let data = data, let response = response {
-                                                        let cachedData = CachedURLResponse(response: response, data: data)
-                                                        cache.storeCachedResponse(cachedData, for: request)
-                                                        user.pfp = data
-                                                    }
-                                                }).resume()
-                                            }
-                                        }
+                        Networking<[Message]>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
+                            userAgent: discordUserAgent,
+                            token: AccordCoreVars.shared.token,
+                            type: .GET,
+                            discordHeaders: true,
+                            referer: "\(rootURL)/channels/\(guildID)/\(channelID)"
+                        )) { messages in
+                            if let messages = messages {
+                                // MARK: - Channel setup after messages loaded.
+
+                                for (index, message) in messages.enumerated() {
+                                    if message != messages.last {
+                                        message.lastMessage = messages[index + 1]
                                     }
-                                    let replyArray = Array(NSOrderedSet(array: newData.compactMap { $0.referenced_message?.author }))
-                                    for user in replyArray as! [User] {
-                                        if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
-                                            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                                            if let data = cache.cachedResponse(for: request)?.data {
-                                                user.pfp = data
-                                            } else {
-                                                URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                                    if let data = data, let response = response {
-                                                        let cachedData = CachedURLResponse(response: response, data: data)
-                                                        cache.storeCachedResponse(cachedData, for: request)
-                                                        user.pfp = data
-                                                    }
-                                                }).resume()
-                                            }
-                                        }
-                                    }
-                                    data.insert(contentsOf: newData, at: data.count)
-                                } catch {
                                 }
+                                self.messages = messages
+                                let authorArray = Array(NSOrderedSet(array: messages.compactMap { $0.author! }))
+                                for user in authorArray as! [User] {
+                                    if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
+                                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
+                                        if let data = cache.cachedResponse(for: request)?.data {
+                                            user.pfp = data
+                                        } else {
+                                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                                if let data = data, let response = response {
+                                                    let cachedData = CachedURLResponse(response: response, data: data)
+                                                    cache.storeCachedResponse(cachedData, for: request)
+                                                    user.pfp = data
+                                                }
+                                            }).resume()
+                                        }
+                                    }
+                                }
+                                let replyArray = Array(NSOrderedSet(array: messages.compactMap { $0.referenced_message?.author }))
+                                for user in replyArray as! [User] {
+                                    if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
+                                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
+                                        if let data = cache.cachedResponse(for: request)?.data {
+                                            user.pfp = data
+                                        } else {
+                                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                                                if let data = data, let response = response {
+                                                    let cachedData = CachedURLResponse(response: response, data: data)
+                                                    cache.storeCachedResponse(cachedData, for: request)
+                                                    user.pfp = data
+                                                }
+                                            }).resume()
+                                        }
+                                    }
+                                }
+                                self.messages.insert(contentsOf: messages, at: messages.count)
                             }
+
                         }
                     }
 

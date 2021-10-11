@@ -9,7 +9,7 @@ import Foundation
 
 extension GuildView: MessageControllerDelegate {
     func sendMessage(msg: Data, channelID: String?) {
-        // Recieved a message from backend
+        // Received a message from backend
         webSocketQueue.async {
             guard channelID != nil else { return }
             if channelID! == self.channelID {
@@ -46,7 +46,8 @@ extension GuildView: MessageControllerDelegate {
                         }
                     }
                 }
-                data.insert(message, at: 0)
+                message.lastMessage = messages.first
+                messages.insert(message, at: 0)
             }
         }
     }
@@ -58,8 +59,8 @@ extension GuildView: MessageControllerDelegate {
                 if channelID! == self.channelID {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
-                    guard let index = fastIndexMessage(message.id, array: data) else { return }
-                    data[index] = message
+                    guard let index = fastIndexMessage(message.id, array: messages) else { return }
+                    messages[index] = message
                 }
             }
 
@@ -70,8 +71,8 @@ extension GuildView: MessageControllerDelegate {
             webSocketQueue.async {
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
-                guard let index = fastIndexMessage(message.id, array: data) else { return }
-                data.remove(at: index)
+                guard let index = fastIndexMessage(message.id, array: messages) else { return }
+                messages.remove(at: index)
             }
         }
     }
@@ -81,8 +82,8 @@ extension GuildView: MessageControllerDelegate {
                 print("[Accord] typing 2")
                 if !(typing.contains(msg["user_id"] as? String ?? "")) {
                     print("[Accord] typing 3")
-                    let memberData = try! JSONSerialization.data(withJSONObject: msg, options: [])
-                    let memberDecodable = try! JSONDecoder().decode(TypingEvent.self, from: memberData)
+                    guard let memberData = try? JSONSerialization.data(withJSONObject: msg, options: []) else { return }
+                    guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: memberData) else { return }
                     guard let nick = memberDecodable.member?.nick else {
                         print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
                         typing.append(memberDecodable.member?.user.username ?? "")
@@ -108,7 +109,7 @@ extension GuildView: MessageControllerDelegate {
             guard let users = chunk.d?.members else { return }
             ChannelMembers.shared.channelMembers[self.channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
             for person in users {
-                WebSocketHandler.shared.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
+                wss.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
                 let nickname = person?.nick ?? person?.user.username ?? ""
                 nicks[(person?.user.id ?? "")] = nickname
                 var rolesTemp: [String] = []

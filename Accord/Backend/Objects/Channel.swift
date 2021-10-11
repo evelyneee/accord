@@ -9,7 +9,7 @@ import Foundation
 
 final class Channel: Decodable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.id == rhs.id
+        lhs.hashValue == rhs.hashValue
     }
 
     var id: String
@@ -46,7 +46,7 @@ final class Channel: Decodable, Identifiable, Hashable {
 
     var read_state: ReadStateEntry?
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(id.appending(String(describing: read_state?.mention_count ?? 0)))
     }
 }
 
