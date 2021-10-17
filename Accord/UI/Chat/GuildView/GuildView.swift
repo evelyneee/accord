@@ -226,6 +226,7 @@ struct GuildView: View, Equatable {
                                         Image(systemName: "arrowshape.turn.up.backward.fill")
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
+                                    /*
                                     Button(action: { [weak message] in
                                         editing = message?.id
                                         chatTextFieldContents = ""
@@ -233,6 +234,8 @@ struct GuildView: View, Equatable {
                                         Image(systemName: "pencil")
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
+                                     
+                                     */
                                     Button(action: { [weak message] in
                                         message!.delete()
                                     }) {
@@ -262,10 +265,6 @@ struct GuildView: View, Equatable {
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1, y: 1, anchor: .center)
                 blurredTextField
-            }
-            .toolbar {
-                Text(channelName)
-                    .fontWeight(.bold)
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Dismiss"))) { obj in
                 userPoppedUp = nil

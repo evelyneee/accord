@@ -31,7 +31,6 @@
 		A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85C02B7268158D300A40114 /* FancyTextView.swift */; };
 		A85D3FDE2677A681002327AD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85D3FDD2677A681002327AD /* Images.swift */; };
 		A864BE612686700300B244BE /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE5D2686700300B244BE /* MainView.swift */; };
-		A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A864BE632686709A00B244BE /* NitrolessStructures.swift */; };
 		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
 		A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsView.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
@@ -59,6 +58,12 @@
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
+		A8ECC4C3271C88E400382E53 /* IncrementNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */; };
+		A8ECC4C5271C893C00382E53 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */; };
+		A8ECC4C7271C898300382E53 /* NetworkingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */; };
+		A8ECC4C9271C8A0C00382E53 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */; };
+		A8ECC4CB271C8A9A00382E53 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */; };
+		A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */; };
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
 		A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */; };
 /* End PBXBuildFile section */
@@ -104,10 +109,13 @@
 		A82A062126D981B4007B9B27 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
 		A82A062326D98259007B9B27 /* ReadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadState.swift; sourceTree = "<group>"; };
 		A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Misc.swift"; sourceTree = "<group>"; };
+		A83B2119271C4EAF0033629A /* Accord_UIKitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accord_UIKitApp.swift; sourceTree = "<group>"; };
+		A83B211B271C4EAF0033629A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A83B211D271C4EB00033629A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A83B2120271C4EB00033629A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/UI/Chat/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		A864BE632686709A00B244BE /* NitrolessStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitrolessStructures.swift; sourceTree = "<group>"; };
 		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
 		A869085E269F2A0A00F13CAD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -115,7 +123,7 @@
 		A88CD70B26E05900007D979B /* postinst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = postinst; sourceTree = "<group>"; };
 		A88CD70E26E065F3007D979B /* MentionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionProtocol.swift; path = Accord/Backend/Networking/MentionProtocol.swift; sourceTree = SOURCE_ROOT; };
 		A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Mentions.swift"; sourceTree = "<group>"; };
-		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Extensions.swift; sourceTree = SOURCE_ROOT; };
+		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Misc/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
 		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
 		A89845402698C3FD00B1C9DB /* GifManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifManager.swift; sourceTree = "<group>"; };
@@ -135,6 +143,12 @@
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
+		A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IncrementNumbers.swift; path = ../../../../IncrementNumbers.swift; sourceTree = "<group>"; };
+		A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageProcessing.swift; path = ../../../../ImageProcessing.swift; sourceTree = "<group>"; };
+		A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NetworkingExtensions.swift; path = ../../../../NetworkingExtensions.swift; sourceTree = "<group>"; };
+		A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "NSColor+Hex.swift"; path = "../../../../NSColor+Hex.swift"; sourceTree = "<group>"; };
+		A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserNotifications.swift; path = ../../../../UserNotifications.swift; sourceTree = "<group>"; };
+		A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NitrolessBackend.swift; sourceTree = "<group>"; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 		A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+Misc.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,6 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				32F4C959256D7D3300343BB3 /* Accord */,
+				A83B2118271C4EAF0033629A /* Accord-UIKit */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -196,7 +211,7 @@
 			children = (
 				32F4C95A256D7D3300343BB3 /* AccordApp.swift */,
 				32F4C95C256D7D3300343BB3 /* ContentView.swift */,
-				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				A8ECC4C1271C88CD00382E53 /* Misc */,
 				32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */,
 				A864BE5926866FDF00B244BE /* Nitroless */,
 				32AA719225EAEEF700550BA5 /* Backend */,
@@ -303,21 +318,45 @@
 			path = GuildView;
 			sourceTree = "<group>";
 		};
+		A83B2118271C4EAF0033629A /* Accord-UIKit */ = {
+			isa = PBXGroup;
+			children = (
+				A83B2119271C4EAF0033629A /* Accord_UIKitApp.swift */,
+				A83B211B271C4EAF0033629A /* ContentView.swift */,
+				A83B211D271C4EB00033629A /* Assets.xcassets */,
+				A83B211F271C4EB00033629A /* Preview Content */,
+			);
+			path = "Accord-UIKit";
+			sourceTree = "<group>";
+		};
+		A83B211F271C4EB00033629A /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				A83B2120271C4EB00033629A /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		A864BE5926866FDF00B244BE /* Nitroless */ = {
 			isa = PBXGroup;
 			children = (
 				A864BE5D2686700300B244BE /* MainView.swift */,
-				A864BE622686708700B244BE /* NitrolessBackend */,
+				A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */,
 			);
 			path = Nitroless;
 			sourceTree = "<group>";
 		};
-		A864BE622686708700B244BE /* NitrolessBackend */ = {
+		A8ECC4C1271C88CD00382E53 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
-				A864BE632686709A00B244BE /* NitrolessStructures.swift */,
+				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */,
+				A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */,
+				A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */,
+				A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */,
+				A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */,
 			);
-			path = NitrolessBackend;
+			path = Misc;
 			sourceTree = "<group>";
 		};
 		A8FA9A9B266823B4003710A4 /* UI */ = {
@@ -360,7 +399,7 @@
 		32F4C94F256D7D3300343BB3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1250;
+				LastSwiftUpdateCheck = 1300;
 				LastUpgradeCheck = 1300;
 				TargetAttributes = {
 					32F4C956256D7D3300343BB3 = {
@@ -442,8 +481,11 @@
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
+				A8ECC4C5271C893C00382E53 /* ImageProcessing.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
+				A8ECC4CB271C8A9A00382E53 /* UserNotifications.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
+				A8ECC4C9271C8A0C00382E53 /* NSColor+Hex.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
@@ -463,18 +505,20 @@
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
-				A864BE642686709A00B244BE /* NitrolessStructures.swift in Sources */,
 				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
+				A8ECC4C7271C898300382E53 /* NetworkingExtensions.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* GuildView+TextField.swift in Sources */,
+				A8ECC4C3271C88E400382E53 /* IncrementNumbers.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
+				A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 			);

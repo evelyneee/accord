@@ -61,7 +61,6 @@ struct AccordApp: App {
                 })
 
         }
-        .windowToolbarStyle(UnifiedCompactWindowToolbarStyle())
     }
 }
 

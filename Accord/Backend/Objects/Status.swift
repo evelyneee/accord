@@ -9,7 +9,7 @@ import Foundation
 
 class Status: Decodable {
     var text: String?
-    var expires_at: Int?
+    // var expires_at: String?
     var emoji_name: String?
     var emoji_id: String?
 }

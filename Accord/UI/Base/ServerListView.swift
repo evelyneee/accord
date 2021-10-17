@@ -285,21 +285,6 @@ struct ServerListView: View {
                 }
             })
         }
-        .toolbar {
-            if guilds != [] && selectedServer ?? 1000 <= guilds.count {
-                HStack {
-                    Text(guilds[selectedServer ?? 0].name)
-                        .fontWeight(.semibold)
-                    Image(nsImage: guildIcons[guilds[selectedServer ?? 0].id] ?? NSImage()).resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
-                        .cornerRadius(23.5)
-                }
-            } else if selectedServer == 999 {
-                Text("Direct Messages")
-                    .fontWeight(.semibold)
-            }
-        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             self.guilds = full?.guilds ?? []
             imageQueue.async {

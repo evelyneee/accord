@@ -366,23 +366,21 @@ final class Networking<T: Decodable> {
             }
         }).resume()
     }
-    func image(url: URL?, completion: @escaping imgBlock) {
+    func image(url: URL?, to size: CGSize? = nil, completion: @escaping imgBlock) {
         let request = URLRequest(url: url!)
-        
         if let cachedImage = cache.cachedResponse(for: request) {
-            return completion(NSImage(data: cachedImage.data))
+            return completion(NSImage(data: cachedImage.data) ?? NSImage())
         }
-        
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-            if let data = data {
-                guard error == nil else {
-                    print(error?.localizedDescription ?? "")
-                    return completion(nil)
-                }
-                let image = NSImage(data: data)?.downsample(withSize: NSSize(width: 400, height: 400))
-                cache.storeCachedResponse(CachedURLResponse(response: response!, data: image?.tiffRepresentation ?? Data()), for: request)
-                return completion(image)
+            guard error == nil,
+              let data = data,
+                let imageData = NSImage(data: data)?.downsample(to: size ?? CGSize(width: 600, height: 600)),
+                    let image = NSImage(data: imageData) else {
+                      print(error?.localizedDescription ?? "")
+                      return completion(nil)
             }
+            cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
+            return completion(image)
         }).resume()
     }
 }

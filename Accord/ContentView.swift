@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 
+// Discord WebSocket
 var wss: WebSocket!
 
 struct ContentView: View {
@@ -28,14 +29,6 @@ struct ContentView: View {
 
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("logged_in"))) { obj in
-//            WebSocketHandler.connect(opcode: 2) { success, array in
-//                 if let structure = array {
-//                     socketOut = structure
-//                                          DispatchQueue.main.async {
-//                         NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
-//                     }
-//                 }
-//            }
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {
@@ -57,7 +50,7 @@ struct ContentView: View {
                             socketOut = d
                             AccordCoreVars.shared.user = socketOut?.user
                             user_id = AccordCoreVars.shared.user?.id ?? ""
-                            NetworkHandling.shared.requestData(url: "https://cdn.discordapp.com/avatars/\(AccordCoreVars.shared.user?.id ?? "")/\(AccordCoreVars.shared.user?.avatar ?? "").png?size=256", token: AccordCoreVars.shared.token, json: false, type: .GET, bodyObject: [:]) { success, data in if success { avatar = data ?? Data() }}
+                            Networking<AnyDecodable>().image(url: URL(string: "https://cdn.discordapp.com/avatars/\(AccordCoreVars.shared.user?.id ?? "")/\(AccordCoreVars.shared.user?.avatar ?? "").png?size=128")) { image in if let image = image { avatar = image.tiffRepresentation ?? Data() } }
                             username = AccordCoreVars.shared.user?.username ?? ""
                             discriminator = AccordCoreVars.shared.user?.discriminator ?? ""
                             DispatchQueue.main.async {

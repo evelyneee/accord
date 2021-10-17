@@ -51,23 +51,44 @@ struct NitrolessView: View, Equatable {
     @Environment(\.openURL) var openURL
     @State var recentsenabled = true
     @State var allEmotes: [String:String] = [:]
+    @State var search: String = ""
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading) {
-                    LazyVGrid(columns: columns) {
-                        ForEach(Array(allEmotes.keys), id: \.self) { key in
-                            Button(action: {
-                                chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
-                            }) {
-                                VStack {
-                                    HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
-                                        .frame(width: 20, height: 20)
+                    TextField("Search for emotes", text: $search)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    if search != "" {
+                        LazyVGrid(columns: columns) {
+                            ForEach(Array(allEmotes.keys.filter { $0.contains(search) }), id: \.self) { key in
+                                Button(action: {
+                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
+                                }) {
+                                    VStack {
+                                        HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
+                                            .frame(width: 20, height: 20)
+                                    }
+                                    .frame(width: 30, height: 30)
                                 }
-                                .frame(width: 30, height: 30)
+                                .buttonStyle(BorderlessButtonStyle())
                             }
-                            .buttonStyle(BorderlessButtonStyle())
                         }
+                    } else {
+                        LazyVGrid(columns: columns) {
+                            ForEach(Array(allEmotes.keys), id: \.self) { key in
+                                Button(action: {
+                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
+                                }) {
+                                    VStack {
+                                        HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
+                                            .frame(width: 20, height: 20)
+                                    }
+                                    .frame(width: 30, height: 30)
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                            }
+                        }
+
                     }
                 }
             }
@@ -75,12 +96,10 @@ struct NitrolessView: View, Equatable {
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            NetworkHandling.shared.requestData(url: "https://assets.ebel.gay/nitrolessrepo/index.json", token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
-                if let data = data {
-                    guard let emotes = try? JSONDecoder().decode(Repo.self, from: data).emotes else { return }
-                    for emote in emotes {
-                        allEmotes[emote.name] = emote.type
-                    }
+            Networking<Repo>().fetch(url: URL(string: "https://assets.ebel.gay/nitrolessrepo/index.json")) { repo in
+                guard let repo = repo else { return }
+                for emote in repo.emotes {
+                    allEmotes[emote.name] = emote.type
                 }
             }
         }

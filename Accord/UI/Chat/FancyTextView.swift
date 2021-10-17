@@ -22,8 +22,6 @@ final class GifServer {
 
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
-
-
 struct FancyTextView: View {
     @Binding var text: String
     @State var textElement: Text? = nil
@@ -49,17 +47,23 @@ struct FancyTextView: View {
                     }
                     .onAppear {
                         textQueue.async {
-                            let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:])
-                            DispatchQueue.main.async {
-                                textElement = text
+                            AccordMarkdown.shared.concatenateAndPrepare(text: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { text in
+                                if let text = text {
+                                    DispatchQueue.main.async {
+                                        textElement = text
+                                    }
+                                }
                             }
                         }
                     }
                     .onChange(of: text) { newValue in
                         textQueue.async {
-                            let text = TextStuff.shared.getTextArray(splitText: text.components(separatedBy: " "), members: ChannelMembers.shared.channelMembers[channelID] ?? [:])
-                            DispatchQueue.main.async {
-                                textElement = text
+                            AccordMarkdown.shared.concatenateAndPrepare(text: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { text in
+                                if let text = text {
+                                    DispatchQueue.main.async {
+                                        textElement = text
+                                    }
+                                }
                             }
                         }
                     }
@@ -72,241 +76,6 @@ struct FancyTextView: View {
         })
     }
 }
-
-final class TextStuff {
-    static var shared = TextStuff()
-    public func getTextArray(splitText: [String], members: [String:String] = [:]) -> Text {
-        var textArray: [Text] = []
-        let config = URLSessionConfiguration.default
-        config.urlCache = cache
-        if proxyEnabled {
-            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            config.connectionProxyDictionary = [AnyHashable: Any]()
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-            if let ip = proxyIP {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-            }
-            if let port = proxyPort {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-            }
-        }
-        for text in splitText {
-            if text.contains("spotify") {
-            }
-            if (text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">" {
-                if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png") {
-                    let session = URLSession(configuration: config)
-                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        if splitText.count == 1 {
-                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                        } else {
-                            textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                        }
-                    } else {
-                        let sem = DispatchSemaphore(value: 0)
-                        session.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                if splitText.count <= 3 {
-                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                                    sem.signal()
-                                } else {
-                                    textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                                    sem.signal()
-                                }
-                            }
-                        }).resume()
-                        sem.wait()
-                    }
-                }
-            } else if (text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">" {
-                guard let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).gif") else { break }
-                if splitText.count == 1 {
-                    let session = URLSession(configuration: config)
-                    let cache = URLCache.shared
-                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        if let amyGif = Gif(data: data) {
-                            DispatchQueue.main.async {
-                                let animatedImages: [NSImage] = amyGif.animatedImages!
-                                print(animatedImages)
-                                let duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
-                                _ = GifServer()
-                                textArray.append(Text("\(Image(nsImage: animatedImages[GifServer.shared?.index ?? 0 % (animatedImages.count)] ).resizable())"))
-                                print(Double(duration / Double(animatedImages.count )))
-                            }
-                        }
-                    } else {
-                        session.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                if let amyGif = Gif(data: data) {
-                                    DispatchQueue.main.async {
-                                        let animatedImages: [NSImage] = amyGif.animatedImages!
-                                        print(animatedImages)
-                                        let duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
-                                        let gifServer = GifServer.init()
-                                        textArray.append(Text("\(Image(nsImage: animatedImages[gifServer.index % (animatedImages.count)] ).resizable())"))
-                                        print(Double(duration / Double(animatedImages.count )))
-                                    }
-                                }
-                            }
-                        }).resume()
-                    }
-                    
-                } else {
-
-                    let session = URLSession(configuration: config)
-                    let request = URLRequest(url: emoteURL, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    let sem = DispatchSemaphore(value: 0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                    } else {
-                        session.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 15, height: 15)) ?? NSImage())))"))
-                                sem.signal()
-                            }
-                        }).resume()
-                        sem.wait()
-                    }
-                }
-
-            } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
-                if let url = URL(string: text) {
-                    let session = URLSession(configuration: config)
-                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                    } else {
-                        let sem = DispatchSemaphore(value: 0)
-                        session.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                                sem.signal()
-                            }
-                        }).resume()
-                        sem.wait()
-                    }
-                }
-            } else if (text.prefix(3) == "<@!" || text.prefix(4) == #"\<@!"# || text.prefix(2) == "<@") && text.suffix(1) == ">" && members != [:] {
-                textArray.append(Text("@\(members[String(text.dropLast().suffix(18))] ?? "Unknown User")").underline().foregroundColor(Color.blue))
-                textArray.append(Text(" "))
-            } else if text.prefix(31) == "https://open.spotify.com/track/" {
-                let sem = DispatchSemaphore(value: 0)
-                SongLink.shared.getSong(song: text) { song in
-                    if let song = song {
-                        if #available(macOS 12, *) {
-                            print("song")
-                            textArray.append(Text(try! AttributedString(markdown: song.linksByPlatform.appleMusic.url)))
-                        } else {
-                            textArray.append(Text(song.linksByPlatform.appleMusic.url))
-                        }
-                        sem.signal()
-                    }
-                }
-                sem.wait()
-            } else {
-                if #available(macOS 12.0, *) {
-                    textArray.append(Text(try! AttributedString(markdown: "\(text)")))
-                    textArray.append(Text(" "))
-                } else {
-                    textArray.append(Text("\(text) "))
-                }
-            }
-        }
-        return textArray.reduce(Text(""), +)
-    }
-
-
-    public func matches(for regex: String, in text: String) -> [String] {
-        do {
-            let regex = try NSRegularExpression(pattern: regex)
-            let results = regex.matches(in: text,
-                                        range: NSRange(text.startIndex..., in: text))
-            return results.map {
-                String(text[Range($0.range, in: text)!])
-            }
-        } catch let error {
-            print("[Accord] invalid regex \(error.localizedDescription)")
-            return []
-        }
-    }
-}
- /*
-  else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
-      if let url = URL(string: text) {
-          let config = URLSessionConfiguration.default
-          config.urlCache = cache
-          if proxyEnabled {
-              config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-              config.connectionProxyDictionary = [AnyHashable: Any]()
-              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-              if let ip = proxyIP {
-                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-              }
-              if let port = proxyPort {
-                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                  config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-              }
-          }
-          let session = URLSession(configuration: config)
-          let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-          if let data = cache.cachedResponse(for: request)?.data {
-              textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-          } else {
-              session.dataTask(with: request, completionHandler: { (data, response, error) in
-                  if let data = data, let response = response {
-                  let cachedData = CachedURLResponse(response: response, data: data)
-                      cache.storeCachedResponse(cachedData, for: request)
-                      textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-                  }
-              }).resume()
-          }
-      }
-  } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
-  if let url = URL(string: text) {
-      let config = URLSessionConfiguration.default
-      config.urlCache = cache
-      if proxyEnabled {
-          config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-          config.connectionProxyDictionary = [AnyHashable: Any]()
-          config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-          if let ip = proxyIP {
-              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-          }
-          if let port = proxyPort {
-              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-              config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-          }
-      }
-      let session = URLSession(configuration: config)
-      let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
-      if let data = cache.cachedResponse(for: request)?.data {
-          textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-      } else {
-          session.dataTask(with: request, completionHandler: { (data, response, error) in
-              if let data = data, let response = response {
-              let cachedData = CachedURLResponse(response: response, data: data)
-                  cache.storeCachedResponse(cachedData, for: request)
-                  textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
-              }
-          }).resume()
-      }
-  }
-}
-  */
 
 extension String {
     public func marked() -> String {
@@ -347,3 +116,72 @@ extension String {
     }
 
 }
+
+final class AccordMarkdown {
+    static var shared = AccordMarkdown()
+    typealias completionBlock = ((_ value: Optional<Text>) -> Void)
+    final func concatenateAndPrepare(text: String, members: [String:String] = [:], completion: @escaping completionBlock) {
+        let split = text.components(separatedBy: " ")
+        var splitCount = split.count
+        var textArray = [Text]()  {
+            didSet {
+                if textArray.count == splitCount {
+                    return completion(textArray.reduce(Text(""), +))
+                }
+            }
+        }
+        let config = URLSessionConfiguration.default.setProxy()
+        config.urlCache = cache
+        let session = URLSession(configuration: config)
+        for text in split {
+            // I'm sorry.
+            if ((text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">") || ((text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">") {
+                if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png?size=40") {
+                    Networking<AnyDecodable>().image(url: emoteURL, to: CGSize(width: 40, height: 40)) { image in
+                        if let image = image {
+                            textArray.append(Text("\(Image(nsImage: image))"))
+                        }
+                    }
+                }
+            } else if text.prefix(5) == "https" && text.suffix(4) == ".gif" {
+                if let url = URL(string: text) {
+                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 3.0)
+                    if let data = cache.cachedResponse(for: request)?.data {
+                        textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                    } else {
+                        session.dataTask(with: request, completionHandler: { (data, response, error) in
+                            if let data = data, let response = response {
+                            let cachedData = CachedURLResponse(response: response, data: data)
+                                cache.storeCachedResponse(cachedData, for: request)
+                                textArray.append(Text("\(Image(nsImage: (NSImage(data: data)?.downsample(withSize: NSSize(width: 40, height: 40)) ?? NSImage())))"))
+                            }
+                        }).resume()
+                    }
+                }
+            } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
+                if let url = URL(string: text) {
+                    Networking<AnyDecodable>().image(url: url, to: CGSize(width: 40, height: 40)) { image in
+                        if let image = image {
+                            textArray.append(Text("\(Image(nsImage: image))"))
+                        }
+                    }
+                }
+            } else if text.prefix(31) == "https://open.spotify.com/track/" {
+                SongLink.shared.getSong(song: text) { song in
+                    if let song = song {
+                        textArray.append(Text(song.linksByPlatform.appleMusic.url))
+                    }
+                }
+            } else {
+                if #available(macOS 12.0, *) {
+                    textArray.append(Text(try! AttributedString(markdown: text)))
+                    textArray.append(Text(" "))
+                    splitCount += 1
+                } else {
+                    textArray.append(Text("\(text) "))
+                }
+            }
+        }
+    }
+}
+
