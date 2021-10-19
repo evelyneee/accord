@@ -19,7 +19,6 @@ struct ContentView: View {
     @State var modalIsPresented: Bool = false
     var body: some View {
         ServerListView(full: $socketOut)
-
         .sheet(isPresented: $modalIsPresented) {
             LoginView()
                 .onDisappear(perform: {
