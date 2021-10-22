@@ -14,7 +14,6 @@ var wss: WebSocket!
 struct ContentView: View {
     @State public var selection: Int?
     @State var socketOut: GatewayD?
-    @State var channels: [Any] = []
     @State var status: statusIndicators?
     @State var modalIsPresented: Bool = false
     var body: some View {
@@ -26,8 +25,6 @@ struct ContentView: View {
                 })
                 .frame(width: 450, height: 350)
 
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("logged_in"))) { obj in
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {

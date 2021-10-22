@@ -338,7 +338,7 @@ final class Networking<T: Decodable> {
                 request.addValue(contentType, forHTTPHeaderField: "Content-Type")
             }
             if let token = headers.token {
-                request.addValue("\(token)", forHTTPHeaderField: "Authorization")
+                request.addValue(token, forHTTPHeaderField: "Authorization")
             }
             if let bodyObject = headers.bodyObject {
                 let bodyString = bodyObject.queryParameters
@@ -348,7 +348,7 @@ final class Networking<T: Decodable> {
                 request.addValue("discord.com", forHTTPHeaderField: ":authority")
                 request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
                 request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
-                request.addValue("user-agent", forHTTPHeaderField: headers.userAgent ?? "WebKit")
+                request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
             }
             if let referer = headers.referer {
                 request.addValue(referer, forHTTPHeaderField: "referer")
@@ -359,6 +359,9 @@ final class Networking<T: Decodable> {
             if let data = data {
                 guard error == nil else {
                     print(error?.localizedDescription ?? "")
+                    return completion(nil)
+                }
+                if T.self == AnyDecodable.self {
                     return completion(nil)
                 }
                 guard let value = try? JSONDecoder().decode(T.self, from: data) else { return completion(nil) }

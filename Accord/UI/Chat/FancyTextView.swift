@@ -172,6 +172,13 @@ final class AccordMarkdown {
                         textArray.append(Text(song.linksByPlatform.appleMusic.url))
                     }
                 }
+            } else if text.hasPrefix("<@!") && text.hasSuffix(">") {
+                let id = String(text.dropLast().dropFirst(3))
+                if #available(macOS 12.0, *) {
+                    textArray.append(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(nsColor: .linkColor)).underline())
+                } else {
+                    textArray.append(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color.blue).underline())
+                }
             } else {
                 if #available(macOS 12.0, *) {
                     textArray.append(Text(try! AttributedString(markdown: text)))

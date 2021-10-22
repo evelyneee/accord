@@ -109,10 +109,6 @@
 		A82A062126D981B4007B9B27 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
 		A82A062326D98259007B9B27 /* ReadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadState.swift; sourceTree = "<group>"; };
 		A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Misc.swift"; sourceTree = "<group>"; };
-		A83B2119271C4EAF0033629A /* Accord_UIKitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accord_UIKitApp.swift; sourceTree = "<group>"; };
-		A83B211B271C4EAF0033629A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A83B211D271C4EB00033629A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A83B2120271C4EB00033629A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A85C02B7268158D300A40114 /* FancyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FancyTextView.swift; path = Accord/UI/Chat/FancyTextView.swift; sourceTree = SOURCE_ROOT; };
 		A85D3FDD2677A681002327AD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		A864BE5D2686700300B244BE /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -190,7 +186,6 @@
 			isa = PBXGroup;
 			children = (
 				32F4C959256D7D3300343BB3 /* Accord */,
-				A83B2118271C4EAF0033629A /* Accord-UIKit */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -316,25 +311,6 @@
 				A82A05F726D3F2D2007B9B27 /* GuildView+MsgSend.swift */,
 			);
 			path = GuildView;
-			sourceTree = "<group>";
-		};
-		A83B2118271C4EAF0033629A /* Accord-UIKit */ = {
-			isa = PBXGroup;
-			children = (
-				A83B2119271C4EAF0033629A /* Accord_UIKitApp.swift */,
-				A83B211B271C4EAF0033629A /* ContentView.swift */,
-				A83B211D271C4EB00033629A /* Assets.xcassets */,
-				A83B211F271C4EB00033629A /* Preview Content */,
-			);
-			path = "Accord-UIKit";
-			sourceTree = "<group>";
-		};
-		A83B211F271C4EB00033629A /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				A83B2120271C4EB00033629A /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		A864BE5926866FDF00B244BE /* Nitroless */ = {

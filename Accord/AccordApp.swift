@@ -9,9 +9,6 @@ import Foundation
 import SwiftUI
 import AppKit
 
-/// Use this variable to add a token to override keychain.
-let tokenOverride = ""
-
 public var logs: [String] = []
 public var socketEvents: [[String:String]] = [] {
     didSet {
@@ -54,18 +51,10 @@ struct AccordApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(darkMode ? .dark : nil)
-                .onAppear(perform: {
-                    if tokenOverride != "" {
-                        _ = AccordCoreVars.init(tokenOverride)
-                    }
-                })
-
         }
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-//    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-//        return true
-//    }
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }
