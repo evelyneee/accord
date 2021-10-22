@@ -11,7 +11,7 @@ extension GuildView {
     // MARK: - Second stage of channel loading
     func performSecondStageLoad() {
         if guildID != "@me" {
-            var allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
+            var allUserIDs = Array(NSOrderedSet(array: viewModel.messages.map { $0.author?.id ?? "" })) as! Array<String>
             getCachedMemberChunk()
             for (index, item) in allUserIDs.enumerated() {
                 if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") {
@@ -24,7 +24,7 @@ extension GuildView {
                 wss.getMembers(ids: allUserIDs, guild: guildID)
             }
         }
-        for message in messages {
+        for message in viewModel.messages {
             if !(message.isSameAuthor()) {
                 if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80") {
                     let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
@@ -43,7 +43,7 @@ extension GuildView {
 
             }
         }
-        let replyArray = Array(NSOrderedSet(array: messages.compactMap { $0.referenced_message?.author }))
+        let replyArray = Array(NSOrderedSet(array: viewModel.messages.compactMap { $0.referenced_message?.author }))
         for user in replyArray as! [User] {
             if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
                 let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)

@@ -23,13 +23,16 @@ struct GuildView: View, Equatable {
 
     // MARK: - Equatable protocol
     static func == (lhs: GuildView, rhs: GuildView) -> Bool {
-        return lhs.messages == rhs.messages
+        return lhs.viewModel.messages == rhs.viewModel.messages
     }
 
     // MARK: - State-driven vars
-    @Binding var guildID: String
-    @Binding var channelID: String
-    @Binding var channelName: String
+    
+    @ObservedObject var viewModel: GuildViewViewModel
+    
+    var guildID: String
+    var channelID: String
+    var channelName: String
     @State var chatTextFieldContents: String = ""
 
     // The actual message array.
@@ -63,9 +66,16 @@ struct GuildView: View, Equatable {
     // Editing
     @State var editing: String? = nil
 
+    init(guildID: String, channelID: String, channelName: String? = nil) {
+        self.guildID = guildID
+        self.channelID = channelID
+        self.channelName = channelName ?? "Unknown channel"
+        self.viewModel = GuildViewViewModel(channelID: channelID, guildID: guildID)
+    }
+    
     // MARK: - View body begins here
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack(alignment: .topTrailing) { [weak viewModel] in
             ZStack(alignment: .bottom) {
                 Spacer()
                 List {
@@ -76,8 +86,15 @@ struct GuildView: View, Equatable {
                             sendingView
                         }
                         // MARK: Message loop
-                        ForEach(Array(zip(messages.indices, messages)), id: \.1.id) { offset, message in
+                        ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
+                            
                             LazyVStack(alignment: .leading) {
+                                if offset == 0 {
+                                    Text("")
+                                        .onAppear(perform: {
+                                            performSecondStageLoad()
+                                        })
+                                }
                                 // MARK: - Reply
                                 if let reply = message.referenced_message {
                                     HStack {
@@ -122,11 +139,9 @@ struct GuildView: View, Equatable {
                                                     userPoppedUp = offset
                                                 }
                                             }) { [weak message] in
-                                                Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
-                                                    .scaledToFit()
+                                                Attachment(pfpURL(message?.author?.id, message?.author?.avatar))
                                                     .frame(width: 33, height: 33)
                                                     .clipShape(Circle())
-
                                             }
                                             .popover(isPresented: Binding.constant(userPoppedUp == offset), content: {
                                                  PopoverProfileView(user: Binding.constant(message.author))
@@ -136,40 +151,40 @@ struct GuildView: View, Equatable {
                                     }
                                     if let author = message.author?.username {
                                         VStack(alignment: .leading) {
-                                            if offset != (messages.count - 1) {
+                                            if offset != (viewModel!.messages.count - 1) {
                                                 if message.isSameAuthor() {
-                                                    FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                         .padding(.leading, 41)
                                                 } else if roles.isEmpty {
                                                     Text(nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                 } else {
                                                     if let roleColor = roleColors[(roles[message.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
-                                                        FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                        FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                     } else {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .fontWeight(.semibold)
-                                                        FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                        FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                     }
                                                 }
                                             } else {
                                                 if roles.isEmpty {
                                                     Text(nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                 } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""]?.0 {
                                                     Text(nicks[message.author?.id ?? ""] ?? author)
                                                         .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                 } else {
                                                     Text(nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $messages[offset].content, channelID: $channelID)
+                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
                                                 }
                                             }
 
@@ -246,7 +261,7 @@ struct GuildView: View, Equatable {
                                 // MARK: - Attachments
                                 if message.attachments.isEmpty == false {
                                     HStack {
-                                        AttachmentView(media: $messages[offset].attachments)
+                                        AttachmentView(media: $viewModel.messages[offset].attachments)
                                         Spacer()
                                     }
                                     .frame(maxWidth: 400, maxHeight: 300)
@@ -257,7 +272,7 @@ struct GuildView: View, Equatable {
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
                         }
-                        if messages.isEmpty == false {
+                        if (viewModel?.messages.isEmpty ?? false) == false {
                             headerView
                         }
                     }
@@ -266,61 +281,17 @@ struct GuildView: View, Equatable {
                 .scaleEffect(x: -1, y: 1, anchor: .center)
                 blurredTextField
             }
+
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Dismiss"))) { obj in
                 userPoppedUp = nil
             }
             .onAppear {
                 // MARK: - Making WebSocket messages receivable now, begin load
                 MessageController.shared.delegate = self
-                MentionSender.shared.removeMentions(server: self.guildID)
-                let GuildViewConcurrentQueue = DispatchQueue(label: "GuildViewQueue", attributes: .concurrent)
-                GuildViewConcurrentQueue.async {
-                    Networking<[Message]>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
-                        userAgent: discordUserAgent,
-                        token: AccordCoreVars.shared.token,
-                        type: .GET,
-                        discordHeaders: true,
-                        referer: "\(rootURL)/channels/\(guildID)/\(channelID)"
-                    )) { messages in
-                        if let messages = messages {
-                            // MARK: - Channel setup after messages loaded.
-
-                            for (index, message) in messages.enumerated() {
-                                if message != messages.last {
-                                    message.lastMessage = messages[index + 1]
-                                }
-                            }
-                            self.messages = messages
-
-                            NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack", referer: "\(rootURL)/channels/\(guildID)/\(channelID)", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
-                            // MARK: - Loading the rest of the channel + the roles
-                            performSecondStageLoad()
-                        }
-
-                    }
-//                    NetworkHandling.shared.requestData(url: "\(rootURL)/channels/\(channelID)/messages?limit=50", referer: "\(rootURL)/channels/\(guildID)/\(channelID)", token: AccordCoreVars.shared.token, json: true, type: .GET, bodyObject: [:]) { success, rawData in
-//                        if success == true {
-//                            // MARK: - Channel setup after messages loaded.
-//                            let decoder = JSONDecoder()
-//                            // decoder.dateDecodingStrategy = JSONDecoder.DateDecodingStrategy.iso8601
-//                            guard let decodedData = try? decoder.decode([Message].self, from: rawData!) else {
-//                                MentionSender.shared.deselect()
-//                                return
-//                            }
-//                            for (index, message) in decodedData.enumerated() {
-//                                if message != decodedData.last {
-//                                    message.lastMessage = decodedData[index + 1]
-//                                }
-//                            }
-//                            messages = decodedData
-//
-//                            NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack", referer: "\(rootURL)/channels/\(guildID)/\(channelID)", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
-//                            // MARK: - Loading the rest of the channel + the roles
-//                            performSecondStageLoad()
-//                        }
-//                    }
-                }
             }
+            .onReceive(viewModel!.$messages, perform: { _ in
+                performSecondStageLoad()
+            })
             // MARK: - WebSocket error display
             if let error = error {
                 VStack(alignment: .leading) {
@@ -366,7 +337,7 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false)
-    windowRef.contentView = NSHostingView(rootView: GuildView(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), channelName: Binding.constant(channelName)))
+    windowRef.contentView = NSHostingView(rootView: GuildView(guildID: guildID, channelID: channelID, channelName: channelName))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
     windowRef.title = "\(channelName) - Accord"

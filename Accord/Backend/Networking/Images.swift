@@ -13,6 +13,8 @@ struct AnyDecodable: Decodable {
     let value: Bool
 }
 
+
+
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {

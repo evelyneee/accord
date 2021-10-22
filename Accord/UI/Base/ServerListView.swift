@@ -7,9 +7,18 @@
 
 import SwiftUI
 
-var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
 
 public var roleColors: [String:(Int, Int)] = [:]
+
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
 
 final class AllEmotes {
     static var shared = AllEmotes()
@@ -140,72 +149,32 @@ struct ServerListView: View {
                         List {
                             Text("Messages")
                                 .fontWeight(.bold)
-                                .font(.title2) 
+                                .font(.title2)
                             Divider()
                             ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: GuildView(guildID: Binding.constant("@me"), channelID: Binding.constant(privateChannels[index].id), channelName: Binding.constant(((privateChannels[index].recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )).equatable(), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: privateChannels[index].id ?? "", channelName: privateChannels[index].name ?? "").equatable()), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
                                     HStack {
-                                        if privateChannels[index].recipients?.count != 1 {
-                                            StockAttachment("https://cdn.discordapp.com/channel-icons/\(privateChannels[index].id)/\(privateChannels[index].icon ?? "").png?size=80").equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 25, height: 25)
-                                            Text(privateChannels[index].name ?? "")
-                                            Spacer()
-                                            if let channel = privateChannels[index] {
-                                                Button(action: { [weak channel] in
-                                                    channel?.read_state!.mention_count = 0
-                                                }) { [weak channel] in
-                                                    if let readState = channel?.read_state {
-                                                        if readState.mention_count != 0 {
-                                                            ZStack {
-                                                                Circle()
-                                                                    .foregroundColor(Color.red)
-                                                                    .frame(width: 15, height: 15)
-                                                                Text(String(describing: readState.mention_count))
-                                                                    .foregroundColor(Color.white)
-                                                                    .fontWeight(.semibold)
-                                                                    .font(.caption)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                Button(action: { [weak channel] in
-                                                    showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: ((channel?.recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )
-                                                }) {
-                                                    Image(systemName: "arrow.up.right.circle")
-                                                }
-                                            }
+                                        Image(systemName: "number") // normal channel
+                                        Text(privateChannels[index].name ?? "")
+                                        Spacer()
 
-                                        } else {
-                                            StockAttachment("https://cdn.discordapp.com/avatars/\(privateChannels[index].recipients![0].id)/\(privateChannels[index].recipients![0].avatar ?? "").png?size=80").equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 25, height: 25)
-                                            Text(privateChannels[index].recipients![0].username )
-                                            Spacer()
-                                            if let channel = privateChannels[index] {
-                                                Button(action: { [weak channel] in
-                                                    channel?.read_state!.mention_count = 0
-                                                }) { [weak channel] in
-                                                    if let readState = channel?.read_state {
-                                                        if readState.mention_count != 0 {
-                                                            ZStack {
-                                                                Circle()
-                                                                    .foregroundColor(Color.red)
-                                                                    .frame(width: 15, height: 15)
-                                                                Text(String(describing: readState.mention_count))
-                                                                    .foregroundColor(Color.white)
-                                                                    .fontWeight(.semibold)
-                                                                    .font(.caption)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                Button(action: { [weak channel] in
-                                                    showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: ((channel?.recipients ?? []).map { ($0.username) }).map{ "\($0)" }.joined(separator: ", ") )
-                                                }) {
-                                                    Image(systemName: "arrow.up.right.circle")
+                                        if let readState = privateChannels[index].read_state {
+                                            if readState.mention_count != 0 {
+                                                ZStack {
+                                                    Circle()
+                                                        .foregroundColor(Color.red)
+                                                        .frame(width: 15, height: 15)
+                                                    Text(String(describing: readState.mention_count))
+                                                        .foregroundColor(Color.white)
+                                                        .fontWeight(.semibold)
+                                                        .font(.caption)
                                                 }
                                             }
+                                        }
+                                        Button(action: {
+                                            showWindow(guildID: "@me", channelID: privateChannels[index].id ?? "", channelName: privateChannels[index].name ?? "")
+                                        }) {
+                                            Image(systemName: "arrow.up.right.circle")
                                         }
                                     }
                                 }
@@ -228,7 +197,7 @@ struct ServerListView: View {
                                             ForEach(channels, id: \.offset) { offset, channel in
                                                 if channel.type != .section {
                                                     if channel.parent_id ?? "no" == section.id {
-                                                        NavigationLink(destination: GuildView(guildID: Binding.constant((guilds[selectedServer ?? 0].id)), channelID: Binding.constant(channel.id), channelName: Binding.constant(channel.name ?? "")).equatable(), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
+                                                        NavigationLink(destination: NavigationLazyView(GuildView(guildID: (guilds[selectedServer ?? 0].id), channelID: channel.id, channelName: channel.name).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
                                                             HStack {
                                                                 switch channel!.type {
                                                                 case .normal:
@@ -285,6 +254,7 @@ struct ServerListView: View {
                 }
             })
         }
+
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
             self.guilds = full?.guilds ?? []
             imageQueue.async {

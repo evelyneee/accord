@@ -8,6 +8,10 @@
 import Foundation
 import AppKit
 
+func pfpURL(_ uid: String?, _ hash: String?) -> String {
+    return "https://cdn.discordapp.com/avatars/\(uid ?? "")/\(hash ?? "").png?size=80"
+}
+
 // BAD
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (exist index: Index) -> Iterator.Element? {

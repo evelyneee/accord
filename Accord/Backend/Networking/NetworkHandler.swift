@@ -315,15 +315,17 @@ final class Headers {
     var type: RequestTypes
     var discordHeaders: Bool
     var referer: String?
+    var empty: Bool = false
 }
 
+var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
 
 final class Networking<T: Decodable> {
     typealias completionBlock = ((_ value: Optional<T>) -> Void)
     typealias imgBlock = ((_ value: Optional<NSImage>) -> Void)
     func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping completionBlock) {
         guard request != nil || url != nil else {
-            fatalError("You need to provide a request method")
+            fatalError("[Networking] You need to provide a request method")
         }
         
         var request = request ?? URLRequest(url: url!)
@@ -361,7 +363,7 @@ final class Networking<T: Decodable> {
                     print(error?.localizedDescription ?? "")
                     return completion(nil)
                 }
-                if T.self == AnyDecodable.self {
+                if T.self == AnyDecodable.self || headers?.empty ?? false {
                     return completion(nil)
                 }
                 guard let value = try? JSONDecoder().decode(T.self, from: data) else { return completion(nil) }
@@ -369,6 +371,46 @@ final class Networking<T: Decodable> {
             }
         }).resume()
     }
+    func combineFetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
+        guard request != nil || url != nil else {
+            fatalError("[Networking] You need to provide a request method")
+        }
+        
+        var request = request ?? URLRequest(url: url!)
+        let config = URLSessionConfiguration.default
+        
+        // Set headers from headers object
+        if let headers = headers {
+            if let userAgent = headers.userAgent {
+                config.httpAdditionalHeaders = ["User-Agent": userAgent]
+            }
+            if let contentType = headers.contentType {
+                request.addValue(contentType, forHTTPHeaderField: "Content-Type")
+            }
+            if let token = headers.token {
+                request.addValue(token, forHTTPHeaderField: "Authorization")
+            }
+            if let bodyObject = headers.bodyObject {
+                let bodyString = bodyObject.queryParameters
+                request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            }
+            if headers.discordHeaders {
+                request.addValue("discord.com", forHTTPHeaderField: ":authority")
+                request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
+                request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+                request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
+            }
+            if let referer = headers.referer {
+                request.addValue(referer, forHTTPHeaderField: "referer")
+            }
+            request.httpMethod = headers.type.rawValue
+        }
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .map { $0.data }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+
     func image(url: URL?, to size: CGSize? = nil, completion: @escaping imgBlock) {
         let request = URLRequest(url: url!)
         if let cachedImage = cache.cachedResponse(for: request) {
