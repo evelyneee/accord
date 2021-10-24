@@ -19,6 +19,8 @@ protocol MessageControllerDelegate {
 class MessageController {
     static let shared = MessageController()
     public var delegate: MessageControllerDelegate?
+    public var delegates = [MessageControllerDelegate]()
+    
     func sendMessage(msg: Data, channelID: String?) {
         delegate?.sendMessage(msg: msg, channelID: channelID)
     }
@@ -36,5 +38,11 @@ class MessageController {
     }
     func sendWSError(msg: String) {
         delegate?.sendWSError(msg: msg)
+    }
+    
+    func runOnAllDelegates(action: () -> Void) {
+        for delegate in self.delegates {
+            
+        }
     }
 }
