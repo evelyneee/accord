@@ -175,6 +175,7 @@ final class WebSocket {
                     if let data = text.data(using: String.Encoding.utf8) {
                         let path = FileManager.default.urls(for: .cachesDirectory,
                                                             in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                        releaseModePrint(path)
                         try! data.write(to: path)
                         guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: data) else {
                             return completion(nil)

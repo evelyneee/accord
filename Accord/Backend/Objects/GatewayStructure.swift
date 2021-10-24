@@ -8,7 +8,7 @@
 import Foundation
 
 class GatewayStructure: Decodable {
-    var t: String
+    var t: String?
     var d: GatewayD
     var s: Int
     var op: Int

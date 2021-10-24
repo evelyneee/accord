@@ -29,17 +29,17 @@ struct ContentView: View {
         .onAppear {
             if (AccordCoreVars.shared.token != "") {
                 concurrentQueue.async {
-                    let path = FileManager.default.urls(for: .cachesDirectory,
-                                                        in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                    print(path)
-                    let data = try? Data(contentsOf: path)
-                    if let data = data {
-                        guard let socketDecoded = try? JSONDecoder().decode(GatewayStructure.self, from: data) else { return }
-                        socketOut = socketDecoded.d
-                        DispatchQueue.main.async {
-                            NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
-                        }
-                    }
+//                    let path = FileManager.default.urls(for: .cachesDirectory,
+//                                                        in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+//                    print(path)
+//                    let data = try? Data(contentsOf: path)
+//                    if let data = data {
+//                        guard let socketDecoded = try? JSONDecoder().decode(GatewayStructure.self, from: data) else { return }
+//                        socketOut = socketDecoded.d
+//                        DispatchQueue.main.async {
+//                            NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
+//                        }
+//                    }
                     wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
                     wss.ready() { d in
                         if let d = d {

@@ -39,10 +39,4 @@ class MessageController {
     func sendWSError(msg: String) {
         delegate?.sendWSError(msg: msg)
     }
-    
-    func runOnAllDelegates(action: () -> Void) {
-        for delegate in self.delegates {
-            
-        }
-    }
 }

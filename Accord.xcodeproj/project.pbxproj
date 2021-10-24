@@ -21,6 +21,8 @@
 		A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */; };
 		A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC292724FD35005F9950 /* NSColor+Hex.swift */; };
 		A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2A2724FD35005F9950 /* UserNotifications.swift */; };
+		A80FEC31272583B4005F9950 /* Embed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC30272583B4005F9950 /* Embed.swift */; };
+		A80FEC3327258457005F9950 /* EmbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC3227258457005F9950 /* EmbedView.swift */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F426D12411007B9B27 /* MessageProtocol.swift */; };
@@ -104,6 +106,8 @@
 		A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingExtensions.swift; sourceTree = "<group>"; };
 		A80FEC292724FD35005F9950 /* NSColor+Hex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSColor+Hex.swift"; sourceTree = "<group>"; };
 		A80FEC2A2724FD35005F9950 /* UserNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotifications.swift; sourceTree = "<group>"; };
+		A80FEC30272583B4005F9950 /* Embed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Embed.swift; sourceTree = "<group>"; };
+		A80FEC3227258457005F9950 /* EmbedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedView.swift; sourceTree = "<group>"; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A82A05F426D12411007B9B27 /* MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProtocol.swift; sourceTree = "<group>"; };
@@ -289,6 +293,7 @@
 				A8B1F29926CB169800E8FDC5 /* Message.swift */,
 				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
 				A8B1F29526CB163B00E8FDC5 /* User.swift */,
+				A80FEC30272583B4005F9950 /* Embed.swift */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -315,6 +320,7 @@
 				A82A05FE26D3F4D2007B9B27 /* GuildView+TextField.swift */,
 				A82A05F926D3F38B007B9B27 /* GuildView+MessageProtocol.swift */,
 				A82A05F726D3F2D2007B9B27 /* GuildView+MsgSend.swift */,
+				A80FEC3227258457005F9950 /* EmbedView.swift */,
 			);
 			path = GuildView;
 			sourceTree = "<group>";
@@ -468,7 +474,9 @@
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
+				A80FEC3327258457005F9950 /* EmbedView.swift in Sources */,
 				A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */,
+				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,

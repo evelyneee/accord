@@ -20,6 +20,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var content: String
     var edited_timestamps: Bool?
     var id: String
+    var embeds: [Embed]?
     var mention_everyone: Bool?
     var mentions: [User?]
     var nonce: String?

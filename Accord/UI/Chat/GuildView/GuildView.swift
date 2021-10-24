@@ -87,7 +87,6 @@ struct GuildView: View, Equatable {
 //                        }
                         // MARK: Message loop
                         ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
-                            
                             LazyVStack(alignment: .leading) {
                                 // MARK: - Reply
                                 if let reply = message.referenced_message {
@@ -227,7 +226,14 @@ struct GuildView: View, Equatable {
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                 }
+                                
+                                if (message.embeds ?? []).indices.contains(0), let embed = message.embeds?[0] {
+                                    EmbedView(embed)
+                                        .padding(.leading, (message.isSameAuthor() ? 0 : 41))
+                                }
+                                
                                 // MARK: - Attachments
+
                                 if message.attachments.isEmpty == false {
                                     HStack {
                                         AttachmentView(media: $viewModel.messages[offset].attachments)
