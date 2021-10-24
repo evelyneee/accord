@@ -49,9 +49,6 @@ struct ChatControls: View {
         body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
         request.httpBody = body
         URLSession.shared.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
-            if let data = data {
-                print(String(data: data, encoding: .utf8) as Any, "RESPONDED")
-            }
         }).resume()
     }
     
@@ -59,7 +56,12 @@ struct ChatControls: View {
         HStack {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
-                         NetworkHandling.shared.emptyRequest(url: "https://discord.com/api/v9/channels/\(channelID)/typing", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: [:])
+                    Networking<AnyDecodable>().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                        userAgent: discordUserAgent,
+                        token: AccordCoreVars.shared.token,
+                        type: .POST,
+                        discordHeaders: true
+                    )) { _ in }
                 }, onCommit: {
                     chatTextFieldContents = textFieldContents
                     var temp = textFieldContents
@@ -72,7 +74,14 @@ struct ChatControls: View {
                         }
                         if (editing != nil) {
                             print(editing ?? "")
-                            NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")", token: AccordCoreVars.shared.token, json: true, type: .PATCH, bodyObject: ["content":"\(String(temp))"])
+                            Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
+                                userAgent: discordUserAgent,
+                                token: AccordCoreVars.shared.token,
+                                bodyObject: ["content":"\(String(temp))"],
+                                type: .PATCH,
+                                discordHeaders: true,
+                                empty: true
+                            )) { _ in }
                             editing = nil
                         } else {
                             if fileUpload != nil {
@@ -81,10 +90,25 @@ struct ChatControls: View {
                                 fileUploadURL = nil
                             } else {
                                 if replyingTo != nil {
-                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: true, type: .POST, bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]])
+                                    Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                        userAgent: discordUserAgent,
+                                        token: AccordCoreVars.shared.token,
+                                        bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
+                                        type: .POST,
+                                        discordHeaders: true,
+                                        empty: true,
+                                        json: true
+                                    )) { _ in }
                                     replyingTo = nil
                                 } else {
-                                    NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channelID)/messages", token: AccordCoreVars.shared.token, json: false, type: .POST, bodyObject: ["content":"\(String(temp))"])
+                                    Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                        userAgent: discordUserAgent,
+                                        token: AccordCoreVars.shared.token,
+                                        bodyObject: ["content":"\(String(temp))"],
+                                        type: .POST,
+                                        discordHeaders: true,
+                                        empty: true
+                                    )) { _ in }
                                 }
 
                             }

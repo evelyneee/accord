@@ -30,13 +30,35 @@ final class User: Decodable, Identifiable {
     
     // MARK: - Relationships
     func addFriend(_ guild: String, _ channel: String) {
-        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/users/@me/relationships/\(id)", referer: "https://discord.com/channels/\(guild)/\(channel)", token: AccordCoreVars.shared.token, json: false, type: .PUT, bodyObject: [:])
+        let headers = Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.shared.token,
+            type: .PUT,
+            discordHeaders: true,
+            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+        )
+        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
     }
     func removeFriend(_ guild: String, _ channel: String) {
-        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/users/@me/relationships/\(id)", referer: "https://discord.com/channels/\(guild)/\(channel)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
+        let headers = Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.shared.token,
+            type: .DELETE,
+            discordHeaders: true,
+            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+        )
+        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
     }
     func block(_ guild: String, _ channel: String) {
-        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/users/@me/relationships/\(id)", referer: "https://discord.com/channels/\(guild)/\(channel)", token: AccordCoreVars.shared.token, json: false, type: .PUT, bodyObject: ["type":2])
+        let headers = Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.shared.token,
+            bodyObject: ["type":2],
+            type: .PUT,
+            discordHeaders: true,
+            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+        )
+        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
     }
 }
 

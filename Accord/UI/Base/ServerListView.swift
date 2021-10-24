@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-public var roleColors: [String:(Int, Int)] = [:]
+public var roleColors: [String:(Int, Int, NSColor?)] = [:]
 
 struct NavigationLazyView<Content: View>: View {
     let build: () -> Content
@@ -44,82 +44,75 @@ struct ServerListView: View {
     var body: some View {
         NavigationView {
             HStack(spacing: 0, content: {
-                List {
+                ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-                    ZStack {
-                        Color.primary.colorInvert()
-                        Image(systemName: "bubble.left.fill")
-                    }
-                    .frame(width: 45, height: 45)
-                    .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
-                    .onTapGesture(count: 1, perform: {
-                        DispatchQueue.main.async { // jump back in main thread
-                            privateChannels = privateChannels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
-                            selectedServer = 999
+                    LazyVStack {
+                        ZStack {
+                            Color.primary.colorInvert()
+                            Image(systemName: "bubble.left.fill")
                         }
-                    })
-                    Divider()
-                    // MARK: - Guild icon UI
-                    ForEach(0..<guilds.count, id: \.self) { index in
-                        ZStack(alignment: .bottomTrailing) {
-                            if let guild = guilds[index] {
+                        .frame(width: 45, height: 45)
+                        .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                        .onTapGesture(count: 1, perform: {
+                            selectedServer = 999
+                        })
+                        // MARK: - Guild icon UI
+                        ForEach(Array(zip(guilds.indices, guilds)), id: \.1.id) { offset, guild in
+                            ZStack(alignment: .bottomTrailing) {
                                 Button(action: {
                                     withAnimation {
                                         DispatchQueue.main.async {
-                                            selectedServer = index
+                                            selectedServer = offset
                                         }
                                     }
                                 }) { [weak guild] in
-                                    Image(nsImage: guildIcons[guild?.id ?? ""] ?? NSImage()).resizable()
-                                        .scaledToFit()
+                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""))
                                         .frame(width: 45, height: 45)
-                                        .cornerRadius(((selectedServer ?? 0) == index) ? 15.0 : 23.5)
+                                        .cornerRadius(((selectedServer ?? 0) == offset) ? 15.0 : 23.5)
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
-                            }
 
-                            if pingCount(guild: guilds[index]) != 0 {
-                                ZStack {
-                                    Circle()
-                                        .foregroundColor(Color.red)
-                                        .frame(width: 15, height: 15)
-                                    Text(String(describing: pingCount(guild: guilds[index])))
-                                        .foregroundColor(Color.white)
-                                        .fontWeight(.semibold)
-                                        .font(.caption)
+                                if pingCount(guild: guild) != 0 {
+                                    ZStack {
+                                        Circle()
+                                            .foregroundColor(Color.red)
+                                            .frame(width: 15, height: 15)
+                                        Text(String(describing: pingCount(guild: guild)))
+                                            .foregroundColor(Color.white)
+                                            .fontWeight(.semibold)
+                                            .font(.caption)
+                                    }
+                                } else {
                                 }
-                            } else {
+                            }
+
+                        }
+                        NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
+                            ZStack(alignment: .bottomTrailing) {
+                                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                    .scaledToFit()
+                                    .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
+                                    .frame(width: 45, height: 45)
+                                Circle()
+                                    .foregroundColor(Color.green.opacity(0.75))
+                                    .frame(width: 10, height: 10)
                             }
                         }
-
-                    }
-                    Divider()
-                    NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
-                        ZStack(alignment: .bottomTrailing) {
-                            Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                .scaledToFit()
-                                .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
-                                .frame(width: 45, height: 45)
-                            Circle()
-                                .foregroundColor(Color.green.opacity(0.75))
-                                .frame(width: 10, height: 10)
+                        .buttonStyle(PlainButtonStyle())
+                        #if DEBUG
+                        NavigationLink(destination: SocketEventsDisplay(), tag: 2, selection: self.$stuffSelection) {
+                            ZStack {
+                                Color.primary.colorInvert()
+                                Image(systemName: "ant")
+                            }
+                            .frame(width: 45, height: 45)
+                            .cornerRadius(15.0)
                         }
+                        .buttonStyle(PlainButtonStyle())
+                        #endif
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    #if DEBUG
-                    NavigationLink(destination: SocketEventsDisplay(), tag: 2, selection: self.$stuffSelection) {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "ant")
-                        }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(15.0)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    #endif
                 }
                 .frame(width: 80)
-                .listStyle(SidebarListStyle())
                 .buttonStyle(BorderlessButtonStyle())
                 .padding(.top, 5)
                 Divider()
@@ -142,7 +135,6 @@ struct ServerListView: View {
                             }
                         })
                     }
-
                 } else if selectedServer == 999 {
                     // MARK: - Private channels (DMs)
                     HStack {
@@ -151,14 +143,14 @@ struct ServerListView: View {
                                 .fontWeight(.bold)
                                 .font(.title2)
                             Divider()
-                            ForEach(0..<privateChannels.count, id: \.self) { index in
-                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: privateChannels[index].id ?? "", channelName: privateChannels[index].name ?? "").equatable()), tag: (Int(privateChannels[index].id) ?? 0), selection: self.$selection) {
+                            ForEach(privateChannels, id: \.id) { channel in
+                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "").equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
                                     HStack {
                                         Image(systemName: "number") // normal channel
-                                        Text(privateChannels[index].name ?? "")
+                                        Text(channel.name ?? channel.recipients?[0].username ?? "")
                                         Spacer()
 
-                                        if let readState = privateChannels[index].read_state {
+                                        if let readState = channel.read_state {
                                             if readState.mention_count != 0 {
                                                 ZStack {
                                                     Circle()
@@ -172,7 +164,7 @@ struct ServerListView: View {
                                             }
                                         }
                                         Button(action: {
-                                            showWindow(guildID: "@me", channelID: privateChannels[index].id ?? "", channelName: privateChannels[index].name ?? "")
+                                            showWindow(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "")
                                         }) {
                                             Image(systemName: "arrow.up.right.circle")
                                         }
@@ -181,9 +173,7 @@ struct ServerListView: View {
                                 .buttonStyle(BorderlessButtonStyle())
 
                             }
-
                         }
-                        .listStyle(SidebarListStyle())
                     }
                     .padding(.top, 5)
                 } else {
@@ -247,7 +237,6 @@ struct ServerListView: View {
                                 }
                             }
                         }
-                        .listStyle(SidebarListStyle())
                         .buttonStyle(PlainButtonStyle())
                         .padding(.top, 5)
                     }
@@ -305,7 +294,6 @@ struct ServerListView: View {
             }
             for i in 0..<guilds.count {
                 AllEmotes.shared.allEmotes["\(guilds[i].id)$\(guilds[i].name)"] = guilds[i].emojis
-//                print(AllEmotes.shared.allEmotes)
                 (guilds[i].channels) = (guilds[i].channels)?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             }
             DispatchQueue.main.async {

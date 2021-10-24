@@ -98,6 +98,9 @@ final class WebSocket {
     
     // MARK: - init
     init(url: URL?) {
+        
+        releaseModePrint("[Accord] [Socket] Hello world!")
+
         var config = URLSessionConfiguration.default
         
         if proxyEnabled {
@@ -170,6 +173,9 @@ final class WebSocket {
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
+                        let path = FileManager.default.urls(for: .cachesDirectory,
+                                                            in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                        try! data.write(to: path)
                         guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: data) else {
                             return completion(nil)
                         }
@@ -354,6 +360,7 @@ final class WebSocket {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
                                                                 in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                            print(path, "w")
                             try! textData.write(to: path)
                             guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: textData) else { break }
                             releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")

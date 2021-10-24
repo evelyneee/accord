@@ -16,38 +16,10 @@ extension GuildView: MessageControllerDelegate {
                 sending = false
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
-                if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80") {
-                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        message.author?.pfp = data
-                    } else {
-                        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                message.author?.pfp = data
-                            }
-                        }).resume()
-                    }
+                message.lastMessage = viewModel.messages.first
+                DispatchQueue.main.async {
+                    viewModel.messages.insert(message, at: 0)
                 }
-                if message.referenced_message != nil {
-                    if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.referenced_message?.author?.id ?? "")/\(message.referenced_message?.author?.avatar ?? "").png?size=80") {
-                        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                        if let data = cache.cachedResponse(for: request)?.data {
-                            message.referenced_message?.author?.pfp = data
-                        } else {
-                            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                                if let data = data, let response = response {
-                                let cachedData = CachedURLResponse(response: response, data: data)
-                                    cache.storeCachedResponse(cachedData, for: request)
-                                    message.referenced_message?.author?.pfp = data
-                                }
-                            }).resume()
-                        }
-                    }
-                }
-                message.lastMessage = messages.first
-                messages.insert(message, at: 0)
             }
         }
     }
@@ -59,8 +31,10 @@ extension GuildView: MessageControllerDelegate {
                 if channelID! == self.channelID {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
-                    guard let index = fastIndexMessage(message.id, array: messages) else { return }
-                    messages[index] = message
+                    guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
+                    DispatchQueue.main.async {
+                        viewModel.messages[index] = message
+                    }
                 }
             }
 
@@ -71,8 +45,10 @@ extension GuildView: MessageControllerDelegate {
             webSocketQueue.async {
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
-                guard let index = fastIndexMessage(message.id, array: messages) else { return }
-                messages.remove(at: index)
+                guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
+                DispatchQueue.main.async {
+                    viewModel.messages.remove(at: index)
+                }
             }
         }
     }
@@ -127,8 +103,9 @@ extension GuildView: MessageControllerDelegate {
                     }
                 }
                 rolesTemp = rolesTemp.reversed()
-                roles[(person?.user.id ?? "")] = rolesTemp
+                roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
             }
+            viewModel.processRoleColors(roles: roles)
         }
     }
     func sendWSError(msg: String) {

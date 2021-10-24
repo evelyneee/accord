@@ -2,7 +2,7 @@
 //  Songlink.swift
 //  Songlink
 //
-//  Created by redacted on 2021-09-17.
+//  Created by evelyn on 2021-09-17.
 //
 
 import Foundation
@@ -16,6 +16,8 @@ final class SongLink {
         let comp = link.components(separatedBy: "/").last
         return "spotify:track:\(comp?.description.components(separatedBy: "?").first ?? "")"
     }
+    
+    #warning("TODO: Other platform parsers")
     
     // MARK: - Song getter
     final func getSong(song: String, completion: @escaping ((SongLinkBase?) -> Void)) {

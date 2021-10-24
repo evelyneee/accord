@@ -33,24 +33,20 @@ struct AttachmentView: View {
                                             .frame(width: 400, height: 300)
 
                                     } else {
-                                        Text("...")
+                                        Text("Loading...")
                                             .onAppear {
                                                 attachmentQueue.async {
                                                     currentImage = NSImage()
-                                                    NetworkHandling.shared.requestData(url: media[index]!.url, token: nil, json: false, type: .GET, bodyObject: [:]) { success, data in
-                                                        if success,
-                                                              let data = data,
-                                                           let amyGif = Gif(data: data) {
-                                                            DispatchQueue.main.async {
-                                                                animatedImages = amyGif.animatedImages
-                                                                duration = Double(CFTimeInterval(amyGif.calculatedDuration ?? 0))
-                                                                setinterval = Double(duration / Double(animatedImages?.count ?? 1))
-                                                                self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
-                                                                    if self.setinterval != 0 {
-                                                                        print(value)
-                                                                        (self.value) += 1 % animatedImages!.count
-                                                                    }
-                                                                }
+                                                    Networking<AnyDecodable>().image(url: URL(string: media[index]!.url), to: nil) { image in
+                                                        guard let gif = image as? Gif else { return }
+                                                        animatedImages = gif.animatedImages
+                                                        duration = Double(CFTimeInterval(gif.calculatedDuration ?? 0))
+                                                        setinterval = Double(duration / Double(animatedImages?.count ?? 1))
+                                                        print(Double(duration / Double(animatedImages?.count ?? 1)))
+                                                        self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
+                                                            if self.setinterval != 0 {
+                                                                print(value)
+                                                                (self.value) += 1 % animatedImages!.count
                                                             }
                                                         }
                                                     }

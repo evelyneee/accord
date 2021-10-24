@@ -24,43 +24,5 @@ extension GuildView {
                 wss.getMembers(ids: allUserIDs, guild: guildID)
             }
         }
-        for message in viewModel.messages {
-            if !(message.isSameAuthor()) {
-                if let url = URL(string: "https://cdn.discordapp.com/avatars/\(message.author?.id ?? "")/\(message.author?.avatar ?? "").png?size=80") {
-                    let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                    if let data = cache.cachedResponse(for: request)?.data {
-                        message.author?.pfp = data
-                    } else {
-                        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                            if let data = data, let response = response {
-                                let cachedData = CachedURLResponse(response: response, data: data)
-                                cache.storeCachedResponse(cachedData, for: request)
-                                message.author?.pfp = data
-                            }
-                        }).resume()
-                    }
-                }
-
-            }
-        }
-        let replyArray = Array(NSOrderedSet(array: viewModel.messages.compactMap { $0.referenced_message?.author }))
-        for user in replyArray as! [User] {
-            if let url = URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(user.avatar ?? "").png?size=80") {
-                let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 5.0)
-                if let data = cache.cachedResponse(for: request)?.data {
-                    user.pfp = data
-                } else {
-                    URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                        if let data = data, let response = response {
-                            let cachedData = CachedURLResponse(response: response, data: data)
-                            cache.storeCachedResponse(cachedData, for: request)
-                            user.pfp = data
-                        }
-                    }).resume()
-                }
-            }
-        }
-
     }
-
 }

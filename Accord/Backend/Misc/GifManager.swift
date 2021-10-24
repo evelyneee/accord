@@ -5,7 +5,7 @@
 //  Created by Amy While on 16/02/2021.
 //
 
-import Cocoa
+import AppKit
 
 final class Gif: NSImage {
     var calculatedDuration: Double?

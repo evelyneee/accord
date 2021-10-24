@@ -299,7 +299,7 @@ public enum RequestTypes: String {
 }
 
 final class Headers {
-    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:String]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil) {
+    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false) {
         self.userAgent = userAgent
         self.contentType = contentType
         self.token = token
@@ -307,15 +307,18 @@ final class Headers {
         self.type = type
         self.discordHeaders = discordHeaders
         self.referer = referer
+        self.empty = empty
+        self.json = json
     }
     var userAgent: String?
     var contentType: String?
     var token: String?
-    var bodyObject: [String:String]?
+    var bodyObject: [String:Any]?
     var type: RequestTypes
     var discordHeaders: Bool
     var referer: String?
-    var empty: Bool = false
+    var empty: Bool?
+    var json: Bool?
 }
 
 var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
@@ -342,7 +345,10 @@ final class Networking<T: Decodable> {
             if let token = headers.token {
                 request.addValue(token, forHTTPHeaderField: "Authorization")
             }
-            if let bodyObject = headers.bodyObject {
+            if let json = headers.json, json {
+                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = try! JSONSerialization.data(withJSONObject: headers.bodyObject ?? [:], options: [])
+            } else if let bodyObject = headers.bodyObject {
                 let bodyString = bodyObject.queryParameters
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             }
@@ -355,6 +361,7 @@ final class Networking<T: Decodable> {
             if let referer = headers.referer {
                 request.addValue(referer, forHTTPHeaderField: "referer")
             }
+
             request.httpMethod = headers.type.rawValue
         }
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in

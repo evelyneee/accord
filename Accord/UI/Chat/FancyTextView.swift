@@ -80,26 +80,11 @@ struct FancyTextView: View {
 extension String {
     public func marked() -> String {
         let textArray = self.components(separatedBy: " ")
-        let config = URLSessionConfiguration.default
+        var config = URLSessionConfiguration.default
         var returnString: String = ""
         config.urlCache = cache
-        if proxyEnabled {
-            config.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-            config.connectionProxyDictionary = [AnyHashable: Any]()
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-            if let ip = proxyIP {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
-            }
-            if let port = proxyPort {
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-                config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
-            }
-        }
+        config = config.setProxy()
         for text in textArray {
-            if text.contains("spotify") {
-                print(text, "SPOTIFY")
-            }
             if text.prefix(31) == "https://open.spotify.com/track/" {
                 let sem = DispatchSemaphore(value: 0)
                 SongLink.shared.getSong(song: text) { song in
@@ -109,9 +94,10 @@ extension String {
                     }
                 }
                 sem.wait()
+            } else {
+                returnString.append(text)
             }
         }
-        print("returning")
         return returnString
     }
 
@@ -183,7 +169,7 @@ final class AccordMarkdown {
                 if #available(macOS 12.0, *) {
                     textArray.append(Text(try! AttributedString(markdown: text)))
                     textArray.append(Text(" "))
-                    splitCount += 1
+                    splitCount++
                 } else {
                     textArray.append(Text("\(text) "))
                 }

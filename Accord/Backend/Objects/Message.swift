@@ -34,11 +34,25 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+    
     func delete() {
-        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/messages/\(id)", token: AccordCoreVars.shared.token, json: false, type: .DELETE, bodyObject: [:])
+        let headers = Headers(userAgent: discordUserAgent,
+                              contentType: nil,
+                              token: AccordCoreVars.shared.token,
+                              type: .DELETE,
+                              discordHeaders: true,
+                              empty: true)
+        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers) { _ in }
     }
     func edit(now: String) {
-        NetworkHandling.shared.emptyRequest(url: "\(rootURL)/channels/\(channel_id)/messages/\(id)", token: AccordCoreVars.shared.token, json: true, type: .PATCH, bodyObject: ["content":now])
+        let headers = Headers(userAgent: discordUserAgent,
+                              contentType: nil,
+                              token: AccordCoreVars.shared.token,
+                              bodyObject: ["content":now],
+                              type: .PATCH,
+                              discordHeaders: true,
+                              empty: true)
+        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers) { _ in }
     }
     func isSameAuthor() -> Bool { lastMessage?.author?.id == self.author?.id }
 }

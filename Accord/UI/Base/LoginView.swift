@@ -109,8 +109,6 @@ struct LoginView: View {
             })
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
                 self.captchaPayload = notif.userInfo?["key"] as? String ?? ""
-                print(twofactor, captchaPayload!)
-                sleep(2)
                 NetworkHandling.shared.login(username: email, password: password, captcha: captchaPayload!) { success, array in
                     if success {
                         if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {

@@ -35,9 +35,6 @@ struct GuildView: View, Equatable {
     var channelName: String
     @State var chatTextFieldContents: String = ""
 
-    // The actual message array.
-    @State var messages = [Message]()
-
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
 
@@ -50,7 +47,7 @@ struct GuildView: View, Equatable {
 
     // nicks and roles
     @State var nicks: [String:String] = [:]
-    @State var roles: [String:[String]] = [:]
+    @State var roles: [String:String] = [:]
 
     // TODO: Add user popup view, done properly
     @State var poppedUpUserProfile: Bool = false
@@ -65,6 +62,8 @@ struct GuildView: View, Equatable {
 
     // Editing
     @State var editing: String? = nil
+    
+    @State var opened: Int? = nil
 
     init(guildID: String, channelID: String, channelName: String? = nil) {
         self.guildID = guildID
@@ -82,28 +81,22 @@ struct GuildView: View, Equatable {
                     LazyVStack {
                         Spacer().frame(height: 93)
                         // MARK: Sending animation
-                        if (sending) && chatTextFieldContents != "" {
-                            sendingView
-                        }
+                        #warning("TODO: Fix this lol")
+//                        if (sending) && chatTextFieldContents != "" {
+//                            sendingView
+//                        }
                         // MARK: Message loop
                         ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
                             
                             LazyVStack(alignment: .leading) {
-                                if offset == 0 {
-                                    Text("")
-                                        .onAppear(perform: {
-                                            performSecondStageLoad()
-                                        })
-                                }
                                 // MARK: - Reply
                                 if let reply = message.referenced_message {
                                     HStack {
                                         Spacer().frame(width: 50)
-                                        Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
-                                            .scaledToFit()
+                                        Attachment(pfpURL(reply.author?.id, reply.author?.avatar))
                                             .frame(width: 15, height: 15)
                                             .clipShape(Circle())
-                                        if let roleColor = roleColors[(roles[reply.author?.id ?? ""] ?? [""])[safe: 0] ?? ""] {
+                                        if let roleColor = roleColors[(roles[reply.author?.id ?? ""] ?? "")] {
                                             Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                                                 .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                                                 .fontWeight(.semibold)
@@ -151,82 +144,58 @@ struct GuildView: View, Equatable {
                                     }
                                     if let author = message.author?.username {
                                         VStack(alignment: .leading) {
-                                            if offset != (viewModel!.messages.count - 1) {
+                                            if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
                                                 if message.isSameAuthor() {
-                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
+                                                    textView
                                                         .padding(.leading, 41)
                                                 } else if roles.isEmpty {
                                                     Text(nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
-                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
+                                                    textView
                                                 } else {
-                                                    if let roleColor = roleColors[(roles[message.author?.id ?? "fuck"] ?? ["fucjk"])[safe: 0] ?? "f"] {
+                                                    if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? "")]?.2 {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
-                                                            .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                                            .foregroundColor(Color(roleColor))
                                                             .fontWeight(.semibold)
-                                                        FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
+                                                        textView
                                                     } else {
                                                         Text(nicks[message.author?.id ?? ""] ?? author)
                                                             .fontWeight(.semibold)
-                                                        FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
+                                                        textView
                                                     }
                                                 }
-                                            } else {
-                                                if roles.isEmpty {
-                                                    Text(nicks[message.author?.id ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
-                                                } else if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? [])[safe: 0] ?? ""]?.0 {
-                                                    Text(nicks[message.author?.id ?? ""] ?? author)
-                                                        .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
-                                                } else {
-                                                    Text(nicks[message.author?.id ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID))
-                                                }
                                             }
-
                                         }
                                     }
                                     Spacer()
                                     // MARK: - Quick Actions
                                     Button(action: {
-                                        if collapsed.contains(offset) {
-                                            collapsed.remove(at: collapsed.firstIndex(of: offset)!)
+                                        if opened == offset {
+                                            opened = nil
                                         } else {
-                                            collapsed.append(offset)
+                                            opened = offset
                                         }
                                     }) {
-                                        Image(systemName: ((collapsed.contains(offset)) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                        Image(systemName: ((opened == offset) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    if (collapsed.contains(offset)) {
+                                    if (opened == offset) {
                                         Button(action: { [weak message] in
                                             let clipQueue = DispatchQueue(label: "clipboard")
                                             clipQueue.async {
                                                 NSPasteboard.general.clearContents()
                                                 NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
                                             }
-                                            if collapsed.contains(offset) {
-                                                collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                            } else {
-                                                collapsed.append(offset)
-                                            }
+                                            opened = nil
                                         }) {
                                             Text("Copy")
                                         }
                                         .buttonStyle(BorderlessButtonStyle())
                                         Button(action: { [weak message] in
-                                            DispatchQueue.main.async {
+                                            DispatchQueue.global().async {
                                                 NSPasteboard.general.clearContents()
                                                 NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
-                                                if collapsed.contains(offset) {
-                                                    collapsed.remove(at: collapsed.firstIndex(of: offset)!)
-                                                } else {
-                                                    collapsed.append(offset)
-                                                }
+                                                opened = nil
                                             }
                                         }) {
                                             Text("Copy Message Link")
@@ -271,6 +240,13 @@ struct GuildView: View, Equatable {
                             .id(message.id)
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
+                            .onAppear(perform: {
+                                if offset == 0 {
+                                    DispatchQueue(label: "Second Stage Load").async {
+                                        performSecondStageLoad()
+                                    }
+                                }
+                            })
                         }
                         if (viewModel?.messages.isEmpty ?? false) == false {
                             headerView
@@ -281,17 +257,10 @@ struct GuildView: View, Equatable {
                 .scaleEffect(x: -1, y: 1, anchor: .center)
                 blurredTextField
             }
-
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Dismiss"))) { obj in
-                userPoppedUp = nil
-            }
             .onAppear {
                 // MARK: - Making WebSocket messages receivable now, begin load
                 MessageController.shared.delegate = self
             }
-            .onReceive(viewModel!.$messages, perform: { _ in
-                performSecondStageLoad()
-            })
             // MARK: - WebSocket error display
             if let error = error {
                 VStack(alignment: .leading) {
@@ -336,7 +305,8 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
     windowRef = NSWindow(
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
-        backing: .buffered, defer: false)
+        backing: .buffered, defer: false
+    )
     windowRef.contentView = NSHostingView(rootView: GuildView(guildID: guildID, channelID: channelID, channelName: channelName))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false

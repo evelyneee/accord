@@ -18,26 +18,12 @@ struct AnyDecodable: Decodable {
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
-
-        let pfpURLs = array.map {
+        var pfpURLs = array.map {
             "https://cdn.discordapp.com/avatars/\($0.author!.id)/\($0.author?.avatar ?? "").png?size=80"
         }
-        var singleURLs: [String] = []
-        var returnArray: [String:NSImage] = [:] {
-            didSet {
-                if returnArray.count == singleURLs.count {
-                    return completion(true, returnArray)
-                }
-            }
-        }
+        var returnArray: [String:NSImage] = [:]
+        pfpURLs = pfpURLs.filter { !($0.contains("null")) }
         for url in pfpURLs {
-            if !(singleURLs.contains(url)) {
-                if !(url.contains("<null>")) {
-                    singleURLs.append(url)
-                }
-            }
-        }
-        for url in singleURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
                 Networking<AnyDecodable>().image(url: url) { image in
@@ -84,27 +70,12 @@ final class ImageHandling {
         return dataReceived
     }
     func getServerIcons(array: [Guild], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
-        let pfpURLs = array.compactMap {
+        var pfpURLs = array.compactMap {
             "https://cdn.discordapp.com/icons/\($0.id)/\($0.icon ?? "").png?size=80"
         }
-        var singleURLs: [String] = []
-        var returnArray: [String:NSImage] = [:] {
-            didSet {
-                if returnArray.count == singleURLs.count {
-                }
-            }
-        }
+        var returnArray: [String:NSImage] = [:]
+        pfpURLs = pfpURLs.filter { !($0.contains("null")) }
         for url in pfpURLs {
-            if !(singleURLs.contains(url)) {
-                if !(url.contains("<null>")) {
-                    singleURLs.append(url)
-                }
-            }
-        }
-        let _ = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { timer in
-            return completion(true, returnArray)
-        }
-        for url in singleURLs {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
                 Networking<AnyDecodable>().image(url: url) { image in
@@ -113,10 +84,8 @@ final class ImageHandling {
                     }
                 }
             }
-            if url == singleURLs[singleURLs.count - 1] {
-                return completion(true, returnArray)
-            }
         }
+        return completion(true, returnArray)
     }
 
     init(_ empty:Bool = false) {
@@ -225,7 +194,12 @@ final class ImageLoaderAndCache: ObservableObject {
     init(imageURL: String) {
         imageQueue.async { [weak self] in
             Networking<AnyDecodable>().image(url: URL(string: imageURL)) { image in
-                guard let image = image else { self?.image = NSImage(); return }
+                guard let image = image else {
+                    DispatchQueue.main.async {
+                        self?.image = NSImage()
+                    }
+                    return
+                }
                 DispatchQueue.main.async {
                     self?.image = image
                 }

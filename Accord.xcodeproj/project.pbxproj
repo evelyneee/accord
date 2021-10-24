@@ -15,6 +15,12 @@
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		A80FEC2327234DE7005F9950 /* GuildViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */; };
+		A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC242724FA2A005F9950 /* MentionView.swift */; };
+		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
+		A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* IncrementNumbers.swift */; };
+		A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */; };
+		A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC292724FD35005F9950 /* NSColor+Hex.swift */; };
+		A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2A2724FD35005F9950 /* UserNotifications.swift */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F426D12411007B9B27 /* MessageProtocol.swift */; };
@@ -59,11 +65,6 @@
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
-		A8ECC4C3271C88E400382E53 /* IncrementNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */; };
-		A8ECC4C5271C893C00382E53 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */; };
-		A8ECC4C7271C898300382E53 /* NetworkingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */; };
-		A8ECC4C9271C8A0C00382E53 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */; };
-		A8ECC4CB271C8A9A00382E53 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */; };
 		A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */; };
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
 		A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */; };
@@ -97,6 +98,12 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildViewViewModel.swift; sourceTree = "<group>"; };
+		A80FEC242724FA2A005F9950 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionView.swift; path = Accord/UI/Chat/GuildView/MentionView.swift; sourceTree = SOURCE_ROOT; };
+		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
+		A80FEC272724FD35005F9950 /* IncrementNumbers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementNumbers.swift; sourceTree = "<group>"; };
+		A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingExtensions.swift; sourceTree = "<group>"; };
+		A80FEC292724FD35005F9950 /* NSColor+Hex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSColor+Hex.swift"; sourceTree = "<group>"; };
+		A80FEC2A2724FD35005F9950 /* UserNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotifications.swift; sourceTree = "<group>"; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A82A05F426D12411007B9B27 /* MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProtocol.swift; sourceTree = "<group>"; };
@@ -141,11 +148,6 @@
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
-		A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IncrementNumbers.swift; path = ../../../../IncrementNumbers.swift; sourceTree = "<group>"; };
-		A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageProcessing.swift; path = ../../../../ImageProcessing.swift; sourceTree = "<group>"; };
-		A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NetworkingExtensions.swift; path = ../../../../NetworkingExtensions.swift; sourceTree = "<group>"; };
-		A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "NSColor+Hex.swift"; path = "../../../../NSColor+Hex.swift"; sourceTree = "<group>"; };
-		A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserNotifications.swift; path = ../../../../UserNotifications.swift; sourceTree = "<group>"; };
 		A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NitrolessBackend.swift; sourceTree = "<group>"; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 		A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+Misc.swift"; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 			isa = PBXGroup;
 			children = (
 				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
+				A80FEC242724FA2A005F9950 /* MentionView.swift */,
 				A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */,
 				A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */,
 				A88A3D14265B22C4003AE08F /* LoginView.swift */,
@@ -329,11 +332,11 @@
 			isa = PBXGroup;
 			children = (
 				A8922500266ED88B00FEA21C /* Extensions.swift */,
-				A8ECC4CA271C8A9A00382E53 /* UserNotifications.swift */,
-				A8ECC4C8271C8A0C00382E53 /* NSColor+Hex.swift */,
-				A8ECC4C6271C898300382E53 /* NetworkingExtensions.swift */,
-				A8ECC4C2271C88E400382E53 /* IncrementNumbers.swift */,
-				A8ECC4C4271C893C00382E53 /* ImageProcessing.swift */,
+				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
+				A80FEC272724FD35005F9950 /* IncrementNumbers.swift */,
+				A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */,
+				A80FEC292724FD35005F9950 /* NSColor+Hex.swift */,
+				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
 			);
 			path = Misc;
 			sourceTree = "<group>";
@@ -450,9 +453,11 @@
 				A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */,
 				A82A062226D981B4007B9B27 /* Status.swift in Sources */,
 				A82A05F826D3F2D2007B9B27 /* GuildView+MsgSend.swift in Sources */,
+				A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */,
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
+				A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
@@ -460,11 +465,8 @@
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
-				A8ECC4C5271C893C00382E53 /* ImageProcessing.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
-				A8ECC4CB271C8A9A00382E53 /* UserNotifications.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
-				A8ECC4C9271C8A0C00382E53 /* NSColor+Hex.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */,
 				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
@@ -475,6 +477,7 @@
 				A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */,
 				A82A060526D3F6DA007B9B27 /* GuildView+HeaderView.swift in Sources */,
 				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,
+				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A82A05FA26D3F38B007B9B27 /* GuildView+MessageProtocol.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
@@ -486,20 +489,21 @@
 				3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */,
 				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
+				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
-				A8ECC4C7271C898300382E53 /* NetworkingExtensions.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				A80FEC2327234DE7005F9950 /* GuildViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
+				A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* GuildView+TextField.swift in Sources */,
-				A8ECC4C3271C88E400382E53 /* IncrementNumbers.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
+				A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
