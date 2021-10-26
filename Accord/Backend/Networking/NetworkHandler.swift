@@ -346,16 +346,24 @@ final class Networking<T: Decodable> {
                 request.addValue(token, forHTTPHeaderField: "Authorization")
             }
             if let json = headers.json, json {
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.addValue("application/json", forHTTPHeaderField: "content-type")
                 request.httpBody = try! JSONSerialization.data(withJSONObject: headers.bodyObject ?? [:], options: [])
             } else if let bodyObject = headers.bodyObject {
                 let bodyString = bodyObject.queryParameters
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             }
             if headers.discordHeaders {
+                request.addValue("https", forHTTPHeaderField: ":scheme")
+                request.addValue(headers.type.rawValue, forHTTPHeaderField: ":method")
+                request.addValue(String(url!.absoluteString.dropFirst(11)), forHTTPHeaderField: ":path")
                 request.addValue("discord.com", forHTTPHeaderField: ":authority")
+                request.addValue("https://discord.com", forHTTPHeaderField: "origin")
                 request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
                 request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+                request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
+                request.addValue("en-US", forHTTPHeaderField: "accept-language")
+                request.addValue("*/*", forHTTPHeaderField: "accept")
+                request.addValue(String(String(describing: headers.bodyObject!).count), forHTTPHeaderField: "content-length")
                 request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
             }
             if let referer = headers.referer {

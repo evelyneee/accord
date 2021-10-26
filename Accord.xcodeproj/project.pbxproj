@@ -23,6 +23,7 @@
 		A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2A2724FD35005F9950 /* UserNotifications.swift */; };
 		A80FEC31272583B4005F9950 /* Embed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC30272583B4005F9950 /* Embed.swift */; };
 		A80FEC3327258457005F9950 /* EmbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC3227258457005F9950 /* EmbedView.swift */; };
+		A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC35272779F2005F9950 /* PluginLoader.swift */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F426D12411007B9B27 /* MessageProtocol.swift */; };
@@ -108,6 +109,7 @@
 		A80FEC2A2724FD35005F9950 /* UserNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotifications.swift; sourceTree = "<group>"; };
 		A80FEC30272583B4005F9950 /* Embed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Embed.swift; sourceTree = "<group>"; };
 		A80FEC3227258457005F9950 /* EmbedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedView.swift; sourceTree = "<group>"; };
+		A80FEC35272779F2005F9950 /* PluginLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginLoader.swift; sourceTree = "<group>"; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A82A05F426D12411007B9B27 /* MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProtocol.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				A80FEC34272779D9005F9950 /* PluginManager */,
 				A82521392687ABD40073F640 /* Objects */,
 				A82521382687ABC50073F640 /* Networking */,
 				A825213A2687ABE40073F640 /* Misc */,
@@ -227,6 +230,14 @@
 				A88CD70A26E05900007D979B /* prerm */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		A80FEC34272779D9005F9950 /* PluginManager */ = {
+			isa = PBXGroup;
+			children = (
+				A80FEC35272779F2005F9950 /* PluginLoader.swift */,
+			);
+			path = PluginManager;
 			sourceTree = "<group>";
 		};
 		A82521352687AB250073F640 /* Chat */ = {
@@ -487,6 +498,7 @@
 				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,
 				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
+				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
 				A82A05FA26D3F38B007B9B27 /* GuildView+MessageProtocol.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */,

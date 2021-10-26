@@ -45,10 +45,6 @@ struct GuildView: View, Equatable {
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
 
-    // nicks and roles
-    @State var nicks: [String:String] = [:]
-    @State var roles: [String:String] = [:]
-
     // TODO: Add user popup view, done properly
     @State var poppedUpUserProfile: Bool = false
     @State var userPoppedUp: Int? = nil
@@ -95,8 +91,8 @@ struct GuildView: View, Equatable {
                                         Attachment(pfpURL(reply.author?.id, reply.author?.avatar))
                                             .frame(width: 15, height: 15)
                                             .clipShape(Circle())
-                                        if let roleColor = roleColors[(roles[reply.author?.id ?? ""] ?? "")] {
-                                            Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                        if let roleColor = roleColors[(viewModel!.roles[reply.author?.id ?? ""] ?? "")] {
+                                            Text(viewModel!.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                                                 .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                                                 .fontWeight(.semibold)
                                             if #available(macOS 12.0, *) {
@@ -107,7 +103,7 @@ struct GuildView: View, Equatable {
                                                     .lineLimit(0)
                                             }
                                         } else {
-                                            Text(nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                            Text(viewModel!.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                                                 .fontWeight(.semibold)
                                             if #available(macOS 12.0, *) {
                                                 Text(try! AttributedString(markdown: reply.content))
@@ -147,18 +143,18 @@ struct GuildView: View, Equatable {
                                                 if message.isSameAuthor() {
                                                     textView
                                                         .padding(.leading, 41)
-                                                } else if roles.isEmpty {
-                                                    Text(nicks[message.author?.id ?? ""] ?? author)
+                                                } else if viewModel!.roles.isEmpty {
+                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
                                                     textView
                                                 } else {
-                                                    if let roleColor = roleColors[(roles[message.author?.id ?? ""] ?? "")]?.2 {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
+                                                    if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.2 {
+                                                        Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
                                                             .foregroundColor(Color(roleColor))
                                                             .fontWeight(.semibold)
                                                         textView
                                                     } else {
-                                                        Text(nicks[message.author?.id ?? ""] ?? author)
+                                                        Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
                                                             .fontWeight(.semibold)
                                                         textView
                                                     }
@@ -249,7 +245,7 @@ struct GuildView: View, Equatable {
                             .onAppear(perform: {
                                 if offset == 0 {
                                     DispatchQueue(label: "Second Stage Load").async {
-                                        performSecondStageLoad()
+                                        viewModel?.performSecondStageLoad()
                                     }
                                 }
                             })

@@ -16,30 +16,4 @@ extension GuildView {
         }
         return messageDict[message]
     }
-    func getCachedMemberChunk() {
-        let allUserIDs = Array(NSOrderedSet(array: viewModel.messages.map { $0.author?.id ?? "" })) as! Array<String>
-        for user in allUserIDs {
-            if let person = wss.cachedMemberRequest["\(guildID)$\(user)"] {
-                let nickname = person.nick ?? person.user.username
-                nicks[(person.user.id)] = nickname
-                var rolesTemp: [String] = []
-                for _ in 0..<100 {
-                    rolesTemp.append("empty")
-                }
-                for role in (person.roles ?? []) {
-                    rolesTemp[roleColors[role]?.1 ?? 0] = role
-                }
-                
-                rolesTemp = rolesTemp.compactMap { role -> String? in
-                    if role == "empty" {
-                        return nil
-                    } else {
-                        return role
-                    }
-                }
-                rolesTemp = rolesTemp.reversed()
-                roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
-            }
-        }
-    }
 }

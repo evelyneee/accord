@@ -12,7 +12,7 @@ extension GuildView {
     func performSecondStageLoad() {
         if guildID != "@me" {
             var allUserIDs = Array(NSOrderedSet(array: viewModel.messages.map { $0.author?.id ?? "" })) as! Array<String>
-            getCachedMemberChunk()
+            viewModel.getCachedMemberChunk()
             for (index, item) in allUserIDs.enumerated() {
                 if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") {
                     if Array<Int>(allUserIDs.indices).contains(index) {

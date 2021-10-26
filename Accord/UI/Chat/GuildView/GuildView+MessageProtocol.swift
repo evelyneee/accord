@@ -87,7 +87,7 @@ extension GuildView: MessageControllerDelegate {
             for person in users {
                 wss.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
                 let nickname = person?.nick ?? person?.user.username ?? ""
-                nicks[(person?.user.id ?? "")] = nickname
+                viewModel.nicks[(person?.user.id ?? "")] = nickname
                 var rolesTemp: [String] = []
                 for _ in 0..<100 {
                     rolesTemp.append("empty")
@@ -103,9 +103,9 @@ extension GuildView: MessageControllerDelegate {
                     }
                 }
                 rolesTemp = rolesTemp.reversed()
-                roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
+                viewModel.roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
             }
-            viewModel.processRoleColors(roles: roles)
+            viewModel.processRoleColors(roles: viewModel.roles)
         }
     }
     func sendWSError(msg: String) {
