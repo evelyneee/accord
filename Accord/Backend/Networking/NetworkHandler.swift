@@ -351,6 +351,7 @@ final class Networking<T: Decodable> {
             } else if let bodyObject = headers.bodyObject {
                 let bodyString = bodyObject.queryParameters
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+                request.addValue(String(String(describing: headers.bodyObject!).count), forHTTPHeaderField: "content-length")
             }
             if headers.discordHeaders {
                 request.addValue("https", forHTTPHeaderField: ":scheme")
@@ -363,7 +364,6 @@ final class Networking<T: Decodable> {
                 request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
                 request.addValue("en-US", forHTTPHeaderField: "accept-language")
                 request.addValue("*/*", forHTTPHeaderField: "accept")
-                request.addValue(String(String(describing: headers.bodyObject!).count), forHTTPHeaderField: "content-length")
                 request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
             }
             if let referer = headers.referer {
