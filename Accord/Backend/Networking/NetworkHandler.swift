@@ -353,12 +353,11 @@ final class Networking<T: Decodable> {
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             }
             if headers.discordHeaders {
-//                request.addValue("https", forHTTPHeaderField: ":scheme")
-//                request.addValue(headers.type.rawValue, forHTTPHeaderField: ":method")
-//                request.addValue(String(url!.absoluteString.dropFirst(11)), forHTTPHeaderField: ":path")
                 request.addValue("discord.com", forHTTPHeaderField: ":authority")
+                request.addValue("https://discord.com", forHTTPHeaderField: "origin")
                 request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
                 request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+                request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
                 request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
             }
             if let referer = headers.referer {
@@ -408,12 +407,11 @@ final class Networking<T: Decodable> {
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             }
             if headers.discordHeaders {
-//                request.addValue("https", forHTTPHeaderField: ":scheme")
-//                request.addValue(headers.type.rawValue, forHTTPHeaderField: ":method")
-//                request.addValue(String(url!.absoluteString.dropFirst(11)), forHTTPHeaderField: ":path")
                 request.addValue("discord.com", forHTTPHeaderField: ":authority")
+                request.addValue("https://discord.com", forHTTPHeaderField: "origin")
                 request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
                 request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+                request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
                 request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
             }
             if let referer = headers.referer {
