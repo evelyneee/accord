@@ -10,6 +10,21 @@ import WebKit
 
 public var captchaPublicKey: String = "error"
 
+enum LoginState {
+    case initial
+    case captcha
+    case twofactor
+}
+
+struct SwappedLabel: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.title
+            configuration.icon
+        }
+    }
+}
+
 struct LoginView: View {
     @State var email: String = ""
     @State var password: String = ""
@@ -20,65 +35,83 @@ struct LoginView: View {
     @State var captchaPayload: String?
     @State var proxyIP: String = ""
     @State var proxyPort: String = ""
-    @Environment(\.presentationMode) var shown
+    @State var state: LoginState = .initial
+    @State var notif: [String:Any] = [:]
+    @ObservedObject var viewModel = LoginViewViewModel()
     var body: some View {
         VStack {
-            Text("Login to Discord")
-                .font(.title)
-                .fontWeight(.bold)
-            TextField("Email", text: $email)
-            TextField("Password", text: $password)
-            TextField("2fa code", text: $twofactor)
-            Text("Login with token instead")
-                .font(.title3)
-                .fontWeight(.semibold)
-            TextField("token", text: $token)
-            Text("Proxy options")
-                .font(.title3)
-                .fontWeight(.semibold)
-            TextField("Proxy IP", text: $proxyIP)
-            TextField("Proxy Port", text: $proxyPort)
-            HStack {
-                Button("Cancel", action: {
-                    self.shown.wrappedValue.dismiss()
-                    exit(EXIT_SUCCESS)
-                })
-                Spacer()
-                Button(action: {
-                    UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
-                    UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
-                    if token != "" {
-                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                        self.shown.wrappedValue.dismiss()
-                    } else {
-                        NetworkHandling.shared.login(username: email, password: password) { success, array in
+            switch viewModel.state {
+            case .initial:
+                VStack {
+                    Text("Welcome to Accord")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 5)
+                        .padding(.top)
+                    Text("Choose how you want to login")
+                        .foregroundColor(Color.secondary)
+                        .padding(.bottom)
+                    TextField("Email", text: $email)
+                    TextField("Password", text: $password)
+                    TextField("Token (optional)", text: $token)
+                    TextField("Proxy IP (optional)", text: $proxyIP)
+                    TextField("Proxy Port (optional)", text: $proxyPort)
+                    HStack {
+                        Button(action: {
+                            exit(EXIT_SUCCESS)
+                        }, label: {
+                            HStack {
+                                Text("Cancel")
+                                    .padding(.top)
+                            }
+                        })
+                        Spacer()
+                        Button(action: {
+                            UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
+                            UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
+                            if token != "" {
+                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                            } else {
+                                viewModel.login(email, password, twofactor)
+                            }
+                            print("[Accord] logging in")
+                        }) {
+                            Label("Login", systemImage: "arrowtriangle.right.fill")
+                                .labelStyle(SwappedLabel())
+                        }
+                    }
+                    .padding(.top, 5)
+                }
+                .transition(AnyTransition.moveAway)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+
+            case .captcha:
+                CaptchaViewControllerSwiftUI(token: captchaPublicKey)
+                    .onAppear(perform: {
+                        print(captchaPublicKey, "fucking hell")
+                    })
+                    .transition(AnyTransition.moveAway)
+            case .twofactor:
+                VStack {
+                    Text("Enter your two-factor code here.")
+                    TextField("2fa code", text: $twofactor)
+                    Button("Login") {
+                        self.captchaPayload = notif["key"] as? String ?? ""
+                        NetworkHandling.shared.login(username: email, password: password, captcha: captchaPayload!) { success, array in
                             if success {
                                 if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
-                                    if let checktoken = returnArray["token"] as? String {
-                                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                        self.shown.wrappedValue.dismiss()
-                                    } else {
-                                        print("[Login debug] Captcha demanded \(returnArray)")
-                                        if let captchaKey = returnArray["captcha_sitekey"] {
-                                            self.captchaVCKey = captchaKey as? String ?? ""
-                                            captchaPublicKey = captchaVCKey!
-                                            captcha = true
-                                        } else if let ticket = returnArray["ticket"] as? String {
-                                            print("[Login debug] Got ticket")
-                                            sleep(2)
-                                            NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
-                                                if success {
-                                                    print("[Accord] log in kek")
-                                                    print(String(decoding: data_login!, as: UTF8.self))
-                                                    if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
-                                                        if let checktoken = loginReturnArray["token"] as? String {
-                                                            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                                            AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                                            captcha = false
-                                                            self.shown.wrappedValue.dismiss()
-                                                        }
+                                    if let ticket = returnArray["ticket"] as? String {
+                                        print("[Login debug] Got ticket")
+                                        NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                            if success {
+                                                print("[Accord] log in kek")
+                                                print(String(decoding: data_login!, as: UTF8.self))
+                                                if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
+                                                    if let checktoken = loginReturnArray["token"] as? String {
+                                                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                                        captcha = false
                                                     }
                                                 }
                                             }
@@ -88,44 +121,57 @@ struct LoginView: View {
                             }
                         }
                     }
-                    print("[Accord] logging in")
-                }) {
-                    HStack {
-                        Text("Login")
-                    }
                 }
+                .transition(AnyTransition.moveAway)
             }
-            .padding(.top, 5)
-            .sheet(isPresented: $captcha, content: {
-                if let key = captchaPublicKey {
-                    CaptchaViewControllerSwiftUI(token: key)
-                        .frame(width: 800, height: 800)
-                        .onAppear(perform: {
-                            print(captchaPublicKey, "fucking hell")
-                        })
-                } else {
-                    Text(captchaVCKey!)
-                }
-            })
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
-                self.captchaPayload = notif.userInfo?["key"] as? String ?? ""
-                NetworkHandling.shared.login(username: email, password: password, captcha: captchaPayload!) { success, array in
-                    if success {
-                        if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
-                            if let ticket = returnArray["ticket"] as? String {
-                                print("[Login debug] Got ticket")
-                                sleep(2)
-                                NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
-                                    if success {
-                                        print("[Accord] log in kek")
-                                        print(String(decoding: data_login!, as: UTF8.self))
-                                        if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
-                                            if let checktoken = loginReturnArray["token"] as? String {
-                                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                                captcha = false
-                                                self.shown.wrappedValue.dismiss()
-                                            }
+
+        }
+        .frame(minHeight: 250)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
+            self.viewModel.state = .twofactor
+            self.notif = notif.userInfo as? [String:Any] ?? [:]
+        }
+        .padding()
+    }
+}
+
+final class LoginViewViewModel: ObservableObject {
+    
+    @Published var state: LoginState = .initial
+    @Published var captcha: Bool = false
+    @Published var captchaVCKey: String?
+    @Published var captchaPayload: String?
+    
+    init() {
+        
+    }
+    
+    func login(_ email: String, _ password: String, _ twofactor: String) {
+        NetworkHandling.shared.login(username: email, password: password) { success, array in
+            if success {
+                if let returnArray = try? JSONSerialization.jsonObject(with: array ?? Data(), options: []) as? [String:Any] {
+                    if let checktoken = returnArray["token"] as? String {
+                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    } else {
+                        print("[Login debug] Captcha demanded \(returnArray)")
+                        if let captchaKey = returnArray["captcha_sitekey"] {
+                            DispatchQueue.main.async {
+                                self.captchaVCKey = captchaKey as? String ?? ""
+                                captchaPublicKey = self.captchaVCKey!
+                                self.state = .captcha
+                            }
+                        } else if let ticket = returnArray["ticket"] as? String {
+                            print("[Login debug] Got ticket")
+                            NetworkHandling.shared.requestData(url: "https://discord.com/api/v9/auth/mfa/totp", token: nil, json: true, type: .POST, bodyObject: ["code": twofactor, "ticket": ticket]) { success, data_login in
+                                if success {
+                                    print("[Accord] log in kek")
+                                    print(String(decoding: data_login!, as: UTF8.self))
+                                    if let loginReturnArray = try? JSONSerialization.jsonObject(with: data_login ?? Data(), options: []) as? [String:Any] {
+                                        if let checktoken = loginReturnArray["token"] as? String {
+                                            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                                            AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                            self.captcha = false
                                         }
                                     }
                                 }
@@ -135,7 +181,18 @@ struct LoginView: View {
                 }
             }
         }
-        .padding()
+    }
+}
+
+class LoginResponse: Decodable {
+    var token: String?
+    var captcha_sitekey: String?
+}
+
+
+extension AnyTransition {
+    static var moveAway: AnyTransition {
+        return .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
     }
 }
 

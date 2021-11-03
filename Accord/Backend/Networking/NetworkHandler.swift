@@ -122,13 +122,14 @@ final class NetworkHandling {
             let bodyString = (bodyObject as? [String:String] ?? [:]).queryParameters
             request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        } else if type == .POST && json == true {
+            print("json")
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
         } else {
             request.addValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         }
-        if type == .POST && json == true {
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try? JSONSerialization.data(withJSONObject: bodyObject, options: [])
-        }
+        
         request.timeoutInterval = 30.0
         // Necessary headers
         request.addValue("discord.com", forHTTPHeaderField: ":authority")

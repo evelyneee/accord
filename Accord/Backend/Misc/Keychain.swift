@@ -8,7 +8,7 @@ final class KeychainManager {
         let query = [
             kSecClass as String           : kSecClassGenericPassword as String,
             kSecAttrAccount as String     : key,
-            kSecAttrAccessGroup as String : "me.evelyn.accord",
+            kSecAttrAccessGroup as String : "group.me.evelyn.accord",
             kSecValueData as String       : data ] as [String : Any]
 
         SecItemDelete(query as CFDictionary)

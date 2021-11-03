@@ -8,6 +8,8 @@
 import Foundation
 import SwiftUI
 
+// NSViewWrapper(Plugins().loadView(url: "/Users/evelyn/plugin")!.body!)
+
 struct SettingsViewRedesign: View {
     @State var bioText: String = " "
     @State var username: String = "test user"
@@ -21,7 +23,7 @@ struct SettingsViewRedesign: View {
     @State var pastel: Bool = pastelColors
     @State var discordSettings: Bool = pastelColors
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
-
+    @State var loading: Bool = false
 
     var body: some View {
         List {
@@ -204,6 +206,28 @@ struct SettingsViewRedesign: View {
                             .textFieldStyle(PlainTextFieldStyle())
                             .frame(width: 250)
                     }
+                    HStack {
+                        Text("Load plugin")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Spacer()
+                        Button("Load") {
+                            self.loading.toggle()
+                        }
+                    }
+                    .fileImporter(isPresented: $loading, allowedContentTypes: [.data], onCompletion: { result in
+                        do {
+                            let url = try result.get()
+                            let path = FileManager.default.urls(for: .documentDirectory,
+                                                                   in: .userDomainMask)[0].appendingPathComponent(UUID().uuidString)
+                            if FileManager.default.secureCopyItem(at: url, to: path) {
+                                print("Plugin successfully copied")
+                            }
+                        } catch {
+                            
+                        }
+                    })
                 }
                 .padding(5)
                 .background(Color.black.opacity(0.25))
@@ -256,3 +280,19 @@ func report_memory() -> Int {
     }
 }
 
+extension FileManager {
+
+    open func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
+        do {
+            if FileManager.default.fileExists(atPath: dstURL.path) {
+                try FileManager.default.removeItem(at: dstURL)
+            }
+            try FileManager.default.copyItem(at: srcURL, to: dstURL)
+        } catch (let error) {
+            print("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
+            return false
+        }
+        return true
+    }
+
+}

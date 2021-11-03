@@ -14,6 +14,7 @@ final class GuildViewViewModel: ObservableObject {
     @Published var messages = [Message]()
     @Published var nicks: [String:String] = [:]
     @Published var roles: [String:String] = [:]
+    @Published var refresh: Bool = false
     
     var requestCancellable: AnyCancellable?
     
@@ -42,11 +43,13 @@ final class GuildViewViewModel: ObservableObject {
     }
     
     func processRoleColors(roles: [String:String]) {
-        // roleColors[(roles[message.author?.id ?? ""] ?? [])[0]]
         let allIDs = messages.map { $0.author?.id ?? "" }
         for id in allIDs {
             let color = NSColor.color(from: roleColors[roles[id] ?? ""]?.0 ?? 0)
             roleColors[roles[id] ?? ""]?.2 = color
+        }
+        DispatchQueue.main.async {
+            self.refresh.toggle()
         }
     }
     
@@ -76,26 +79,25 @@ final class GuildViewViewModel: ObservableObject {
         for user in allUserIDs {
             if let person = wss.cachedMemberRequest["\(guildID)$\(user)"] {
                 let nickname = person.nick ?? person.user.username
-                nicks[(person.user.id)] = nickname
-                var rolesTemp: [String] = []
-                
-                for _ in 0..<100 {
-                    rolesTemp.append("empty")
+                DispatchQueue.main.async { [weak self] in
+                    self!.nicks[(person.user.id)] = nickname
                 }
+                var rolesTemp: [String] = Array.init(repeating: "", count: 50)
                 
                 for role in (person.roles ?? []) {
                     rolesTemp[roleColors[role]?.1 ?? 0] = role
                 }
                 
                 rolesTemp = rolesTemp.compactMap { role -> String? in
-                    if role == "empty" {
+                    if role == "" {
                         return nil
                     } else {
                         return role
                     }
+                }.reversed()
+                DispatchQueue.main.async { [weak self] in
+                    self?.roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
                 }
-                rolesTemp = rolesTemp.reversed()
-                roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
             }
         }
     }

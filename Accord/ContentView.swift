@@ -17,14 +17,21 @@ struct ContentView: View {
     @State var status: statusIndicators?
     @State var modalIsPresented: Bool = false
     var body: some View {
-        ServerListView(full: $socketOut)
-        .sheet(isPresented: $modalIsPresented) {
-            LoginView()
-                .onDisappear(perform: {
-                    #warning("TODO: Fix post-login")
-                })
-                .frame(width: 450, height: 350)
-
+        Group {
+            if modalIsPresented {
+                LoginView()
+                    .onDisappear(perform: {
+                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+                        let task = Process()
+                        task.launchPath = "/usr/bin/open"
+                        task.arguments = [path]
+                        task.launch()
+                        exit(0)
+                    })
+            } else {
+                ServerListView(full: $socketOut)
+            }
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {

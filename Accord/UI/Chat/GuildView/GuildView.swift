@@ -48,6 +48,7 @@ struct GuildView: View, Equatable {
     // TODO: Add user popup view, done properly
     @State var poppedUpUserProfile: Bool = false
     @State var userPoppedUp: Int? = nil
+    @State var popup: [Bool] = Array.init(repeating: false, count: 50)
 
     // WebSocket error
     @State var error: String? = nil
@@ -120,18 +121,13 @@ struct GuildView: View, Equatable {
                                     VStack {
                                         if !(message.isSameAuthor()) {
                                             Button(action: {
-                                                poppedUpUserProfile.toggle()
-                                                if userPoppedUp != nil {
-                                                    userPoppedUp = nil
-                                                } else {
-                                                    userPoppedUp = offset
-                                                }
+                                                popup[offset].toggle()
                                             }) { [weak message] in
                                                 Attachment(pfpURL(message?.author?.id, message?.author?.avatar))
                                                     .frame(width: 33, height: 33)
                                                     .clipShape(Circle())
                                             }
-                                            .popover(isPresented: Binding.constant(userPoppedUp == offset), content: {
+                                            .popover(isPresented: $popup[offset], content: {
                                                  PopoverProfileView(user: Binding.constant(message.author))
                                             })
                                             .buttonStyle(BorderlessButtonStyle())

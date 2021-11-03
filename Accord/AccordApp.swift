@@ -51,6 +51,9 @@ struct AccordApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(darkMode ? .dark : nil)
+                .onAppear(perform: {
+                    // AccordCoreVars.shared.loadPlugins()
+                })
         }
     }
 }

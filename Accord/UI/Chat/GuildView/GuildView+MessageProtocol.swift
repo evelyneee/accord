@@ -18,6 +18,7 @@ extension GuildView: MessageControllerDelegate {
                 guard let message = gatewayMessage.d else { return }
                 message.lastMessage = viewModel.messages.first
                 DispatchQueue.main.async {
+                    self.popup.append(false)
                     viewModel.messages.insert(message, at: 0)
                 }
             }
@@ -87,23 +88,23 @@ extension GuildView: MessageControllerDelegate {
             for person in users {
                 wss.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
                 let nickname = person?.nick ?? person?.user.username ?? ""
-                viewModel.nicks[(person?.user.id ?? "")] = nickname
-                var rolesTemp: [String] = []
-                for _ in 0..<100 {
-                    rolesTemp.append("empty")
+                DispatchQueue.main.async {
+                    viewModel.nicks[(person?.user.id ?? "")] = nickname
                 }
+                var rolesTemp: [String] = Array.init(repeating: "", count: 100)
                 for role in (person?.roles ?? []) {
                     rolesTemp[roleColors[role]?.1 ?? 0] = role
                 }
                 rolesTemp = rolesTemp.compactMap { role -> String? in
-                    if role == "empty" {
+                    if role == "" {
                         return nil
                     } else {
                         return role
                     }
+                }.reversed()
+                DispatchQueue.main.async {
+                    viewModel.roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
                 }
-                rolesTemp = rolesTemp.reversed()
-                viewModel.roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
             }
             viewModel.processRoleColors(roles: viewModel.roles)
         }

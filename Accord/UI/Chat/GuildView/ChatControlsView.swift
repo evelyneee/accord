@@ -24,6 +24,8 @@ struct ChatControls: View {
     @State var fileUpload: Data? = nil
     @State var fileUploadURL: URL? = nil
     @State var dragOver: Bool = false
+    @State var pluginPoppedUp: [Bool] = []
+    
     fileprivate func uploadFile(temp: String, url: URL? = nil) {
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
@@ -117,6 +119,11 @@ struct ChatControls: View {
 
                     }
                 })
+                .onAppear(perform: {
+                    for _ in AccordCoreVars.shared.plugins {
+                        pluginPoppedUp.append(false)
+                    }
+                })
                 .textFieldStyle(PlainTextFieldStyle())
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
                     fileUpload = try! Data(contentsOf: try! result.get())
@@ -135,6 +142,23 @@ struct ChatControls: View {
                     if fileUpload != nil {
                         Image(systemName: "doc.fill")
                             .foregroundColor(Color.secondary)
+                    }
+                    
+                    if AccordCoreVars.shared.plugins != [] {
+                        ForEach(AccordCoreVars.shared.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+                            if pluginPoppedUp.indices.contains(offset) {
+                                Button(action: {
+                                    pluginPoppedUp[offset].toggle()
+                                }) {
+                                    Image(systemName: plugin.symbol)
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .popover(isPresented: $pluginPoppedUp[offset], content: {
+                                    NSViewWrapper(plugin.body ?? NSView())
+                                        .frame(width: 200, height: 200)
+                                })
+                            }
+                        }
                     }
                     Button(action: {
                         fileImport.toggle()

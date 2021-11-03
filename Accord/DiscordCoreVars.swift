@@ -29,6 +29,7 @@ var discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWeb
 final class AccordCoreVars {
     static var shared = AccordCoreVars()
     init(_ tokenOverride: String = "") {
+        
         if tokenOverride != "" {
             token = tokenOverride
         } else {
@@ -38,4 +39,17 @@ final class AccordCoreVars {
     
     public var token: String = ""
     public var user: User?
+    public var plugins: [AccordPlugin] = []
+    
+    func loadPlugins() {
+        let path = FileManager.default.urls(for: .documentDirectory,
+                                               in: .userDomainMask)[0]
+        let directoryContents = try! FileManager.default.contentsOfDirectory(at: path, includingPropertiesForKeys: nil)
+        for item in directoryContents {
+            if item.isFileURL {
+                let plugin = Plugins().loadView(url: String(item.absoluteString.dropFirst(7)))
+                plugins.append(plugin!)
+            }
+        }
+    }
 }
