@@ -26,10 +26,18 @@ final class GuildViewViewModel: ObservableObject {
         self.guildID = guildID
         // messages are now read
         MentionSender.shared.removeMentions(server: guildID)
-        // fetch messages
-        self.getMessages(channelID: channelID, guildID: guildID)
-        // ACK
-        self.ack(channelID: channelID, guildID: guildID)
+        switch self.guildID == "@me" {
+        case true:
+            wss.subscribeToDM(channelID)
+        case false:
+            wss.subscribe(guildID, channelID)
+        }
+        DispatchQueue(label: "Message Fetch Queue").async {
+            // fetch messages
+            self.getMessages(channelID: channelID, guildID: guildID)
+            // ACK
+            self.ack(channelID: channelID, guildID: guildID)
+        }
     }
     
     func ack(channelID: String, guildID: String) {
@@ -71,33 +79,45 @@ final class GuildViewViewModel: ObservableObject {
                 }
                 return element
             }
+            DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
+            self.fakeNicksObject()
         })
+    }
+    
+    func fakeNicksObject() {
+        guard self.guildID == "@me" else { return }
+        self.nicks = messages.compactMap { [ $0.author?.id ?? "" : $0.author?.username ?? "" ] }
+        .flatMap { $0 }
+        .reduce([String:String]()) { (dict, tuple) in
+            var nextDict = dict
+            nextDict.updateValue(tuple.1, forKey: tuple.0)
+            return nextDict
+        }
+        print(nicks)
     }
     
     func getCachedMemberChunk() {
         let allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
-        for user in allUserIDs {
-            if let person = wss.cachedMemberRequest["\(guildID)$\(user)"] {
-                let nickname = person.nick ?? person.user.username
-                DispatchQueue.main.async { [weak self] in
-                    self!.nicks[(person.user.id)] = nickname
+        for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
+            let nickname = person.nick ?? person.user.username
+            DispatchQueue.main.async { [weak self] in
+                self!.nicks[(person.user.id)] = nickname
+            }
+            var rolesTemp: [String] = Array.init(repeating: "", count: 50)
+            
+            for role in (person.roles ?? []) {
+                rolesTemp[roleColors[role]?.1 ?? 0] = role
+            }
+            
+            rolesTemp = rolesTemp.compactMap { role -> String? in
+                if role == "" {
+                    return nil
+                } else {
+                    return role
                 }
-                var rolesTemp: [String] = Array.init(repeating: "", count: 50)
-                
-                for role in (person.roles ?? []) {
-                    rolesTemp[roleColors[role]?.1 ?? 0] = role
-                }
-                
-                rolesTemp = rolesTemp.compactMap { role -> String? in
-                    if role == "" {
-                        return nil
-                    } else {
-                        return role
-                    }
-                }.reversed()
-                DispatchQueue.main.async { [weak self] in
-                    self?.roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
-                }
+            }.reversed()
+            DispatchQueue.main.async { [weak self] in
+                self?.roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
             }
         }
     }
@@ -115,5 +135,19 @@ final class GuildViewViewModel: ObservableObject {
                 wss.getMembers(ids: allUserIDs, guild: guildID)
             }
         }
+    }
+    func loadAvatars() {
+        for user in messages.compactMap({ $0.author }) {
+            user.loadPfp()
+        }
+        for user in messages.compactMap({ $0.referenced_message?.author }) {
+            user.loadPfp()
+        }
+    }
+}
+
+extension Array where Array.Element: Hashable {
+    func unique() -> some Collection {
+        return Array(Set(self))
     }
 }

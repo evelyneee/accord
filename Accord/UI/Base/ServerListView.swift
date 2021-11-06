@@ -99,17 +99,6 @@ struct ServerListView: View {
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
-                        #if DEBUG
-                        NavigationLink(destination: SocketEventsDisplay(), tag: 2, selection: self.$stuffSelection) {
-                            ZStack {
-                                Color.primary.colorInvert()
-                                Image(systemName: "ant")
-                            }
-                            .frame(width: 45, height: 45)
-                            .cornerRadius(15.0)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        #endif
                     }
                 }
                 .frame(width: 80)
@@ -308,26 +297,3 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }
-
-struct SocketEventsDisplay: View {
-    var body: some View {
-        List(0..<Array(socketEvents).count, id: \.self) { event in
-            if let event = socketEvents.reversed()[event] {
-                Divider()
-                VStack(alignment: .leading) {
-                    Text(Array(event.keys)[0])
-                        .fontWeight(.bold)
-                    Divider()
-                    Text(event[Array(event.keys)[0]] ?? "")
-                        .lineLimit(30)
-                        .font(.system(.body, design: .monospaced))
-                }
-                .rotationEffect(.radians(.pi))
-                .scaleEffect(x: -1, y: 1, anchor: .center)
-            }
-        }
-        .rotationEffect(.radians(.pi))
-        .scaleEffect(x: -1, y: 1, anchor: .center)
-    }
-}
-

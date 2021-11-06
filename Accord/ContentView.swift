@@ -20,15 +20,6 @@ struct ContentView: View {
         Group {
             if modalIsPresented {
                 LoginView()
-                    .onDisappear(perform: {
-                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                        let task = Process()
-                        task.launchPath = "/usr/bin/open"
-                        task.arguments = [path]
-                        task.launch()
-                        exit(0)
-                    })
             } else {
                 ServerListView(full: $socketOut)
             }

@@ -6,8 +6,13 @@
 //
 
 import Foundation
+import AppKit
 
-final class User: Decodable, Identifiable {
+final class User: Decodable, Identifiable, Hashable {
+    static func == (lhs: User, rhs: User) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var id: String
     var username: String
     var discriminator: String
@@ -22,11 +27,17 @@ final class User: Decodable, Identifiable {
     var premium_type: NitroTypes?
     var public_flags: Int?
     var bio: String?
-    // Not part of decodable
     var nick: String?
     var roleColor: String?
     var pfp: Data?
+    
     func isMe() -> Bool { user_id == self.id }
+    func loadPfp() {
+        Networking<AnyDecodable>().image(url: URL(string: pfpURL(self.id, self.avatar))) { avatar in
+            guard let avatar = avatar else { return }
+            self.pfp = avatar.tiffRepresentation
+        }
+    }
     
     // MARK: - Relationships
     func addFriend(_ guild: String, _ channel: String) {
@@ -35,7 +46,7 @@ final class User: Decodable, Identifiable {
             token: AccordCoreVars.shared.token,
             type: .PUT,
             discordHeaders: true,
-            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+            referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
         Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
     }
@@ -45,7 +56,7 @@ final class User: Decodable, Identifiable {
             token: AccordCoreVars.shared.token,
             type: .DELETE,
             discordHeaders: true,
-            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+            referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
         Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
     }
@@ -56,9 +67,13 @@ final class User: Decodable, Identifiable {
             bodyObject: ["type":2],
             type: .PUT,
             discordHeaders: true,
-            referer: "https://discorc.com/channels/\(guild)/\(channel)"
+            referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
         Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

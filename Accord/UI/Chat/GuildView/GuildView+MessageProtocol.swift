@@ -19,6 +19,7 @@ extension GuildView: MessageControllerDelegate {
                 message.lastMessage = viewModel.messages.first
                 DispatchQueue.main.async {
                     self.popup.append(false)
+                    message.isSameAuthor() ? print("No pfp to store") : message.author?.loadPfp()
                     viewModel.messages.insert(message, at: 0)
                 }
             }
@@ -34,7 +35,7 @@ extension GuildView: MessageControllerDelegate {
                     guard let message = gatewayMessage.d else { return }
                     guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
                     DispatchQueue.main.async {
-                        viewModel.messages[index] = message
+                        viewModel.messages[index].content = message.content
                     }
                 }
             }
@@ -56,23 +57,29 @@ extension GuildView: MessageControllerDelegate {
     func typing(msg: [String: Any], channelID: String?) {
         webSocketQueue.async {
             if channelID == self.channelID {
-                print("[Accord] typing 2")
                 if !(typing.contains(msg["user_id"] as? String ?? "")) {
-                    print("[Accord] typing 3")
                     guard let memberData = try? JSONSerialization.data(withJSONObject: msg, options: []) else { return }
                     guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: memberData) else { return }
-                    guard let nick = memberDecodable.member?.nick else {
-                        print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
-                        typing.append(memberDecodable.member?.user.username ?? "")
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
-                            typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
+                    dump(memberDecodable)
+                    guard let nick_fake = viewModel.nicks[memberDecodable.user_id ?? ""] else {
+                        guard let nick = memberDecodable.member?.nick else {
+                            print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
+                            typing.append(memberDecodable.member?.user.username ?? "")
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
+                                typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
+                            })
+                            return
+                        }
+                        print("[Accord] typing 4", nick)
+                        typing.append(nick)
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
+                            typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
                         })
                         return
                     }
-                    print("[Accord] typing 4", nick)
-                    typing.append(nick)
+                    typing.append(nick_fake)
                     DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                        typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
+                        typing.remove(at: typing.firstIndex(of: (nick_fake)) ?? 0)
                     })
                 }
             }

@@ -79,7 +79,7 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
             releaseModePrint("[Accord] Socket closed for unknown reason")
         }
         #if DEBUG
-        fatalError("Socket Disconnected: \(reason) \(closeCode)")
+        // fatalError("Socket Disconnected: \(reason) \(closeCode)")
         #endif
     }
 }
@@ -200,7 +200,6 @@ final class WebSocket {
             "op":1,
             "d":self.seq ?? 0
         ]
-        socketEvents.append(["heartbeat (op 9) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { [weak self] error in
@@ -238,7 +237,6 @@ final class WebSocket {
                 ]
             ]
         ]
-        socketEvents.append(["identify (op 2) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
@@ -286,7 +284,6 @@ final class WebSocket {
                 "members":[]
             ],
         ]
-        socketEvents.append(["subscribe to channel (op 14) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
@@ -296,14 +293,14 @@ final class WebSocket {
             }
         }
     }
+    
     final func subscribeToDM(_ channel: String) {
         let packet: [String:Any] = [
             "op":13,
             "d": [
                 "channel_id":channel
-            ],
+            ]
         ]
-        socketEvents.append(["subscribe to dm (op 13) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
@@ -323,7 +320,6 @@ final class WebSocket {
                 "guild_id":guild
             ]
         ]
-        socketEvents.append(["get members (op 8) ~>":String(describing: packet as [String:Any])])
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
@@ -356,7 +352,6 @@ final class WebSocket {
                                 print("[Accord] Heartbeat successful")
                             }
                         }
-                        socketEvents.append(["\(payload["t"] as? String ?? "") <~":String(describing: payload["d"])])
                         switch payload["t"] as? String ?? "" {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
@@ -427,6 +422,7 @@ final class WebSocket {
                         case "TYPING_START":
                             print("typing")
                             let data = payload["d"] as! [String: Any]
+                            print(data)
                             if let channelid = data["channel_id"] as? String {
                                 MessageController.shared.typing(msg: data, channelID: channelid)
                             }

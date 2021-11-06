@@ -10,15 +10,6 @@ import SwiftUI
 import AppKit
 
 public var logs: [String] = []
-public var socketEvents: [[String:String]] = [] {
-    didSet {
-
-        #if DEBUG
-        #else
-        socketEvents.removeAll()
-        #endif
-    }
-}
 
 public func print(_ object: Any...) {
     #if DEBUG
