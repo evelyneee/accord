@@ -65,7 +65,7 @@ extension GuildView: MessageControllerDelegate {
                         guard let nick = memberDecodable.member?.nick else {
                             typing.append(memberDecodable.member?.user.username ?? "")
                             DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
-                                typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
+                                typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "Unknown User") ?? 0)
                             })
                             return
                         }
