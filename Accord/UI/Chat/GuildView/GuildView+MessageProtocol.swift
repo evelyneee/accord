@@ -63,14 +63,12 @@ extension GuildView: MessageControllerDelegate {
                     dump(memberDecodable)
                     guard let nick_fake = viewModel.nicks[memberDecodable.user_id ?? ""] else {
                         guard let nick = memberDecodable.member?.nick else {
-                            print("[Accord] typing 4", memberDecodable.member?.user.username ?? "")
                             typing.append(memberDecodable.member?.user.username ?? "")
                             DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
                                 typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "") ?? 0)
                             })
                             return
                         }
-                        print("[Accord] typing 4", nick)
                         typing.append(nick)
                         DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
                             typing.remove(at: typing.firstIndex(of: (nick)) ?? 0)
