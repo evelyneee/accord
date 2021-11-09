@@ -10,6 +10,7 @@ import Combine
 
 // Discord WebSocket
 var wss: WebSocket!
+let wssThread = DispatchQueue(label: "WebSocket Thread")
 
 struct ContentView: View {
     @State public var selection: Int?
@@ -38,15 +39,19 @@ struct ContentView: View {
 //                            NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
 //                        }
 //                    }
+
                     wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
                     wss.ready() { d in
                         if let d = d {
                             socketOut = d
-                            AccordCoreVars.shared.user = socketOut?.user
-                            user_id = AccordCoreVars.shared.user?.id ?? ""
-                            Networking<AnyDecodable>().image(url: URL(string: "https://cdn.discordapp.com/avatars/\(AccordCoreVars.shared.user?.id ?? "")/\(AccordCoreVars.shared.user?.avatar ?? "").png?size=128")) { image in if let image = image { avatar = image.tiffRepresentation ?? Data() } }
-                            username = AccordCoreVars.shared.user?.username ?? ""
-                            discriminator = AccordCoreVars.shared.user?.discriminator ?? ""
+                            guard let user = socketOut?.user else { return }
+                            AccordCoreVars.shared.user = user
+                            user_id = user.id
+                            if let pfp = user.avatar {
+                                Networking<AnyDecodable>().image(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=128")) { image in if let image = image { avatar = image.tiffRepresentation ?? Data() } }
+                            }
+                            username = user.username
+                            discriminator = user.discriminator
                             DispatchQueue.main.async {
                                 NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                             }

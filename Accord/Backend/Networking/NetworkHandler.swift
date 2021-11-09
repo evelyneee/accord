@@ -47,7 +47,7 @@ final class Networking<T: Decodable> {
     typealias imgBlock = ((_ value: Optional<NSImage>) -> Void)
     func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping completionBlock) {
         guard request != nil || url != nil else {
-            fatalError("[Networking] You need to provide a request method")
+            fatalError("[Networking] Either the URL is invalid or you need to provide a request method")
         }
         
         var request = request ?? URLRequest(url: url!)
@@ -88,7 +88,7 @@ final class Networking<T: Decodable> {
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
             if let data = data {
                 guard error == nil else {
-                    print(error?.localizedDescription ?? "")
+                    print(error?.localizedDescription ?? "unknown error")
                     return completion(nil)
                 }
                 if T.self == AnyDecodable.self || headers?.empty ?? false {
@@ -150,12 +150,13 @@ final class Networking<T: Decodable> {
         if let cachedImage = cache.cachedResponse(for: request) {
             return completion(NSImage(data: cachedImage.data) ?? NSImage())
         }
+
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard error == nil,
               let data = data,
                 let imageData = NSImage(data: data)?.downsample(to: size ?? CGSize(width: 600, height: 600)),
                     let image = NSImage(data: imageData) else {
-                      print(error?.localizedDescription ?? "")
+                      print(error?.localizedDescription ?? "unknown error")
                       return completion(nil)
             }
             cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)

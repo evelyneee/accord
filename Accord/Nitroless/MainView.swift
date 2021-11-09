@@ -62,7 +62,8 @@ struct NitrolessView: View, Equatable {
                         LazyVGrid(columns: columns) {
                             ForEach(Array(allEmotes.keys.filter { $0.contains(search) }), id: \.self) { key in
                                 Button(action: {
-                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
+                                    guard let emote = allEmotes[key] else { return }
+                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(emote)")
                                 }) {
                                     VStack {
                                         HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()

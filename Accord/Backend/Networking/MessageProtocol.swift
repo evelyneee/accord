@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MessageControllerDelegate {
-    func sendMessage(msg: Data, channelID: String?)
+    func sendMessage(msg: Data, channelID: String?, isMe: Bool)
     func editMessage(msg: Data, channelID: String?)
     func deleteMessage(msg: Data, channelID: String?)
     func typing(msg: [String: Any], channelID: String?)
@@ -19,10 +19,9 @@ protocol MessageControllerDelegate {
 class MessageController {
     static let shared = MessageController()
     public var delegate: MessageControllerDelegate?
-    public var delegates = [MessageControllerDelegate]()
     
-    func sendMessage(msg: Data, channelID: String?) {
-        delegate?.sendMessage(msg: msg, channelID: channelID)
+    func sendMessage(msg: Data, channelID: String?, isMe: Bool = false) {
+        delegate?.sendMessage(msg: msg, channelID: channelID, isMe: isMe)
     }
     func editMessage(msg: Data, channelID: String?) {
         delegate?.editMessage(msg: msg, channelID: channelID)

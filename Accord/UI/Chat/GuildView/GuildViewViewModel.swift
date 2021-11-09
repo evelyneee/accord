@@ -62,6 +62,9 @@ final class GuildViewViewModel: ObservableObject {
     }
     
     func getMessages(channelID: String, guildID: String) {
+        if Thread.isMainThread {
+            fatalError("Time consuming operations should not be called from main thread")
+        }
         requestCancellable = Networking<[Message]>().combineFetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
@@ -79,6 +82,7 @@ final class GuildViewViewModel: ObservableObject {
                 }
                 return element
             }
+            print(self.messages)
             DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
             self.fakeNicksObject()
         })
@@ -93,7 +97,6 @@ final class GuildViewViewModel: ObservableObject {
             nextDict.updateValue(tuple.1, forKey: tuple.0)
             return nextDict
         }
-        print(nicks)
     }
     
     func getCachedMemberChunk() {
@@ -140,8 +143,8 @@ final class GuildViewViewModel: ObservableObject {
         for user in messages.compactMap({ $0.author }) {
             user.loadPfp()
         }
-        for user in messages.compactMap({ $0.referenced_message?.author }) {
-            user.loadPfp()
+        for message in messages {
+            message.referenced_message?.author?.loadPfp()
         }
     }
 }

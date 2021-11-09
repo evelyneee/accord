@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Message: Decodable, Equatable, Identifiable, Hashable {
+final class Message: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
         return lhs.id == rhs.id
     }
@@ -31,6 +31,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var attachments: [AttachedFiles?]
     var referenced_message: Reply?
     weak var lastMessage: Message?
+    var sent: Bool?
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -58,7 +59,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     func isSameAuthor() -> Bool { lastMessage?.author?.id == self.author?.id }
 }
 
-final class Reply: Decodable, Equatable, Identifiable, Hashable {
+final class Reply: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Reply, rhs: Reply) -> Bool {
         return lhs.id == rhs.id
     }

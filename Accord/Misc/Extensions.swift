@@ -43,11 +43,13 @@ struct Collapsible<Content: View>: View {
 }
 
 func pfpURL(_ uid: String?, _ hash: String?) -> String {
-    return "https://cdn.discordapp.com/avatars/\(uid ?? "")/\(hash ?? "").png?size=80"
+    guard let uid = uid, let hash = hash else { return "" }
+    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=80"
 }
 
 func iconURL(_ id: String?, _ icon: String?) -> String {
-    return "https://cdn.discordapp.com/icons/\(id ?? "")/\(icon ?? "").png?size=80"
+    guard let id = id, let icon = icon else { return "" }
+    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=80"
 }
 
 // BAD

@@ -50,5 +50,13 @@ struct AccordApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    func applicationDidUnhide(_ notification: Notification) {
+        if wss == nil {
+            wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
+        }
+    }
+    func applicationDidHide(_ notification: Notification) {
+        wss = nil
+    }
 }
+

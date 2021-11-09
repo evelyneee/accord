@@ -7,7 +7,11 @@
 
 import Foundation
 
-final class Embed: Decodable {
+final class Embed: Codable, Hashable, Identifiable {
+    static func == (lhs: Embed, rhs: Embed) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var title: String?
     var type: String?
     var description: String?
@@ -20,9 +24,13 @@ final class Embed: Decodable {
 //    var provider?    eion
 //    var author?    emb
 //    var fields?
+    var id: String? = UUID().uuidString
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-class EmbedImage: Decodable {
+class EmbedImage: Codable {
     var url: String
     var proxy_url: String?
     var height: Int?

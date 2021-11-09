@@ -8,7 +8,7 @@
 import Foundation
 import AppKit
 
-final class User: Decodable, Identifiable, Hashable {
+final class User: Codable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.id == rhs.id
     }
@@ -77,7 +77,7 @@ final class User: Decodable, Identifiable, Hashable {
     }
 }
 
-enum NitroTypes: Int, Decodable {
+enum NitroTypes: Int, Codable {
     case none = 0
     case classic = 1
     case nitro = 2

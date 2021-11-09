@@ -53,23 +53,25 @@ struct ChatControls: View {
         URLSession.shared.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
         }).resume()
     }
-    
+    let messageSendQueue = DispatchQueue(label: "Send Message")
+
     var body: some View {
         HStack {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
-                    Networking<AnyDecodable>().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
-                        userAgent: discordUserAgent,
-                        token: AccordCoreVars.shared.token,
-                        type: .POST,
-                        discordHeaders: true
-                    )) { _ in }
+                    messageSendQueue.async {
+                        Networking<AnyDecodable>().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                            userAgent: discordUserAgent,
+                            token: AccordCoreVars.shared.token,
+                            type: .POST,
+                            discordHeaders: true
+                        )) { _ in }
+                    }
                 }, onCommit: {
                     chatTextFieldContents = textFieldContents
                     var temp = textFieldContents
                     textFieldContents = ""
                     sending = true
-                    let messageSendQueue = DispatchQueue(label: "Send Message")
                     messageSendQueue.async {
                         if temp == "/shrug" {
                             temp = #"¯\_(ツ)_/¯"#

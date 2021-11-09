@@ -11,6 +11,16 @@ import SwiftUI
 final class SongLink {
     static var shared = SongLink()
     
+    final func parseLink(link: String) -> String? {
+        var ret: String? = nil
+        switch URL(string: link)?.host {
+        case "music.apple.com": break
+        case "spotify.com": ret = parseSpotifyLink(link: link); break
+        default: break
+        }
+        return ret
+    }
+    
     // MARK: - Get song id
     final func parseSpotifyLink(link: String) -> String {
         let comp = link.components(separatedBy: "/").last
