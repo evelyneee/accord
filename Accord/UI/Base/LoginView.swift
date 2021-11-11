@@ -16,6 +16,11 @@ enum LoginState {
     case twofactor
 }
 
+enum DiscordLoginErrors: Error {
+    case invalidForm
+    case missingFields
+}
+
 struct SwappedLabel: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
@@ -37,6 +42,7 @@ struct LoginView: View {
     @State var proxyPort: String = ""
     @State var state: LoginState = .initial
     @State var notif: [String:Any] = [:]
+    @State var error: String? = nil
     @ObservedObject var viewModel = LoginViewViewModel()
     var body: some View {
         VStack {
@@ -56,6 +62,11 @@ struct LoginView: View {
                     TextField("Token (optional)", text: $token)
                     TextField("Proxy IP (optional)", text: $proxyIP)
                     TextField("Proxy Port (optional)", text: $proxyPort)
+                    if let error = error {
+                        Text(error)
+                            .foregroundColor(Color.red)
+                            .font(.subheadline)
+                    }
                     HStack {
                         Button(action: {
                             exit(EXIT_SUCCESS)
@@ -73,7 +84,16 @@ struct LoginView: View {
                                 _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                             } else {
-                                viewModel.login(email, password, twofactor)
+                                do {
+                                    try viewModel.login(email, password, twofactor)
+                                } catch {
+                                    switch error {
+                                    case DiscordLoginErrors.invalidForm:
+                                        self.error = "Invalid login and/or password"
+                                    default:
+                                        self.error = "An error occured"
+                                    }
+                                }
                             }
                             print("[Accord] logging in")
                         }) {
@@ -95,7 +115,7 @@ struct LoginView: View {
                     TextField("2fa code", text: $twofactor)
                     Button("Login") {
                         self.captchaPayload = notif["key"] as? String ?? ""
-                        Networking<LoginResponse>().fetch(url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+                        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
                             userAgent: discordUserAgent,
                             contentType: "application/json",
                             bodyObject: [
@@ -107,8 +127,20 @@ struct LoginView: View {
                             discordHeaders: true,
                             json: true
                         )) { response in
+                            if let token = response?.token {
+                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                self.captcha = false
+                                let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+                                let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+                                let task = Process()
+                                task.launchPath = "/usr/bin/open"
+                                task.arguments = [path]
+                                task.launch()
+                                exit(EXIT_SUCCESS)
+                            }
                             if let response = response, let ticket = response.ticket {
-                                Networking<LoginResponse>().fetch(url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
+                                Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                                     contentType: "application/json",
                                     token: AccordCoreVars.shared.token,
                                     bodyObject: ["code": twofactor, "ticket": ticket],
@@ -158,8 +190,9 @@ final class LoginViewViewModel: ObservableObject {
         
     }
     
-    func login(_ email: String, _ password: String, _ twofactor: String) {
-        Networking<LoginResponse>().fetch(url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+    func login(_ email: String, _ password: String, _ twofactor: String) throws {
+        var loginError: Error? = nil
+        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
             bodyObject: [
@@ -171,6 +204,14 @@ final class LoginViewViewModel: ObservableObject {
             json: true
         )) { response in
             if let response = response {
+                if let error = response.message {
+                    switch error {
+                    case "Invalid Form Body":
+                        loginError = DiscordLoginErrors.invalidForm
+                    default:
+                        loginError = DiscordLoginErrors.invalidForm
+                    }
+                }
                 if let checktoken = response.token {
                     _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -190,7 +231,7 @@ final class LoginViewViewModel: ObservableObject {
                         }
                     } else if let ticket = response.ticket {
                         print("[Login debug] Got ticket")
-                        Networking<LoginResponse>().fetch(url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
+                        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                             contentType: "application/json",
                             token: AccordCoreVars.shared.token,
                             bodyObject: ["code": twofactor, "ticket": ticket],
@@ -216,13 +257,10 @@ final class LoginViewViewModel: ObservableObject {
 
             }
         }
+        if let loginError = loginError {
+            throw loginError
+        }
     }
-}
-
-class LoginResponse: Decodable {
-    var token: String?
-    var captcha_sitekey: String?
-    var ticket: String?
 }
 
 

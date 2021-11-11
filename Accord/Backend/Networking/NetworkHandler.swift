@@ -42,10 +42,13 @@ final class Headers {
 
 var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
 
-final class Networking<T: Decodable> {
-    typealias completionBlock = ((_ value: Optional<T>) -> Void)
-    typealias imgBlock = ((_ value: Optional<NSImage>) -> Void)
-    func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping completionBlock) {
+final class Request {
+    
+    // MARK: - Empty Decodable
+    struct AnyDecodable: Decodable { }
+    
+    // MARK: - Perform request with completion handler
+    func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>) -> Void)) -> Void {
         guard request != nil || url != nil else {
             fatalError("[Networking] Either the URL is invalid or you need to provide a request method")
         }
@@ -92,14 +95,21 @@ final class Networking<T: Decodable> {
                     return completion(nil)
                 }
                 if T.self == AnyDecodable.self || headers?.empty ?? false {
-                    return completion(nil)
+                    return completion(nil) // Bail out if we don't ask for a type
                 }
                 let value = try? JSONDecoder().decode(T.self, from: data)
                 return completion(value)
             }
         }).resume()
     }
-    func combineFetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
+    
+    // MARK: - fetch() wrapper for empty requests without completion handlers
+    func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
+        self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _ in }
+    }
+    
+    // MARK: - Get a publisher for the request
+    func combineFetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
         guard request != nil || url != nil else {
             fatalError("[Networking] You need to provide a request method")
         }
@@ -144,9 +154,11 @@ final class Networking<T: Decodable> {
             .decode(type: T.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
     }
-
-    func image(url: URL?, to size: CGSize? = nil, completion: @escaping imgBlock) {
-        let request = URLRequest(url: url!)
+    
+    // MARK: - Image getter
+    func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: Optional<NSImage>) -> Void)) {
+        guard let url = url else { return }
+        let request = URLRequest(url: url)
         if let cachedImage = cache.cachedResponse(for: request) {
             return completion(NSImage(data: cachedImage.data) ?? NSImage())
         }
@@ -164,3 +176,4 @@ final class Networking<T: Decodable> {
         }).resume()
     }
 }
+

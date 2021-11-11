@@ -56,6 +56,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func applicationDidHide(_ notification: Notification) {
+        wss.ws.cancel()
         wss = nil
     }
 }

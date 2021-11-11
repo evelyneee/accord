@@ -13,22 +13,27 @@ extension GuildView: MessageControllerDelegate {
         webSocketQueue.async { [weak viewModel] in
             guard channelID != nil else { return }
             if channelID! == self.channelID {
-                sending = false
+                // sending = false
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
+                if viewModel?.guildID != "@me" {
+                    viewModel?.loadUser(for: message.author?.id)
+                }
                 if let firstMessage = viewModel?.messages.first {
                     message.lastMessage = firstMessage
                 }
+                message.isSameAuthor() ? print("No pfp to store") : message.author?.loadPfp()
+                message.referenced_message?.author?.loadPfp()
                 DispatchQueue.main.async {
                     self.popup.append(false)
-                    message.isSameAuthor() ? print("No pfp to store") : message.author?.loadPfp()
+                    viewModel?.messages.remove(at: viewModel!.messages.count - 1)
                     viewModel?.messages.insert(message, at: 0)
                 }
             }
         }
     }
     func editMessage(msg: Data, channelID: String?) {
-        // Recieved a message from backend
+        // Received a message from backend
         webSocketQueue.async {
             if channelID == self.channelID {
                 guard channelID != nil else { return }
@@ -36,12 +41,11 @@ extension GuildView: MessageControllerDelegate {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
                     guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
-                    DispatchQueue.main.async {
-                        viewModel.messages[index].content = message.content
+                    DispatchQueue.main.async { [weak message] in
+                        viewModel.messages[index].content = message?.content ?? "Error loading message content"
                     }
                 }
             }
-
         }
     }
     func deleteMessage(msg: Data, channelID: String?) {
@@ -65,8 +69,8 @@ extension GuildView: MessageControllerDelegate {
                     guard let nick_fake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
                         guard let nick = memberDecodable.member?.nick else {
                             typing.append(memberDecodable.member?.user.username ?? "")
-                            DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: {
-                                typing.remove(at: typing.firstIndex(of: memberDecodable.member?.user.username ?? "Unknown User") ?? 0)
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 7, execute: { [weak memberDecodable] in
+                                typing.remove(at: typing.firstIndex(of: memberDecodable?.member?.user.username ?? "Unknown User") ?? 0)
                             })
                             return
                         }
@@ -119,7 +123,6 @@ extension GuildView: MessageControllerDelegate {
                     viewModel?.roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
                 }
             }
-            viewModel?.processRoleColors(roles: viewModel?.roles ?? [:])
         }
     }
     func sendWSError(msg: String) {

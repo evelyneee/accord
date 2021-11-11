@@ -14,6 +14,7 @@
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
+		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		A80FEC2327234DE7005F9950 /* GuildViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */; };
 		A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC242724FA2A005F9950 /* MentionView.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
@@ -100,6 +101,7 @@
 		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildViewViewModel.swift; sourceTree = "<group>"; };
 		A80FEC242724FA2A005F9950 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionView.swift; path = Accord/UI/Chat/GuildView/MentionView.swift; sourceTree = SOURCE_ROOT; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
@@ -313,6 +315,7 @@
 				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
 				A8B1F29526CB163B00E8FDC5 /* User.swift */,
 				A80FEC30272583B4005F9950 /* Embed.swift */,
+				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -511,6 +514,7 @@
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
+				9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
@@ -658,6 +662,10 @@
 		32F4C97E256D7D3500343BB3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
@@ -688,6 +696,10 @@
 		32F4C97F256D7D3500343BB3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;

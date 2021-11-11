@@ -9,12 +9,6 @@ import Foundation
 import AppKit
 import SwiftUI
 
-struct AnyDecodable: Decodable {
-    let value: Bool
-}
-
-
-
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
@@ -26,7 +20,7 @@ final class ImageHandling {
         for url in pfpURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
-                Networking<AnyDecodable>().image(url: url) { image in
+                Request().image(url: url) { image in
                     if let image = image {
                         returnArray[String(userid)] = image
                     }
@@ -78,7 +72,7 @@ final class ImageHandling {
         for url in pfpURLs {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
-                Networking<AnyDecodable>().image(url: url) { image in
+                Request().image(url: url) { image in
                     if let image = image {
                         returnArray[String(userid)] = image
                     }
@@ -193,7 +187,7 @@ final class ImageLoaderAndCache: ObservableObject {
     @Published var image = NSImage()
     init(imageURL: String) {
         imageQueue.async { [weak self] in
-            Networking<AnyDecodable>().image(url: URL(string: imageURL)) { image in
+            Request().image(url: URL(string: imageURL)) { image in
                 guard let image = image else {
                     DispatchQueue.main.async {
                         self?.image = NSImage()

@@ -24,7 +24,6 @@ struct SettingsViewRedesign: View {
     @State var discordSettings: Bool = pastelColors
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
     @State var loading: Bool = false
-
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {

@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-public var roleColors: [String:(Int, Int, NSColor?)] = [:]
+public var roleColors: [String:(Int, Int)] = [:]
 
 struct NavigationLazyView<Content: View>: View {
     let build: () -> Content
@@ -111,11 +111,9 @@ struct ServerListView: View {
                         Text("Connecting...")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .onAppear(perform: {
-                            let privChannelQueue = DispatchQueue(label: "Private Channel Loading Queue", attributes: .concurrent)
-                            privChannelQueue.async {
-                                Networking<[Channel]>().fetch(url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
+                            concurrentQueue.async {
+                                Request().fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
                                     if let channels = channels {
                                         privateChannels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                                         Notifications.shared.privateChannels = privateChannels.map { $0.id }
@@ -268,7 +266,7 @@ struct ServerListView: View {
             if sortByMostRecent {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
             } else {
-                guildOrder = full!.user_settings!.guild_positions
+                guildOrder = full?.user_settings?.guild_positions ?? []
                 var guildTemp = [Guild]()
                 for item in guildOrder {
                     if let first = fastIndexGuild(item, array: guilds) {

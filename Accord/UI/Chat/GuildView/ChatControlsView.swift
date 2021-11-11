@@ -60,32 +60,33 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
                     messageSendQueue.async {
-                        Networking<AnyDecodable>().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                        Request().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
                             userAgent: discordUserAgent,
                             token: AccordCoreVars.shared.token,
                             type: .POST,
                             discordHeaders: true
-                        )) { _ in }
+                        ))
                     }
                 }, onCommit: {
                     chatTextFieldContents = textFieldContents
                     var temp = textFieldContents
                     textFieldContents = ""
-                    sending = true
+                    // sending = true
                     messageSendQueue.async {
                         if temp == "/shrug" {
                             temp = #"¯\_(ツ)_/¯"#
                         }
                         if (editing != nil) {
                             print(editing ?? "")
-                            Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
+                            Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
                                 userAgent: discordUserAgent,
                                 token: AccordCoreVars.shared.token,
                                 bodyObject: ["content":"\(String(temp))"],
                                 type: .PATCH,
                                 discordHeaders: true,
-                                empty: true
-                            )) { _ in }
+                                empty: true,
+                                json: true
+                            ))
                             editing = nil
                         } else {
                             if fileUpload != nil {
@@ -94,7 +95,7 @@ struct ChatControls: View {
                                 fileUploadURL = nil
                             } else {
                                 if replyingTo != nil {
-                                    Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                    Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
                                         bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
@@ -102,23 +103,21 @@ struct ChatControls: View {
                                         discordHeaders: true,
                                         empty: true,
                                         json: true
-                                    )) { _ in }
+                                    ))
                                     replyingTo = nil
                                 } else {
-                                    Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                    Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
                                         bodyObject: ["content":"\(String(temp))"],
                                         type: .POST,
                                         discordHeaders: true,
-                                        empty: true
-                                    )) { _ in }
+                                        empty: true,
+                                        json: true
+                                    ))
                                 }
-
                             }
                         }
-
-
                     }
                 })
                 .onAppear(perform: {

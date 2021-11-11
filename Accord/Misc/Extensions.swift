@@ -59,6 +59,19 @@ public extension Collection where Indices.Iterator.Element == Index {
     }
 }
 
+@propertyWrapper class AsynchronousImage {
+    var wrappedValue: NSImage = NSImage()
+    init(url: String) {
+        imageQueue.async {
+            Request().image(url: URL(string: url)) { [weak self] image in
+                if let image = image {
+                    self?.wrappedValue = image
+                }
+            }
+        }
+    }
+}
+
 public extension String {
     func capturedGroups(withRegex pattern: String) -> [String] {
         var results = [String]()

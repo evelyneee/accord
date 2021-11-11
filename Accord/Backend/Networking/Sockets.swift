@@ -45,6 +45,9 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
         MessageController.shared.sendWSError(msg: reason)
         print("[Accord] Error from Discord: \(reason)")
+        if reason.contains("auth") {
+            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: Data())
+        }
         // MARK: WebSocket close codes.
         switch closeCode {
         case .invalid:
@@ -78,9 +81,6 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         @unknown default:
             releaseModePrint("[Accord] Socket closed for unknown reason")
         }
-        #if DEBUG
-        // fatalError("Socket Disconnected: \(reason) \(closeCode)")
-        #endif
     }
 }
 
@@ -110,9 +110,8 @@ final class WebSocket {
         ws = session.webSocketTask(with: url!)
         ws.maximumMessageSize = 9999999999
         ws.resume()
-        initialReception()
-        ping()
-        authenticate()
+        self.hello()
+        self.authenticate()
         releaseModePrint("[Accord] Socket initiated")
     }
     
@@ -133,7 +132,7 @@ final class WebSocket {
     }
 
     // MARK: Initial WS setup
-    func initialReception() {
+    func hello() {
         ws.receive { [weak self] result in
             switch result {
             case .success(let message):
@@ -143,8 +142,8 @@ final class WebSocket {
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
                         let hello = self?.decodePayload(payload: data) ?? [:]
-                        self?.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 0
-                        DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 0), execute: {
+                        self?.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 10000
+                        wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: {
                             self?.heartbeat()
                         })
 
@@ -208,7 +207,7 @@ final class WebSocket {
                     self?.reconnect()
                 }
                 print("[Accord] heartbeat")
-                DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 0), execute: {
+                wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: {
                     self?.heartbeat()
                 })
             }
@@ -371,6 +370,7 @@ final class WebSocket {
                         case "GUILD_MEMBER_ADD": break
                         case "GUILD_MEMBER_REMOVE": break
                         case "GUILD_MEMBER_UPDATE": break
+                        case "GUILD_MEMBER_LIST_UPDATE": print(payload, "WEIRD EVENT"); break
                         case "GUILD_MEMBERS_CHUNK":
                             MessageController.shared.sendMemberChunk(msg: data)
                             break

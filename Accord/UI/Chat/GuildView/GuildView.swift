@@ -77,45 +77,12 @@ struct GuildView: View, Equatable {
                 List {
                     LazyVStack {
                         Spacer().frame(height: 93)
-                        // MARK: Sending animation
-                        #warning("TODO: Fix this animation")
-                        if (sending) && chatTextFieldContents != "" {
-                            sendingView
-                        }
                         // MARK: Message loop
                         ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
                             LazyVStack(alignment: .leading) {
                                 // MARK: - Reply
                                 if let reply = message.referenced_message {
-                                    HStack {
-                                        Spacer().frame(width: 50)
-                                        Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
-                                            .frame(width: 15, height: 15)
-                                            .scaledToFit()
-                                            .clipShape(Circle())
-                                        if let roleColor = roleColors[(viewModel!.roles[reply.author?.id ?? ""] ?? "")] {
-                                            Text(viewModel!.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                                                .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
-                                                .fontWeight(.semibold)
-                                            if #available(macOS 12.0, *) {
-                                                Text(try! AttributedString(markdown: reply.content))
-                                                    .lineLimit(0)
-                                            } else {
-                                                Text(reply.content)
-                                                    .lineLimit(0)
-                                            }
-                                        } else {
-                                            Text(viewModel!.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                                                .fontWeight(.semibold)
-                                            if #available(macOS 12.0, *) {
-                                                Text(try! AttributedString(markdown: reply.content))
-                                                    .lineLimit(0)
-                                            } else {
-                                                Text(reply.content)
-                                                    .lineLimit(0)
-                                            }
-                                        }
-                                    }
+                                    makeReplyView(reply: reply)
                                 }
                                 // MARK: - The actual message
                                 HStack(alignment: .top) {
@@ -146,9 +113,9 @@ struct GuildView: View, Equatable {
                                                         .fontWeight(.semibold)
                                                     textView
                                                 } else {
-                                                    if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.2 {
+                                                    if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
                                                         Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                            .foregroundColor(Color(roleColor))
+                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
                                                         textView
                                                     } else {
@@ -220,8 +187,8 @@ struct GuildView: View, Equatable {
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                 }
-                                ForEach(message.embeds ?? [], id: \.self) { embed in
-                                    EmbedView(embed)
+                                ForEach(message.embeds ?? [], id: \.id) { embed in
+                                    EmbedView(embed).equatable()
                                         .padding(.leading, (message.isSameAuthor() ? 0 : 41))
                                 }
 
@@ -229,7 +196,7 @@ struct GuildView: View, Equatable {
 
                                 if message.attachments.isEmpty == false {
                                     HStack {
-                                        AttachmentView(media: $viewModel.messages[offset].attachments)
+                                        AttachmentView(media: $viewModel.messages[offset].attachments).equatable()
                                         Spacer()
                                     }
                                     .frame(maxWidth: 400, maxHeight: 300)
@@ -271,15 +238,15 @@ struct GuildView: View, Equatable {
 }
 
 extension GuildView {
-    func ReplyView(reply: Reply, nick: String? = nil, roleColor: String? = nil) -> some View {
+    func makeReplyView(reply: Reply) -> some View {
         return HStack {
             Spacer().frame(width: 50)
             Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
                 .frame(width: 15, height: 15)
                 .scaledToFit()
                 .clipShape(Circle())
-            if let roleColor = roleColors[(viewModel!.roles[reply.author?.id ?? ""] ?? "")] {
-                Text(nick ?? reply.author?.username ?? "")
+            if let roleColor = roleColors[(viewModel.roles[reply.author?.id ?? ""] ?? "")] {
+                Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                     .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                     .fontWeight(.semibold)
                 if #available(macOS 12.0, *) {
@@ -290,7 +257,7 @@ extension GuildView {
                         .lineLimit(0)
                 }
             } else {
-                Text(nick ?? reply.author?.username ?? "")
+                Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                     .fontWeight(.semibold)
                 if #available(macOS 12.0, *) {
                     Text(try! AttributedString(markdown: reply.content))

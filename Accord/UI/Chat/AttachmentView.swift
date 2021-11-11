@@ -9,7 +9,10 @@ import SwiftUI
 import AVKit
 import Combine
 
-struct AttachmentView: View {
+struct AttachmentView: View, Equatable {
+    static func == (lhs: AttachmentView, rhs: AttachmentView) -> Bool {
+        return true
+    }
     @Binding var media: [AttachedFiles?]
     @State var currentImage: NSImage = NSImage()
     @State var animatedImages: [NSImage]? = []
@@ -31,13 +34,12 @@ struct AttachmentView: View {
                                         Image(nsImage: animatedImages?[value % (animatedImages?.count ?? 1)] ?? NSImage()).resizable()
                                             .scaledToFit()
                                             .frame(width: 400, height: 300)
-
                                     } else {
                                         Text("Loading...")
                                             .onAppear {
                                                 attachmentQueue.async {
                                                     currentImage = NSImage()
-                                                    Networking<AnyDecodable>().image(url: URL(string: media[index]!.url), to: nil) { image in
+                                                    Request().image(url: URL(string: media[index]!.url), to: nil) { image in
                                                         guard let gif = image as? Gif else { return }
                                                         animatedImages = gif.animatedImages
                                                         duration = Double(CFTimeInterval(gif.calculatedDuration ?? 0))
@@ -81,9 +83,6 @@ struct AttachmentView: View {
                         .buttonStyle(BorderlessButtonStyle())
                     }
                 }
-            }
-            .onChange(of: media) { newValue in
-                media = newValue
             }
         }
     }

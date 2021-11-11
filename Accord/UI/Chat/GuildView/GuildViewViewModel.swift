@@ -14,7 +14,6 @@ final class GuildViewViewModel: ObservableObject {
     @Published var messages = [Message]()
     @Published var nicks: [String:String] = [:]
     @Published var roles: [String:String] = [:]
-    @Published var refresh: Bool = false
     
     var requestCancellable: AnyCancellable?
     
@@ -25,7 +24,6 @@ final class GuildViewViewModel: ObservableObject {
         self.channelID = channelID
         self.guildID = guildID
         // messages are now read
-        MentionSender.shared.removeMentions(server: guildID)
         switch self.guildID == "@me" {
         case true:
             wss.subscribeToDM(channelID)
@@ -33,39 +31,28 @@ final class GuildViewViewModel: ObservableObject {
             wss.subscribe(guildID, channelID)
         }
         DispatchQueue(label: "Message Fetch Queue").async {
+            MentionSender.shared.removeMentions(server: guildID)
             // fetch messages
             self.getMessages(channelID: channelID, guildID: guildID)
-            // ACK
-            self.ack(channelID: channelID, guildID: guildID)
         }
+        self.ack(channelID: channelID, guildID: guildID)
     }
     
     func ack(channelID: String, guildID: String) {
-        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack")!, headers: Headers(
+        Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack")!, headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
-        )) { _ in }
-    }
-    
-    func processRoleColors(roles: [String:String]) {
-        let allIDs = messages.map { $0.author?.id ?? "" }
-        for id in allIDs {
-            let color = NSColor.color(from: roleColors[roles[id] ?? ""]?.0 ?? 0)
-            roleColors[roles[id] ?? ""]?.2 = color
-        }
-        DispatchQueue.main.async {
-            self.refresh.toggle()
-        }
+        ))
     }
     
     func getMessages(channelID: String, guildID: String) {
         if Thread.isMainThread {
             fatalError("Time consuming operations should not be called from main thread")
         }
-        requestCancellable = Networking<[Message]>().combineFetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
+        requestCancellable = Request().combineFetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .GET,
@@ -82,10 +69,14 @@ final class GuildViewViewModel: ObservableObject {
                 }
                 return element
             }
-            print(self.messages)
             DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
             self.fakeNicksObject()
         })
+    }
+    
+    func loadUser(for id: String?) {
+        guard let id = id else { return }
+        wss.getMembers(ids: [id], guild: guildID)
     }
     
     func fakeNicksObject() {

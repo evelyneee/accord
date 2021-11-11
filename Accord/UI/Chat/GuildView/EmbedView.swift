@@ -7,11 +7,17 @@
 
 import SwiftUI
 
-struct EmbedView: View {
+struct EmbedView: View, Equatable {
     var embed: Embed
+    
+    static func == (lhs: EmbedView, rhs: EmbedView) -> Bool {
+        return true
+    }
+    
     init(_ embed: Embed) {
         self.embed = embed
     }
+
     var body: some View {
         HStack(spacing: 0) {
             if let color = embed.color {

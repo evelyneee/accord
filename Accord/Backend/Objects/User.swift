@@ -33,7 +33,7 @@ final class User: Codable, Identifiable, Hashable {
     
     func isMe() -> Bool { user_id == self.id }
     func loadPfp() {
-        Networking<AnyDecodable>().image(url: URL(string: pfpURL(self.id, self.avatar))) { avatar in
+        Request().image(url: URL(string: pfpURL(self.id, self.avatar))) { avatar in
             guard let avatar = avatar else { return }
             self.pfp = avatar.tiffRepresentation
         }
@@ -48,7 +48,7 @@ final class User: Codable, Identifiable, Hashable {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
-        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
+        Request().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     func removeFriend(_ guild: String, _ channel: String) {
         let headers = Headers(
@@ -58,7 +58,7 @@ final class User: Codable, Identifiable, Hashable {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
-        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
+        Request().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     func block(_ guild: String, _ channel: String) {
         let headers = Headers(
@@ -69,7 +69,7 @@ final class User: Codable, Identifiable, Hashable {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guild)/\(channel)"
         )
-        Networking<AnyDecodable>().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers) { _ in }
+        Request().fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     
     func hash(into hasher: inout Hasher) {
