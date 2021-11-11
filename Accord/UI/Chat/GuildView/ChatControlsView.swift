@@ -60,7 +60,7 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
                     messageSendQueue.async {
-                        Request().fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                        Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
                             userAgent: discordUserAgent,
                             token: AccordCoreVars.shared.token,
                             type: .POST,
@@ -78,7 +78,7 @@ struct ChatControls: View {
                         }
                         if (editing != nil) {
                             print(editing ?? "")
-                            Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
+                            Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
                                 userAgent: discordUserAgent,
                                 token: AccordCoreVars.shared.token,
                                 bodyObject: ["content":"\(String(temp))"],
@@ -95,7 +95,7 @@ struct ChatControls: View {
                                 fileUploadURL = nil
                             } else {
                                 if replyingTo != nil {
-                                    Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                    Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
                                         bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
@@ -106,7 +106,7 @@ struct ChatControls: View {
                                     ))
                                     replyingTo = nil
                                 } else {
-                                    Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                    Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
                                         bodyObject: ["content":"\(String(temp))"],

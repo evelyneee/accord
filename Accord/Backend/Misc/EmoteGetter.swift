@@ -56,7 +56,7 @@ struct GifView: View {
             DispatchQueue.main.async {
                 currentImage = NSImage()
 
-                Request().image(url: URL(string: url), to: nil) { image in
+                Request.image(url: URL(string: url), to: nil) { image in
                     guard let gif = image as? Gif else { return }
                     animatedImages = gif.animatedImages
                     duration = Double(CFTimeInterval(gif.calculatedDuration ?? 0))

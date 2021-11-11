@@ -44,7 +44,7 @@ final class Message: Codable, Equatable, Identifiable, Hashable {
                               type: .DELETE,
                               discordHeaders: true,
                               empty: true)
-        Request().fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
     func edit(now: String) {
         let headers = Headers(userAgent: discordUserAgent,
@@ -54,7 +54,7 @@ final class Message: Codable, Equatable, Identifiable, Hashable {
                               type: .PATCH,
                               discordHeaders: true,
                               empty: true)
-        Request().fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
     func isSameAuthor() -> Bool { lastMessage?.author?.id == self.author?.id }
 }

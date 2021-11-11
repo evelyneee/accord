@@ -249,6 +249,7 @@ final class WebSocket {
         let reason = "Closing connection".data(using: .utf8)
         ws.cancel(with: .goingAway, reason: reason)
     }
+    
     final func reconnect() {
         let packet: [String:Any] = [
             "op":6,
@@ -258,7 +259,6 @@ final class WebSocket {
                 "token":AccordCoreVars.shared.token
             ]
         ]
-        print("RECONNECT SENDING", packet)
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
@@ -269,6 +269,7 @@ final class WebSocket {
             }
         }
     }
+    
     final func subscribe(_ guild: String, _ channel: String) {
         let packet: [String:Any] = [
             "op":14,
@@ -278,7 +279,7 @@ final class WebSocket {
                 "activities":true,
                 "threads":false,
                 "members":[]
-            ],
+            ]
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
@@ -442,17 +443,25 @@ final class WebSocket {
             case .success(let message):
                 switch message {
                 case .string(let text):
-                    if let textData = text.data(using: String.Encoding.utf8), let payload = self?.decodePayload(payload: textData) {
-                        if payload["s"] as? Int != nil {
-                            self?.seq = payload["s"] as? Int
-                        } else {
-                            if (payload["op"] as? Int ?? 0) != 11 {
-                                self?.reconnect()
-                            } else {
+                    if let textData = text.data(using: .utf8) {
+                        guard let payload = self?.decodePayload(payload: textData), let op = payload["op"] as? Int else { return }
+                        guard let s = payload["s"] as? Int else {
+                            if op == 11 {
+                                // no seq + op 11 means a hearbeat was done successfully
                                 print("[Accord] Heartbeat successful")
+                                self?.receive()
+                            } else {
+                                // disconnected?
+                                self?.reconnect()
                             }
+                            return
                         }
-                        switch payload["t"] as? String ?? "" {
+                        self?.seq = s
+                        guard let t = payload["t"] as? String else {
+                            self?.receive()
+                            return
+                        }
+                        switch t {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
                                                                 in: .userDomainMask)[0].appendingPathComponent("socketOut.json")

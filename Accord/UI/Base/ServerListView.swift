@@ -113,7 +113,7 @@ struct ServerListView: View {
                             .fontWeight(.bold)
                         .onAppear(perform: {
                             concurrentQueue.async {
-                                Request().fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
+                                Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
                                     if let channels = channels {
                                         privateChannels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                                         Notifications.shared.privateChannels = privateChannels.map { $0.id }
@@ -131,13 +131,13 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(privateChannels, id: \.id) { channel in
-                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "").equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "").equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
                                     HStack {
                                         Image(systemName: "number") // normal channel
-                                        Text(channel.name ?? channel.recipients?[0].username ?? "")
+                                        Text(channel?.name ?? channel?.recipients?[0].username ?? "")
                                         Spacer()
 
-                                        if let readState = channel.read_state {
+                                        if let readState = channel?.read_state {
                                             if readState.mention_count != 0 {
                                                 ZStack {
                                                     Circle()
@@ -151,14 +151,13 @@ struct ServerListView: View {
                                             }
                                         }
                                         Button(action: {
-                                            showWindow(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "")
+                                            showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: channel?.name ?? "")
                                         }) {
                                             Image(systemName: "arrow.up.right.circle")
                                         }
                                     }
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
-
                             }
                         }
                     }

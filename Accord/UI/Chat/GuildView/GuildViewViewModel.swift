@@ -39,7 +39,7 @@ final class GuildViewViewModel: ObservableObject {
     }
     
     func ack(channelID: String, guildID: String) {
-        Request().fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack")!, headers: Headers(
+        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack")!, headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .POST,
@@ -52,7 +52,7 @@ final class GuildViewViewModel: ObservableObject {
         if Thread.isMainThread {
             fatalError("Time consuming operations should not be called from main thread")
         }
-        requestCancellable = Request().combineFetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
+        requestCancellable = Request.combineFetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .GET,

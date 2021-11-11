@@ -123,7 +123,7 @@ final class AccordMarkdown {
             // I'm sorry.
             if ((text.prefix(2) == "<:" || text.prefix(3) == #"\<:"#) && text.suffix(1) == ">") || ((text.prefix(4) == #"\<a:"# || text.prefix(3) == "<a:") && text.suffix(1) == ">") {
                 if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(String(text.dropLast().suffix(18))).png?size=40") {
-                    Request().image(url: emoteURL, to: CGSize(width: 40, height: 40)) { image in
+                    Request.image(url: emoteURL, to: CGSize(width: 40, height: 40)) { image in
                         if let image = image {
                             textArray.append(Text("\(Image(nsImage: image))"))
                         }
@@ -146,7 +146,7 @@ final class AccordMarkdown {
                 }
             } else if text.prefix(5) == "https" && text.suffix(4) == ".png" {
                 if let url = URL(string: text) {
-                    Request().image(url: url, to: CGSize(width: 40, height: 40)) { image in
+                    Request.image(url: url, to: CGSize(width: 40, height: 40)) { image in
                         if let image = image {
                             textArray.append(Text("\(Image(nsImage: image))"))
                         }

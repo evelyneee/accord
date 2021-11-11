@@ -19,7 +19,7 @@ extension GuildView {
                 Button("Load more messages") {
                     let extraMessageLoadQueue = DispatchQueue(label: "Message Load Queue", attributes: .concurrent)
                     extraMessageLoadQueue.async {
-                        Request().fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?before=\(viewModel.messages.last?.id ?? "")&limit=50"), headers: Headers(
+                        Request.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?before=\(viewModel.messages.last?.id ?? "")&limit=50"), headers: Headers(
                             userAgent: discordUserAgent,
                             token: AccordCoreVars.shared.token,
                             type: .GET,

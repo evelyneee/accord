@@ -38,6 +38,37 @@ final class Headers {
     var referer: String?
     var empty: Bool?
     var json: Bool
+    func set(request: inout URLRequest, config: inout URLSessionConfiguration) {
+        if let userAgent = self.userAgent {
+            config.httpAdditionalHeaders = ["User-Agent": userAgent]
+        }
+        if let contentType = self.contentType, !(self.json) {
+            request.addValue(contentType, forHTTPHeaderField: "Content-Type")
+        }
+        if let token = self.token {
+            request.addValue(token, forHTTPHeaderField: "Authorization")
+        }
+        if self.json {
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try! JSONSerialization.data(withJSONObject: self.bodyObject ?? [:], options: [])
+        } else if let bodyObject = self.bodyObject {
+            let bodyString = bodyObject.queryParameters
+            request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+        }
+        if self.discordHeaders {
+            request.addValue("discord.com", forHTTPHeaderField: ":authority")
+            request.addValue("https://discord.com", forHTTPHeaderField: "origin")
+            request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
+            request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+            request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
+            request.addValue(self.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
+        }
+        if let referer = self.referer {
+            request.addValue(referer, forHTTPHeaderField: "referer")
+        }
+
+        request.httpMethod = self.type.rawValue
+    }
 }
 
 var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
@@ -48,46 +79,24 @@ final class Request {
     struct AnyDecodable: Decodable { }
     
     // MARK: - Perform request with completion handler
-    func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>) -> Void)) -> Void {
-        guard request != nil || url != nil else {
-            fatalError("[Networking] Either the URL is invalid or you need to provide a request method")
-        }
+    final public class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>) -> Void)) -> Void {
         
-        var request = request ?? URLRequest(url: url!)
-        let config = URLSessionConfiguration.default
+        let request: URLRequest? = {
+            if let request = request {
+                return request
+            } else if let url = url {
+                return URLRequest(url: url)
+            } else {
+                print("[Networking] You need to provide a request method")
+                return nil
+            }
+        }()
+        guard var request = request else { return completion(nil) }
+        var config = URLSessionConfiguration.default
         
-        // Set headers from headers object
-        if let headers = headers {
-            if let userAgent = headers.userAgent {
-                config.httpAdditionalHeaders = ["User-Agent": userAgent]
-            }
-            if let contentType = headers.contentType, !(headers.json) {
-                request.addValue(contentType, forHTTPHeaderField: "Content-Type")
-            }
-            if let token = headers.token {
-                request.addValue(token, forHTTPHeaderField: "Authorization")
-            }
-            if headers.json {
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.httpBody = try! JSONSerialization.data(withJSONObject: headers.bodyObject ?? [:], options: [])
-            } else if let bodyObject = headers.bodyObject {
-                let bodyString = bodyObject.queryParameters
-                request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
-            }
-            if headers.discordHeaders {
-                request.addValue("discord.com", forHTTPHeaderField: ":authority")
-                request.addValue("https://discord.com", forHTTPHeaderField: "origin")
-                request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
-                request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
-                request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
-                request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
-            }
-            if let referer = headers.referer {
-                request.addValue(referer, forHTTPHeaderField: "referer")
-            }
-
-            request.httpMethod = headers.type.rawValue
-        }
+        // Set headers
+        headers?.set(request: &request, config: &config)
+        
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
             if let data = data {
                 guard error == nil else {
@@ -104,51 +113,29 @@ final class Request {
     }
     
     // MARK: - fetch() wrapper for empty requests without completion handlers
-    func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
+    final public class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
         self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _ in }
     }
     
     // MARK: - Get a publisher for the request
-    func combineFetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
-        guard request != nil || url != nil else {
-            fatalError("[Networking] You need to provide a request method")
-        }
+    final public class func combineFetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
         
-        var request = request ?? URLRequest(url: url!)
-        let config = URLSessionConfiguration.default
+        let request: URLRequest? = {
+            if let request = request {
+                return request
+            } else if let url = url {
+                return URLRequest(url: url)
+            } else {
+                print("[Networking] You need to provide a request method")
+                return nil
+            }
+        }()
+        guard var request = request else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
+        var config = URLSessionConfiguration.default
         
-        // Set headers from headers object
-        if let headers = headers {
-            if let userAgent = headers.userAgent {
-                config.httpAdditionalHeaders = ["User-Agent": userAgent]
-            }
-            if let contentType = headers.contentType, !(headers.json) {
-                request.addValue(contentType, forHTTPHeaderField: "Content-Type")
-            }
-            if let token = headers.token {
-                request.addValue(token, forHTTPHeaderField: "Authorization")
-            }
-            if headers.json {
-                request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.httpBody = try! JSONSerialization.data(withJSONObject: headers.bodyObject ?? [:], options: [])
-            } else if let bodyObject = headers.bodyObject {
-                let bodyString = bodyObject.queryParameters
-                request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
-            }
-            if headers.discordHeaders {
-                request.addValue("discord.com", forHTTPHeaderField: ":authority")
-                request.addValue("https://discord.com", forHTTPHeaderField: "origin")
-                request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
-                request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
-                request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
-                request.addValue(headers.userAgent ?? "WebKit", forHTTPHeaderField: "user-agent")
-            }
-            if let referer = headers.referer {
-                request.addValue(referer, forHTTPHeaderField: "referer")
-            }
-
-            request.httpMethod = headers.type.rawValue
-        }
+        // Set headers
+        headers?.set(request: &request, config: &config)
+        
         return URLSession(configuration: config).dataTaskPublisher(for: request)
             .map { $0.data }
             .decode(type: T.self, decoder: JSONDecoder())
@@ -156,8 +143,8 @@ final class Request {
     }
     
     // MARK: - Image getter
-    func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: Optional<NSImage>) -> Void)) {
-        guard let url = url else { return }
+    final public class func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: Optional<NSImage>) -> Void)) {
+        guard let url = url else { return completion(nil) }
         let request = URLRequest(url: url)
         if let cachedImage = cache.cachedResponse(for: request) {
             return completion(NSImage(data: cachedImage.data) ?? NSImage())

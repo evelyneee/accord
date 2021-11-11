@@ -63,7 +63,7 @@ public extension Collection where Indices.Iterator.Element == Index {
     var wrappedValue: NSImage = NSImage()
     init(url: String) {
         imageQueue.async {
-            Request().image(url: URL(string: url)) { [weak self] image in
+            Request.image(url: URL(string: url)) { [weak self] image in
                 if let image = image {
                     self?.wrappedValue = image
                 }

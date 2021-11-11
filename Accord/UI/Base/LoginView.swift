@@ -115,7 +115,7 @@ struct LoginView: View {
                     TextField("2fa code", text: $twofactor)
                     Button("Login") {
                         self.captchaPayload = notif["key"] as? String ?? ""
-                        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+                        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
                             userAgent: discordUserAgent,
                             contentType: "application/json",
                             bodyObject: [
@@ -140,7 +140,7 @@ struct LoginView: View {
                                 exit(EXIT_SUCCESS)
                             }
                             if let response = response, let ticket = response.ticket {
-                                Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
+                                Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                                     contentType: "application/json",
                                     token: AccordCoreVars.shared.token,
                                     bodyObject: ["code": twofactor, "ticket": ticket],
@@ -192,7 +192,7 @@ final class LoginViewViewModel: ObservableObject {
     
     func login(_ email: String, _ password: String, _ twofactor: String) throws {
         var loginError: Error? = nil
-        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
             bodyObject: [
@@ -231,7 +231,7 @@ final class LoginViewViewModel: ObservableObject {
                         }
                     } else if let ticket = response.ticket {
                         print("[Login debug] Got ticket")
-                        Request().fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
+                        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                             contentType: "application/json",
                             token: AccordCoreVars.shared.token,
                             bodyObject: ["code": twofactor, "ticket": ticket],
