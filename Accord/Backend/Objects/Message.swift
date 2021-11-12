@@ -43,6 +43,7 @@ final class Message: Codable, Equatable, Identifiable, Hashable {
                               token: AccordCoreVars.shared.token,
                               type: .DELETE,
                               discordHeaders: true,
+                              referer: "https://discord.com/channels/\(channel_id)/\(id)",
                               empty: true)
         Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
@@ -53,6 +54,7 @@ final class Message: Codable, Equatable, Identifiable, Hashable {
                               bodyObject: ["content":now],
                               type: .PATCH,
                               discordHeaders: true,
+                              referer: "https://discord.com/channels/\(channel_id)/\(id)",
                               empty: true)
         Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }

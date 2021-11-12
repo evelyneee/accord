@@ -71,7 +71,14 @@ final class Headers {
     }
 }
 
-var standardHeaders = Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.shared.token, type: .GET, discordHeaders: true)
+var standardHeaders = Headers(
+    userAgent: discordUserAgent,
+    contentType: nil,
+    token: AccordCoreVars.shared.token,
+    type: .GET,
+    discordHeaders: true,
+    referer: "https://discord.com/channels/@me"
+)
 
 final class Request {
     
@@ -153,14 +160,14 @@ final class Request {
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard error == nil,
               let data = data,
-                let imageData = NSImage(data: data)?.downsample(to: size ?? CGSize(width: 600, height: 600)),
-                    let image = NSImage(data: imageData) else {
+                  let image = (size != nil ? NSImage(data: data)?.downsample(to: size ?? CGSize(width: 600, height: 600)) : NSImage(data: data)) else {
                       print(error?.localizedDescription ?? "unknown error")
                       return completion(nil)
             }
-            cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
+            if let data = image.tiffRepresentation {
+                cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+            }
             return completion(image)
         }).resume()
     }
 }
-

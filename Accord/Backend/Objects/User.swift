@@ -41,35 +41,35 @@ final class User: Codable, Identifiable, Hashable {
     
     // MARK: - Relationships
     func addFriend(_ guild: String, _ channel: String) {
-        let headers = Headers(
-            userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
-            type: .PUT,
-            discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild)/\(channel)"
-        )
-        Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
+//        let headers = Headers(
+//            userAgent: discordUserAgent,
+//            token: AccordCoreVars.shared.token,
+//            type: .PUT,
+//            discordHeaders: true,
+//            referer: "https://discord.com/channels/\(guild)/\(channel)"
+//        )
+//         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     func removeFriend(_ guild: String, _ channel: String) {
-        let headers = Headers(
-            userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
-            type: .DELETE,
-            discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild)/\(channel)"
-        )
-        Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
+//        let headers = Headers(
+//            userAgent: discordUserAgent,
+//            token: AccordCoreVars.shared.token,
+//            type: .DELETE,
+//            discordHeaders: true,
+//            referer: "https://discord.com/channels/\(guild)/\(channel)"
+//        )
+//         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     func block(_ guild: String, _ channel: String) {
-        let headers = Headers(
-            userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
-            bodyObject: ["type":2],
-            type: .PUT,
-            discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild)/\(channel)"
-        )
-        Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
+//        let headers = Headers(
+//            userAgent: discordUserAgent,
+//            token: AccordCoreVars.shared.token,
+//            bodyObject: ["type":2],
+//            type: .PUT,
+//            discordHeaders: true,
+//            referer: "https://discord.com/channels/\(guild)/\(channel)"
+//        )
+//         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
     
     func hash(into hasher: inout Hasher) {

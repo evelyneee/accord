@@ -286,12 +286,12 @@
 		A82521382687ABC50073F640 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
-				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
+				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
+				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
+				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */,
 				A89BE785266BDFB3007B0CBF /* Sockets.swift */,
-				A85D3FDD2677A681002327AD /* Images.swift */,
-				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
-				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
+				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -299,23 +299,23 @@
 		A82521392687ABD40073F640 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
-				A8C73D1326F583A000CF0350 /* SongLink.swift */,
-				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
-				A82A061F26D98193007B9B27 /* Settings.swift */,
-				A82A062326D98259007B9B27 /* ReadState.swift */,
-				A82A062126D981B4007B9B27 /* Status.swift */,
-				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
-				A8B1F2A126CB171600E8FDC5 /* Enums.swift */,
-				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
-				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
-				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
-				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
 				A8B1F29B26CB16C400E8FDC5 /* Attachment.swift */,
-				A8B1F29926CB169800E8FDC5 /* Message.swift */,
-				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
-				A8B1F29526CB163B00E8FDC5 /* User.swift */,
+				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
 				A80FEC30272583B4005F9950 /* Embed.swift */,
+				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
+				A8B1F2A126CB171600E8FDC5 /* Enums.swift */,
+				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
+				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
+				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
 				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
+				A8B1F29926CB169800E8FDC5 /* Message.swift */,
+				A82A062326D98259007B9B27 /* ReadState.swift */,
+				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
+				A82A061F26D98193007B9B27 /* Settings.swift */,
+				A8C73D1326F583A000CF0350 /* SongLink.swift */,
+				A82A062126D981B4007B9B27 /* Status.swift */,
+				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
+				A8B1F29526CB163B00E8FDC5 /* User.swift */,
 			);
 			path = Objects;
 			sourceTree = "<group>";

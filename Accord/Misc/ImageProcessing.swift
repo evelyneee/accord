@@ -88,12 +88,14 @@ extension NSImage {
     }
     
     // Thanks Amy 🙂
-    func downsample(to pointSize: CGSize? = nil, scale: CGFloat? = nil) -> Data? {
+    func downsample(to pointSize: CGSize? = nil, scale: CGFloat? = nil) -> NSImage? {
         let size = pointSize ?? CGSize(width: self.width, height: self.height)
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let data = self.tiffRepresentation as CFData?,
               let imageSource = CGImageSourceCreateWithData(data, imageSourceOptions) else { return nil }
-        return self.downsample(source: imageSource, size: size, scale: scale)
+        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
+        guard let downsampled = downsampled else { return nil }
+        return NSImage(data: downsampled)
     }
     
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
