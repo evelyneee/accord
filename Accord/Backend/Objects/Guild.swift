@@ -57,8 +57,8 @@ final class Guild: Decodable, Equatable {
     var vanity_url_code: String?
     var description: String?
     var banner: String?
-    // var premium_tier: Int?
-    // var premium_subscription_count: Int?
+    var premium_tier: Int?
+    var premium_subscription_count: Int?
     // var preferred_locale: String?
     // var public_updates_channel_id: String?
     // var max_video_channel_users: Int?

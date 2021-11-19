@@ -24,7 +24,7 @@ class GatewayD: Decodable {
     var session_id: String
     // var relationships: [Relationship]
     var read_state: ReadState?
-    var private_channels: [Channel]?
+    // var private_channels: [Channel]?
     // var merged_members: [[User]]
     var guilds: [Guild]
     // var guild_join_requests: [GuildJoinRequest]?

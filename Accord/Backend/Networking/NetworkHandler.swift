@@ -17,6 +17,16 @@ public enum RequestTypes: String {
     case PATCH = "PATCH"
 }
 
+final class DiscordError: Codable {
+    var code: Int
+    var message: String?
+}
+
+func logOut() {
+    _ = KeychainManager.save(key: "me.evelyn.accord.token", data: Data())
+    NSApplication.shared.restart()
+}
+
 final class Headers {
     init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false) {
         self.userAgent = userAgent
@@ -85,8 +95,15 @@ final class Request {
     // MARK: - Empty Decodable
     struct AnyDecodable: Decodable { }
     
+    enum FetchErrors: Error {
+        case invalidRequest
+        case badResponse(URLResponse?)
+        case notRequired
+        case decodingError(String, Error)
+    }
+    
     // MARK: - Perform request with completion handler
-    final public class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>) -> Void)) -> Void {
+    final public class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>, _ error: Error?) -> Void)) -> Void {
         
         let request: URLRequest? = {
             if let request = request {
@@ -98,8 +115,9 @@ final class Request {
                 return nil
             }
         }()
-        guard var request = request else { return completion(nil) }
+        guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
         var config = URLSessionConfiguration.default
+        config.setProxy()
         
         // Set headers
         headers?.set(request: &request, config: &config)
@@ -107,21 +125,31 @@ final class Request {
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
             if let data = data {
                 guard error == nil else {
-                    print(error?.localizedDescription ?? "unknown error")
-                    return completion(nil)
+                    print(error?.localizedDescription ?? "Unknown Error")
+                    return completion(nil, FetchErrors.badResponse(response))
                 }
-                if T.self == AnyDecodable.self || headers?.empty ?? false {
-                    return completion(nil) // Bail out if we don't ask for a type
+                if T.self == AnyDecodable.self {
+                    return completion(nil, FetchErrors.notRequired) // Bail out if we don't ask for a type
                 }
-                let value = try? JSONDecoder().decode(T.self, from: data)
-                return completion(value)
+                do {
+                    let value = try JSONDecoder().decode(T.self, from: data)
+                    return completion(value, nil)
+                } catch {
+                    guard let error = try? JSONDecoder().decode(DiscordError.self, from: data) else {
+                        guard let strError = String(data: data, encoding: .utf8) else { return }
+                        return completion(nil, FetchErrors.decodingError(strError, error))
+                    }
+                    if let message = error.message, message.contains("Unauthorized") {
+                        logOut()
+                    }
+                }
             }
         }).resume()
     }
     
     // MARK: - fetch() wrapper for empty requests without completion handlers
     final public class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
-        self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _ in }
+        self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _, _ in }
     }
     
     // MARK: - Get a publisher for the request
@@ -156,11 +184,10 @@ final class Request {
         if let cachedImage = cache.cachedResponse(for: request) {
             return completion(NSImage(data: cachedImage.data) ?? NSImage())
         }
-
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard error == nil,
               let data = data,
-                  let image = (size != nil ? NSImage(data: data)?.downsample(to: size ?? CGSize(width: 600, height: 600)) : NSImage(data: data)) else {
+                  let image = (size != nil ? NSImage(data: data)?.downsample(to: size!) : NSImage(data: data)) else {
                       print(error?.localizedDescription ?? "unknown error")
                       return completion(nil)
             }

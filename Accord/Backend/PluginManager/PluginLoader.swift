@@ -12,31 +12,32 @@ import AppKit
 import SwiftUI
 
 final class Plugins {
-    
     func loadView(url: String) -> AccordPlugin? {
-        let pluginClass = LoadPlugin(onto: AccordPlugin.self, dylib: url).init()
+        let pluginClass = LoadPlugin(onto: AccordPlugin.self, dylib: url)?.init()
         return pluginClass
     }
     
-    func LoadPlugin<T>(onto: T.Type, dylib: String) -> T.Type {
+    func LoadPlugin<T>(onto: T.Type, dylib: String) -> Optional<T.Type> {
         guard let handle = dlopen(dylib, RTLD_NOW) else {
-            fatalError("Could not open \(dylib) \(String(cString: dlerror()))")
+            releaseModePrint("Could not open \(dylib) \(String(cString: dlerror()))")
+            return nil
         }
 
         guard let replacement = dlsym(handle, "principalClass") else {
-            fatalError("Could not locate principalClass function")
+            releaseModePrint("Could not locate principalClass function")
+            return nil
         }
 
         let principalClass = unsafeBitCast(replacement,
                 to: (@convention (c) () -> UnsafeRawPointer).self)
         return unsafeBitCast(principalClass(), to: T.Type.self)
     }
-
 }
+
 
 @objc open class AccordPlugin: NSObject {
 
-    override required public init() {  }
+    override required public init() { }
 
     open var body: NSView? = nil
     open var name = ""
@@ -85,4 +86,3 @@ struct NSViewWrapper: NSViewRepresentable {
      }
  }
  */
-                        

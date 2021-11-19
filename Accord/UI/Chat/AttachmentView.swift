@@ -39,25 +39,25 @@ struct AttachmentView: View, Equatable {
                                             .onAppear {
                                                 attachmentQueue.async {
                                                     currentImage = NSImage()
-                                                    Request.image(url: URL(string: media[index]!.url), to: nil) { image in
+                                                    guard let media = media[index] else { return }
+                                                    Request.image(url: URL(string: media.url), to: nil) { image in
                                                         guard let gif = image as? Gif else { return }
                                                         animatedImages = gif.animatedImages
+                                                        guard let animatedImages = animatedImages else { return }
                                                         duration = Double(CFTimeInterval(gif.calculatedDuration ?? 0))
-                                                        setinterval = Double(duration / Double(animatedImages?.count ?? 1))
-                                                        print(Double(duration / Double(animatedImages?.count ?? 1)))
-                                                        self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
+                                                        setinterval = Double(duration / Double(animatedImages.count))
+                                                        self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages.count)), repeats: true) { _ in
                                                             if self.setinterval != 0 {
                                                                 print(value)
-                                                                (self.value) += 1 % animatedImages!.count
+                                                                (self.value) += 1 % animatedImages.count
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
                                     }
-
                                 } else {
-                                    StockAttachment(media[index]!.url).equatable()
+                                    Attachment(media[index]!.url, size: CGSize(width: 500, height: 400)).equatable()
                                         .cornerRadius(5)
                                 }
                             }

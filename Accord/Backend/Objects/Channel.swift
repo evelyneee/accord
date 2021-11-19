@@ -7,15 +7,15 @@
 
 import Foundation
 
-final class Channel: Decodable, Identifiable, Hashable {
+final class Channel: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
         lhs.hashValue == rhs.hashValue
     }
 
-    var id: String
-    var type: ChannelType
+    let id: String
+    let type: ChannelType
     var guild_id: String?
-    var position: Int?
+    let position: Int?
     // TODO: Overwrite objects
     // var permission_overwrites: ?
     var name: String?
@@ -30,7 +30,7 @@ final class Channel: Decodable, Identifiable, Hashable {
     var icon: String?
     var owner_id: String?
     // var application_id: String?
-    var parent_id: String?
+    let parent_id: String?
     // var last_pin_timestamp: String?
     // TODO: ISO8601 timestamp
     //  var rtc_region: ?
@@ -46,11 +46,11 @@ final class Channel: Decodable, Identifiable, Hashable {
 
     var read_state: ReadStateEntry?
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id.appending(String(describing: read_state?.mention_count ?? 0)))
+        hasher.combine(self.id.appending(String(describing: read_state?.mention_count ?? 0)))
     }
 }
 
-enum ChannelType: Int, Decodable {
+enum ChannelType: Int, Codable {
     case normal = 0
     case dm = 1
     case voice = 2
@@ -58,8 +58,12 @@ enum ChannelType: Int, Decodable {
     case section = 4
     case guild_news = 5
     case guild_store = 6
+    case unknown1 = 7
+    case unknown2 = 8
+    case unknown3 = 9
     case guild_news_thread = 10
     case guild_public_thread = 11
     case guild_private_thread = 12
     case stage = 13
+    case unknown4 = 14
 }

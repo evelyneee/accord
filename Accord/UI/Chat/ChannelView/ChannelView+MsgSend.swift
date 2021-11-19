@@ -1,6 +1,6 @@
 //
-//  GuildView+MsgSend.swift
-//  GuildView+MsgSend
+//  ChannelView+MsgSend.swift
+//  ChannelView+MsgSend
 //
 //  Created by evelyn on 2021-08-23.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-extension GuildView {
+extension ChannelView {
     var sendingView: some View {
         return HStack(alignment: .top) {
             if viewModel.messages.first?.author?.id != user_id {

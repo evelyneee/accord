@@ -92,7 +92,7 @@ final class WebSocket {
     let webSocketDelegate = WebSocketDelegate.shared
     var session_id: String? = nil
     var seq: Int? = nil
-    var heartbeat_interval: Int? = nil
+    var heartbeat_interval: Int = 0
     var cachedMemberRequest: [String:GuildMember] = [:]
     typealias completionBlock = ((_ value: Optional<GatewayD>) -> Void)
     
@@ -101,10 +101,10 @@ final class WebSocket {
         
         releaseModePrint("[Accord] [Socket] Hello world!")
 
-        var config = URLSessionConfiguration.default
+        let config = URLSessionConfiguration.default
         
         if proxyEnabled {
-            config = config.setProxy()
+            config.setProxy()
         }
         session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
         ws = session.webSocketTask(with: url!)
@@ -113,6 +113,14 @@ final class WebSocket {
         self.hello()
         self.authenticate()
         releaseModePrint("[Accord] Socket initiated")
+    }
+    
+    func reset() {
+        ws.cancel()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+            wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
+        })
+        wss = nil
     }
     
     // MARK: - Ping
@@ -133,7 +141,7 @@ final class WebSocket {
 
     // MARK: Initial WS setup
     func hello() {
-        ws.receive { [weak self] result in
+        ws.receive { [weak self, ws] result in
             switch result {
             case .success(let message):
                 switch message {
@@ -141,9 +149,11 @@ final class WebSocket {
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
-                        let hello = self?.decodePayload(payload: data) ?? [:]
-                        self?.heartbeat_interval = (hello["d"] as? [String:Any] ?? [:])["heartbeat_interval"] as? Int ?? 10000
-                        wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: {
+                        guard let hello = self?.decodePayload(payload: data) else { ws?.cancel(); return }
+                        guard let hello = hello["d"] as? [String:Any] else { ws?.cancel(); return }
+                        guard let heartbeat_interval = hello["heartbeat_interval"] as? Int else { ws?.cancel(); return }
+                        self?.heartbeat_interval = heartbeat_interval
+                        wssThread.asyncAfter(deadline: .now() + .milliseconds(heartbeat_interval), execute: {
                             self?.heartbeat()
                         })
 
@@ -168,17 +178,20 @@ final class WebSocket {
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
-                        let path = FileManager.default.urls(for: .cachesDirectory,
-                                                            in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                        releaseModePrint(path)
-                        try! data.write(to: path)
-                        guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: data) else {
+                        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                        releaseModePrint("Cached Gateway payload at ", path.absoluteString.dropFirst(7))
+                        try? data.write(to: path)
+                        do {
+                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                            wssThread.async {
+                                self.receive()
+                            }
+                            releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
+                            return completion(structure.d)
+                        } catch {
+                            releaseModePrint(error)
                             return completion(nil)
                         }
-                        wssThread.async {
-                            self.receive()
-                        }
-                        return completion(structure.d)
                     }
                 @unknown default:
                     print("[Accord] unknown")
@@ -193,22 +206,22 @@ final class WebSocket {
     
     // MARK: ACK
     func heartbeat() {
+        guard let seq = seq else {
+            self.reset()
+            return
+        }
         let packet: [String:Any] = [
             "op":1,
-            "d":self.seq ?? 0
+            "d":seq
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { [weak self] error in
-                if let error = error {
-                    releaseModePrint("[Accord] WebSocket sending error: \(error)")
-                    print("[Accord] RECONNECT")
-                    self?.ws.resume()
-                    self?.reconnect()
+            ws.send(.string(jsonString)) { error in
+                if let _ = error {
+                    self.reconnect()
                 }
-                print("[Accord] heartbeat")
-                wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: {
-                    self?.heartbeat()
+                wssThread.asyncAfter(deadline: .now() + .milliseconds(self.heartbeat_interval), execute: {
+                    self.heartbeat()
                 })
             }
         }
@@ -388,12 +401,20 @@ final class WebSocket {
                             } else if let channelID = dict["channel_id"] as? String {
                                 MessageController.shared.sendMessage(msg: data, channelID: channelID)
                             }
-                            if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
-                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                MentionSender.shared.addMention(guild: dict["guild_id"] as? String ?? "@me", channel: dict["channel_id"] as! String)
-                            } else if Notifications.shared.privateChannels.contains(dict["channel_id"] as! String) && ((((payload["d"] as! [String: Any])["author"]) as! [String:Any])["id"] as? String ?? "") != user_id {
-                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                MentionSender.shared.addMention(guild: "@me", channel: dict["channel_id"] as! String)
+                            guard let mentions = dict["mentions"] as? [[String:Any]] else { break }
+                            let ids = mentions.compactMap { $0["id"] as? String }
+                            let guild_id = dict["guild_id"] as? String ?? "@me"
+                            guard let channel_id = dict["channel_id"] as? String else { break }
+                            guard let author = dict["author"] as? [String:Any] else { break }
+                            guard let username = author["username"] as? String else { break }
+                            guard let user_id = author["id"] as? String else { break }
+                            guard let content = dict["content"] as? String else { break }
+                            if ids.contains(user_id) {
+                                showNotification(title: username, subtitle: content)
+                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
+                            } else if Notifications.shared.privateChannels.contains(channel_id) && user_id != user_id {
+                                showNotification(title: username, subtitle: content)
+                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
                             }
                             break
                         case "MESSAGE_UPDATE":
@@ -430,7 +451,7 @@ final class WebSocket {
                 default: break
                 }
             case .failure(let error):
-                releaseModePrint(error.localizedDescription)
+                releaseModePrint(error)
                 break
             }
         }

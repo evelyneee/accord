@@ -30,8 +30,8 @@ func pingCount(guild: Guild) -> Int {
     return intArray.reduce(0, +)
 }
 
-
 struct ServerListView: View {
+    
     @State var guilds = [Guild]()
     @Binding var full: GatewayD?
     @State var selection: Int? = nil
@@ -41,6 +41,7 @@ struct ServerListView: View {
     @State var guildIcons: [String:NSImage] = [:]
     @State var pings: [(String, String)] = []
     @State var stuffSelection: Int? = nil
+    
     var body: some View {
         NavigationView {
             HStack(spacing: 0, content: {
@@ -85,7 +86,6 @@ struct ServerListView: View {
                                 } else {
                                 }
                             }
-
                         }
                         NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
                             ZStack(alignment: .bottomTrailing) {
@@ -100,6 +100,7 @@ struct ServerListView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
+                    .padding(.vertical)
                 }
                 .frame(width: 80)
                 .buttonStyle(BorderlessButtonStyle())
@@ -111,16 +112,6 @@ struct ServerListView: View {
                         Text("Connecting...")
                             .font(.title2)
                             .fontWeight(.bold)
-                        .onAppear(perform: {
-                            concurrentQueue.async {
-                                Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels in
-                                    if let channels = channels {
-                                        privateChannels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
-                                        Notifications.shared.privateChannels = privateChannels.map { $0.id }
-                                    }
-                                }
-                            }
-                        })
                     }
                 } else if selectedServer == 999 {
                     // MARK: - Private channels (DMs)
@@ -131,30 +122,9 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(privateChannels, id: \.id) { channel in
-                                NavigationLink(destination: NavigationLazyView(GuildView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? "").equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
-                                    HStack {
-                                        Image(systemName: "number") // normal channel
-                                        Text(channel?.name ?? channel?.recipients?[0].username ?? "")
-                                        Spacer()
-
-                                        if let readState = channel?.read_state {
-                                            if readState.mention_count != 0 {
-                                                ZStack {
-                                                    Circle()
-                                                        .foregroundColor(Color.red)
-                                                        .frame(width: 15, height: 15)
-                                                    Text(String(describing: readState.mention_count))
-                                                        .foregroundColor(Color.white)
-                                                        .fontWeight(.semibold)
-                                                        .font(.caption)
-                                                }
-                                            }
-                                        }
-                                        Button(action: {
-                                            showWindow(guildID: "@me", channelID: channel?.id ?? "", channelName: channel?.name ?? "")
-                                        }) {
-                                            Image(systemName: "arrow.up.right.circle")
-                                        }
+                                NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) { [weak channel] in
+                                    if let channel = channel {
+                                        ServerListViewCell(channel: channel)
                                     }
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
@@ -165,105 +135,43 @@ struct ServerListView: View {
                 } else {
                     // MARK: - Guild channels
                     if guilds.isEmpty == false {
-                        List {
-                            if let channels = guilds[selectedServer ?? 0].channels!.enumerated().reversed().reversed() {
-                                ForEach(channels, id: \.offset) { offset, section in
-                                    if section.type == .section {
-                                        Section(header: Text(section.name ?? "")) {
-                                            ForEach(channels, id: \.offset) { offset, channel in
-                                                if channel.type != .section {
-                                                    if channel.parent_id ?? "no" == section.id {
-                                                        NavigationLink(destination: NavigationLazyView(GuildView(guildID: (guilds[selectedServer ?? 0].id), channelID: channel.id, channelName: channel.name).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) { [weak channel] in
-                                                            HStack {
-                                                                switch channel!.type {
-                                                                case .normal:
-                                                                    Image(systemName: "number") // normal channel
-                                                                case .voice:
-                                                                    Image(systemName: "speaker.wave.2.fill") // voice chat
-                                                                case .guild_news:
-                                                                    Image(systemName: "megaphone.fill") // announcement channel
-                                                                case .stage:
-                                                                    Image(systemName: "person.2.fill") // stages
-                                                                default:
-                                                                    Image(systemName: "camera.metering.unknown") // unknown
-                                                                }
-                                                                Text(channel?.name ?? "")
-                                                                Spacer()
-
-                                                                Button(action: {
-                                                                    channel?.read_state!.mention_count = 0
-                                                                }) {
-                                                                    if let readState = channel?.read_state {
-                                                                        if readState.mention_count != 0 {
-                                                                            ZStack {
-                                                                                Circle()
-                                                                                    .foregroundColor(Color.red)
-                                                                                    .frame(width: 15, height: 15)
-                                                                                Text(String(describing: readState.mention_count))
-                                                                                    .foregroundColor(Color.white)
-                                                                                    .fontWeight(.semibold)
-                                                                                    .font(.caption)
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                                Button(action: {
-                                                                    showWindow(guildID: (guilds[selectedServer ?? 0].id), channelID: channel?.id ?? "", channelName: channel?.name ?? "")
-                                                                }) {
-                                                                    Image(systemName: "arrow.up.right.circle")
-                                                                }
-                                                            }
-                                                        }
-                                                        .buttonStyle(BorderlessButtonStyle())
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.top, 5)
+                        GuildView(guild: $guilds[selectedServer ?? 0]).equatable()
                     }
                 }
             })
         }
-
+        .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
-            self.guilds = full?.guilds ?? []
-            imageQueue.async {
-                ImageHandling.shared?.getServerIcons(array: guilds) { success, icons in
-                    if success {
-                        guildIcons = icons
+            concurrentQueue.async {
+                Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
+                    if let channels = channels {
+                        let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
+                        DispatchQueue.main.async {
+                            self.privateChannels = channels
+                        }
+                        Notifications.shared.privateChannels = privateChannels.map { $0.id }
+                    } else if let error = error {
+                        releaseModePrint(error)
                     }
                 }
             }
+            var guilds = full?.guilds ?? []
             MentionSender.shared.delegate = self
-
-            let firstIndexQueue = DispatchQueue(label: "shitcode queue", attributes: .concurrent)
-            firstIndexQueue.async {
-                let readState = full!.read_state!
-                for guild in 0..<guilds.count {
-                    for channel in guilds[safe: guild]?.channels ?? [] {
-                        if channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                            if let index = fastIndexEntries(channel.id, array: readState.entries) {
-                                channel.read_state = readState.entries[safe: index]
-                            }
-                        }
-                    }
-                }
-                
-                for channel in privateChannels {
-                    if channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                        if let index = fastIndexEntries(channel.id, array: readState.entries) {
-                            channel.read_state = readState.entries[safe: index]
-                        }
-                    }
+            DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
+                assignReadStates()
+            }
+                        
+            for guild in guilds {
+                let name = "\(guild.id)$\(guild.name)"
+                AllEmotes.shared.allEmotes[name] = guild.emojis
+                for channel in guild.channels ?? [] {
+                    channel.guild_id = guild.id
                 }
             }
             if sortByMostRecent {
+                
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
+                
             } else {
                 guildOrder = full?.user_settings?.guild_positions ?? []
                 var guildTemp = [Guild]()
@@ -272,17 +180,14 @@ struct ServerListView: View {
                         guildTemp.append(guilds[first])
                     }
                 }
-                guilds = guildTemp
+                self.guilds = guildTemp
             }
-            selectedServer = 0
             concurrentQueue.async {
                 roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
             }
-            for i in 0..<guilds.count {
-                AllEmotes.shared.allEmotes["\(guilds[i].id)$\(guilds[i].name)"] = guilds[i].emojis
-                (guilds[i].channels) = (guilds[i].channels)?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
-            }
+            order()
             DispatchQueue.main.async {
+                selectedServer = 0
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
                 full = nil
             }
@@ -290,7 +195,6 @@ struct ServerListView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
             pings.append((notif.userInfo as! [String:Any])["info"] as! (String, String))
         }
-
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }

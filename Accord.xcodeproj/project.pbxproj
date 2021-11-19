@@ -9,13 +9,15 @@
 /* Begin PBXBuildFile section */
 		3207A24425867586006C2665 /* DiscordCoreVars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */; };
 		32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */; };
-		32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742A25733D8000ADB7E6 /* GuildView.swift */; };
+		32F3742F25733D8100ADB7E6 /* ChannelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F3742A25733D8000ADB7E6 /* ChannelView.swift */; };
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
+		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
-		A80FEC2327234DE7005F9950 /* GuildViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */; };
+		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
+		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
 		A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC242724FA2A005F9950 /* MentionView.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
 		A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* IncrementNumbers.swift */; };
@@ -28,12 +30,11 @@
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F426D12411007B9B27 /* MessageProtocol.swift */; };
-		A82A05F826D3F2D2007B9B27 /* GuildView+MsgSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F726D3F2D2007B9B27 /* GuildView+MsgSend.swift */; };
-		A82A05FA26D3F38B007B9B27 /* GuildView+MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F926D3F38B007B9B27 /* GuildView+MessageProtocol.swift */; };
-		A82A05FF26D3F4D2007B9B27 /* GuildView+TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05FE26D3F4D2007B9B27 /* GuildView+TextField.swift */; };
+		A82A05F826D3F2D2007B9B27 /* ChannelView+MsgSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F726D3F2D2007B9B27 /* ChannelView+MsgSend.swift */; };
+		A82A05FA26D3F38B007B9B27 /* ChannelView+MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */; };
+		A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */; };
 		A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */; };
-		A82A060526D3F6DA007B9B27 /* GuildView+HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */; };
-		A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */; };
+		A82A060526D3F6DA007B9B27 /* ChannelView+HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060426D3F6DA007B9B27 /* ChannelView+HeaderView.swift */; };
 		A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */; };
 		A82A062026D98193007B9B27 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A061F26D98193007B9B27 /* Settings.swift */; };
 		A82A062226D981B4007B9B27 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A062126D981B4007B9B27 /* Status.swift */; };
@@ -71,7 +72,7 @@
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
 		A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */; };
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
-		A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */; };
+		A8FC3C7626E956010008A2CE /* ChannelView+Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* ChannelView+Misc.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,7 +91,7 @@
 /* Begin PBXFileReference section */
 		32AA719025EAEEDA00550BA5 /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		32ADD58A2583997F008D1715 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		32F3742A25733D8000ADB7E6 /* GuildView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
+		32F3742A25733D8000ADB7E6 /* ChannelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChannelView.swift; sourceTree = "<group>"; };
 		32F3742C25733D8000ADB7E6 /* DiscordCoreVars.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscordCoreVars.swift; sourceTree = "<group>"; };
 		32F4C957256D7D3300343BB3 /* Accord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accord.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F4C95A256D7D3300343BB3 /* AccordApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordApp.swift; sourceTree = "<group>"; };
@@ -101,9 +102,11 @@
 		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
-		A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildViewViewModel.swift; sourceTree = "<group>"; };
-		A80FEC242724FA2A005F9950 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionView.swift; path = Accord/UI/Chat/GuildView/MentionView.swift; sourceTree = SOURCE_ROOT; };
+		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
+		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
+		A80FEC242724FA2A005F9950 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionView.swift; path = Accord/UI/Chat/ChannelView/MentionView.swift; sourceTree = SOURCE_ROOT; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		A80FEC272724FD35005F9950 /* IncrementNumbers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementNumbers.swift; sourceTree = "<group>"; };
 		A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingExtensions.swift; sourceTree = "<group>"; };
@@ -115,12 +118,11 @@
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A82A05F426D12411007B9B27 /* MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProtocol.swift; sourceTree = "<group>"; };
-		A82A05F726D3F2D2007B9B27 /* GuildView+MsgSend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+MsgSend.swift"; sourceTree = "<group>"; };
-		A82A05F926D3F38B007B9B27 /* GuildView+MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+MessageProtocol.swift"; sourceTree = "<group>"; };
-		A82A05FE26D3F4D2007B9B27 /* GuildView+TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+TextField.swift"; sourceTree = "<group>"; };
+		A82A05F726D3F2D2007B9B27 /* ChannelView+MsgSend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+MsgSend.swift"; sourceTree = "<group>"; };
+		A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+MessageProtocol.swift"; sourceTree = "<group>"; };
+		A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+TextField.swift"; sourceTree = "<group>"; };
 		A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsView.swift; sourceTree = "<group>"; };
-		A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+HeaderView.swift"; sourceTree = "<group>"; };
-		A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+SecondLoad.swift"; sourceTree = "<group>"; };
+		A82A060426D3F6DA007B9B27 /* ChannelView+HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+HeaderView.swift"; sourceTree = "<group>"; };
 		A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayStructure.swift; sourceTree = "<group>"; };
 		A82A061F26D98193007B9B27 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		A82A062126D981B4007B9B27 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
@@ -151,14 +153,14 @@
 		A8B1F2A126CB171600E8FDC5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		A8B1F2A326CB176900E8FDC5 /* Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Channel.swift; sourceTree = "<group>"; };
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
-		A8C73D1126F5812D00CF0350 /* Songlink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Songlink.swift; path = Accord/UI/Chat/GuildView/Songlink.swift; sourceTree = SOURCE_ROOT; };
+		A8C73D1126F5812D00CF0350 /* Songlink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Songlink.swift; path = Accord/UI/Chat/ChannelView/Songlink.swift; sourceTree = SOURCE_ROOT; };
 		A8C73D1326F583A000CF0350 /* SongLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongLink.swift; sourceTree = "<group>"; };
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
 		A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NitrolessBackend.swift; sourceTree = "<group>"; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
-		A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GuildView+Misc.swift"; sourceTree = "<group>"; };
+		A8FC3C7526E956010008A2CE /* ChannelView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+Misc.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +179,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9E7BC56B27472308008E3FAB /* Markdown */,
 				A80FEC34272779D9005F9950 /* PluginManager */,
 				A82521392687ABD40073F640 /* Objects */,
 				A82521382687ABC50073F640 /* Networking */,
@@ -232,6 +235,14 @@
 			path = Accord;
 			sourceTree = "<group>";
 		};
+		9E7BC56B27472308008E3FAB /* Markdown */ = {
+			isa = PBXGroup;
+			children = (
+				9E7BC56C27472317008E3FAB /* Markdown.swift */,
+			);
+			path = Markdown;
+			sourceTree = "<group>";
+		};
 		9ED6F671273702040009C78C /* dpkg */ = {
 			isa = PBXGroup;
 			children = (
@@ -253,7 +264,7 @@
 		A82521352687AB250073F640 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
-				A82A05FB26D3F3AC007B9B27 /* GuildView */,
+				A82A05FB26D3F3AC007B9B27 /* ChannelView */,
 				A898453D26978EBA00B1C9DB /* EmotesView.swift */,
 				A85C02B7268158D300A40114 /* FancyTextView.swift */,
 				A8BC5253268DF5AD00B7823E /* AttachmentView.swift */,
@@ -264,11 +275,12 @@
 		A82521362687AB390073F640 /* Base */ = {
 			isa = PBXGroup;
 			children = (
-				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
-				A80FEC242724FA2A005F9950 /* MentionView.swift */,
-				A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */,
-				A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */,
 				A88A3D14265B22C4003AE08F /* LoginView.swift */,
+				A80FEC242724FA2A005F9950 /* MentionView.swift */,
+				A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */,
+				A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */,
+				A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */,
+				9E6470662741B9960026686C /* GuildView.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -330,21 +342,20 @@
 			path = Misc;
 			sourceTree = "<group>";
 		};
-		A82A05FB26D3F3AC007B9B27 /* GuildView */ = {
+		A82A05FB26D3F3AC007B9B27 /* ChannelView */ = {
 			isa = PBXGroup;
 			children = (
-				A80FEC2227234DE7005F9950 /* GuildViewViewModel.swift */,
-				32F3742A25733D8000ADB7E6 /* GuildView.swift */,
-				A8FC3C7526E956010008A2CE /* GuildView+Misc.swift */,
-				A82A060626D3FBE5007B9B27 /* GuildView+SecondLoad.swift */,
-				A82A060426D3F6DA007B9B27 /* GuildView+HeaderView.swift */,
+				A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */,
+				32F3742A25733D8000ADB7E6 /* ChannelView.swift */,
+				A8FC3C7526E956010008A2CE /* ChannelView+Misc.swift */,
+				A82A060426D3F6DA007B9B27 /* ChannelView+HeaderView.swift */,
 				A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */,
-				A82A05FE26D3F4D2007B9B27 /* GuildView+TextField.swift */,
-				A82A05F926D3F38B007B9B27 /* GuildView+MessageProtocol.swift */,
-				A82A05F726D3F2D2007B9B27 /* GuildView+MsgSend.swift */,
+				A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */,
+				A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */,
+				A82A05F726D3F2D2007B9B27 /* ChannelView+MsgSend.swift */,
 				A80FEC3227258457005F9950 /* EmbedView.swift */,
 			);
-			path = GuildView;
+			path = ChannelView;
 			sourceTree = "<group>";
 		};
 		A864BE5926866FDF00B244BE /* Nitroless */ = {
@@ -480,7 +491,8 @@
 			files = (
 				A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */,
 				A82A062226D981B4007B9B27 /* Status.swift in Sources */,
-				A82A05F826D3F2D2007B9B27 /* GuildView+MsgSend.swift in Sources */,
+				A82A05F826D3F2D2007B9B27 /* ChannelView+MsgSend.swift in Sources */,
+				9E6470672741B9960026686C /* GuildView.swift in Sources */,
 				A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */,
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
@@ -493,24 +505,24 @@
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
-				32F3742F25733D8100ADB7E6 /* GuildView.swift in Sources */,
+				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
+				32F3742F25733D8100ADB7E6 /* ChannelView.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A80FEC3327258457005F9950 /* EmbedView.swift in Sources */,
-				A8FC3C7626E956010008A2CE /* GuildView+Misc.swift in Sources */,
+				A8FC3C7626E956010008A2CE /* ChannelView+Misc.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
-				A82A060726D3FBE5007B9B27 /* GuildView+SecondLoad.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
 				A8B1F29C26CB16C400E8FDC5 /* Attachment.swift in Sources */,
 				A832557826EEEC1D00F18A55 /* ServerListView+Misc.swift in Sources */,
 				A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */,
-				A82A060526D3F6DA007B9B27 /* GuildView+HeaderView.swift in Sources */,
+				A82A060526D3F6DA007B9B27 /* ChannelView+HeaderView.swift in Sources */,
 				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,
 				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
-				A82A05FA26D3F38B007B9B27 /* GuildView+MessageProtocol.swift in Sources */,
+				A82A05FA26D3F38B007B9B27 /* ChannelView+MessageProtocol.swift in Sources */,
 				A85C02B8268158D300A40114 /* FancyTextView.swift in Sources */,
 				A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
@@ -525,13 +537,13 @@
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
-				A80FEC2327234DE7005F9950 /* GuildViewViewModel.swift in Sources */,
+				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */,
-				A82A05FF26D3F4D2007B9B27 /* GuildView+TextField.swift in Sources */,
+				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
@@ -676,6 +688,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = TT4NY6N9VL;
+				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -685,6 +698,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -711,6 +725,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = TT4NY6N9VL;
+				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -720,6 +735,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";

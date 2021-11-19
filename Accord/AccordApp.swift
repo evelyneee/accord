@@ -27,12 +27,12 @@ public func print(_ object: Any) {
 
 public func releaseModePrint(_ object: Any...) {
     for item in object {
-        Swift.print(item)
+        NSLog(String(describing: item))
     }
 }
 
 public func releaseModePrint(_ object: Any) {
-    Swift.print(object)
+    NSLog(String(describing: object))
 }
 
 @main

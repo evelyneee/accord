@@ -88,7 +88,7 @@ final class ImageHandling {
 }
 
 
-let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+let cachesURL: URL = FileManager.default.urls(for: FileManager.SearchPathDirectory.cachesDirectory, in: FileManager.SearchPathDomainMask.userDomainMask)[0]
 let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
 let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
 
@@ -122,8 +122,8 @@ struct Attachment: View, Equatable {
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
 
-    init(_ url: String) {
-        imageLoader = ImageLoaderAndCache(imageURL: url)
+    init(_ url: String, size: CGSize? = nil) {
+        imageLoader = ImageLoaderAndCache(imageURL: url, size: size)
     }
 
     var body: some View {
@@ -185,9 +185,9 @@ let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
 final class ImageLoaderAndCache: ObservableObject {
     
     @Published var image = NSImage()
-    init(imageURL: String) {
+    init(imageURL: String, size: CGSize? = nil) {
         imageQueue.async { [weak self] in
-            Request.image(url: URL(string: imageURL)) { image in
+            Request.image(url: URL(string: imageURL), to: size) { image in
                 guard let image = image else {
                     DispatchQueue.main.async {
                         self?.image = NSImage()

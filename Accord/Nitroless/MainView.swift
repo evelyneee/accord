@@ -97,10 +97,13 @@ struct NitrolessView: View, Equatable {
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            Request.fetch(Repo.self, url: URL(string: "https://assets.ebel.gay/nitrolessrepo/index.json")) { repo in
-                guard let repo = repo else { return }
-                for emote in repo.emotes {
-                    allEmotes[emote.name] = emote.type
+            Request.fetch(Repo.self, url: URL(string: "https://assets.ebel.gay/nitrolessrepo/index.json")) { repo, error in
+                if let repo = repo {
+                    for emote in repo.emotes {
+                        allEmotes[emote.name] = emote.type
+                    }
+                } else if let error = error {
+                    releaseModePrint(error)
                 }
             }
         }

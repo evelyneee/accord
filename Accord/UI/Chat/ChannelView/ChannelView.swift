@@ -1,5 +1,5 @@
 //
-//  GuildView.swift
+//  ChannelView.swift
 //  Accord
 //
 //  Created by evelyn on 2020-11-27.
@@ -19,16 +19,16 @@ final class ChannelMembers {
 let concurrentQueue = DispatchQueue(label: "UpdatingQueue", attributes: .concurrent)
 let webSocketQueue = DispatchQueue(label: "WebSocketQueue", attributes: .concurrent)
 
-struct GuildView: View, Equatable {
+struct ChannelView: View, Equatable {
 
     // MARK: - Equatable protocol
-    static func == (lhs: GuildView, rhs: GuildView) -> Bool {
+    static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         return lhs.viewModel.messages == rhs.viewModel.messages
     }
 
     // MARK: - State-driven vars
     
-    @ObservedObject var viewModel: GuildViewViewModel
+    @ObservedObject var viewModel: ChannelViewViewModel
     
     var guildID: String
     var channelID: String
@@ -66,7 +66,7 @@ struct GuildView: View, Equatable {
         self.guildID = guildID
         self.channelID = channelID
         self.channelName = channelName ?? "Unknown channel"
-        self.viewModel = GuildViewViewModel(channelID: channelID, guildID: guildID)
+        self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
     }
     
     // MARK: - View body begins here
@@ -76,7 +76,7 @@ struct GuildView: View, Equatable {
                 Spacer()
                 List {
                     LazyVStack {
-                        Spacer().frame(height: 93)
+                        Spacer().frame(height: 90)
                         // MARK: Message loop
                         ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
                             LazyVStack(alignment: .leading) {
@@ -103,7 +103,7 @@ struct GuildView: View, Equatable {
                                         }
                                     }
                                     if let author = message.author?.username {
-                                        VStack(alignment: .leading) {
+                                        VStack(alignment: .leading, spacing: 0) {
                                             if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
                                                 if message.isSameAuthor() {
                                                     textView
@@ -199,7 +199,7 @@ struct GuildView: View, Equatable {
                                         AttachmentView(media: $viewModel.messages[offset].attachments).equatable()
                                         Spacer()
                                     }
-                                    .frame(maxWidth: 400, maxHeight: 300)
+                                    .frame(maxWidth: 500, maxHeight: 400)
                                     .padding(.leading, 41)
                                 }
                             }
@@ -237,7 +237,7 @@ struct GuildView: View, Equatable {
     }
 }
 
-extension GuildView {
+extension ChannelView {
     func makeReplyView(reply: Reply) -> some View {
         return HStack {
             Spacer().frame(width: 50)
@@ -302,7 +302,7 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false
     )
-    windowRef.contentView = NSHostingView(rootView: GuildView(guildID: guildID, channelID: channelID, channelName: channelName))
+    windowRef.contentView = NSHostingView(rootView: ChannelView(guildID: guildID, channelID: channelID, channelName: channelName))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
     windowRef.title = "\(channelName) - Accord"

@@ -1,33 +1,33 @@
 //
-//  GuildView+MessageProtocol.swift
-//  GuildView+MessageProtocol
+//  ChannelView+MessageProtocol.swift
+//  ChannelView+MessageProtocol
 //
 //  Created by evelyn on 2021-08-23.
 //
 
 import Foundation
 
-extension GuildView: MessageControllerDelegate {
+extension ChannelView: MessageControllerDelegate {
     func sendMessage(msg: Data, channelID: String?, isMe: Bool = false) {
         // Received a message from backend
-        webSocketQueue.async { [weak viewModel] in
+        webSocketQueue.async {
             guard channelID != nil else { return }
             if channelID! == self.channelID {
                 // sending = false
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
                 guard let message = gatewayMessage.d else { return }
-                if viewModel?.guildID != "@me" {
-                    viewModel?.loadUser(for: message.author?.id)
+                if viewModel.guildID != "@me" {
+                    viewModel.loadUser(for: message.author?.id)
                 }
-                if let firstMessage = viewModel?.messages.first {
+                if let firstMessage = viewModel.messages.first {
                     message.lastMessage = firstMessage
                 }
                 message.isSameAuthor() ? print("No pfp to store") : message.author?.loadPfp()
                 message.referenced_message?.author?.loadPfp()
                 DispatchQueue.main.async {
                     self.popup.append(false)
-                    viewModel?.messages.remove(at: viewModel!.messages.count - 1)
-                    viewModel?.messages.insert(message, at: 0)
+                    viewModel.messages.remove(at: viewModel.messages.count - 1)
+                    viewModel.messages.insert(message, at: 0)
                 }
             }
         }
@@ -89,38 +89,40 @@ extension GuildView: MessageControllerDelegate {
                     }
                     DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
                         if let index = typing.firstIndex(of: (nick_fake)), typing.indices.contains(index) {
-                            typing.remove(at: index)
+                            DispatchQueue.main.async {
+                                typing.remove(at: index)
+                            }
                         }
                     })
                 }
             }
-
         }
-
     }
     func sendMemberChunk(msg: Data) {
         webSocketQueue.async { [weak viewModel] in
             guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
             ChannelMembers.shared.channelMembers[self.channelID] = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0!.user.id }, users.compactMap { $0?.nick ?? $0!.user.username }))
-            for person in users {
-                wss.cachedMemberRequest["\(guildID)$\(person?.user.id ?? "")"] = person
-                let nickname = person?.nick ?? person?.user.username ?? ""
+            let allUsers: [GuildMember] = users.compactMap { $0 }
+            for person in allUsers {
+                wss.cachedMemberRequest["\(guildID)$\(person.user.id)"] = person
+                let nickname = person.nick ?? person.user.username
                 DispatchQueue.main.async {
-                    viewModel?.nicks[(person?.user.id ?? "")] = nickname
+                    viewModel?.nicks[(person.user.id)] = nickname
                 }
-                var rolesTemp: [String] = Array.init(repeating: "", count: 100)
-                for role in (person?.roles ?? []) {
-                    rolesTemp[roleColors[role]?.1 ?? 0] = role
-                }
-                rolesTemp = rolesTemp.compactMap { role -> String? in
-                    if role == "" {
-                        return nil
-                    } else {
-                        return role
+                
+                if let roles = person.roles {
+                    var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
+                    for role in roles {
+                        if let roleColor = roleColors[role]?.1 {
+                            rolesTemp[roleColor] = role
+                        }
                     }
-                }.reversed()
-                DispatchQueue.main.async {
-                    viewModel?.roles[(person?.user.id ?? "")] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
+                    let temp: [String] = (rolesTemp.compactMap { $0 }).reversed()
+                    if temp.indices.contains(0) {
+                        DispatchQueue.main.async {
+                            viewModel?.roles[(person.user.id)] = temp[0]
+                        }
+                    }
                 }
             }
         }

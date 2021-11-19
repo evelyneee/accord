@@ -33,7 +33,7 @@ struct EmbedView: View, Equatable {
                     Text(description)
                 }
                 if let image = embed.image {
-                    Attachment(image.url)
+                    Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
                 }
             }
             .frame(width: 248)

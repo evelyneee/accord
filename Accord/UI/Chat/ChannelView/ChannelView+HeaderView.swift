@@ -1,6 +1,6 @@
 //
-//  GuildView+HeaderView.swift
-//  GuildView+HeaderView
+//  ChannelView+HeaderView.swift
+//  ChannelView+HeaderView
 //
 //  Created by evelyn on 2021-08-23.
 //
@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 
-extension GuildView {
+extension ChannelView {
     var headerView: some View {
         return HStack {
             VStack(alignment: .leading) {
@@ -25,19 +25,23 @@ extension GuildView {
                             type: .GET,
                             discordHeaders: true,
                             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
-                        )) { messages in
-                            if let messages = messages {
-                                // MARK: - Channel setup after messages loaded.
-                                DispatchQueue.main.async {
-                                    for (index, message) in messages.enumerated() {
-                                        if message != messages.last {
-                                            message.lastMessage = messages[index + 1]
-                                        }
-                                    }
-                                    self.popup.append(contentsOf: Array.init(repeating: false, count: 50))
-                                    self.viewModel.messages = messages
-                                    self.viewModel.messages.insert(contentsOf: messages, at: messages.count)
+                        )) { messages, error in
+                            guard let messages = messages else {
+                                if let error = error {
+                                    releaseModePrint(error)
                                 }
+                                return
+                            }
+                            // MARK: - Channel setup after messages loaded.
+                            DispatchQueue.main.async {
+                                let messages = messages.enumerated().compactMap { (index, element) -> Message in
+                                    guard element != messages.last else { return element }
+                                    element.lastMessage = messages[index + 1]
+                                    return element
+                                }
+                                self.popup.append(contentsOf: Array.init(repeating: false, count: 50))
+                                self.viewModel.messages = messages
+                                self.viewModel.messages.insert(contentsOf: messages, at: messages.count)
                             }
                         }
                     }

@@ -14,19 +14,18 @@ extension NSString {
 }
 
 extension URLSessionConfiguration {
-    func setProxy() -> URLSessionConfiguration {
-        let config = self
-        config.connectionProxyDictionary = [AnyHashable: Any]()
-        config.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+    func setProxy() {
+        guard proxyEnabled else { return }
+        self.connectionProxyDictionary = [AnyHashable: Any]()
+        self.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
         if let ip = proxyIP {
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
         }
         if let port = proxyPort {
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-            config.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
         }
-        return config
     }
 }
 

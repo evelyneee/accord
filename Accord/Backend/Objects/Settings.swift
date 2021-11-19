@@ -18,20 +18,20 @@ class Settings: Decodable {
     var render_embeds: Bool?
     var native_phone_integration_enabled: Bool?
     var message_display_compact: Bool?
-    var locale: String?
+    // var locale: String?
     var inline_embed_media: Bool?
     var inline_attachment_media: Bool?
     var guild_positions: [String]
     // var guild_folders:
     var gif_auto_play: Bool?
     // var friend_source_flags:
-    var friend_discovery_flags: Int?
-    var explicit_content_filter: Int?
-    var enable_tts_command: Bool?
+    // var friend_discovery_flags: Int?
+    // var explicit_content_filter: Int?
+    // var enable_tts_command: Bool?
     // var disable_games_tab: Bool?
-    var developer_mode: Bool?
-    var detect_platform_accounts: Bool?
-    var default_guilds_restricted: Bool?
+    // var developer_mode: Bool?
+    // var detect_platform_accounts: Bool?
+    // var default_guilds_restricted: Bool?
     var custom_status: Status?
     // var convert_emoticons: Bool?
     // var contact_sync_enabled: Bool?

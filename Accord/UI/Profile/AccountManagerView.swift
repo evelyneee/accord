@@ -43,7 +43,7 @@ struct AccountManagerView: View {
                     let data = try JSONSerialization.data(withJSONObject: jsonString, options: [])
                     accounts = try JSONDecoder().decode([Account].self, from: data)
                 } catch {
-                    print(error.localizedDescription)
+                    print(error)
                 }
             })
         }

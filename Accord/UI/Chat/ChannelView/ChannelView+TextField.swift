@@ -1,6 +1,6 @@
 //
-//  GuildView+TextField.swift
-//  GuildView+TextField
+//  ChannelView+TextField.swift
+//  ChannelView+TextField
 //
 //  Created by evelyn on 2021-08-23.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-extension GuildView {
+extension ChannelView {
     var blurredTextField: some View {
         return VStack(alignment: .leading) {
             HStack {
@@ -32,12 +32,12 @@ extension GuildView {
                 }
             }
             if #available(macOS 12.0, *) {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
                     .padding(15)
                     .background(Material.regular) // blurred background
                     .cornerRadius(15)
             } else {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
+                ChatControls(chatTextFieldContents: $chatTextFieldContents, guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sheet, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                     .cornerRadius(15)

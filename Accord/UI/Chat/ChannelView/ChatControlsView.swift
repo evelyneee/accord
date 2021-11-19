@@ -10,8 +10,8 @@ import SwiftUI
 
 struct ChatControls: View {
     @Binding var chatTextFieldContents: String
-    @State var textFieldContents: String = ""
     @State var pfps: [String : NSImage] = [:]
+    @Binding var guildID: String
     @Binding var channelID: String
     @Binding var chatText: String
     @Binding var sending: Bool
@@ -19,12 +19,13 @@ struct ChatControls: View {
     @Binding var editing: String?
     @State var nitroless = false
     @State var emotes = false
-    @State var temporaryText = ""
     @State var fileImport: Bool = false
     @State var fileUpload: Data? = nil
     @State var fileUploadURL: URL? = nil
     @State var dragOver: Bool = false
     @State var pluginPoppedUp: [Bool] = []
+    
+    @State var typing: Bool = false
     
     fileprivate func uploadFile(temp: String, url: URL? = nil) {
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
@@ -58,39 +59,29 @@ struct ChatControls: View {
     var body: some View {
         HStack {
             ZStack(alignment: .trailing) {
-                TextField(chatText, text: $textFieldContents, onEditingChanged: { state in
-                    messageSendQueue.async {
-                        Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
-                            userAgent: discordUserAgent,
-                            token: AccordCoreVars.shared.token,
-                            type: .POST,
-                            discordHeaders: true
-                        ))
-                    }
+                TextField(chatText, text: $chatTextFieldContents, onEditingChanged: { state in
                 }, onCommit: {
-                    chatTextFieldContents = textFieldContents
-                    var temp = textFieldContents
-                    textFieldContents = ""
                     // sending = true
                     messageSendQueue.async {
-                        if temp == "/shrug" {
-                            temp = #"¯\_(ツ)_/¯"#
+                        if chatTextFieldContents == "/shrug" {
+                            chatTextFieldContents = #"¯\_(ツ)_/¯"#
                         }
                         if (editing != nil) {
                             print(editing ?? "")
                             Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
                                 userAgent: discordUserAgent,
                                 token: AccordCoreVars.shared.token,
-                                bodyObject: ["content":"\(String(temp))"],
+                                bodyObject: ["content":"\(String(chatTextFieldContents))"],
                                 type: .PATCH,
                                 discordHeaders: true,
+                                referer: "https://discord.com/channels/\(guildID)/\(channelID)",
                                 empty: true,
                                 json: true
                             ))
                             editing = nil
                         } else {
                             if fileUpload != nil {
-                                uploadFile(temp: temp)
+                                uploadFile(temp: chatTextFieldContents)
                                 fileUpload = nil
                                 fileUploadURL = nil
                             } else {
@@ -98,9 +89,10 @@ struct ChatControls: View {
                                     Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
-                                        bodyObject: ["content":"\(String(temp))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
+                                        bodyObject: ["content":"\(String(chatTextFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
                                         type: .POST,
                                         discordHeaders: true,
+                                        referer: "https://discord.com/channels/\(guildID)/\(channelID)",
                                         empty: true,
                                         json: true
                                     ))
@@ -109,7 +101,7 @@ struct ChatControls: View {
                                     Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                         userAgent: discordUserAgent,
                                         token: AccordCoreVars.shared.token,
-                                        bodyObject: ["content":"\(String(temp))"],
+                                        bodyObject: ["content":"\(String(chatTextFieldContents))"],
                                         type: .POST,
                                         discordHeaders: true,
                                         empty: true,
@@ -118,6 +110,7 @@ struct ChatControls: View {
                                 }
                             }
                         }
+                        chatTextFieldContents = ""
                     }
                 })
                 .onAppear(perform: {
@@ -174,7 +167,7 @@ struct ChatControls: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .popover(isPresented: $nitroless, content: {
-                        NitrolessView(chatText: $temporaryText).equatable()
+                        NitrolessView(chatText: $chatTextFieldContents).equatable()
                             .frame(width: 300, height: 400)
                     })
                     Button(action: {
@@ -185,14 +178,25 @@ struct ChatControls: View {
                     .buttonStyle(BorderlessButtonStyle())
                     .keyboardShortcut("e", modifiers: [.command])
                     .popover(isPresented: $emotes, content: {
-                        EmotesView(chatText: $temporaryText).equatable()
+                        EmotesView(chatText: $chatTextFieldContents).equatable()
                             .frame(width: 300, height: 400)
                     })
-                    .onChange(of: temporaryText) { newValue in
-                        textFieldContents = newValue
-                    }
-                    .onChange(of: textFieldContents) { newValue in
-                        temporaryText = newValue
+                    .onChange(of: chatTextFieldContents) { [chatTextFieldContents] new in
+                        if chatTextFieldContents != new && !(typing) {
+                            messageSendQueue.async {
+                                Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                                    userAgent: discordUserAgent,
+                                    token: AccordCoreVars.shared.token,
+                                    type: .POST,
+                                    discordHeaders: true,
+                                    referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+                                ))
+                            }
+                            typing = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                                typing = false
+                            })
+                        }
                     }
                 }
             }

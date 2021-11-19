@@ -30,6 +30,18 @@ struct SwappedLabel: LabelStyle {
     }
 }
 
+extension NSApplication {
+    func restart() {
+        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+        let task = Process()
+        task.launchPath = "/usr/bin/open"
+        task.arguments = [path]
+        task.launch()
+        exit(EXIT_SUCCESS)
+    }
+}
+
 struct LoginView: View {
     @State var email: String = ""
     @State var password: String = ""
@@ -126,7 +138,7 @@ struct LoginView: View {
                             type: .POST,
                             discordHeaders: true,
                             json: true
-                        )) { response in
+                        )) { response, error in
                             if let token = response?.token {
                                 _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -147,7 +159,7 @@ struct LoginView: View {
                                     type: .POST,
                                     discordHeaders: true,
                                     json: true
-                                )) { value in
+                                )) { value, error in
                                     if let token = value?.token {
                                         _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                         AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -202,7 +214,7 @@ final class LoginViewViewModel: ObservableObject {
             type: .POST,
             discordHeaders: true,
             json: true
-        )) { response in
+        )) { response, error in
             if let response = response {
                 if let error = response.message {
                     switch error {
@@ -238,7 +250,7 @@ final class LoginViewViewModel: ObservableObject {
                             type: .POST,
                             discordHeaders: true,
                             json: true
-                        )) { value in
+                        )) { value, error in
                             if let token = value?.token {
                                 _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -250,11 +262,15 @@ final class LoginViewViewModel: ObservableObject {
                                 task.arguments = [path]
                                 task.launch()
                                 exit(EXIT_SUCCESS)
+                            } else if let error = error {
+                                releaseModePrint(error)
                             }
                         }
                     }
                 }
-
+            } else if let error = error {
+                releaseModePrint(error)
+                loginError = error
             }
         }
         if let loginError = loginError {
@@ -262,7 +278,6 @@ final class LoginViewViewModel: ObservableObject {
         }
     }
 }
-
 
 extension AnyTransition {
     static var moveAway: AnyTransition {
@@ -297,8 +312,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
             webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
         ])
         if siteKey != "" {
-            print(generateHTML(self.siteKey), siteKey)
-            webView.loadHTMLString(generateHTML(self.siteKey), baseURL: URL(string: "https://discord.com")!)
+            webView.loadHTMLString(generateHTML, baseURL: URL(string: "https://discord.com")!)
         }
         return webView
     }
@@ -319,9 +333,45 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
     }
 }
 
+/*
+ - extracted from Discord iOS v100
+ 
+ function documentReady() {
+   var PAGE_BG_COLOR = RECAPTCHA_THEME == 'dark' ? '#222' : '#fff';
+   document.body.style.backgroundColor = PAGE_BG_COLOR;
+   showCaptcha(document.body.firstElementChild);
+ }
+
+ function showCaptcha(el) {
+   try {
+     grecaptcha.render(el, {
+       sitekey: RECAPTCHA_SITE_KEY,
+       theme: RECAPTCHA_THEME,
+       callback: captchaSolved,
+       'expired-callback': captchaExpired,
+     });
+
+     window.webkit.messageHandlers.reCaptcha.postMessage(['didLoad']);
+   } catch (_) {
+     window.setTimeout(function() {
+       showCaptcha(el);
+     }, 50);
+   }
+ }
+
+ function captchaSolved(response) {
+   window.webkit.messageHandlers.reCaptcha.postMessage(['didSolve', response]);
+ }
+
+ function captchaExpired(response) {
+   window.webkit.messageHandlers.reCaptcha.postMessage(['didExpire']);
+ }
+ */
+
+
 extension CaptchaViewControllerSwiftUI {
     
-    private func generateHTML(_ sitekey: String) -> String {
+    private var generateHTML: String {
         var hCaptchaHTML =
         """
         <html>
@@ -364,8 +414,6 @@ extension CaptchaViewControllerSwiftUI {
                     transform: translate(-50%, -50%);
                 }
                 .h-captcha {
-                    transform: scale(3.2);
-                    -webkit-transform: scale(3.2);
                     transform-origin: center;
                     -webkit-transform-origin: center;
                     display: inline-block;
@@ -380,7 +428,7 @@ extension CaptchaViewControllerSwiftUI {
             </body>
         </html>
         """
-        hCaptchaHTML = hCaptchaHTML.replacingOccurrences(of: "${sitekey}", with: sitekey)
+        hCaptchaHTML = hCaptchaHTML.replacingOccurrences(of: "${sitekey}", with: self.siteKey)
         return hCaptchaHTML
     }
 }

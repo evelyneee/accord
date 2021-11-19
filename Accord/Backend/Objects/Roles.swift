@@ -17,8 +17,8 @@ final class RoleManager {
                 roles.sort { $0.position > $1.position }
                 for role in roles {
                     if !(Array(returnArray.keys).contains(role.id)) {
-                        if role.color != 0 {
-                            returnArray[role.id] = (role.color ?? 0, role.position)
+                        if let color = role.color, role.color != 0 {
+                            returnArray[role.id] = (color, role.position)
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 //
-//  GuildViewViewModel.swift
+//  ChannelViewViewModel.swift
 //  Accord
 //
 //  Created by evelyn on 2021-10-22.
@@ -9,11 +9,22 @@ import Foundation
 import AppKit
 import Combine
 
-final class GuildViewViewModel: ObservableObject {
+
+@propertyWrapper class DispatchToMain<T> {
+    var wrappedValue: () -> T
+    init(wrappedValue: @escaping () -> T) {
+        self.wrappedValue = {
+            DispatchQueue.main.sync { return wrappedValue() }
+        }
+    }
+}
+
+final class ChannelViewViewModel: ObservableObject {
     
     @Published var messages = [Message]()
     @Published var nicks: [String:String] = [:]
     @Published var roles: [String:String] = [:]
+    @Published var colors: [String:NSColor] = [:]
     
     var requestCancellable: AnyCancellable?
     
@@ -24,6 +35,7 @@ final class GuildViewViewModel: ObservableObject {
         self.channelID = channelID
         self.guildID = guildID
         // messages are now read
+        self.ack(channelID: channelID, guildID: guildID)
         switch self.guildID == "@me" {
         case true:
             wss.subscribeToDM(channelID)
@@ -35,11 +47,11 @@ final class GuildViewViewModel: ObservableObject {
             // fetch messages
             self.getMessages(channelID: channelID, guildID: guildID)
         }
-        self.ack(channelID: channelID, guildID: guildID)
     }
     
     func ack(channelID: String, guildID: String) {
-        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(messages.first?.id ?? "")/ack")!, headers: Headers(
+        guard let first = messages.first?.id else { return }
+        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(first)/ack")!, headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .POST,
@@ -60,15 +72,14 @@ final class GuildViewViewModel: ObservableObject {
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
         .replaceError(with: [])
-        .receive(on: RunLoop.main)
-        .eraseToAnyPublisher()
+        .receive(on: DispatchQueue.main)
         .sink(receiveValue: { msg in
-            self.messages = msg.enumerated().compactMap { (index, element) -> Message in
-                if element != msg.last {
-                    element.lastMessage = msg[index + 1]
-                }
+            let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
+                guard element != msg.last else { return element }
+                element.lastMessage = msg[index + 1]
                 return element
             }
+            self.messages = messages
             DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
             self.fakeNicksObject()
         })
@@ -81,37 +92,38 @@ final class GuildViewViewModel: ObservableObject {
     
     func fakeNicksObject() {
         guard self.guildID == "@me" else { return }
-        self.nicks = messages.compactMap { [ $0.author?.id ?? "" : $0.author?.username ?? "" ] }
+        let _nicks: [String:String] = messages.compactMap { [ $0.author?.id ?? "" : $0.author?.username ?? "" ] }
         .flatMap { $0 }
         .reduce([String:String]()) { (dict, tuple) in
             var nextDict = dict
             nextDict.updateValue(tuple.1, forKey: tuple.0)
             return nextDict
         }
+        self.nicks = _nicks
     }
     
     func getCachedMemberChunk() {
         let allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
         for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
+            wss.cachedMemberRequest["\(guildID)$\(person.user.id)"] = person
             let nickname = person.nick ?? person.user.username
-            DispatchQueue.main.async { [weak self] in
-                self!.nicks[(person.user.id)] = nickname
-            }
-            var rolesTemp: [String] = Array.init(repeating: "", count: 50)
-            
-            for role in (person.roles ?? []) {
-                rolesTemp[roleColors[role]?.1 ?? 0] = role
+            DispatchQueue.main.async {
+                self.nicks[(person.user.id)] = nickname
             }
             
-            rolesTemp = rolesTemp.compactMap { role -> String? in
-                if role == "" {
-                    return nil
-                } else {
-                    return role
+            if let roles = person.roles {
+                var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
+                for role in roles {
+                    if let roleColor = roleColors[role]?.1 {
+                        rolesTemp[roleColor] = role
+                    }
                 }
-            }.reversed()
-            DispatchQueue.main.async { [weak self] in
-                self?.roles[(person.user.id)] = (rolesTemp.indices.contains(0) ? rolesTemp[0] : "")
+                let temp: [String] = rolesTemp.compactMap { $0 }
+                if temp.indices.contains(0) {
+                    DispatchQueue.main.async {
+                        self.roles[(person.user.id)] = temp[0]
+                    }
+                }
             }
         }
     }

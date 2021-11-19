@@ -24,7 +24,7 @@ let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
 struct FancyTextView: View {
     @Binding var text: String
-    @State var textElement: Text? = nil
+    @State var textElement: NSAttributedString? = nil
     @Binding var channelID: String
     var body: some View {
         VStack {
@@ -38,33 +38,31 @@ struct FancyTextView: View {
                 } else {
                     HStack(spacing: 0) {
                         if let textView = textElement {
-                            textView
+                            AttributedTextRepresentable(attributed: textView)
                         } else if #available(macOS 12.0, *) {
-                            Text(try! AttributedString(markdown: text))
+                            if let attributed = try? AttributedString(markdown: text) {
+                                Text(attributed)
+                            }
                         } else {
                             Text(text)
                         }
                     }
                     .onAppear {
                         textQueue.async {
-                            AccordMarkdown.shared.concatenateAndPrepare(text: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { text in
-                                if let text = text {
-                                    DispatchQueue.main.async {
-                                        textElement = text
-                                    }
+                            Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
+                                DispatchQueue.main.async {
+                                    textElement = text
                                 }
-                            }
+                            })
                         }
                     }
                     .onChange(of: text) { newValue in
                         textQueue.async {
-                            AccordMarkdown.shared.concatenateAndPrepare(text: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { text in
-                                if let text = text {
-                                    DispatchQueue.main.async {
-                                        textElement = text
-                                    }
+                            Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
+                                DispatchQueue.main.async {
+                                    textElement = text
                                 }
-                            }
+                            })
                         }
                     }
                 }
@@ -80,10 +78,10 @@ struct FancyTextView: View {
 extension String {
     public func marked() -> String {
         let textArray = self.components(separatedBy: " ")
-        var config = URLSessionConfiguration.default
+        let config = URLSessionConfiguration.default
         var returnString: String = ""
         config.urlCache = cache
-        config = config.setProxy()
+        config.setProxy()
         for text in textArray {
             if text.prefix(31) == "https://open.spotify.com/track/" {
                 let sem = DispatchSemaphore(value: 0)
@@ -100,7 +98,6 @@ extension String {
         }
         return returnString
     }
-
 }
 
 final class AccordMarkdown {
@@ -116,8 +113,9 @@ final class AccordMarkdown {
                 }
             }
         }
-        let config = URLSessionConfiguration.default.setProxy()
+        let config = URLSessionConfiguration.default
         config.urlCache = cache
+        config.setProxy()
         let session = URLSession(configuration: config)
         for text in split {
             // I'm sorry.
@@ -156,6 +154,8 @@ final class AccordMarkdown {
                 SongLink.shared.getSong(song: text) { song in
                     if let song = song {
                         textArray.append(Text(song.linksByPlatform.appleMusic.url))
+                    } else {
+                        textArray.append(Text(text))
                     }
                 }
             } else if text.hasPrefix("<@!") && text.hasSuffix(">") {

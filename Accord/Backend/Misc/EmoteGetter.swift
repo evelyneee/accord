@@ -16,18 +16,14 @@ final class Counter: ObservableObject {
         didSet {
             print("[Accord] set")
             timer = Timer.scheduledTimer(withTimeInterval: setinterval, repeats: true) { _ in
-                if self.setinterval != 0 {
-                    self.value += 1
-                }
+                self.value += 1
             }
         }
     }
 
     init(interval: Double) {
         timer = Timer.scheduledTimer(withTimeInterval: setinterval, repeats: true) { _ in
-            if self.setinterval != 0 {
-                self.value += 1
-            }
+            self.value += 1
         }
     }
 }
@@ -59,13 +55,13 @@ struct GifView: View {
                 Request.image(url: URL(string: url), to: nil) { image in
                     guard let gif = image as? Gif else { return }
                     animatedImages = gif.animatedImages
+                    guard let images = animatedImages else { return }
                     duration = Double(CFTimeInterval(gif.calculatedDuration ?? 0))
-                    setinterval = Double(duration / Double(animatedImages?.count ?? 1))
-                    print(Double(duration / Double(animatedImages?.count ?? 1)))
-                    self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(animatedImages?.count ?? 1)), repeats: true) { _ in
+                    setinterval = Double(duration / Double(images.count))
+                    self.timer = Timer.scheduledTimer(withTimeInterval: Double(duration / Double(images.count)), repeats: true) { _ in
                         if self.setinterval != 0 {
                             print(value)
-                            (self.value) += 1 % animatedImages!.count
+                            (self.value) += 1 % (images.count)
                         }
                     }
                 }

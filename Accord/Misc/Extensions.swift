@@ -63,9 +63,9 @@ public extension Collection where Indices.Iterator.Element == Index {
     var wrappedValue: NSImage = NSImage()
     init(url: String) {
         imageQueue.async {
-            Request.image(url: URL(string: url)) { [weak self] image in
+            Request.image(url: URL(string: url)) { image in
                 if let image = image {
-                    self?.wrappedValue = image
+                    self.wrappedValue = image
                 }
             }
         }
@@ -116,5 +116,50 @@ extension NSTextField {
     open override var focusRingType: NSFocusRingType {
         get { .none }
         set { }
+    }
+}
+
+@propertyWrapper struct Marked {
+    var wrappedValue: NSAttributedString
+    init(wrappedValue: NSAttributedString) {
+        self.wrappedValue = load(string: wrappedValue.string) ?? NSAttributedString.init()
+    }
+
+}
+
+extension String {
+    var markeddown: NSAttributedString {
+        load(string: self) ?? NSAttributedString.init()
+    }
+}
+
+func load(string: String) -> NSAttributedString? {
+    let sem = DispatchSemaphore(value: 0)
+    var ret: NSAttributedString? = nil
+    Markdown.marked(for: string, completion: { text in
+        ret = text
+        sem.signal()
+    })
+    sem.wait()
+    return ret
+}
+
+extension NSTextField {
+
+    /// Return an `NSTextField` configured exactly like one created by dragging a “Label” into a storyboard.
+    var newLabel: NSTextField {
+        let label = NSTextField()
+        label.isEditable = false
+        label.isSelectable = false
+        label.textColor = .labelColor
+        label.backgroundColor = .controlColor
+        label.drawsBackground = false
+        label.isBezeled = false
+        label.alignment = .natural
+        label.font = NSFont.systemFont(ofSize: 50)
+        label.lineBreakMode = .byClipping
+        label.cell?.isScrollable = true
+        label.cell?.wraps = false
+        return label
     }
 }

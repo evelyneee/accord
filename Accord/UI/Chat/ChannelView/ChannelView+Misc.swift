@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension GuildView {
+extension ChannelView {
     func fastIndexMessage(_ message: String, array: [Message]) -> Int? {
         let messageDict = array.enumerated().compactMap { (index, element) in
             return [element.id:index]

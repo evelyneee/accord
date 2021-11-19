@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Base
 struct SongLinkBase: Codable {
-    let entityUniqueID: String
+    let entityUniqueID: String?
     let userCountry: Country
     let pageURL: String
     let entitiesByUniqueID: [String: EntitiesByUniqueID]

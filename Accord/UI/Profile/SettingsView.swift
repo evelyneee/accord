@@ -255,8 +255,6 @@ struct SettingsViewRedesign: View {
                 UserDefaults.standard.set(self.discordSettings, forKey: "discordStockSettings")
 
             })
-
-
         }
     }
 }
