@@ -58,6 +58,7 @@ final class Markdown {
         for (index, line) in newlines.enumerated() {
             let words: [String] = line.split(separator: " ").compactMap { $0.str() }
             for word in words {
+                
                 let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
                 let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
                 let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
@@ -65,16 +66,16 @@ final class Markdown {
                     .replaceAllOccurences(of: "music.apple", with: "applemusic")
                 let dict = Array(arrayLiteral: zip(songIDs, platforms))
                     .reduce([], +)
-                
+                /*
                 // Syntax highlighting
                 let languageKeywords = word.matches(for: #"(func|guard|let|var|return|for|self|try)"#)
                 let miscKeywords = word.matches(for: #"(function|fetch|const)"#)
                 let typeKeywords = word.matches(for: #"(String|str|Any|Int|Int64|Int32)"#)
                 let function = word.matches(for: #".*\(\)$"#)
-                
-                
+
+
                 let whitemonospace: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]
-                
+
                 for item in languageKeywords {
                     let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
                                                                          .foregroundColor: NSColor.purple]
@@ -104,11 +105,10 @@ final class Markdown {
                     attributed.append(" ".attributed)
                     continue
                 }
+                */
                 for (id, platform) in dict {
                     SongLink.shared.getSong(song: "\(platform):track:\(id)") { song in
-                        guard let song = song else {
-                            return
-                        }
+                        guard let song = song else { return }
                         let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.systemFont(ofSize: 13),
                                                                              .foregroundColor: NSColor.blue,
                                                                              .underlineStyle: NSUnderlineStyle.single]
@@ -146,7 +146,7 @@ final class Markdown {
                 }
                 for id in mentions {
                     let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.systemFont(ofSize: 13),
-                                                                         .foregroundColor: NSColor.blue,
+                                                                         .foregroundColor: NSColor.controlAccentColor,
                                                                          .underlineStyle: NSUnderlineStyle.single]
                     attributed.append(NSAttributedString(string: "@\(members[id] ?? "Unknown user") ", attributes: fontAttributes))
                 }
@@ -188,5 +188,3 @@ struct AttributedTextRepresentable: NSViewRepresentable {
         nsView.attributedStringValue = attributed
     }
 }
-
-

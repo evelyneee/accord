@@ -26,6 +26,7 @@ extension ChannelView: MessageControllerDelegate {
                 message.referenced_message?.author?.loadPfp()
                 DispatchQueue.main.async {
                     self.popup.append(false)
+                    self.sidePopups.append(false)
                     viewModel.messages.remove(at: viewModel.messages.count - 1)
                     viewModel.messages.insert(message, at: 0)
                 }
@@ -55,6 +56,8 @@ extension ChannelView: MessageControllerDelegate {
                 guard let message = gatewayMessage.d else { return }
                 guard let index = fastIndexMessage(message.id, array: viewModel?.messages ?? []) else { return }
                 DispatchQueue.main.async {
+                    self.sidePopups.remove(at: index)
+                    self.popup.remove(at: index)
                     viewModel?.messages.remove(at: index)
                 }
             }
@@ -114,7 +117,7 @@ extension ChannelView: MessageControllerDelegate {
                         }
                     }
                     let temp: [String] = (rolesTemp.compactMap { $0 }).reversed()
-                    if temp.indices.contains(0) {
+                    if !(temp.isEmpty) {
                         DispatchQueue.main.async {
                             viewModel?.roles[(person.user.id)] = temp[0]
                         }

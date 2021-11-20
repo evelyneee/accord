@@ -62,76 +62,141 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 VStack {
                     if !(viewModel.matchedUsers.isEmpty) {
-                        List(viewModel.matchedUsers, id: \.id) { user in
-                            Button(user.username) {
+                        ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
+                            Button(action: {
                                 if let range = viewModel.textFieldContents.range(of: "@") {
                                     viewModel.textFieldContents.removeSubrange(range.lowerBound..<viewModel.textFieldContents.endIndex)
                                 }
                                 viewModel.textFieldContents.append("<@!\(user.id)>")
-                            }
+                            }, label: {
+                                HStack {
+                                    Attachment(pfpURL(user.id, user.avatar).appending("?size=24"))
+                                        .clipShape(Circle())
+                                        .frame(width: 20, height: 20)
+                                    Text(user.username)
+                                    Spacer()
+                                }
+                            })
+                            .buttonStyle(.borderless)
+                            .padding(5)
+                            .background(Color(NSColor.windowBackgroundColor))
+                            .cornerRadius(10)
                         }
-                        .listRowBackground(Color.clear)
-                        .frame(maxHeight: 150)
                     }
-                    TextField(chatText, text: $viewModel.textFieldContents, onEditingChanged: { state in
-                    }, onCommit: {
-                        // sending = true
-                        messageSendQueue.async {
-                            if viewModel.textFieldContents == "/shrug" {
-                                viewModel.textFieldContents = #"¯\_(ツ)_/¯"#
-                            }
-                            if (editing != nil) {
-                                print(editing ?? "")
-                                Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
-                                    userAgent: discordUserAgent,
-                                    token: AccordCoreVars.shared.token,
-                                    bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
-                                    type: .PATCH,
-                                    discordHeaders: true,
-                                    referer: "https://discord.com/channels/\(guildID)/\(channelID)",
-                                    empty: true,
-                                    json: true
-                                ))
-                                editing = nil
-                            } else {
-                                if fileUpload != nil {
-                                    uploadFile(temp: viewModel.textFieldContents)
-                                    fileUpload = nil
-                                    fileUploadURL = nil
+                    HStack {
+                        TextField(chatText, text: $viewModel.textFieldContents, onEditingChanged: { state in
+                        }, onCommit: {
+                            // sending = true
+                            messageSendQueue.async {
+                                if viewModel.textFieldContents == "/shrug" {
+                                    viewModel.textFieldContents = #"¯\_(ツ)_/¯"#
+                                }
+                                if (editing != nil) {
+                                    print(editing ?? "")
+                                    Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
+                                        userAgent: discordUserAgent,
+                                        token: AccordCoreVars.shared.token,
+                                        bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
+                                        type: .PATCH,
+                                        discordHeaders: true,
+                                        referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+                                        empty: true,
+                                        json: true
+                                    ))
+                                    editing = nil
                                 } else {
-                                    if replyingTo != nil {
-                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-                                            userAgent: discordUserAgent,
-                                            token: AccordCoreVars.shared.token,
-                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
-                                            type: .POST,
-                                            discordHeaders: true,
-                                            referer: "https://discord.com/channels/\(guildID)/\(channelID)",
-                                            empty: true,
-                                            json: true
-                                        ))
-                                        replyingTo = nil
+                                    if fileUpload != nil {
+                                        uploadFile(temp: viewModel.textFieldContents)
+                                        fileUpload = nil
+                                        fileUploadURL = nil
                                     } else {
-                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-                                            userAgent: discordUserAgent,
-                                            token: AccordCoreVars.shared.token,
-                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
-                                            type: .POST,
-                                            discordHeaders: true,
-                                            empty: true,
-                                            json: true
-                                        ))
+                                        if replyingTo != nil {
+                                            Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                                userAgent: discordUserAgent,
+                                                token: AccordCoreVars.shared.token,
+                                                bodyObject: ["content":"\(String(viewModel.textFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
+                                                type: .POST,
+                                                discordHeaders: true,
+                                                referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+                                                empty: true,
+                                                json: true
+                                            ))
+                                            replyingTo = nil
+                                        } else {
+                                            Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                                userAgent: discordUserAgent,
+                                                token: AccordCoreVars.shared.token,
+                                                bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
+                                                type: .POST,
+                                                discordHeaders: true,
+                                                empty: true,
+                                                json: true
+                                            ))
+                                        }
                                     }
                                 }
+                                DispatchQueue.main.async {
+                                    viewModel.textFieldContents = ""
+                                }
                             }
-                            DispatchQueue.main.async {
-                                viewModel.textFieldContents = ""
-                            }
+                        })
+                        Button(action: {
+                            fileImport.toggle()
+                        }) {
+                            Image(systemName: "plus.circle.fill")
                         }
+                        .buttonStyle(BorderlessButtonStyle())
+                        Button(action: {
+                            nitroless.toggle()
+                        }) {
+                            Image(systemName: "rectangle.grid.3x2.fill")
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .popover(isPresented: $nitroless, content: {
+                            NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
+                                .frame(width: 300, height: 400)
+                        })
+                        Button(action: {
+                            emotes.toggle()
+                        }) {
+                            Text("🥺")
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .keyboardShortcut("e", modifiers: [.command])
+                        .popover(isPresented: $emotes, content: {
+                            NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
+                                .frame(width: 300, height: 400)
+                        })
+                    }
+                    .padding(15)
+                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.behindWindow)) // blurred background
+                    .cornerRadius(15)
+                    .onAppear(perform: {
+                        viewModel.cachedUsers = self.users
                     })
-                        .padding(15)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.behindWindow)) // blurred background
-                        .cornerRadius(15)
+                    .onChange(of: users, perform: { value in
+                        self.viewModel.cachedUsers = value
+                    })
+                    .onChange(of: viewModel.textFieldContents) { [weak viewModel] new in
+                        if viewModel?.textFieldContents != new && !(typing) {
+                            messageSendQueue.async {
+                                Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                                    userAgent: discordUserAgent,
+                                    token: AccordCoreVars.shared.token,
+                                    type: .POST,
+                                    discordHeaders: true,
+                                    referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+                                ))
+                            }
+                            typing = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                                typing = false
+                            })
+                        }
+                    }
+                    .onReceive(viewModel.$textFieldContents, perform: { new in
+                        viewModel.checkText()
+                    })
                 }
                 .onAppear(perform: {
                     for _ in AccordCoreVars.shared.plugins {
@@ -174,65 +239,6 @@ struct ChatControls: View {
                             }
                         }
                     }
-                    Button(action: {
-                        fileImport.toggle()
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                    Button(action: {
-                        nitroless.toggle()
-                    }) {
-                        Image(systemName: "rectangle.grid.3x2.fill")
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                    .popover(isPresented: $nitroless, content: {
-                        NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
-                            .frame(width: 300, height: 400)
-                    })
-                    Button(action: {
-                        emotes.toggle()
-                    }) {
-                        Text("🥺")
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                    .keyboardShortcut("e", modifiers: [.command])
-                    .popover(isPresented: $emotes, content: {
-                        NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
-                            .frame(width: 300, height: 400)
-                    })
-                    .onAppear(perform: {
-                        viewModel.cachedUsers = self.users
-                    })
-                    .onChange(of: users, perform: { value in
-                        print(value)
-                        self.viewModel.cachedUsers = value
-                        print(self.viewModel.cachedUsers, "now")
-                    })
-                    .onChange(of: viewModel.textFieldContents) { [weak viewModel] new in
-                        if viewModel?.textFieldContents != new && !(typing) {
-                            messageSendQueue.async {
-                                Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
-                                    userAgent: discordUserAgent,
-                                    token: AccordCoreVars.shared.token,
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    referer: "https://discord.com/channels/\(guildID)/\(channelID)"
-                                ))
-                            }
-                            typing = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                                typing = false
-                            })
-                        }
-                    }
-                    .onReceive(viewModel.$textFieldContents, perform: { new in
-                        print("cock", viewModel.cachedUsers)
-                        viewModel.checkText()
-                    })
-                    .onReceive(viewModel.$cachedUsers, perform: { new in
-                        print("cock")
-                    })
                 }
             }
         }
@@ -254,11 +260,17 @@ final class ChatControlsViewModel: ObservableObject {
     @Published var cachedUsers = [User]()
     
     func checkText() {
-        let matches = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
-        if matches.indices.contains(0) {
-            let search = matches[0]
+        let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
+        let channels = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
+        let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
+        if !(mentions.isEmpty) {
+            let search = mentions[0]
             let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }
             matchedUsers = matched.removingDuplicates()
+        } else if !(channels.isEmpty) {
+            // TODO: Channel completion implementation here
+        } else if !(slashes.isEmpty) {
+            // TODO: Slash command implementation here
         }
     }
 }
@@ -275,4 +287,13 @@ extension Array where Element: Hashable {
     mutating func removeDuplicates() {
         self = self.removingDuplicates()
     }
+}
+
+extension NSTableView {
+  open override func viewDidMoveToWindow() {
+    super.viewDidMoveToWindow()
+
+    backgroundColor = NSColor.clear
+    enclosingScrollView!.drawsBackground = false
+  }
 }

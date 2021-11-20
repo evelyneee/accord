@@ -163,3 +163,10 @@ extension NSTextField {
         return label
     }
 }
+
+extension String {
+    func makeProperDate() -> String {
+        let date = ISO8601DateFormatter().date(from: self)
+        return DateFormatter.localizedString(from: date ?? Date(), dateStyle: .medium, timeStyle: .short)
+    }
+}

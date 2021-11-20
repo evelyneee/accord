@@ -119,7 +119,7 @@ final class ChannelViewViewModel: ObservableObject {
                     }
                 }
                 let temp: [String] = rolesTemp.compactMap { $0 }
-                if temp.indices.contains(0) {
+                if !(temp.isEmpty) {
                     DispatchQueue.main.async {
                         self.roles[(person.user.id)] = temp[0]
                     }

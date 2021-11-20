@@ -48,6 +48,7 @@ struct ChannelView: View, Equatable {
     @State var poppedUpUserProfile: Bool = false
     @State var userPoppedUp: Int? = nil
     @State var popup: [Bool] = Array.init(repeating: false, count: 50)
+    @State var sidePopups: [Bool] = Array.init(repeating: false, count: 50)
 
     // WebSocket error
     @State var error: String? = nil
@@ -110,18 +111,28 @@ struct ChannelView: View, Equatable {
                                                 } else if viewModel!.roles.isEmpty {
                                                     Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
                                                         .fontWeight(.semibold)
+                                                    +
+                                                    Text(" — \(message.timestamp.makeProperDate())")
+                                                        .foregroundColor(Color.secondary)
+                                                        .font(.subheadline)
+                                                    textView
+                                                } else if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
+                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                        .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                        .fontWeight(.semibold)
+                                                    +
+                                                    Text(" — \(message.timestamp.makeProperDate())")
+                                                        .foregroundColor(Color.secondary)
+                                                        .font(.subheadline)
                                                     textView
                                                 } else {
-                                                    if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
-                                                        Text("\(viewModel!.nicks[message.author?.id ?? ""] ?? author) -- \(message.timestamp)")
-                                                            .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                            .fontWeight(.semibold)
-                                                        textView
-                                                    } else {
-                                                        Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                            .fontWeight(.semibold)
-                                                        textView
-                                                    }
+                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                        .fontWeight(.semibold)
+                                                    +
+                                                    Text(" — \(message.timestamp.makeProperDate())")
+                                                        .foregroundColor(Color.secondary)
+                                                        .font(.subheadline)
+                                                    textView
                                                 }
                                             }
                                         }
@@ -129,23 +140,19 @@ struct ChannelView: View, Equatable {
                                     Spacer()
                                     // MARK: - Quick Actions
                                     Button(action: {
-                                        if opened == offset {
-                                            opened = nil
-                                        } else {
-                                            opened = offset
-                                        }
+                                        sidePopups[offset].toggle()
                                     }) {
-                                        Image(systemName: ((opened == offset) ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                        Image(systemName: (sidePopups[offset] ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    if (opened == offset) {
+                                    if sidePopups[offset] {
                                         Button(action: { [weak message] in
                                             let clipQueue = DispatchQueue(label: "clipboard")
                                             clipQueue.async {
                                                 NSPasteboard.general.clearContents()
                                                 NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
                                             }
-                                            opened = nil
+                                            sidePopups[offset].toggle()
                                         }) {
                                             Text("Copy")
                                         }
@@ -154,7 +161,7 @@ struct ChannelView: View, Equatable {
                                             DispatchQueue.global().async {
                                                 NSPasteboard.general.clearContents()
                                                 NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
-                                                opened = nil
+                                                sidePopups[offset].toggle()
                                             }
                                         }) {
                                             Text("Copy Message Link")
