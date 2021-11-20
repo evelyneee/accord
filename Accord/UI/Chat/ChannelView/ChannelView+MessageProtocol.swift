@@ -88,11 +88,7 @@ extension ChannelView: MessageControllerDelegate {
                         typing.append(nick_fake)
                     }
                     DispatchQueue.global().asyncAfter(deadline: .now() + 5, execute: {
-                        if let index = typing.firstIndex(of: (nick_fake)), typing.indices.contains(index) {
-                            DispatchQueue.main.async {
-                                typing.remove(at: index)
-                            }
-                        }
+                        typing.removeAll(where: { $0 == nick_fake })
                     })
                 }
             }

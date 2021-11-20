@@ -65,6 +65,45 @@ final class Markdown {
                     .replaceAllOccurences(of: "music.apple", with: "applemusic")
                 let dict = Array(arrayLiteral: zip(songIDs, platforms))
                     .reduce([], +)
+                
+                // Syntax highlighting
+                let languageKeywords = word.matches(for: #"(func|guard|let|var|return|for|self|try)"#)
+                let miscKeywords = word.matches(for: #"(function|fetch|const)"#)
+                let typeKeywords = word.matches(for: #"(String|str|Any|Int|Int64|Int32)"#)
+                let function = word.matches(for: #".*\(\)$"#)
+                
+                
+                let whitemonospace: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]
+                
+                for item in languageKeywords {
+                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                                                                         .foregroundColor: NSColor.purple]
+                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    continue
+                }
+                for item in typeKeywords {
+                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                                                                         .foregroundColor: NSColor.green]
+                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    continue
+                }
+                for item in miscKeywords {
+                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                                                                         .foregroundColor: NSColor.orange]
+                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    continue
+                }
+                for item in function {
+                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                                                                         .foregroundColor: NSColor.red]
+                    attributed.append(NSAttributedString.init(string: item.dropLast(2).str(), attributes: fontAttributes))
+                    attributed.append(NSAttributedString.init(string: "()", attributes: whitemonospace))
+                    continue
+                }
+                if (!(languageKeywords.isEmpty) || !(miscKeywords.isEmpty) || !(typeKeywords.isEmpty) || !(function.isEmpty)) {
+                    attributed.append(" ".attributed)
+                    continue
+                }
                 for (id, platform) in dict {
                     SongLink.shared.getSong(song: "\(platform):track:\(id)") { song in
                         guard let song = song else {
@@ -85,6 +124,7 @@ final class Markdown {
                     }
                 }
                 if dict.isEmpty == false {
+                    attributed.append(" ".attributed)
                     continue
                 }
                 for id in emoteIDs {
@@ -101,6 +141,7 @@ final class Markdown {
                     }
                 }
                 if emoteIDs != [] {
+                    attributed.append(" ".attributed)
                     continue
                 }
                 for id in mentions {
@@ -110,6 +151,7 @@ final class Markdown {
                     attributed.append(NSAttributedString(string: "@\(members[id] ?? "Unknown user") ", attributes: fontAttributes))
                 }
                 if mentions != [] {
+                    attributed.append(" ".attributed)
                     continue
                 }
                 do {
@@ -146,3 +188,5 @@ struct AttributedTextRepresentable: NSViewRepresentable {
         nsView.attributedStringValue = attributed
     }
 }
+
+

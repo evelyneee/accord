@@ -13,7 +13,7 @@ struct EmbedView: View, Equatable {
     static func == (lhs: EmbedView, rhs: EmbedView) -> Bool {
         return true
     }
-    
+        
     init(_ embed: Embed) {
         self.embed = embed
     }

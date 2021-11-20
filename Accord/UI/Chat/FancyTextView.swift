@@ -100,6 +100,23 @@ extension String {
     }
 }
 
+enum EnumView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("View from enum!!!")
+            Spacer()
+        }
+        .frame(width: 400, height: 400)
+    }
+    case view
+    init() {
+        self = .view
+        print(body)
+    }
+}
+
+
 final class AccordMarkdown {
     static var shared = AccordMarkdown()
     typealias completionBlock = ((_ value: Optional<Text>) -> Void)

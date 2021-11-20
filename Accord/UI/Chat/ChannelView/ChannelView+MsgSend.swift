@@ -17,21 +17,21 @@ extension ChannelView {
                     .frame(width: 33, height: 33)
                     .clipShape(Circle())
             }
-            VStack(alignment: .leading) {
-                if viewModel.messages.first?.author?.id != user_id {
-                    Text(username)
-                        .fontWeight(.semibold)
-                    if let temp = chatTextFieldContents {
-                        Text(temp)
-                    }
-                } else {
-                    if let temp = chatTextFieldContents {
-                        Text(temp)
-                            .padding(.leading, 41)
-                    }
-                }
-
-            }
+//            VStack(alignment: .leading) {
+//                if viewModel.messages.first?.author?.id != user_id {
+//                    Text(username)
+//                        .fontWeight(.semibold)
+//                    if let temp = chatTextFieldContents {
+//                        Text(temp)
+//                    }
+//                } else {
+//                    if let temp = chatTextFieldContents {
+//                        Text(temp)
+//                            .padding(.leading, 41)
+//                    }
+//                }
+//
+//            }
             Spacer()
             Button(action: {
             }) {

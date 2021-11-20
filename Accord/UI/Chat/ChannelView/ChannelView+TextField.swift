@@ -32,15 +32,9 @@ extension ChannelView {
                 }
             }
             if #available(macOS 12.0, *) {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
-                    .padding(15)
-                    .background(Material.regular) // blurred background
-                    .cornerRadius(15)
+                ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
             } else {
-                ChatControls(chatTextFieldContents: $chatTextFieldContents, guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing)
-                    .padding(15)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sheet, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                    .cornerRadius(15)
+                ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
             }
         }
         .padding()

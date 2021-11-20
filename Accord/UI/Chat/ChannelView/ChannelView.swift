@@ -33,7 +33,6 @@ struct ChannelView: View, Equatable {
     var guildID: String
     var channelID: String
     var channelName: String
-    @State var chatTextFieldContents: String = ""
 
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
@@ -114,7 +113,7 @@ struct ChannelView: View, Equatable {
                                                     textView
                                                 } else {
                                                     if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
-                                                        Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                        Text("\(viewModel!.nicks[message.author?.id ?? ""] ?? author) -- \(message.timestamp)")
                                                             .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
                                                             .fontWeight(.semibold)
                                                         textView
@@ -206,6 +205,7 @@ struct ChannelView: View, Equatable {
                             .id(message.id)
                             .rotationEffect(.radians(.pi))
                             .scaleEffect(x: -1, y: 1, anchor: .center)
+
                         }
 
                         if (viewModel?.messages.isEmpty ?? false) == false {
