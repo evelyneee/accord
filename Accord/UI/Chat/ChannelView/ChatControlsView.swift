@@ -14,9 +14,7 @@ struct ChatControls: View {
     @Binding var guildID: String
     @Binding var channelID: String
     @Binding var chatText: String
-    @Binding var sending: Bool
     @Binding var replyingTo: Message?
-    @Binding var editing: String?
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
@@ -86,53 +84,37 @@ struct ChatControls: View {
                     HStack {
                         TextField(chatText, text: $viewModel.textFieldContents, onEditingChanged: { state in
                         }, onCommit: {
-                            // sending = true
                             messageSendQueue.async {
                                 if viewModel.textFieldContents == "/shrug" {
                                     viewModel.textFieldContents = #"¯\_(ツ)_/¯"#
                                 }
-                                if (editing != nil) {
-                                    print(editing ?? "")
-                                    Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(editing ?? "")"), headers: Headers(
-                                        userAgent: discordUserAgent,
-                                        token: AccordCoreVars.shared.token,
-                                        bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
-                                        type: .PATCH,
-                                        discordHeaders: true,
-                                        referer: "https://discord.com/channels/\(guildID)/\(channelID)",
-                                        empty: true,
-                                        json: true
-                                    ))
-                                    editing = nil
+                                if fileUpload != nil {
+                                    uploadFile(temp: viewModel.textFieldContents)
+                                    fileUpload = nil
+                                    fileUploadURL = nil
                                 } else {
-                                    if fileUpload != nil {
-                                        uploadFile(temp: viewModel.textFieldContents)
-                                        fileUpload = nil
-                                        fileUploadURL = nil
+                                    if replyingTo != nil {
+                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                            userAgent: discordUserAgent,
+                                            token: AccordCoreVars.shared.token,
+                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
+                                            type: .POST,
+                                            discordHeaders: true,
+                                            referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+                                            empty: true,
+                                            json: true
+                                        ))
+                                        replyingTo = nil
                                     } else {
-                                        if replyingTo != nil {
-                                            Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-                                                userAgent: discordUserAgent,
-                                                token: AccordCoreVars.shared.token,
-                                                bodyObject: ["content":"\(String(viewModel.textFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
-                                                type: .POST,
-                                                discordHeaders: true,
-                                                referer: "https://discord.com/channels/\(guildID)/\(channelID)",
-                                                empty: true,
-                                                json: true
-                                            ))
-                                            replyingTo = nil
-                                        } else {
-                                            Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-                                                userAgent: discordUserAgent,
-                                                token: AccordCoreVars.shared.token,
-                                                bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
-                                                type: .POST,
-                                                discordHeaders: true,
-                                                empty: true,
-                                                json: true
-                                            ))
-                                        }
+                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                            userAgent: discordUserAgent,
+                                            token: AccordCoreVars.shared.token,
+                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
+                                            type: .POST,
+                                            discordHeaders: true,
+                                            empty: true,
+                                            json: true
+                                        ))
                                     }
                                 }
                                 DispatchQueue.main.async {
@@ -169,7 +151,7 @@ struct ChatControls: View {
                         })
                     }
                     .padding(15)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.behindWindow)) // blurred background
+                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
                     .cornerRadius(15)
                     .onAppear(perform: {
                         viewModel.cachedUsers = self.users

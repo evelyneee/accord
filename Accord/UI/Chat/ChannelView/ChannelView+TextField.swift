@@ -12,30 +12,26 @@ extension ChannelView {
     var blurredTextField: some View {
         return VStack(alignment: .leading) {
             HStack {
-                if typing.count == 1 && !(typing.isEmpty) {
-                    Text(channelID != "@me" ? "\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..." : "\(channelName) is typing...")
-                        .padding(4)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                        .cornerRadius(5)
-                } else if !(typing.isEmpty) {
-                    Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) are typing...")
-                        .lineLimit(0)
-                        .padding(4)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                        .cornerRadius(5)
+                Group {
+                    if typing.count == 1 && !(typing.isEmpty) {
+                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..")
+                    } else if !(typing.isEmpty) {
+                        Text("\(typing.joined(separator: ", ")) are typing...")
+                    }
                 }
+                .padding(4)
+                .lineLimit(0)
+                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                .cornerRadius(5)
                 if let replied = replyingTo {
                     Text("replying to \(replied.author?.username ?? "")")
                         .padding(4)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                        .lineLimit(0)
+                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
                         .cornerRadius(5)
                 }
             }
-            if #available(macOS 12.0, *) {
-                ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
-            } else {
-                ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), sending: $sending, replyingTo: $replyingTo, editing: $editing, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
-            }
+            ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), replyingTo: $replyingTo, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
         }
         .padding()
     }

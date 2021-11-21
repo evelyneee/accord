@@ -176,16 +176,6 @@ struct ChannelView: View, Equatable {
                                         Image(systemName: "arrowshape.turn.up.backward.fill")
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    /*
-                                    Button(action: { [weak message] in
-                                        editing = message?.id
-                                        chatTextFieldContents = ""
-                                    }) {
-                                        Image(systemName: "pencil")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-
-                                     */
                                     Button(action: { [weak message] in
                                         message!.delete()
                                     }) {
@@ -256,7 +246,7 @@ extension ChannelView {
                 Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                     .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                     .fontWeight(.semibold)
-                Text(reply.content)
+                AttributedTextRepresentable(NSAttributedString(string: reply.content))
                     .lineLimit(0)
             } else {
                 Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
@@ -271,20 +261,27 @@ extension ChannelView {
 
 // MARK: - macOS Big Sur blur view
 
-struct VisualEffectView: NSViewRepresentable {
+public struct VisualEffectView: NSViewRepresentable {
     let material: NSVisualEffectView.Material
     let blendingMode: NSVisualEffectView.BlendingMode
 
-    func makeNSView(context: Context) -> NSVisualEffectView {
+    public init(
+        material: NSVisualEffectView.Material = .contentBackground,
+        blendingMode: NSVisualEffectView.BlendingMode = .withinWindow
+    ) {
+        self.material = material
+        self.blendingMode = blendingMode
+    }
+
+    public func makeNSView(context: Context) -> NSVisualEffectView {
         let visualEffectView = NSVisualEffectView()
         visualEffectView.material = material
         visualEffectView.blendingMode = blendingMode
         visualEffectView.state = NSVisualEffectView.State.active
-        visualEffectView.shadow?.shadowBlurRadius = 20
         return visualEffectView
     }
 
-    func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
+    public func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
         visualEffectView.material = material
         visualEffectView.blendingMode = blendingMode
     }

@@ -35,7 +35,6 @@ final class ChannelViewViewModel: ObservableObject {
         self.channelID = channelID
         self.guildID = guildID
         // messages are now read
-        self.ack(channelID: channelID, guildID: guildID)
         switch self.guildID == "@me" {
         case true:
             wss.subscribeToDM(channelID)
@@ -82,6 +81,7 @@ final class ChannelViewViewModel: ObservableObject {
             self.messages = messages
             DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
             self.fakeNicksObject()
+            self.ack(channelID: channelID, guildID: guildID)
         })
     }
     

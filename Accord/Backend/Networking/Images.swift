@@ -127,11 +127,12 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: imageLoader.image)
-              .resizable()
-              .scaledToFit()
+        if imageLoader.image != NSImage() {
+            Image(nsImage: imageLoader.image)
+                  .resizable()
+                  .scaledToFit()
+        }
     }
-
 }
 
 struct StockAttachment: View, Equatable {

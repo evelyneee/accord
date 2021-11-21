@@ -33,9 +33,11 @@ final class User: Codable, Identifiable, Hashable {
     
     func isMe() -> Bool { user_id == self.id }
     func loadPfp() {
-        Request.image(url: URL(string: pfpURL(self.id, self.avatar)), to: CGSize(width: 80, height: 80)) { avatar in
-            guard let avatar = avatar else { return }
-            self.pfp = avatar.tiffRepresentation
+        imageQueue.async {
+            Request.image(url: URL(string: pfpURL(self.id, self.avatar)), to: CGSize(width: 80, height: 80)) { avatar in
+                guard let avatar = avatar else { return }
+                self.pfp = avatar.tiffRepresentation
+            }
         }
     }
     

@@ -339,124 +339,7 @@ final class WebSocket {
             }
         }
     }
-    
-    final func frame() {
-        ws.receive { result in
-            switch result {
-            case .success(let message):
-                switch message {
-                case .string(let text):
-                    if let data = text.data(using: .utf8) {
-                        guard let payload = self.decodePayload(payload: data), let op = payload["op"] as? Int else { return }
-                        guard let s = payload["s"] as? Int else {
-                            if op == 11 {
-                                // no seq + op 11 means a hearbeat was done successfully
-                                print("[Accord] Heartbeat successful")
-                                self.frame()
-                            } else {
-                                // disconnected?
-                                self.reconnect()
-                            }
-                            return
-                        }
-                        self.seq = s
-                        guard let t = payload["t"] as? String else {
-                            self.frame()
-                            return
-                        }
-                        switch t {
-                        case "READY":
-                            let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                            try? data.write(to: path)
-                            guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: data) else { break }
-                            releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
-                            self.session_id = structure.d.session_id
-                            break
-
-                        // MARK: Channel Event Handlers
-                        case "CHANNEL_CREATE": break
-                        case "CHANNEL_UPDATE": break
-                        case "CHANNEL_DELETE": break
-
-                        // MARK: Guild Event Handlers
-                        case "GUILD_CREATE": print("[Accord] something was created"); break
-                        case "GUILD_DELETE": break
-                        case "GUILD_MEMBER_ADD": break
-                        case "GUILD_MEMBER_REMOVE": break
-                        case "GUILD_MEMBER_UPDATE": break
-                        case "GUILD_MEMBER_LIST_UPDATE": print(payload, "WEIRD EVENT"); break
-                        case "GUILD_MEMBERS_CHUNK":
-                            MessageController.shared.sendMemberChunk(msg: data)
-                            break
-
-                        // MARK: Invite Event Handlers
-                        case "INVITE_CREATE": break
-                        case "INVITE_DELETE": break
-
-                        // MARK: Message Event Handlers
-                        case "MESSAGE_CREATE":
-                            guard let dict = payload["d"] as? [String: Any] else { break }
-                            if let channelID = dict["channel_id"] as? String, let author = dict["author"] as? [String:Any], let id = author["id"] as? String, id == user_id {
-                                MessageController.shared.sendMessage(msg: data, channelID: channelID, isMe: true)
-                            } else if let channelID = dict["channel_id"] as? String {
-                                MessageController.shared.sendMessage(msg: data, channelID: channelID)
-                            }
-                            guard let mentions = dict["mentions"] as? [[String:Any]] else { break }
-                            let ids = mentions.compactMap { $0["id"] as? String }
-                            let guild_id = dict["guild_id"] as? String ?? "@me"
-                            guard let channel_id = dict["channel_id"] as? String else { break }
-                            guard let author = dict["author"] as? [String:Any] else { break }
-                            guard let username = author["username"] as? String else { break }
-                            guard let user_id = author["id"] as? String else { break }
-                            guard let content = dict["content"] as? String else { break }
-                            if ids.contains(user_id) {
-                                showNotification(title: username, subtitle: content)
-                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
-                            } else if Notifications.shared.privateChannels.contains(channel_id) && user_id != user_id {
-                                showNotification(title: username, subtitle: content)
-                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
-                            }
-                            break
-                        case "MESSAGE_UPDATE":
-                            let dict = payload["d"] as! [String: Any]
-                            if let channelid = dict["channel_id"] as? String {
-                                MessageController.shared.editMessage(msg: data, channelID: channelid)
-                            }
-                            break
-                        case "MESSAGE_DELETE":
-                            let dict = payload["d"] as! [String: Any]
-                            if let channelid = dict["channel_id"] as? String {
-                                MessageController.shared.deleteMessage(msg: data, channelID: channelid)
-                            }
-                            break
-                        case "MESSAGE_REACTION_ADD": print("[Accord] something was created"); break
-                        case "MESSAGE_REACTION_REMOVE": print("[Accord] something was created"); break
-                        case "MESSAGE_REACTION_REMOVE_ALL": print("[Accord] something was created"); break
-                        case "MESSAGE_REACTION_REMOVE_EMOJI": print("[Accord] something was created"); break
-
-                        // MARK: Presence Event Handlers
-                        case "PRESENCE_UPDATE": break
-                        case "TYPING_START":
-                            let data = payload["d"] as! [String: Any]
-                            if let channelid = data["channel_id"] as? String {
-                                MessageController.shared.typing(msg: data, channelID: channelid)
-                            }
-                            break
-                        case "USER_UPDATE": break
-                        default: break
-                        }
-                        
-                    }
-                case .data(_): break
-                default: break
-                }
-            case .failure(let error):
-                releaseModePrint(error)
-                break
-            }
-        }
-    }
-    
+        
     // MARK: - Receive
     final func receive() {
         ws.receive { [weak self] result in
@@ -515,18 +398,26 @@ final class WebSocket {
 
                         // MARK: Message Event Handlers
                         case "MESSAGE_CREATE":
-                            let data = payload["d"] as! [String: Any]
-                            if let channelID = data["channel_id"] as? String, let author = data["author"] as? [String:Any], let id = author["id"] as? String, id == user_id {
+                            guard let dict = payload["d"] as? [String: Any] else { break }
+                            if let channelID = dict["channel_id"] as? String, let author = dict["author"] as? [String:Any], let id = author["id"] as? String, id == user_id {
                                 MessageController.shared.sendMessage(msg: textData, channelID: channelID, isMe: true)
-                            } else if let channelID = data["channel_id"] as? String {
+                            } else if let channelID = dict["channel_id"] as? String {
                                 MessageController.shared.sendMessage(msg: textData, channelID: channelID)
                             }
-                            if (((payload["d"] as! [String: Any])["mentions"] as? [[String:Any]] ?? []).map { $0["id"] as? String ?? ""}).contains(user_id) {
-                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                MentionSender.shared.addMention(guild: data["guild_id"] as? String ?? "@me", channel: data["channel_id"] as! String)
-                            } else if Notifications.shared.privateChannels.contains(data["channel_id"] as! String) && ((((payload["d"] as! [String: Any])["author"]) as! [String:Any])["id"] as? String ?? "") != user_id {
-                                showNotification(title: (((payload["d"] as! [String: Any])["author"]) as! [String:Any])["username"] as? String ?? "", subtitle: (payload["d"] as! [String: Any])["content"] as! String)
-                                MentionSender.shared.addMention(guild: "@me", channel: data["channel_id"] as! String)
+                            guard let mentions = dict["mentions"] as? [[String:Any]] else { break }
+                            let ids = mentions.compactMap { $0["id"] as? String }
+                            let guild_id = dict["guild_id"] as? String ?? "@me"
+                            guard let channel_id = dict["channel_id"] as? String else { break }
+                            guard let author = dict["author"] as? [String:Any] else { break }
+                            guard let username = author["username"] as? String else { break }
+                            guard let user_id = author["id"] as? String else { break }
+                            guard let content = dict["content"] as? String else { break }
+                            if ids.contains(user_id) {
+                                showNotification(title: username, subtitle: content)
+                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
+                            } else if Notifications.shared.privateChannels.contains(channel_id) && user_id != user_id {
+                                showNotification(title: username, subtitle: content)
+                                MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
                             }
                             break
                         case "MESSAGE_UPDATE":
