@@ -178,7 +178,13 @@ struct AttributedTextRepresentable: NSViewRepresentable {
 
     typealias NSViewType = NSTextField
     let attributed: NSAttributedString
-
+    let limit: Int?
+    
+    init(_ attributed: NSAttributedString, _ limit: Int? = nil) {
+        self.attributed = attributed
+        self.limit = limit
+    }
+    
     func makeNSView(context: Context) -> NSViewType {
         let textView = NSTextField(labelWithAttributedString: attributed)
         return textView
@@ -186,5 +192,9 @@ struct AttributedTextRepresentable: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSViewType, context: Context) {
         nsView.attributedStringValue = attributed
+    }
+    
+    @inlinable func lineLimit(_ limit: Int) -> some View {
+        return AttributedTextRepresentable(self.attributed)
     }
 }

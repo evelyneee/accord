@@ -256,23 +256,13 @@ extension ChannelView {
                 Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                     .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
                     .fontWeight(.semibold)
-                if #available(macOS 12.0, *) {
-                    Text(try! AttributedString(markdown: reply.content))
-                        .lineLimit(0)
-                } else {
-                    Text(reply.content)
-                        .lineLimit(0)
-                }
+                Text(reply.content)
+                    .lineLimit(0)
             } else {
                 Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
                     .fontWeight(.semibold)
-                if #available(macOS 12.0, *) {
-                    Text(try! AttributedString(markdown: reply.content))
-                        .lineLimit(0)
-                } else {
-                    Text(reply.content)
-                        .lineLimit(0)
-                }
+                Text(reply.content)
+                    .lineLimit(0)
             }
         }
 

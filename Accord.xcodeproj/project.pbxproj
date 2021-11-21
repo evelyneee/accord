@@ -15,6 +15,7 @@
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
+		9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E746A2727499CE6009A9C22 /* Interaction.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
@@ -103,6 +104,7 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
+		9E746A2727499CE6009A9C22 /* Interaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interaction.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
@@ -319,6 +321,7 @@
 				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
 				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
 				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
+				9E746A2727499CE6009A9C22 /* Interaction.swift */,
 				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
 				A8B1F29926CB169800E8FDC5 /* Message.swift */,
 				A82A062326D98259007B9B27 /* ReadState.swift */,
@@ -516,6 +519,7 @@
 				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
 				A8B1F29C26CB16C400E8FDC5 /* Attachment.swift in Sources */,
 				A832557826EEEC1D00F18A55 /* ServerListView+Misc.swift in Sources */,
+				9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */,
 				A8B1F2A226CB171600E8FDC5 /* Enums.swift in Sources */,
 				A82A060526D3F6DA007B9B27 /* ChannelView+HeaderView.swift in Sources */,
 				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,

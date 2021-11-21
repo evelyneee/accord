@@ -29,41 +29,29 @@ struct FancyTextView: View {
     var body: some View {
         VStack {
             HStack {
-                if text.contains("`") {
-                    if #available(macOS 12.0, *) {
-                        Text(try! AttributedString(markdown: text))
+                HStack(spacing: 0) {
+                    if let textView = textElement {
+                        AttributedTextRepresentable(textView)
                     } else {
                         Text(text)
                     }
-                } else {
-                    HStack(spacing: 0) {
-                        if let textView = textElement {
-                            AttributedTextRepresentable(attributed: textView)
-                        } else if #available(macOS 12.0, *) {
-                            if let attributed = try? AttributedString(markdown: text) {
-                                Text(attributed)
+                }
+                .onAppear {
+                    textQueue.async {
+                        Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
+                            DispatchQueue.main.async {
+                                textElement = text
                             }
-                        } else {
-                            Text(text)
-                        }
+                        })
                     }
-                    .onAppear {
-                        textQueue.async {
-                            Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
-                                DispatchQueue.main.async {
-                                    textElement = text
-                                }
-                            })
-                        }
-                    }
-                    .onChange(of: text) { newValue in
-                        textQueue.async {
-                            Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
-                                DispatchQueue.main.async {
-                                    textElement = text
-                                }
-                            })
-                        }
+                }
+                .onChange(of: text) { newValue in
+                    textQueue.async {
+                        Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
+                            DispatchQueue.main.async {
+                                textElement = text
+                            }
+                        })
                     }
                 }
             }

@@ -61,7 +61,7 @@ struct ServerListViewCell: View, Equatable {
     }
     var body: some View {
         
-        lazy var label: some View = {
+        var label: some View {
             return Group {
                 switch channel.type {
                 case .normal:
@@ -90,9 +90,9 @@ struct ServerListViewCell: View, Equatable {
                     Label(channel.name ?? channel.recipients?[0].username ?? "Unknown Channel", systemImage: "camera.metering.unknown")
                 }
             }
-        }()
+        }
         
-        lazy var readStateDot: some View = {
+        var readStateDot: some View {
             return ZStack {
                 Circle()
                     .foregroundColor(Color.red)
@@ -102,15 +102,15 @@ struct ServerListViewCell: View, Equatable {
                     .fontWeight(.semibold)
                     .font(.caption)
             }
-        }()
+        }
         
-        lazy var windowButton: some View = {
+        var windowButton: some View {
             return Button(action: { [weak channel] in
                 showWindow(guildID: guildID, channelID: channel?.id ?? "", channelName: channel?.name ?? "")
             }) {
                 Image(systemName: "arrow.up.right.circle")
             }
-        }()
+        }
         
         return HStack {
             label
