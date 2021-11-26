@@ -15,7 +15,6 @@ let wssThread = DispatchQueue(label: "WebSocket Thread")
 struct ContentView: View {
     @State public var selection: Int?
     @State var socketOut: GatewayD?
-    @State var status: statusIndicators?
     @State var modalIsPresented: Bool = false
     var body: some View {
         Group {
@@ -26,7 +25,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-                        
             if (AccordCoreVars.shared.token != "") {
                 concurrentQueue.async {
                     let path = FileManager.default.urls(for: .cachesDirectory,

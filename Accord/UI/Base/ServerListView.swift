@@ -122,10 +122,8 @@ struct ServerListView: View {
                                 .font(.title2)
                             Divider()
                             ForEach(privateChannels, id: \.id) { channel in
-                                NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) { [weak channel] in
-                                    if let channel = channel {
-                                        ServerListViewCell(channel: channel)
-                                    }
+                                NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
+                                    ServerListViewCell(channel: channel)
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
                             }
@@ -135,7 +133,7 @@ struct ServerListView: View {
                 } else {
                     // MARK: - Guild channels
                     if guilds.isEmpty == false {
-                        GuildView(guild: $guilds[selectedServer ?? 0]).equatable()
+                        GuildView(guild: $guilds[selectedServer ?? 0])
                     }
                 }
             })
@@ -160,18 +158,21 @@ struct ServerListView: View {
             DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
                 assignReadStates()
             }
-                        
             for guild in guilds {
-                let name = "\(guild.id)$\(guild.name)"
-                AllEmotes.shared.allEmotes[name] = guild.emojis
                 for channel in guild.channels ?? [] {
                     channel.guild_id = guild.id
                 }
             }
+            AllEmotes.shared.allEmotes = guilds.map { ["\($0.id)$\($0.name)":$0.emojis] }
+                                            .flatMap { $0 }
+                                            .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
+                                                var nextDict = dict
+                                                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                                                return nextDict
+                                            }
+            
             if sortByMostRecent {
-                
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
-                
             } else {
                 guildOrder = full?.user_settings?.guild_positions ?? []
                 var guildTemp = [Guild]()
@@ -183,7 +184,7 @@ struct ServerListView: View {
                 self.guilds = guildTemp
             }
             concurrentQueue.async {
-                roleColors = (RoleManager.shared?.arrangeRoleColors(guilds: guilds))!
+                roleColors = RoleManager.shared.arrangeRoleColors(guilds: guilds)
             }
             order()
             DispatchQueue.main.async {
@@ -195,6 +196,5 @@ struct ServerListView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
             pings.append((notif.userInfo as! [String:Any])["info"] as! (String, String))
         }
-        .navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
 }

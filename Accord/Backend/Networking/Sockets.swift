@@ -117,7 +117,7 @@ final class WebSocket {
     
     func reset() {
         ws.cancel()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+        concurrentQueue.asyncAfter(deadline: .now() + 5, execute: {
             wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
         })
         wss = nil
@@ -238,9 +238,9 @@ final class WebSocket {
                 "properties": [
                     "os":"Mac OS X",
                     "browser":"Discord Client",
-                    "release_channel":"canary",
-                    "client_build_number": 101473,
-                    "client_version":"0.0.278",
+                    "release_channel":"stable",
+                    "client_build_number": 105608,
+                    "client_version":"0.0.264",
                     "os_version":"21.1.0",
                     "os_arch":"x64",
                     "system-locale":"en-US",
@@ -440,9 +440,7 @@ final class WebSocket {
                         // MARK: Presence Event Handlers
                         case "PRESENCE_UPDATE": break
                         case "TYPING_START":
-                            print("typing")
                             let data = payload["d"] as! [String: Any]
-                            print(data)
                             if let channelid = data["channel_id"] as? String {
                                 MessageController.shared.typing(msg: data, channelID: channelid)
                             }

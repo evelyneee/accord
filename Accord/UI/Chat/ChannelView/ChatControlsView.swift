@@ -204,7 +204,7 @@ struct ChatControls: View {
                         Image(systemName: "doc.fill")
                             .foregroundColor(Color.secondary)
                     }
-                    
+                    /*
                     if AccordCoreVars.shared.plugins != [] {
                         ForEach(AccordCoreVars.shared.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
                             if pluginPoppedUp.indices.contains(offset) {
@@ -221,6 +221,7 @@ struct ChatControls: View {
                             }
                         }
                     }
+                    */
                 }
             }
         }

@@ -10,7 +10,7 @@
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)group.me.evelyn.accord</string>
+		<string>$(AppIdentifierPrefix)group.com.evelyn.accord</string>
 	</array>
 </dict>
 </plist>

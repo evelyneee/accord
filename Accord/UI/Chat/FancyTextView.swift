@@ -8,58 +8,36 @@
 import Foundation
 import SwiftUI
 
-final class GifServer {
-    static var shared: GifServer? = GifServer()
-    init(_ a: Bool = false) {
-        print("[Accord] innit")
-        index = 0
-    }
-    var timer: Timer? = Timer(timeInterval: Double(0.05), repeats: true) { time in
-        GifServer.shared?.index += 1 % 20
-    }
-    var index: Int = 0
-}
-
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
 struct FancyTextView: View {
     @Binding var text: String
-    @State var textElement: NSAttributedString? = nil
+    @State var textElement: Text? = nil
     @Binding var channelID: String
     var body: some View {
-        VStack {
-            HStack {
-                HStack(spacing: 0) {
-                    if let textView = textElement {
-                        AttributedTextRepresentable(textView)
-                    } else {
-                        Text(text)
-                    }
-                }
-                .onAppear {
-                    textQueue.async {
-                        Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
-                            DispatchQueue.main.async {
-                                textElement = text
-                            }
-                        })
-                    }
-                }
-                .onChange(of: text) { newValue in
-                    textQueue.async {
-                        Markdown.marked(for: text, members: ChannelMembers.shared.channelMembers[channelID] ?? [:], completion: { text in
-                            DispatchQueue.main.async {
-                                textElement = text
-                            }
-                        })
-                    }
+        HStack(spacing: 0) {
+            if let textView = textElement {
+                textView
+            } else {
+                Text(text)
+            }
+        }
+        .onAppear {
+            textQueue.async {
+                text.markdown(members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { markdown in
+                    guard let markdown = markdown else { return }
+                    self.textElement = markdown
                 }
             }
         }
-        .onDisappear(perform: {
-            GifServer.shared?.timer?.invalidate()
-            GifServer.shared = nil
-        })
+        .onChange(of: text) { newValue in
+            textQueue.async {
+                text.markdown(members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { markdown in
+                    guard let markdown = markdown else { return }
+                    self.textElement = markdown
+                }
+            }
+        }
     }
 }
 
@@ -87,23 +65,6 @@ extension String {
         return returnString
     }
 }
-
-enum EnumView: View {
-    var body: some View {
-        VStack {
-            Spacer()
-            Text("View from enum!!!")
-            Spacer()
-        }
-        .frame(width: 400, height: 400)
-    }
-    case view
-    init() {
-        self = .view
-        print(body)
-    }
-}
-
 
 final class AccordMarkdown {
     static var shared = AccordMarkdown()
@@ -182,4 +143,3 @@ final class AccordMarkdown {
         }
     }
 }
-

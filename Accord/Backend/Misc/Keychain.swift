@@ -8,7 +8,7 @@ final class KeychainManager {
         let query = [
             kSecClass as String           : kSecClassGenericPassword as String,
             kSecAttrAccount as String     : key,
-            kSecAttrAccessGroup as String : "group.me.evelyn.accord",
+            kSecAttrAccessGroup as String : "group.com.evelyn.accord",
             kSecValueData as String       : data ] as [String : Any]
 
         SecItemDelete(query as CFDictionary)
@@ -21,7 +21,7 @@ final class KeychainManager {
             kSecClass as String       : kSecClassGenericPassword,
             kSecAttrAccount as String : key,
             kSecReturnData as String  : kCFBooleanTrue!,
-            kSecAttrAccessGroup as String: "group.evelyn.accord",
+            kSecAttrAccessGroup as String: "group.com.evelyn.accord",
             kSecMatchLimit as String  : kSecMatchLimitOne
         ] as [String : Any]
 

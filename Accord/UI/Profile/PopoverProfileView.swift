@@ -14,7 +14,7 @@ struct PopoverProfileView: View {
         if let user = user {
             ZStack(alignment: .top) {
                 VStack {
-                    Color.yellow.frame(height: 100)
+                    Color(NSImage(data: user.pfp ?? Data())?.averageColor ?? NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
                     Spacer()
                 }
                 VStack {
@@ -139,13 +139,10 @@ struct PopoverProfileView: View {
                         .transition(AnyTransition.opacity)
                     }
                     .padding()
-                    .background(Color.primary.colorInvert())
+                    .background(Color(NSColor.windowBackgroundColor))
                 }
             }
             .frame(width: 290, height: 250)
-            .onDisappear {
-                NotificationCenter.default.post(name: Notification.Name(rawValue: "Dismiss"), object: nil)
-            }
         }
     }
 }

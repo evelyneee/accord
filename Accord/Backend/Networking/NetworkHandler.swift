@@ -187,13 +187,17 @@ final class Request {
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard error == nil,
               let data = data,
-                  let image = (size != nil ? NSImage(data: data)?.downsample(to: size!) : NSImage(data: data)) else {
-                      print(error?.localizedDescription ?? "unknown error")
-                      return completion(nil)
+                let size = size,
+                  let imageData = NSImage(data: data)?.downsample(to: size),
+                    let image = NSImage(data: imageData) else {
+                        print(error?.localizedDescription ?? "unknown error")
+                        if let data = data {
+                            return completion(NSImage(data: data))
+                        } else {
+                            return completion(nil)
+                        }
             }
-            if let data = image.tiffRepresentation {
-                cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
-            }
+            cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
             return completion(image)
         }).resume()
     }

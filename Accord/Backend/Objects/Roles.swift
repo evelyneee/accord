@@ -9,7 +9,7 @@ import Foundation
 import AppKit
 
 final class RoleManager {
-    static var shared: RoleManager? = RoleManager()
+    static var shared: RoleManager = RoleManager()
     final func arrangeRoleColors(guilds: [Guild]) -> [String:(Int, Int)] {
         var returnArray: [String:(Int, Int)] = [:]
         for guild in guilds {

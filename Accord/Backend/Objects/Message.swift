@@ -12,7 +12,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
         return lhs.id == rhs.id
     }
-    
+        
     var author: User?
     var nick: String?
     var channel_id: String
@@ -32,7 +32,8 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var referenced_message: Reply?
     weak var lastMessage: Message?
     
-    #warning("TODO: Component object")
+    // TODO: Component object
+    
     /*
      [
        {

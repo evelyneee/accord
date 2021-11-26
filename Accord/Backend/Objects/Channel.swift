@@ -31,8 +31,6 @@ final class Channel: Codable, Equatable, Identifiable, Hashable {
     var owner_id: String?
     // var application_id: String?
     let parent_id: String?
-    // var last_pin_timestamp: String?
-    // TODO: ISO8601 timestamp
     //  var rtc_region: ?
     // var video_quality_mode: Int?
     var message_count: Int?

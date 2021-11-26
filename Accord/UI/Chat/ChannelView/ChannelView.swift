@@ -71,191 +71,169 @@ struct ChannelView: View, Equatable {
     
     // MARK: - View body begins here
     var body: some View {
-        ZStack(alignment: .topTrailing) { [weak viewModel] in
-            ZStack(alignment: .bottom) {
-                Spacer()
-                List {
-                    LazyVStack {
-                        Spacer().frame(height: 90)
-                        // MARK: Message loop
-                        ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
-                            LazyVStack(alignment: .leading) {
-                                // MARK: - Reply
-                                if let reply = message.referenced_message {
-                                    makeReplyView(reply: reply)
-                                }
-                                // MARK: - The actual message
-                                HStack(alignment: .top) {
-                                    VStack {
-                                        if !(message.isSameAuthor()) {
-                                            Button(action: {
-                                                popup[offset].toggle()
-                                            }) { [weak message] in
-                                                Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
-                                                    .frame(width: 33, height: 33)
-                                                    .scaledToFit()
-                                                    .clipShape(Circle())
-                                            }
-                                            .popover(isPresented: $popup[offset], content: {
-                                                 PopoverProfileView(user: Binding.constant(message.author))
-                                            })
-                                            .buttonStyle(BorderlessButtonStyle())
-                                        }
+        ZStack(alignment: .bottom) { [weak viewModel] in
+            Spacer()
+            List {
+                LazyVStack {
+                    Spacer().frame(height: 90)
+                    // MARK: Message loop
+                    ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
+                        VStack(alignment: .leading) {
+                            // MARK: - Reply
+                            if let reply = message.referenced_message {
+                                HStack {
+                                    Spacer().frame(width: 50)
+                                    Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                        .frame(width: 15, height: 15)
+                                        .scaledToFit()
+                                        .clipShape(Circle())
+                                    if let roleColor = roleColors[(viewModel?.roles[reply.author?.id ?? ""] ?? "")] {
+                                        Text(viewModel?.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                            .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
+                                            .fontWeight(.semibold)
+                                        Text(reply.content)
+                                            .lineLimit(0)
+                                    } else {
+                                        Text(viewModel?.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
+                                            .fontWeight(.semibold)
+                                        Text(reply.content)
+                                            .lineLimit(0)
                                     }
-                                    if let author = message.author?.username {
-                                        VStack(alignment: .leading, spacing: 0) {
-                                            if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
-                                                if message.isSameAuthor() {
-                                                    textView
-                                                        .padding(.leading, 41)
-                                                } else if viewModel!.roles.isEmpty {
-                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    +
-                                                    Text(" — \(message.timestamp.makeProperDate())")
-                                                        .foregroundColor(Color.secondary)
-                                                        .font(.subheadline)
-                                                    textView
-                                                } else if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
-                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                        .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                        .fontWeight(.semibold)
-                                                    +
-                                                    Text(" — \(message.timestamp.makeProperDate())")
-                                                        .foregroundColor(Color.secondary)
-                                                        .font(.subheadline)
-                                                    textView
-                                                } else {
-                                                    Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                        .fontWeight(.semibold)
-                                                    +
-                                                    Text(" — \(message.timestamp.makeProperDate())")
-                                                        .foregroundColor(Color.secondary)
-                                                        .font(.subheadline)
-                                                    textView
-                                                }
-                                            }
-                                        }
-                                    }
-                                    Spacer()
-                                    // MARK: - Quick Actions
-                                    Button(action: {
-                                        sidePopups[offset].toggle()
-                                    }) {
-                                        Image(systemName: (sidePopups[offset] ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    if sidePopups[offset] {
-                                        Button(action: { [weak message] in
-                                            let clipQueue = DispatchQueue(label: "clipboard")
-                                            clipQueue.async {
-                                                NSPasteboard.general.clearContents()
-                                                NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
-                                            }
-                                            sidePopups[offset].toggle()
-                                        }) {
-                                            Text("Copy")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        Button(action: { [weak message] in
-                                            DispatchQueue.global().async {
-                                                NSPasteboard.general.clearContents()
-                                                NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
-                                                sidePopups[offset].toggle()
-                                            }
-                                        }) {
-                                            Text("Copy Message Link")
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                    }
-                                    Button(action: { [weak message] in
-                                        DispatchQueue.main.async {
-                                            replyingTo = message
-                                        }
-                                    }) {
-                                        Image(systemName: "arrowshape.turn.up.backward.fill")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    Button(action: { [weak message] in
-                                        message!.delete()
-                                    }) {
-                                        Image(systemName: "trash")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                }
-                                ForEach(message.embeds ?? [], id: \.id) { embed in
-                                    EmbedView(embed).equatable()
-                                        .padding(.leading, (message.isSameAuthor() ? 0 : 41))
-                                }
-
-                                // MARK: - Attachments
-
-                                if message.attachments.isEmpty == false {
-                                    HStack {
-                                        AttachmentView(media: $viewModel.messages[offset].attachments).equatable()
-                                        Spacer()
-                                    }
-                                    .frame(maxWidth: 500, maxHeight: 400)
-                                    .padding(.leading, 41)
                                 }
                             }
-                            .id(message.id)
-                            .rotationEffect(.radians(.pi))
-                            .scaleEffect(x: -1, y: 1, anchor: .center)
+                            // MARK: - The actual message
+                            HStack(alignment: .top) {
+                                VStack {
+                                    if !(message.isSameAuthor()) {
+                                        Button(action: {
+                                            popup[offset].toggle()
+                                        }) { [weak message] in
+                                            Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                                .frame(width: 33, height: 33)
+                                                .scaledToFit()
+                                                .clipShape(Circle())
+                                        }
+                                        .popover(isPresented: $popup[offset], content: {
+                                             PopoverProfileView(user: Binding.constant(message.author))
+                                        })
+                                        .buttonStyle(BorderlessButtonStyle())
+                                    }
+                                }
+                                if let author = message.author?.username {
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
+                                            if message.isSameAuthor() {
+                                                textView
+                                                    .padding(.leading, 41)
+                                            } else if viewModel!.roles.isEmpty {
+                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                    .fontWeight(.semibold)
+                                                +
+                                                Text(" — \(message.timestamp.makeProperDate())")
+                                                    .foregroundColor(Color.secondary)
+                                                    .font(.subheadline)
+                                                textView
+                                            } else if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
+                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                    .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                    .fontWeight(.semibold)
+                                                +
+                                                Text(" — \(message.timestamp.makeProperDate())")
+                                                    .foregroundColor(Color.secondary)
+                                                    .font(.subheadline)
+                                                textView
+                                            } else {
+                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
+                                                    .fontWeight(.semibold)
+                                                +
+                                                Text(" — \(message.timestamp.makeProperDate())")
+                                                    .foregroundColor(Color.secondary)
+                                                    .font(.subheadline)
+                                                textView
+                                            }
+                                        }
+                                    }
+                                }
+                                Spacer()
+                                // MARK: - Quick Actions
+                                Button(action: {
+                                    sidePopups[offset].toggle()
+                                }) {
+                                    Image(systemName: (sidePopups[offset] ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                if sidePopups[offset] {
+                                    Button(action: { [weak message] in
+                                        let clipQueue = DispatchQueue(label: "clipboard")
+                                        clipQueue.async {
+                                            NSPasteboard.general.clearContents()
+                                            NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
+                                        }
+                                        sidePopups[offset].toggle()
+                                    }) {
+                                        Text("Copy")
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                    Button(action: { [weak message] in
+                                        DispatchQueue.global().async {
+                                            NSPasteboard.general.clearContents()
+                                            NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
+                                            sidePopups[offset].toggle()
+                                        }
+                                    }) {
+                                        Text("Copy Message Link")
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                }
+                                Button(action: { [weak message] in
+                                    DispatchQueue.main.async {
+                                        replyingTo = message
+                                    }
+                                }) {
+                                    Image(systemName: "arrowshape.turn.up.backward.fill")
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                Button(action: { [weak message] in
+                                    message!.delete()
+                                }) {
+                                    Image(systemName: "trash")
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                            }
+                            ForEach(message.embeds ?? [], id: \.id) { embed in
+                                EmbedView(embed).equatable()
+                                    .padding(.leading, (message.isSameAuthor() ? 0 : 41))
+                            }
 
-                        }
+                            // MARK: - Attachments
 
-                        if (viewModel?.messages.isEmpty ?? false) == false {
-                            headerView
+                            if message.attachments.isEmpty == false {
+                                HStack {
+                                    AttachmentView(media: $viewModel.messages[offset].attachments).equatable()
+                                    Spacer()
+                                }
+                                .frame(maxWidth: 500, maxHeight: 400)
+                                .padding(.leading, 41)
+                            }
                         }
+                        .id(message.id)
+                        .rotationEffect(.radians(.pi))
+                        .scaleEffect(x: -1, y: 1, anchor: .center)
+                    }
+
+                    if (viewModel?.messages.isEmpty ?? false) == false {
+                        headerView
                     }
                 }
-                .rotationEffect(.radians(.pi))
-                .scaleEffect(x: -1, y: 1, anchor: .center)
-                blurredTextField
             }
-            .onAppear {
-                // MARK: - Making WebSocket messages receivable now, begin load
-                MessageController.shared.delegate = self
-            }
-            // MARK: - WebSocket error display
-            if let error = error {
-                VStack(alignment: .leading) {
-                    Text("WebSocket was disconnected")
-                        .fontWeight(.bold)
-                    Text("Cause: \(error)")
-                }
-                .padding()
-                .background(Color.red)
-                .cornerRadius(10)
-                .padding()
-            }
+            .rotationEffect(.radians(.pi))
+            .scaleEffect(x: -1, y: 1, anchor: .center)
+            blurredTextField
         }
-    }
-}
-
-extension ChannelView {
-    func makeReplyView(reply: Reply) -> some View {
-        return HStack {
-            Spacer().frame(width: 50)
-            Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
-                .frame(width: 15, height: 15)
-                .scaledToFit()
-                .clipShape(Circle())
-            if let roleColor = roleColors[(viewModel.roles[reply.author?.id ?? ""] ?? "")] {
-                Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                    .foregroundColor(Color(NSColor.color(from: roleColor.0) ?? NSColor.textColor))
-                    .fontWeight(.semibold)
-                AttributedTextRepresentable(NSAttributedString(string: reply.content))
-                    .lineLimit(0)
-            } else {
-                Text(viewModel.nicks[reply.author?.id ?? ""] ?? reply.author?.username ?? "")
-                    .fontWeight(.semibold)
-                Text(reply.content)
-                    .lineLimit(0)
-            }
+        .onAppear {
+            // Make Gateway messages receivable now
+            MessageController.shared.delegate = self
         }
-
     }
 }
 

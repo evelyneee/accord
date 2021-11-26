@@ -36,3 +36,4 @@ extension ServerListView: MentionSenderDelegate {
     }
     */
 }
+

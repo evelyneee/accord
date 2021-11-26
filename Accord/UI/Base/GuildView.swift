@@ -16,11 +16,6 @@ struct GuildView: View, Equatable {
     @Binding var guild: Guild
     @State var selection: Int?
     var body: some View {
-        lazy var banner: Optional<Attachment> = {
-            guard let banner = guild.banner else { return nil }
-            let url = "https://cdn.discordapp.com/banners/\(guild.id)/\(banner).png"
-            return Attachment(url)
-        }()
         return List {
             VStack {
                 HStack {
@@ -31,7 +26,10 @@ struct GuildView: View, Equatable {
                         .fontWeight(.medium)
                 }
             }
-            banner
+            if let banner = guild.banner {
+                Attachment("https://cdn.discordapp.com/banners/\(guild.id)/\(banner).png")
+                    .cornerRadius(10)
+            }
             ForEach(guild.channels ?? [], id: \.id) { channel in
                 if channel.type == .section {
                     Text(channel.name ?? "")

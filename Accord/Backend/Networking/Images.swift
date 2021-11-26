@@ -12,11 +12,11 @@ import SwiftUI
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
     func getProfilePictures(array: [Message], _ completion: @escaping ((_ success: Bool, _ pfps: [String:NSImage]) -> Void)) {
-        var pfpURLs = array.map {
-            "https://cdn.discordapp.com/avatars/\($0.author!.id)/\($0.author?.avatar ?? "").png?size=80"
+        let pfpURLs = array.compactMap { (elem) -> String? in
+            guard let avi = elem.author?.avatar else { return nil }
+            return "https://cdn.discordapp.com/avatars/\(elem.author!.id)/\(avi).png?size=80"
         }
         var returnArray: [String:NSImage] = [:]
-        pfpURLs = pfpURLs.filter { !($0.contains("null")) }
         for url in pfpURLs {
             let userid = String((String(url.dropFirst(35))).prefix(18))
             if let url = URL(string: url) {
@@ -64,11 +64,11 @@ final class ImageHandling {
         return dataReceived
     }
     func getServerIcons(array: [Guild], _ completion: @escaping ((_ success: Bool, _ icons: [String:NSImage]) -> Void)) {
-        var pfpURLs = array.compactMap {
-            "https://cdn.discordapp.com/icons/\($0.id)/\($0.icon ?? "").png?size=80"
+        let pfpURLs = array.compactMap { (elem) -> String? in
+            guard let avi = elem.icon else { return nil }
+            return "https://cdn.discordapp.com/icons/\(elem.id)/\(avi).png?size=80"
         }
         var returnArray: [String:NSImage] = [:]
-        pfpURLs = pfpURLs.filter { !($0.contains("null")) }
         for url in pfpURLs {
             let userid = String((String(url.dropFirst(33))).prefix(18))
             if let url = URL(string: url) {
@@ -90,13 +90,12 @@ final class ImageHandling {
 
 let cachesURL: URL = FileManager.default.urls(for: FileManager.SearchPathDirectory.cachesDirectory, in: FileManager.SearchPathDomainMask.userDomainMask)[0]
 let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
-let cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
+let cache = URLCache(memoryCapacity: 1_000_000_000, diskCapacity: 1_000_000_000, directory: diskCacheURL)
 
 struct ImageWithURL: View, Equatable {
     static func == (lhs: ImageWithURL, rhs: ImageWithURL) -> Bool {
         return true
     }
-    
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
 

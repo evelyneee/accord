@@ -36,34 +36,30 @@ public extension NSColor {
     }
 }
 
-extension NSColor {
-    convenience init(hex: Int, alpha: Float) {
-        print(hex, "HEX")
-        self.init(
-            calibratedRed: CGFloat((hex & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((hex & 0xFF00) >> 8) / 255.0,
-            blue: CGFloat((hex & 0xFF)) / 255.0,
-            alpha: 1.0
-        )
-    }
-    
-    convenience init(hex: String, alpha: Float) {
-        // Handle two types of literals: 0x and # prefixed
-        var cleanedString = ""
-        if hex.hasPrefix("0x") {
-            cleanedString = String(hex[hex.index(cleanedString.startIndex, offsetBy: 2)...hex.endIndex])
-        } else if hex.hasPrefix("#") {
-            cleanedString = String(hex[hex.index(cleanedString.startIndex, offsetBy: 1)...hex.endIndex])
+// https://gist.github.com/musa11971/62abcfda9ce3bb17f54301fdc84d8323
+extension NSImage {
+    /// Returns the average color that is present in the image.
+    var averageColor: NSColor? {
+        // Image is not valid, so we cannot get the average color
+        if !isValid {
+            return nil
         }
         
-        // Ensure it only contains valid hex characters 0
-        let validHexPattern = "[a-fA-F0-9]+"
-        if cleanedString.conformsTo(validHexPattern) {
-            var value: UInt64 = 0
-            Scanner(string: cleanedString).scanHexInt64(&value)
-            self.init(hex: Int(value), alpha: 1)
-        } else {
-            fatalError("Unable to parse color?")
-        }
+        // Create a CGImage from the NSImage
+        var imageRect = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
+        let cgImageRef = self.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
+        
+        // Create vector and apply filter
+        let inputImage = CIImage(cgImage: cgImageRef!)
+        let extentVector = CIVector(x: inputImage.extent.origin.x, y: inputImage.extent.origin.y, z: inputImage.extent.size.width, w: inputImage.extent.size.height)
+
+        let filter = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: inputImage, kCIInputExtentKey: extentVector])
+        let outputImage = filter!.outputImage!
+
+        var bitmap = [UInt8](repeating: 0, count: 4)
+        let context = CIContext(options: [.workingColorSpace: kCFNull!])
+        context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
+
+        return NSColor(red: CGFloat(bitmap[0]) / 255, green: CGFloat(bitmap[1]) / 255, blue: CGFloat(bitmap[2]) / 255, alpha: CGFloat(bitmap[3]) / 255)
     }
 }

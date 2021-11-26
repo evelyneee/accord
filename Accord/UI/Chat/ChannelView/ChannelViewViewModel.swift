@@ -60,9 +60,6 @@ final class ChannelViewViewModel: ObservableObject {
     }
     
     func getMessages(channelID: String, guildID: String) {
-        if Thread.isMainThread {
-            fatalError("Time consuming operations should not be called from main thread")
-        }
         requestCancellable = Request.combineFetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
@@ -87,7 +84,29 @@ final class ChannelViewViewModel: ObservableObject {
     
     func loadUser(for id: String?) {
         guard let id = id else { return }
-        wss.getMembers(ids: [id], guild: guildID)
+        guard let person = wss.cachedMemberRequest["\(guildID)$\(id)"] else {
+            wss.getMembers(ids: [id], guild: guildID)
+            return
+        }
+        let nickname = person.nick ?? person.user.username
+        DispatchQueue.main.async {
+            self.nicks[(person.user.id)] = nickname
+        }
+        
+        if let roles = person.roles {
+            var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
+            for role in roles {
+                if let roleColor = roleColors[role]?.1 {
+                    rolesTemp[roleColor] = role
+                }
+            }
+            let temp: [String] = rolesTemp.compactMap { $0 }
+            if !(temp.isEmpty) {
+                DispatchQueue.main.async {
+                    self.roles[(person.user.id)] = temp[0]
+                }
+            }
+        }
     }
     
     func fakeNicksObject() {
@@ -103,9 +122,9 @@ final class ChannelViewViewModel: ObservableObject {
     }
     
     func getCachedMemberChunk() {
-        let allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
+        let allUserIDs = messages.map { $0.author?.id ?? "" }
+                            .removingDuplicates()
         for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
-            wss.cachedMemberRequest["\(guildID)$\(person.user.id)"] = person
             let nickname = person.nick ?? person.user.username
             DispatchQueue.main.async {
                 self.nicks[(person.user.id)] = nickname
