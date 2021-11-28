@@ -67,7 +67,7 @@ struct ServerListView: View {
                                         }
                                     }
                                 }) { [weak guild] in
-                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""))
+                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
                                         .frame(width: 45, height: 45)
                                         .cornerRadius(((selectedServer ?? 0) == offset) ? 15.0 : 23.5)
                                 }

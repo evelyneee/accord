@@ -18,6 +18,7 @@
 		9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E746A2727499CE6009A9C22 /* Interaction.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
+		9EA2951F2752EE1D0014927D /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA2951E2752EE1C0014927D /* QuickActionsView.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
 		A80FEC252724FA2A005F9950 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC242724FA2A005F9950 /* MentionView.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
@@ -106,6 +107,7 @@
 		9E746A2727499CE6009A9C22 /* Interaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interaction.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
+		9EA2951E2752EE1C0014927D /* QuickActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsView.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
 		A80FEC242724FA2A005F9950 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionView.swift; path = Accord/UI/Chat/ChannelView/MentionView.swift; sourceTree = SOURCE_ROOT; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
@@ -354,6 +356,7 @@
 				A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */,
 				A82A05F726D3F2D2007B9B27 /* ChannelView+MsgSend.swift */,
 				A80FEC3227258457005F9950 /* EmbedView.swift */,
+				9EA2951E2752EE1C0014927D /* QuickActionsView.swift */,
 			);
 			path = ChannelView;
 			sourceTree = "<group>";
@@ -497,6 +500,7 @@
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
+				9EA2951F2752EE1D0014927D /* QuickActionsView.swift in Sources */,
 				A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* NetworkHandler.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,

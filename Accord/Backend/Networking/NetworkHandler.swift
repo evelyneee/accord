@@ -194,6 +194,7 @@ final class Request {
                         if let data = data {
                             return completion(NSImage(data: data))
                         } else {
+                            print("load failed")
                             return completion(nil)
                         }
             }

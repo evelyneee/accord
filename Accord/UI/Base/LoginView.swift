@@ -55,7 +55,7 @@ struct LoginView: View {
     @State var state: LoginState = .initial
     @State var notif: [String:Any] = [:]
     @State var error: String? = nil
-    @ObservedObject var viewModel = LoginViewViewModel()
+    @StateObject var viewModel = LoginViewViewModel()
     var body: some View {
         VStack {
             switch viewModel.state {
@@ -70,7 +70,7 @@ struct LoginView: View {
                         .foregroundColor(Color.secondary)
                         .padding(.bottom)
                     TextField("Email", text: $email)
-                    TextField("Password", text: $password)
+                    SecureField("Password", text: $password)
                     TextField("Token (optional)", text: $token)
                     TextField("Proxy IP (optional)", text: $proxyIP)
                     TextField("Proxy Port (optional)", text: $proxyPort)

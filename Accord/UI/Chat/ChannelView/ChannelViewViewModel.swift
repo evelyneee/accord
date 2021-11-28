@@ -69,16 +69,16 @@ final class ChannelViewViewModel: ObservableObject {
         ))
         .replaceError(with: [])
         .receive(on: DispatchQueue.main)
-        .sink(receiveValue: { msg in
+        .sink(receiveValue: { [weak self] msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
                 guard element != msg.last else { return element }
                 element.lastMessage = msg[index + 1]
                 return element
             }
-            self.messages = messages
-            DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad(); self.loadAvatars() }
-            self.fakeNicksObject()
-            self.ack(channelID: channelID, guildID: guildID)
+            self?.messages = messages
+            DispatchQueue(label: "Channel loading").async { self?.performSecondStageLoad(); self?.loadAvatars() }
+            self?.fakeNicksObject()
+            self?.ack(channelID: channelID, guildID: guildID)
         })
     }
     

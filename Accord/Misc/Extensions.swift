@@ -42,9 +42,23 @@ struct Collapsible<Content: View>: View {
     }
 }
 
+func showWindow(guildID: String, channelID: String, channelName: String) {
+    var windowRef: NSWindow
+    windowRef = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
+        styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
+        backing: .buffered, defer: false
+    )
+    windowRef.contentView = NSHostingView(rootView: ChannelView(guildID: guildID, channelID: channelID, channelName: channelName))
+    windowRef.minSize = NSSize(width: 500, height: 300)
+    windowRef.isReleasedWhenClosed = false
+    windowRef.title = "\(channelName) - Accord"
+    windowRef.makeKeyAndOrderFront(nil)
+}
+
 func pfpURL(_ uid: String?, _ hash: String?) -> String {
     guard let uid = uid, let hash = hash else { return "" }
-    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=80"
+    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=64"
 }
 
 func iconURL(_ id: String?, _ icon: String?) -> String {

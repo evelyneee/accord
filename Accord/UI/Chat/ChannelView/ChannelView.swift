@@ -26,8 +26,6 @@ struct ChannelView: View, Equatable {
         return lhs.viewModel.messages == rhs.viewModel.messages
     }
 
-    // MARK: - State-driven vars
-    
     @ObservedObject var viewModel: ChannelViewViewModel
     
     var guildID: String
@@ -44,7 +42,6 @@ struct ChannelView: View, Equatable {
     @State var collapsed: [Int] = []
     @State var pfpArray: [String:NSImage] = [:]
 
-    // TODO: Add user popup view, done properly
     @State var poppedUpUserProfile: Bool = false
     @State var userPoppedUp: Int? = nil
     @State var popup: [Bool] = Array.init(repeating: false, count: 50)
@@ -62,6 +59,7 @@ struct ChannelView: View, Equatable {
     
     @State var opened: Int? = nil
     
+    // MARK: - init
     init(guildID: String, channelID: String, channelName: String? = nil) {
         self.guildID = guildID
         self.channelID = channelID
@@ -69,7 +67,6 @@ struct ChannelView: View, Equatable {
         self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
     }
     
-    // MARK: - View body begins here
     var body: some View {
         ZStack(alignment: .bottom) { [weak viewModel] in
             Spacer()
@@ -78,11 +75,9 @@ struct ChannelView: View, Equatable {
                     Spacer().frame(height: 90)
                     // MARK: Message loop
                     ForEach(Array(zip((viewModel?.messages ?? []).indices, viewModel?.messages ?? [])), id: \.1.id) { offset, message in
-                        VStack(alignment: .leading) {
-                            // MARK: - Reply
+                        LazyVStack(alignment: .leading) {
                             if let reply = message.referenced_message {
                                 HStack {
-                                    Spacer().frame(width: 50)
                                     Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
                                         .frame(width: 15, height: 15)
                                         .scaledToFit()
@@ -100,8 +95,8 @@ struct ChannelView: View, Equatable {
                                             .lineLimit(0)
                                     }
                                 }
+                                .padding(.leading, 43)
                             }
-                            // MARK: - The actual message
                             HStack(alignment: .top) {
                                 VStack {
                                     if !(message.isSameAuthor()) {
@@ -113,95 +108,48 @@ struct ChannelView: View, Equatable {
                                                 .scaledToFit()
                                                 .clipShape(Circle())
                                         }
-                                        .popover(isPresented: $popup[offset], content: {
-                                             PopoverProfileView(user: Binding.constant(message.author))
+                                        .popover(isPresented: $popup[offset], content: { [weak message] in
+                                            if let message = message {
+                                                PopoverProfileView(user: Binding.constant(message.author))
+                                            }
                                         })
                                         .buttonStyle(BorderlessButtonStyle())
                                     }
                                 }
-                                if let author = message.author?.username {
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
-                                            if message.isSameAuthor() {
-                                                textView
-                                                    .padding(.leading, 41)
-                                            } else if viewModel!.roles.isEmpty {
-                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                    .fontWeight(.semibold)
-                                                +
-                                                Text(" — \(message.timestamp.makeProperDate())")
-                                                    .foregroundColor(Color.secondary)
-                                                    .font(.subheadline)
-                                                textView
-                                            } else if let roleColor = roleColors[(viewModel!.roles[message.author?.id ?? ""] ?? "")]?.0 {
-                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                    .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
-                                                    .fontWeight(.semibold)
-                                                +
-                                                Text(" — \(message.timestamp.makeProperDate())")
-                                                    .foregroundColor(Color.secondary)
-                                                    .font(.subheadline)
-                                                textView
-                                            } else {
-                                                Text(viewModel!.nicks[message.author?.id ?? ""] ?? author)
-                                                    .fontWeight(.semibold)
-                                                +
-                                                Text(" — \(message.timestamp.makeProperDate())")
-                                                    .foregroundColor(Color.secondary)
-                                                    .font(.subheadline)
-                                                textView
-                                            }
+                                VStack(alignment: .leading) {
+                                    if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
+                                        if message.isSameAuthor() {
+                                            textView
+                                                .padding(.leading, 41)
+                                        } else if let authorid = message.author?.id,
+                                                  let role = (viewModel?.roles[authorid] ?? ""),
+                                                  let roleColor = roleColors[role]?.0 {
+                                            Text(viewModel?.nicks[message.author?.id ?? ""] ?? message.author?.username ?? "Unknown User")
+                                                .foregroundColor(Color(NSColor.color(from: roleColor) ?? NSColor.textColor))
+                                                .fontWeight(.semibold)
+                                            +
+                                            Text(" — \(message.timestamp.makeProperDate())")
+                                                .foregroundColor(Color.secondary)
+                                                .font(.subheadline)
+                                            textView
+                                        } else {
+                                            Text(viewModel?.nicks[message.author?.id ?? ""] ?? message.author?.username ?? "Unknown User")
+                                                .fontWeight(.semibold)
+                                            +
+                                            Text(" — \(message.timestamp.makeProperDate())")
+                                                .foregroundColor(Color.secondary)
+                                                .font(.subheadline)
+                                            textView
                                         }
                                     }
                                 }
+
                                 Spacer()
                                 // MARK: - Quick Actions
-                                Button(action: {
-                                    sidePopups[offset].toggle()
-                                }) {
-                                    Image(systemName: (sidePopups[offset] ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                if sidePopups[offset] {
-                                    Button(action: { [weak message] in
-                                        let clipQueue = DispatchQueue(label: "clipboard")
-                                        clipQueue.async {
-                                            NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
-                                        }
-                                        sidePopups[offset].toggle()
-                                    }) {
-                                        Text("Copy")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    Button(action: { [weak message] in
-                                        DispatchQueue.global().async {
-                                            NSPasteboard.general.clearContents()
-                                            NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
-                                            sidePopups[offset].toggle()
-                                        }
-                                    }) {
-                                        Text("Copy Message Link")
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                }
-                                Button(action: { [weak message] in
-                                    DispatchQueue.main.async {
-                                        replyingTo = message
-                                    }
-                                }) {
-                                    Image(systemName: "arrowshape.turn.up.backward.fill")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                Button(action: { [weak message] in
-                                    message!.delete()
-                                }) {
-                                    Image(systemName: "trash")
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
+                                QuickActionsView(message: $viewModel.messages[offset], replyingTo: $replyingTo, opened: $sidePopups[offset]).equatable()
                             }
                             ForEach(message.embeds ?? [], id: \.id) { embed in
-                                EmbedView(embed).equatable()
+                                EmbedView(embed: embed).equatable()
                                     .padding(.leading, (message.isSameAuthor() ? 0 : 41))
                             }
 
@@ -216,9 +164,7 @@ struct ChannelView: View, Equatable {
                                 .padding(.leading, 41)
                             }
                         }
-                        .id(message.id)
-                        .rotationEffect(.radians(.pi))
-                        .scaleEffect(x: -1, y: 1, anchor: .center)
+                        .rotationEffect(Angle(degrees: 180)).scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                     }
 
                     if (viewModel?.messages.isEmpty ?? false) == false {
@@ -226,8 +172,7 @@ struct ChannelView: View, Equatable {
                     }
                 }
             }
-            .rotationEffect(.radians(.pi))
-            .scaleEffect(x: -1, y: 1, anchor: .center)
+            .rotationEffect(Angle(degrees: 180)).scaleEffect(x: -1.0, y: 1.0, anchor: .center)
             blurredTextField
         }
         .onAppear {
@@ -265,24 +210,7 @@ public struct VisualEffectView: NSViewRepresentable {
     }
 }
 
-// MARK: - Multi window
-
-func showWindow(guildID: String, channelID: String, channelName: String) {
-    var windowRef: NSWindow
-    windowRef = NSWindow(
-        contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
-        styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
-        backing: .buffered, defer: false
-    )
-    windowRef.contentView = NSHostingView(rootView: ChannelView(guildID: guildID, channelID: channelID, channelName: channelName))
-    windowRef.minSize = NSSize(width: 500, height: 300)
-    windowRef.isReleasedWhenClosed = false
-    windowRef.title = "\(channelName) - Accord"
-    windowRef.makeKeyAndOrderFront(nil)
-}
-
 // prevent index out of range
-
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil

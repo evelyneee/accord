@@ -59,7 +59,7 @@ struct ChatControls: View {
         HStack {
             ZStack(alignment: .trailing) {
                 VStack {
-                    if !(viewModel.matchedUsers.isEmpty) {
+                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) {
                         ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
                             Button(action: {
                                 if let range = viewModel.textFieldContents.range(of: "@") {
@@ -72,6 +72,26 @@ struct ChatControls: View {
                                         .clipShape(Circle())
                                         .frame(width: 20, height: 20)
                                     Text(user.username)
+                                    Spacer()
+                                }
+                            })
+                            .buttonStyle(.borderless)
+                            .padding(5)
+                            .background(Color(NSColor.windowBackgroundColor))
+                            .cornerRadius(10)
+                        }
+                        ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
+                            Button(action: {
+                                if let range = viewModel.textFieldContents.range(of: ":") {
+                                    viewModel.textFieldContents.removeSubrange(range.lowerBound..<viewModel.textFieldContents.endIndex)
+                                }
+                                viewModel.textFieldContents.append("<:\(emoji.name):\(emoji.id)>")
+                            }, label: {
+                                HStack {
+                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80")
+                                        .clipShape(Circle())
+                                        .frame(width: 20, height: 20)
+                                    Text(emoji.name)
                                     Spacer()
                                 }
                             })
@@ -177,7 +197,9 @@ struct ChatControls: View {
                         }
                     }
                     .onReceive(viewModel.$textFieldContents, perform: { new in
-                        viewModel.checkText()
+                        textQueue.async {
+                            viewModel.checkText()
+                        }
                     })
                 }
                 .onAppear(perform: {
@@ -239,6 +261,7 @@ extension Data {
 final class ChatControlsViewModel: ObservableObject {
     
     @Published var matchedUsers = [User]()
+    @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
     @Published var cachedUsers = [User]()
     
@@ -246,14 +269,23 @@ final class ChatControlsViewModel: ObservableObject {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
         let channels = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
+        let emoji = textFieldContents.matches(for: #"(?<=:)(?:(?!:| ).)*"#)
         if !(mentions.isEmpty) {
             let search = mentions[0]
             let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }
-            matchedUsers = matched.removingDuplicates()
+            DispatchQueue.main.async { [weak self] in
+                self?.matchedUsers = matched.removingDuplicates()
+            }
         } else if !(channels.isEmpty) {
             // TODO: Channel completion implementation here
         } else if !(slashes.isEmpty) {
             // TODO: Slash command implementation here
+        } else if !(emoji.isEmpty) {
+            let key = emoji[0]
+            let matched: [DiscordEmote] = Array(AllEmotes.shared.allEmotes.values.joined()).filter { $0.name.lowercased().contains(key) }
+            DispatchQueue.main.async { [weak self] in
+                self?.matchedEmoji = matched
+            }
         }
     }
 }

@@ -24,14 +24,22 @@ extension ChannelView {
                 .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
                 .cornerRadius(5)
                 if let replied = replyingTo {
-                    Text("replying to \(replied.author?.username ?? "")")
-                        .padding(4)
-                        .lineLimit(0)
-                        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
-                        .cornerRadius(5)
+                    HStack {
+                        Text("replying to \(replied.author?.username ?? "")")
+                            .lineLimit(0)
+                        Button(action: {
+                            replyingTo = nil
+                        }, label: {
+                            Image(systemName: "xmark.circle.fill")
+                        })
+                        .buttonStyle(BorderlessButtonStyle())
+                    }
+                    .padding(4)
+                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                    .cornerRadius(5)
                 }
             }
-            ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), replyingTo: $replyingTo, users: Binding.constant(self.viewModel.messages.compactMap { $0.author }))
+            ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), replyingTo: $replyingTo, users: Binding.constant(viewModel.messages.compactMap { $0.author }))
         }
         .padding()
     }
