@@ -48,7 +48,7 @@ final class Headers {
     var referer: String?
     var empty: Bool?
     var json: Bool
-    func set(request: inout URLRequest, config: inout URLSessionConfiguration) {
+    func set(request: inout URLRequest, config: inout URLSessionConfiguration) throws {
         if let userAgent = self.userAgent {
             config.httpAdditionalHeaders = ["User-Agent": userAgent]
         }
@@ -60,7 +60,7 @@ final class Headers {
         }
         if self.json {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try! JSONSerialization.data(withJSONObject: self.bodyObject ?? [:], options: [])
+            request.httpBody = try JSONSerialization.data(withJSONObject: self.bodyObject ?? [:], options: [])
         } else if let bodyObject = self.bodyObject {
             let bodyString = bodyObject.queryParameters
             request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
@@ -97,6 +97,7 @@ final class Request {
     
     enum FetchErrors: Error {
         case invalidRequest
+        case invalidForm
         case badResponse(URLResponse?)
         case notRequired
         case decodingError(String, Error)
@@ -120,7 +121,7 @@ final class Request {
         config.setProxy()
         
         // Set headers
-        headers?.set(request: &request, config: &config)
+        do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
         
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
             if let data = data {
@@ -169,8 +170,8 @@ final class Request {
         var config = URLSessionConfiguration.default
         
         // Set headers
-        headers?.set(request: &request, config: &config)
-        
+        do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }
+
         return URLSession(configuration: config).dataTaskPublisher(for: request)
             .map { $0.data }
             .decode(type: T.self, decoder: JSONDecoder())
