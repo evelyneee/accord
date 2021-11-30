@@ -115,26 +115,22 @@ struct ServerListView: View {
                     }
                 } else if selectedServer == 999 {
                     // MARK: - Private channels (DMs)
-                    HStack {
-                        List {
-                            Text("Messages")
-                                .fontWeight(.bold)
-                                .font(.title2)
-                            Divider()
-                            ForEach(privateChannels, id: \.id) { channel in
-                                NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
-                                    ServerListViewCell(channel: channel)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
+                    List {
+                        Text("Messages")
+                            .fontWeight(.bold)
+                            .font(.title2)
+                        Divider()
+                        ForEach(privateChannels, id: \.id) { channel in
+                            NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
+                                ServerListViewCell(channel: channel)
                             }
+                            .buttonStyle(BorderlessButtonStyle())
                         }
                     }
                     .padding(.top, 5)
-                } else {
+                } else if !(guilds.isEmpty) {
                     // MARK: - Guild channels
-                    if guilds.isEmpty == false {
-                        GuildView(guild: $guilds[selectedServer ?? 0])
-                    }
+                    GuildView(guild: $guilds[selectedServer ?? 0])
                 }
             })
         }
@@ -158,11 +154,6 @@ struct ServerListView: View {
             DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
                 assignReadStates()
             }
-            for guild in guilds {
-                for channel in guild.channels ?? [] {
-                    channel.guild_id = guild.id
-                }
-            }
             AllEmotes.shared.allEmotes = guilds.map { ["\($0.id)$\($0.name)":$0.emojis] }
                                             .flatMap { $0 }
                                             .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
@@ -173,24 +164,16 @@ struct ServerListView: View {
             
             if sortByMostRecent {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
-            } else {
-                guildOrder = full?.user_settings?.guild_positions ?? []
-                var guildTemp = [Guild]()
-                for item in guildOrder {
-                    if let first = fastIndexGuild(item, array: guilds) {
-                        guildTemp.append(guilds[first])
-                    }
-                }
-                self.guilds = guildTemp
             }
-            concurrentQueue.async {
-                roleColors = RoleManager.shared.arrangeRoleColors(guilds: guilds)
-            }
+            self.guilds = guilds
             order()
             DispatchQueue.main.async {
                 selectedServer = 0
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
                 full = nil
+            }
+            concurrentQueue.async {
+                roleColors = RoleManager.shared.arrangeRoleColors(guilds: guilds)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in

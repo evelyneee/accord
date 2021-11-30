@@ -184,13 +184,18 @@ final class Markdown {
 
 public extension String {
     typealias swiftUIBlock = ((_ value: Optional<Text>) -> Void)
-    typealias modernBlock = ((_ value: Optional<Text>) -> Void)
     func markdown(members: [String:String] = [:], _ completion: @escaping swiftUIBlock) {
-        var text = self
-        let newlines = text.split(whereSeparator: \.isNewline)
-        var attributed = [Text]()
         enum MarkdownErrors: Error {
             case unsupported
+        }
+        let text = self
+        let newlines = text.split(whereSeparator: \.isNewline)
+        var attributed = [Text]() {
+            didSet {
+                if attributed.count >= text.components(separatedBy: " ").count {
+                    return completion(attributed.reduce(Text(""), +))
+                }
+            }
         }
         for (index, line) in newlines.enumerated() {
             let words: [String] = line.split(separator: " ").compactMap { $0.str() }
@@ -252,7 +257,7 @@ public extension String {
                         case .spotify:
                             attributed.append(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline())
                         case .none:
-                            break
+                            attributed.append(Text(text))
                         default: break
                         }
                     }
@@ -265,6 +270,7 @@ public extension String {
                     if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=40") {
                         Request.image(url: emoteURL, to: CGSize(width: 40, height: 40)) { image in
                             guard let image = image else {
+                                attributed.append(Text(text))
                                 return
                             }
                             attributed.append(Text("\(Image(nsImage: image))"))
@@ -296,7 +302,6 @@ public extension String {
                 attributed.append(Text("\n"))
             }
         }
-        return completion(attributed.reduce(Text(""), +))
     }
 }
 

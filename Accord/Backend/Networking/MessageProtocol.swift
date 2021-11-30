@@ -13,6 +13,7 @@ protocol MessageControllerDelegate {
     func deleteMessage(msg: Data, channelID: String?)
     func typing(msg: [String: Any], channelID: String?)
     func sendMemberChunk(msg: Data)
+    func sendMemberList(msg: MemberListUpdate)
     func sendWSError(msg: String)
 }
 
@@ -34,6 +35,9 @@ class MessageController {
     }
     func sendMemberChunk(msg: Data) {
         delegate?.sendMemberChunk(msg: msg)
+    }
+    func sendMemberList(msg: MemberListUpdate) {
+        delegate?.sendMemberList(msg: msg)
     }
     func sendWSError(msg: String) {
         delegate?.sendWSError(msg: msg)

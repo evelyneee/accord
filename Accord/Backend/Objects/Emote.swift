@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class DiscordEmote: Decodable, Identifiable, Hashable, Equatable, Encodable {
+final class DiscordEmote: Codable, Identifiable, Hashable, Equatable {
     static func == (lhs: DiscordEmote, rhs: DiscordEmote) -> Bool {
         return lhs.id == rhs.id
     }

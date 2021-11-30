@@ -188,18 +188,18 @@ final class Request {
         URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
             guard error == nil,
               let data = data,
-                let size = size,
-                  let imageData = NSImage(data: data)?.downsample(to: size),
-                    let image = NSImage(data: imageData) else {
-                        print(error?.localizedDescription ?? "unknown error")
-                        if let data = data {
-                            return completion(NSImage(data: data))
-                        } else {
-                            print("load failed")
-                            return completion(nil)
-                        }
+                let imageData = NSImage(data: data)?.downsample(to: size),
+                  let image = NSImage(data: imageData) else {
+                    print(error?.localizedDescription ?? "unknown error")
+                    if let data = data {
+                        cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+                        return completion(NSImage(data: data))
+                    } else {
+                        print("load failed")
+                        return completion(nil)
+                    }
             }
-            cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+            cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
             return completion(image)
         }).resume()
     }

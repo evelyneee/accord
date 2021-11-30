@@ -43,7 +43,6 @@ struct GuildView: View, Equatable {
                 }
             }
             .buttonStyle(PlainButtonStyle())
-            .padding(.top, 5)
         }
 
     }

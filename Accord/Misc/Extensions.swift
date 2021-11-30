@@ -121,7 +121,12 @@ func load(string: String) -> NSAttributedString? {
 
 extension String {
     func makeProperDate() -> String {
-        let date = ISO8601DateFormatter().date(from: self)
-        return DateFormatter.localizedString(from: date ?? Date(), dateStyle: .medium, timeStyle: .short)
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
+        let date = formatter.date(from: self)
+        guard let date = date else {
+            return ""
+        }
+        return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
 }

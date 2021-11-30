@@ -16,7 +16,7 @@ class ReadState: Codable {
 class ReadStateEntry: Codable {
     var mention_count: Int
     var last_pin_timestamp: String
-    var last_message_id: StringOrInt?
+    // var last_message_id: StringOrInt?
     var id: String // Channel ID
 }
 

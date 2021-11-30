@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Guild: Decodable, Equatable {
+final class Guild: Codable, Equatable {
     static func == (lhs: Guild, rhs: Guild) -> Bool {
         return lhs.id == rhs.id
     }

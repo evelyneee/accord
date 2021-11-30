@@ -19,6 +19,9 @@ extension ChannelView: MessageControllerDelegate {
             if viewModel.guildID != "@me" && !(viewModel.roles.keys.contains(message.author?.id ?? "")) {
                 viewModel.loadUser(for: message.author?.id)
             }
+            for user in message.mentions.compactMap { $0?.id }.filter({ !(viewModel.roles.keys.contains($0)) }) {
+                viewModel.loadUser(for: user)
+            }
             if let firstMessage = viewModel.messages.first {
                 message.lastMessage = firstMessage
             }
@@ -41,8 +44,8 @@ extension ChannelView: MessageControllerDelegate {
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
             guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
-            DispatchQueue.main.async { [weak message] in
-                viewModel.messages[index].content = message?.content ?? "Error loading message content"
+            DispatchQueue.main.async {
+                viewModel.messages[index].content = message.content
             }
         }
     }
@@ -96,10 +99,14 @@ extension ChannelView: MessageControllerDelegate {
 
         }
     }
+    func sendMemberList(msg: MemberListUpdate) {
+        
+    }
     func sendMemberChunk(msg: Data) {
         webSocketQueue.async { [weak viewModel] in
-            guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
+            guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { print(error as Any); return }
             let cache = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0?.user.id }, users.compactMap { $0?.nick ?? $0?.user.username }))
+            print("received")
             ChannelMembers.shared.channelMembers[self.channelID] = cache
             let allUsers: [GuildMember] = users.compactMap { $0 }
             for person in allUsers {

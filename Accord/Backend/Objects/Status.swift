@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Status: Decodable {
+class Status: Codable {
     var text: String?
     // var expires_at: String?
     var emoji_name: String?

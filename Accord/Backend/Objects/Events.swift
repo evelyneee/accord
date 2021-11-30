@@ -40,7 +40,8 @@ final class TypingEvent: Decodable {
     var user_id: String?
 }
 
-final class GuildMember: Decodable {
+final class GuildMember: Codable {
+    var avatar: String?
     var user: User
     var nick: String?
     var roles: [String]?

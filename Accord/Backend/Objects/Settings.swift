@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Settings: Decodable {
+class Settings: Codable {
     var view_nsfw_guilds: Bool?
     var timezone_offset: Int?
     var theme: SyncedTheme
@@ -41,7 +41,7 @@ class Settings: Decodable {
     var afk_timeout: Int?
 }
 
-enum SyncedTheme: String, Decodable {
+enum SyncedTheme: String, Codable {
     case dark = "dark"
     case light = "light"
 }

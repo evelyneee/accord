@@ -28,7 +28,7 @@ final class RoleManager {
     }
 }
 
-final class Role: Decodable {
+final class Role: Codable {
     var id: String
     var name: String
     var color: Int?

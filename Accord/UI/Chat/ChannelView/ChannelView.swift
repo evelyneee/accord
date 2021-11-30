@@ -78,7 +78,7 @@ struct ChannelView: View, Equatable {
                         LazyVStack(alignment: .leading) {
                             if let reply = message.referenced_message {
                                 HStack {
-                                    Image(nsImage: NSImage(data: reply.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar)).equatable()
                                         .frame(width: 15, height: 15)
                                         .scaledToFit()
                                         .clipShape(Circle())
@@ -103,7 +103,7 @@ struct ChannelView: View, Equatable {
                                         Button(action: {
                                             popup[offset].toggle()
                                         }) { [weak message] in
-                                            Image(nsImage: NSImage(data: message?.author?.pfp ?? Data()) ?? NSImage()).resizable()
+                                            Attachment(pfpURL(message?.author?.id, message?.author?.avatar)).equatable()
                                                 .frame(width: 33, height: 33)
                                                 .scaledToFit()
                                                 .clipShape(Circle())
@@ -146,11 +146,46 @@ struct ChannelView: View, Equatable {
 
                                 Spacer()
                                 // MARK: - Quick Actions
-                                QuickActionsView(message: $viewModel.messages[offset], replyingTo: $replyingTo, opened: $sidePopups[offset]).equatable()
+                                Button(action: {
+                                     sidePopups[offset].toggle()
+                                 }) {
+                                     Image(systemName: (sidePopups[offset] ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+                                 }
+                                 .buttonStyle(BorderlessButtonStyle())
+                                 if sidePopups[offset] {
+                                     Button(action: { [weak message] in
+                                         NSPasteboard.general.clearContents()
+                                         NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
+                                         sidePopups[offset].toggle()
+                                     }) {
+                                         Text("Copy")
+                                     }
+                                     .buttonStyle(BorderlessButtonStyle())
+                                     Button(action: { [weak message] in
+                                         NSPasteboard.general.clearContents()
+                                         NSPasteboard.general.setString("https://discord.com/channels/\(guildID)/\(channelID)/\(message?.id ?? "")", forType: .string)
+                                         sidePopups[offset].toggle()
+                                     }) {
+                                         Text("Copy Message Link")
+                                     }
+                                     .buttonStyle(BorderlessButtonStyle())
+                                 }
+                                 Button(action: { [weak message] in
+                                     replyingTo = message
+                                 }) {
+                                     Image(systemName: "arrowshape.turn.up.backward.fill")
+                                 }
+                                 .buttonStyle(BorderlessButtonStyle())
+                                 Button(action: { [weak message] in
+                                     message?.delete()
+                                 }) {
+                                     Image(systemName: "trash")
+                                 }
+                                 .buttonStyle(BorderlessButtonStyle())
                             }
                             ForEach(message.embeds ?? [], id: \.id) { embed in
                                 EmbedView(embed: embed).equatable()
-                                    .padding(.leading, (message.isSameAuthor() ? 0 : 41))
+                                    .padding(.leading, 41)
                             }
 
                             // MARK: - Attachments
@@ -178,6 +213,9 @@ struct ChannelView: View, Equatable {
         .onAppear {
             // Make Gateway messages receivable now
             MessageController.shared.delegate = self
+        }
+        .onDisappear {
+            MessageController.shared.delegate = nil
         }
     }
 }

@@ -178,16 +178,27 @@ final class WebSocket {
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
-                        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                        releaseModePrint("Cached Gateway payload at ", path.absoluteString.dropFirst(7))
-                        try? data.write(to: path)
                         do {
                             let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
                             wssThread.async {
                                 self.receive()
                             }
                             releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
-                            return completion(structure.d)
+                            let guildOrder = structure.d.user_settings?.guild_positions ?? []
+                            var guildTemp = [Guild]()
+                            for item in guildOrder {
+                                if let first = ServerListView.fastIndexGuild(item, array: structure.d.guilds) {
+                                    guildTemp.append(structure.d.guilds[first])
+                                }
+                            }
+                            structure.d.guilds = guildTemp
+                            completion(structure.d)
+                            let data = try JSONEncoder().encode(structure)
+                            let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                in: .userDomainMask)[0]
+                                                                .appendingPathComponent("socketOut.json")
+                            try data.write(to: path)
+                            return
                         } catch {
                             releaseModePrint(error)
                             return completion(nil)
@@ -292,6 +303,9 @@ final class WebSocket {
                 "activities":true,
                 "threads":false,
                 "members":[]
+//                "channels": [
+//                     channel: [["0", "99"]]
+//                 ],
             ]
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
@@ -369,7 +383,7 @@ final class WebSocket {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
                                                                 in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                            try! textData.write(to: path)
+                            try? textData.write(to: path)
                             guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: textData) else { break }
                             releaseModePrint("[Accord] Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
                             self?.session_id = structure.d.session_id
@@ -445,7 +459,13 @@ final class WebSocket {
                                 MessageController.shared.typing(msg: data, channelID: channelid)
                             }
                         case "USER_UPDATE": break
-                        default: break
+                        case "GUILD_MEMBER_LIST_UPDATE":
+//                            do {
+//                                let list = try JSONDecoder().decode(MemberListUpdate.self, from: textData)
+//                                MessageController.shared.sendMemberList(msg: list)
+//                            } catch { }
+                            break
+                        default: print("not handled: \(payload["t"]!)"); break
                         }
                     }
                     self?.receive() // call back the function, creating a loop

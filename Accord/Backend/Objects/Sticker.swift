@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Sticker: Decodable {
+final class Sticker: Codable {
     var id: String
     var pack_id: String?
     var name: String
@@ -21,12 +21,12 @@ final class Sticker: Decodable {
     var sort_value: Int?
 }
 
-enum StickerType: Int, Decodable {
+enum StickerType: Int, Codable {
     case standard = 1
     case guild = 2
 }
 
-enum StickerFormat: Int, Decodable {
+enum StickerFormat: Int, Codable {
     case png = 1
     case apng = 2
     case lottie = 3

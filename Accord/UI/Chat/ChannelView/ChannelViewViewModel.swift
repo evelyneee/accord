@@ -68,17 +68,18 @@ final class ChannelViewViewModel: ObservableObject {
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
         .replaceError(with: [])
-        .receive(on: DispatchQueue.main)
-        .sink(receiveValue: { [weak self] msg in
+        .sink(receiveValue: { msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
                 guard element != msg.last else { return element }
                 element.lastMessage = msg[index + 1]
                 return element
             }
-            self?.messages = messages
-            DispatchQueue(label: "Channel loading").async { self?.performSecondStageLoad(); self?.loadAvatars() }
-            self?.fakeNicksObject()
-            self?.ack(channelID: channelID, guildID: guildID)
+            DispatchQueue.main.async { [weak self] in
+                self?.messages = messages
+                DispatchQueue(label: "Channel loading").async { self?.performSecondStageLoad() }
+            }
+            self.fakeNicksObject()
+            self.ack(channelID: channelID, guildID: guildID)
         })
     }
     
@@ -118,7 +119,9 @@ final class ChannelViewViewModel: ObservableObject {
             nextDict.updateValue(tuple.1, forKey: tuple.0)
             return nextDict
         }
-        self.nicks = _nicks
+        DispatchQueue.main.async {
+            self.nicks = _nicks
+        }
     }
     
     func getCachedMemberChunk() {
@@ -151,22 +154,17 @@ final class ChannelViewViewModel: ObservableObject {
         if guildID != "@me" {
             var allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
             getCachedMemberChunk()
+            print("done")
             for (index, item) in allUserIDs.enumerated() {
                 if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") && Array<Int>(allUserIDs.indices).contains(index) {
                     allUserIDs.remove(at: index)
                 }
             }
+            print("done 2")
             if !(allUserIDs.isEmpty) {
+                print(allUserIDs)
                 wss.getMembers(ids: allUserIDs, guild: guildID)
             }
-        }
-    }
-    func loadAvatars() {
-        for user in messages.compactMap({ $0.author }) {
-            user.loadPfp()
-        }
-        for message in messages {
-            message.referenced_message?.author?.loadPfp()
         }
     }
 }

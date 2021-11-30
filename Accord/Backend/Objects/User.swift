@@ -8,6 +8,8 @@
 import Foundation
 import AppKit
 
+let pfpLoader = DispatchQueue(label: "pfp")
+
 final class User: Codable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.id == rhs.id
@@ -33,7 +35,7 @@ final class User: Codable, Identifiable, Hashable {
     
     func isMe() -> Bool { user_id == self.id }
     func loadPfp() {
-        imageQueue.async {
+        pfpLoader.async {
             Request.image(url: URL(string: pfpURL(self.id, self.avatar)), to: CGSize(width: 80, height: 80)) { avatar in
                 guard let avatar = avatar else { return }
                 self.pfp = avatar.tiffRepresentation

@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import SwiftUI
+import Combine
 
 final class ImageHandling {
     static var shared: ImageHandling? = ImageHandling()
@@ -115,13 +116,14 @@ struct ImageWithURL: View, Equatable {
 
 struct Attachment: View, Equatable {
     static func == (lhs: Attachment, rhs: Attachment) -> Bool {
-        return true
+        return lhs.url == rhs.url
     }
     
-    
     @ObservedObject var imageLoader: ImageLoaderAndCache
-
+    var url: String
+    
     init(_ url: String, size: CGSize? = nil) {
+        self.url = url
         imageLoader = ImageLoaderAndCache(imageURL: url, size: size)
     }
 
@@ -185,19 +187,36 @@ let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
 final class ImageLoaderAndCache: ObservableObject {
     
     @Published var image = NSImage()
+    private var cancellable: AnyCancellable? = nil
     init(imageURL: String, size: CGSize? = nil) {
-        imageQueue.async { [weak self] in
-            Request.image(url: URL(string: imageURL), to: size) { image in
-                guard let image = image else {
-                    DispatchQueue.main.async {
-                        self?.image = NSImage()
-                    }
-                    return
-                }
+        DispatchQueue(label: "ImageQueue-\(imageURL)", attributes: .concurrent).async { [weak self] in
+            guard let url = URL(string: imageURL) else { return }
+            let request = URLRequest.init(url: url)
+            if let cachedImage = cache.cachedResponse(for: request) {
                 DispatchQueue.main.async {
-                    self?.image = image
+                    self?.image = NSImage(data: cachedImage.data) ?? NSImage()
                 }
+                return
             }
+            self?.cancellable = URLSession.shared.dataTaskPublisher(for: request)
+                .map { $0.data }
+                .replaceError(with: Data())
+                .eraseToAnyPublisher()
+                .sink { data in
+                    guard let imageData = NSImage(data: data)?.downsample(to: size),
+                          let image = NSImage(data: imageData) else {
+                              cache.storeCachedResponse(CachedURLResponse(response: URLResponse.init(url: URL(string: imageURL)!, mimeType: "image/png", expectedContentLength: 0, textEncodingName: ""), data: data), for: request)
+                              DispatchQueue.main.async {
+                                  self?.image = NSImage(data: data) ?? NSImage()
+                              }
+                              return
+                    }
+                    cache.storeCachedResponse(CachedURLResponse(response: URLResponse.init(url: URL(string: imageURL)!, mimeType: "image/png", expectedContentLength: 0, textEncodingName: ""), data: imageData), for: request)
+                    print("done")
+                    DispatchQueue.main.async {
+                        self?.image = image
+                    }
+                }
         }
     }
 }

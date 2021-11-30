@@ -8,7 +8,7 @@
 import Foundation
 
 extension ServerListView {
-    func fastIndexGuild(_ guild: String, array: [Guild]) -> Int? {
+    static func fastIndexGuild(_ guild: String, array: [Guild]) -> Int? {
         let messageDict = array.enumerated().compactMap { (index, element) in
             return [element.id:index]
         }.reduce(into: [:]) { (result, next) in
@@ -51,7 +51,6 @@ extension ServerListView {
         for guild in guilds {
             for channel in guild.channels ?? [] {
                 if let index = fastIndexEntries(channel.id, array: readState.entries), channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                    channel.guild_id = guild.id
                     channel.read_state = readState.entries[index]
                 }
             }

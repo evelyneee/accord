@@ -10,9 +10,8 @@ import AppKit
 
 final class Message: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.id.appending(lhs.content) == rhs.id.appending(rhs.content)
     }
-        
     var author: User?
     var nick: String?
     var channel_id: String
@@ -104,7 +103,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
      */
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(id.appending(content))
     }
     
     func delete() {

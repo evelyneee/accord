@@ -35,11 +35,12 @@ struct ContentView: View {
                     do {
                         let structure = try JSONDecoder().decode(GatewayStructure.self, from: data ?? Data())
                         socketOut = structure.d
+                        
                         DispatchQueue.main.async {
                             NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                         }
                     } catch {
-                        
+                        print(error)
                     }
                     wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
                     wss.ready() { d in

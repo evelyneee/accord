@@ -61,17 +61,17 @@ struct ChatControls: View {
                 VStack {
                     if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) {
                         ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
-                            Button(action: {
-                                if let range = viewModel.textFieldContents.range(of: "@") {
-                                    viewModel.textFieldContents.removeSubrange(range.lowerBound..<viewModel.textFieldContents.endIndex)
+                            Button(action: { [weak viewModel, weak user] in
+                                if let range = viewModel?.textFieldContents.range(of: "@") {
+                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                 }
-                                viewModel.textFieldContents.append("<@!\(user.id)>")
-                            }, label: {
+                                viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
+                            }, label: { [weak user] in
                                 HStack {
-                                    Attachment(pfpURL(user.id, user.avatar).appending("?size=24"))
+                                    Attachment(pfpURL(user?.id, user?.avatar).appending("?size=24"))
                                         .clipShape(Circle())
                                         .frame(width: 20, height: 20)
-                                    Text(user.username)
+                                    Text(user?.username ?? "Unknown User")
                                     Spacer()
                                 }
                             })
@@ -81,17 +81,16 @@ struct ChatControls: View {
                             .cornerRadius(10)
                         }
                         ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
-                            Button(action: {
-                                if let range = viewModel.textFieldContents.range(of: ":") {
-                                    viewModel.textFieldContents.removeSubrange(range.lowerBound..<viewModel.textFieldContents.endIndex)
+                            Button(action: { [weak viewModel, weak emoji] in
+                                if let range = viewModel?.textFieldContents.range(of: ":") {
+                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                 }
-                                viewModel.textFieldContents.append("<:\(emoji.name):\(emoji.id)>")
-                            }, label: {
+                                viewModel?.textFieldContents.append("<:\(emoji?.name ?? ""):\(emoji?.id ?? "")>")
+                            }, label: { [weak emoji] in
                                 HStack {
-                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80")
-                                        .clipShape(Circle())
+                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80")
                                         .frame(width: 20, height: 20)
-                                    Text(emoji.name)
+                                    Text(emoji?.name ?? "Unknown Emote")
                                     Spacer()
                                 }
                             })
@@ -269,7 +268,7 @@ final class ChatControlsViewModel: ObservableObject {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
         let channels = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
-        let emoji = textFieldContents.matches(for: #"(?<=:)(?:(?!:| ).)*"#)
+        let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
         if !(mentions.isEmpty) {
             let search = mentions[0]
             let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }

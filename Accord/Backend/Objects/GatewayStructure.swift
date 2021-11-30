@@ -7,14 +7,14 @@
 
 import Foundation
 
-class GatewayStructure: Decodable {
+class GatewayStructure: Codable {
     var t: String?
     var d: GatewayD
     var s: Int
     var op: Int
 }
 
-class GatewayD: Decodable {
+class GatewayD: Codable {
     var v: Int?
     // var users: [User]?
     var user_settings: Settings?
@@ -39,7 +39,7 @@ class GatewayD: Decodable {
     // var _trace
 }
 
-final class Relationship: Decodable {
+final class Relationship: Codable {
     var user_id: String
     var nick: String?
     var type: Int?
