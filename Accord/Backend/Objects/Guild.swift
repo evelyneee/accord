@@ -9,7 +9,7 @@ import Foundation
 
 final class Guild: Codable, Equatable {
     static func == (lhs: Guild, rhs: Guild) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
     
     let id: String

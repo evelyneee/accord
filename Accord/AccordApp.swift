@@ -9,30 +9,29 @@ import Foundation
 import SwiftUI
 import AppKit
 
-public var logs: [String] = []
-
 public func print(_ object: Any...) {
     #if DEBUG
     for item in object {
-        Swift.print(item)
+        Swift.print("[Accord]", item)
     }
     #endif
 }
 
 public func print(_ object: Any) {
     #if DEBUG
-    Swift.print(object)
+    Swift.print("[Accord]", object)
     #endif
 }
 
 public func releaseModePrint(_ object: Any...) {
+    NSLog("[Accord] ")
     for item in object {
         NSLog(String(describing: item))
     }
 }
 
 public func releaseModePrint(_ object: Any) {
-    NSLog(String(describing: object))
+    NSLog("[Accord] \(String(describing: object))")
 }
 
 @main

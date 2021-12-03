@@ -78,13 +78,10 @@ final class Markdown {
                 let typeKeywords = word.matches(for: #"(String|str|Any|Int|Int64|Int32)"#)
                 let function = word.matches(for: #".*\(\)$"#)
 
-
-                let whitemonospace: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]
-
                 for item in languageKeywords {
                     let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
                                                                          .foregroundColor: NSColor.purple]
-                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    attributed.append(Text(item).font(.body.monospaced()).foregroundColor(Color.purple))
                     continue
                 }
                 for item in typeKeywords {
@@ -215,36 +212,25 @@ public extension String {
                 let typeKeywords = word.matches(for: #"(String|str|Any|Int|Int64|Int32)"#)
                 let function = word.matches(for: #".*\(\)$"#)
 
-
-                let whitemonospace: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)]
-
                 for item in languageKeywords {
-                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
-                                                                         .foregroundColor: NSColor.purple]
-                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    attributed.append(Text(item).font(.system(.body, design: .monospaced)).foregroundColor(Color.purple))
                     continue
                 }
                 for item in typeKeywords {
-                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
-                                                                         .foregroundColor: NSColor.green]
-                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    attributed.append(Text(item).font(.system(.body, design: .monospaced)).foregroundColor(Color.green))
                     continue
                 }
                 for item in miscKeywords {
-                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
-                                                                         .foregroundColor: NSColor.orange]
-                    attributed.append(NSAttributedString.init(string: item, attributes: fontAttributes))
+                    attributed.append(Text(item).font(.system(.body, design: .monospaced)).foregroundColor(Color.orange))
                     continue
                 }
                 for item in function {
-                    let fontAttributes: [NSAttributedString.Key: Any] = [.font:NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
-                                                                         .foregroundColor: NSColor.red]
-                    attributed.append(NSAttributedString.init(string: item.dropLast(2).str(), attributes: fontAttributes))
-                    attributed.append(NSAttributedString.init(string: "()", attributes: whitemonospace))
+                    attributed.append(Text(item.dropLast(2).str()).font(.system(.body, design: .monospaced)).foregroundColor(Color.red))
+                    attributed.append(Text("()").font(.system(.body, design: .monospaced)))
                     continue
                 }
                 if (!(languageKeywords.isEmpty) || !(miscKeywords.isEmpty) || !(typeKeywords.isEmpty) || !(function.isEmpty)) {
-                    attributed.append(" ".attributed)
+                    attributed.append(Text(" "))
                     continue
                 }
                 */

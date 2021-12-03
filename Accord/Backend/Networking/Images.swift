@@ -84,7 +84,7 @@ final class ImageHandling {
     }
 
     init(_ empty:Bool = false) {
-        print("[Accord] loaded pfpmanager")
+        print("loaded pfpmanager")
     }
 }
 

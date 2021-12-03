@@ -25,8 +25,6 @@ extension ChannelView: MessageControllerDelegate {
             if let firstMessage = viewModel.messages.first {
                 message.lastMessage = firstMessage
             }
-            message.isSameAuthor() ? print("No pfp to store") : message.author?.loadPfp()
-            message.referenced_message?.author?.loadPfp()
             DispatchQueue.main.async {
                 self.popup.append(false)
                 self.sidePopups.append(false)

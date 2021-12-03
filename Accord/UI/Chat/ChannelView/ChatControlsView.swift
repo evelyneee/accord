@@ -85,7 +85,7 @@ struct ChatControls: View {
                                 if let range = viewModel?.textFieldContents.range(of: ":") {
                                     viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                 }
-                                viewModel?.textFieldContents.append("<:\(emoji?.name ?? ""):\(emoji?.id ?? "")>")
+                                viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "a" : ""):\(emoji?.name ?? ""):\(emoji?.id ?? "")>")
                             }, label: { [weak emoji] in
                                 HStack {
                                     Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80")

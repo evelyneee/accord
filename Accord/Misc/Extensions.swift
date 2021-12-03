@@ -56,6 +56,33 @@ func showWindow(guildID: String, channelID: String, channelName: String) {
     windowRef.makeKeyAndOrderFront(nil)
 }
 
+func pronounDBFormed(pronoun: inout String?) {
+    switch pronoun {
+    case "hh":
+        pronoun = "he/him"
+    case "hi":
+        pronoun = "he/it"
+    case "hs":
+        pronoun = "he/she"
+    case "ht":
+        pronoun = "he/they"
+    case "ih":
+        pronoun = "it/him"
+    case "ii":
+        pronoun = "it/its"
+    case "is":
+        pronoun = "it/she"
+    case "it":
+        pronoun = "it/they"
+    case "shh":
+        pronoun = "she/he"
+    case "sh":
+        pronoun = "she/her"
+    default:
+        pronoun = nil
+    }
+}
+
 func pfpURL(_ uid: String?, _ hash: String?) -> String {
     guard let uid = uid, let hash = hash else { return "" }
     return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=64"

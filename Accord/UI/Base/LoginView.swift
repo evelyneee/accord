@@ -107,7 +107,7 @@ struct LoginView: View {
                                     }
                                 }
                             }
-                            print("[Accord] logging in")
+                            print("logging in")
                         }) {
                             Label("Login", systemImage: "arrowtriangle.right.fill")
                                 .labelStyle(SwappedLabel())
@@ -164,13 +164,14 @@ struct LoginView: View {
                                         _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                         AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
-                                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                        let task = Process()
-                                        task.launchPath = "/usr/bin/open"
-                                        task.arguments = [path]
-                                        task.launch()
-                                        exit(EXIT_SUCCESS)
+                                        print(token)
+//                                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+//                                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+//                                        let task = Process()
+//                                        task.launchPath = "/usr/bin/open"
+//                                        task.arguments = [path]
+//                                        task.launch()
+//                                        exit(EXIT_SUCCESS)
                                     }
                                 }
                             }

@@ -24,6 +24,8 @@ struct SettingsViewRedesign: View {
     @State var discordSettings: Bool = pastelColors
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
     @State var loading: Bool = false
+    @AppStorage("enableSuffixRemover") var suffixes: Bool = false
+    @AppStorage("pronounDB") var pronounDB: Bool = false
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
@@ -90,7 +92,7 @@ struct SettingsViewRedesign: View {
                 .background(Color.black.opacity(0.25))
                 .cornerRadius(15)
                 .padding()
-                VStack {
+                VSplitView {
                     HStack(alignment: .top) {
                         Text("Show profile pictures")
                             .font(.title3)
@@ -102,7 +104,6 @@ struct SettingsViewRedesign: View {
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
                     }
-                    Divider()
                     HStack(alignment: .top) {
                         Text("Use stock discord settings")
                             .font(.title3)
@@ -114,7 +115,6 @@ struct SettingsViewRedesign: View {
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
                     }
-                    Divider()
                     HStack(alignment: .top) {
                         Text("Sort servers by recent messages")
                             .font(.title3)
@@ -126,7 +126,28 @@ struct SettingsViewRedesign: View {
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
                     }
-                    Divider()
+                    HStack(alignment: .top) {
+                        Text("Enable useless suffix remover")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Spacer()
+                        Toggle(isOn: $suffixes) {
+                        }
+                        .padding()
+                        .toggleStyle(SwitchToggleStyle())
+                    }
+                    HStack(alignment: .top) {
+                        Text("Enable PronounDB integration")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Spacer()
+                        Toggle(isOn: $pronounDB) {
+                        }
+                        .padding()
+                        .toggleStyle(SwitchToggleStyle())
+                    }
                     HStack(alignment: .top) {
                         Text("Always dark mode")
                             .font(.title3)
@@ -138,7 +159,6 @@ struct SettingsViewRedesign: View {
                         .padding()
                         .toggleStyle(SwitchToggleStyle())
                     }
-                    Divider()
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)

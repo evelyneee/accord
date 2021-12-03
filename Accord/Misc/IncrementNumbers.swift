@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CloudKit
 
 prefix operator ++
 postfix operator ++

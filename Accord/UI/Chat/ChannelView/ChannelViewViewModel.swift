@@ -9,7 +9,6 @@ import Foundation
 import AppKit
 import Combine
 
-
 @propertyWrapper class DispatchToMain<T> {
     var wrappedValue: () -> T
     init(wrappedValue: @escaping () -> T) {
@@ -25,9 +24,10 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var nicks: [String:String] = [:]
     @Published var roles: [String:String] = [:]
     @Published var colors: [String:NSColor] = [:]
+    @Published var pronouns: [String:String] = [:]
     
     var requestCancellable: AnyCancellable?
-    
+
     var guildID: String
     var channelID: String
     
@@ -50,7 +50,7 @@ final class ChannelViewViewModel: ObservableObject {
     
     func ack(channelID: String, guildID: String) {
         guard let first = messages.first?.id else { return }
-        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(first)/ack")!, headers: Headers(
+        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(first)/ack"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .POST,
@@ -74,10 +74,11 @@ final class ChannelViewViewModel: ObservableObject {
                 element.lastMessage = msg[index + 1]
                 return element
             }
-            DispatchQueue.main.async { [weak self] in
+            DispatchQueue.main.sync { [weak self] in
                 self?.messages = messages
-                DispatchQueue(label: "Channel loading").async { self?.performSecondStageLoad() }
             }
+            DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad() }
+            self.loadPronouns()
             self.fakeNicksObject()
             self.ack(channelID: channelID, guildID: guildID)
         })
@@ -124,6 +125,27 @@ final class ChannelViewViewModel: ObservableObject {
         }
     }
     
+    func loadPronouns() {
+        guard AccordCoreVars.shared.pronounDB else { return }
+        Request.fetch(url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
+            bodyObject: ["platform":"discord", "ids":messages.compactMap({ $0.author?.id}).joined(separator: ",")],
+            type: .GET), completion: { data, error in
+            if let data = data {
+                do {
+                    var serialized = try JSONSerialization.jsonObject(with: data, options: []) as? [String:String] ?? [:]
+                    for key in serialized.keys {
+                        pronounDBFormed(pronoun: &serialized[key])
+                    }
+                    DispatchQueue.main.async {
+                        self.pronouns = serialized
+                    }
+                } catch {
+                    print(error)
+                }
+            }
+        })
+    }
+    
     func getCachedMemberChunk() {
         let allUserIDs = messages.map { $0.author?.id ?? "" }
                             .removingDuplicates()
@@ -154,13 +176,11 @@ final class ChannelViewViewModel: ObservableObject {
         if guildID != "@me" {
             var allUserIDs = Array(NSOrderedSet(array: messages.map { $0.author?.id ?? "" })) as! Array<String>
             getCachedMemberChunk()
-            print("done")
             for (index, item) in allUserIDs.enumerated() {
                 if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") && Array<Int>(allUserIDs.indices).contains(index) {
                     allUserIDs.remove(at: index)
                 }
             }
-            print("done 2")
             if !(allUserIDs.isEmpty) {
                 print(allUserIDs)
                 wss.getMembers(ids: allUserIDs, guild: guildID)

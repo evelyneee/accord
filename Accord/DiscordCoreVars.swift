@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 public let rootURL: String = "https://discord.com/api/v9"
 public let gatewayURL: String = "wss://gateway.discord.gg"
@@ -23,22 +24,21 @@ public var proxyEnabled: Bool = UserDefaults.standard.bool(forKey: "proxyEnabled
 public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors")
 public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "discordStockSettings")
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
-var discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.276 Chrome/91.0.4472.164 Electron/13.2.2 Safari/537.36"
+public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.276 Chrome/91.0.4472.164 Electron/13.2.2 Safari/537.36"
 
 final class AccordCoreVars {
     static var shared = AccordCoreVars()
-    init(_ tokenOverride: String = "") {
-        
-        if tokenOverride != "" {
-            token = tokenOverride
-        } else {
-            token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
-        }
-    }
+    
+    @AppStorage("enableSuffixRemover") var suffixes: Bool = false
+    @AppStorage("pronounDB") var pronounDB: Bool = false
     
     public var token: String = ""
     public var user: User?
     public var plugins: [AccordPlugin] = []
+    
+    init() {
+        token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+    }
     
     func loadPlugins() {
         let path = FileManager.default.urls(for: .documentDirectory,

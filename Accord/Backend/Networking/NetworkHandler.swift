@@ -28,7 +28,7 @@ func logOut() {
 }
 
 final class Headers {
-    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false) {
+    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false, cached: Bool = false) {
         self.userAgent = userAgent
         self.contentType = contentType
         self.token = token
@@ -38,6 +38,7 @@ final class Headers {
         self.referer = referer
         self.empty = empty
         self.json = json
+        self.cached = cached
     }
     var userAgent: String?
     var contentType: String?
@@ -48,9 +49,13 @@ final class Headers {
     var referer: String?
     var empty: Bool?
     var json: Bool
+    var cached: Bool
     func set(request: inout URLRequest, config: inout URLSessionConfiguration) throws {
         if let userAgent = self.userAgent {
             config.httpAdditionalHeaders = ["User-Agent": userAgent]
+        }
+        if cached {
+            config.requestCachePolicy = .returnCacheDataElseLoad
         }
         if let contentType = self.contentType, !(self.json) {
             request.addValue(contentType, forHTTPHeaderField: "Content-Type")
@@ -62,8 +67,12 @@ final class Headers {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONSerialization.data(withJSONObject: self.bodyObject ?? [:], options: [])
         } else if let bodyObject = self.bodyObject {
-            let bodyString = bodyObject.queryParameters
-            request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            if self.type == .GET {
+                request.url = request.url?.appendingQueryParameters(bodyObject as? [String:String] ?? [:])
+            } else {
+                let bodyString = bodyObject.queryParameters
+                request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
+            }
         }
         if self.discordHeaders {
             request.addValue("discord.com", forHTTPHeaderField: ":authority")
@@ -144,6 +153,33 @@ final class Request {
                         logOut()
                     }
                 }
+            }
+        }).resume()
+    }
+    
+    // MARK: - Perform data request with completion handler
+    final public class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<Data>, _ error: Error?) -> Void)) -> Void {
+        
+        let request: URLRequest? = {
+            if let request = request {
+                return request
+            } else if let url = url {
+                return URLRequest(url: url)
+            } else {
+                print("[Networking] You need to provide a request method")
+                return nil
+            }
+        }()
+        guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
+        var config = URLSessionConfiguration.default
+        config.setProxy()
+        
+        // Set headers
+        do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
+        
+        URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
+            if let data = data {
+                return completion(data, error)
             }
         }).resume()
     }

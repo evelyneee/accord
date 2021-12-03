@@ -50,30 +50,6 @@ extension NSImage {
         return image
     }
 
-    /// Copy the image and resize it to the supplied size, while maintaining it's
-    /// original aspect ratio.
-    ///
-    /// - Parameter size: The target size of the image.
-    /// - Returns: The resized image.
-    func downsample(withSize targetSize: NSSize) -> NSImage? {
-        let newSize: NSSize
-        let widthRatio  = targetSize.width / self.width
-        let heightRatio = targetSize.height / self.height
-        
-        if targetSize.width >= self.width || targetSize.height >= self.height {
-            print("too small, cancelling", self.width, self.height)
-            return self
-        }
-        
-        if widthRatio > heightRatio {
-            newSize = NSSize(width: floor(self.width * widthRatio),
-                             height: floor(self.height * widthRatio))
-        } else {
-            newSize = NSSize(width: floor(self.width * heightRatio),
-                             height: floor(self.height * heightRatio))
-        }
-        return self.resize(withSize: newSize)
-    }
     func downsampled() -> NSImage? {
         
         let ratio = self.width / 400

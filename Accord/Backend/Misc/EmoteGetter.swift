@@ -14,7 +14,7 @@ final class Counter: ObservableObject {
     @Published var value: Int = 0
     @Published var setinterval: Double = 0 {
         didSet {
-            print("[Accord] set")
+            print("set")
             timer = Timer.scheduledTimer(withTimeInterval: setinterval, repeats: true) { _ in
                 self.value += 1
             }

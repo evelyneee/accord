@@ -40,10 +40,6 @@ struct ChannelView: View, Equatable {
 
     // Collapsed message quick action indexes
     @State var collapsed: [Int] = []
-    @State var pfpArray: [String:NSImage] = [:]
-
-    @State var poppedUpUserProfile: Bool = false
-    @State var userPoppedUp: Int? = nil
     @State var popup: [Bool] = Array.init(repeating: false, count: 50)
     @State var sidePopups: [Bool] = Array.init(repeating: false, count: 50)
 
@@ -131,12 +127,20 @@ struct ChannelView: View, Equatable {
                                             Text(" — \(message.timestamp.makeProperDate())")
                                                 .foregroundColor(Color.secondary)
                                                 .font(.subheadline)
+                                            +
+                                            Text((viewModel?.pronouns[message.author?.id ?? ""] != nil) ? " — \(viewModel?.pronouns[message.author?.id ?? ""] ?? "")" : "")
+                                                .foregroundColor(Color.secondary)
+                                                .font(.subheadline)
                                             textView
                                         } else {
                                             Text(viewModel?.nicks[message.author?.id ?? ""] ?? message.author?.username ?? "Unknown User")
                                                 .fontWeight(.semibold)
                                             +
                                             Text(" — \(message.timestamp.makeProperDate())")
+                                                .foregroundColor(Color.secondary)
+                                                .font(.subheadline)
+                                            +
+                                            Text((viewModel?.pronouns[message.author?.id ?? ""] != nil) ? " — \(viewModel?.pronouns[message.author?.id ?? ""] ?? "")" : "")
                                                 .foregroundColor(Color.secondary)
                                                 .font(.subheadline)
                                             textView

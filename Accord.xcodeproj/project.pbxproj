@@ -70,7 +70,6 @@
 		A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */; };
 		A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */; };
 		A8DE781A26BF1532004AC30C /* AccountManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE781926BF1532004AC30C /* AccountManagerView.swift */; };
-		A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */; };
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
 		A8FC3C7626E956010008A2CE /* ChannelView+Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FC3C7526E956010008A2CE /* ChannelView+Misc.swift */; };
 /* End PBXBuildFile section */
@@ -158,7 +157,6 @@
 		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8DE781926BF1532004AC30C /* AccountManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerView.swift; sourceTree = "<group>"; };
-		A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NitrolessBackend.swift; sourceTree = "<group>"; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 		A8FC3C7526E956010008A2CE /* ChannelView+Misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+Misc.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -362,7 +360,6 @@
 			isa = PBXGroup;
 			children = (
 				A864BE5D2686700300B244BE /* MainView.swift */,
-				A8ECC4CF271C8C2400382E53 /* NitrolessBackend.swift */,
 			);
 			path = Nitroless;
 			sourceTree = "<group>";
@@ -545,7 +542,6 @@
 				A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
-				A8ECC4D0271C8C2400382E53 /* NitrolessBackend.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
@@ -696,7 +692,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.evelyn.accord;
+				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -729,7 +725,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.evelyn.accord;
+				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;

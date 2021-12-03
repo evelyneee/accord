@@ -27,6 +27,16 @@ struct EmoteButton: ButtonStyle {
     }
 }
 
+struct Repo: Decodable {
+    var name: String
+    var emotes: [Emote]
+}
+
+struct Emote: Decodable {
+    var name: String
+    var type: String
+}
+
 // actual view
 struct NitrolessView: View, Equatable {
     static func == (lhs: NitrolessView, rhs: NitrolessView) -> Bool {
