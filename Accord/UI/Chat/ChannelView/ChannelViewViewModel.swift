@@ -26,7 +26,8 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var colors: [String:NSColor] = [:]
     @Published var pronouns: [String:String] = [:]
     
-    var requestCancellable: AnyCancellable?
+    private var requestCancellable: AnyCancellable?
+    private var pronounCancellable: AnyCancellable?
 
     var guildID: String
     var channelID: String
@@ -67,17 +68,23 @@ final class ChannelViewViewModel: ObservableObject {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-        .replaceError(with: [])
-        .sink(receiveValue: { msg in
+        .sink(receiveCompletion: { completion in
+            switch completion {
+            case .finished: break
+            case .failure(let error):
+                print(error)
+                MentionSender.shared.deselect()
+            }
+        }, receiveValue: { msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
                 guard element != msg.last else { return element }
                 element.lastMessage = msg[index + 1]
                 return element
             }
-            DispatchQueue.main.sync { [weak self] in
-                self?.messages = messages
+            DispatchQueue.main.sync {
+                self.messages = messages
+                DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad() }
             }
-            DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad() }
             self.loadPronouns()
             self.fakeNicksObject()
             self.ack(channelID: channelID, guildID: guildID)
@@ -127,21 +134,19 @@ final class ChannelViewViewModel: ObservableObject {
     
     func loadPronouns() {
         guard AccordCoreVars.shared.pronounDB else { return }
-        Request.fetch(url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
+        pronounCancellable = Request.combineFetchAndSerialize([String:String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
             bodyObject: ["platform":"discord", "ids":messages.compactMap({ $0.author?.id}).joined(separator: ",")],
-            type: .GET), completion: { data, error in
-            if let data = data {
-                do {
-                    var serialized = try JSONSerialization.jsonObject(with: data, options: []) as? [String:String] ?? [:]
-                    for key in serialized.keys {
-                        pronounDBFormed(pronoun: &serialized[key])
-                    }
-                    DispatchQueue.main.async {
-                        self.pronouns = serialized
-                    }
-                } catch {
-                    print(error)
-                }
+            type: .GET
+        ))
+        .sink(receiveCompletion: { _ in
+        }, receiveValue: { value in
+            print(value)
+            var value = value
+            for key in value.keys {
+                pronounDBFormed(pronoun: &value[key])
+            }
+            DispatchQueue.main.async {
+                self.pronouns = value
             }
         })
     }
@@ -181,6 +186,7 @@ final class ChannelViewViewModel: ObservableObject {
                     allUserIDs.remove(at: index)
                 }
             }
+            print("hi")
             if !(allUserIDs.isEmpty) {
                 print(allUserIDs)
                 wss.getMembers(ids: allUserIDs, guild: guildID)

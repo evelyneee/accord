@@ -57,8 +57,9 @@ struct AttachmentView: View, Equatable {
                                             }
                                     }
                                 } else {
-                                    Attachment(media[index]!.url, size: CGSize(width: 500, height: 400)).equatable()
+                                    Attachment(media[index]!.url, size: CGSize(width: 2000, height: 2000)).equatable()
                                         .cornerRadius(5)
+                                        .frame(maxWidth: 500, maxHeight: 500)
                                 }
                             }
                         } else if String((media[index]?.content_type ?? "").prefix(6)) == "video/" {

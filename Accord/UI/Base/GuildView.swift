@@ -14,7 +14,7 @@ struct GuildView: View, Equatable {
     }
     
     @Binding var guild: Guild
-    @State var selection: Int?
+    @Binding var selection: Int?
     var body: some View {
         return List {
             VStack {
@@ -36,8 +36,8 @@ struct GuildView: View, Equatable {
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(guildID: guild.id, channelID: channel.id, channelName: channel.name ?? "").equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
-                        ServerListViewCell(channel: channel, guildID: guild.id).equatable()
+                    NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                        ServerListViewCell(channel: channel).equatable()
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 }
@@ -49,15 +49,13 @@ struct GuildView: View, Equatable {
 }
 
 struct ServerListViewCell: View, Equatable {
-    
     var channel: Channel
     var guildID: String
-    init(channel: Channel, guildID: String = "@me") {
+    init(channel: Channel) {
         self.channel = channel
-        self.guildID = guildID
+        self.guildID = channel.guild_id ?? "@me"
     }
     var body: some View {
-        
         var label: some View {
             return Group {
                 switch channel.type {
@@ -103,7 +101,9 @@ struct ServerListViewCell: View, Equatable {
         
         var windowButton: some View {
             return Button(action: { [weak channel] in
-                showWindow(guildID: guildID, channelID: channel?.id ?? "", channelName: channel?.name ?? "")
+                if let channel = channel {
+                    showWindow(channel)
+                }
             }) {
                 Image(systemName: "arrow.up.right.circle")
             }

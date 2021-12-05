@@ -41,6 +41,8 @@ struct ServerListView: View {
     @State var guildIcons: [String:NSImage] = [:]
     @State var pings: [(String, String)] = []
     @State var stuffSelection: Int? = nil
+    @State var online: Bool = true
+    @State var alert: Bool = true
     
     var body: some View {
         NavigationView {
@@ -48,15 +50,46 @@ struct ServerListView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
                     LazyVStack {
-                        ZStack {
-                            Color.primary.colorInvert()
-                            Image(systemName: "bubble.left.fill")
+                        if !online {
+                            Button("Error") {
+                                alert.toggle()
+                            }
+                            .alert(isPresented: $alert) {
+                                Alert(
+                                    title: Text("Could not connect"),
+                                    message: Text("There was an error connecting to Discord"),
+                                    primaryButton: .default(
+                                        Text("Ok"),
+                                        action: {
+                                            alert.toggle()
+                                        }
+                                    ),
+                                    secondaryButton: .destructive(
+                                        Text("Reconnect"),
+                                        action: {
+                                            wss.reset()
+                                        }
+                                    )
+                                )
+                            }
                         }
-                        .frame(width: 45, height: 45)
-                        .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
-                        .onTapGesture(count: 1, perform: {
-                            selectedServer = 999
-                        })
+                        if #available(macOS 12.0, *) {
+                            Image(systemName: "bubble.left.fill")
+                                .frame(width: 45, height: 45)
+                                .background(Material.thick)
+                                .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                                .onTapGesture(count: 1, perform: {
+                                    selectedServer = 999
+                                })
+                        } else {
+                            Image(systemName: "bubble.left.fill")
+                                .frame(width: 45, height: 45)
+                                .background(Color(NSColor.windowBackgroundColor))
+                                .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                                .onTapGesture(count: 1, perform: {
+                                    selectedServer = 999
+                                })
+                        }
                         // MARK: - Guild icon UI
                         ForEach(Array(zip(guilds.indices, guilds)), id: \.1.id) { offset, guild in
                             ZStack(alignment: .bottomTrailing) {
@@ -121,7 +154,7 @@ struct ServerListView: View {
                             .font(.title2)
                         Divider()
                         ForEach(privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(guildID: "@me", channelID: channel.id, channelName: channel.name ?? channel.recipients?[0].username ?? "Unknown Channel").equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
+                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
                                 ServerListViewCell(channel: channel)
                             }
                             .buttonStyle(BorderlessButtonStyle())
@@ -130,7 +163,7 @@ struct ServerListView: View {
                     .padding(.top, 5)
                 } else if !(guilds.isEmpty) {
                     // MARK: - Guild channels
-                    GuildView(guild: $guilds[selectedServer ?? 0])
+                    GuildView(guild: $guilds[selectedServer ?? 0], selection: $selection)
                 }
             })
         }
@@ -161,11 +194,28 @@ struct ServerListView: View {
                                                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                                                 return nextDict
                                             }
-            
             if sortByMostRecent {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
+                self.guilds = guilds
+            } else {
+                let guildOrder = full?.user_settings?.guild_positions ?? []
+                let messageDict = guilds.enumerated().compactMap { (index, element) in
+                    return [element.id:index]
+                }.reduce(into: [:]) { (result, next) in
+                    result.merge(next) { (_, rhs) in rhs }
+                }
+                var guildTemp = [Guild]()
+                for item in guildOrder {
+                    if let first = messageDict[item] {
+                        let guild = guilds[first]
+                        for channel in guild.channels ?? [] {
+                            channel.guild_id = guild.id
+                        }
+                        guildTemp.append(guild)
+                    }
+                }
+                self.guilds = guildTemp
             }
-            self.guilds = guilds
             order()
             DispatchQueue.main.async {
                 selectedServer = 0

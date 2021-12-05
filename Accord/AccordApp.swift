@@ -42,23 +42,32 @@ struct AccordApp: App {
             ContentView()
                 .preferredColorScheme(darkMode ? .dark : nil)
                 .onAppear(perform: {
-                    // AccordCoreVars.shared.loadPlugins()
+                    appDelegate.fileNotifications()
                 })
         }
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidUnhide(_ notification: Notification) {
+    @objc func onWakeNote(note: NSNotification) {
+        print("hi")
         if wss == nil {
             concurrentQueue.async {
                 wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
+                _ = wss.ready()
             }
         }
     }
-    func applicationDidHide(_ notification: Notification) {
-        wss.ws.cancel()
+    @objc func onSleepNote(note: NSNotification) {
+        wss.ws.cancel(with: .goingAway, reason: Data())
         wss = nil
     }
+    func fileNotifications() {
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(onWakeNote(note:)),
+            name: NSWorkspace.didWakeNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(onSleepNote(note:)),
+            name: NSWorkspace.willSleepNotification, object: nil)
+    }
 }
-

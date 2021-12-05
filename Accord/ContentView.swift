@@ -16,6 +16,8 @@ struct ContentView: View {
     @State public var selection: Int?
     @State var socketOut: GatewayD?
     @State var modalIsPresented: Bool = false
+    @State var wsCancellable: AnyCancellable? = nil
+    
     var body: some View {
         Group {
             if modalIsPresented {
@@ -42,9 +44,18 @@ struct ContentView: View {
                     } catch {
                         print(error)
                     }
+                    guard wss == nil else { return }
                     wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
-                    wss.ready() { d in
-                        if let d = d {
+                    _ = wss.ready()
+                        .sink(receiveCompletion: { completion in
+                            switch completion {
+                            case .finished:
+                                break
+                            case .failure(let error):
+                                print(error)
+                                break
+                            }
+                        }, receiveValue: { d in
                             socketOut = d
                             guard let user = socketOut?.user else { return }
                             AccordCoreVars.shared.user = user
@@ -57,8 +68,7 @@ struct ContentView: View {
                             DispatchQueue.main.async {
                                 NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                             }
-                        }
-                    }
+                        })
                 }
             } else {
                 modalIsPresented = true

@@ -11,21 +11,24 @@ import SwiftUI
 // NSViewWrapper(Plugins().loadView(url: "/Users/evelyn/plugin")!.body!)
 
 struct SettingsViewRedesign: View {
-    @State var bioText: String = " "
-    @State var username: String = "test user"
-    @State var profilePictures: Bool = pfpShown
-    @State var recent: Bool = sortByMostRecent
-    @State var dark: Bool = darkMode
-    @State var user: User? = AccordCoreVars.shared.user
-    @State var proxyIP: String = ""
-    @State var proxyPort: String = ""
-    @State var proxyEnable: Bool = proxyEnabled
-    @State var pastel: Bool = pastelColors
-    @State var discordSettings: Bool = pastelColors
-    @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
-    @State var loading: Bool = false
+    
+    @AppStorage("pfpShown") var profilePictures: Bool = pfpShown
+    @AppStorage("sortByMostRecent") var recent: Bool = sortByMostRecent
+    @AppStorage("darkMode") var dark: Bool = darkMode
+    @AppStorage("proxyIP") var proxyIP: String = ""
+    @AppStorage("proxyPort") var proxyPort: String = ""
+    @AppStorage("proxyEnabled") var proxyEnable: Bool = proxyEnabled
+    @AppStorage("pastelColors") var pastel: Bool = pastelColors
+    @AppStorage("discordStockSettings") var discordSettings: Bool = pastelColors
     @AppStorage("enableSuffixRemover") var suffixes: Bool = false
     @AppStorage("pronounDB") var pronounDB: Bool = false
+    
+    @State var user: User? = AccordCoreVars.shared.user
+    @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
+    @State var loading: Bool = false
+    @State var bioText: String = " "
+    @State var username: String = AccordCoreVars.shared.user?.username ?? "Unknown User"
+    
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
@@ -102,7 +105,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $profilePictures) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Use stock discord settings")
@@ -113,7 +115,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $discordSettings) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Sort servers by recent messages")
@@ -124,7 +125,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $recent) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Enable useless suffix remover")
@@ -135,7 +135,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $suffixes) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Enable PronounDB integration")
@@ -146,7 +145,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $pronounDB) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Always dark mode")
@@ -157,7 +155,6 @@ struct SettingsViewRedesign: View {
                         Toggle(isOn: $dark) {
                         }
                         .padding()
-                        .toggleStyle(SwitchToggleStyle())
                     }
                     HStack(alignment: .top) {
                         Text("Music platform")
@@ -179,9 +176,10 @@ struct SettingsViewRedesign: View {
                         }, label: {
                         })
                         .padding()
-                        .pickerStyle(MenuPickerStyle())
                     }
                 }
+                .toggleStyle(SwitchToggleStyle())
+                .pickerStyle(MenuPickerStyle())
                 .padding(5)
                 .background(Color.black.opacity(0.25))
                 .cornerRadius(15)
@@ -260,20 +258,11 @@ struct SettingsViewRedesign: View {
                     .foregroundColor(.secondary)
             }
             .onDisappear(perform: {
-                darkMode = self.dark
-                sortByMostRecent = self.recent
-                pfpShown = self.profilePictures
+                darkMode = dark
+                sortByMostRecent = recent
+                pfpShown = profilePictures
                 pastelColors = pastel
                 discordStockSettings = discordSettings
-                UserDefaults.standard.set(darkMode, forKey: "darkMode")
-                UserDefaults.standard.set(sortByMostRecent, forKey: "sortByMostRecent")
-                UserDefaults.standard.set(pfpShown, forKey: "pfpShown")
-                UserDefaults.standard.set(pastel, forKey: "pastelColors")
-                UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
-                UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
-                UserDefaults.standard.set(self.proxyEnable, forKey: "proxyEnabled")
-                UserDefaults.standard.set(self.discordSettings, forKey: "discordStockSettings")
-
             })
         }
     }

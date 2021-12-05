@@ -49,18 +49,25 @@ extension ServerListView {
     func assignReadStates() {
         guard let readState = full?.read_state else { return }
         for guild in guilds {
+            let messageDict = guild.channels?.enumerated().compactMap { (index, element) in
+                return [element.id:index]
+            }.reduce(into: [:]) { (result, next) in
+                result.merge(next) { (_, rhs) in rhs }
+            }
             for channel in guild.channels ?? [] {
-                if let index = fastIndexEntries(channel.id, array: readState.entries), channel.type != .section || channel.type != .stage || channel.type != .voice  {
+                if let index = messageDict?[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice {
                     channel.read_state = readState.entries[index]
                 }
             }
         }
-        
+        let messageDict = privateChannels.enumerated().compactMap { (index, element) in
+            return [element.id:index]
+        }.reduce(into: [:]) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        }
         for channel in privateChannels {
-            if channel.type != .section || channel.type != .stage || channel.type != .voice  {
-                if let index = fastIndexEntries(channel.id, array: readState.entries) {
-                    channel.read_state = readState.entries[index]
-                }
+            if let index = messageDict[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice  {
+                channel.read_state = readState.entries[index]
             }
         }
     }

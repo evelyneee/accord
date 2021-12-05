@@ -27,6 +27,11 @@ extension ServerListView: MentionSenderDelegate {
         }
     }
     
+    func sendWSError(error: Error) {
+        print("bad")
+        self.online = false
+    }
+    
     /// This does not work unfortunately, needs some work
     /*
     func fastBindReadState(channels: [Channel], read_state: [ReadStateEntry]) -> [Channel] {

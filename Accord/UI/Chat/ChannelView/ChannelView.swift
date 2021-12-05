@@ -56,10 +56,10 @@ struct ChannelView: View, Equatable {
     @State var opened: Int? = nil
     
     // MARK: - init
-    init(guildID: String, channelID: String, channelName: String? = nil) {
-        self.guildID = guildID
-        self.channelID = channelID
-        self.channelName = channelName ?? "Unknown channel"
+    init(_ channel: Channel) {
+        self.guildID = channel.guild_id ?? "@me"
+        self.channelID = channel.id
+        self.channelName = channel.name ?? "Unknown channel"
         self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
     }
     
@@ -199,7 +199,6 @@ struct ChannelView: View, Equatable {
                                     AttachmentView(media: $viewModel.messages[offset].attachments).equatable()
                                     Spacer()
                                 }
-                                .frame(maxWidth: 500, maxHeight: 400)
                                 .padding(.leading, 41)
                             }
                         }

@@ -20,7 +20,7 @@ struct PopoverProfileView: View {
                 VStack {
                     Spacer().frame(height: 100)
                     VStack(alignment: .leading) {
-                        Image(nsImage: NSImage(data: user.pfp ?? Data()) ?? NSImage()).resizable()
+                        Attachment(pfpURL(user.id, user.avatar)).equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)

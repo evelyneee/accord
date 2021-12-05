@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
@@ -14,6 +15,7 @@ struct FancyTextView: View {
     @Binding var text: String
     @State var textElement: Text? = nil
     @Binding var channelID: String
+    @State var cancellable: AnyCancellable? = nil
     var body: some View {
         HStack(spacing: 0) {
             if let textView = textElement {
@@ -24,18 +26,22 @@ struct FancyTextView: View {
         }
         .onAppear {
             textQueue.async {
-                text.markdown(members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { markdown in
-                    guard let markdown = markdown else { return }
-                    self.textElement = markdown
-                }
+                cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[channelID] ?? [:])
+                    .sink(receiveCompletion: { value in
+                        print(value)
+                    }, receiveValue: { text in
+                        self.textElement = text
+                    })
             }
         }
         .onChange(of: text) { newValue in
             textQueue.async {
-                text.markdown(members: ChannelMembers.shared.channelMembers[channelID] ?? [:]) { markdown in
-                    guard let markdown = markdown else { return }
-                    self.textElement = markdown
-                }
+                cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[channelID] ?? [:])
+                    .sink(receiveCompletion: { value in
+                        print(value)
+                    }, receiveValue: { text in
+                        self.textElement = text
+                    })
             }
         }
     }

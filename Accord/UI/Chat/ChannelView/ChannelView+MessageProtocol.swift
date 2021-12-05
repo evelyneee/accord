@@ -28,8 +28,9 @@ extension ChannelView: MessageControllerDelegate {
             DispatchQueue.main.async {
                 self.popup.append(false)
                 self.sidePopups.append(false)
-                viewModel.messages.last?.author?.pfp = nil
-                viewModel.messages.remove(at: viewModel.messages.count - 1)
+                if viewModel.messages.count == 50 {
+                    viewModel.messages.remove(at: viewModel.messages.count - 1)
+                }
                 viewModel.messages.insert(message, at: 0)
             }
         }

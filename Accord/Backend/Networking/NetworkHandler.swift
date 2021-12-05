@@ -109,7 +109,8 @@ final class Request {
         case invalidForm
         case badResponse(URLResponse?)
         case notRequired
-        case decodingError(String, Error)
+        case decodingError(String, Error?)
+        case noData
     }
     
     // MARK: - Perform request with completion handler
@@ -209,6 +210,7 @@ final class Request {
         do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }
 
         return URLSession(configuration: config).dataTaskPublisher(for: request)
+            .retry(3)
             .map { $0.data }
             .decode(type: T.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
@@ -239,4 +241,31 @@ final class Request {
             return completion(image)
         }).resume()
     }
+    final public class func combineFetchAndSerialize<T>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> Future<T, Error> {
+        
+        let request: URLRequest? = {
+            if let request = request {
+                return request
+            } else if let url = url {
+                return URLRequest(url: url)
+            } else {
+                print("[Networking] You need to provide a request method")
+                return nil
+            }
+        }()
+        guard var request = request else { fatalError("Bad Request") }
+        var config = URLSessionConfiguration.default
+        
+        // Set headers
+        do { try headers?.set(request: &request, config: &config) } catch { return Future { promise in promise(.failure(error))} }
+        return Future { promise in
+            URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
+                guard let data = data else { promise(.failure(error!)); return }
+                guard let val = try? JSONSerialization.jsonObject(with: data, options: []) as? T else { promise(.failure(error!)); return }
+                promise(.success(val))
+            }).resume()
+        }
+    }
 }
+
+

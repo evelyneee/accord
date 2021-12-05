@@ -11,6 +11,7 @@ protocol MentionSenderDelegate {
     func addMention(guild: String, channel: String)
     func deselect()
     func removeMentions(server: String)
+    func sendWSError(error: Error)
 }
 
 class MentionSender {
@@ -24,5 +25,8 @@ class MentionSender {
     }
     func removeMentions(server: String) {
         delegate?.removeMentions(server: server)
+    }
+    func sendWSError(error: Error) {
+        delegate?.sendWSError(error: error)
     }
 }

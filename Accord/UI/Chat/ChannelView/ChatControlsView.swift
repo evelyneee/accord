@@ -68,7 +68,7 @@ struct ChatControls: View {
                                 viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
                             }, label: { [weak user] in
                                 HStack {
-                                    Attachment(pfpURL(user?.id, user?.avatar).appending("?size=24"))
+                                    Attachment(pfpURL(user?.id, user?.avatar).appending("?size=24"), size: CGSize(width: 48, height: 48))
                                         .clipShape(Circle())
                                         .frame(width: 20, height: 20)
                                     Text(user?.username ?? "Unknown User")
@@ -88,7 +88,7 @@ struct ChatControls: View {
                                 viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "a" : ""):\(emoji?.name ?? ""):\(emoji?.id ?? "")>")
                             }, label: { [weak emoji] in
                                 HStack {
-                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80")
+                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
                                         .frame(width: 20, height: 20)
                                     Text(emoji?.name ?? "Unknown Emote")
                                     Spacer()

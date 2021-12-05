@@ -33,14 +33,11 @@ protocol URLQueryParameterStringConvertible {
 
 final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     static var shared = WebSocketDelegate()
-    var connected = false
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         releaseModePrint("Web Socket did connect")
-        connected = true
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        connected = false
         releaseModePrint("Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
         MessageController.shared.sendWSError(msg: reason)
@@ -84,7 +81,6 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     }
 }
 
-
 final class WebSocket {
     
     var ws: URLSessionWebSocketTask!
@@ -94,7 +90,6 @@ final class WebSocket {
     var seq: Int? = nil
     var heartbeat_interval: Int = 0
     var cachedMemberRequest: [String:GuildMember] = [:]
-    typealias completionBlock = ((_ value: Optional<GatewayD>) -> Void)
     
     // MARK: - init
     init(url: URL?) {
@@ -117,17 +112,17 @@ final class WebSocket {
     
     func reset() {
         ws.cancel()
-        concurrentQueue.asyncAfter(deadline: .now() + 5, execute: {
+        concurrentQueue.async {
+            wss = nil
             wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
-        })
-        wss = nil
+        }
     }
     
     // MARK: - Ping
     func ping() {
         ws.sendPing { error in
             if let error = error {
-                releaseModePrint(" Error when sending PING \(error)")
+                releaseModePrint("Error when sending PING \(error)")
             } else {
                 print("Web Socket connection is alive")
             }
@@ -169,47 +164,38 @@ final class WebSocket {
     }
 
     // MARK: - Ready
-    func ready(_ completion: @escaping completionBlock) {
-        ws.receive { result in
-            switch result {
-            case .success(let message):
-                switch message {
-                case .data(_):
-                    break
-                case .string(let text):
-                    if let data = text.data(using: String.Encoding.utf8) {
-                        do {
-                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                            wssThread.async {
-                                self.receive()
-                            }
-                            releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
-                            let guildOrder = structure.d.user_settings?.guild_positions ?? []
-                            var guildTemp = [Guild]()
-                            for item in guildOrder {
-                                if let first = ServerListView.fastIndexGuild(item, array: structure.d.guilds) {
-                                    guildTemp.append(structure.d.guilds[first])
+    func ready() -> Future<GatewayD, Error> {
+        return Future { [weak ws] promise in
+            ws?.receive { result in
+                switch result {
+                case .success(let message):
+                    switch message {
+                    case .data(_):
+                        break
+                    case .string(let text):
+                        if let data = text.data(using: String.Encoding.utf8) {
+                            do {
+                                let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                    in: .userDomainMask)[0]
+                                                                    .appendingPathComponent("socketOut.json")
+                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                                try data.write(to: path)
+                                wssThread.async {
+                                    self.receive()
                                 }
+                                releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
+                                return promise(.success(structure.d))
+                            } catch {
+                                return promise(.failure(error))
                             }
-                            structure.d.guilds = guildTemp
-                            completion(structure.d)
-                            let data = try JSONEncoder().encode(structure)
-                            let path = FileManager.default.urls(for: .cachesDirectory,
-                                                                in: .userDomainMask)[0]
-                                                                .appendingPathComponent("socketOut.json")
-                            try data.write(to: path)
-                            return
-                        } catch {
-                            releaseModePrint(error)
-                            return completion(nil)
                         }
+                    @unknown default:
+                        print("unknown")
+                        break
                     }
-                @unknown default:
-                    print("unknown")
-                    break
+                case .failure(let error):
+                    print("Error when init receiving \(error)")
                 }
-            case .failure(let error):
-                print("Error when init receiving \(error)")
             }
         }
     }
@@ -218,7 +204,7 @@ final class WebSocket {
     // MARK: ACK
     func heartbeat() {
         guard let seq = seq else {
-            self.reset()
+            // self.reset()
             return
         }
         let packet: [String:Any] = [
@@ -262,6 +248,7 @@ final class WebSocket {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let error = error {
+                    MentionSender.shared.sendWSError(error: error)
                     releaseModePrint("WebSocket sending error: \(error)")
                 }
             }
@@ -286,7 +273,7 @@ final class WebSocket {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let error = error {
-                    releaseModePrint(" WebSocket sending reconnect error: \(error)")
+                    releaseModePrint("WebSocket sending reconnect error: \(error)")
                 }
                 return
             }
@@ -302,16 +289,14 @@ final class WebSocket {
                 "activities":true,
                 "threads":false,
                 "members":[],
-//                "channels": [
-//                     channel: [["0", "99"]]
-//                 ],
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let error = error {
-                    releaseModePrint(" WebSocket sending error: \(error)")
+                    MentionSender.shared.sendWSError(error: error)
+                    releaseModePrint("WebSocket sending error: \(error)")
                 }
             }
         }
@@ -324,11 +309,12 @@ final class WebSocket {
                 "channel_id":channel
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let error = error {
-                    releaseModePrint(" WebSocket sending error: \(error)")
+                    MentionSender.shared.sendWSError(error: error)
+                    releaseModePrint("WebSocket sending error: \(error)")
                 }
             }
         }
@@ -343,11 +329,12 @@ final class WebSocket {
                 "guild_id":guild
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: .prettyPrinted),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let error = error {
-                    releaseModePrint(" WebSocket sending error: \(error)")
+                    MentionSender.shared.sendWSError(error: error)
+                    releaseModePrint("WebSocket sending error: \(error)")
                 }
             }
         }
@@ -378,7 +365,6 @@ final class WebSocket {
                             self?.receive()
                             return
                         }
-                        print("new event: ", t)
                         switch t {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
@@ -475,6 +461,7 @@ final class WebSocket {
             case .failure(let error):
                 releaseModePrint(" Error when receiving loop \(error)")
                 print("RECONNECT")
+                MentionSender.shared.sendWSError(error: error)
             }
         }
     }

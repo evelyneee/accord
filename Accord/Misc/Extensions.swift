@@ -42,17 +42,17 @@ struct Collapsible<Content: View>: View {
     }
 }
 
-func showWindow(guildID: String, channelID: String, channelName: String) {
+func showWindow(_ channel: Channel) {
     var windowRef: NSWindow
     windowRef = NSWindow(
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false
     )
-    windowRef.contentView = NSHostingView(rootView: ChannelView(guildID: guildID, channelID: channelID, channelName: channelName))
+    windowRef.contentView = NSHostingView(rootView: ChannelView(channel))
     windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.isReleasedWhenClosed = false
-    windowRef.title = "\(channelName) - Accord"
+    windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }
 
@@ -85,7 +85,7 @@ func pronounDBFormed(pronoun: inout String?) {
 
 func pfpURL(_ uid: String?, _ hash: String?) -> String {
     guard let uid = uid, let hash = hash else { return "" }
-    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=64"
+    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=128"
 }
 
 func iconURL(_ id: String?, _ icon: String?) -> String {
@@ -120,30 +120,6 @@ extension NSTextField {
         get { .none }
         set { }
     }
-}
-
-@propertyWrapper struct Marked {
-    var wrappedValue: NSAttributedString
-    init(wrappedValue: NSAttributedString) {
-        self.wrappedValue = load(string: wrappedValue.string) ?? NSAttributedString.init()
-    }
-}
-
-extension String {
-    var markeddown: NSAttributedString {
-        load(string: self) ?? NSAttributedString.init()
-    }
-}
-
-func load(string: String) -> NSAttributedString? {
-    let sem = DispatchSemaphore(value: 0)
-    var ret: NSAttributedString? = nil
-    Markdown.marked(for: string, completion: { text in
-        ret = text
-        sem.signal()
-    })
-    sem.wait()
-    return ret
 }
 
 extension String {
