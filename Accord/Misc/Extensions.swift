@@ -9,8 +9,8 @@ import Foundation
 import AppKit
 import SwiftUI
 
-struct Collapsible<Content: View>: View {
-    @State var label: () -> Text
+struct Folder<Content: View>: View {
+    @State var color: NSColor
     @State var content: () -> Content
     
     @State private var collapsed: Bool = true
@@ -18,25 +18,25 @@ struct Collapsible<Content: View>: View {
     var body: some View {
         VStack {
             Button(
-                action: { self.collapsed.toggle() },
+                action: { withAnimation {self.collapsed.toggle()} },
                 label: {
                     HStack {
-                        self.label()
-                        Spacer()
-                        Image(systemName: self.collapsed ? "chevron.down" : "chevron.up")
+                        Image(systemName: "folder.fill").resizable()
+                            .scaledToFit()
+                            .frame(width: 25, height: 25)
+                            .padding()
+                            .frame(width: 45)
+                            .background(Color(color.withAlphaComponent(0.75)))
+                            .clipShape(Circle())
                     }
-                    .padding(.bottom, 1)
-                    .background(Color.white.opacity(0.01))
                 }
             )
             .buttonStyle(PlainButtonStyle())
-            
             VStack {
-                self.content()
+                if !collapsed {
+                    self.content()
+                }
             }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: collapsed ? 0 : .none)
-            .clipped()
-            .animation(.easeOut)
             .transition(.slide)
         }
     }

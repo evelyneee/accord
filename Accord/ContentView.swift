@@ -46,7 +46,7 @@ struct ContentView: View {
                     }
                     guard wss == nil else { return }
                     wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
-                    _ = wss.ready()
+                    wsCancellable = wss.ready()
                         .sink(receiveCompletion: { completion in
                             switch completion {
                             case .finished:
@@ -56,15 +56,15 @@ struct ContentView: View {
                                 break
                             }
                         }, receiveValue: { d in
-                            socketOut = d
-                            guard let user = socketOut?.user else { return }
+                            let user = d.user
                             AccordCoreVars.shared.user = user
                             user_id = user.id
                             if let pfp = user.avatar {
-                                Request.image(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=128")) { image in if let image = image { avatar = image.tiffRepresentation ?? Data() } }
+                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); print($1) }
                             }
                             username = user.username
                             discriminator = user.discriminator
+                            socketOut = d
                             DispatchQueue.main.async {
                                 NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
                             }

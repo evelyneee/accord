@@ -61,7 +61,7 @@ final class ChannelViewViewModel: ObservableObject {
     }
     
     func getMessages(channelID: String, guildID: String) {
-        requestCancellable = Request.combineFetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
+        requestCancellable = RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             type: .GET,
@@ -72,7 +72,7 @@ final class ChannelViewViewModel: ObservableObject {
             switch completion {
             case .finished: break
             case .failure(let error):
-                print(error)
+                releaseModePrint(error)
                 MentionSender.shared.deselect()
             }
         }, receiveValue: { msg in
@@ -81,13 +81,15 @@ final class ChannelViewViewModel: ObservableObject {
                 element.lastMessage = msg[index + 1]
                 return element
             }
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async {
                 self.messages = messages
-                DispatchQueue(label: "Channel loading").async { self.performSecondStageLoad() }
+                DispatchQueue(label: "Channel loading").async {
+                    self.performSecondStageLoad()
+                    self.loadPronouns()
+                    self.fakeNicksObject()
+                    self.ack(channelID: channelID, guildID: guildID)
+                }
             }
-            self.loadPronouns()
-            self.fakeNicksObject()
-            self.ack(channelID: channelID, guildID: guildID)
         })
     }
     
@@ -134,7 +136,7 @@ final class ChannelViewViewModel: ObservableObject {
     
     func loadPronouns() {
         guard AccordCoreVars.shared.pronounDB else { return }
-        pronounCancellable = Request.combineFetchAndSerialize([String:String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
+        pronounCancellable = RequestPublisher.fetch([String:String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
             bodyObject: ["platform":"discord", "ids":messages.compactMap({ $0.author?.id}).joined(separator: ",")],
             type: .GET
         ))
@@ -149,6 +151,7 @@ final class ChannelViewViewModel: ObservableObject {
                 self.pronouns = value
             }
         })
+
     }
     
     func getCachedMemberChunk() {

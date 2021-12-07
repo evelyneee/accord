@@ -51,80 +51,79 @@ final public class Markdown {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
     
+    public typealias TextPublisher = AnyPublisher<Text, Error>
+    public typealias TextArrayPublisher = AnyPublisher<[Text], Error>
+    
     /// Publisher that sends a SwiftUI Text view with a newline
-    static public var newLinePublisher: AnyPublisher<[Text], Error> = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
+    static public var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     
     /**
-     # markWord: Simple Publisher that sends a text view with the processed word
+     markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markWord(_ word: String, _ members: [String:String] = [:]) -> AnyPublisher<Text, Error> {
-        return Deferred {
-            Future { promise in
-                let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
-                let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
-                let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
-                let platforms = word.matches(for: #"(spotify|music\.apple|tidal)"#)
-                    .replaceAllOccurences(of: "music.apple", with: "applemusic")
-                let dict = Array(arrayLiteral: zip(songIDs, platforms))
-                    .reduce([], +)
-                for (id, platform) in dict {
-                    SongLink.shared.getSong(song: "\(platform):track:\(id)") { song in
-                        guard let song = song else { return }
-                        switch musicPlatform {
-                        case .appleMusic:
-                            promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
-                            return
-                        case .spotify:
-                            promise(.success(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline() + Text(" ")))
-                            return
-                        case .none:
-                            promise(.success(Text(word) + Text(" ")))
-                            return
-                        default: break
-                        }
-                    }
-                }
-                for id in emoteIDs {
-                    if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=40") {
-                        Request.image(url: emoteURL, to: CGSize(width: 40, height: 40)) { image in
-                            guard let image = image else {
-                                promise(.success(Text(word) + Text(" ")))
-                                return
-                            }
-                            promise(.success(Text("\(Image(nsImage: image))") + Text(" ")))
-                            return
-                        }
-                    }
-                }
-                for id in mentions {
-                    promise(.success(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
-                    return
-                }
-                do {
-                    if #available(macOS 12, *) {
-                        let markdown = try AttributedString(markdown: word)
-                        promise(.success(Text(markdown) + Text(" ")))
+    public class func markWord(_ word: String, _ members: [String:String] = [:]) -> TextPublisher {
+        Deferred { Future { promise in
+            let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
+            let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
+            let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
+            let platforms = word.matches(for: #"(spotify|music\.apple|tidal)"#)
+                .replaceAllOccurences(of: "music.apple", with: "applemusic")
+            let dict = Array(arrayLiteral: zip(songIDs, platforms))
+                .reduce([], +)
+            for (id, platform) in dict {
+                SongLink.shared.getSong(song: "\(platform):track:\(id)") { song in
+                    guard let song = song else { return }
+                    switch musicPlatform {
+                    case .appleMusic:
+                        promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
                         return
-                    } else { throw MarkdownErrors.unsupported }
-                } catch {
-                    promise(.success(Text(word) + Text(" ")))
-                    return
+                    case .spotify:
+                        promise(.success(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline() + Text(" ")))
+                        return
+                    case .none:
+                        promise(.success(Text(word) + Text(" ")))
+                        return
+                    default: break
+                    }
                 }
             }
-        }
+            for id in emoteIDs {
+                if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=40") {
+                    _ = RequestPublisher.image(url: emoteURL, to: CGSize(width: 48, height: 48))
+                        .replaceError(with: NSImage(systemSymbolName: "wifi.exclamationmark", accessibilityDescription: "Error loading image"))
+                        .replaceNil(with: NSImage(systemSymbolName: "wifi.exclamationmark", accessibilityDescription: "Error loading image") ?? NSImage())
+                        .sink(receiveValue: { image in
+                            promise(.success(Text("\(Image(nsImage: image))") + Text(" ")))
+                        })
+                }
+            }
+            for id in mentions {
+                promise(.success(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                return
+            }
+            do {
+                if #available(macOS 12, *) {
+                    let markdown = try AttributedString(markdown: word)
+                    promise(.success(Text(markdown) + Text(" ")))
+                    return
+                } else { throw MarkdownErrors.unsupported }
+            } catch {
+                promise(.success(Text(word) + Text(" ")))
+                return
+            }
+        } }
         .eraseToAnyPublisher()
     }
     
     /**
-     # markLine: Simple Publisher that combines an array of word publishers for a split line
+     markLine: Simple Publisher that combines an array of word publishers for a split line
      - Parameter line: The line being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
-    public class func markLine(_ line: String, _ members: [String:String] = [:]) -> AnyPublisher<[Text], Error> {
+    public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
         let words: [String] = line.split(separator: " ").compactMap { $0.str() }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
         return Publishers.MergeMany(pubs)
@@ -133,15 +132,15 @@ final public class Markdown {
     }
     
     /**
-     # markLine: Simple Publisher that combines an array of word and line publishers for a text section
+     markLine: Simple Publisher that combines an array of word and line publishers for a text section
      - Parameter text: The text being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markAll(text: String, _ members: [String:String] = [:]) -> AnyPublisher<Text, Error> {
+    public class func markAll(text: String, _ members: [String:String] = [:]) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
         let pubs = newlines.map { markLine(String($0), members) }
-        let withNewlines: [AnyPublisher<[Text], Error>] = Array(pubs.map { [$0] }.joined(separator: [newLinePublisher]))
+        let withNewlines: [TextArrayPublisher] = Array(pubs.map { [$0] }.joined(separator: [newLinePublisher]))
         return Publishers.MergeMany(withNewlines)
             .map { $0.reduce(Text(""), +) }
             .mapError { $0 as Error }

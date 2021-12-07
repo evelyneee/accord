@@ -43,13 +43,14 @@ struct ServerListView: View {
     @State var stuffSelection: Int? = nil
     @State var online: Bool = true
     @State var alert: Bool = true
+    @State var folders = [GuildFolder]()
     
     var body: some View {
         NavigationView {
             HStack(spacing: 0, content: {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-                    LazyVStack {
+                    VStack {
                         if !online {
                             Button("Error") {
                                 alert.toggle()
@@ -91,47 +92,81 @@ struct ServerListView: View {
                                 })
                         }
                         // MARK: - Guild icon UI
-                        ForEach(Array(zip(guilds.indices, guilds)), id: \.1.id) { offset, guild in
-                            ZStack(alignment: .bottomTrailing) {
-                                Button(action: {
-                                    withAnimation {
-                                        DispatchQueue.main.async {
-                                            selectedServer = offset
+                        ForEach(folders, id: \.hashValue) { folder in
+                            if folder.guilds?.count != 1 {
+                                Folder(color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
+                                    ForEach(folder.guilds ?? [], id: \.hashValue) { guild in
+                                        ZStack(alignment: .bottomTrailing) {
+                                            Button(action: { [weak guild] in
+                                                withAnimation {
+                                                    DispatchQueue.main.async {
+                                                        selectedServer = guild?.index
+                                                    }
+                                                }
+                                            }) { [weak guild] in
+                                                Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
+                                                    .frame(width: 45, height: 45)
+                                                    .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                            if pingCount(guild: guild) != 0 {
+                                                ZStack {
+                                                    Circle()
+                                                        .foregroundColor(Color.red)
+                                                        .frame(width: 15, height: 15)
+                                                    Text(String(describing: pingCount(guild: guild)))
+                                                        .foregroundColor(Color.white)
+                                                        .fontWeight(.semibold)
+                                                        .font(.caption)
+                                                }
+                                            }
                                         }
                                     }
-                                }) { [weak guild] in
-                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
-                                        .frame(width: 45, height: 45)
-                                        .cornerRadius(((selectedServer ?? 0) == offset) ? 15.0 : 23.5)
                                 }
-                                .buttonStyle(BorderlessButtonStyle())
-
-                                if pingCount(guild: guild) != 0 {
-                                    ZStack {
-                                        Circle()
-                                            .foregroundColor(Color.red)
-                                            .frame(width: 15, height: 15)
-                                        Text(String(describing: pingCount(guild: guild)))
-                                            .foregroundColor(Color.white)
-                                            .fontWeight(.semibold)
-                                            .font(.caption)
+                            } else {
+                                ZStack(alignment: .bottomTrailing) {
+                                    ForEach(folder.guilds ?? [], id: \.hashValue) { guild in
+                                        Button(action: { [weak guild] in
+                                            withAnimation {
+                                                DispatchQueue.main.async {
+                                                    selectedServer = guild?.index
+                                                }
+                                            }
+                                        }) { [weak guild] in
+                                            Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
+                                                .frame(width: 45, height: 45)
+                                                .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                        if pingCount(guild: guild) != 0 {
+                                            ZStack {
+                                                Circle()
+                                                    .foregroundColor(Color.red)
+                                                    .frame(width: 15, height: 15)
+                                                Text(String(describing: pingCount(guild: guild)))
+                                                    .foregroundColor(Color.white)
+                                                    .fontWeight(.semibold)
+                                                    .font(.caption)
+                                            }
+                                        }
                                     }
-                                } else {
                                 }
                             }
                         }
-                        NavigationLink(destination: SettingsViewRedesign(), tag: 1, selection: self.$stuffSelection) {
-                            ZStack(alignment: .bottomTrailing) {
-                                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                    .scaledToFit()
-                                    .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
-                                    .frame(width: 45, height: 45)
-                                Circle()
-                                    .foregroundColor(Color.green.opacity(0.75))
-                                    .frame(width: 10, height: 10)
+                        if !(folders.isEmpty) {
+                            NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$stuffSelection) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                                        .scaledToFit()
+                                        .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
+                                        .frame(width: 45, height: 45)
+                                    Circle()
+                                        .foregroundColor(Color.green.opacity(0.75))
+                                        .frame(width: 10, height: 10)
+                                }
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                     .padding(.vertical)
                 }
@@ -163,7 +198,7 @@ struct ServerListView: View {
                     .padding(.top, 5)
                 } else if !(guilds.isEmpty) {
                     // MARK: - Guild channels
-                    GuildView(guild: $guilds[selectedServer ?? 0], selection: $selection)
+                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()) ?? [])[selectedServer ?? 0]), selection: $selection)
                 }
             })
         }
@@ -215,6 +250,23 @@ struct ServerListView: View {
                     }
                 }
                 self.guilds = guildTemp
+                let guildDict = guildTemp.enumerated().compactMap { (index, element) in
+                    return [element.id:index]
+                }.reduce(into: [:]) { (result, next) in
+                    result.merge(next) { (_, rhs) in rhs }
+                }
+                let folderTemp = full?.user_settings?.guild_folders ?? []
+                for folder in folderTemp {
+                    folder.guilds = []
+                    for id in folder.guild_ids {
+                        if let guildIndex = guildDict[id] {
+                            let guild = guildTemp[guildIndex]
+                            guild.index = guildIndex
+                            folder.guilds?.append(guild)
+                        }
+                    }
+                }
+                self.folders = folderTemp
             }
             order()
             DispatchQueue.main.async {

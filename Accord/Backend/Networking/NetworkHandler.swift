@@ -99,7 +99,7 @@ var standardHeaders = Headers(
     referer: "https://discord.com/channels/@me"
 )
 
-final class Request {
+final public class Request {
     
     // MARK: - Empty Decodable
     struct AnyDecodable: Decodable { }
@@ -114,7 +114,7 @@ final class Request {
     }
     
     // MARK: - Perform request with completion handler
-    final public class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<T>, _ error: Error?) -> Void)) -> Void {
+    class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: T?, _ error: Error?) -> Void)) -> Void {
         
         let request: URLRequest? = {
             if let request = request {
@@ -159,7 +159,7 @@ final class Request {
     }
     
     // MARK: - Perform data request with completion handler
-    final public class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Optional<Data>, _ error: Error?) -> Void)) -> Void {
+    class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Data?, _ error: Error?) -> Void)) -> Void {
         
         let request: URLRequest? = {
             if let request = request {
@@ -186,12 +186,41 @@ final class Request {
     }
     
     // MARK: - fetch() wrapper for empty requests without completion handlers
-    final public class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
+    class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
         self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _, _ in }
     }
     
+    // MARK: - Image getter
+    class func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: NSImage?) -> Void)) {
+        guard let url = url else { return completion(nil) }
+        let request = URLRequest(url: url)
+        if let cachedImage = cache.cachedResponse(for: request) {
+            return completion(NSImage(data: cachedImage.data) ?? NSImage())
+        }
+        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+            guard let data = data,
+                  let imageData = NSImage(data: data)?.downsample(to: size),
+                  let image = NSImage(data: imageData) else {
+                      print(error?.localizedDescription ?? "unknown error")
+                      if let data = data {
+                          cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+                          return completion(NSImage(data: data))
+                      } else {
+                          print("load failed")
+                          return completion(nil)
+                      }
+            }
+            cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
+            return completion(image)
+        }).resume()
+    }
+    
+}
+
+final public class RequestPublisher {
+    
     // MARK: - Get a publisher for the request
-    final public class func combineFetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
+    class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
         
         let request: URLRequest? = {
             if let request = request {
@@ -216,56 +245,36 @@ final class Request {
             .eraseToAnyPublisher()
     }
     
-    // MARK: - Image getter
-    final public class func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: Optional<NSImage>) -> Void)) {
-        guard let url = url else { return completion(nil) }
-        let request = URLRequest(url: url)
-        if let cachedImage = cache.cachedResponse(for: request) {
-            return completion(NSImage(data: cachedImage.data) ?? NSImage())
-        }
-        URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-            guard error == nil,
-              let data = data,
-                let imageData = NSImage(data: data)?.downsample(to: size),
-                  let image = NSImage(data: imageData) else {
-                    print(error?.localizedDescription ?? "unknown error")
-                    if let data = data {
-                        cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
-                        return completion(NSImage(data: data))
-                    } else {
-                        print("load failed")
-                        return completion(nil)
-                    }
-            }
-            cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
-            return completion(image)
-        }).resume()
-    }
-    final public class func combineFetchAndSerialize<T>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> Future<T, Error> {
-        
-        let request: URLRequest? = {
-            if let request = request {
-                return request
-            } else if let url = url {
-                return URLRequest(url: url)
-            } else {
-                print("[Networking] You need to provide a request method")
-                return nil
-            }
-        }()
-        guard var request = request else { fatalError("Bad Request") }
-        var config = URLSessionConfiguration.default
-        
-        // Set headers
-        do { try headers?.set(request: &request, config: &config) } catch { return Future { promise in promise(.failure(error))} }
+    // MARK: - Combine Image getter
+    class func image(url: URL?, to size: CGSize? = nil) -> Future<NSImage?, Error> {
         return Future { promise in
-            URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
-                guard let data = data else { promise(.failure(error!)); return }
-                guard let val = try? JSONSerialization.jsonObject(with: data, options: []) as? T else { promise(.failure(error!)); return }
-                promise(.success(val))
+            guard let url = url else { return promise(.failure(Request.FetchErrors.invalidRequest)) }
+            let request = URLRequest(url: url)
+            if let cachedImage = cache.cachedResponse(for: request) {
+                promise(.success(NSImage(data: cachedImage.data)))
+            }
+            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
+                guard error == nil,
+                  let data = data,
+                    let imageData = NSImage(data: data)?.downsample(to: size),
+                      let image = NSImage(data: imageData) else {
+                        print(error?.localizedDescription ?? "unknown error")
+                        if let data = data {
+                            cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+                            promise(.success(NSImage(data: data)))
+                            return
+                        } else {
+                            promise(.failure(Request.FetchErrors.noData))
+                        }
+                        return
+                }
+                cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
+                promise(.success(image))
+                return
             }).resume()
         }
     }
+    
 }
 
 

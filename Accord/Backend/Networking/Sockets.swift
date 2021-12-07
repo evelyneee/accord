@@ -184,9 +184,11 @@ final class WebSocket {
                                     self.receive()
                                 }
                                 releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
-                                return promise(.success(structure.d))
+                                promise(.success(structure.d))
+                                return
                             } catch {
-                                return promise(.failure(error))
+                                promise(.failure(error))
+                                return
                             }
                         }
                     @unknown default:

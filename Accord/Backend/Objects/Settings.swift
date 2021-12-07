@@ -22,7 +22,7 @@ class Settings: Codable {
     var inline_embed_media: Bool?
     var inline_attachment_media: Bool?
     var guild_positions: [String]
-    // var guild_folders:
+    var guild_folders: [GuildFolder]
     var gif_auto_play: Bool?
     // var friend_source_flags:
     // var friend_discovery_flags: Int?
@@ -39,6 +39,20 @@ class Settings: Codable {
     var animate_emoji: Bool?
     // var allow_accessibility_detection: Bool?
     var afk_timeout: Int?
+}
+
+final class GuildFolder: Codable, Hashable {
+    static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
+        return lhs.guild_ids == rhs.guild_ids
+    }
+    var id: Int?
+    var name: String?
+    var color: Int?
+    var guild_ids: [String]
+    var guilds: [Guild]?
+    func hash(into hasher: inout Hasher) {
+        return hasher.combine(guild_ids)
+    }
 }
 
 enum SyncedTheme: String, Codable {

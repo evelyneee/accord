@@ -189,34 +189,23 @@ final class ImageLoaderAndCache: ObservableObject {
     @Published var image = NSImage()
     private var cancellable: AnyCancellable? = nil
     init(imageURL: String, size: CGSize? = nil) {
+        guard let url = URL(string: imageURL) else { return }
+        let request = URLRequest.init(url: url)
         DispatchQueue(label: "ImageQueue-\(imageURL)", attributes: .concurrent).async { [weak self] in
-            guard let url = URL(string: imageURL) else { return }
-            let request = URLRequest.init(url: url)
             if let cachedImage = cache.cachedResponse(for: request) {
                 DispatchQueue.main.async {
                     self?.image = NSImage(data: cachedImage.data) ?? NSImage()
                 }
                 return
             }
-            self?.cancellable = URLSession.shared.dataTaskPublisher(for: request)
-                .map { $0.data }
-                .replaceError(with: Data())
-                .eraseToAnyPublisher()
-                .sink { data in
-                    guard let imageData = NSImage(data: data)?.downsample(to: size),
-                          let image = NSImage(data: imageData) else {
-                              cache.storeCachedResponse(CachedURLResponse(response: URLResponse.init(url: URL(string: imageURL)!, mimeType: "image/png", expectedContentLength: 0, textEncodingName: ""), data: data), for: request)
-                              DispatchQueue.main.async {
-                                  self?.image = NSImage(data: data) ?? NSImage()
-                              }
-                              return
-                    }
-                    cache.storeCachedResponse(CachedURLResponse(response: URLResponse.init(url: URL(string: imageURL)!, mimeType: "image/png", expectedContentLength: 0, textEncodingName: ""), data: imageData), for: request)
-                    print("done")
+            self?.cancellable = RequestPublisher.image(url: url, to: size)
+                .replaceError(with: NSImage())
+                .replaceNil(with: NSImage())
+                .sink(receiveValue: { image in
                     DispatchQueue.main.async {
                         self?.image = image
                     }
-                }
+                })
         }
     }
 }

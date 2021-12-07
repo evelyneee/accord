@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Guild: Codable, Equatable {
+final class Guild: Codable, Equatable, Hashable {
     static func == (lhs: Guild, rhs: Guild) -> Bool {
         lhs.id == rhs.id
     }
@@ -70,5 +70,9 @@ final class Guild: Codable, Equatable {
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
     var stickers: [Sticker]?
+    var index: Int?
+    func hash(into hasher: inout Hasher) {
+        return hasher.combine(id)
+    }
 }
 

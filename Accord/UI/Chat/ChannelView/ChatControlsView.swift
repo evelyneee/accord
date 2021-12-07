@@ -214,7 +214,7 @@ struct ChatControls: View {
                 .onDrop(of: ["public.file-url"], isTargeted: $dragOver) { providers -> Bool in
                     providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { (data, error) in
                         if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                            fileUpload = data
+                            fileUpload = try! Data(contentsOf: url)
                             fileUploadURL = url
                         }
                     })

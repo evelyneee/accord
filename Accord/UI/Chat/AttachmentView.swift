@@ -57,7 +57,7 @@ struct AttachmentView: View, Equatable {
                                             }
                                     }
                                 } else {
-                                    Attachment(media[index]!.url, size: CGSize(width: 2000, height: 2000)).equatable()
+                                    Attachment(media[index]!.url, size: CGSize(width: 1000, height: 1000)).equatable()
                                         .cornerRadius(5)
                                         .frame(maxWidth: 500, maxHeight: 500)
                                 }

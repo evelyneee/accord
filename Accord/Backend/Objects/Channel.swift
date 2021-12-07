@@ -41,7 +41,6 @@ final class Channel: Codable, Equatable, Identifiable, Hashable {
     // var member: User?
     var default_auto_archive_duration: Int?
     // var permissions: String?
-
     var read_state: ReadStateEntry?
     func hash(into hasher: inout Hasher) {
         hasher.combine(self.id.appending(String(describing: read_state?.mention_count ?? 0)))
