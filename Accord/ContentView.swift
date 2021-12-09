@@ -60,7 +60,7 @@ struct ContentView: View {
                             AccordCoreVars.shared.user = user
                             user_id = user.id
                             if let pfp = user.avatar {
-                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); print($1) }
+                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
                             }
                             username = user.username
                             discriminator = user.discriminator

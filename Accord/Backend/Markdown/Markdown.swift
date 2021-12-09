@@ -64,8 +64,16 @@ final public class Markdown {
      - Returns AnyPublisher with SwiftUI Text view
      **/
     public class func markWord(_ word: String, _ members: [String:String] = [:]) -> TextPublisher {
-        Deferred { Future { promise in
-            let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
+        let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
+        for id in emoteIDs {
+            if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=24") {
+                return RequestPublisher.image(url: emoteURL)
+                    .replaceNil(with: NSImage())
+                    .map { Text("\(Image(nsImage: $0))") + Text(" ") }
+                    .eraseToAnyPublisher()
+            }
+        }
+        return Deferred { Future { promise in
             let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
             let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
             let platforms = word.matches(for: #"(spotify|music\.apple|tidal)"#)
@@ -87,16 +95,6 @@ final public class Markdown {
                         return
                     default: break
                     }
-                }
-            }
-            for id in emoteIDs {
-                if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=40") {
-                    _ = RequestPublisher.image(url: emoteURL, to: CGSize(width: 48, height: 48))
-                        .replaceError(with: NSImage(systemSymbolName: "wifi.exclamationmark", accessibilityDescription: "Error loading image"))
-                        .replaceNil(with: NSImage(systemSymbolName: "wifi.exclamationmark", accessibilityDescription: "Error loading image") ?? NSImage())
-                        .sink(receiveValue: { image in
-                            promise(.success(Text("\(Image(nsImage: image))") + Text(" ")))
-                        })
                 }
             }
             for id in mentions {

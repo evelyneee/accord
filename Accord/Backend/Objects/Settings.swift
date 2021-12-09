@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Settings: Codable {
+class Settings: Decodable {
     var view_nsfw_guilds: Bool?
     var timezone_offset: Int?
     var theme: SyncedTheme
@@ -41,7 +41,7 @@ class Settings: Codable {
     var afk_timeout: Int?
 }
 
-final class GuildFolder: Codable, Hashable {
+final class GuildFolder: Decodable, Hashable {
     static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
         return lhs.guild_ids == rhs.guild_ids
     }
@@ -49,7 +49,7 @@ final class GuildFolder: Codable, Hashable {
     var name: String?
     var color: Int?
     var guild_ids: [String]
-    var guilds: [Guild]?
+    @DefaultEmptyArray var guilds: [Guild] = []
     func hash(into hasher: inout Hasher) {
         return hasher.combine(guild_ids)
     }

@@ -7,14 +7,14 @@
 
 import Foundation
 
-class GatewayStructure: Codable {
+class GatewayStructure: Decodable {
     var t: String?
     var d: GatewayD
     var s: Int
     var op: Int
 }
 
-class GatewayD: Codable {
+class GatewayD: Decodable {
     var v: Int?
     // var users: [User]?
     var user_settings: Settings?
@@ -26,6 +26,7 @@ class GatewayD: Codable {
     var read_state: ReadState?
     // var private_channels: [Channel]?
     // var merged_members: [[User]]
+    @IgnoreFailure
     var guilds: [Guild]
     // var guild_join_requests: [GuildJoinRequest]?
     // var guild_experiments: [GuildExperiment]?

@@ -246,35 +246,58 @@ final public class RequestPublisher {
     }
     
     // MARK: - Combine Image getter
-    class func image(url: URL?, to size: CGSize? = nil) -> Future<NSImage?, Error> {
-        return Future { promise in
-            guard let url = url else { return promise(.failure(Request.FetchErrors.invalidRequest)) }
-            let request = URLRequest(url: url)
-            if let cachedImage = cache.cachedResponse(for: request) {
-                promise(.success(NSImage(data: cachedImage.data)))
-            }
-            URLSession.shared.dataTask(with: request, completionHandler: { (data, response, error) in
-                guard error == nil,
-                  let data = data,
-                    let imageData = NSImage(data: data)?.downsample(to: size),
-                      let image = NSImage(data: imageData) else {
-                        print(error?.localizedDescription ?? "unknown error")
-                        if let data = data {
-                            cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
-                            promise(.success(NSImage(data: data)))
-                            return
-                        } else {
-                            promise(.failure(Request.FetchErrors.noData))
-                        }
-                        return
+    class func image(url: URL?, to size: CGSize? = nil) -> AnyPublisher<NSImage?, Error> {
+        return Deferred {
+            Future { promise in
+                guard let url = url else { return promise(.failure(Request.FetchErrors.invalidRequest)) }
+                let request = URLRequest(url: url)
+                if let cachedImage = cache.cachedResponse(for: request) {
+                    print("Using cached image \(url)")
+                    promise(.success(NSImage(data: cachedImage.data)))
+                    return
                 }
-                cache.storeCachedResponse(CachedURLResponse(response: response!, data: imageData), for: request)
-                promise(.success(image))
-                return
-            }).resume()
-        }
+                let task = URLSession.shared.dataTask(with: request, completionHandler: { [promise] (data, response, error) in
+                    if let data = data {
+                        if let size = size, let downsampled = data.downsample(to: size), let image = NSImage(data: downsampled) {
+                            print("Successfully downsampled \(url)")
+                            cache.storeCachedResponse(CachedURLResponse(response: response!, data: downsampled), for: request)
+                            promise(.success(image))
+                            return
+                        } else if let image = NSImage(data: data) {
+                            print("Using original Data \(url)")
+                            cache.storeCachedResponse(CachedURLResponse(response: response!, data: data), for: request)
+                            promise(.success(image))
+                            return
+                        }
+                    } else if let error = error {
+                        print(error, url)
+                        return promise(.failure(error))
+                    }
+                })
+                task.resume()
+            }
+        }.eraseToAnyPublisher()
     }
     
 }
 
-
+fileprivate extension Data {
+    // Thanks Amy 🙂
+    func downsample(to size: CGSize, scale: CGFloat? = nil) -> Data? {
+        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+        guard let imageSource = CGImageSourceCreateWithData(self as CFData, imageSourceOptions) else { return nil }
+        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
+        guard let downsampled = downsampled else { return nil }
+        return downsampled
+    }
+    
+    private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
+        let maxDimensionInPixels = Swift.max(size.width, size.height) * (scale ?? 0.5)
+        let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+          kCGImageSourceShouldCacheImmediately: true,
+          kCGImageSourceCreateThumbnailWithTransform: true,
+          kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+        guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
+        return downScaledImage.png
+    }
+}

@@ -113,7 +113,7 @@ struct ChannelView: View, Equatable {
                                     }
                                 }
                                 VStack(alignment: .leading) {
-                                    if let textView = FancyTextView(text: $viewModel.messages[offset].content, channelID: Binding.constant(channelID)) {
+                                    if let textView = FancyTextView(text: message.content, channelID: channelID) {
                                         if message.isSameAuthor() {
                                             textView
                                                 .padding(.leading, 41)

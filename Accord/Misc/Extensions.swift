@@ -9,6 +9,86 @@ import Foundation
 import AppKit
 import SwiftUI
 
+@propertyWrapper
+public final class IgnoreFailure<Value: Decodable>: Decodable {
+    public var wrappedValue: [Value] = []
+
+    private struct _None: Decodable {}
+
+    public required init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        while !container.isAtEnd {
+            if let decoded = try? container.decode(Value.self) {
+                wrappedValue.append(decoded)
+            }
+            else {
+                print("failed to decode")
+                _ = try? container.decode(_None.self)
+            }
+        }
+    }
+}
+
+@propertyWrapper
+public final class DefaultValue<T: Decodable & ExpressibleByArrayLiteral>: Decodable {
+    
+    private var _value: T?
+    
+    private func _wrappedValue<U>(_ type: U.Type) -> U? where U: ExpressibleByNilLiteral {
+        return _value as? U
+    }
+    
+    private func _wrappedValue<U>(_ type: U.Type) -> U {
+        return _value as! U
+    }
+    
+    public var wrappedValue: T {
+        get {
+            return _wrappedValue(T.self)
+        } set {
+            _value = newValue
+        }
+    }
+    
+    public required init(from decoder: Decoder) throws {
+
+        var container = try decoder.unkeyedContainer()
+        print(container)
+        guard let value = try? container.decode(T.self) else {
+            wrappedValue = []
+            return
+        }
+        print(value)
+        wrappedValue = value
+    }
+}
+
+@propertyWrapper
+struct DefaultEmptyArray<T:Codable & ExpressibleByArrayLiteral> {
+    var wrappedValue: T = T()
+}
+
+//codable extension to encode/decode the wrapped value
+extension DefaultEmptyArray: Codable {
+    
+    func encode(to encoder: Encoder) throws {
+        try wrappedValue.encode(to: encoder)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        wrappedValue = try container.decode(T.self)
+    }
+    
+}
+
+extension KeyedDecodingContainer {
+    func decode<T:Decodable>(_ type: DefaultEmptyArray<T>.Type,
+                forKey key: Key) throws -> DefaultEmptyArray<T> {
+        try decodeIfPresent(type, forKey: key) ?? .init()
+    }
+}
+
 struct Folder<Content: View>: View {
     @State var color: NSColor
     @State var content: () -> Content
@@ -18,7 +98,7 @@ struct Folder<Content: View>: View {
     var body: some View {
         VStack {
             Button(
-                action: { withAnimation {self.collapsed.toggle()} },
+                action: { withAnimation { self.collapsed.toggle() } },
                 label: {
                     HStack {
                         Image(systemName: "folder.fill").resizable()
@@ -90,7 +170,7 @@ func pfpURL(_ uid: String?, _ hash: String?) -> String {
 
 func iconURL(_ id: String?, _ icon: String?) -> String {
     guard let id = id, let icon = icon else { return "" }
-    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=80"
+    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=128"
 }
 
 // BAD

@@ -128,11 +128,9 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        if imageLoader.image != NSImage() {
-            Image(nsImage: imageLoader.image)
-                  .resizable()
-                  .scaledToFit()
-        }
+        Image(nsImage: imageLoader.image)
+              .resizable()
+              .scaledToFit()
     }
 }
 
@@ -186,26 +184,17 @@ let imageQueue = DispatchQueue(label: "ImageQueue", attributes: .concurrent)
 
 final class ImageLoaderAndCache: ObservableObject {
     
-    @Published var image = NSImage()
+    @Published var image: NSImage = NSImage()
     private var cancellable: AnyCancellable? = nil
+    
     init(imageURL: String, size: CGSize? = nil) {
         guard let url = URL(string: imageURL) else { return }
-        let request = URLRequest.init(url: url)
-        DispatchQueue(label: "ImageQueue-\(imageURL)", attributes: .concurrent).async { [weak self] in
-            if let cachedImage = cache.cachedResponse(for: request) {
-                DispatchQueue.main.async {
-                    self?.image = NSImage(data: cachedImage.data) ?? NSImage()
-                }
-                return
-            }
-            self?.cancellable = RequestPublisher.image(url: url, to: size)
+        imageQueue.async {
+            self.cancellable = RequestPublisher.image(url: url, to: size)
                 .replaceError(with: NSImage())
                 .replaceNil(with: NSImage())
-                .sink(receiveValue: { image in
-                    DispatchQueue.main.async {
-                        self?.image = image
-                    }
-                })
+                .receive(on: RunLoop.main)
+                .assign(to: \.image, on: self)
         }
     }
 }

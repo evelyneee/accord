@@ -12,9 +12,9 @@ import Combine
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
 struct FancyTextView: View {
-    @Binding var text: String
+    var text: String
+    var channelID: String
     @State var textElement: Text? = nil
-    @Binding var channelID: String
     @State var cancellable: AnyCancellable? = nil
     var body: some View {
         HStack(spacing: 0) {

@@ -90,7 +90,11 @@ final class WebSocket {
     var seq: Int? = nil
     var heartbeat_interval: Int = 0
     var cachedMemberRequest: [String:GuildMember] = [:]
-    
+    var req: Int = 0
+    let timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
+        print("reset req blocker")
+        wss.req = 0
+    }
     // MARK: - init
     init(url: URL?) {
         
@@ -178,8 +182,8 @@ final class WebSocket {
                                 let path = FileManager.default.urls(for: .cachesDirectory,
                                                                     in: .userDomainMask)[0]
                                                                     .appendingPathComponent("socketOut.json")
-                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
                                 try data.write(to: path)
+                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
                                 wssThread.async {
                                     self.receive()
                                 }
@@ -323,6 +327,8 @@ final class WebSocket {
     }
     
     final func getMembers(ids: [String], guild: String) {
+        guard req <= 30 else { print("blocked req"); return }
+        print("fetched")
         let packet: [String:Any] = [
             "op":8,
             "d": [
@@ -334,6 +340,7 @@ final class WebSocket {
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
+                self.req++
                 if let error = error {
                     MentionSender.shared.sendWSError(error: error)
                     releaseModePrint("WebSocket sending error: \(error)")
@@ -367,6 +374,7 @@ final class WebSocket {
                             self?.receive()
                             return
                         }
+                        print("t: \(t)")
                         switch t {
                         case "READY":
                             let path = FileManager.default.urls(for: .cachesDirectory,
@@ -383,7 +391,7 @@ final class WebSocket {
                         case "CHANNEL_DELETE": break
 
                         // MARK: Guild Event Handlers
-                        case "GUILD_CREATE": print("something was created"); break
+                        case "GUILD_CREATE": print("guild created"); break
                         case "GUILD_DELETE": break
                         case "GUILD_MEMBER_ADD": break
                         case "GUILD_MEMBER_REMOVE": break

@@ -35,14 +35,13 @@ final class ChannelViewViewModel: ObservableObject {
     init(channelID: String, guildID: String) {
         self.channelID = channelID
         self.guildID = guildID
-        // messages are now read
-        switch self.guildID == "@me" {
-        case true:
-            wss.subscribeToDM(channelID)
-        case false:
-            wss.subscribe(guildID, channelID)
-        }
         DispatchQueue(label: "Message Fetch Queue").async {
+            switch self.guildID == "@me" {
+            case true:
+                wss.subscribeToDM(channelID)
+            case false:
+                wss.subscribe(guildID, channelID)
+            }
             MentionSender.shared.removeMentions(server: guildID)
             // fetch messages
             self.getMessages(channelID: channelID, guildID: guildID)

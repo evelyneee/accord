@@ -93,9 +93,9 @@ struct ServerListView: View {
                         }
                         // MARK: - Guild icon UI
                         ForEach(folders, id: \.hashValue) { folder in
-                            if folder.guilds?.count != 1 {
+                            if folder.guilds.count != 1 {
                                 Folder(color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
-                                    ForEach(folder.guilds ?? [], id: \.hashValue) { guild in
+                                    ForEach(folder.guilds, id: \.hashValue) { guild in
                                         ZStack(alignment: .bottomTrailing) {
                                             Button(action: { [weak guild] in
                                                 withAnimation {
@@ -105,7 +105,7 @@ struct ServerListView: View {
                                                 }
                                             }) { [weak guild] in
                                                 Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
-                                                    .frame(width: 45, height: 45)
+                                                    .frame(minWidth: 15, idealWidth: 45, minHeight: 15, idealHeight: 45)
                                                     .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
                                             }
                                             .buttonStyle(BorderlessButtonStyle())
@@ -125,7 +125,7 @@ struct ServerListView: View {
                                 }
                             } else {
                                 ZStack(alignment: .bottomTrailing) {
-                                    ForEach(folder.guilds ?? [], id: \.hashValue) { guild in
+                                    ForEach(folder.guilds, id: \.hashValue) { guild in
                                         Button(action: { [weak guild] in
                                             withAnimation {
                                                 DispatchQueue.main.async {
@@ -198,7 +198,7 @@ struct ServerListView: View {
                     .padding(.top, 5)
                 } else if !(guilds.isEmpty) {
                     // MARK: - Guild channels
-                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()) ?? [])[selectedServer ?? 0]), selection: $selection)
+                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()))[selectedServer ?? 0]), selection: $selection)
                 }
             })
         }
@@ -257,12 +257,11 @@ struct ServerListView: View {
                 }
                 let folderTemp = full?.user_settings?.guild_folders ?? []
                 for folder in folderTemp {
-                    folder.guilds = []
                     for id in folder.guild_ids {
                         if let guildIndex = guildDict[id] {
                             let guild = guildTemp[guildIndex]
                             guild.index = guildIndex
-                            folder.guilds?.append(guild)
+                            folder.guilds.append(guild)
                         }
                     }
                 }

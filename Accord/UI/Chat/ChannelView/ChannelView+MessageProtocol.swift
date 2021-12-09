@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 extension ChannelView: MessageControllerDelegate {
     func sendMessage(msg: Data, channelID: String?, isMe: Bool = false) {
