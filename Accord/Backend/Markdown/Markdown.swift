@@ -61,13 +61,11 @@ final public class Markdown {
      **/
     public class func markWord(_ word: String, _ members: [String:String] = [:]) -> TextPublisher {
         let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
-        for id in emoteIDs {
-            if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
-                return RequestPublisher.image(url: emoteURL)
-                    .replaceNil(with: NSImage())
-                    .map { Text("\(Image(nsImage: $0))") + Text(" ") }
-                    .eraseToAnyPublisher()
-            }
+        if let id = emoteIDs.first, let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
+            return RequestPublisher.image(url: emoteURL)
+                .replaceNil(with: NSImage())
+                .map { Text("\(Image(nsImage: $0))") + Text(" ") }
+                .eraseToAnyPublisher()
         }
         return Deferred { Future { promise in
             let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
@@ -134,6 +132,7 @@ final public class Markdown {
             .collect()
             .map { $0.reduce(Text(""), +) }
             .eraseToAnyPublisher()
+            .debugAssertNoMainThread()
     }
     
 }

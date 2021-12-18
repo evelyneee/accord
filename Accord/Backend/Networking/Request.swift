@@ -1696,7 +1696,9 @@ final public class RequestPublisher {
         guard let url = url else { return EmptyImagePublisher }
         let request = URLRequest(url: url)
         if let cachedImage = cache.cachedResponse(for: request) {
-            return Just.init(NSImage(data: cachedImage.data)).eraseToAny()
+            print(cachedImage.data)
+            let img = NSImage(data: cachedImage.data)
+            return Just.init(img).eraseToAny()
         }
         return URLSession.shared.dataTaskPublisher(for: url)
             .map { (data, response) -> NSImage? in

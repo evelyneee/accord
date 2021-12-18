@@ -29,5 +29,3 @@ final class AppKitLink<T: NSView> {
         }
     }
 }
-
-

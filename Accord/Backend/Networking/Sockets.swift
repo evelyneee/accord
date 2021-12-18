@@ -439,16 +439,20 @@ final class WebSocket {
                             }
                             guard let mentions = dict["mentions"] as? [[String:Any]] else { break }
                             let ids = mentions.compactMap { $0["id"] as? String }
+                            print("notification 1")
                             let guild_id = dict["guild_id"] as? String ?? "@me"
                             guard let channel_id = dict["channel_id"] as? String else { break }
+                            print("notification 2")
                             guard let author = dict["author"] as? [String:Any] else { break }
                             guard let username = author["username"] as? String else { break }
-                            guard let user_id = author["id"] as? String else { break }
+                            guard let userID = author["id"] as? String else { break }
+                            print("notification 3")
                             guard let content = dict["content"] as? String else { break }
                             if ids.contains(user_id) {
+                                print("notification")
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
-                            } else if Notifications.shared.privateChannels.contains(channel_id) && user_id != user_id {
+                            } else if Notifications.shared.privateChannels.contains(channel_id) && userID != user_id {
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
                             }

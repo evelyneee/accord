@@ -9,9 +9,10 @@ import Foundation
 import SwiftUI
 import Combine
 
-let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
+let textQueue = DispatchQueue(label: "Text load queue")
 
 struct FancyTextView: View {
+
     @Binding var text: String
     var channelID: String
     @State var textElement: Text? = nil
@@ -27,6 +28,7 @@ struct FancyTextView: View {
                 })
         }
     }
+    
     var body: some View {
         Group {
             textElement ?? Text(text)

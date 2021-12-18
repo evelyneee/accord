@@ -18,13 +18,13 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var messages = [Message]()
     @Published var nicks: [String:String] = [:]
     @Published var roles: [String:String] = [:]
-    @Published var colors: [String:NSColor] = [:]
     @Published var pronouns: [String:String] = [:]
     var cancellable = Set<AnyCancellable>()
     
     var guildID: String
     var channelID: String
     
+    // save scrollview so we can scroll programmatically the good way
     weak var scrollView: NSScrollView? = nil
     
     init(channelID: String, guildID: String) {
@@ -47,6 +47,12 @@ final class ChannelViewViewModel: ObservableObject {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
+    }
+    
+    func scrollTo(_ index: Int) {
+        guard let scrollView = scrollView else { return }
+        guard let height = scrollView.documentView?.bounds.height else { print("no position"); return }
+        scrollView.documentView?.scroll(NSPoint(x: 0, y: Int(height) / self.messages.count * index))
     }
     
     func getMessages(channelID: String, guildID: String) {
@@ -89,6 +95,7 @@ final class ChannelViewViewModel: ObservableObject {
                             Swift.print("[AppKitLink] Successfully found \(type(of: scrollView))")
                             self.scrollView = scrollView
                             documentView.scroll(NSPoint(x: 0, y: documentView.bounds.size.height))
+                            print(documentView.subviews.count, "initial")
                         }
                     }
                 })

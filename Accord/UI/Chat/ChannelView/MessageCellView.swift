@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import Combine
 
 let colorQueue = DispatchQueue(label: "ColorQueue")
 
@@ -20,8 +21,10 @@ struct MessageCellView: View {
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
     @State var popup: Bool = false
-    @State var color: NSColor = NSColor.textColor
-    @State var replyColor: NSColor = NSColor.textColor
+    @State var color: Color = Color(NSColor.textColor)
+    @State var replyColor: Color = Color(NSColor.textColor)
+    @State var textElement: Text? = nil
+    @State var cancellable: AnyCancellable? = nil
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
@@ -31,7 +34,7 @@ struct MessageCellView: View {
                         .scaledToFit()
                         .clipShape(Circle())
                     Text(replyNick ?? reply.author?.username ?? "")
-                        .foregroundColor(Color(replyColor))
+                        .foregroundColor(replyColor)
                         .fontWeight(.semibold)
                     Text(reply.content)
                         .lineLimit(0)
@@ -57,11 +60,10 @@ struct MessageCellView: View {
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor() {
-                        FancyTextView(text: $message.content, channelID: message.channel_id)
-                            .padding(.leading, 41)
+                        textElement?.padding(.leading, 41) ?? Text(message.content).padding(.leading, 41)
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
-                            .foregroundColor(Color(color))
+                            .foregroundColor(color)
                             .fontWeight(.semibold)
                         +
                         Text(" — \(message.timestamp.makeProperDate())")
@@ -71,43 +73,58 @@ struct MessageCellView: View {
                         Text((pronouns != nil) ? " — \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                        FancyTextView(text: $message.content, channelID: message.channel_id)
+                        textElement ?? Text(message.content)
                     }
                 }
                 Spacer()
                 // MARK: - Quick Actions
                 QuickActionsView(message: message, replyingTo: $replyingTo)
             }
-            if let embeds = message.embeds, !embeds.isEmpty {
-                ForEach(message.embeds ?? [], id: \.id) { embed in
-                    EmbedView(embed: embed).equatable()
-                        .padding(.leading, 41)
-                }
+            ForEach(message.embeds ?? [], id: \.id) { embed in
+                EmbedView(embed: embed).equatable()
+                    .padding(.leading, 41)
             }
-            
             AttachmentView(message.attachments).equatable()
                 .padding(.leading, 41)
         }
         .id(message.id)
         .onAppear {
+            textQueue.async { [weak message] in
+                self.load(text: message?.content ?? "")
+            }
             colorQueue.async {
-                if let role = role, let color = roleColors[role]?.0, let nsColor = NSColor.color(from: color) {
-                    self.color = nsColor
+                if let role = role, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    self.color = Color.init(hex: hex)
                 }
-                if let role = replyRole, let color = roleColors[role]?.0, let nsColor = NSColor.color(from: color) {
-                    self.replyColor = nsColor
+                if let role = replyRole, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    self.replyColor = Color.init(hex: hex)
                 }
             }
         }
         .onChange(of: self.role, perform: { _ in
             colorQueue.async {
-                if let role = role, let color = roleColors[role]?.0, let nsColor = NSColor.color(from: color) {
-                    self.color = nsColor
+                if let role = role, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    self.color = Color.init(hex: hex)
                 }
-                if let role = replyRole, let color = roleColors[role]?.0, let nsColor = NSColor.color(from: color) {
-                    self.replyColor = nsColor
+                if let role = replyRole, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    self.replyColor = Color.init(hex: hex)
                 }
             }
         })
+    }
+    func load(text: String) {
+        textQueue.async {
+            self.cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
+                .assertNoFailure()
+                .sink(receiveValue: { text in
+                    DispatchQueue.main.async {
+                        self.textElement = text
+                    }
+                })
+        }
     }
 }

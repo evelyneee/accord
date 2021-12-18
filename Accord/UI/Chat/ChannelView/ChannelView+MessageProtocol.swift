@@ -34,8 +34,10 @@ extension ChannelView: MessageControllerDelegate {
                 }
                 viewModel?.messages.append(message)
                 if let view = viewModel?.scrollView?.documentView {
-                    if let floatValue = viewModel?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.9 && floatValue != 1.0 {
-                        view.scroll(NSPoint(x: 0, y: view.bounds.size.height))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak view] in
+                        if let floatValue = viewModel?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.8 && floatValue != 1.0, let height = view?.bounds.size.height {
+                            view?.scroll(NSPoint(x: 0, y: height))
+                        }
                     }
                 }
             }
