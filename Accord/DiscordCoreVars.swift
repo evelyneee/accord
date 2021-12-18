@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 
 public let rootURL: String = "https://discord.com/api/v9"
-public let gatewayURL: String = "wss://gateway.discord.gg"
 public let cdnURL: String = "https://cdn.discordapp.com"
 public var user_id: String = ""
 public var avatar: Data = Data()
@@ -29,8 +28,8 @@ public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) A
 final class AccordCoreVars {
     static var shared = AccordCoreVars()
     
-    @AppStorage("enableSuffixRemover") var suffixes: Bool = false
-    @AppStorage("pronounDB") var pronounDB: Bool = false
+    var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
+    var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
     
     public var token: String = ""
     public var user: User?

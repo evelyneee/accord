@@ -13,26 +13,31 @@ extension ChannelView: MessageControllerDelegate {
         // Received a message from backend
         guard let channelID = channelID else { return }
         guard channelID == self.channelID else { return }
-        webSocketQueue.async {
+        webSocketQueue.async { [weak viewModel] in
             // sending = false
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            if viewModel.guildID != "@me" && !(viewModel.roles.keys.contains(message.author?.id ?? "")) {
-                viewModel.loadUser(for: message.author?.id)
+            if viewModel?.guildID != "@me" && !(viewModel?.roles.keys.contains(message.author?.id ?? "") ?? false) {
+                viewModel?.loadUser(for: message.author?.id)
             }
-            for user in message.mentions.compactMap { $0?.id }.filter({ !(viewModel.roles.keys.contains($0)) }) {
-                viewModel.loadUser(for: user)
+            for user in message.mentions.compactMap { $0?.id }.filter({ !(viewModel?.roles.keys.contains($0) ?? false) }) {
+                viewModel?.loadUser(for: user)
             }
-            if let firstMessage = viewModel.messages.first {
+            if let firstMessage = viewModel?.messages.last {
                 message.lastMessage = firstMessage
             }
             DispatchQueue.main.async {
                 self.popup.append(false)
                 self.sidePopups.append(false)
-                if viewModel.messages.count == 50 {
-                    viewModel.messages.remove(at: viewModel.messages.count - 1)
+                if let count = viewModel?.messages.count, count == 50 {
+                    viewModel?.messages.removeFirst()
                 }
-                viewModel.messages.insert(message, at: 0)
+                viewModel?.messages.append(message)
+                if let view = viewModel?.scrollView?.documentView {
+                    if let floatValue = viewModel?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.9 && floatValue != 1.0 {
+                        view.scroll(NSPoint(x: 0, y: view.bounds.size.height))
+                    }
+                }
             }
         }
     }
@@ -43,7 +48,7 @@ extension ChannelView: MessageControllerDelegate {
         webSocketQueue.async {
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            guard let index = fastIndexMessage(message.id, array: viewModel.messages) else { return }
+            guard let index = messageMap[message.id] as? Int else { return }
             DispatchQueue.main.async {
                 viewModel.messages[index].content = message.content
             }
@@ -55,7 +60,7 @@ extension ChannelView: MessageControllerDelegate {
         webSocketQueue.async { [weak viewModel] in
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            guard let index = fastIndexMessage(message.id, array: viewModel?.messages ?? []) else { return }
+            guard let index = messageMap[message.id] as? Int else { return }
             DispatchQueue.main.async {
                 self.sidePopups.remove(at: index)
                 self.popup.remove(at: index)

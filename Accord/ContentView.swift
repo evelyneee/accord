@@ -12,6 +12,7 @@ import Combine
 var wss: WebSocket!
 let wssThread = DispatchQueue(label: "WebSocket Thread")
 
+@available(macOS 11.0, *)
 struct ContentView: View {
     @State public var selection: Int?
     @State var socketOut: GatewayD?
@@ -45,7 +46,8 @@ struct ContentView: View {
                         print(error)
                     }
                     guard wss == nil else { return }
-                    wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
+                    guard let new = try? WebSocket.init(url: WebSocket.gatewayURL) else { return }
+                    wss = new
                     wsCancellable = wss.ready()
                         .sink(receiveCompletion: { completion in
                             switch completion {

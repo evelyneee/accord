@@ -12,38 +12,28 @@ import Combine
 let textQueue = DispatchQueue(label: "Text", attributes: .concurrent)
 
 struct FancyTextView: View {
-    var text: String
+    @Binding var text: String
     var channelID: String
     @State var textElement: Text? = nil
     @State var cancellable: AnyCancellable? = nil
+    func load(text: String) {
+        textQueue.async {
+            self.cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[channelID] ?? [:])
+                .assertNoFailure()
+                .sink(receiveValue: { text in
+                    DispatchQueue.main.async {
+                        self.textElement = text
+                    }
+                })
+        }
+    }
     var body: some View {
-        HStack(spacing: 0) {
-            if let textView = textElement {
-                textView
-            } else {
-                Text(text)
-            }
+        Group {
+            textElement ?? Text(text)
         }
-        .onAppear {
-            textQueue.async {
-                cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[channelID] ?? [:])
-                    .sink(receiveCompletion: { value in
-                        print(value)
-                    }, receiveValue: { text in
-                        self.textElement = text
-                    })
-            }
-        }
-        .onChange(of: text) { newValue in
-            textQueue.async {
-                cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[channelID] ?? [:])
-                    .sink(receiveCompletion: { value in
-                        print(value)
-                    }, receiveValue: { text in
-                        self.textElement = text
-                    })
-            }
-        }
+        .onAppear(perform: {
+            self.load(text: self.text)
+        })
     }
 }
 

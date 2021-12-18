@@ -14,9 +14,9 @@ struct QuickActionsView: View, Equatable {
         return lhs.opened == rhs.opened
     }
     
-    @Binding var message: Message
+    var message: Message
     @Binding var replyingTo: Message?
-    @Binding var opened: Bool
+    @State var opened: Bool = false
     
     var openButton: some View {
         Button(action: {

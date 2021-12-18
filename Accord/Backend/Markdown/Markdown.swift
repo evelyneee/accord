@@ -37,11 +37,7 @@ extension String {
 
 extension Array where Element == String {
     @inlinable func replaceAllOccurences(of original: String, with string: String) -> [String] {
-        var ret = [String]()
-        for i in self {
-            ret.append(i.replacingOccurrences(of: original, with: string))
-        }
-        return ret
+        self.map { $0.replacingOccurrences(of: original, with: string) }
     }
 }
 
@@ -66,7 +62,7 @@ final public class Markdown {
     public class func markWord(_ word: String, _ members: [String:String] = [:]) -> TextPublisher {
         let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
         for id in emoteIDs {
-            if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=24") {
+            if let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
                 return RequestPublisher.image(url: emoteURL)
                     .replaceNil(with: NSImage())
                     .map { Text("\(Image(nsImage: $0))") + Text(" ") }
@@ -85,34 +81,27 @@ final public class Markdown {
                     guard let song = song else { return }
                     switch musicPlatform {
                     case .appleMusic:
-                        promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
-                        return
+                        return promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
                     case .spotify:
-                        promise(.success(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline() + Text(" ")))
-                        return
+                        return promise(.success(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline() + Text(" ")))
                     case .none:
-                        promise(.success(Text(word) + Text(" ")))
-                        return
+                        return promise(.success(Text(word) + Text(" ")))
                     default: break
                     }
                 }
             }
             for id in mentions {
-                promise(.success(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
-                return
+                return promise(.success(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             do {
                 if #available(macOS 12, *) {
                     let markdown = try AttributedString(markdown: word)
-                    promise(.success(Text(markdown) + Text(" ")))
-                    return
+                    return promise(.success(Text(markdown) + Text(" ")))
                 } else { throw MarkdownErrors.unsupported }
             } catch {
-                promise(.success(Text(word) + Text(" ")))
-                return
+                return promise(.success(Text(word) + Text(" ")))
             }
-        } }
-        .eraseToAnyPublisher()
+        } }.eraseToAnyPublisher()
     }
     
     /**
@@ -122,7 +111,7 @@ final public class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
-        let words: [String] = line.split(separator: " ").compactMap { $0.str() }
+        let words: [String] = line.split(separator: " ").compactMap { $0.stringLiteral }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
         return Publishers.MergeMany(pubs)
             .collect()

@@ -31,56 +31,6 @@ protocol URLQueryParameterStringConvertible {
     var queryParameters: String { get }
 }
 
-final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
-    static var shared = WebSocketDelegate()
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        releaseModePrint("Web Socket did connect")
-    }
-
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        releaseModePrint("Web Socket did disconnect")
-        let reason = String(decoding: reason ?? Data(), as: UTF8.self)
-        MessageController.shared.sendWSError(msg: reason)
-        print("Error from Discord: \(reason)")
-        if reason.contains("auth") {
-            _ = KeychainManager.save(key: "me.evelyn.accord.token", data: Data())
-        }
-        // MARK: WebSocket close codes.
-        switch closeCode {
-        case .invalid:
-            releaseModePrint("Socket closed because payload was invalid")
-        case .normalClosure:
-            releaseModePrint("Socket closed because connection was closed")
-            releaseModePrint(reason)
-        case .goingAway:
-            releaseModePrint("Socket closed because connection was closed")
-            releaseModePrint(reason)
-        case .protocolError:
-            releaseModePrint(" Socket closed because there was a protocol error")
-        case .unsupportedData:
-            releaseModePrint("Socket closed input/output data was unsupported")
-        case .noStatusReceived:
-            releaseModePrint("Socket closed no status was received")
-        case .abnormalClosure:
-            releaseModePrint("Socket closed, there was an abnormal closure")
-        case .invalidFramePayloadData:
-            releaseModePrint("Socket closed the frame data was invalid")
-        case .policyViolation:
-            releaseModePrint("Socket closed: Policy violation")
-        case .messageTooBig:
-            releaseModePrint("Socket closed because the message was too big")
-        case .mandatoryExtensionMissing:
-            releaseModePrint("Socket closed because an extension was missing")
-        case .internalServerError:
-            releaseModePrint("Socket closed because there was an internal server error")
-        case .tlsHandshakeFailure:
-            releaseModePrint("Socket closed because the tls handshake failed")
-        @unknown default:
-            releaseModePrint("Socket closed for unknown reason")
-        }
-    }
-}
-
 final class WebSocket {
     
     var ws: URLSessionWebSocketTask!
@@ -91,12 +41,28 @@ final class WebSocket {
     var heartbeat_interval: Int = 0
     var cachedMemberRequest: [String:GuildMember] = [:]
     var req: Int = 0
-    let timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
-        print("reset req blocker")
-        wss.req = 0
+    var waitlist: [String:[String]] = [:]
+    var timer: Timer?
+    
+    private var bag = Set<AnyCancellable>()
+    
+    var failedHearbeats: Int = 0 {
+        didSet {
+            if failedHearbeats > 3 {
+                wss.reset()
+            }
+        }
     }
+    
+    static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
+    
+    enum WebSocketErrors: Error {
+        case maxRequestReached
+        case essentialEventFailed(String)
+    }
+    
     // MARK: - init
-    init(url: URL?) {
+    init(url: URL?, session_id: String? = nil, seq: Int? = nil) throws {
         
         releaseModePrint("[Socket] Hello world!")
 
@@ -107,18 +73,47 @@ final class WebSocket {
         }
         session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
         ws = session.webSocketTask(with: url!)
-        ws.maximumMessageSize = 9999999999
+        print(ws.maximumMessageSize, "default size")
+        ws.maximumMessageSize = 9999999
+        DispatchQueue.main.async {
+            self.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
+                print("reset req blocker")
+                wss.req = 0
+                wssThread.async {
+                    for (key, value) in wss.waitlist {
+                        print("loading from waitlist for \(key)")
+                        do {
+                            try wss.getMembers(ids: value, guild: key)
+                            wss.waitlist[key] = [String]()
+                        } catch { print("back in waitlist for \(key)") }
+                    }
+                }
+            }
+        }
         ws.resume()
-        self.hello()
-        self.authenticate()
+        try self.hello()
+        if let session_id = session_id, let seq = seq {
+            try self.reconnect(session_id: session_id, seq: seq)
+        } else {
+            try self.authenticate()
+        }
         releaseModePrint("Socket initiated")
     }
     
     func reset() {
-        ws.cancel()
+        ws.cancel(with: .goingAway, reason: Data())
         concurrentQueue.async {
-            wss = nil
-            wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!)
+            guard let new = try? WebSocket.init(url: WebSocket.gatewayURL, session_id: wss.session_id, seq: wss.seq) else { return }
+            new.ready().sink(receiveCompletion: { _ in }, receiveValue: { _ in }).store(in: &new.bag)
+            wss = new
+        }
+    }
+    
+    func hardReset() {
+        wss = nil
+        concurrentQueue.async {
+            guard let new = try? WebSocket.init(url: WebSocket.gatewayURL) else { return }
+            wss = new
         }
     }
     
@@ -137,10 +132,17 @@ final class WebSocket {
     func decodePayload(payload: Data) -> [String: Any]? {
         return try? JSONSerialization.jsonObject(with: payload, options: []) as? [String:Any]
     }
-
+    
+    struct Hello: Decodable {
+        var d: HelloD
+        struct HelloD: Decodable {
+            var heartbeat_interval: Int
+        }
+    }
+    
     // MARK: Initial WS setup
-    func hello() {
-        ws.receive { [weak self, ws] result in
+    func hello() throws {
+        ws.receive { [weak self] result in
             switch result {
             case .success(let message):
                 switch message {
@@ -148,14 +150,19 @@ final class WebSocket {
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
-                        guard let hello = self?.decodePayload(payload: data) else { ws?.cancel(); return }
-                        guard let hello = hello["d"] as? [String:Any] else { ws?.cancel(); return }
-                        guard let heartbeat_interval = hello["heartbeat_interval"] as? Int else { ws?.cancel(); return }
-                        self?.heartbeat_interval = heartbeat_interval
-                        wssThread.asyncAfter(deadline: .now() + .milliseconds(heartbeat_interval), execute: {
-                            self?.heartbeat()
+                        let interval = try? JSONDecoder().decode(Hello.self, from: data).d.heartbeat_interval
+                        guard let interval = interval else {
+                            wss.hardReset()
+                            return
+                        }
+                        self?.heartbeat_interval = interval
+                        wssThread.asyncAfter(deadline: .now() + .milliseconds(interval), execute: {
+                            do {
+                                try self?.heartbeat()
+                            } catch {
+                                self?.failedHearbeats++
+                            }
                         })
-
                     }
                 @unknown default:
                     print("unknown")
@@ -208,9 +215,10 @@ final class WebSocket {
 
     
     // MARK: ACK
-    func heartbeat() {
+    func heartbeat() throws {
+        print("sent heartbeat")
         guard let seq = seq else {
-            // self.reset()
+            self.reset()
             return
         }
         let packet: [String:Any] = [
@@ -221,17 +229,21 @@ final class WebSocket {
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
             ws.send(.string(jsonString)) { error in
                 if let _ = error {
-                    self.reconnect()
+                    try? self.reconnect()
                 }
-                wssThread.asyncAfter(deadline: .now() + .milliseconds(self.heartbeat_interval), execute: {
-                    self.heartbeat()
+                wssThread.asyncAfter(deadline: .now() + .milliseconds(self.heartbeat_interval), execute: { [weak self] in
+                    do {
+                        try self?.heartbeat()
+                    } catch {
+                        self?.failedHearbeats++
+                    }
                 })
             }
         }
     }
 
     // MARK: Authentication
-    func authenticate() {
+    func authenticate() throws {
         let packet: [String:Any] = [
             "op":2,
             "d":[
@@ -250,15 +262,18 @@ final class WebSocket {
                 ]
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
-                if let error = error {
-                    MentionSender.shared.sendWSError(error: error)
-                    releaseModePrint("WebSocket sending error: \(error)")
+        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
+        let jsonString = try String(jsonData)
+        ws.sendPublisher(.string(jsonString))
+            .sink(receiveCompletion: { comp in
+                switch comp {
+                    case .finished: break
+                    case .failure(let error):
+                        MentionSender.shared.sendWSError(error: error)
+                        break
                 }
-            }
-        }
+            }) { _ in }
+            .store(in: &bag)
     }
 
     final func close() {
@@ -266,24 +281,28 @@ final class WebSocket {
         ws.cancel(with: .goingAway, reason: reason)
     }
     
-    final func reconnect() {
+    final func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
         let packet: [String:Any] = [
             "op":6,
             "d":[
-                "seq":Int(self.seq ?? 0),
-                "session_id":String(self.session_id ?? ""),
+                "seq":seq ?? self.seq ?? 0,
+                "session_id":session_id ?? self.session_id ?? "",
                 "token":AccordCoreVars.shared.token
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
-                if let error = error {
-                    releaseModePrint("WebSocket sending reconnect error: \(error)")
+        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
+        let jsonString = try String(jsonData)
+        ws.sendPublisher(.string(jsonString))
+            .sink(receiveCompletion: { comp in
+                switch comp {
+                    case .finished: break
+                    case .failure(let error):
+                        releaseModePrint("error reconnecting ", error)
+                        self.hardReset()
+                        break
                 }
-                return
-            }
-        }
+            }) { _ in }
+            .store(in: &bag)
     }
     
     final func subscribe(_ guild: String, _ channel: String) {
@@ -326,8 +345,12 @@ final class WebSocket {
         }
     }
     
-    final func getMembers(ids: [String], guild: String) {
-        guard req <= 30 else { print("blocked req"); return }
+    final func getMembers(ids: [String], guild: String) throws {
+        guard req <= 30 else {
+            print("blocked req")
+            waitlist[guild]?.append(contentsOf: ids)
+            throw WebSocketErrors.maxRequestReached
+        }
         print("fetched")
         let packet: [String:Any] = [
             "op":8,
@@ -365,7 +388,7 @@ final class WebSocket {
                                 self?.receive()
                             } else {
                                 // disconnected?
-                                self?.reconnect()
+                                try? self?.reconnect()
                             }
                             return
                         }

@@ -103,20 +103,20 @@ struct ChatControls: View {
                     HStack {
                         TextField(chatText, text: $viewModel.textFieldContents, onEditingChanged: { state in
                         }, onCommit: {
-                            messageSendQueue.async {
-                                if viewModel.textFieldContents == "/shrug" {
-                                    viewModel.textFieldContents = #"¯\_(ツ)_/¯"#
+                            messageSendQueue.async { [weak viewModel] in
+                                if viewModel?.textFieldContents == "/shrug" {
+                                    viewModel?.textFieldContents = #"¯\_(ツ)_/¯"#
                                 }
                                 if fileUpload != nil {
-                                    uploadFile(temp: viewModel.textFieldContents)
+                                    uploadFile(temp: viewModel?.textFieldContents ?? "")
                                     fileUpload = nil
                                     fileUploadURL = nil
                                 } else {
                                     if replyingTo != nil {
-                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                             userAgent: discordUserAgent,
                                             token: AccordCoreVars.shared.token,
-                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
+                                            bodyObject: ["content":"\(String(viewModel?.textFieldContents ?? ""))", "allowed_mentions":["parse":["users","roles","everyone"], "replied_user":true], "message_reference":["channel_id":channelID, "message_id":replyingTo?.id ?? ""]],
                                             type: .POST,
                                             discordHeaders: true,
                                             referer: "https://discord.com/channels/\(guildID)/\(channelID)",
@@ -125,10 +125,10 @@ struct ChatControls: View {
                                         ))
                                         replyingTo = nil
                                     } else {
-                                        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                                        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                                             userAgent: discordUserAgent,
                                             token: AccordCoreVars.shared.token,
-                                            bodyObject: ["content":"\(String(viewModel.textFieldContents))"],
+                                            bodyObject: ["content":"\(String(viewModel?.textFieldContents ?? ""))"],
                                             type: .POST,
                                             discordHeaders: true,
                                             empty: true,
@@ -137,7 +137,7 @@ struct ChatControls: View {
                                     }
                                 }
                                 DispatchQueue.main.async {
-                                    viewModel.textFieldContents = ""
+                                    viewModel?.textFieldContents = ""
                                 }
                             }
                         })
@@ -181,7 +181,7 @@ struct ChatControls: View {
                     .onChange(of: viewModel.textFieldContents) { [weak viewModel] new in
                         if viewModel?.textFieldContents != new && !(typing) {
                             messageSendQueue.async {
-                                Request.fetch(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+                                Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
                                     userAgent: discordUserAgent,
                                     token: AccordCoreVars.shared.token,
                                     type: .POST,
@@ -301,13 +301,4 @@ extension Array where Element: Hashable {
     mutating func removeDuplicates() {
         self = self.removingDuplicates()
     }
-}
-
-extension NSTableView {
-  open override func viewDidMoveToWindow() {
-    super.viewDidMoveToWindow()
-
-    backgroundColor = NSColor.clear
-    enclosingScrollView!.drawsBackground = false
-  }
 }

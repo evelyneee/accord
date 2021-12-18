@@ -8,6 +8,7 @@
 import SwiftUI
 
 // actual view
+@available(macOS 11.0, *)
 struct EmotesView: View, Equatable {
     static func == (lhs: EmotesView, rhs: EmotesView) -> Bool {
         return true

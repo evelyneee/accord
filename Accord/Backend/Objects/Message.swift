@@ -27,7 +27,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var timestamp: String
     var tts: Bool
     var type: Int
-    var attachments: [AttachedFiles?]
+    var attachments: [AttachedFiles]
     var referenced_message: Reply?
     weak var lastMessage: Message?
     
@@ -114,7 +114,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
                               discordHeaders: true,
                               referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
                               empty: true)
-        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
     func edit(now: String) {
         let headers = Headers(userAgent: discordUserAgent,
@@ -125,7 +125,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
                               discordHeaders: true,
                               referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
                               empty: true)
-        Request.fetch(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
     func isSameAuthor() -> Bool { lastMessage?.author?.id == self.author?.id }
 }
@@ -148,7 +148,7 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
     var timestamp: String
     var tts: Bool
     var type: Int
-    var attachments: [AttachedFiles?]
+    var attachments: [AttachedFiles]
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)

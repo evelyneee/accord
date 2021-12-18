@@ -36,7 +36,7 @@ final class SlashCommands {
          "nonce":"911725258594058240"
          }
          */
-        Request.fetch(url: URL(string: "\(rootURL)/interactions"), headers: Headers(
+        Request.ping(url: URL(string: "\(rootURL)/interactions"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             bodyObject: [

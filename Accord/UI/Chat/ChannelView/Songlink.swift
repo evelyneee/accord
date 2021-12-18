@@ -27,5 +27,7 @@ final class SongLink {
 }
 
 extension Substring {
-    func str() -> String { String(self) }
+    var stringLiteral: String {
+        return String(self)
+    }
 }

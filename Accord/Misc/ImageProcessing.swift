@@ -20,52 +20,9 @@ extension CGImage {
 
 extension NSImage {
 
-    /// The height of the image.
-    var height: CGFloat {
-        return size.height
-    }
-
-    /// The width of the image.
-    var width: CGFloat {
-        return size.width
-    }
-
-    /// A PNG representation of the image.
-    var PNGRepresentation: Data? {
-        if let tiff = self.tiffRepresentation, let tiffData = NSBitmapImageRep(data: tiff) {
-            return tiffData.representation(using: .png, properties: [:])
-        }
-
-        return nil
-    }
-    func resize(withSize targetSize: NSSize) -> NSImage? {
-        let frame = NSRect(x: 0, y: 0, width: targetSize.width, height: targetSize.height)
-        guard let representation = self.bestRepresentation(for: frame, context: nil, hints: nil) else {
-            return nil
-        }
-        let image = NSImage(size: targetSize, flipped: false, drawingHandler: { (_) -> Bool in
-            return representation.draw(in: frame)
-        })
-
-        return image
-    }
-
-    func downsampled() -> NSImage? {
-        
-        let ratio = self.width / 400
-        
-        let sizes = NSSize(width: self.width / ratio, height: self.height / ratio)
-        
-        if ratio <= 1 {
-            return nil
-        }
-        
-        return self.resize(withSize: sizes)
-    }
-    
     // Thanks Amy 🙂
     func downsample(to pointSize: CGSize? = nil, scale: CGFloat? = nil) -> Data? {
-        let size = pointSize ?? CGSize(width: self.width, height: self.height)
+        let size = pointSize ?? CGSize(width: self.size.width, height: self.size.height)
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let data = self.tiffRepresentation as CFData?,
               let imageSource = CGImageSourceCreateWithData(data, imageSourceOptions) else { return nil }
@@ -83,11 +40,4 @@ extension NSImage {
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }
-}
-
-/// Exceptions for the image extension class.
-///
-/// - creatingPngRepresentationFailed: Is thrown when the creation of the png representation failed.
-enum NSImageExtensionError: Error {
-    case unwrappingPNGRepresentationFailed
 }

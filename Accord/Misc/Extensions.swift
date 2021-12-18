@@ -30,45 +30,10 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
 }
 
 @propertyWrapper
-public final class DefaultValue<T: Decodable & ExpressibleByArrayLiteral>: Decodable {
-    
-    private var _value: T?
-    
-    private func _wrappedValue<U>(_ type: U.Type) -> U? where U: ExpressibleByNilLiteral {
-        return _value as? U
-    }
-    
-    private func _wrappedValue<U>(_ type: U.Type) -> U {
-        return _value as! U
-    }
-    
-    public var wrappedValue: T {
-        get {
-            return _wrappedValue(T.self)
-        } set {
-            _value = newValue
-        }
-    }
-    
-    public required init(from decoder: Decoder) throws {
-
-        var container = try decoder.unkeyedContainer()
-        print(container)
-        guard let value = try? container.decode(T.self) else {
-            wrappedValue = []
-            return
-        }
-        print(value)
-        wrappedValue = value
-    }
-}
-
-@propertyWrapper
 struct DefaultEmptyArray<T:Codable & ExpressibleByArrayLiteral> {
     var wrappedValue: T = T()
 }
 
-//codable extension to encode/decode the wrapped value
 extension DefaultEmptyArray: Codable {
     
     func encode(to encoder: Encoder) throws {
@@ -89,6 +54,30 @@ extension KeyedDecodingContainer {
     }
 }
 
+extension String {
+    enum DataErrors: Error {
+        case notString
+    }
+    init(_ data: Data) throws {
+        let initialize = Self.init(data: data, encoding: .utf8)
+        guard let initialize = initialize else { throw DataErrors.notString }
+        self = initialize
+    }
+    var cString: UnsafePointer<CChar>? {
+        let nsString = self as NSString
+        return nsString.utf8String
+    }
+}
+
+@discardableResult func runCommand(command: String) -> Int32 {
+    let systemPtr = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "system")
+    let system = unsafeBitCast(systemPtr, to: (@convention(c) (_: UnsafePointer<CChar>) -> Int32).self)
+    guard let cString = command.cString else { return 1 }
+    let res = system(cString)
+    return res
+}
+
+@available(macOS 11.0, *)
 struct Folder<Content: View>: View {
     @State var color: NSColor
     @State var content: () -> Content
@@ -104,6 +93,7 @@ struct Folder<Content: View>: View {
                         Image(systemName: "folder.fill").resizable()
                             .scaledToFit()
                             .frame(width: 25, height: 25)
+                            .foregroundColor(Color.white)
                             .padding()
                             .frame(width: 45)
                             .background(Color(color.withAlphaComponent(0.75)))
@@ -119,6 +109,23 @@ struct Folder<Content: View>: View {
             }
             .transition(.slide)
         }
+    }
+}
+
+extension Collection where Self.Element: Identifiable {
+    subscript(id id: Self.Element.ID) -> Self.Element? {
+        self.enumerated().compactMap { (index, element) in
+            return [element.id:element]
+        }.reduce(into: [Self.Element.ID:Self.Element]()) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        }[id]
+    }
+    subscript(num num: Self.Element.ID) -> Int? {
+        self.enumerated().compactMap { (index, element) in
+            return [element.id:index]
+        }.reduce(into: [Self.Element.ID:Int]()) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        }[num]
     }
 }
 
@@ -165,7 +172,7 @@ func pronounDBFormed(pronoun: inout String?) {
 
 func pfpURL(_ uid: String?, _ hash: String?) -> String {
     guard let uid = uid, let hash = hash else { return "" }
-    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=128"
+    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=64"
 }
 
 func iconURL(_ id: String?, _ icon: String?) -> String {
@@ -177,19 +184,6 @@ func iconURL(_ id: String?, _ icon: String?) -> String {
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (exist index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil
-    }
-}
-
-@propertyWrapper class AsynchronousImage {
-    var wrappedValue: NSImage = NSImage()
-    init(url: String) {
-        imageQueue.async {
-            Request.image(url: URL(string: url)) { image in
-                if let image = image {
-                    self.wrappedValue = image
-                }
-            }
-        }
     }
 }
 

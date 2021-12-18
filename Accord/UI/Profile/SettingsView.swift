@@ -8,8 +8,7 @@
 import Foundation
 import SwiftUI
 
-// NSViewWrapper(Plugins().loadView(url: "/Users/evelyn/plugin")!.body!)
-
+@available(macOS 11.0, *)
 struct SettingsViewRedesign: View {
     
     @AppStorage("pfpShown") var profilePictures: Bool = pfpShown

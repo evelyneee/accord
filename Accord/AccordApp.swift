@@ -34,7 +34,7 @@ public func releaseModePrint(_ object: Any) {
     NSLog("[Accord] \(String(describing: object))")
 }
 
-@main
+@available(macOS 11.0, *) @main
 struct AccordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
@@ -44,6 +44,8 @@ struct AccordApp: App {
                 .onAppear(perform: {
                     appDelegate.fileNotifications()
                 })
+        }.commands {
+            SidebarCommands() // 1
         }
     }
 }
@@ -53,14 +55,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         print("hi")
         if wss == nil {
             concurrentQueue.async {
-                wss = WebSocket.init(url: URL(string: "wss://gateway.discord.gg?v=9&encoding=json"))
-                _ = wss.ready()
+                wss.reset()
             }
         }
     }
     @objc func onSleepNote(note: NSNotification) {
         wss.ws.cancel(with: .goingAway, reason: Data())
-        wss = nil
     }
     func fileNotifications() {
         NSWorkspace.shared.notificationCenter.addObserver(
