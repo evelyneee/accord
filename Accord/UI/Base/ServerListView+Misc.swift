@@ -33,7 +33,7 @@ extension ServerListView {
         return messageDict[entry]
     }
     func order() {
-        for guild in full?.guilds ?? [] {
+        for guild in full.guilds ?? [] {
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             let parents: [Channel] = guild.channels?.filter( { $0.type == .section } ) ?? []
             let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []
@@ -47,16 +47,16 @@ extension ServerListView {
         }
     }
     func assignReadStates() {
-        guard let readState = full?.read_state else { return }
-        for guild in guilds {
-            let messageDict = guild.channels?.enumerated().compactMap { (index, element) in
-                return [element.id:index]
-            }.reduce(into: [:]) { (result, next) in
-                result.merge(next) { (_, rhs) in rhs }
-            }
-            for channel in guild.channels ?? [] {
-                if let index = messageDict?[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice {
-                    channel.read_state = readState.entries[index]
+        guard let readState = full.read_state else { return }
+        let stateDict = readState.entries.enumerated().compactMap { (index, element) in
+            return [element.id:index]
+        }.reduce(into: [:]) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        }
+        for folder in folders {
+            for guild in folder.guilds {
+                for channel in guild.channels ?? [] {
+                    channel.read_state = readState.entries[stateDict[channel.id] ?? 0]
                 }
             }
         }

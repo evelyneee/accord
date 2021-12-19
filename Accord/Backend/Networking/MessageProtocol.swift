@@ -19,27 +19,41 @@ protocol MessageControllerDelegate {
 
 class MessageController {
     static let shared = MessageController()
-    public var delegate: MessageControllerDelegate?
+    public var delegates: [String:MessageControllerDelegate?] = [:]
     
     func sendMessage(msg: Data, channelID: String?, isMe: Bool = false) {
-        delegate?.sendMessage(msg: msg, channelID: channelID, isMe: isMe)
+        for delegate in delegates.values {
+            delegate?.sendMessage(msg: msg, channelID: channelID, isMe: isMe)
+        }
     }
     func editMessage(msg: Data, channelID: String?) {
-        delegate?.editMessage(msg: msg, channelID: channelID)
+        for delegate in delegates.values {
+            delegate?.editMessage(msg: msg, channelID: channelID)
+        }
     }
     func deleteMessage(msg: Data, channelID: String?) {
-        delegate?.deleteMessage(msg: msg, channelID: channelID)
+        for delegate in delegates.values {
+            delegate?.deleteMessage(msg: msg, channelID: channelID)
+        }
     }
     func typing(msg: [String: Any], channelID: String?) {
-        delegate?.typing(msg: msg, channelID: channelID)
+        for delegate in delegates.values {
+            delegate?.typing(msg: msg, channelID: channelID)
+        }
     }
     func sendMemberChunk(msg: Data) {
-        delegate?.sendMemberChunk(msg: msg)
+        for delegate in delegates.values {
+            delegate?.sendMemberChunk(msg: msg)
+        }
     }
     func sendMemberList(msg: MemberListUpdate) {
-        delegate?.sendMemberList(msg: msg)
+        for delegate in delegates.values {
+            delegate?.sendMemberList(msg: msg)
+        }
     }
     func sendWSError(msg: String) {
-        delegate?.sendWSError(msg: msg)
+        for delegate in delegates.values {
+            delegate?.sendWSError(msg: msg)
+        }
     }
 }

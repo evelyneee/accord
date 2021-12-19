@@ -33,6 +33,17 @@ extension String {
         }
         return mapped
     }
+    func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var startIndex = self.startIndex
+        while startIndex < endIndex,
+            let range = self[startIndex...].range(of: string, options: options) {
+                result.append(range)
+                startIndex = range.lowerBound < range.upperBound ? range.upperBound :
+                    index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
+    }
 }
 
 extension Array where Element == String {
@@ -109,7 +120,8 @@ final public class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
-        let words: [String] = line.split(separator: " ").compactMap { $0.stringLiteral }
+        let regex = #"(\*|~~|_| |).+(\*|~~|_| |)"#
+        let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
         return Publishers.MergeMany(pubs)
             .collect()

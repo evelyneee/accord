@@ -30,10 +30,14 @@ func pingCount(guild: Guild) -> Int {
     return intArray.reduce(0, +)
 }
 
-struct ServerListView: View {
+struct ServerListView: View, Equatable {
+    
+    static func == (lhs: ServerListView, rhs: ServerListView) -> Bool {
+        return true
+    }
     
     @State var guilds = [Guild]()
-    @Binding var full: GatewayD?
+    var full: GatewayD
     @State var selection: Int? = nil
     @State var selectedServer: Int? = nil
     @State var privateChannels = [Channel]()
@@ -45,6 +49,10 @@ struct ServerListView: View {
     @State var alert: Bool = true
     @State var folders = [GuildFolder]()
     @State var status: String? = nil
+    
+    init(d: GatewayD) {
+        self.full = d
+    }
     
     var body: some View {
         NavigationView {
@@ -219,8 +227,8 @@ struct ServerListView: View {
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
-            status = full?.user_settings?.status
+        .onAppear {
+            status = full.user_settings?.status
             concurrentQueue.async {
                 Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
                     if let channels = channels {
@@ -234,11 +242,8 @@ struct ServerListView: View {
                     }
                 }
             }
-            var guilds = full?.guilds ?? []
+            var guilds = full.guilds
             MentionSender.shared.delegate = self
-            DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
-                assignReadStates()
-            }
             AllEmotes.shared.allEmotes = guilds.map { ["\($0.id)$\($0.name)":$0.emojis] }
                                             .flatMap { $0 }
                                             .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
@@ -250,7 +255,7 @@ struct ServerListView: View {
                 guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
                 self.guilds = guilds
             } else {
-                let guildOrder = full?.user_settings?.guild_positions ?? []
+                let guildOrder = full.user_settings?.guild_positions ?? []
                 let messageDict = guilds.enumerated().compactMap { (index, element) in
                     return [element.id:index]
                 }.reduce(into: [:]) { (result, next) in
@@ -272,7 +277,7 @@ struct ServerListView: View {
                 }.reduce(into: [:]) { (result, next) in
                     result.merge(next) { (_, rhs) in rhs }
                 }
-                let folderTemp = full?.user_settings?.guild_folders ?? []
+                let folderTemp = full.user_settings?.guild_folders ?? []
                 for folder in folderTemp {
                     for id in folder.guild_ids {
                         if let guildIndex = guildDict[id] {
@@ -284,20 +289,18 @@ struct ServerListView: View {
                 }
                 self.folders = folderTemp
             }
+            DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
+                assignReadStates()
+            }
             concurrentQueue.async {
                 order()
             }
             DispatchQueue.main.async {
                 selectedServer = 0
-                NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)
-                full = nil
             }
             concurrentQueue.async {
                 roleColors = RoleManager.shared.arrangeRoleColors(guilds: guilds)
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Notification"))) { notif in
-            pings.append((notif.userInfo as! [String:Any])["info"] as! (String, String))
         }
     }
 }

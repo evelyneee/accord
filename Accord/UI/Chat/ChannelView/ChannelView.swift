@@ -85,10 +85,10 @@ struct ChannelView: View, Equatable {
         }
         .onAppear {
             // Make Gateway messages receivable now
-            MessageController.shared.delegate = self
+            MessageController.shared.delegates[channelID] = self
         }
         .onDisappear {
-            MessageController.shared.delegate = nil
+            MessageController.shared.delegates.removeValue(forKey: channelID)
             ChannelView.set = false
         }
     }

@@ -46,7 +46,7 @@ struct MessageCellView: View {
                 }
                 .padding(.leading, 47)
             }
-            HStack(alignment: .top) {
+            HStack {
                 if !(message.isSameAuthor()) {
                     Button(action: {
                         popup.toggle()

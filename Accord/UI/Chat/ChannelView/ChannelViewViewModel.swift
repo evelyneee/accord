@@ -85,7 +85,7 @@ final class ChannelViewViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.messages = messages.reversed()
                 DispatchQueue(label: "Channel loading").async {
-                    channelID == "@me" ? self.fakeNicksObject() : self.performSecondStageLoad()
+                    guildID == "@me" ? self.fakeNicksObject() : self.performSecondStageLoad()
                     self.loadPronouns()
                     self.ack(channelID: channelID, guildID: guildID)
                 }
