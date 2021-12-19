@@ -34,16 +34,29 @@ public func releaseModePrint(_ object: Any) {
     NSLog("[Accord] \(String(describing: object))")
 }
 
-@available(macOS 11.0, *) @main
+@main
 struct AccordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @AppStorage("windowWidth") var windowWidth: Int = Int(NSApplication.shared.keyWindow?.frame.width ?? 1000)
+    @AppStorage("windowHeight") var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .preferredColorScheme(darkMode ? .dark : nil)
-                .onAppear(perform: {
-                    appDelegate.fileNotifications()
-                })
+            GeometryReader { reader in
+                ContentView()
+                    .preferredColorScheme(darkMode ? .dark : nil)
+                    .onAppear(perform: {
+                        print("hi")
+                        appDelegate.fileNotifications()
+                        DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
+                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                        })
+                    })
+                    .onDisappear(perform: {
+                        windowWidth = Int(reader.size.width)
+                        windowHeight = Int(reader.size.height)
+                        print(windowWidth, windowHeight)
+                    })
+            }
         }.commands {
             SidebarCommands() // 1
         }
@@ -69,5 +82,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(note:)),
             name: NSWorkspace.willSleepNotification, object: nil)
+    }
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag{
+            NSApplication.shared.keyWindow?.makeKeyAndOrderFront(nil)
+        }
+        return true
     }
 }

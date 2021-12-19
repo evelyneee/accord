@@ -44,6 +44,7 @@ struct ServerListView: View {
     @State var online: Bool = true
     @State var alert: Bool = true
     @State var folders = [GuildFolder]()
+    @State var status: String? = nil
     
     var body: some View {
         NavigationView {
@@ -160,9 +161,29 @@ struct ServerListView: View {
                                         .scaledToFit()
                                         .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
                                         .frame(width: 45, height: 45)
-                                    Circle()
-                                        .foregroundColor(Color.green.opacity(0.75))
-                                        .frame(width: 10, height: 10)
+                                    switch self.status {
+                                    case "online":
+                                        Circle()
+                                            .foregroundColor(Color(NSColor.systemGreen))
+                                            .frame(width: 12, height: 12)
+                                    case "invisible":
+                                        Circle()
+                                            .foregroundColor(Color(NSColor.systemGray))
+                                            .frame(width: 12, height: 12)
+                                    case "dnd":
+                                        Circle()
+                                            .foregroundColor(Color(NSColor.systemRed))
+                                            .frame(width: 12, height: 12)
+                                    case "idle":
+                                        Circle()
+                                            .foregroundColor(Color(NSColor.systemOrange))
+                                            .frame(width: 12, height: 12)
+                                    default:
+                                        Circle()
+                                            .foregroundColor(Color.clear)
+                                            .frame(width: 12, height: 12)
+                                    }
+
                                 }
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -175,13 +196,7 @@ struct ServerListView: View {
                 .padding(.top, 5)
                 Divider()
                 // MARK: - Loading UI
-                if selectedServer == nil {
-                    VStack {
-                        Text("Connecting...")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                    }
-                } else if selectedServer == 999 {
+                if selectedServer == 999 {
                     // MARK: - Private channels (DMs)
                     List {
                         Text("Messages")
@@ -198,12 +213,14 @@ struct ServerListView: View {
                     .padding(.top, 5)
                 } else if !(guilds.isEmpty) {
                     // MARK: - Guild channels
-                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()))[selectedServer ?? 0]), selection: $selection)
+                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()))[selectedServer ?? 0]), selection: self.$selection)
                 }
             })
+            .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("READY"))) { notif in
+            status = full?.user_settings?.status
             concurrentQueue.async {
                 Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
                     if let channels = channels {
@@ -267,7 +284,9 @@ struct ServerListView: View {
                 }
                 self.folders = folderTemp
             }
-            order()
+            concurrentQueue.async {
+                order()
+            }
             DispatchQueue.main.async {
                 selectedServer = 0
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "SETUP_DONE"), object: nil)

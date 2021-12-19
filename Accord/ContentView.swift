@@ -12,39 +12,51 @@ import Combine
 var wss: WebSocket!
 let wssThread = DispatchQueue(label: "WebSocket Thread")
 
+struct AppIcon: View {
+    var body: some View {
+        Image(nsImage: NSApplication.shared.applicationIconImage)
+    }
+}
+
+struct LoadingView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                VStack {
+                    AppIcon().saturation(0.0)
+                    Text("Connecting to Discord")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }
+                Spacer()
+            }
+            Spacer()
+        }
+    }
+}
+
 @available(macOS 11.0, *)
 struct ContentView: View {
     @State public var selection: Int?
     @State var socketOut: GatewayD?
     @State var modalIsPresented: Bool = false
     @State var wsCancellable: AnyCancellable? = nil
-    
+    @State var loaded: Bool = false
     var body: some View {
         Group {
             if modalIsPresented {
                 LoginView()
-            } else {
+            } else if loaded {
                 ServerListView(full: $socketOut)
+            } else {
+                LoadingView()
             }
         }
         .onAppear {
             if (AccordCoreVars.shared.token != "") {
                 concurrentQueue.async {
-                    let path = FileManager.default.urls(for: .cachesDirectory,
-                                                        in: .userDomainMask)[0]
-                                                        .appendingPathComponent("socketOut.json")
-
-                    let data = try? Data(contentsOf: path) 
-                    do {
-                        let structure = try JSONDecoder().decode(GatewayStructure.self, from: data ?? Data())
-                        socketOut = structure.d
-                        
-                        DispatchQueue.main.async {
-                            NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
-                        }
-                    } catch {
-                        print(error)
-                    }
                     guard wss == nil else { return }
                     guard let new = try? WebSocket.init(url: WebSocket.gatewayURL) else { return }
                     wss = new
@@ -52,12 +64,26 @@ struct ContentView: View {
                         .sink(receiveCompletion: { completion in
                             switch completion {
                             case .finished:
+                                loaded = true
                                 break
                             case .failure(let error):
                                 print(error)
+                                let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                                let data = try? Data(contentsOf: path)
+                                do {
+                                    let structure = try JSONDecoder().decode(GatewayStructure.self, from: data ?? Data())
+                                    socketOut = structure.d
+                                    loaded = true
+                                    DispatchQueue.main.async {
+                                        NotificationCenter.default.post(name: Notification.Name(rawValue: "READY"), object: nil)
+                                    }
+                                } catch {
+                                    print(error)
+                                }
                                 break
                             }
                         }, receiveValue: { d in
+                            loaded = true
                             let user = d.user
                             AccordCoreVars.shared.user = user
                             user_id = user.id

@@ -8,10 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct GuildView: View, Equatable {
-    static func == (lhs: GuildView, rhs: GuildView) -> Bool {
-        return lhs.guild.id == rhs.guild.id
-    }
+struct GuildView: View {
     
     @Binding var guild: Guild
     @Binding var selection: Int?
@@ -44,7 +41,6 @@ struct GuildView: View, Equatable {
             }
             .buttonStyle(PlainButtonStyle())
         }
-
     }
 }
 

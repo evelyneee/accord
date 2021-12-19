@@ -74,8 +74,9 @@ final class ImageLoaderAndCache: ObservableObject {
         self.size = size
         self.load()
     }
+    
     func load() {
-        imageQueue.async { [weak self] in
+        DispatchQueue(label: "Image-\(url?.absoluteString ?? "")").async { [weak self] in
             self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
                 .replaceError(with: NSImage())
                 .replaceNil(with: NSImage())

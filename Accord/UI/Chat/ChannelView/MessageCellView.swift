@@ -17,6 +17,8 @@ struct MessageCellView: View {
     var nick: String?
     var replyNick: String?
     var pronouns: String?
+    var replyAuthorID: String?
+    var replyAuthorHash: String?
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
@@ -24,12 +26,15 @@ struct MessageCellView: View {
     @State var color: Color = Color(NSColor.textColor)
     @State var replyColor: Color = Color(NSColor.textColor)
     @State var textElement: Text? = nil
-    @State var cancellable: AnyCancellable? = nil
+    @State var pfp: NSImage = NSImage()
+    @State var replyPfp: NSImage = NSImage()
+    @State var bag = Set<AnyCancellable>()
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack {
-                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar)).equatable()
+                HStack { [weak replyPfp] in
+                    Image(nsImage: replyPfp ?? NSImage())
+                        .resizable()
                         .frame(width: 15, height: 15)
                         .scaledToFit()
                         .clipShape(Circle())
@@ -39,16 +44,17 @@ struct MessageCellView: View {
                     Text(reply.content)
                         .lineLimit(0)
                 }
-                .padding(.leading, 43)
+                .padding(.leading, 47)
             }
             HStack(alignment: .top) {
                 if !(message.isSameAuthor()) {
                     Button(action: {
                         popup.toggle()
-                    }) { [weak message] in
-                        Attachment(pfpURL(message?.author?.id, message?.author?.avatar)).equatable()
-                            .frame(width: 33, height: 33)
+                    }) { [weak pfp] in
+                        Image(nsImage: pfp ?? NSImage())
+                            .resizable()
                             .scaledToFit()
+                            .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }
                     .popover(isPresented: $popup, content: { [weak message] in
@@ -102,6 +108,20 @@ struct MessageCellView: View {
                     self.replyColor = Color.init(hex: hex)
                 }
             }
+            imageQueue.async { [weak message] in
+                RequestPublisher.image(url: URL(string: pfpURL(message?.author?.id, message?.author?.avatar)))
+                    .replaceError(with: NSImage())
+                    .replaceNil(with: NSImage())
+                    .sink { img in DispatchQueue.main.async { self.pfp = img } }
+                    .store(in: &bag)
+                if let replyAuthorID = replyAuthorID, let replyAuthorHash = replyAuthorHash {
+                    RequestPublisher.image(url: URL(string: pfpURL(replyAuthorID, replyAuthorHash)))
+                        .replaceError(with: NSImage())
+                        .replaceNil(with: NSImage())
+                        .sink { img in DispatchQueue.main.async { self.replyPfp = img } }
+                        .store(in: &bag)
+                }
+            }
         }
         .onChange(of: self.role, perform: { _ in
             colorQueue.async {
@@ -118,13 +138,14 @@ struct MessageCellView: View {
     }
     func load(text: String) {
         textQueue.async {
-            self.cancellable = Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
+            Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
                 .assertNoFailure()
                 .sink(receiveValue: { text in
                     DispatchQueue.main.async {
                         self.textElement = text
                     }
                 })
+                .store(in: &bag)
         }
     }
 }
