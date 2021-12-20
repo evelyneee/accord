@@ -33,7 +33,7 @@ extension ServerListView {
         return messageDict[entry]
     }
     func order() {
-        for guild in full.guilds ?? [] {
+        for guild in full.guilds {
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             let parents: [Channel] = guild.channels?.filter( { $0.type == .section } ) ?? []
             let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []

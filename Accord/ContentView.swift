@@ -12,9 +12,19 @@ import Combine
 var wss: WebSocket!
 let wssThread = DispatchQueue(label: "WebSocket Thread")
 
-struct AppIcon: View {
-    var body: some View {
-        Image(nsImage: NSApplication.shared.applicationIconImage)
+struct TiltAnimation: ViewModifier {
+    @State var rotated: Bool = false
+    @State var timer: Timer?
+    func body(content: Content) -> some View {
+        content
+            .rotationEffect(.degrees(rotated ? 10 : -10))
+            .onAppear {
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
+                    withAnimation(Animation.linear(duration: 0.3)) {
+                        rotated.toggle()
+                    }
+                }
+            }
     }
 }
 
@@ -30,14 +40,17 @@ internal extension View {
 }
 
 struct LoadingView: View {
-    fileprivate static let greetings = [
-        "Entering girlmode",
-        "Stay dry.",
-        "Gaslight. Gatekeep. Girlboss.",
-        "eval deez nuts",
-        "Not a car",
-        "What the fuck is this Jailbreak drama y'all mad furries bro",
-        "Now available on Rejail!"
+    fileprivate static let greetings: [Text] = [
+        Text("Entering girlmode"),
+        Text("Stay dry"),
+        Text("Gaslight. Gatekeep. Girlboss.").italic(),
+        Text("eval deez nuts"),
+        Text("Not a car"),
+        Text("Ratio + Civic better"),
+        Text("Now available on Rejail!"),
+        Text("The more mature, hot older sister."),
+        Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
+        Text("Never gonna give you up, never gonna use electron")
     ]
     var body: some View {
         VStack {
@@ -45,8 +58,9 @@ struct LoadingView: View {
             HStack {
                 Spacer()
                 VStack {
-                    AppIcon().saturation(0.0)
-                    Text(LoadingView.greetings.randomElement() ?? "I fucked up")
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .saturation(0.0).modifier(TiltAnimation())
+                    LoadingView.greetings.randomElement()!
                         .font(.title2)
                         .fontWeight(.medium)
                         .padding(5)
@@ -81,49 +95,55 @@ struct ContentView: View {
         .onAppear {
             if (AccordCoreVars.shared.token != "") {
                 concurrentQueue.async {
-                    guard wss == nil else { return }
-                    guard let new = try? WebSocket.init(url: WebSocket.gatewayURL) else { return }
-                    wss = new
-                    wsCancellable = wss.ready()
-                        .sink(receiveCompletion: { completion in
-                            switch completion {
-                            case .finished:
-                                break
-                            case .failure(let error):
-                                print(error)
-                                let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                                let data = try? Data(contentsOf: path)
-                                do {
-                                    let structure = try JSONDecoder().decode(GatewayStructure.self, from: data ?? Data())
-                                    socketOut = structure.d
-                                    self.serverListView = ServerListView(d: structure.d)
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                                        withAnimation {
-                                            loaded = true
-                                        }
-                                    })
-                                } catch {
-                                    print(error)
+                    do {
+                        guard wss == nil else { return }
+                        print("trying")
+                        let new = try WebSocket.init(url: WebSocket.gatewayURL)
+                        print("init")
+                        wss = new
+                        wsCancellable = wss.ready()
+                            .sink(receiveCompletion: { completion in
+                                switch completion {
+                                case .finished:
+                                    break
+                                case .failure(let error):
+                                    print("error")
+                                    break
                                 }
-                                break
-                            }
-                        }, receiveValue: { d in
-                            let user = d.user
-                            AccordCoreVars.shared.user = user
-                            user_id = user.id
-                            if let pfp = user.avatar {
-                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
-                            }
-                            username = user.username
-                            discriminator = user.discriminator
-                            socketOut = d
-                            self.serverListView = ServerListView(d: d)
+                            }, receiveValue: { d in
+                                let user = d.user
+                                AccordCoreVars.shared.user = user
+                                user_id = user.id
+                                if let pfp = user.avatar {
+                                    Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
+                                }
+                                username = user.username
+                                discriminator = user.discriminator
+                                socketOut = d
+                                self.serverListView = ServerListView(d: d)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                    withAnimation {
+                                        loaded = true
+                                    }
+                                })
+                            })
+                    } catch {
+                        print(error)
+                        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                        do {
+                            let data = try Data(contentsOf: path)
+                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                            socketOut = structure.d
+                            self.serverListView = ServerListView(d: structure.d)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                                 withAnimation {
                                     loaded = true
                                 }
                             })
-                        })
+                        } catch {
+                            print(error)
+                        }
+                    }
                 }
             } else {
                 modalIsPresented = true

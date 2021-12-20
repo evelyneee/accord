@@ -21,6 +21,8 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var pronouns: [String:String] = [:]
     var cancellable = Set<AnyCancellable>()
     
+    var offset: Float = 0
+    
     var guildID: String
     var channelID: String
     
@@ -228,6 +230,10 @@ final class ChannelViewViewModel: ObservableObject {
                 try? wss.getMembers(ids: allUserIDs, guild: guildID)
             }
         }
+    }
+    deinit {
+        print("Closing \(channelID)")
+        cancellable.forEach { $0.cancel() }
     }
 }
 

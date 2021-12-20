@@ -14,14 +14,6 @@ extension NSResponder {
     }
 }
 
-struct TestView: View {
-    var body: some View {
-        TableView.init(["cock"], content: { value in
-            Text(value)
-        })
-    }
-}
-
 struct TableView<T: Collection, Content: View>: NSViewRepresentable {
     typealias NSViewType = NSScrollView
     
@@ -83,62 +75,5 @@ extension TableView {
         func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
             return views[row]
         }
-    }
-}
-
-struct SampleViewController: NSViewRepresentable {
-    
-    var tableView:NSTableView = {
-        let table = NSTableView(frame: NSRect.init(x: 0, y: 0, width: 400, height: 400))
-        table.rowSizeStyle = .large
-        table.backgroundColor = .yellow
-        return table
-    }()
-    
-    func makeNSView(context: Context) -> NSTableView {
-        
-        return tableView
-    }
-    
-    func updateNSView(_ nsView: NSTableView, context: Context) {
-        //tbd
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
-        var parent: SampleViewController
-        
-        init(_ tvController: SampleViewController) {
-            self.parent = tvController
-        }
-        
-        func numberOfRows(in tableView: NSTableView) -> Int {
-            return 10
-        }
-        
-        func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-            return NSTextField.init(labelWithString: "cock")
-        }
-        
-        func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-            return CGFloat(90)
-        }
-        
-        func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-            return false
-        }
-
-    }
-
-    
-}
-
-
-struct SampleView: View {
-    var body: some View {
-        SampleViewController()
     }
 }

@@ -17,8 +17,6 @@ struct MessageCellView: View {
     var nick: String?
     var replyNick: String?
     var pronouns: String?
-    var replyAuthorID: String?
-    var replyAuthorHash: String?
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
@@ -26,17 +24,13 @@ struct MessageCellView: View {
     @State var color: Color = Color(NSColor.textColor)
     @State var replyColor: Color = Color(NSColor.textColor)
     @State var textElement: Text? = nil
-    @State var pfp: NSImage = NSImage()
-    @State var replyPfp: NSImage = NSImage()
     @State var bag = Set<AnyCancellable>()
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack { [weak replyPfp] in
-                    Image(nsImage: replyPfp ?? NSImage())
-                        .resizable()
+                HStack {
+                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar)).equatable()
                         .frame(width: 15, height: 15)
-                        .scaledToFit()
                         .clipShape(Circle())
                     Text(replyNick ?? reply.author?.username ?? "")
                         .foregroundColor(replyColor)
@@ -50,10 +44,8 @@ struct MessageCellView: View {
                 if !(message.isSameAuthor()) {
                     Button(action: {
                         popup.toggle()
-                    }) { [weak pfp] in
-                        Image(nsImage: pfp ?? NSImage())
-                            .resizable()
-                            .scaledToFit()
+                    }) { [weak message] in
+                        Attachment(pfpURL(message?.author?.id, message?.author?.avatar)).equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }
@@ -106,20 +98,6 @@ struct MessageCellView: View {
                 if let role = replyRole, let color = roleColors[role]?.0 {
                     let hex = String(format: "%06X", color)
                     self.replyColor = Color.init(hex: hex)
-                }
-            }
-            imageQueue.async { [weak message] in
-                RequestPublisher.image(url: URL(string: pfpURL(message?.author?.id, message?.author?.avatar)))
-                    .replaceError(with: NSImage())
-                    .replaceNil(with: NSImage())
-                    .sink { img in DispatchQueue.main.async { self.pfp = img } }
-                    .store(in: &bag)
-                if let replyAuthorID = replyAuthorID, let replyAuthorHash = replyAuthorHash {
-                    RequestPublisher.image(url: URL(string: pfpURL(replyAuthorID, replyAuthorHash)))
-                        .replaceError(with: NSImage())
-                        .replaceNil(with: NSImage())
-                        .sink { img in DispatchQueue.main.async { self.replyPfp = img } }
-                        .store(in: &bag)
                 }
             }
         }

@@ -120,7 +120,7 @@ final public class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
-        let regex = #"(\*|~~|_| |).+(\*|~~|_| |)"#
+        let regex = #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#
         let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
         return Publishers.MergeMany(pubs)

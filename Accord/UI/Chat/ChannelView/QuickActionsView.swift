@@ -8,13 +8,10 @@
 import Foundation
 import SwiftUI
 
-struct QuickActionsView: View, Equatable {
+struct QuickActionsView: View {
     
-    static func == (lhs: QuickActionsView, rhs: QuickActionsView) -> Bool {
-        return lhs.opened == rhs.opened
-    }
+    weak var message: Message?
     
-    var message: Message
     @Binding var replyingTo: Message?
     @State var opened: Bool = false
     
@@ -26,28 +23,8 @@ struct QuickActionsView: View, Equatable {
         }
     }
     
-    var clipButton: some View {
-        Button(action: { [weak message] in
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
-            opened.toggle()
-        }) {
-            Text("Copy")
-        }
-    }
-    
-    var linkButton: some View {
-        Button(action: { [weak message] in
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(message!.channel_id)/\(message?.id ?? "")", forType: .string)
-            opened.toggle()
-        }) {
-            Text("Copy Message Link")
-        }
-    }
-    
     var replyButton: some View {
-        Button(action: { [weak message] in
+        Button(action: {
             replyingTo = message
         }) {
             Image(systemName: "arrowshape.turn.up.backward.fill")
@@ -55,7 +32,7 @@ struct QuickActionsView: View, Equatable {
     }
     
     var deleteButton: some View {
-        Button(action: { [weak message] in
+        Button(action: {
             DispatchQueue.global(qos: .background).async {
                 message?.delete()
             }
@@ -65,7 +42,27 @@ struct QuickActionsView: View, Equatable {
     }
     
     var body: some View {
-        HStack {
+        lazy var clipButton = {
+            return Button(action: {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
+                opened.toggle()
+            }) {
+                Text("Copy")
+            }
+        }()
+        
+        lazy var linkButton = {
+            Button(action: {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(message!.channel_id)/\(message?.id ?? "")", forType: .string)
+                opened.toggle()
+            }) {
+                Text("Copy Message Link")
+            }
+        }()
+        
+        return HStack {
             openButton
             if opened {
                 clipButton

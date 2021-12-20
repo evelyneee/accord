@@ -19,7 +19,7 @@ final class AppKitLink<T: NSView> {
         }
     }
     func introspect(_ completion: @escaping ((_ nsView: T, _ subviewCount: Int) -> Void)) {
-        guard let view = NSApplication.shared.keyWindow?.contentView else { return }
+        guard let view = NSApp.keyWindow?.contentView else { return }
         for child in view.subviews {
             if let child = child as? T {
                 completion(child, child.subviews.count)

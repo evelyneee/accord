@@ -32,7 +32,6 @@ struct EmbedView: View, Equatable {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
                 }
             }
-            .frame(width: 248)
         }
         .frame(width: 250)
     }

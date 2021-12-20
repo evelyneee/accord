@@ -1465,7 +1465,7 @@ final class DiscordError: Codable {
 
 func logOut() {
     _ = KeychainManager.save(key: "me.evelyn.accord.token", data: Data())
-    NSApplication.shared.restart()
+    NSApp.restart()
 }
 
 final class Headers {
@@ -1696,7 +1696,6 @@ final public class RequestPublisher {
         guard let url = url else { return EmptyImagePublisher }
         let request = URLRequest(url: url)
         if let cachedImage = cache.cachedResponse(for: request) {
-            print(cachedImage.data)
             let img = NSImage(data: cachedImage.data)
             return Just.init(img).eraseToAny()
         }

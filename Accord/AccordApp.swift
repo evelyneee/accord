@@ -48,7 +48,7 @@ struct AccordApp: App {
                         print("hi")
                         appDelegate.fileNotifications()
                         DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
-                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                            NSApp.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
                         })
                     })
                     .onDisappear(perform: {
@@ -73,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     @objc func onSleepNote(note: NSNotification) {
+        guard wss != nil else { return }
         wss.ws.cancel(with: .goingAway, reason: Data())
     }
     func fileNotifications() {
@@ -85,7 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag{
-            NSApplication.shared.keyWindow?.makeKeyAndOrderFront(nil)
+            NSApp.keyWindow?.makeKeyAndOrderFront(nil)
         }
         return true
     }

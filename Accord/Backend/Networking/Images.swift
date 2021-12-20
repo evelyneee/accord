@@ -16,7 +16,7 @@ let cache = URLCache(memoryCapacity: 1_000_000_000, diskCapacity: 1_000_000_000,
 
 struct Attachment: View, Equatable {
     static func == (lhs: Attachment, rhs: Attachment) -> Bool {
-        return lhs.url == rhs.url
+        return lhs.url == rhs.url || lhs.imageLoader.image == rhs.imageLoader.image
     }
     
     @ObservedObject var imageLoader: ImageLoaderAndCache
@@ -76,7 +76,7 @@ final class ImageLoaderAndCache: ObservableObject {
     }
     
     func load() {
-        DispatchQueue(label: "Image-\(url?.absoluteString ?? "")").async { [weak self] in
+        imageQueue.async { [weak self] in
             self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
                 .replaceError(with: NSImage())
                 .replaceNil(with: NSImage())

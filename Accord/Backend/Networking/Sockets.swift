@@ -75,8 +75,8 @@ final class WebSocket {
         ws = session.webSocketTask(with: url!)
         print(ws.maximumMessageSize, "default size")
         ws.maximumMessageSize = 9999999
-        DispatchQueue.main.async {
-            self.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
+        DispatchQueue.main.async { [weak self] in
+            self?.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
                 print("reset req blocker")
                 wss.req = 0
                 wssThread.async {
@@ -91,7 +91,7 @@ final class WebSocket {
             }
         }
         ws.resume()
-        try self.hello()
+        self.hello()
         if let session_id = session_id, let seq = seq {
             try self.reconnect(session_id: session_id, seq: seq)
         } else {
@@ -141,7 +141,7 @@ final class WebSocket {
     }
     
     // MARK: Initial WS setup
-    func hello() throws {
+    func hello() {
         ws.receive { [weak self] result in
             switch result {
             case .success(let message):

@@ -86,8 +86,8 @@ struct ServerListView: View, Equatable {
                         if #available(macOS 12.0, *) {
                             Image(systemName: "bubble.left.fill")
                                 .frame(width: 45, height: 45)
-                                .background(Material.thick)
-                                .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                                .background(Material.ultraThick)
+                                .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
                                 .onTapGesture(count: 1, perform: {
                                     selectedServer = 999
                                 })
@@ -95,7 +95,7 @@ struct ServerListView: View, Equatable {
                             Image(systemName: "bubble.left.fill")
                                 .frame(width: 45, height: 45)
                                 .background(Color(NSColor.windowBackgroundColor))
-                                .cornerRadius((selectedServer ?? 0) == 999 ? 15.0 : 23.5)
+                                .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
                                 .onTapGesture(count: 1, perform: {
                                     selectedServer = 999
                                 })
@@ -115,7 +115,7 @@ struct ServerListView: View, Equatable {
                                             }) { [weak guild] in
                                                 Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
                                                     .frame(minWidth: 15, idealWidth: 45, minHeight: 15, idealHeight: 45)
-                                                    .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
+                                                    .cornerRadius(selectedServer == guild?.index ? 15.0 : 23.5)
                                             }
                                             .buttonStyle(BorderlessButtonStyle())
                                             if pingCount(guild: guild) != 0 {
