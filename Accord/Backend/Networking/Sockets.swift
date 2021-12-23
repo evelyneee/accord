@@ -470,13 +470,14 @@ final class WebSocket {
                                 MessageController.shared.typing(msg: data, channelID: channelid)
                             }
                         case "USER_UPDATE": break
+                        case "READY_SUPPLEMENTAL": break
                         case "GUILD_MEMBER_LIST_UPDATE":
 //                            do {
 //                                let list = try JSONDecoder().decode(MemberListUpdate.self, from: textData)
 //                                MessageController.shared.sendMemberList(msg: list)
 //                            } catch { }
                             break
-                        default: print("not handled: \(payload)"); break
+                        default: print("not handled: \(String(data: textData, encoding: .utf8))"); break
                         }
                     }
                     self?.receive() // call back the function, creating a loop

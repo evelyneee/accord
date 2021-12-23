@@ -33,8 +33,13 @@ struct MessageCellView: View {
                     Text(replyNick ?? reply.author?.username ?? "")
                         .foregroundColor(replyColor)
                         .fontWeight(.semibold)
-                    Text(reply.content)
-                        .lineLimit(0)
+                    if #available(macOS 12.0, *) {
+                        Text(try! AttributedString(markdown: reply.content))
+                            .lineLimit(0)
+                    } else {
+                        Text(reply.content)
+                            .lineLimit(0)
+                    }
                 }
                 .padding(.leading, 47)
             }

@@ -249,7 +249,7 @@ struct SettingsViewRedesign: View {
                 .background(Color.black.opacity(0.25))
                 .cornerRadius(15)
                 .padding()
-                Text("Accord (me.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""), using \(String(describing: report_memory())) bytes of RAM")
+                Text("Accord (me.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
                 Text("OS: macOS \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))")
@@ -264,24 +264,6 @@ struct SettingsViewRedesign: View {
                 discordStockSettings = discordSettings
             })
         }
-    }
-}
-
-// Get memory usage
-func report_memory() -> Int {
-    var taskInfo = mach_task_basic_info()
-    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-    let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
-        $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-            task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
-        }
-    }
-    if kerr == KERN_SUCCESS {
-        return Int(taskInfo.resident_size)
-    } else {
-        print("Error with task_info(): " +
-            (String(cString: mach_error_string(kerr), encoding: String.Encoding.ascii) ?? "unknown error"))
-        return 0
     }
 }
 
