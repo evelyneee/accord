@@ -32,6 +32,9 @@ struct Attachment: View, Equatable {
               .resizable()
               .frame(maxWidth: imageLoader.image.size.width, maxHeight: imageLoader.image.size.height)
               .scaledToFit()
+              .onDisappear(perform: {
+                  imageLoader.cancellable?.cancel()
+              })
     }
 }
 
@@ -60,12 +63,10 @@ struct HoveredAttachment: View, Equatable {
     }
 }
 
-let imageQueue = DispatchQueue(label: "Image Queue")
-
 final class ImageLoaderAndCache: ObservableObject {
     
     @Published var image: NSImage = NSImage()
-    private var cancellable: AnyCancellable? = nil
+    var cancellable: AnyCancellable? = nil
     private var url: URL?
     private var size: CGSize?
     

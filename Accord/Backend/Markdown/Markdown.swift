@@ -63,6 +63,7 @@ final public class Markdown {
     
     /// Publisher that sends a SwiftUI Text view with a newline
     static public var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
+    static fileprivate let blankCharacter = "‎" // Not an empty string
     
     /**
      markWord: Simple Publisher that sends a text view with the processed word
@@ -86,7 +87,7 @@ final public class Markdown {
             let dict = Array(arrayLiteral: zip(songIDs, platforms))
                 .reduce([], +)
             for (id, platform) in dict {
-                SongLink.shared.getSong(song: "\(platform):track:\(id)") { song in
+                SongLink.getSong(song: "\(platform):track:\(id)") { song in
                     guard let song = song else { return }
                     switch musicPlatform {
                     case .appleMusic:
@@ -120,6 +121,7 @@ final public class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
+        let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         let regex = #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#
         let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }

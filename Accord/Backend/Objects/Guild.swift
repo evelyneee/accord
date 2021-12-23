@@ -27,18 +27,18 @@ final class Guild: Codable, Equatable, Hashable, Identifiable {
     // var widget_enabled: Bool?
     // var widget_channel_id: String?
     // var verification_level: Int
-    var default_message_notification: Int?
-    var explicit_content_filter: Int
+    // var default_message_notification: Int?
+    // var explicit_content_filter: Int
     // TODO: Role object
     var roles: [Role]?
     var emojis: [DiscordEmote]
     // TODO: Guild features
     // var features:
     var mfa_level: Int
-    var application_id: String?
-    var system_channel_id: String?
-    var system_channel_flags: Int?
-    var rules_channel_id: String?
+    // var application_id: String?
+    // var system_channel_id: String?
+    // var system_channel_flags: Int?
+    // var rules_channel_id: String?
     // TODO: ISO8061 timestamp
     // var joined_at: ISO8061
     var large: Bool?
@@ -69,7 +69,7 @@ final class Guild: Codable, Equatable, Hashable, Identifiable {
     var nsfw_level: Int
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
-    var stickers: [Sticker]?
+    // var stickers: [Sticker]?
     var index: Int?
     func hash(into hasher: inout Hasher) {
         return hasher.combine(id)

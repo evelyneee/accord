@@ -36,19 +36,20 @@ public func releaseModePrint(_ object: Any) {
 
 @main
 struct AccordApp: App {
+    @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @AppStorage("windowWidth") var windowWidth: Int = Int(NSApplication.shared.keyWindow?.frame.width ?? 1000)
     @AppStorage("windowHeight") var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
     var body: some Scene {
         WindowGroup {
             GeometryReader { reader in
-                ContentView()
+                ContentView(loaded: $loaded)
                     .preferredColorScheme(darkMode ? .dark : nil)
                     .onAppear(perform: {
                         print("hi")
                         appDelegate.fileNotifications()
                         DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
-                            NSApp.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
                         })
                     })
                     .onDisappear(perform: {
@@ -57,7 +58,10 @@ struct AccordApp: App {
                         print(windowWidth, windowHeight)
                     })
             }
-        }.commands {
+        }
+        .windowStyle(.automatic)
+        .windowToolbarStyle(.unifiedCompact)
+        .commands {
             SidebarCommands() // 1
         }
     }
@@ -83,11 +87,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(note:)),
             name: NSWorkspace.willSleepNotification, object: nil)
-    }
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag{
-            NSApp.keyWindow?.makeKeyAndOrderFront(nil)
-        }
-        return true
     }
 }

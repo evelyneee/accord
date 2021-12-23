@@ -8,8 +8,6 @@
 import Foundation
 import AppKit
 
-let pfpLoader = DispatchQueue(label: "pfp")
-
 final class User: Codable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.id == rhs.id
@@ -31,7 +29,6 @@ final class User: Codable, Identifiable, Hashable {
     var bio: String?
     var nick: String?
     var roleColor: String?
-    var pfp: Data?
     
     func isMe() -> Bool { user_id == self.id }
         

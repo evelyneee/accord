@@ -9,22 +9,7 @@ import Foundation
 import Combine
 
 final class Notifications {
-    static var shared = Notifications()
-    final var notifications: [(String, String)] = [] {
-        didSet {
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: Notification.Name(rawValue: "Notification"), object: nil, userInfo: ["info":(self.notifications.first) ?? [:]])
-            }
-        }
-    }
-    final var privateChannels: [String] = []
-    final func clearNotifications(forSet: (String, String)) {
-        for (i, notif) in notifications.enumerated() {
-            if notif == forSet {
-                notifications.remove(at: i)
-            }
-        }
-    }
+    public static var privateChannels: [String] = []
 }
 
 protocol URLQueryParameterStringConvertible {
@@ -43,6 +28,7 @@ final class WebSocket {
     var req: Int = 0
     var waitlist: [String:[String]] = [:]
     var timer: Timer?
+    var pendingHeartbeat: Bool = false
     
     private var bag = Set<AnyCancellable>()
     
@@ -175,7 +161,7 @@ final class WebSocket {
     }
 
     // MARK: - Ready
-    func ready() -> Future<GatewayD, Error> {
+    func ready() -> Future<GatewayD?, Error> {
         return Future { [weak ws] promise in
             ws?.receive { result in
                 switch result {
@@ -217,7 +203,7 @@ final class WebSocket {
     // MARK: ACK
     func heartbeat() throws {
         print("sent heartbeat")
-        guard let seq = seq else {
+        guard let seq = seq, !pendingHeartbeat else {
             self.reset()
             return
         }
@@ -227,11 +213,12 @@ final class WebSocket {
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
+            ws.send(.string(jsonString)) { [weak self] error in
+                self?.pendingHeartbeat = true
                 if let _ = error {
-                    try? self.reconnect()
+                    try? self?.reconnect()
                 }
-                wssThread.asyncAfter(deadline: .now() + .milliseconds(self.heartbeat_interval), execute: { [weak self] in
+                wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: { [weak self] in
                     do {
                         try self?.heartbeat()
                     } catch {
@@ -385,6 +372,7 @@ final class WebSocket {
                             if op == 11 {
                                 // no seq + op 11 means a hearbeat was done successfully
                                 print("Heartbeat successful")
+                                self?.pendingHeartbeat = false
                                 self?.receive()
                             } else {
                                 // disconnected?
@@ -452,7 +440,7 @@ final class WebSocket {
                                 print("notification")
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
-                            } else if Notifications.shared.privateChannels.contains(channel_id) && userID != user_id {
+                            } else if Notifications.privateChannels.contains(channel_id) && userID != user_id {
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
                             }
@@ -488,7 +476,7 @@ final class WebSocket {
 //                                MessageController.shared.sendMemberList(msg: list)
 //                            } catch { }
                             break
-                        default: print("not handled: \(payload["t"]!)"); break
+                        default: print("not handled: \(payload)"); break
                         }
                     }
                     self?.receive() // call back the function, creating a loop

@@ -9,8 +9,7 @@ import Foundation
 import AppKit
 
 final class RoleManager {
-    static var shared: RoleManager = RoleManager()
-    final func arrangeRoleColors(guilds: [Guild]) -> [String:(Int, Int)] {
+    final class func arrangeRoleColors(guilds: [Guild]) -> [String:(Int, Int)] {
         var returnArray: [String:(Int, Int)] = [:]
         for guild in guilds {
             if var roles = guild.roles {
@@ -32,9 +31,5 @@ final class Role: Codable {
     var id: String
     var name: String
     var color: Int?
-    var hoist: Bool
     var position: Int
-    var permissions: String?
-    var managed: Bool
-    var mentionable: Bool
 }

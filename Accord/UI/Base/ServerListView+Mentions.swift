@@ -23,9 +23,11 @@ extension ServerListView: MentionSenderDelegate {
         selection = nil
     }
     func removeMentions(server: String) {
-        guard let guild = ServerListView.fastIndexGuild(server, array: guilds) else { return }
-        for channel in (guilds)[guild].channels! {
-            channel.read_state?.mention_count = 0
+
+        let index = folders.compactMap { ServerListView.fastIndexGuild(server, array: $0.guilds) }
+        for (i, v) in index.enumerated() {
+            let guild = folders[i].guilds[v]
+            guild.channels?.forEach { $0.read_state?.mention_count = 0 }
         }
     }
     

@@ -53,8 +53,6 @@ struct ChatControls: View {
         URLSession.shared.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) in
         }).resume()
     }
-    let messageSendQueue = DispatchQueue(label: "Send Message")
-
     var body: some View {
         HStack {
             ZStack(alignment: .trailing) {
@@ -281,7 +279,7 @@ final class ChatControlsViewModel: ObservableObject {
             // TODO: Slash command implementation here
         } else if !(emoji.isEmpty) {
             let key = emoji[0]
-            let matched: [DiscordEmote] = Array(AllEmotes.shared.allEmotes.values.joined()).filter { $0.name.lowercased().contains(key) }
+            let matched: [DiscordEmote] = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased().contains(key) }
             DispatchQueue.main.async { [weak self] in
                 self?.matchedEmoji = matched
             }

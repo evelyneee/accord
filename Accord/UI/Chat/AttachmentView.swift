@@ -29,7 +29,6 @@ struct AttachmentView: View, Equatable {
                             .cornerRadius(5)
                     }
                 }
-                .frame(width: Double(obj.width ?? 1000) * 0.4, height: Double(obj.height ?? 1000) * 0.4)
                 Button(action: { [weak obj] in
                     if obj?.content_type?.prefix(6).stringLiteral == "video/" {
                         attachmentWindows(player: AVPlayer(url: URL(string: obj?.url ?? "")!), url: nil, name: (obj?.filename)!, width: (obj?.width)!, height: (obj?.height)!)

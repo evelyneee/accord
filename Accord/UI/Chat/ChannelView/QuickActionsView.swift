@@ -17,7 +17,9 @@ struct QuickActionsView: View {
     
     var openButton: some View {
         Button(action: {
-            opened.toggle()
+            withAnimation {
+                opened.toggle()
+            }
         }) {
             Image(systemName: (opened ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
         }
@@ -45,7 +47,7 @@ struct QuickActionsView: View {
         lazy var clipButton = {
             return Button(action: {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString((message?.content ?? "").marked(), forType: .string)
+                NSPasteboard.general.setString((message?.content ?? ""), forType: .string)
                 opened.toggle()
             }) {
                 Text("Copy")

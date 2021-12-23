@@ -106,26 +106,60 @@ extension Color {
 
 @available(macOS 11.0, *)
 struct Folder<Content: View>: View {
+    @State var icon: [Guild]
     @State var color: NSColor
     @State var content: () -> Content
     
     @State private var collapsed: Bool = true
+    
+    let gridLayout: [GridItem] = [
+        GridItem(spacing: 0),
+        GridItem(spacing: 0)
+    ]
     
     var body: some View {
         VStack {
             Button(
                 action: { withAnimation { self.collapsed.toggle() } },
                 label: {
-                    HStack {
-                        Image(systemName: "folder.fill").resizable()
-                            .scaledToFit()
-                            .frame(width: 25, height: 25)
-                            .foregroundColor(Color.white)
-                            .padding()
-                            .frame(width: 45)
-                            .background(Color(color.withAlphaComponent(0.75)))
-                            .clipShape(Circle())
+                    VStack(spacing: 3) {
+                        HStack(spacing: 3) {
+                            if let guild = icon[safe: 0], let icon = guild.icon {
+                                Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .clipShape(Circle())
+                                    .frame(width: 16, height: 16)
+                            } else {
+                                Spacer().frame(width: 16, height: 16)
+                            }
+                            if let guild = icon[safe: 1], let icon = guild.icon {
+                                Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .clipShape(Circle())
+                                    .frame(width: 16, height: 16)
+                            } else {
+                                Spacer().frame(width: 16, height: 16)
+                            }
+                        }
+                        HStack(spacing: 3) {
+                            if let guild = icon[safe: 2], let icon = guild.icon {
+                                Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .clipShape(Circle())
+                                    .frame(width: 16, height: 16)
+                            } else {
+                                Spacer().frame(width: 16, height: 16)
+                            }
+                            if let guild = icon[safe: 3], let icon = guild.icon {
+                                Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .clipShape(Circle())
+                                    .frame(width: 16, height: 16)
+                            } else {
+                                Spacer().frame(width: 16, height: 16)
+                            }
+                        }
                     }
+                    .frame(width: 45, height: 45)
+                    .background(Color(color.withAlphaComponent(0.75)))
+                    .cornerRadius(15)
+                    .frame(width: 45, height: 45)
                 }
             )
             .buttonStyle(PlainButtonStyle())
@@ -204,7 +238,7 @@ func pfpURL(_ uid: String?, _ hash: String?) -> String {
 
 func iconURL(_ id: String?, _ icon: String?) -> String {
     guard let id = id, let icon = icon else { return "" }
-    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=128"
+    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=64"
 }
 
 // BAD

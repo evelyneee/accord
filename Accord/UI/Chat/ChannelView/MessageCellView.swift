@@ -10,8 +10,6 @@ import SwiftUI
 import AppKit
 import Combine
 
-let colorQueue = DispatchQueue(label: "ColorQueue")
-
 struct MessageCellView: View {
     @Binding var message: Message
     var nick: String?
@@ -28,7 +26,7 @@ struct MessageCellView: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack {
+                HStack { [unowned reply] in
                     Attachment(pfpURL(reply.author?.id, reply.author?.avatar)).equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
@@ -105,11 +103,15 @@ struct MessageCellView: View {
             colorQueue.async {
                 if let role = role, let color = roleColors[role]?.0 {
                     let hex = String(format: "%06X", color)
-                    self.color = Color.init(hex: hex)
+                    withAnimation {
+                        self.color = Color.init(hex: hex)
+                    }
                 }
                 if let role = replyRole, let color = roleColors[role]?.0 {
                     let hex = String(format: "%06X", color)
-                    self.replyColor = Color.init(hex: hex)
+                    withAnimation {
+                        self.replyColor = Color.init(hex: hex)
+                    }
                 }
             }
         })

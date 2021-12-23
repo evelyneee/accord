@@ -7,10 +7,7 @@
 
 import Foundation
 
-final class Channel: Codable, Equatable, Identifiable, Hashable {
-    static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.hashValue == rhs.hashValue
-    }
+final class Channel: Codable, Identifiable {
 
     let id: String
     let type: ChannelType
@@ -33,18 +30,12 @@ final class Channel: Codable, Equatable, Identifiable, Hashable {
     let parent_id: String?
     //  var rtc_region: ?
     // var video_quality_mode: Int?
-    var message_count: Int?
-    var member_count: Int?
     // TODO: Thread metadata object
     // var thread_metadata?
     // TODO: Thread member object
     // var member: User?
-    var default_auto_archive_duration: Int?
     // var permissions: String?
     var read_state: ReadStateEntry?
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(self.id.appending(String(describing: read_state?.mention_count ?? 0)))
-    }
 }
 
 enum ChannelType: Int, Codable {

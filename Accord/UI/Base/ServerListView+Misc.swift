@@ -32,8 +32,8 @@ extension ServerListView {
         }
         return messageDict[entry]
     }
-    func order() {
-        for guild in full.guilds {
+    func order(full: GatewayD?) {
+        for guild in full?.guilds ?? [] {
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             let parents: [Channel] = guild.channels?.filter( { $0.type == .section } ) ?? []
             let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []
@@ -46,8 +46,8 @@ extension ServerListView {
             guild.channels = ret
         }
     }
-    func assignReadStates() {
-        guard let readState = full.read_state else { return }
+    func assignReadStates(full: GatewayD?) {
+        guard let readState = full?.read_state else { return }
         let stateDict = readState.entries.enumerated().compactMap { (index, element) in
             return [element.id:index]
         }.reduce(into: [:]) { (result, next) in

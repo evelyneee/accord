@@ -32,7 +32,7 @@ final class ChannelViewViewModel: ObservableObject {
     init(channelID: String, guildID: String) {
         self.channelID = channelID
         self.guildID = guildID
-        DispatchQueue(label: "Message Fetch Queue").async { [weak self] in
+        messageFetchQueue.async { [weak self] in
             self?.guildID == "@me" ? wss.subscribeToDM(channelID) : wss.subscribe(guildID, channelID)
             MentionSender.shared.removeMentions(server: guildID)
             // fetch messages
@@ -86,7 +86,7 @@ final class ChannelViewViewModel: ObservableObject {
             }
             DispatchQueue.main.async {
                 self.messages = messages.reversed()
-                DispatchQueue(label: "Channel loading").async {
+                messageFetchQueue.async {
                     guildID == "@me" ? self.fakeNicksObject() : self.performSecondStageLoad()
                     self.loadPronouns()
                     self.ack(channelID: channelID, guildID: guildID)

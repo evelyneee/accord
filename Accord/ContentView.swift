@@ -10,7 +10,6 @@ import Combine
 
 // Discord WebSocket
 var wss: WebSocket!
-let wssThread = DispatchQueue(label: "WebSocket Thread")
 
 struct TiltAnimation: ViewModifier {
     @State var rotated: Bool = false
@@ -20,7 +19,7 @@ struct TiltAnimation: ViewModifier {
             .rotationEffect(.degrees(rotated ? 10 : -10))
             .onAppear {
                 timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
-                    withAnimation(Animation.linear(duration: 0.3)) {
+                    withAnimation(Animation.spring()) {
                         rotated.toggle()
                     }
                 }
@@ -50,7 +49,8 @@ struct LoadingView: View {
         Text("Now available on Rejail!"),
         Text("The more mature, hot older sister."),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
-        Text("Never gonna give you up, never gonna use electron")
+        Text("Never gonna give you up, never gonna use electron"),
+        Text("Tell ur oomfies")
     ]
     var body: some View {
         VStack {
@@ -74,13 +74,11 @@ struct LoadingView: View {
     }
 }
 
-@available(macOS 11.0, *)
 struct ContentView: View {
-    @State public var selection: Int?
     @State var socketOut: GatewayD?
     @State var modalIsPresented: Bool = false
-    @State var wsCancellable: AnyCancellable? = nil
-    @State var loaded: Bool = false
+    @State var wsCancellable = Set<AnyCancellable>()
+    @Binding var loaded: Bool
     @State var serverListView: ServerListView?
     var body: some View {
         Group {
@@ -93,60 +91,58 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if (AccordCoreVars.shared.token != "") {
-                concurrentQueue.async {
-                    do {
-                        guard wss == nil else { return }
-                        print("trying")
-                        let new = try WebSocket.init(url: WebSocket.gatewayURL)
-                        print("init")
-                        wss = new
-                        wsCancellable = wss.ready()
-                            .sink(receiveCompletion: { completion in
-                                switch completion {
-                                case .finished:
-                                    break
-                                case .failure(let error):
-                                    print("error")
-                                    break
-                                }
-                            }, receiveValue: { d in
-                                let user = d.user
-                                AccordCoreVars.shared.user = user
-                                user_id = user.id
-                                if let pfp = user.avatar {
-                                    Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
-                                }
-                                username = user.username
-                                discriminator = user.discriminator
-                                socketOut = d
-                                self.serverListView = ServerListView(d: d)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                                    withAnimation {
-                                        loaded = true
-                                    }
-                                })
-                            })
-                    } catch {
-                        print(error)
-                        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                        do {
-                            let data = try Data(contentsOf: path)
-                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                            socketOut = structure.d
-                            self.serverListView = ServerListView(d: structure.d)
+            concurrentQueue.async {
+                guard AccordCoreVars.shared.token != "" else { modalIsPresented = true; return }
+                do {
+                    guard wss == nil else { return }
+                    print("trying")
+                    let new = try WebSocket.init(url: WebSocket.gatewayURL)
+                    print("init")
+                    wss = new
+                    wss.ready()
+                        .sink(receiveCompletion: { completion in
+                            switch completion {
+                            case .finished:
+                                break
+                            case .failure(let error):
+                                print(error)
+                                break
+                            }
+                        }, receiveValue: { d in
+                            weak var user = d?.user
+                            AccordCoreVars.shared.user = user
+                            user_id = user?.id ?? ""
+                            if let pfp = user?.avatar {
+                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
+                            }
+                            username = user?.username ?? ""
+                            discriminator = user?.discriminator ?? ""
+                            self.serverListView = ServerListView(full: d)
+                            socketOut = d
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                                 withAnimation {
                                     loaded = true
                                 }
                             })
-                        } catch {
-                            print(error)
-                        }
+                        })
+                        .store(in: &wsCancellable)
+                } catch {
+                    print(error)
+                    let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+                    do {
+                        let data = try Data(contentsOf: path)
+                        let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                        socketOut = structure.d
+                        self.serverListView = ServerListView(full: socketOut)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                            withAnimation {
+                                loaded = true
+                            }
+                        })
+                    } catch {
+                        print(error)
                     }
                 }
-            } else {
-                modalIsPresented = true
             }
         }
     }

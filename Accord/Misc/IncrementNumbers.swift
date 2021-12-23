@@ -16,6 +16,16 @@ postfix operator --
 
 infix operator &=
 
+postfix operator ~~
+
+public postfix func ~~<T: Collection & ExpressibleByArrayLiteral>(_ x: T?) -> T {
+    if let x = x {
+        return x
+    } else {
+        return []
+    }
+}
+
 @discardableResult public prefix func ++<T: Numeric>(_ x: inout T) -> T {
     x += 1
     return x

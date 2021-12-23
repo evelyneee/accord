@@ -27,8 +27,6 @@ extension ChannelView: MessageControllerDelegate {
                 message.lastMessage = firstMessage
             }
             DispatchQueue.main.async {
-                self.popup.append(false)
-                self.sidePopups.append(false)
                 if let count = viewModel?.messages.count, count == 50 {
                     viewModel?.messages.removeFirst()
                 }
@@ -36,7 +34,9 @@ extension ChannelView: MessageControllerDelegate {
                 if let view = viewModel?.scrollView?.documentView {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak view] in
                         if let floatValue = viewModel?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.8 && floatValue != 1.0, let height = view?.bounds.size.height {
-                            view?.scroll(NSPoint(x: 0, y: height))
+                            withAnimation(Animation.linear) {
+                                view?.scroll(NSPoint(x: 0, y: height))
+                            }
                         }
                     }
                 }
@@ -59,14 +59,14 @@ extension ChannelView: MessageControllerDelegate {
     func deleteMessage(msg: Data, channelID: String?) {
         guard let channelID = channelID else { return }
         guard channelID == self.channelID else { return }
-        webSocketQueue.async { [weak viewModel] in
+        webSocketQueue.async {
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            guard let index = messageMap[message.id] as? Int else { return }
-            DispatchQueue.main.async {
-                self.sidePopups.remove(at: index)
-                self.popup.remove(at: index)
-                viewModel?.messages.remove(at: index)
+            DispatchQueue.main.async { [weak message, weak viewModel] in
+                withAnimation {
+                    guard let index = messageMap[message?.id ?? ""] as? Int else { return }
+                    viewModel?.messages.remove(at: index)
+                }
             }
         }
     }
@@ -80,7 +80,7 @@ extension ChannelView: MessageControllerDelegate {
                 guard let nick_fake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
                     guard let nick = memberDecodable.member?.nick else {
                         typing.append(memberDecodable.member?.user.username ?? "")
-                        webSocketQueue.asyncAfter(deadline: .now() + 5, execute: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                             guard !(typing.isEmpty) else { return }
                             typing.removeLast()
                         })
@@ -89,7 +89,7 @@ extension ChannelView: MessageControllerDelegate {
                     if !(typing.contains(nick)) {
                         typing.append(nick)
                     }
-                    webSocketQueue.asyncAfter(deadline: .now() + 5, execute: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                         guard !(typing.isEmpty) else { return }
                         typing.removeLast()
                     })
@@ -98,7 +98,7 @@ extension ChannelView: MessageControllerDelegate {
                 if !(typing.contains(nick_fake)) {
                     typing.append(nick_fake)
                 }
-                webSocketQueue.asyncAfter(deadline: .now() + 5, execute: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                     guard !(typing.isEmpty) else { return }
                     typing.removeLast()
                 })

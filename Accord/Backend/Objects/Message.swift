@@ -29,6 +29,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var type: Int
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
+    //var message_reference: Reply? // in the mentions endpoint
     weak var lastMessage: Message?
     
     // TODO: Component object

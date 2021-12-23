@@ -41,10 +41,10 @@ struct EmotesView: View, Equatable {
                     Spacer().frame(height: 45)
                     LazyVStack(alignment: .leading) {
                         if search == "" {
-                            ForEach(Array(AllEmotes.shared.allEmotes.keys), id: \.self) { key in
+                            ForEach(Array(Emotes.emotes.keys), id: \.self) { key in
                                 Section(header: Text(key.components(separatedBy: "$")[1])) {
                                     LazyVGrid(columns: columns) {
-                                        ForEach((AllEmotes.shared.allEmotes[key] ?? []), id: \.self) { emote in
+                                        ForEach((Emotes.emotes[key] ?? []), id: \.id) { emote in
                                             Button(action: { [weak emote] in
                                                 chatText.append(contentsOf: "<\(emote?.animated ?? false ? "a" : ""):\(emote?.name ?? ""):\(emote?.id ?? "")>")
                                             }) {
@@ -62,7 +62,7 @@ struct EmotesView: View, Equatable {
 
                         } else {
                             LazyVGrid(columns: columns) {
-                                ForEach(AllEmotes.shared.allEmotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.self) { emote in
+                                ForEach(Emotes.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
                                     Button(action: { [weak emote] in
                                         chatText.append(contentsOf: "<\(emote?.animated ?? false ? "a" : ""):\(emote?.name ?? ""):\(emote?.id ?? "")>")
                                     }) { [weak emote] in

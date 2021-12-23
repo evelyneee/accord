@@ -9,10 +9,9 @@ import Foundation
 import SwiftUI
 
 final class SongLink {
-    static var shared = SongLink()
        
     // MARK: - Song getter
-    final func getSong(song: String, completion: @escaping ((SongLinkBase?) -> Void)) {
+    public class func getSong(song: String, completion: @escaping ((SongLinkBase?) -> Void)) {
         guard let encoded = song.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
         let url = URL(string: "https://api.song.link/v1-alpha.1/links?url=\(encoded)") else { print("ripbozo"); return completion(nil) }
         Request.fetch(SongLinkBase.self, url: url, headers: Headers(type: .GET)) { songLink, error in
@@ -23,7 +22,6 @@ final class SongLink {
             }
         }
     }
-    
 }
 
 extension Substring {

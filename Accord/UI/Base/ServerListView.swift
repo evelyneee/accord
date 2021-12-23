@@ -20,9 +20,8 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
-final class AllEmotes {
-    static var shared = AllEmotes()
-    var allEmotes: [String:[DiscordEmote]] = [:]
+final class Emotes {
+    static public var emotes: [String:[DiscordEmote]] = [:]
 }
 
 func pingCount(guild: Guild) -> Int {
@@ -30,276 +29,284 @@ func pingCount(guild: Guild) -> Int {
     return intArray.reduce(0, +)
 }
 
-struct ServerListView: View, Equatable {
+struct ServerListView: View {
     
-    static func == (lhs: ServerListView, rhs: ServerListView) -> Bool {
-        return true
+    init(full: GatewayD?) {
+        status = full?.user_settings?.status
+        Emotes.emotes = full?.guilds
+                                        .map { ["\($0.id)$\($0.name)":$0.emojis] }
+                                        .flatMap { $0 }
+                                        .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
+                                            var nextDict = dict
+                                            nextDict.updateValue(tuple.1, forKey: tuple.0)
+                                            return nextDict
+                                        } ?? [:]
+        let guildOrder = full?.user_settings?.guild_positions ?? []
+        let messageDict = full?.guilds.enumerated().compactMap { (index, element) in
+            return [element.id:index]
+        }.reduce(into: [:]) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        } ?? [:]
+        let guildTemp = guildOrder.compactMap { messageDict[$0] }.compactMap { full?.guilds[$0] }
+        let guildDict = guildTemp.enumerated().compactMap { (index, element) in
+            return [element.id:index]
+        }.reduce(into: [:]) { (result, next) in
+            result.merge(next) { (_, rhs) in rhs }
+        }
+        let folderTemp = full?.user_settings?.guild_folders ?? []
+        for folder in folderTemp {
+            for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
+                let guild = guildTemp[id]
+                guild.emojis.removeAll()
+                guild.index = id
+                guild.channels?.forEach { $0.guild_id = guild.id }
+                folder.guilds.append(guild)
+            }
+        }
+        self.folders = folderTemp
+        assignReadStates(full: full)
+        order(full: full)
+        concurrentQueue.async {
+            guard let guilds = full?.guilds else { return }
+            roleColors = RoleManager.arrangeRoleColors(guilds: guilds)
+        }
+        MentionSender.shared.delegate = self
     }
     
-    @State var guilds = [Guild]()
-    var full: GatewayD
     @State var selection: Int? = nil
-    @State var selectedServer: Int? = nil
-    @State var privateChannels = [Channel]()
-    @State var guildOrder: [String] = []
-    @State var guildIcons: [String:NSImage] = [:]
-    @State var pings: [(String, String)] = []
-    @State var stuffSelection: Int? = nil
+    @State var selectedServer: Int? = 0
     @State var online: Bool = true
     @State var alert: Bool = true
-    @State var folders = [GuildFolder]()
+    var folders: [GuildFolder]
+    @State var privateChannels: [Channel] = []
     @State var status: String? = nil
-    
-    init(d: GatewayD) {
-        self.full = d
-    }
+    @State var timedOut: Bool = false
+    @State var mentions: Bool = false
     
     var body: some View {
-        NavigationView {
-            HStack(spacing: 0, content: {
+        lazy var dmButton: some View = {
+            return Group {
+                if #available(macOS 12.0, *) {
+                    Image(systemName: "bubble.left.fill")
+                        .frame(width: 45, height: 45)
+                        .background(Material.ultraThick)
+                        .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
+                        .onTapGesture(count: 1, perform: {
+                            selectedServer = 201
+                        })
+                } else {
+                    Image(systemName: "bubble.left.fill")
+                        .frame(width: 45, height: 45)
+                        .background(Color(NSColor.windowBackgroundColor))
+                        .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
+                        .onTapGesture(count: 1, perform: {
+                            selectedServer = 201
+                        })
+                }
+            }
+        }()
+        lazy var onlineButton: some View = {
+            Button("Error") {
+                alert.toggle()
+            }
+            .alert(isPresented: $alert) {
+                Alert(
+                    title: Text("Could not connect"),
+                    message: Text("There was an error connecting to Discord"),
+                    primaryButton: .default(
+                        Text("Ok"),
+                        action: {
+                            alert.toggle()
+                        }
+                    ),
+                    secondaryButton: .destructive(
+                        Text("Reconnect"),
+                        action: {
+                            wss.reset()
+                        }
+                    )
+                )
+            }
+        }()
+        lazy var foldersList: some View = {
+            ForEach(folders, id: \.hashValue) { folder in
+                if folder.guilds.count != 1 {
+                    Folder(icon: Array(folder.guilds.prefix(4)), color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
+                        ForEach(folder.guilds, id: \.hashValue) { guild in
+                            ZStack(alignment: .bottomTrailing) {
+                                Button(action: { [weak guild] in
+                                    withAnimation {
+                                        DispatchQueue.main.async {
+                                            selectedServer = guild?.index
+                                        }
+                                    }
+                                }) { [weak guild] in
+                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? "")).equatable()
+                                        .frame(width: 45, height: 45)
+                                        .cornerRadius(selectedServer == guild?.index ? 15.0 : 23.5)
+                                }
+                                if pingCount(guild: guild) != 0 {
+                                    ZStack {
+                                        Circle()
+                                            .foregroundColor(Color.red)
+                                            .frame(width: 15, height: 15)
+                                        Text(String(describing: pingCount(guild: guild)))
+                                            .foregroundColor(Color.white)
+                                            .fontWeight(.semibold)
+                                            .font(.caption)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 1)
+                } else {
+                    ZStack(alignment: .bottomTrailing) {
+                        ForEach(folder.guilds, id: \.hashValue) { guild in
+                            Button(action: { [weak guild] in
+                                withAnimation {
+                                    DispatchQueue.main.async {
+                                        selectedServer = guild?.index
+                                    }
+                                }
+                            }) { [weak guild] in
+                                Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil).equatable()
+                                    .frame(width: 45, height: 45)
+                                    .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+                            if pingCount(guild: guild) != 0 {
+                                ZStack {
+                                    Circle()
+                                        .foregroundColor(Color.red)
+                                        .frame(width: 15, height: 15)
+                                    Text(String(describing: pingCount(guild: guild)))
+                                        .foregroundColor(Color.white)
+                                        .fontWeight(.semibold)
+                                        .font(.caption)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }()
+        lazy var statusIndicator: some View = {
+            return Group {
+                switch self.status {
+                case "online":
+                    Circle()
+                        .foregroundColor(Color.green)
+                        .frame(width: 12, height: 12)
+                case "invisible":
+                    Image("invisible")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                case "dnd":
+                    Image("dnd")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                case "idle":
+                    Circle()
+                        .foregroundColor(Color(NSColor.systemOrange))
+                        .frame(width: 12, height: 12)
+                default:
+                    Circle()
+                        .foregroundColor(Color.clear)
+                        .frame(width: 12, height: 12)
+                }
+            }
+        }()
+        lazy var settingsLink: some View = {
+            NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$selection) {
+                ZStack(alignment: .bottomTrailing) {
+                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                        .scaledToFit()
+                        .clipShape(Circle())
+                        .frame(width: 45, height: 45)
+                    statusIndicator
+                }
+            }
+        }()
+        return NavigationView {
+            HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-                    VStack {
+                    LazyVStack {
                         if !online {
-                            Button("Error") {
-                                alert.toggle()
-                            }
-                            .alert(isPresented: $alert) {
-                                Alert(
-                                    title: Text("Could not connect"),
-                                    message: Text("There was an error connecting to Discord"),
-                                    primaryButton: .default(
-                                        Text("Ok"),
-                                        action: {
-                                            alert.toggle()
-                                        }
-                                    ),
-                                    secondaryButton: .destructive(
-                                        Text("Reconnect"),
-                                        action: {
-                                            wss.reset()
-                                        }
-                                    )
-                                )
-                            }
+                            onlineButton
                         }
-                        if #available(macOS 12.0, *) {
-                            Image(systemName: "bubble.left.fill")
-                                .frame(width: 45, height: 45)
-                                .background(Material.ultraThick)
-                                .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
-                                .onTapGesture(count: 1, perform: {
-                                    selectedServer = 999
-                                })
-                        } else {
-                            Image(systemName: "bubble.left.fill")
-                                .frame(width: 45, height: 45)
-                                .background(Color(NSColor.windowBackgroundColor))
-                                .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
-                                .onTapGesture(count: 1, perform: {
-                                    selectedServer = 999
-                                })
-                        }
-                        // MARK: - Guild icon UI
-                        ForEach(folders, id: \.hashValue) { folder in
-                            if folder.guilds.count != 1 {
-                                Folder(color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
-                                    ForEach(folder.guilds, id: \.hashValue) { guild in
-                                        ZStack(alignment: .bottomTrailing) {
-                                            Button(action: { [weak guild] in
-                                                withAnimation {
-                                                    DispatchQueue.main.async {
-                                                        selectedServer = guild?.index
-                                                    }
-                                                }
-                                            }) { [weak guild] in
-                                                Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
-                                                    .frame(minWidth: 15, idealWidth: 45, minHeight: 15, idealHeight: 45)
-                                                    .cornerRadius(selectedServer == guild?.index ? 15.0 : 23.5)
-                                            }
-                                            .buttonStyle(BorderlessButtonStyle())
-                                            if pingCount(guild: guild) != 0 {
-                                                ZStack {
-                                                    Circle()
-                                                        .foregroundColor(Color.red)
-                                                        .frame(width: 15, height: 15)
-                                                    Text(String(describing: pingCount(guild: guild)))
-                                                        .foregroundColor(Color.white)
-                                                        .fontWeight(.semibold)
-                                                        .font(.caption)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                ZStack(alignment: .bottomTrailing) {
-                                    ForEach(folder.guilds, id: \.hashValue) { guild in
-                                        Button(action: { [weak guild] in
-                                            withAnimation {
-                                                DispatchQueue.main.async {
-                                                    selectedServer = guild?.index
-                                                }
-                                            }
-                                        }) { [weak guild] in
-                                            Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil)
-                                                .frame(width: 45, height: 45)
-                                                .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        if pingCount(guild: guild) != 0 {
-                                            ZStack {
-                                                Circle()
-                                                    .foregroundColor(Color.red)
-                                                    .frame(width: 15, height: 15)
-                                                Text(String(describing: pingCount(guild: guild)))
-                                                    .foregroundColor(Color.white)
-                                                    .fontWeight(.semibold)
-                                                    .font(.caption)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if !(folders.isEmpty) {
-                            NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$stuffSelection) {
-                                ZStack(alignment: .bottomTrailing) {
-                                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                                        .scaledToFit()
-                                        .cornerRadius((selectedServer ?? 0) == 9999 ? 15.0 : 23.5)
-                                        .frame(width: 45, height: 45)
-                                    switch self.status {
-                                    case "online":
-                                        Circle()
-                                            .foregroundColor(Color(NSColor.systemGreen))
-                                            .frame(width: 12, height: 12)
-                                    case "invisible":
-                                        Circle()
-                                            .foregroundColor(Color(NSColor.systemGray))
-                                            .frame(width: 12, height: 12)
-                                    case "dnd":
-                                        Circle()
-                                            .foregroundColor(Color(NSColor.systemRed))
-                                            .frame(width: 12, height: 12)
-                                    case "idle":
-                                        Circle()
-                                            .foregroundColor(Color(NSColor.systemOrange))
-                                            .frame(width: 12, height: 12)
-                                    default:
-                                        Circle()
-                                            .foregroundColor(Color.clear)
-                                            .frame(width: 12, height: 12)
-                                    }
-
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
+                        dmButton
+                        foldersList
+                        settingsLink
                     }
                     .padding(.vertical)
                 }
                 .frame(width: 80)
-                .buttonStyle(BorderlessButtonStyle())
                 .padding(.top, 5)
                 Divider()
                 // MARK: - Loading UI
-                if selectedServer == 999 {
+                if selectedServer == 201 {
                     // MARK: - Private channels (DMs)
                     List {
                         Text("Messages")
                             .fontWeight(.bold)
                             .font(.title2)
                         Divider()
-                        ForEach(privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: $selection) {
+                        ForEach(self.privateChannels, id: \.id) { channel in
+                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
                                 ServerListViewCell(channel: channel)
                             }
-                            .buttonStyle(BorderlessButtonStyle())
                         }
                     }
                     .padding(.top, 5)
-                } else if !(guilds.isEmpty) {
+                } else if let selected = selectedServer {
                     // MARK: - Guild channels
-                    GuildView(guild: Binding.constant((Array(folders.compactMap { $0.guilds }.joined()))[selectedServer ?? 0]), selection: self.$selection)
+                    GuildView(guild: Array(folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection)
                 }
-            })
+            }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
+        .buttonStyle(BorderlessButtonStyle())
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
+        .toolbar {
+            ToolbarItemGroup {
+                if selection == nil {
+                    Button(action: { [weak wss] in
+                        wss?.reset()
+                        timedOut = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                            timedOut = false
+                        })
+                    }, label: {
+                        Image(systemName: "arrow.counterclockwise")
+                    })
+                    .disabled(timedOut)
+                    Toggle(isOn: $mentions, label: {
+                        Image(systemName: "bell.badge.fill")
+                    })
+                    .popover(isPresented: $mentions, content: {
+                        MentionsView()
+                            .frame(width: 500, height: 600)
+                    })
+                }
+            }
+        }
         .onAppear {
-            status = full.user_settings?.status
             concurrentQueue.async {
-                Request.fetch([Channel].self, url: URL(string: "https://discordapp.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
+                Request.fetch([Channel].self, url: URL(string: "https://discord.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
                     if let channels = channels {
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
                             self.privateChannels = channels
                         }
-                        Notifications.shared.privateChannels = privateChannels.map { $0.id }
+                        Notifications.privateChannels = privateChannels.map { $0.id }
                     } else if let error = error {
                         releaseModePrint(error)
                     }
                 }
-            }
-            var guilds = full.guilds
-            MentionSender.shared.delegate = self
-            AllEmotes.shared.allEmotes = guilds.map { ["\($0.id)$\($0.name)":$0.emojis] }
-                                            .flatMap { $0 }
-                                            .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
-                                                var nextDict = dict
-                                                nextDict.updateValue(tuple.1, forKey: tuple.0)
-                                                return nextDict
-                                            }
-            if sortByMostRecent {
-                guilds.sort { ($0.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" > ($1.channels ?? []).sorted(by: {$0.last_message_id ?? "" > $1.last_message_id ?? ""})[0].last_message_id ?? "" }
-                self.guilds = guilds
-            } else {
-                let guildOrder = full.user_settings?.guild_positions ?? []
-                let messageDict = guilds.enumerated().compactMap { (index, element) in
-                    return [element.id:index]
-                }.reduce(into: [:]) { (result, next) in
-                    result.merge(next) { (_, rhs) in rhs }
-                }
-                var guildTemp = [Guild]()
-                for item in guildOrder {
-                    if let first = messageDict[item] {
-                        let guild = guilds[first]
-                        for channel in guild.channels ?? [] {
-                            channel.guild_id = guild.id
-                        }
-                        guildTemp.append(guild)
-                    }
-                }
-                self.guilds = guildTemp
-                let guildDict = guildTemp.enumerated().compactMap { (index, element) in
-                    return [element.id:index]
-                }.reduce(into: [:]) { (result, next) in
-                    result.merge(next) { (_, rhs) in rhs }
-                }
-                let folderTemp = full.user_settings?.guild_folders ?? []
-                for folder in folderTemp {
-                    for id in folder.guild_ids {
-                        if let guildIndex = guildDict[id] {
-                            let guild = guildTemp[guildIndex]
-                            guild.index = guildIndex
-                            folder.guilds.append(guild)
-                        }
-                    }
-                }
-                self.folders = folderTemp
-            }
-            DispatchQueue(label: "shitcode queue", attributes: .concurrent).async {
-                assignReadStates()
-            }
-            concurrentQueue.async {
-                order()
-            }
-            DispatchQueue.main.async {
-                selectedServer = 0
-            }
-            concurrentQueue.async {
-                roleColors = RoleManager.shared.arrangeRoleColors(guilds: guilds)
             }
         }
     }
