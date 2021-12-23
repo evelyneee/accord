@@ -65,15 +65,7 @@ final class WebSocket {
             self?.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
                 print("reset req blocker")
                 wss.req = 0
-                wssThread.async {
-                    for (key, value) in wss.waitlist {
-                        print("loading from waitlist for \(key)")
-                        do {
-                            try wss.getMembers(ids: value, guild: key)
-                            wss.waitlist[key] = [String]()
-                        } catch { print("back in waitlist for \(key)") }
-                    }
-                }
+                wss.waitlist.removeAll()
             }
         }
         ws.resume()
@@ -477,7 +469,7 @@ final class WebSocket {
 //                                MessageController.shared.sendMemberList(msg: list)
 //                            } catch { }
                             break
-                        default: print("not handled: \(String(data: textData, encoding: .utf8))"); break
+                        default: break
                         }
                     }
                     self?.receive() // call back the function, creating a loop

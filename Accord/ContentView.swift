@@ -39,6 +39,7 @@ internal extension View {
 }
 
 struct LoadingView: View {
+    
     fileprivate static let greetings: [Text] = [
         Text("Entering girlmode"),
         Text("Stay dry"),
@@ -52,6 +53,7 @@ struct LoadingView: View {
         Text("Never gonna give you up, never gonna use electron"),
         Text("Tell ur oomfies")
     ]
+    
     var body: some View {
         VStack {
             Spacer()
@@ -94,7 +96,12 @@ struct ContentView: View {
             concurrentQueue.async {
                 guard AccordCoreVars.shared.token != "" else { modalIsPresented = true; return }
                 do {
-                    guard wss == nil else { return }
+                    guard wss == nil else {
+                        enum Errors: Error {
+                            case alreadyLoaded
+                        }
+                        throw Errors.alreadyLoaded
+                    }
                     print("trying")
                     let new = try WebSocket.init(url: WebSocket.gatewayURL)
                     print("init")
