@@ -9,24 +9,26 @@ import SwiftUI
 import AVKit
 import Combine
 
-struct AttachmentView: View, Equatable {
-    static func == (lhs: AttachmentView, rhs: AttachmentView) -> Bool {
-        return lhs.media.map { $0.url } == rhs.media.map { $0.url }
-    }
+struct AttachmentView: View {
     var media: [AttachedFiles]
-    init(_ media: [AttachedFiles]) {
-        self.media = media
-    }
     var body: some View {
         ForEach(media, id: \.url) { obj in
             HStack(alignment: .top) {
-                VStack {
+                VStack { [unowned obj] in
                     if obj.content_type?.prefix(6).stringLiteral == "image/" {
                         Attachment(obj.url, size: CGSize(width: obj.width ?? 1000, height: obj.height ?? 1000)).equatable()
                             .cornerRadius(5)
-                    } else if obj.content_type?.prefix(6).stringLiteral == "video/" {
-                        VideoPlayer(player: AVPlayer(url: URL(string: obj.url)!))
-                            .cornerRadius(5)
+                    } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
+                        if var controller = VideoPlayerController(videoURL: url) {
+                            controller
+                                .cornerRadius(5)
+                                .frame(minWidth: 400, minHeight: 400)
+                                .onDisappear {
+                                    print("goodbye")
+                                    controller.player = nil
+                                }
+                        }
+
                     }
                 }
                 Button(action: { [weak obj] in
@@ -57,8 +59,23 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
         windowRef.contentView = NSHostingView(rootView: Attachment(url ?? "").frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).cornerRadius(5))
     }
     windowRef.minSize = NSSize(width: CGFloat(width ?? 0), height: CGFloat(height ?? 0))
-    windowRef.isReleasedWhenClosed = false
     windowRef.title = name
     windowRef.makeKeyAndOrderFront(nil)
+}
+
+struct VideoPlayerController: NSViewRepresentable {
+    init(videoURL: URL) {
+        self.player = AVPlayer(url: videoURL)
+    }
+    var player: AVPlayer? = nil
+    func makeNSView(context: Context) -> AVPlayerView {
+        let playerView = AVPlayerView()
+        playerView.player = player
+        return playerView
+    }
+    
+    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+        
+    }
 }
 

@@ -93,8 +93,8 @@ struct LoginView: View {
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
-                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                             } else {
                                 do {
                                     try viewModel.login(email, password, twofactor)
@@ -140,8 +140,8 @@ struct LoginView: View {
                             json: true
                         )) { response, error in
                             if let token = response?.token {
-                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                                 let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
@@ -161,17 +161,17 @@ struct LoginView: View {
                                     json: true
                                 )) { value, error in
                                     if let token = value?.token {
-                                        _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                        _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
                                         print(token)
-//                                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-//                                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-//                                        let task = Process()
-//                                        task.launchPath = "/usr/bin/open"
-//                                        task.arguments = [path]
-//                                        task.launch()
-//                                        exit(EXIT_SUCCESS)
+                                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+                                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+                                        let task = Process()
+                                        task.launchPath = "/usr/bin/open"
+                                        task.arguments = [path]
+                                        task.launch()
+                                        exit(EXIT_SUCCESS)
                                     }
                                 }
                             }
@@ -226,8 +226,8 @@ final class LoginViewViewModel: ObservableObject {
                     }
                 }
                 if let checktoken = response.token {
-                    _ = KeychainManager.save(key: "me.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                    AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    _ = KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                    AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                     let task = Process()
@@ -253,8 +253,8 @@ final class LoginViewViewModel: ObservableObject {
                             json: true
                         )) { value, error in
                             if let token = value?.token {
-                                _ = KeychainManager.save(key: "me.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                                 let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString

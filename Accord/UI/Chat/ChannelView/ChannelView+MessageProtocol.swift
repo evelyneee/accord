@@ -59,13 +59,19 @@ extension ChannelView: MessageControllerDelegate {
     func deleteMessage(msg: Data, channelID: String?) {
         guard let channelID = channelID else { return }
         guard channelID == self.channelID else { return }
-        webSocketQueue.async {
+        webSocketQueue.async { [weak viewModel] in
+            let messageMap = viewModel?.messages.enumerated().compactMap { (index, element) in
+                return [element.id:index]
+            }.reduce(into: [:]) { (result, next) in
+                result.merge(next) { (_, rhs) in rhs }
+            }
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            DispatchQueue.main.async { [weak message, weak viewModel] in
+            guard let index = messageMap?[message.id] else { return }
+            DispatchQueue.main.async { [weak viewModel] in
                 withAnimation {
-                    guard let index = messageMap[message?.id ?? ""] as? Int else { return }
-                    viewModel?.messages.remove(at: index)
+                    let i: Int = index
+                    viewModel?.messages.remove(at: i)
                 }
             }
         }
@@ -79,28 +85,40 @@ extension ChannelView: MessageControllerDelegate {
                 guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: memberData) else { return }
                 guard let nick_fake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
                     guard let nick = memberDecodable.member?.nick else {
-                        typing.append(memberDecodable.member?.user.username ?? "")
+                        withAnimation {
+                            typing.append(memberDecodable.member?.user.username ?? "")
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                             guard !(typing.isEmpty) else { return }
-                            typing.removeLast()
+                            _ = withAnimation {
+                                typing.removeLast()
+                            }
                         })
                         return
                     }
                     if !(typing.contains(nick)) {
-                        typing.append(nick)
+                        withAnimation {
+                            typing.append(nick)
+                        }
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                         guard !(typing.isEmpty) else { return }
-                        typing.removeLast()
+                        _ = withAnimation {
+                            typing.removeLast()
+                        }
                     })
                     return
                 }
                 if !(typing.contains(nick_fake)) {
-                    typing.append(nick_fake)
+                    withAnimation {
+                        typing.append(nick_fake)
+                    }
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                     guard !(typing.isEmpty) else { return }
-                    typing.removeLast()
+                    _ = withAnimation {
+                        typing.removeLast()
+                    }
                 })
             }
 

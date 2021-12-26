@@ -24,9 +24,9 @@ public func print(_ object: Any) {
 }
 
 public func releaseModePrint(_ object: Any...) {
-    NSLog("[Accord] ")
+    Swift.print("\(Date()) [Accord] ")
     for item in object {
-        NSLog(String(describing: item))
+        Swift.print(String(describing: item))
     }
 }
 
@@ -42,23 +42,34 @@ struct AccordApp: App {
     @State var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
     var body: some Scene {
         WindowGroup {
-            GeometryReader { reader in
-                ContentView(loaded: $loaded)
-                    .preferredColorScheme(darkMode ? .dark : nil)
-                    .onAppear(perform: {
-                        self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
-                        self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
-                        appDelegate.fileNotifications()
-                        DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
-                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+            if AccordCoreVars.shared.token == "" {
+                LoginView()
+            } else {
+                GeometryReader { reader in
+                    ContentView(loaded: $loaded)
+                        .frame(minWidth: 800, minHeight: 600)
+                        .preferredColorScheme(darkMode ? .dark : nil)
+                        .onAppear(perform: {
+                            self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
+                            self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
+                            if self.windowWidth == 0 {
+                                self.windowWidth = 1000
+                            }
+                            if self.windowHeight == 0 {
+                                self.windowHeight = 800
+                            }
+                            appDelegate.fileNotifications()
+                            DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
+                                NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                            })
                         })
-                    })
-                    .onDisappear(perform: {
-                        loaded = false
-                        UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
-                        UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
-                        print(windowWidth, windowHeight)
-                    })
+                        .onDisappear(perform: {
+                            loaded = false
+                            UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
+                            UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
+                            print(windowWidth, windowHeight)
+                        })
+                }
             }
         }
         .windowStyle(.automatic)
@@ -72,7 +83,7 @@ struct AccordApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func onWakeNote(note: NSNotification) {
         print("hi")
-        if wss == nil {
+        if wss != nil {
             concurrentQueue.async {
                 wss.reset()
             }

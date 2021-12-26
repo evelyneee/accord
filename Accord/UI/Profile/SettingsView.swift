@@ -72,7 +72,7 @@ struct SettingsViewRedesign: View {
                     .padding()
                     Divider()
                     VStack(alignment: .leading) {
-                        Attachment("https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").png?size=256").equatable()
+                        GifView(url: "https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif")
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)
@@ -249,7 +249,7 @@ struct SettingsViewRedesign: View {
                 .background(Color.black.opacity(0.25))
                 .cornerRadius(15)
                 .padding()
-                Text("Accord (me.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
+                Text("Accord (red.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
                 Text("OS: macOS \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))")

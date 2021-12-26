@@ -1464,7 +1464,7 @@ final class DiscordError: Codable {
 }
 
 func logOut() {
-    _ = KeychainManager.save(key: "me.evelyn.accord.token", data: Data())
+    _ = KeychainManager.save(key: "red.evelyn.accord.token", data: Data())
     NSApp.restart()
 }
 

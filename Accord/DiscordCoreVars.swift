@@ -36,7 +36,7 @@ final class AccordCoreVars {
     public var plugins: [AccordPlugin] = []
     
     init() {
-        token = String(decoding: KeychainManager.load(key: "me.evelyn.accord.token") ?? Data(), as: UTF8.self)
+        token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
     }
     
     func loadPlugins() {

@@ -199,7 +199,6 @@ func showWindow(_ channel: Channel) {
     )
     windowRef.contentView = NSHostingView(rootView: ChannelView(channel))
     windowRef.minSize = NSSize(width: 500, height: 300)
-    windowRef.isReleasedWhenClosed = false
     windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
     windowRef.makeKeyAndOrderFront(nil)
 }

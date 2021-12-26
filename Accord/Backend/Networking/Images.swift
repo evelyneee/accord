@@ -30,7 +30,7 @@ struct Attachment: View, Equatable {
     var body: some View {
         Image(nsImage: imageLoader.image)
               .resizable()
-              .frame(maxWidth: imageLoader.image.size.width, maxHeight: imageLoader.image.size.height)
+              .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
               .scaledToFit()
               .onDisappear(perform: {
                   imageLoader.cancellable?.cancel()

@@ -75,7 +75,14 @@ final public class Markdown {
         let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
         if let id = emoteIDs.first, let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
             return RequestPublisher.image(url: emoteURL)
-                .replaceNil(with: NSImage())
+                .replaceNil(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
+                .map { Text("\(Image(nsImage: $0))") + Text(" ") }
+                .eraseToAnyPublisher()
+        }
+        let inlineImages = word.matches(for: #"(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpg|gif|png))(?:\?([^#]*))?(?:#(.*))?"#).filter { $0.contains("nitroless") || $0.contains("emote") || $0.contains("emoji") } // nitroless emoji
+        if let url = inlineImages.first, let emoteURL = URL(string: url) {
+            return RequestPublisher.image(url: emoteURL)
+                .replaceNil(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
                 .eraseToAnyPublisher()
         }
@@ -149,4 +156,44 @@ final public class Markdown {
             .debugAssertNoMainThread()
     }
     
+}
+
+final class NSAttributedMarkdown {
+    public class func markdown(_ text: String, font: NSFont?) -> NSMutableAttributedString {
+        let mut = NSMutableAttributedString(string: text)
+        let italic = text.matchRange(for: #"(\*|_)(.*?)\1"#)
+        let bold = text.matchRange(for: #"(\*\*|__)(.*?)\1"#)
+        let strikeThrough = text.matchRange(for: #"(~~(\w+(\s\w+)*)~~)"#)
+        if let font = font {
+            mut.setAttributes([.font: font, .foregroundColor: NSColor.textColor], range: NSRange(mut.string.startIndex..., in: mut.string))
+        }
+        italic.forEach { match in
+            mut.applyFontTraits(NSFontTraitMask.italicFontMask, range: NSRange(match, in: mut.string))
+        }
+        bold.forEach { match in
+            mut.applyFontTraits(NSFontTraitMask.boldFontMask, range: NSRange(match, in: mut.string))
+        }
+        strikeThrough.forEach { match in
+            mut.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSRange(match, in: mut.string))
+        }
+        return mut
+    }
+}
+
+private extension NSFont {
+    var bold: NSFont {
+        let font = NSFont.boldSystemFont(ofSize: 12)
+        return font
+    }
+
+    var italic: NSFont {
+        let font = NSFont.systemFont(ofSize: 12)
+        let descriptor = font.fontDescriptor.withSymbolicTraits([.italic])
+        return NSFont(descriptor: descriptor, size: NSFont.systemFontSize)!
+    }
+
+    var boldItalic: NSFont {
+        let font = NSFont.boldSystemFont(ofSize: 13)
+        return font
+    }
 }

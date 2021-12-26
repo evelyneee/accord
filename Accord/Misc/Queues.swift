@@ -31,3 +31,6 @@ let messageFetchQueue = DispatchQueue(label: "AccordMessageFetchQueue")
 
 // Message sending queue - Used by ChatControlsView
 let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue")
+
+// Gif loading queue
+let gifQueue = DispatchQueue(label: "AccordGifQueue")

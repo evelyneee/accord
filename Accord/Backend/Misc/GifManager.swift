@@ -12,7 +12,6 @@ final class Gif: NSImage {
     var animatedImages: [NSImage]?
 
     convenience init?(data: Data) {
-        self.init()
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
         let metadata = CGImageSourceCopyPropertiesAtIndex(source, 0, nil),
         let delayTime = ((metadata as NSDictionary)["{GIF}"] as? NSMutableDictionary)?["DelayTime"] as? Double else { return nil }
@@ -25,20 +24,8 @@ final class Gif: NSImage {
             }
         }
         let calculatedDuration = Double(imageCount) * delayTime
+        self.init()
         self.animatedImages = images
         self.calculatedDuration = calculatedDuration
-    }
-
-    public final class func downsample(image: NSImage, to pointSize: CGSize) -> NSImage? {
-        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-        guard let data = image.tiffRepresentation as CFData?,
-              let imageSource = CGImageSourceCreateWithData(data, imageSourceOptions) else { return nil }
-        let maxDimentionInPixels = max(pointSize.width, pointSize.height) * (NSScreen.main?.backingScaleFactor ?? 0)
-        let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
-          kCGImageSourceShouldCacheImmediately: true,
-          kCGImageSourceCreateThumbnailWithTransform: true,
-          kCGImageSourceThumbnailMaxPixelSize: maxDimentionInPixels] as CFDictionary
-        guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampledOptions) else { return nil }
-        return NSImage(cgImage: downScaledImage, size: CGSize(width: 40, height: 40))
     }
 }

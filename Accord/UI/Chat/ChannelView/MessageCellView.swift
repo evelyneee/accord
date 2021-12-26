@@ -26,18 +26,18 @@ struct MessageCellView: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack { [unowned reply] in
-                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar)).equatable()
+                HStack { [weak reply] in
+                    Attachment(pfpURL(reply?.author?.id, reply?.author?.avatar)).equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
-                    Text(replyNick ?? reply.author?.username ?? "")
+                    Text(replyNick ?? reply?.author?.username ?? "")
                         .foregroundColor(replyColor)
                         .fontWeight(.semibold)
                     if #available(macOS 12.0, *) {
-                        Text(try! AttributedString(markdown: reply.content))
+                        Text(try! AttributedString(markdown: reply?.content ?? ""))
                             .lineLimit(0)
                     } else {
-                        Text(reply.content)
+                        Text(reply?.content ?? "")
                             .lineLimit(0)
                     }
                 }
@@ -85,8 +85,9 @@ struct MessageCellView: View {
                 EmbedView(embed: embed).equatable()
                     .padding(.leading, 41)
             }
-            AttachmentView(message.attachments).equatable()
+            AttachmentView(media: message.attachments)
                 .padding(.leading, 41)
+                .frame(maxWidth: 600)
         }
         .id(message.id)
         .onAppear {
@@ -124,7 +125,7 @@ struct MessageCellView: View {
     func load(text: String) {
         textQueue.async {
             Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
-                .assertNoFailure()
+                .replaceError(with: Text(""))
                 .sink(receiveValue: { text in
                     DispatchQueue.main.async {
                         self.textElement = text

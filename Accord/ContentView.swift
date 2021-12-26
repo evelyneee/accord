@@ -77,11 +77,15 @@ struct LoadingView: View {
 }
 
 struct ContentView: View {
-    @State var socketOut: GatewayD?
     @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
     @State var serverListView: ServerListView?
+    
+    enum LoadErrors: Error {
+        case alreadyLoaded
+    }
+    
     var body: some View {
         Group {
             if modalIsPresented {
@@ -97,12 +101,8 @@ struct ContentView: View {
                 guard AccordCoreVars.shared.token != "" else { modalIsPresented = true; return }
                 do {
                     guard wss == nil else {
-                        enum Errors: Error {
-                            case alreadyLoaded
-                        }
-                        throw Errors.alreadyLoaded
+                        throw LoadErrors.alreadyLoaded
                     }
-                    print("trying")
                     let new = try WebSocket.init(url: WebSocket.gatewayURL)
                     print("init")
                     wss = new
@@ -125,7 +125,6 @@ struct ContentView: View {
                             username = user?.username ?? ""
                             discriminator = user?.discriminator ?? ""
                             self.serverListView = ServerListView(full: d)
-                            socketOut = d
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                                 withAnimation {
                                     loaded = true
@@ -139,8 +138,7 @@ struct ContentView: View {
                     do {
                         let data = try Data(contentsOf: path)
                         let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                        socketOut = structure.d
-                        self.serverListView = ServerListView(full: socketOut)
+                        self.serverListView = ServerListView(full: structure.d)
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                             withAnimation {
                                 loaded = true

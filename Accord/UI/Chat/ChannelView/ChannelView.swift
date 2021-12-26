@@ -85,21 +85,21 @@ struct ChannelView: View, Equatable {
         }
         .toolbar {
             ToolbarItemGroup {
-                Toggle(isOn: $pins, label: {
+                Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))
-                })
-                .popover(isPresented: $pins, content: {
+                }
+                .popover(isPresented: $pins) {
                     PinsView(guildID: guildID, channelID: channelID)
                         .frame(width: 500, height: 600)
-                })
-                Toggle(isOn: $mentions, label: {
+                }
+                Toggle(isOn: $mentions) {
                     Image(systemName: "bell.badge.fill")
-                })
-                .popover(isPresented: $mentions, content: {
+                }
+                .popover(isPresented: $mentions) {
                     MentionsView()
                         .frame(width: 500, height: 600)
-                })
+                }
             }
         }
     }

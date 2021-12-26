@@ -10,23 +10,26 @@ import SwiftUI
 struct PopoverProfileView: View {
     @Binding var user: User?
     @State var hovered: Int? = nil
-    @State var pfp: Attachment = {
-        Attachment("")
-    }()
     var body: some View {
         return ZStack(alignment: .top) {
             VStack {
-                Color(pfp.imageLoader.image.averageColor ?? NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
+                Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
                 Spacer()
             }
             VStack {
                 Spacer().frame(height: 100)
                 VStack(alignment: .leading) {
-                    pfp
-                        .equatable()
-                        .clipShape(Circle())
-                        .frame(width: 45, height: 45)
-                        .shadow(radius: 5)
+                    if user?.avatar?.prefix(2) == "a_" {
+                        GifView(url: "https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
+                            .clipShape(Circle())
+                            .frame(width: 45, height: 45)
+                            .shadow(radius: 5)
+                    } else {
+                        Attachment(pfpURL(user?.id, user?.avatar))
+                            .clipShape(Circle())
+                            .frame(width: 45, height: 45)
+                            .shadow(radius: 5)
+                    }
                     Text(user?.username ?? "")
                         .font(.title2)
                         .fontWeight(.bold)
@@ -146,8 +149,5 @@ struct PopoverProfileView: View {
             }
         }
         .frame(width: 290, height: 250)
-        .onAppear {
-            self.pfp = Attachment(pfpURL(user?.id, user?.avatar))
-        }
     }
 }

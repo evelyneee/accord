@@ -76,7 +76,7 @@ final class ChannelViewViewModel: ObservableObject {
             case .finished: break
             case .failure(let error):
                 releaseModePrint(error)
-                MentionSender.shared.deselect()
+                // MentionSender.shared.deselect()
             }
         }) { msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
@@ -92,7 +92,7 @@ final class ChannelViewViewModel: ObservableObject {
                     self.ack(channelID: channelID, guildID: guildID)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                    AppKitLink<NSScrollView>().introspect { scrollView, count in
+                    AppKitLink<NSScrollView>.introspect { scrollView, count in
                         if let documentView = scrollView.documentView, count == 4 {
                             Swift.print("[AppKitLink] Successfully found \(type(of: scrollView))")
                             self.scrollView = scrollView
@@ -118,7 +118,7 @@ final class ChannelViewViewModel: ObservableObject {
         DispatchQueue.main.async {
             self.messages = messages.reversed()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                AppKitLink<NSScrollView>().introspect { scrollView, count in
+                AppKitLink<NSScrollView>.introspect { scrollView, count in
                     if let documentView = scrollView.documentView, count == 4 {
                         Swift.print("[AppKitLink] Successfully found \(type(of: scrollView))")
                         documentView.scroll(NSPoint(x: 0, y: documentView.bounds.size.height))
@@ -147,7 +147,7 @@ final class ChannelViewViewModel: ObservableObject {
                     rolesTemp[roleColor] = role
                 }
             }
-            let temp: [String] = rolesTemp.compactMap { $0 }
+            let temp: [String] = rolesTemp.compactMap { $0 }.reversed()
             if !(temp.isEmpty) {
                 DispatchQueue.main.async {
                     self.roles[(person.user.id)] = temp[0]
@@ -205,7 +205,7 @@ final class ChannelViewViewModel: ObservableObject {
                         rolesTemp[roleColor] = role
                     }
                 }
-                let temp: [String] = rolesTemp.compactMap { $0 }
+                let temp: [String] = rolesTemp.compactMap { $0 }.reversed()
                 if !(temp.isEmpty) {
                     DispatchQueue.main.async {
                         self.roles[(person.user.id)] = temp[0]

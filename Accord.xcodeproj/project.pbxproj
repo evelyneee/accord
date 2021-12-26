@@ -14,6 +14,7 @@
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
+		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E746A2727499CE6009A9C22 /* Interaction.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
@@ -59,7 +60,6 @@
 		A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
 		A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453D26978EBA00B1C9DB /* EmotesView.swift */; };
-		A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */; };
 		A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89845402698C3FD00B1C9DB /* GifManager.swift */; };
 		A89BE786266BDFB3007B0CBF /* Sockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BE785266BDFB3007B0CBF /* Sockets.swift */; };
 		A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8A14CC226CE9A29006C4AEC /* Roles.swift */; };
@@ -106,6 +106,7 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1C1BB3277136900014BDEB /* Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Debug.entitlements; sourceTree = "<group>"; };
+		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E746A2727499CE6009A9C22 /* Interaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interaction.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
@@ -151,7 +152,6 @@
 		A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Mentions.swift"; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Misc/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
-		A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmoteGetter.swift; sourceTree = "<group>"; };
 		A89845402698C3FD00B1C9DB /* GifManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifManager.swift; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Sockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sockets.swift; sourceTree = "<group>"; };
 		A8A14CC226CE9A29006C4AEC /* Roles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Roles.swift; sourceTree = "<group>"; };
@@ -241,6 +241,14 @@
 				9ED6F671273702040009C78C /* dpkg */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		9E4F3FC327764E0C0003E383 /* Gifs */ = {
+			isa = PBXGroup;
+			children = (
+				9E4F3FC427764E200003E383 /* GifView.swift */,
+			);
+			path = Gifs;
 			sourceTree = "<group>";
 		};
 		9E7BC56B27472308008E3FAB /* Markdown */ = {
@@ -343,7 +351,6 @@
 		A825213A2687ABE40073F640 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
-				A898453F2698C3FD00B1C9DB /* EmoteGetter.swift */,
 				A89845402698C3FD00B1C9DB /* GifManager.swift */,
 				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
 				9ED4A5AE276E334600BD485C /* AppKitLink.swift */,
@@ -394,6 +401,7 @@
 		A8FA9A9B266823B4003710A4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				9E4F3FC327764E0C0003E383 /* Gifs */,
 				A82521372687AB780073F640 /* Profile */,
 				A82521362687AB390073F640 /* Base */,
 				A82521352687AB250073F640 /* Chat */,
@@ -525,9 +533,9 @@
 				A80FEC3327258457005F9950 /* EmbedView.swift in Sources */,
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
+				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
-				A89845412698C3FD00B1C9DB /* EmoteGetter.swift in Sources */,
 				A8B1F29C26CB16C400E8FDC5 /* Attachment.swift in Sources */,
 				9E98EFB0276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift in Sources */,
 				9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */,
@@ -710,7 +718,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
+				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_DISABLE_SAFETY_CHECKS = YES;
@@ -744,7 +752,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = me.evelyn.accord;
+				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_DISABLE_SAFETY_CHECKS = YES;
