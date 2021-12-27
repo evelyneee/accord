@@ -18,7 +18,7 @@ struct GifView: View {
     @State var duration: Double = 0
     @State var value: Int = 0
     @State var timer: Timer?
-    @State private var can: AnyCancellable? = nil
+    @State private var can: AnyCancellable?
     var body: some View {
         ZStack {
             if animatedImages.isEmpty {
@@ -60,8 +60,8 @@ struct HoverGifView: View {
     @State var counterValue: Int = 0
     @State var duration: Double = 0
     @State var value: Int = 0
-    @State var timer: Timer? = nil
-    @State private var can: AnyCancellable? = nil
+    @State var timer: Timer?
+    @State private var can: AnyCancellable?
     @State var animated: Bool = false
     var body: some View {
         ZStack {

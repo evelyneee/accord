@@ -17,21 +17,21 @@ protocol URLQueryParameterStringConvertible {
 }
 
 final class WebSocket {
-    
+
     var ws: URLSessionWebSocketTask!
     let session: URLSession
-    let webSocketDelegate = WebSocketDelegate.shared
-    var session_id: String? = nil
-    var seq: Int? = nil
+    weak var webSocketDelegate = WebSocketDelegate.shared
+    var session_id: String?
+    var seq: Int?
     var heartbeat_interval: Int = 0
-    var cachedMemberRequest: [String:GuildMember] = [:]
+    var cachedMemberRequest: [String: GuildMember] = [:]
     var req: Int = 0
-    var waitlist: [String:[String]] = [:]
+    var waitlist: [String: [String]] = [:]
     var timer: Timer?
     var pendingHeartbeat: Bool = false
-    
+
     private var bag = Set<AnyCancellable>()
-    
+
     var failedHearbeats: Int = 0 {
         didSet {
             if failedHearbeats > 3 {
@@ -39,21 +39,21 @@ final class WebSocket {
             }
         }
     }
-    
+
     static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
-    
+
     enum WebSocketErrors: Error {
         case maxRequestReached
         case essentialEventFailed(String)
     }
-    
+
     // MARK: - init
     init(url: URL?, session_id: String? = nil, seq: Int? = nil) throws {
-        
+
         releaseModePrint("[Socket] Hello world!")
 
         let config = URLSessionConfiguration.default
-        
+
         if proxyEnabled {
             config.setProxy()
         }
@@ -62,7 +62,7 @@ final class WebSocket {
         print(ws.maximumMessageSize, "default size")
         ws.maximumMessageSize = 9999999
         DispatchQueue.main.async { [weak self] in
-            self?.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { temp in
+            self?.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
                 print("reset req blocker")
                 wss.req = 0
                 wss.waitlist.removeAll()
@@ -77,7 +77,7 @@ final class WebSocket {
         }
         releaseModePrint("Socket initiated")
     }
-    
+
     func reset() {
         ws.cancel(with: .goingAway, reason: Data())
         concurrentQueue.async {
@@ -86,7 +86,7 @@ final class WebSocket {
             wss = new
         }
     }
-    
+
     func hardReset() {
         wss = nil
         concurrentQueue.async {
@@ -94,7 +94,7 @@ final class WebSocket {
             wss = new
         }
     }
-    
+
     // MARK: - Ping
     func ping() {
         ws.sendPing { error in
@@ -105,26 +105,26 @@ final class WebSocket {
             }
         }
     }
-    
+
     // MARK: Decode payloads
     func decodePayload(payload: Data) -> [String: Any]? {
-        return try? JSONSerialization.jsonObject(with: payload, options: []) as? [String:Any]
+        return try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
     }
-    
+
     struct Hello: Decodable {
         var d: HelloD
         struct HelloD: Decodable {
             var heartbeat_interval: Int
         }
     }
-    
+
     // MARK: Initial WS setup
     func hello() {
         ws.receive { [weak self] result in
             switch result {
             case .success(let message):
                 switch message {
-                case .data(_):
+                case .data:
                     break
                 case .string(let text):
                     if let data = text.data(using: String.Encoding.utf8) {
@@ -159,7 +159,7 @@ final class WebSocket {
                 switch result {
                 case .success(let message):
                     switch message {
-                    case .data(_):
+                    case .data:
                         break
                     case .string(let text):
                         if let data = text.data(using: String.Encoding.utf8) {
@@ -191,7 +191,6 @@ final class WebSocket {
         }
     }
 
-    
     // MARK: ACK
     func heartbeat() throws {
         print("sent heartbeat")
@@ -199,9 +198,9 @@ final class WebSocket {
             self.reset()
             return
         }
-        let packet: [String:Any] = [
-            "op":1,
-            "d":seq
+        let packet: [String: Any] = [
+            "op": 1,
+            "d": seq
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
            let jsonString: String = String(data: jsonData, encoding: .utf8) {
@@ -223,21 +222,21 @@ final class WebSocket {
 
     // MARK: Authentication
     func authenticate() throws {
-        let packet: [String:Any] = [
-            "op":2,
-            "d":[
-                "token":AccordCoreVars.shared.token,
-                "capabilities":125,
-                "compress":false,
+        let packet: [String: Any] = [
+            "op": 2,
+            "d": [
+                "token": AccordCoreVars.shared.token,
+                "capabilities": 125,
+                "compress": false,
                 "properties": [
-                    "os":"Mac OS X",
-                    "browser":"Discord Client",
-                    "release_channel":"stable",
+                    "os": "Mac OS X",
+                    "browser": "Discord Client",
+                    "release_channel": "stable",
                     "client_build_number": 105608,
-                    "client_version":"0.0.264",
-                    "os_version":"21.1.0",
-                    "os_arch":"x64",
-                    "system-locale":"en-US",
+                    "client_version": "0.0.264",
+                    "os_version": "21.1.0",
+                    "os_arch": "x64",
+                    "system-locale": "en-US"
                 ]
             ]
         ]
@@ -259,14 +258,14 @@ final class WebSocket {
         let reason = "Closing connection".data(using: .utf8)
         ws.cancel(with: .goingAway, reason: reason)
     }
-    
+
     final func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
-        let packet: [String:Any] = [
-            "op":6,
-            "d":[
-                "seq":seq ?? self.seq ?? 0,
-                "session_id":session_id ?? self.session_id ?? "",
-                "token":AccordCoreVars.shared.token
+        let packet: [String: Any] = [
+            "op": 6,
+            "d": [
+                "seq": seq ?? self.seq ?? 0,
+                "session_id": session_id ?? self.session_id ?? "",
+                "token": AccordCoreVars.shared.token
             ]
         ]
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
@@ -283,16 +282,16 @@ final class WebSocket {
             }) { _ in }
             .store(in: &bag)
     }
-    
+
     final func subscribe(_ guild: String, _ channel: String) {
-        let packet: [String:Any] = [
-            "op":14,
+        let packet: [String: Any] = [
+            "op": 14,
             "d": [
-                "guild_id":guild,
-                "typing":true,
-                "activities":true,
-                "threads":false,
-                "members":[],
+                "guild_id": guild,
+                "typing": true,
+                "activities": true,
+                "threads": false,
+                "members": []
             ]
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
@@ -305,12 +304,12 @@ final class WebSocket {
             }
         }
     }
-    
+
     final func subscribeToDM(_ channel: String) {
-        let packet: [String:Any] = [
-            "op":13,
+        let packet: [String: Any] = [
+            "op": 13,
             "d": [
-                "channel_id":channel
+                "channel_id": channel
             ]
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
@@ -323,7 +322,7 @@ final class WebSocket {
             }
         }
     }
-    
+
     final func getMembers(ids: [String], guild: String) throws {
         guard req <= 30 else {
             print("blocked req")
@@ -331,12 +330,12 @@ final class WebSocket {
             throw WebSocketErrors.maxRequestReached
         }
         print("fetched")
-        let packet: [String:Any] = [
-            "op":8,
+        let packet: [String: Any] = [
+            "op": 8,
             "d": [
-                "limit":0,
-                "user_ids":ids,
-                "guild_id":guild
+                "limit": 0,
+                "user_ids": ids,
+                "guild_id": guild
             ]
         ]
         if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
@@ -350,7 +349,7 @@ final class WebSocket {
             }
         }
     }
-        
+
     // MARK: - Receive
     final func receive() {
         ws.receive { [weak self] result in
@@ -412,18 +411,18 @@ final class WebSocket {
                         // MARK: Message Event Handlers
                         case "MESSAGE_CREATE":
                             guard let dict = payload["d"] as? [String: Any] else { break }
-                            if let channelID = dict["channel_id"] as? String, let author = dict["author"] as? [String:Any], let id = author["id"] as? String, id == user_id {
+                            if let channelID = dict["channel_id"] as? String, let author = dict["author"] as? [String: Any], let id = author["id"] as? String, id == user_id {
                                 MessageController.shared.sendMessage(msg: textData, channelID: channelID, isMe: true)
                             } else if let channelID = dict["channel_id"] as? String {
                                 MessageController.shared.sendMessage(msg: textData, channelID: channelID)
                             }
-                            guard let mentions = dict["mentions"] as? [[String:Any]] else { break }
+                            guard let mentions = dict["mentions"] as? [[String: Any]] else { break }
                             let ids = mentions.compactMap { $0["id"] as? String }
                             print("notification 1")
                             let guild_id = dict["guild_id"] as? String ?? "@me"
                             guard let channel_id = dict["channel_id"] as? String else { break }
                             print("notification 2")
-                            guard let author = dict["author"] as? [String:Any] else { break }
+                            guard let author = dict["author"] as? [String: Any] else { break }
                             guard let username = author["username"] as? String else { break }
                             guard let userID = author["id"] as? String else { break }
                             print("notification 3")
@@ -463,6 +462,7 @@ final class WebSocket {
                             }
                         case "USER_UPDATE": break
                         case "READY_SUPPLEMENTAL": break
+                        case "MESSAGE_ACK": print(text); break
                         case "GUILD_MEMBER_LIST_UPDATE":
 //                            do {
 //                                let list = try JSONDecoder().decode(MemberListUpdate.self, from: textData)
@@ -473,7 +473,7 @@ final class WebSocket {
                         }
                     }
                     self?.receive() // call back the function, creating a loop
-                case .data(_): break
+                case .data: break
                 @unknown default: break
                 }
             case .failure(let error):

@@ -29,11 +29,11 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var type: Int
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
-    //var message_reference: Reply? // in the mentions endpoint
+    // var message_reference: Reply? // in the mentions endpoint
     weak var lastMessage: Message?
-    
+
     // TODO: Component object
-    
+
     /*
      [
        {
@@ -102,11 +102,11 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
        }
      ]
      */
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id.appending(content))
     }
-    
+
     func delete() {
         let headers = Headers(userAgent: discordUserAgent,
                               contentType: nil,
@@ -121,7 +121,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
         let headers = Headers(userAgent: discordUserAgent,
                               contentType: nil,
                               token: AccordCoreVars.shared.token,
-                              bodyObject: ["content":now],
+                              bodyObject: ["content": now],
                               type: .PATCH,
                               discordHeaders: true,
                               referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
@@ -135,7 +135,7 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Reply, rhs: Reply) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     var author: User?
     var channel_id: String
     var guild_id: String?
@@ -150,7 +150,7 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
     var tts: Bool
     var type: Int
     var attachments: [AttachedFiles]
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

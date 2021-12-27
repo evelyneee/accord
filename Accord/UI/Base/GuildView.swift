@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct GuildView: View {
-    
+
     weak var guild: Guild?
     @Binding var selection: Int?
     var body: some View {
@@ -66,7 +66,7 @@ struct ServerListViewCell: View {
         self.guildID = channel.guild_id ?? "@me"
     }
     var body: some View {
-        
+
         var readStateDot: some View {
             return ZStack {
                 Circle()
@@ -78,7 +78,7 @@ struct ServerListViewCell: View {
                     .font(.caption)
             }
         }
-        
+
         var windowButton: some View {
             return Button(action: {
                 if let channel = channel {
@@ -88,7 +88,7 @@ struct ServerListViewCell: View {
                 Image(systemName: "arrow.up.right.circle")
             }
         }
-        
+
         return HStack {
             switch channel?.type {
             case .normal:
@@ -124,4 +124,3 @@ struct ServerListViewCell: View {
         }
     }
 }
-

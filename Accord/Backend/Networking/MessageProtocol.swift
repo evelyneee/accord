@@ -19,8 +19,8 @@ protocol MessageControllerDelegate {
 
 class MessageController {
     static let shared = MessageController()
-    public var delegates: [String:MessageControllerDelegate?] = [:]
-    
+    public var delegates: [String: MessageControllerDelegate?] = [:]
+
     func sendMessage(msg: Data, channelID: String?, isMe: Bool = false) {
         for delegate in delegates.values {
             delegate?.sendMessage(msg: msg, channelID: channelID, isMe: isMe)

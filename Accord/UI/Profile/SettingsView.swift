@@ -10,7 +10,7 @@ import SwiftUI
 
 @available(macOS 11.0, *)
 struct SettingsViewRedesign: View {
-    
+
     @AppStorage("pfpShown") var profilePictures: Bool = pfpShown
     @AppStorage("sortByMostRecent") var recent: Bool = sortByMostRecent
     @AppStorage("darkMode") var dark: Bool = darkMode
@@ -21,13 +21,13 @@ struct SettingsViewRedesign: View {
     @AppStorage("discordStockSettings") var discordSettings: Bool = pastelColors
     @AppStorage("enableSuffixRemover") var suffixes: Bool = false
     @AppStorage("pronounDB") var pronounDB: Bool = false
-    
+
     @State var user: User? = AccordCoreVars.shared.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
     @State var loading: Bool = false
     @State var bioText: String = " "
     @State var username: String = AccordCoreVars.shared.user?.username ?? "Unknown User"
-    
+
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
@@ -241,7 +241,7 @@ struct SettingsViewRedesign: View {
                                 print("Plugin successfully copied")
                             }
                         } catch {
-                            
+
                         }
                     })
                 }
@@ -275,7 +275,7 @@ extension FileManager {
                 try FileManager.default.removeItem(at: dstURL)
             }
             try FileManager.default.copyItem(at: srcURL, to: dstURL)
-        } catch (let error) {
+        } catch let error {
             print("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
             return false
         }

@@ -1469,7 +1469,7 @@ func logOut() {
 }
 
 final class Headers {
-    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String:Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false, cached: Bool = false) {
+    init(userAgent: String? = nil, contentType: String? = nil, token: String? = nil, bodyObject: [String: Any]? = nil, type: RequestTypes, discordHeaders: Bool = false, referer: String? = nil, empty: Bool = false, json: Bool = false, cached: Bool = false) {
         self.userAgent = userAgent
         self.contentType = contentType
         self.token = token
@@ -1484,7 +1484,7 @@ final class Headers {
     var userAgent: String?
     var contentType: String?
     var token: String?
-    var bodyObject: [String:Any]?
+    var bodyObject: [String: Any]?
     var type: RequestTypes
     var discordHeaders: Bool
     var referer: String?
@@ -1509,7 +1509,7 @@ final class Headers {
             request.httpBody = try JSONSerialization.data(withJSONObject: self.bodyObject ?? [:], options: [])
         } else if let bodyObject = self.bodyObject {
             if self.type == .GET {
-                request.url = request.url?.appendingQueryParameters(bodyObject as? [String:String] ?? [:])
+                request.url = request.url?.appendingQueryParameters(bodyObject as? [String: String] ?? [:])
             } else {
                 let bodyString = bodyObject.queryParameters
                 request.httpBody = bodyString.data(using: .utf8, allowLossyConversion: true)
@@ -1541,10 +1541,10 @@ var standardHeaders = Headers(
 )
 
 final public class Request {
-    
+
     // MARK: - Empty Decodable
     struct AnyDecodable: Decodable { }
-    
+
     enum FetchErrors: Error {
         case invalidRequest
         case invalidForm
@@ -1553,10 +1553,10 @@ final public class Request {
         case decodingError(String, Error?)
         case noData
     }
-    
+
     // MARK: - Perform request with completion handler
     class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: T?, _ error: Error?) -> Void)) {
-        
+
         let request: URLRequest? = {
             if let request = request {
                 return request
@@ -1570,10 +1570,10 @@ final public class Request {
         guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-        
+
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
-        
+
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
             if let data = data {
                 guard error == nil else {
@@ -1598,10 +1598,10 @@ final public class Request {
             }
         }).resume()
     }
-    
+
     // MARK: - Perform data request with completion handler
     class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Data?, _ error: Error?) -> Void)) {
-        
+
         let request: URLRequest? = {
             if let request = request {
                 return request
@@ -1615,22 +1615,22 @@ final public class Request {
         guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-        
+
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
-        
-        URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, response, error) in
+
+        URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, _, error) in
             if let data = data {
                 return completion(data, error)
             }
         }).resume()
     }
-    
+
     // MARK: - fetch() wrapper for empty requests without completion handlers
     class func ping(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
         self.fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _, _ in }
     }
-    
+
     // MARK: - Image getter
     class func image(url: URL?, to size: CGSize? = nil, completion: @escaping ((_ value: NSImage?) -> Void)) {
         guard let url = url else { return completion(nil) }
@@ -1655,18 +1655,18 @@ final public class Request {
             return completion(image)
         }).resume()
     }
-    
+
 }
 
 final public class RequestPublisher {
-    
+
     static var EmptyImagePublisher: AnyPublisher<NSImage?, Error> = {
         return Empty<NSImage?, Error>.init().eraseToAnyPublisher()
     }()
-    
+
     // MARK: - Get a publisher for the request
     class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
-        
+
         let request: URLRequest? = {
             if let request = request {
                 return request
@@ -1679,7 +1679,7 @@ final public class RequestPublisher {
         }()
         guard var request = request else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
         var config = URLSessionConfiguration.default
-        
+
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }
 
@@ -1690,7 +1690,7 @@ final public class RequestPublisher {
             .debugAssertNoMainThread()
             .eraseToAnyPublisher()
     }
-    
+
     // MARK: - Combine Image getter
     class func image(url: URL?, to size: CGSize? = nil) -> AnyPublisher<NSImage?, Error> {
         guard let url = url else { return EmptyImagePublisher }
@@ -1723,7 +1723,7 @@ fileprivate extension Data {
         guard let downsampled = downsampled else { return nil }
         return downsampled
     }
-    
+
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
         let maxDimensionInPixels = size.width >= 1000 && size.height >= 1000 ? Swift.max(500, 500) : Swift.max(size.width, size.height) * 0.4
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,

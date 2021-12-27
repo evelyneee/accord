@@ -16,7 +16,15 @@ struct PinsView: View {
     @State var bag = Set<AnyCancellable>()
     var body: some View {
         List($pins, id: \.id) { $message in
-            MessageCellView(message: $message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: Binding.constant(nil))
+            MessageCellView(
+                message: $message,
+                nick: nil,
+                replyNick: nil,
+                pronouns: nil,
+                role: Binding.constant(nil),
+                replyRole: Binding.constant(nil),
+                replyingTo: Binding.constant(nil)
+            )
         }
         .onAppear(perform: {
             messageFetchQueue.async {

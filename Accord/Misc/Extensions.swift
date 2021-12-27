@@ -20,8 +20,7 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
         while !container.isAtEnd {
             if let decoded = try? container.decode(Value.self) {
                 wrappedValue.append(decoded)
-            }
-            else {
+            } else {
                 print("failed to decode")
                 _ = try? container.decode(_None.self)
             }
@@ -30,26 +29,23 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
 }
 
 @propertyWrapper
-struct DefaultEmptyArray<T:Codable & ExpressibleByArrayLiteral> {
+struct DefaultEmptyArray<T: Codable & ExpressibleByArrayLiteral> {
     var wrappedValue: T = T()
 }
 
 extension DefaultEmptyArray: Codable {
-    
     func encode(to encoder: Encoder) throws {
         try wrappedValue.encode(to: encoder)
     }
-    
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         wrappedValue = try container.decode(T.self)
     }
-    
+
 }
 
 extension KeyedDecodingContainer {
-    func decode<T:Decodable>(_ type: DefaultEmptyArray<T>.Type,
-                forKey key: Key) throws -> DefaultEmptyArray<T> {
+    func decode<T: Decodable>(_ type: DefaultEmptyArray<T>.Type, forKey key: Key) throws -> DefaultEmptyArray<T> {
         try decodeIfPresent(type, forKey: key) ?? .init()
     }
 }
@@ -90,7 +86,7 @@ extension Color {
             .sRGB,
             red: Double(r) / 255,
             green: Double(g) / 255,
-            blue:  Double(b) / 255,
+            blue: Double(b) / 255,
             opacity: Double(a) / 255
         )
     }
@@ -109,14 +105,14 @@ struct Folder<Content: View>: View {
     @State var icon: [Guild]
     @State var color: NSColor
     @State var content: () -> Content
-    
+
     @State private var collapsed: Bool = true
-    
+
     let gridLayout: [GridItem] = [
         GridItem(spacing: 0),
         GridItem(spacing: 0)
     ]
-    
+
     var body: some View {
         VStack {
             Button(
@@ -175,16 +171,16 @@ struct Folder<Content: View>: View {
 
 extension Collection where Self.Element: Identifiable {
     subscript(id id: Self.Element.ID) -> Self.Element? {
-        self.enumerated().compactMap { (index, element) in
-            return [element.id:element]
-        }.reduce(into: [Self.Element.ID:Self.Element]()) { (result, next) in
+        self.enumerated().compactMap { (_, element) in
+            return [element.id: element]
+        }.reduce(into: [Self.Element.ID: Self.Element]()) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }[id]
     }
     subscript(num num: Self.Element.ID) -> Int? {
         self.enumerated().compactMap { (index, element) in
-            return [element.id:index]
-        }.reduce(into: [Self.Element.ID:Int]()) { (result, next) in
+            return [element.id: index]
+        }.reduce(into: [Self.Element.ID: Int]()) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }[num]
     }
@@ -230,14 +226,14 @@ func pronounDBFormed(pronoun: inout String?) {
     }
 }
 
-func pfpURL(_ uid: String?, _ hash: String?) -> String {
+func pfpURL(_ uid: String?, _ hash: String?, _ size: String = "32") -> String {
     guard let uid = uid, let hash = hash else { return "" }
-    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=64"
+    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=\(size)"
 }
 
-func iconURL(_ id: String?, _ icon: String?) -> String {
+func iconURL(_ id: String?, _ icon: String?, _ size: String = "32") -> String {
     guard let id = id, let icon = icon else { return "" }
-    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=64"
+    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=\(size)"
 }
 
 // BAD
@@ -265,5 +261,29 @@ extension String {
             return ""
         }
         return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
+    }
+}
+
+extension DispatchQueue {
+    func asyncIf(_ condition: @autoclosure () -> Bool, _ perform: @escaping () -> Void) {
+        if condition() {
+            self.async {
+                perform()
+            }
+        }
+    }
+    func asyncWithAnimation(_ perform: @escaping () -> Void) {
+        self.async {
+            withAnimation {
+                perform()
+            }
+        }
+    }
+    func asyncAfterWithAnimation(deadline: DispatchTime, _ perform: @escaping () -> Void) {
+        self.asyncAfter(deadline: deadline) {
+            withAnimation {
+                perform()
+            }
+        }
     }
 }

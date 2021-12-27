@@ -30,8 +30,8 @@ extension URLSessionConfiguration {
 }
 
 extension URL {
-    func appendingQueryParameters(_ parametersDictionary : Dictionary<String, String>) -> URL {
-        let URLString : String = String(format: "%@?%@", self.absoluteString, parametersDictionary.queryParameters)
+    func appendingQueryParameters(_ parametersDictionary: [String: String]) -> URL {
+        let URLString: String = String(format: "%@?%@", self.absoluteString, parametersDictionary.queryParameters)
         return URL(string: URLString)!
     }
 }
@@ -162,5 +162,5 @@ extension Dictionary {
         }
         return parts.joined(separator: "&")
     }
-    
+
 }

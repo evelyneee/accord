@@ -18,7 +18,7 @@ struct TiltAnimation: ViewModifier {
         content
             .rotationEffect(.degrees(rotated ? 10 : -10))
             .onAppear {
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
+                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
                     withAnimation(Animation.spring()) {
                         rotated.toggle()
                     }
@@ -39,7 +39,7 @@ internal extension View {
 }
 
 struct LoadingView: View {
-    
+
     fileprivate static let greetings: [Text] = [
         Text("Entering girlmode"),
         Text("Stay dry"),
@@ -53,7 +53,7 @@ struct LoadingView: View {
         Text("Never gonna give you up, never gonna use electron"),
         Text("Tell ur oomfies")
     ]
-    
+
     var body: some View {
         VStack {
             Spacer()
@@ -81,11 +81,11 @@ struct ContentView: View {
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
     @State var serverListView: ServerListView?
-    
+
     enum LoadErrors: Error {
         case alreadyLoaded
     }
-    
+
     var body: some View {
         Group {
             if modalIsPresented {

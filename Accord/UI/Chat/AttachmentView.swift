@@ -33,9 +33,19 @@ struct AttachmentView: View {
                 }
                 Button(action: { [weak obj] in
                     if obj?.content_type?.prefix(6).stringLiteral == "video/" {
-                        attachmentWindows(player: AVPlayer(url: URL(string: obj?.url ?? "")!), url: nil, name: (obj?.filename)!, width: (obj?.width)!, height: (obj?.height)!)
+                        attachmentWindows(
+                            player: AVPlayer(url: URL(string: obj?.url ?? "")!),
+                            url: nil,
+                            name: (obj?.filename)!,
+                            width: (obj?.width)!,
+                            height: (obj?.height)!)
                     } else {
-                        attachmentWindows(player: nil, url: (obj?.url)!, name: (obj?.filename)!, width: (obj?.width)!, height: (obj?.height)!)
+                        attachmentWindows(
+                            player: nil,
+                            url: (obj?.url)!,
+                            name: (obj?.filename)!,
+                            width: (obj?.width)!,
+                            height: (obj?.height)!)
                     }
                 }) {
                     Image(systemName: "arrow.up.forward.circle")
@@ -52,8 +62,8 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
         contentRect: NSRect(x: 0, y: 0, width: CGFloat(width ?? 0), height: CGFloat(height ?? 0)),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false)
-    if player != nil {
-         windowRef.contentView = NSHostingView(rootView: VideoPlayer(player: player!).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).padding(.horizontal, 45).cornerRadius(5))
+    if let player = player {
+         windowRef.contentView = NSHostingView(rootView: VideoPlayer(player: player).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).padding(.horizontal, 45).cornerRadius(5))
     }
     if url != nil {
         windowRef.contentView = NSHostingView(rootView: Attachment(url ?? "").frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).cornerRadius(5))
@@ -67,15 +77,14 @@ struct VideoPlayerController: NSViewRepresentable {
     init(videoURL: URL) {
         self.player = AVPlayer(url: videoURL)
     }
-    var player: AVPlayer? = nil
+    var player: AVPlayer?
     func makeNSView(context: Context) -> AVPlayerView {
         let playerView = AVPlayerView()
         playerView.player = player
         return playerView
     }
-    
+
     func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        
+
     }
 }
-

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 final class SongLink {
-       
+
     // MARK: - Song getter
     public class func getSong(song: String, completion: @escaping ((SongLinkBase?) -> Void)) {
         guard let encoded = song.addingPercentEncoding(withAllowedCharacters: .alphanumerics),

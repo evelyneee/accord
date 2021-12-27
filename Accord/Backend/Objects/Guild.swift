@@ -11,7 +11,7 @@ final class Guild: Codable, Equatable, Hashable, Identifiable {
     static func == (lhs: Guild, rhs: Guild) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     let id: String
     let name: String
     var icon: String?
@@ -75,4 +75,3 @@ final class Guild: Codable, Equatable, Hashable, Identifiable {
         return hasher.combine(id)
     }
 }
-

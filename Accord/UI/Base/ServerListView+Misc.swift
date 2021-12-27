@@ -10,7 +10,7 @@ import Foundation
 extension ServerListView {
     static func fastIndexGuild(_ guild: String, array: [Guild]) -> Int? {
         let messageDict = array.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
@@ -18,7 +18,7 @@ extension ServerListView {
     }
     func fastIndexChannels(_ channel: String, array: [Channel]) -> Int? {
         let messageDict = array.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
@@ -26,7 +26,7 @@ extension ServerListView {
     }
     func fastIndexEntries(_ entry: String, array: [ReadStateEntry]) -> Int? {
         let messageDict = array.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
@@ -35,7 +35,7 @@ extension ServerListView {
     func order(full: GatewayD?) {
         for guild in full?.guilds ?? [] {
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
-            let parents: [Channel] = guild.channels?.filter( { $0.type == .section } ) ?? []
+            let parents: [Channel] = guild.channels?.filter({ $0.type == .section }) ?? []
             let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []
             var ret = [Channel]()
             for id in ids {
@@ -49,7 +49,7 @@ extension ServerListView {
     func assignReadStates(full: GatewayD?) {
         guard let readState = full?.read_state else { return }
         let stateDict = readState.entries.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
@@ -61,12 +61,12 @@ extension ServerListView {
             }
         }
         let messageDict = privateChannels.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
         for channel in privateChannels {
-            if let index = messageDict[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice  {
+            if let index = messageDict[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice {
                 channel.read_state = readState.entries[index]
             }
         }

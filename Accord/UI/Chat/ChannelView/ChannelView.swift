@@ -11,7 +11,7 @@ import AVKit
 
 final class ChannelMembers {
     static var shared = ChannelMembers()
-    var channelMembers: [String:[String:String]] = [:]
+    var channelMembers: [String: [String: String]] = [:]
 }
 
 struct ChannelView: View, Equatable {
@@ -22,7 +22,7 @@ struct ChannelView: View, Equatable {
     }
 
     @ObservedObject var viewModel: ChannelViewViewModel
-    
+
     var guildID: String
     var channelID: String
     var channelName: String
@@ -37,23 +37,23 @@ struct ChannelView: View, Equatable {
     // Collapsed message quick action indexes
 
     // WebSocket error
-    @State var error: String? = nil
+    @State var error: String?
 
     // Mention users in replies
     @State var mention: Bool = true
-    @State var replyingTo: Message? = nil
+    @State var replyingTo: Message?
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
-    
-    var messageMap: [String:Int?] {
+
+    var messageMap: [String: Int?] {
         return viewModel.messages.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
     }
-        
+
     // MARK: - init
     init(_ channel: Channel, _ guildName: String? = nil) {
         self.guildID = channel.guild_id ?? "@me"
@@ -62,7 +62,7 @@ struct ChannelView: View, Equatable {
         self.guildName = guildName ?? "Direct Messages"
         self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) { [weak viewModel] in
             List {

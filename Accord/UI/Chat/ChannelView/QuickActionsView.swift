@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct QuickActionsView: View {
-    
+
     weak var message: Message?
-    
+
     @Binding var replyingTo: Message?
     @State var opened: Bool = false
-    
+
     var openButton: some View {
         Button(action: {
             withAnimation {
@@ -24,7 +24,7 @@ struct QuickActionsView: View {
             Image(systemName: (opened ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
         }
     }
-    
+
     var replyButton: some View {
         Button(action: {
             replyingTo = message
@@ -32,7 +32,7 @@ struct QuickActionsView: View {
             Image(systemName: "arrowshape.turn.up.backward.fill")
         }
     }
-    
+
     var deleteButton: some View {
         Button(action: {
             DispatchQueue.global(qos: .background).async {
@@ -42,7 +42,7 @@ struct QuickActionsView: View {
             Image(systemName: "trash")
         }
     }
-    
+
     var body: some View {
         lazy var clipButton = {
             return Button(action: {
@@ -53,7 +53,7 @@ struct QuickActionsView: View {
                 Text("Copy")
             }
         }()
-        
+
         lazy var linkButton = {
             Button(action: {
                 NSPasteboard.general.clearContents()
@@ -63,7 +63,7 @@ struct QuickActionsView: View {
                 Text("Copy Message Link")
             }
         }()
-        
+
         return HStack {
             openButton
             if opened {

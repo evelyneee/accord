@@ -53,8 +53,8 @@ struct LoginView: View {
     @State var proxyIP: String = ""
     @State var proxyPort: String = ""
     @State var state: LoginState = .initial
-    @State var notif: [String:Any] = [:]
-    @State var error: String? = nil
+    @State var notif: [String: Any] = [:]
+    @State var error: String?
     @StateObject var viewModel = LoginViewViewModel()
     var body: some View {
         VStack {
@@ -138,7 +138,7 @@ struct LoginView: View {
                             type: .POST,
                             discordHeaders: true,
                             json: true
-                        )) { response, error in
+                        )) { response, _ in
                             if let token = response?.token {
                                 _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -159,7 +159,7 @@ struct LoginView: View {
                                     type: .POST,
                                     discordHeaders: true,
                                     json: true
-                                )) { value, error in
+                                )) { value, _ in
                                     if let token = value?.token {
                                         _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                         AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -185,7 +185,7 @@ struct LoginView: View {
         .frame(minHeight: 250)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
             self.viewModel.state = .twofactor
-            self.notif = notif.userInfo as? [String:Any] ?? [:]
+            self.notif = notif.userInfo as? [String: Any] ?? [:]
             print(notif)
         }
         .padding()
@@ -193,18 +193,18 @@ struct LoginView: View {
 }
 
 final class LoginViewViewModel: ObservableObject {
-    
+
     @Published var state: LoginState = .initial
     @Published var captcha: Bool = false
     @Published var captchaVCKey: String?
     @Published var captchaPayload: String?
-    
+
     init() {
-        
+
     }
-    
+
     func login(_ email: String, _ password: String, _ twofactor: String) throws {
-        var loginError: Error? = nil
+        var loginError: Error?
         Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
@@ -287,7 +287,7 @@ extension AnyTransition {
 }
 
 struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
-    
+
     init(token: String) {
         self.siteKey = token
         print(token, siteKey)
@@ -304,7 +304,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         webConfiguration.userContentController = contentController
 
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        
+
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: webView.topAnchor),
@@ -317,11 +317,11 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         }
         return webView
     }
-    
+
     func updateNSView(_ nsView: WKWebView, context: Context) {
-    
+
     }
-    
+
     typealias NSViewType = WKWebView
 }
 
@@ -329,7 +329,7 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController,
                                    didReceive message: WKScriptMessage) {
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key":message.body as! String])
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key": message.body as! String])
         }
     }
 }
@@ -369,9 +369,8 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
  }
  */
 
-
 extension CaptchaViewControllerSwiftUI {
-    
+
     private var generateHTML: String {
         var hCaptchaHTML =
         """

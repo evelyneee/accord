@@ -12,7 +12,7 @@ final class User: Codable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
         return lhs.id == rhs.id
     }
-        
+
     var id: String
     var username: String
     var discriminator: String
@@ -29,9 +29,9 @@ final class User: Codable, Identifiable, Hashable {
     var bio: String?
     var nick: String?
     var roleColor: String?
-    
+
     func isMe() -> Bool { user_id == self.id }
-        
+
     // MARK: - Relationships
     func addFriend(_ guild: String, _ channel: String) {
 //        let headers = Headers(
@@ -64,7 +64,7 @@ final class User: Codable, Identifiable, Hashable {
 //        )
 //         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

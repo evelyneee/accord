@@ -61,18 +61,16 @@ extension ChannelView: MessageControllerDelegate {
         guard channelID == self.channelID else { return }
         webSocketQueue.async { [weak viewModel] in
             let messageMap = viewModel?.messages.enumerated().compactMap { (index, element) in
-                return [element.id:index]
+                return [element.id: index]
             }.reduce(into: [:]) { (result, next) in
                 result.merge(next) { (_, rhs) in rhs }
             }
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
             guard let index = messageMap?[message.id] else { return }
-            DispatchQueue.main.async { [weak viewModel] in
-                withAnimation {
-                    let i: Int = index
-                    viewModel?.messages.remove(at: i)
-                }
+            DispatchQueue.main.asyncWithAnimation { [weak viewModel] in
+                let i: Int = index
+                viewModel?.messages.remove(at: i)
             }
         }
     }
@@ -83,7 +81,7 @@ extension ChannelView: MessageControllerDelegate {
             if !(typing.contains(msg["user_id"] as? String ?? "")) {
                 guard let memberData = try? JSONSerialization.data(withJSONObject: msg, options: []) else { return }
                 guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: memberData) else { return }
-                guard let nick_fake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
+                guard let nickFake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
                     guard let nick = memberDecodable.member?.nick else {
                         withAnimation {
                             typing.append(memberDecodable.member?.user.username ?? "")
@@ -109,9 +107,9 @@ extension ChannelView: MessageControllerDelegate {
                     })
                     return
                 }
-                if !(typing.contains(nick_fake)) {
+                if !(typing.contains(nickFake)) {
                     withAnimation {
-                        typing.append(nick_fake)
+                        typing.append(nickFake)
                     }
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
@@ -125,7 +123,7 @@ extension ChannelView: MessageControllerDelegate {
         }
     }
     func sendMemberList(msg: MemberListUpdate) {
-        
+
     }
     func sendMemberChunk(msg: Data) {
         webSocketQueue.async { [weak viewModel] in

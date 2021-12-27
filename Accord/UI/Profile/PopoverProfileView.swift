@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PopoverProfileView: View {
     @Binding var user: User?
-    @State var hovered: Int? = nil
+    @State var hovered: Int?
     var body: some View {
         return ZStack(alignment: .top) {
             VStack {
@@ -38,7 +38,7 @@ struct PopoverProfileView: View {
                         .foregroundColor(Color.secondary)
                     HStack(alignment: .bottom) {
                         Button(action: {
-                            
+
                         }, label: {
                             VStack {
                                 Image(systemName: "bubble.right.fill")
@@ -64,7 +64,7 @@ struct PopoverProfileView: View {
                                 }
                             })
                         Button(action: {
-                            
+
                         }, label: {
                             VStack {
                                 Image(systemName: "phone.fill")
@@ -90,7 +90,7 @@ struct PopoverProfileView: View {
                                 }
                             })
                         Button(action: {
-                            
+
                         }, label: {
                             VStack {
                                 Image(systemName: "camera.circle.fill")
@@ -116,7 +116,7 @@ struct PopoverProfileView: View {
                                 }
                             })
                         Button(action: {
-                            
+
                         }, label: {
                             VStack {
                                 Image(systemName: "person.crop.circle.badge.plus")

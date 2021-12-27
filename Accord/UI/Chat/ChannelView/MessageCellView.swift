@@ -21,13 +21,13 @@ struct MessageCellView: View {
     @State var popup: Bool = false
     @State var color: Color = Color(NSColor.textColor)
     @State var replyColor: Color = Color(NSColor.textColor)
-    @State var textElement: Text? = nil
+    @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
                 HStack { [weak reply] in
-                    Attachment(pfpURL(reply?.author?.id, reply?.author?.avatar)).equatable()
+                    Attachment(pfpURL(reply?.author?.id, reply?.author?.avatar, "16")).equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
                     Text(replyNick ?? reply?.author?.username ?? "")

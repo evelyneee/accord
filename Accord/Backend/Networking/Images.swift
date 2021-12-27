@@ -18,10 +18,10 @@ struct Attachment: View, Equatable {
     static func == (lhs: Attachment, rhs: Attachment) -> Bool {
         return lhs.url == rhs.url || lhs.imageLoader.image == rhs.imageLoader.image
     }
-    
+
     @ObservedObject var imageLoader: ImageLoaderAndCache
     var url: String
-    
+
     init(_ url: String, size: CGSize? = nil) {
         self.url = url
         imageLoader = ImageLoaderAndCache(imageURL: url, size: size)
@@ -39,14 +39,14 @@ struct Attachment: View, Equatable {
 }
 
 struct HoveredAttachment: View, Equatable {
-    
+
     static func == (lhs: HoveredAttachment, rhs: HoveredAttachment) -> Bool {
         return true
     }
-    
+
     @ObservedObject var imageLoader: ImageLoaderAndCache
     @State var hovering = false
-    
+
     init(_ url: String) {
         imageLoader = ImageLoaderAndCache(imageURL: url)
     }
@@ -64,18 +64,18 @@ struct HoveredAttachment: View, Equatable {
 }
 
 final class ImageLoaderAndCache: ObservableObject {
-    
+
     @Published var image: NSImage = NSImage()
-    var cancellable: AnyCancellable? = nil
+    var cancellable: AnyCancellable?
     private var url: URL?
     private var size: CGSize?
-    
+
     init(imageURL: String, size: CGSize? = nil) {
         self.url = URL(string: imageURL)
         self.size = size
         self.load()
     }
-    
+
     func load() {
         imageQueue.async { [weak self] in
             self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
@@ -85,6 +85,3 @@ final class ImageLoaderAndCache: ObservableObject {
         }
     }
 }
-
-
-

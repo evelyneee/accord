@@ -16,8 +16,8 @@ final class Plugins {
         let pluginClass = LoadPlugin(onto: AccordPlugin.self, dylib: url)?.init()
         return pluginClass
     }
-    
-    func LoadPlugin<T>(onto: T.Type, dylib: String) -> Optional<T.Type> {
+
+    func LoadPlugin<T>(onto: T.Type, dylib: String) -> T.Type? {
         guard let handle = dlopen(dylib, RTLD_NOW) else {
             releaseModePrint("Could not open \(dylib) \(String(cString: dlerror()))")
             return nil
@@ -34,16 +34,15 @@ final class Plugins {
     }
 }
 
-
 @objc open class AccordPlugin: NSObject {
 
     override required public init() { }
 
-    open var body: NSView? = nil
+    open var body: NSView?
     open var name = ""
     open var descript = ""
     open var symbol = ""
-    
+
 }
 
 struct NSViewWrapper: NSViewRepresentable {
@@ -56,7 +55,7 @@ struct NSViewWrapper: NSViewRepresentable {
     }
     func updateNSView(_ nsView: NSView, context: Context) {
     }
-    
+
     typealias NSViewType = NSView
 }
 

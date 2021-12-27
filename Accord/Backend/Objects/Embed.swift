@@ -11,7 +11,7 @@ final class Embed: Codable, Hashable, Identifiable {
     static func == (lhs: Embed, rhs: Embed) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     var title: String?
     var type: String?
     var description: String?

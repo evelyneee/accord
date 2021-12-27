@@ -24,22 +24,38 @@ extension ChannelView {
                         .buttonStyle(BorderlessButtonStyle())
                     }
                     .padding(4)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                    .background(
+                        VisualEffectView(
+                            material: NSVisualEffectView.Material.sidebar,
+                            blendingMode: NSVisualEffectView.BlendingMode.withinWindow
+                        )
+                    )
                     .cornerRadius(5)
                 }
                 Group {
                     if typing.count == 1 && !(typing.isEmpty) {
-                        Text("\(typing.map{ "\($0)" }.joined(separator: ", ")) is typing..")
+                        Text("\(typing.map { "\($0)" }.joined(separator: ", ")) is typing..")
                     } else if !(typing.isEmpty) {
                         Text("\(typing.joined(separator: ", ")) are typing...")
                     }
                 }
                 .padding(4)
                 .lineLimit(0)
-                .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow))
+                .background(
+                    VisualEffectView(
+                        material: NSVisualEffectView.Material.sidebar,
+                        blendingMode: NSVisualEffectView.BlendingMode.withinWindow
+                    )
+                )
                 .cornerRadius(5)
             }
-            ChatControls(guildID: Binding.constant(guildID), channelID: Binding.constant(channelID), chatText: Binding.constant("Message #\(channelName)"), replyingTo: $replyingTo, users: Binding.constant(viewModel.messages.compactMap { $0.author }))
+            ChatControls(
+                guildID: Binding.constant(guildID),
+                channelID: Binding.constant(channelID),
+                chatText: Binding.constant("Message #\(channelName)"),
+                replyingTo: $replyingTo,
+                users: Binding.constant(viewModel.messages.compactMap { $0.author })
+            )
         }
         .padding()
     }

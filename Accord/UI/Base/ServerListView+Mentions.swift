@@ -23,20 +23,19 @@ extension ServerListView: MentionSenderDelegate {
         selection = nil
     }
     func removeMentions(server: String) {
-
         let index = folders.compactMap { ServerListView.fastIndexGuild(server, array: $0.guilds) }
-        for (i, v) in index.enumerated() {
-            let guild = folders[i].guilds[v]
+        for (index1, index2) in index.enumerated() {
+            let guild = folders[index1].guilds[index2]
             guild.channels?.forEach { $0.read_state?.mention_count = 0 }
         }
     }
-    
+
     func sendWSError(error: Error) {
         print("bad")
         self.online = false
     }
-    
-    /// This does not work unfortunately, needs some work
+
+    // This does not work unfortunately, needs some work
     /*
     func fastBindReadState(channels: [Channel], read_state: [ReadStateEntry]) -> [Channel] {
         let dict =  Dictionary(uniqueKeysWithValues: zip(channels, read_state))
@@ -47,4 +46,3 @@ extension ServerListView: MentionSenderDelegate {
     }
     */
 }
-

@@ -1,4 +1,3 @@
-
 import Security
 import Foundation
 
@@ -6,10 +5,10 @@ final class KeychainManager {
     static var shared = KeychainManager()
     class func save(key: String, data: Data) -> OSStatus {
         let query = [
-            kSecClass as String           : kSecClassGenericPassword as String,
-            kSecAttrAccount as String     : key,
-            kSecAttrAccessGroup as String : "group.evelyn.accord",
-            kSecValueData as String       : data ] as [String : Any]
+            kSecClass as String: kSecClassGenericPassword as String,
+            kSecAttrAccount as String: key,
+            kSecAttrAccessGroup as String: "group.evelyn.accord",
+            kSecValueData as String: data ] as [String: Any]
 
         SecItemDelete(query as CFDictionary)
 
@@ -18,14 +17,14 @@ final class KeychainManager {
 
     class func load(key: String) -> Data? {
         let query = [
-            kSecClass as String       : kSecClassGenericPassword,
-            kSecAttrAccount as String : key,
-            kSecReturnData as String  : kCFBooleanTrue!,
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: kCFBooleanTrue!,
             kSecAttrAccessGroup as String: "group.evelyn.accord",
-            kSecMatchLimit as String  : kSecMatchLimitOne
-        ] as [String : Any]
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ] as [String: Any]
 
-        var dataTypeRef: AnyObject? = nil
+        var dataTypeRef: AnyObject?
 
         let status: OSStatus = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
 
@@ -47,5 +46,3 @@ final class KeychainManager {
         print("login ended")
     }
 }
-
-

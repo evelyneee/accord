@@ -30,7 +30,7 @@ extension NSImage {
         guard let downsampled = downsampled else { return nil }
         return downsampled
     }
-    
+
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
         let maxDimensionInPixels = max(size.width, size.height) * (scale ?? 0.5)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -40,7 +40,7 @@ extension NSImage {
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }
-    
+
     func resized(to newSize: NSSize) -> NSImage? {
         if let bitmapRep = NSBitmapImageRep(
             bitmapDataPlanes: nil, pixelsWide: Int(newSize.width), pixelsHigh: Int(newSize.height),

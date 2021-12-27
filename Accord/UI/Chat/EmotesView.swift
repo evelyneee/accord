@@ -13,7 +13,7 @@ struct EmotesView: View, Equatable {
     static func == (lhs: EmotesView, rhs: EmotesView) -> Bool {
         return true
     }
-    
+
     @State var searchenabled = true
     var columns: [GridItem] = [
         GridItem(spacing: 0),

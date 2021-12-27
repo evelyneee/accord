@@ -8,14 +8,13 @@
 import Foundation
 import UserNotifications
 
-func showNotification(title: String, subtitle: String) -> Void {
+func showNotification(title: String, subtitle: String) {
     let content = UNMutableNotificationContent()
     content.title = title
     content.body = subtitle
     let date = Date() // 2018-10-10T10:00:00+00:00
     let calendar = Calendar.current
     let dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
-       
     // Create the trigger as a repeating event.
     let trigger = UNCalendarNotificationTrigger(
              dateMatching: dateComponents, repeats: false)
@@ -32,8 +31,7 @@ func showNotification(title: String, subtitle: String) -> Void {
     }
 }
 
-func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                         shouldPresent notification: UNNotification) -> Bool {
+func userNotificationCenter(_ center: UNUserNotificationCenter, shouldPresent notification: UNNotification) -> Bool {
         return true
 }
 

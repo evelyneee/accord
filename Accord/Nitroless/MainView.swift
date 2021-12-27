@@ -43,7 +43,7 @@ struct NitrolessView: View, Equatable {
     static func == (lhs: NitrolessView, rhs: NitrolessView) -> Bool {
         return true
     }
-    
+
     @State var searchenabled = true
     var columns: [GridItem] = [
         GridItem(spacing: 1),
@@ -61,7 +61,7 @@ struct NitrolessView: View, Equatable {
     @State var recentMax = 8
     @Environment(\.openURL) var openURL
     @State var recentsenabled = true
-    @State var allEmotes: [String:String] = [:]
+    @State var allEmotes: [String: String] = [:]
     @State var search: String = ""
     var body: some View {
         VStack {

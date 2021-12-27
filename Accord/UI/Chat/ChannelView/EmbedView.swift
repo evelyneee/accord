@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EmbedView: View, Equatable {
     weak var embed: Embed?
-    
+
     static func == (lhs: EmbedView, rhs: EmbedView) -> Bool {
         return true
     }

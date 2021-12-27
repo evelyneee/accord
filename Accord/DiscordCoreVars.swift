@@ -27,18 +27,18 @@ public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) A
 
 final class AccordCoreVars {
     static var shared = AccordCoreVars()
-    
+
     var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
     var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
-    
+
     public var token: String = ""
     public var user: User?
     public var plugins: [AccordPlugin] = []
-    
+
     init() {
         token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
     }
-    
+
     func loadPlugins() {
         let path = FileManager.default.urls(for: .documentDirectory,
                                                in: .userDomainMask)[0]

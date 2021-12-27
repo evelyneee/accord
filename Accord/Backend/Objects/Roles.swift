@@ -9,8 +9,8 @@ import Foundation
 import AppKit
 
 final class RoleManager {
-    final class func arrangeRoleColors(guilds: [Guild]) -> [String:(Int, Int)] {
-        var returnArray: [String:(Int, Int)] = [:]
+    final class func arrangeRoleColors(guilds: [Guild]) -> [String: (Int, Int)] {
+        var returnArray: [String: (Int, Int)] = [:]
         for guild in guilds {
             if var roles = guild.roles {
                 roles.sort { $0.position > $1.position }

@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-
-public var roleColors: [String:(Int, Int)] = [:]
+public var roleColors: [String: (Int, Int)] = [:]
 
 struct NavigationLazyView<Content: View>: View {
     let build: () -> Content
@@ -21,7 +20,7 @@ struct NavigationLazyView<Content: View>: View {
 }
 
 final class Emotes {
-    static public var emotes: [String:[DiscordEmote]] = [:]
+    static public var emotes: [String: [DiscordEmote]] = [:]
 }
 
 func pingCount(guild: Guild) -> Int {
@@ -30,26 +29,26 @@ func pingCount(guild: Guild) -> Int {
 }
 
 struct ServerListView: View {
-    
+
     init(full: GatewayD?) {
         status = full?.user_settings?.status
         Emotes.emotes = full?.guilds
-                                        .map { ["\($0.id)$\($0.name)":$0.emojis] }
+                                        .map { ["\($0.id)$\($0.name)": $0.emojis] }
                                         .flatMap { $0 }
-                                        .reduce([String:[DiscordEmote]]()) { (dict, tuple) in
+                                        .reduce([String: [DiscordEmote]]()) { (dict, tuple) in
                                             var nextDict = dict
                                             nextDict.updateValue(tuple.1, forKey: tuple.0)
                                             return nextDict
                                         } ?? [:]
         let guildOrder = full?.user_settings?.guild_positions ?? []
         let messageDict = full?.guilds.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         } ?? [:]
         let guildTemp = guildOrder.compactMap { messageDict[$0] }.compactMap { full?.guilds[$0] }
         let guildDict = guildTemp.enumerated().compactMap { (index, element) in
-            return [element.id:index]
+            return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
@@ -72,17 +71,17 @@ struct ServerListView: View {
         }
         MentionSender.shared.delegate = self
     }
-    
-    @State var selection: Int? = nil
+
+    @State var selection: Int?
     @State var selectedServer: Int? = 0
     @State var online: Bool = true
     @State var alert: Bool = true
     var folders: [GuildFolder]
     @State var privateChannels: [Channel] = []
-    @State var status: String? = nil
+    @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
-    
+
     var body: some View {
         lazy var dmButton: some View = {
             return Group {
@@ -135,10 +134,8 @@ struct ServerListView: View {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak guild] in
-                                    withAnimation {
-                                        DispatchQueue.main.async {
-                                            selectedServer = guild?.index
-                                        }
+                                    DispatchQueue.main.asyncWithAnimation {
+                                        selectedServer = guild?.index
                                     }
                                 }) { [weak guild] in
                                     Attachment(iconURL(guild?.id ?? "", guild?.icon ?? "")).equatable()
@@ -164,10 +161,8 @@ struct ServerListView: View {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             Button(action: { [weak guild] in
-                                withAnimation {
-                                    DispatchQueue.main.async {
-                                        selectedServer = guild?.index
-                                    }
+                                DispatchQueue.main.asyncWithAnimation {
+                                    selectedServer = guild?.index
                                 }
                             }) { [weak guild] in
                                 Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil).equatable()

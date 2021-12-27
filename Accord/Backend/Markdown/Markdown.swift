@@ -28,7 +28,7 @@ extension String {
     func matchRange(for regex: String) -> [Range<String.Index>] {
         let regex = try? NSRegularExpression(pattern: regex)
         let results = regex?.matches(in: self, range: NSRange(self.startIndex..., in: self))
-        guard let mapped = results?.compactMap( { Range($0.range, in: self) } ) else {
+        guard let mapped = results?.compactMap({ Range($0.range, in: self) }) else {
             return []
         }
         return mapped
@@ -53,25 +53,25 @@ extension Array where Element == String {
 }
 
 final public class Markdown {
-    
+
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
-    
+
     public typealias TextPublisher = AnyPublisher<Text, Error>
     public typealias TextArrayPublisher = AnyPublisher<[Text], Error>
-    
+
     /// Publisher that sends a SwiftUI Text view with a newline
     static public var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     static fileprivate let blankCharacter = "‎" // Not an empty string
-    
+
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markWord(_ word: String, _ members: [String:String] = [:]) -> TextPublisher {
+    public class func markWord(_ word: String, _ members: [String: String] = [:]) -> TextPublisher {
         let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
         if let id = emoteIDs.first, let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
             return RequestPublisher.image(url: emoteURL)
@@ -120,14 +120,14 @@ final public class Markdown {
             }
         } }.eraseToAnyPublisher()
     }
-    
+
     /**
      markLine: Simple Publisher that combines an array of word publishers for a split line
      - Parameter line: The line being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
-    public class func markLine(_ line: String, _ members: [String:String] = [:]) -> TextArrayPublisher {
+    public class func markLine(_ line: String, _ members: [String: String] = [:]) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         let regex = #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#
         let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
@@ -136,14 +136,14 @@ final public class Markdown {
             .collect()
             .eraseToAnyPublisher()
     }
-    
+
     /**
      markLine: Simple Publisher that combines an array of word and line publishers for a text section
      - Parameter text: The text being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markAll(text: String, _ members: [String:String] = [:]) -> TextPublisher {
+    public class func markAll(text: String, _ members: [String: String] = [:]) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
         let pubs = newlines.map { markLine(String($0), members) }
         let withNewlines: [TextArrayPublisher] = Array(pubs.map { [$0] }.joined(separator: [newLinePublisher]))
@@ -155,7 +155,7 @@ final public class Markdown {
             .eraseToAnyPublisher()
             .debugAssertNoMainThread()
     }
-    
+
 }
 
 final class NSAttributedMarkdown {

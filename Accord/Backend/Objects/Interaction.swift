@@ -16,7 +16,7 @@ final class Interaction: Codable {
 
 final class SlashCommands {
     init() {
-        
+
     }
     final public class func interact(type: Int, applicationID: String, guildID: String, channelID: String, appVersion: String, id: String, dataType: Int, appName: String) {
         /*
@@ -40,17 +40,17 @@ final class SlashCommands {
             userAgent: discordUserAgent,
             token: AccordCoreVars.shared.token,
             bodyObject: [
-                "type":type,
-                "application_id":applicationID,
-                "guild_id":guildID,
-                "channel_id":channelID,
-                "data":[
-                    "version":appVersion,
-                    "id":id,
-                    "type":dataType,
-                    "name":appName,
-                    "options":[],
-                    "attachments":[]
+                "type": type,
+                "application_id": applicationID,
+                "guild_id": guildID,
+                "channel_id": channelID,
+                "data": [
+                    "version": appVersion,
+                    "id": id,
+                    "type": dataType,
+                    "name": appName,
+                    "options": [],
+                    "attachments": []
                 ]
             ],
             type: .POST,

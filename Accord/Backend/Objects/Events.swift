@@ -51,7 +51,6 @@ final class GatewayMessage: Decodable {
     var d: Message?
 }
 
-
 final class GatewayDeletedMessage: Decodable {
     var d: DeletedMessage?
 }

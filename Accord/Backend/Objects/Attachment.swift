@@ -12,7 +12,7 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
     static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     var id: String
     var filename: String
     var content_type: String?
@@ -21,7 +21,7 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
     var proxy_url: String
     var height: Int?
     var width: Int?
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

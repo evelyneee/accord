@@ -16,9 +16,9 @@ extension NSResponder {
 
 struct TableView<T: Collection, Content: View>: NSViewRepresentable {
     typealias NSViewType = NSScrollView
-    
+
     var views: [NSView] = []
-    
+
     public init(_ array: T, @ViewBuilder content: @escaping (T.Element) -> Content) {
         let array = array.reversed()
         views.append(NSHostingView.init(rootView: Text("This is the beginnning of this channel").font(.title).fontWeight(.bold)))
@@ -29,14 +29,14 @@ struct TableView<T: Collection, Content: View>: NSViewRepresentable {
         }
         views.append(NSHostingView(rootView: Spacer().frame(height: 90)))
     }
-    
+
     func makeNSView(context: Context) -> NSScrollView {
         let tableContainer = NSScrollView(frame: .zero)
-    
+
         let tableView = NSTableView(frame: .zero)
         tableView.delegate = context.coordinator
         tableView.dataSource = context.coordinator
-        
+
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "column"))
         tableView.headerView = nil
         column.width = 1
@@ -49,14 +49,14 @@ struct TableView<T: Collection, Content: View>: NSViewRepresentable {
         }
         return tableContainer
     }
-  
+
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        
+
         guard let tableView = nsView.documentView as? NSTableView else { return }
         context.coordinator.views = views
         tableView.reloadData()
     }
-  
+
     func makeCoordinator() -> Coordinator {
         return Coordinator(views: views)
     }
@@ -71,7 +71,7 @@ extension TableView {
         func numberOfRows(in tableView: NSTableView) -> Int {
             return views.count
         }
-                
+
         func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
             return views[row]
         }
