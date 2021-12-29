@@ -41,6 +41,8 @@ extension ChannelView: MessageControllerDelegate {
                     }
                 }
             }
+            guard let author = message.author else { return }
+            ChannelMembers.shared.channelMembers[self.channelID]?[author.id] = viewModel?.nicks[author.id] ?? author.username
         }
     }
     func editMessage(msg: Data, channelID: String?) {

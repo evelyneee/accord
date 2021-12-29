@@ -32,16 +32,16 @@ struct ChatControls: View {
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let params: [String: String]? = [
+        let params: [String: String] = [
             "content": String(temp)
         ]
         request.addValue(AccordCoreVars.shared.token, forHTTPHeaderField: "Authorization")
         var body = Data()
         let boundaryPrefix = "--\(boundary)\r\n"
-        for key in params!.keys {
+        for key in params.keys {
             body.append(string: boundaryPrefix, encoding: .utf8)
             body.append(string: "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n", encoding: .utf8)
-            body.append(string: "\(params!["content"]!)\r\n", encoding: .utf8)
+            body.append(string: "\(params["content"]!)\r\n", encoding: .utf8)
         }
         body.append(string: boundaryPrefix, encoding: .utf8)
         let mimeType = fileUploadURL?.mimeType()
@@ -114,7 +114,7 @@ struct ChatControls: View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
                 VStack {
-                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) {
+                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) {
                         ForEach(Array(zip(viewModel.matchedUsers.prefix(10).indices, viewModel.matchedUsers.prefix(10))), id: \.1) { _, user in
                             Button(action: { [weak viewModel, weak user] in
                                 if let range = viewModel?.textFieldContents.range(of: "@") {
@@ -147,6 +147,24 @@ struct ChatControls: View {
                                     Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
                                         .frame(width: 20, height: 20)
                                     Text(emoji?.name ?? "Unknown Emote")
+                                    Spacer()
+                                }
+                            })
+                            .buttonStyle(.borderless)
+                            .padding(5)
+                            .background(Color(NSColor.windowBackgroundColor))
+                            .cornerRadius(10)
+                        }
+                        ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
+                            Button(action: { [weak viewModel, weak channel] in
+                                if let range = viewModel?.textFieldContents.range(of: "#") {
+                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                }
+                                guard let id = channel?.id else { return }
+                                viewModel?.textFieldContents.append("<#\(id)>")
+                            }, label: { [weak channel] in
+                                HStack {
+                                    Text(channel?.name ?? "Unknown Channel")
                                     Spacer()
                                 }
                             })
@@ -197,6 +215,30 @@ struct ChatControls: View {
                             NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
                                 .frame(width: 300, height: 400)
                         })
+                        HStack {
+                            if fileUpload != nil {
+                                Image(systemName: "doc.fill")
+                                    .foregroundColor(Color.secondary)
+                            }
+                            /*
+                            if AccordCoreVars.shared.plugins != [] {
+                                ForEach(AccordCoreVars.shared.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+                                    if pluginPoppedUp.indices.contains(offset) {
+                                        Button(action: {
+                                            pluginPoppedUp[offset].toggle()
+                                        }) {
+                                            Image(systemName: plugin.symbol)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                        .popover(isPresented: $pluginPoppedUp[offset], content: {
+                                            NSViewWrapper(plugin.body ?? NSView())
+                                                .frame(width: 200, height: 200)
+                                        })
+                                    }
+                                }
+                            }
+                            */
+                        }
                     }
                     .padding(15)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
@@ -225,7 +267,7 @@ struct ChatControls: View {
                         }
                         viewModel?.markdown()
                         textQueue.async {
-                            viewModel?.checkText()
+                            viewModel?.checkText(guildID: guildID)
                         }
                     })
                 }
@@ -249,30 +291,6 @@ struct ChatControls: View {
                     })
                     return true
                 }
-                HStack {
-                    if fileUpload != nil {
-                        Image(systemName: "doc.fill")
-                            .foregroundColor(Color.secondary)
-                    }
-                    /*
-                    if AccordCoreVars.shared.plugins != [] {
-                        ForEach(AccordCoreVars.shared.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
-                            if pluginPoppedUp.indices.contains(offset) {
-                                Button(action: {
-                                    pluginPoppedUp[offset].toggle()
-                                }) {
-                                    Image(systemName: plugin.symbol)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                .popover(isPresented: $pluginPoppedUp[offset], content: {
-                                    NSViewWrapper(plugin.body ?? NSView())
-                                        .frame(width: 200, height: 200)
-                                })
-                            }
-                        }
-                    }
-                    */
-                }
             }
         }
     }
@@ -289,6 +307,7 @@ extension Data {
 final class ChatControlsViewModel: ObservableObject {
 
     @Published var matchedUsers = [User]()
+    @Published var matchedChannels = [Channel]()
     @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
     @Published var cachedUsers = [User]()
@@ -296,9 +315,9 @@ final class ChatControlsViewModel: ObservableObject {
     var currentValue: String?
     var currentRange: Int?
 
-    func checkText() {
+    func checkText(guildID: String) {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
-        let channels = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
+        let channels = textFieldContents.matches(for: #"(?<=#)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
         if !(mentions.isEmpty) {
@@ -308,7 +327,13 @@ final class ChatControlsViewModel: ObservableObject {
                 self?.matchedUsers = matched.removingDuplicates()
             }
         } else if !(channels.isEmpty) {
-            // TODO: Channel completion implementation here
+            let search = channels[0]
+            let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
+            let joined: [Channel] = Array(Array(Array(matches).joined()).joined()).filter { $0.guild_id == guildID }
+            print(joined)
+            DispatchQueue.main.async { [weak self] in
+                self?.matchedChannels = joined
+            }
         } else if !(slashes.isEmpty) {
             // TODO: Slash command implementation here
         } else if !(emoji.isEmpty) {

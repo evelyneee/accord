@@ -32,7 +32,7 @@ extension NSImage {
     }
 
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
-        let maxDimensionInPixels = max(size.width, size.height) * (scale ?? 0.5)
+        let maxDimensionInPixels = max(size.width, size.height) * (scale ?? 1)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
           kCGImageSourceShouldCacheImmediately: true,
           kCGImageSourceCreateThumbnailWithTransform: true,

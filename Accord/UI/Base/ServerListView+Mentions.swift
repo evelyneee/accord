@@ -9,13 +9,13 @@ import Foundation
 
 extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
-        let index = folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
+        let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
         for (i, v) in index.enumerated() {
             print("joe mama")
             guard let v = v else { continue }
-            if let index = self.fastIndexChannels(channel, array: folders[i].guilds[v].channels ?? []) {
+            if let index = self.fastIndexChannels(channel, array: Self.folders[i].guilds[v].channels ?? []) {
                 print("cock")
-                folders[i].guilds[v].channels?[index].read_state?.mention_count += 1
+                Self.folders[i].guilds[v].channels?[index].read_state?.mention_count += 1
             }
         }
     }
@@ -23,9 +23,9 @@ extension ServerListView: MentionSenderDelegate {
         selection = nil
     }
     func removeMentions(server: String) {
-        let index = folders.compactMap { ServerListView.fastIndexGuild(server, array: $0.guilds) }
+        let index = Self.folders.compactMap { ServerListView.fastIndexGuild(server, array: $0.guilds) }
         for (index1, index2) in index.enumerated() {
-            let guild = folders[index1].guilds[index2]
+            let guild = Self.folders[index1].guilds[index2]
             guild.channels?.forEach { $0.read_state?.mention_count = 0 }
         }
     }

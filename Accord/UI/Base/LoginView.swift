@@ -93,7 +93,7 @@ struct LoginView: View {
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
-                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                             } else {
                                 do {
@@ -140,7 +140,7 @@ struct LoginView: View {
                             json: true
                         )) { response, _ in
                             if let token = response?.token {
-                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
@@ -161,7 +161,7 @@ struct LoginView: View {
                                     json: true
                                 )) { value, _ in
                                     if let token = value?.token {
-                                        _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                        KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                         AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
                                         print(token)
@@ -226,7 +226,7 @@ final class LoginViewViewModel: ObservableObject {
                     }
                 }
                 if let checktoken = response.token {
-                    _ = KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                    KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
@@ -253,7 +253,7 @@ final class LoginViewViewModel: ObservableObject {
                             json: true
                         )) { value, error in
                             if let token = value?.token {
-                                _ = KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
                                 AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
@@ -321,13 +321,10 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
     func updateNSView(_ nsView: WKWebView, context: Context) {
 
     }
-
-    typealias NSViewType = WKWebView
 }
 
 final class ScriptHandler: NSObject, WKScriptMessageHandler {
-    func userContentController(_ userContentController: WKUserContentController,
-                                   didReceive message: WKScriptMessage) {
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key": message.body as! String])
         }
@@ -372,8 +369,7 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
 extension CaptchaViewControllerSwiftUI {
 
     private var generateHTML: String {
-        var hCaptchaHTML =
-        """
+        return """
         <html>
             <head>
             <title>Discord Login Captcha</title>
@@ -427,8 +423,6 @@ extension CaptchaViewControllerSwiftUI {
                   <br />
             </body>
         </html>
-        """
-        hCaptchaHTML = hCaptchaHTML.replacingOccurrences(of: "${sitekey}", with: self.siteKey)
-        return hCaptchaHTML
+        """.replacingOccurrences(of: "${sitekey}", with: self.siteKey)
     }
 }

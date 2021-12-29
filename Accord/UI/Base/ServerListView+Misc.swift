@@ -53,7 +53,7 @@ extension ServerListView {
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
-        for folder in folders {
+        for folder in Self.folders {
             for guild in folder.guilds {
                 for channel in guild.channels ?? [] {
                     channel.read_state = readState.entries[stateDict[channel.id] ?? 0]

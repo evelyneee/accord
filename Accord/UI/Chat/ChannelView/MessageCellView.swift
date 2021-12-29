@@ -48,7 +48,7 @@ struct MessageCellView: View {
                     Button(action: {
                         popup.toggle()
                     }) { [weak message] in
-                        Attachment(pfpURL(message?.author?.id, message?.author?.avatar)).equatable()
+                        Attachment(pfpURL(message?.author?.id, message?.author?.avatar, "24")).equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }
@@ -87,7 +87,6 @@ struct MessageCellView: View {
             }
             AttachmentView(media: message.attachments)
                 .padding(.leading, 41)
-                .frame(maxWidth: 600)
         }
         .id(message.id)
         .onAppear {

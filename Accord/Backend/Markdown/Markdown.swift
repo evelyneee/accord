@@ -61,7 +61,7 @@ final public class Markdown {
     public typealias TextPublisher = AnyPublisher<Text, Error>
     public typealias TextArrayPublisher = AnyPublisher<[Text], Error>
 
-    /// Publisher that sends a SwiftUI Text view with a newline
+    // Publisher that sends a SwiftUI Text view with a newline
     static public var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     static fileprivate let blankCharacter = "‎" // Not an empty string
 
@@ -88,6 +88,7 @@ final public class Markdown {
         }
         return Deferred { Future { promise in
             let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
+            let channels = word.matches(for: ##"(?<=\#)(\d+)(.+?)(?=\>)"##)
             let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
             let platforms = word.matches(for: #"(spotify|music\.apple|tidal)"#)
                 .replaceAllOccurences(of: "music.apple", with: "applemusic")
@@ -108,7 +109,12 @@ final public class Markdown {
                 }
             }
             for id in mentions {
-                return promise(.success(Text("@\(members[id] ?? "Unknown user") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                return promise(.success(Text("@\(members[id] ?? "Unknown user")").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+            }
+            for id in channels {
+                let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == id } } }
+                let joined: Channel? = Array(Array(Array(matches).joined()).joined())[safe: 0]
+                return promise(.success(Text("#\(joined?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             do {
                 if #available(macOS 12, *) {
@@ -164,6 +170,7 @@ final class NSAttributedMarkdown {
         let italic = text.matchRange(for: #"(\*|_)(.*?)\1"#)
         let bold = text.matchRange(for: #"(\*\*|__)(.*?)\1"#)
         let strikeThrough = text.matchRange(for: #"(~~(\w+(\s\w+)*)~~)"#)
+        let monospace = text.matchRange(for: #"(`(\w+(\s\w+)*)`)"#)
         if let font = font {
             mut.setAttributes([.font: font, .foregroundColor: NSColor.textColor], range: NSRange(mut.string.startIndex..., in: mut.string))
         }
@@ -175,6 +182,9 @@ final class NSAttributedMarkdown {
         }
         strikeThrough.forEach { match in
             mut.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSRange(match, in: mut.string))
+        }
+        monospace.forEach { match in
+            mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular   ), range: NSRange(match, in: mut.string))
         }
         return mut
     }

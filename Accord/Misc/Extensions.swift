@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import SwiftUI
+import Combine
 
 @propertyWrapper
 public final class IgnoreFailure<Value: Decodable>: Decodable {

@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import AppKit
 
 final class Notifications {
     public static var privateChannels: [String] = []
@@ -222,6 +223,10 @@ final class WebSocket {
 
     // MARK: Authentication
     func authenticate() throws {
+        var size = 0
+        sysctlbyname("kern.osrelease", nil, &size, nil, 0)
+        var machine = [CChar](repeating: 0,  count: size)
+        sysctlbyname("kern.osrelease", &machine, &size, nil, 0)
         let packet: [String: Any] = [
             "op": 2,
             "d": [
@@ -232,11 +237,11 @@ final class WebSocket {
                     "os": "Mac OS X",
                     "browser": "Discord Client",
                     "release_channel": "stable",
-                    "client_build_number": 105608,
+                    "client_build_number": 108924,
                     "client_version": "0.0.264",
-                    "os_version": "21.1.0",
-                    "os_arch": "x64",
-                    "system-locale": "en-US"
+                    "os_version": String(cString: machine),
+                    "os_arch": NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
+                    "system-locale": NSLocale.current.languageCode ?? "en-US"
                 ]
             ]
         ]
@@ -254,6 +259,30 @@ final class WebSocket {
             .store(in: &bag)
     }
 
+    func updatePresence(status: String, since: Int, activities: [Activity]) throws {
+        let packet: [String:Any] = [
+            "op":3,
+            "d": [
+                "status":status,
+                "since":since,
+                "activities": activities.map { $0.dictValue },
+                "afk":false
+            ]
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
+        let jsonString = try String(jsonData)
+        ws.sendPublisher(.string(jsonString))
+            .sink(receiveCompletion: { comp in
+                switch comp {
+                    case .finished: break
+                    case .failure(let error):
+                        MentionSender.shared.sendWSError(error: error)
+                        break
+                }
+            }) { _ in }
+            .store(in: &bag)
+    }
+    
     final func close() {
         let reason = "Closing connection".data(using: .utf8)
         ws.cancel(with: .goingAway, reason: reason)
@@ -454,7 +483,7 @@ final class WebSocket {
                         case "MESSAGE_REACTION_REMOVE_EMOJI": print("something was created"); break
 
                         // MARK: Presence Event Handlers
-                        case "PRESENCE_UPDATE": break
+                        case "PRESENCE_UPDATE": print(text); break
                         case "TYPING_START":
                             let data = payload["d"] as! [String: Any]
                             if let channelid = data["channel_id"] as? String {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 public var roleColors: [String: (Int, Int)] = [:]
 
@@ -32,6 +33,15 @@ struct ServerListView: View {
 
     init(full: GatewayD?) {
         status = full?.user_settings?.status
+        Activity.current = Activity(
+            emoji: StatusEmoji(
+                name: full?.user_settings?.custom_status?.emoji_name ?? "",
+                id: full?.user_settings?.custom_status?.emoji_id ?? "",
+                animated: false
+            ),
+            name: "Custom Status",
+            type: 4
+        )
         Emotes.emotes = full?.guilds
                                         .map { ["\($0.id)$\($0.name)": $0.emojis] }
                                         .flatMap { $0 }
@@ -62,7 +72,7 @@ struct ServerListView: View {
                 folder.guilds.append(guild)
             }
         }
-        self.folders = folderTemp
+        Self.folders = folderTemp
         assignReadStates(full: full)
         order(full: full)
         concurrentQueue.async {
@@ -76,11 +86,12 @@ struct ServerListView: View {
     @State var selectedServer: Int? = 0
     @State var online: Bool = true
     @State var alert: Bool = true
-    var folders: [GuildFolder]
+    public static var folders: [GuildFolder] = []
     @State var privateChannels: [Channel] = []
     @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
+    @State var bag = Set<AnyCancellable>()
 
     var body: some View {
         lazy var dmButton: some View = {
@@ -128,7 +139,7 @@ struct ServerListView: View {
             }
         }()
         lazy var foldersList: some View = {
-            ForEach(folders, id: \.hashValue) { folder in
+            ForEach(Self.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
                     Folder(icon: Array(folder.guilds.prefix(4)), color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
@@ -259,7 +270,7 @@ struct ServerListView: View {
                     .padding(.top, 5)
                 } else if let selected = selectedServer {
                     // MARK: - Guild channels
-                    GuildView(guild: Array(folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection)
+                    GuildView(guild: Array(Self.folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection)
                 }
             }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
@@ -302,6 +313,35 @@ struct ServerListView: View {
                         releaseModePrint(error)
                     }
                 }
+                do {
+                    try wss.updatePresence(status: "dnd", since: 0, activities: [
+                        Activity.current!,
+                    ])
+                } catch {}
+                MediaRemoteWrapper.getCurrentlyPlayingSong()
+                    .sink(receiveCompletion: { c in
+                        
+                    }, receiveValue: { song in
+                        guard song.isMusic else { return }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(Int(song.elapsed ?? 240)), execute: {
+                            MediaRemoteWrapper.updatePresence(status: status)
+                        })
+                        do {
+                            try wss.updatePresence(status: status ?? "dnd", since: 0, activities: [
+                                Activity.current!,
+                                Activity(
+                                    applicationID: "925514277987704842",
+                                    flags: 1,
+                                    name: "Apple Music",
+                                    type: 0,
+                                    timestamp: Int(Date().timeIntervalSince1970) * 1000,
+                                    state: "Listening to \(song.artist ?? "cock")",
+                                    details: song.name
+                                )
+                            ])
+                        } catch {}
+                    })
+                    .store(in: &bag)
             }
         }
     }

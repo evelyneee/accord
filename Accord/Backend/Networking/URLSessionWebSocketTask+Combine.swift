@@ -21,6 +21,7 @@ extension URLSessionWebSocketTask {
             }
         }
     }
+    
     func sendPingPublisher() -> Future<Never, Error> {
         Future { promise in
             self.sendPing { err in

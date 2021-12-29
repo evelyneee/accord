@@ -107,24 +107,6 @@ final class ChannelViewViewModel: ObservableObject {
 
     #if DEBUG
     func offlineMessages() {
-        let data = messagesString.data(using: .utf8)
-        let serialized = try! JSONDecoder().decode([Message].self, from: data!)
-        let messages: [Message] = serialized.enumerated().compactMap { (index, element) -> Message in
-            guard element != serialized.last else { return element }
-            element.lastMessage = serialized[index + 1]
-            return element
-        }
-        DispatchQueue.main.async {
-            self.messages = messages.reversed()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                AppKitLink<NSScrollView>.introspect { scrollView, count in
-                    if let documentView = scrollView.documentView, count == 4 {
-                        Swift.print("[AppKitLink] Successfully found \(type(of: scrollView))")
-                        documentView.scroll(NSPoint(x: 0, y: documentView.bounds.size.height))
-                    }
-                }
-            })
-        }
     }
     #endif
 
@@ -213,14 +195,13 @@ final class ChannelViewViewModel: ObservableObject {
     }
 
     func performSecondStageLoad() {
-        var allUserIDs: [String] = Array(_immutableCocoaArray: NSOrderedSet(array: messages.compactMap { $0.author?.id }))
+        var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
         getCachedMemberChunk()
         for (index, item) in allUserIDs.enumerated {
             if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") && [Int](allUserIDs.indices).contains(index) {
                 allUserIDs.remove(at: index)
             }
         }
-        print("hi")
         if !(allUserIDs.isEmpty) {
             print(allUserIDs)
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
@@ -229,6 +210,7 @@ final class ChannelViewViewModel: ObservableObject {
     deinit {
         print("Closing \(channelID)")
         cancellable.forEach { $0.cancel() }
+        ChannelMembers.shared.channelMembers = [:]
     }
 }
 

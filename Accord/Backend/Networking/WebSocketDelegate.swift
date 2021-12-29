@@ -19,7 +19,7 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
         MessageController.shared.sendWSError(msg: reason)
         print("Error from Discord: \(reason)")
         if reason.contains("auth") {
-            _ = KeychainManager.save(key: "red.evelyn.accord.token", data: Data())
+            KeychainManager.save(key: "red.evelyn.accord.token", data: Data())
         }
         // MARK: WebSocket close codes.
         switch closeCode {

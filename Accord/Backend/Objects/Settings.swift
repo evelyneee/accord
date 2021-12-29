@@ -35,7 +35,7 @@ final class GuildFolder: Decodable, Hashable {
     var name: String?
     var color: Int?
     var guild_ids: [String]
-    @DefaultEmptyArray var guilds: [Guild] = []
+    @DefaultEmptyArray var guilds: [Guild]
     func hash(into hasher: inout Hasher) {
         return hasher.combine(guild_ids)
     }

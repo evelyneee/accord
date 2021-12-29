@@ -2,7 +2,7 @@
 //  AttachmentView.swift
 //  Accord
 //
-//  Created by evelyn on 2021-07-01.
+//  Created by evelyn on 2021-07-01
 //
 
 import SwiftUI
@@ -16,19 +16,19 @@ struct AttachmentView: View {
             HStack(alignment: .top) {
                 VStack { [unowned obj] in
                     if obj.content_type?.prefix(6).stringLiteral == "image/" {
-                        Attachment(obj.url, size: CGSize(width: obj.width ?? 1000, height: obj.height ?? 1000)).equatable()
+                        Attachment(obj.url, size: CGSize(width: 350, height: 350)).equatable()
                             .cornerRadius(5)
+                            .frame(maxWidth: 350, maxHeight: 350)
                     } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
                         if var controller = VideoPlayerController(videoURL: url) {
                             controller
                                 .cornerRadius(5)
-                                .frame(minWidth: 400, minHeight: 400)
+                                .frame(minWidth: 300, minHeight: 300)
                                 .onDisappear {
                                     print("goodbye")
                                     controller.player = nil
                                 }
                         }
-
                     }
                 }
                 Button(action: { [weak obj] in
