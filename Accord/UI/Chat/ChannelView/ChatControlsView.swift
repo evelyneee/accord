@@ -240,9 +240,9 @@ struct ChatControls: View {
                             */
                         }
                     }
-                    .padding(15)
+                    .padding(13)
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                    .cornerRadius(15)
+                    .cornerRadius(12)
                     .onAppear(perform: {
                         viewModel.cachedUsers = self.users
                     })

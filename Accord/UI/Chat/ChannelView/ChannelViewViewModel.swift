@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import Combine
+import SwiftUI
 
 final class ChannelViewViewModel: ObservableObject {
 
@@ -188,7 +189,7 @@ final class ChannelViewViewModel: ObservableObject {
                 }
                 let temp: [String] = rolesTemp.compactMap { $0 }.reversed()
                 DispatchQueue.main.asyncIf(temp.isEmpty) {
-                    self.roles[(person.user.id)] = temp[0]
+                    self.roles[(person.user.id)] = temp[safe: 0]
                 }
             }
         }

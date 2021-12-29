@@ -85,6 +85,12 @@ struct MessageCellView: View {
                 EmbedView(embed: embed).equatable()
                     .padding(.leading, 41)
             }
+            ForEach(message.sticker_items ?? [], id: \.id) { sticker in
+                Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=160")
+                    .frame(width: 160, height: 160)
+                    .cornerRadius(3)
+                    .padding(.leading, 41)
+            }
             AttachmentView(media: message.attachments)
                 .padding(.leading, 41)
         }

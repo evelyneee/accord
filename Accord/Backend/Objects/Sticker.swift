@@ -31,3 +31,8 @@ enum StickerFormat: Int, Codable {
     case apng = 2
     case lottie = 3
 }
+
+final class StickerItem: Codable {
+    var id: String
+    var name: String 
+}

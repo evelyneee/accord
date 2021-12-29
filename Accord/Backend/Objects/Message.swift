@@ -31,6 +31,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var referenced_message: Reply?
     // var message_reference: Reply? // in the mentions endpoint
     weak var lastMessage: Message?
+    let sticker_items: [StickerItem]?
 
     // TODO: Component object
 

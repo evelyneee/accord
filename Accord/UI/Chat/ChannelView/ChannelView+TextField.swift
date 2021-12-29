@@ -57,6 +57,7 @@ extension ChannelView {
                 users: Binding.constant(viewModel.messages.compactMap { $0.author })
             )
         }
-        .padding()
+        .padding(12)
+        .padding(.bottom, 2)
     }
 }
