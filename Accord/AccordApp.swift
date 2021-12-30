@@ -100,5 +100,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(note:)),
             name: NSWorkspace.willSleepNotification, object: nil)
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.init(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil, using: { notif in
+            print("Song Changed")
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2, execute: {
+                MediaRemoteWrapper.updatePresence()
+            })
+        })
     }
 }

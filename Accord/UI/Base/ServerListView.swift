@@ -33,6 +33,7 @@ struct ServerListView: View {
 
     init(full: GatewayD?) {
         status = full?.user_settings?.status
+        MediaRemoteWrapper.status = full?.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
                 name: full?.user_settings?.custom_status?.emoji_name ?? "",
@@ -43,13 +44,13 @@ struct ServerListView: View {
             type: 4
         )
         Emotes.emotes = full?.guilds
-                                        .map { ["\($0.id)$\($0.name)": $0.emojis] }
-                                        .flatMap { $0 }
-                                        .reduce([String: [DiscordEmote]]()) { (dict, tuple) in
-                                            var nextDict = dict
-                                            nextDict.updateValue(tuple.1, forKey: tuple.0)
-                                            return nextDict
-                                        } ?? [:]
+                            .map { ["\($0.id)$\($0.name)": $0.emojis] }
+                            .flatMap { $0 }
+                            .reduce([String: [DiscordEmote]]()) { (dict, tuple) in
+                                var nextDict = dict
+                                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                                return nextDict
+                            } ?? [:]
         let guildOrder = full?.user_settings?.guild_positions ?? []
         let messageDict = full?.guilds.enumerated().compactMap { (index, element) in
             return [element.id: index]
@@ -145,8 +146,10 @@ struct ServerListView: View {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak guild] in
-                                    DispatchQueue.main.asyncWithAnimation {
-                                        selectedServer = guild?.index
+                                    DispatchQueue.main.async {
+                                        withAnimation {
+                                            selectedServer = guild?.index
+                                        }
                                     }
                                 }) { [weak guild] in
                                     Attachment(iconURL(guild?.id ?? "", guild?.icon ?? "")).equatable()
@@ -172,8 +175,10 @@ struct ServerListView: View {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             Button(action: { [weak guild] in
-                                DispatchQueue.main.asyncWithAnimation {
-                                    selectedServer = guild?.index
+                                DispatchQueue.main.async {
+                                    withAnimation {
+                                        selectedServer = guild?.index
+                                    }
                                 }
                             }) { [weak guild] in
                                 Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil).equatable()
@@ -322,10 +327,7 @@ struct ServerListView: View {
                     .sink(receiveCompletion: { c in
                         
                     }, receiveValue: { song in
-                        guard song.isMusic else { return }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(Int(song.elapsed ?? 240)), execute: {
-                            MediaRemoteWrapper.updatePresence(status: status)
-                        })
+                        guard song.isMusic else { return } 
                         do {
                             try wss.updatePresence(status: status ?? "dnd", since: 0, activities: [
                                 Activity.current!,

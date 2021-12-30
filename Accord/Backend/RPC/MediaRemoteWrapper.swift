@@ -63,15 +63,20 @@ final class MediaRemoteWrapper {
     }
     
     static var bag = Set<AnyCancellable>()
+    static var rateLimit: Bool = false
+    static var status: String? = nil
     
-    class func updatePresence(status: String?) {
+    class func updatePresence(status: String? = nil) {
+        guard !Self.rateLimit else { return }
+        rateLimit = true
         MediaRemoteWrapper.getCurrentlyPlayingSong()
             .sink(receiveCompletion: { c in
                 
             }, receiveValue: { song in
                 guard song.isMusic else { return }
                 do {
-                    try wss.updatePresence(status: status ?? "dnd", since: 0, activities: [
+                    print("sent")
+                    try wss.updatePresence(status: Self.status ?? status ?? "dnd", since: 0, activities: [
                         Activity.current!,
                         Activity(
                             applicationID: "925514277987704842",
@@ -83,10 +88,10 @@ final class MediaRemoteWrapper {
                             details: song.name
                         )
                     ])
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                        rateLimit = false
+                    })
                 } catch {}
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(Int(song.duration ?? 360)), execute: {
-                    MediaRemoteWrapper.updatePresence(status: status)
-                })
             })
             .store(in: &Self.bag)
     }
