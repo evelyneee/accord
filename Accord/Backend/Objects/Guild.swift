@@ -71,6 +71,7 @@ final class Guild: Codable, Equatable, Hashable, Identifiable {
     // var stage_instances: [StageInstances]
     // var stickers: [Sticker]?
     var index: Int?
+    
     func hash(into hasher: inout Hasher) {
         return hasher.combine(id)
     }

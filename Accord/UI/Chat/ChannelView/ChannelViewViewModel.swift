@@ -45,7 +45,7 @@ final class ChannelViewViewModel: ObservableObject {
         guard let first = messages.first?.id else { return }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(first)/ack"), headers: Headers(
             userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
+            token: AccordCoreVars.token,
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
@@ -67,7 +67,7 @@ final class ChannelViewViewModel: ObservableObject {
         #endif
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
+            token: AccordCoreVars.token,
             type: .GET,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
@@ -153,7 +153,7 @@ final class ChannelViewViewModel: ObservableObject {
     }
 
     func loadPronouns() {
-        guard AccordCoreVars.shared.pronounDB else { return }
+        guard AccordCoreVars.pronounDB else { return }
         RequestPublisher.fetch([String: String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
             bodyObject: ["platform": "discord", "ids": messages.compactMap({ $0.author?.id}).joined(separator: ",")],
             type: .GET

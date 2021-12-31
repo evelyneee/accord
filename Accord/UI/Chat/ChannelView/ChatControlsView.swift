@@ -35,7 +35,7 @@ struct ChatControls: View {
         let params: [String: String] = [
             "content": String(temp)
         ]
-        request.addValue(AccordCoreVars.shared.token, forHTTPHeaderField: "Authorization")
+        request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
         var body = Data()
         let boundaryPrefix = "--\(boundary)\r\n"
         for key in params.keys {
@@ -75,7 +75,7 @@ struct ChatControls: View {
                 if replyingTo != nil {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
-                        token: AccordCoreVars.shared.token,
+                        token: AccordCoreVars.token,
                         bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))", "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": channelID, "message_id": replyingTo?.id ?? ""]],
                         type: .POST,
                         discordHeaders: true,
@@ -91,7 +91,7 @@ struct ChatControls: View {
                 } else {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
-                        token: AccordCoreVars.shared.token,
+                        token: AccordCoreVars.token,
                         bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))"],
                         type: .POST,
                         discordHeaders: true,
@@ -221,8 +221,8 @@ struct ChatControls: View {
                                     .foregroundColor(Color.secondary)
                             }
                             /*
-                            if AccordCoreVars.shared.plugins != [] {
-                                ForEach(AccordCoreVars.shared.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+                            if AccordCoreVars.plugins != [] {
+                                ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
                                     if pluginPoppedUp.indices.contains(offset) {
                                         Button(action: {
                                             pluginPoppedUp[offset].toggle()
@@ -254,7 +254,7 @@ struct ChatControls: View {
                             messageSendQueue.async {
                                 Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
                                     userAgent: discordUserAgent,
-                                    token: AccordCoreVars.shared.token,
+                                    token: AccordCoreVars.token,
                                     type: .POST,
                                     discordHeaders: true,
                                     referer: "https://discord.com/channels/\(guildID)/\(channelID)"
@@ -273,7 +273,7 @@ struct ChatControls: View {
                 }
                 .onAppear(perform: {
                     viewModel.findView()
-                    for _ in AccordCoreVars.shared.plugins {
+                    for _ in AccordCoreVars.plugins {
                         pluginPoppedUp.append(false)
                     }
                 })

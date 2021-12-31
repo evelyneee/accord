@@ -139,7 +139,7 @@ final class Headers {
 var standardHeaders = Headers(
     userAgent: discordUserAgent,
     contentType: nil,
-    token: AccordCoreVars.shared.token,
+    token: AccordCoreVars.token,
     type: .GET,
     discordHeaders: true,
     referer: "https://discord.com/channels/@me"

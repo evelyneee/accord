@@ -49,8 +49,8 @@ final class Activity {
             dict["party"] = [:]
             dict["secrets"] = [:]
         }
-        if let applicationID = applicationID {
-            dict["application_id"] = applicationID
+        if name != "Custom Status" {
+            dict["application_id"] = applicationID ?? NSNull()
         }
         if let timestamp = timestamp {
             dict["timestamps"] = ["start":timestamp]

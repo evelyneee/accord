@@ -38,7 +38,7 @@ final class SlashCommands {
          */
         Request.ping(url: URL(string: "\(rootURL)/interactions"), headers: Headers(
             userAgent: discordUserAgent,
-            token: AccordCoreVars.shared.token,
+            token: AccordCoreVars.token,
             bodyObject: [
                 "type": type,
                 "application_id": applicationID,

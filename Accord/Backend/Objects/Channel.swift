@@ -12,6 +12,7 @@ final class Channel: Codable, Identifiable {
     let id: String
     let type: ChannelType
     var guild_id: String?
+    var guild_icon: String?
     let position: Int?
     // TODO: Overwrite objects
     // var permission_overwrites: ?

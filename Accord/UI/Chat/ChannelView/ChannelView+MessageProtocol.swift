@@ -52,9 +52,14 @@ extension ChannelView: MessageControllerDelegate {
         webSocketQueue.async {
             guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
             guard let message = gatewayMessage.d else { return }
-            guard let index = messageMap[message.id] as? Int else { return }
+            let messageMap = viewModel.messages.enumerated().compactMap { (index, element) in
+                return [element.id: index]
+            }.reduce(into: [:]) { (result, next) in
+                result.merge(next) { (_, rhs) in rhs }
+            }
+            guard let index = messageMap[message.id] else { return }
             DispatchQueue.main.async {
-                viewModel.messages[index].content = message.content
+                viewModel.messages[index] = message
             }
         }
     }

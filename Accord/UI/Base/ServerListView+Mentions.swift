@@ -23,16 +23,27 @@ extension ServerListView: MentionSenderDelegate {
         selection = nil
     }
     func removeMentions(server: String) {
-        let index = Self.folders.compactMap { ServerListView.fastIndexGuild(server, array: $0.guilds) }
+        let index = Self.folders.map { ServerListView.fastIndexGuild(server, array: $0.guilds) }
         for (index1, index2) in index.enumerated() {
-            let guild = Self.folders[index1].guilds[index2]
-            guild.channels?.forEach { $0.read_state?.mention_count = 0 }
+            guard let index2 = index2 else { return }
+            Self.folders[index1].guilds[index2].channels?.forEach { $0.read_state?.mention_count = 0 }
         }
     }
 
     func sendWSError(error: Error) {
         print("bad")
         self.online = false
+    }
+    
+    func select(channel: Channel) {
+        guard let guildID = channel.guild_id else { return }
+        print("selecting")
+        let index = Self.folders.map { ServerListView.fastIndexGuild(guildID, array: $0.guilds) }
+        print(index)
+        for (i, v) in index.enumerated() {
+            guard let v = v else { continue }
+            NotificationCenter.default.post(name: NSNotification.Name.init(rawValue: "Refresh"), object: nil, userInfo: [Self.folders[i].guilds[v].index ?? 0: Int(channel.id) ?? 0])
+        }
     }
 
     // This does not work unfortunately, needs some work

@@ -12,6 +12,7 @@ protocol MentionSenderDelegate {
     func deselect()
     func removeMentions(server: String)
     func sendWSError(error: Error)
+    func select(channel: Channel)
 }
 
 class MentionSender {
@@ -28,5 +29,8 @@ class MentionSender {
     }
     func sendWSError(error: Error) {
         delegate?.sendWSError(error: error)
+    }
+    func select(channel: Channel) {
+        delegate?.select(channel: channel)
     }
 }

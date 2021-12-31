@@ -11,7 +11,7 @@ import AppKit
 import Combine
 
 struct MessageCellView: View {
-    @Binding var message: Message
+    unowned var message: Message
     var nick: String?
     var replyNick: String?
     var pronouns: String?
@@ -23,6 +23,7 @@ struct MessageCellView: View {
     @State var replyColor: Color = Color(NSColor.textColor)
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
+    @State var hovered: Bool = false
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
@@ -44,23 +45,21 @@ struct MessageCellView: View {
                 .padding(.leading, 47)
             }
             HStack {
-                if !(message.isSameAuthor()) {
+                if !message.isSameAuthor {
                     Button(action: {
                         popup.toggle()
-                    }) { [weak message] in
-                        Attachment(pfpURL(message?.author?.id, message?.author?.avatar, "24")).equatable()
+                    }) {
+                        Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }
-                    .popover(isPresented: $popup, content: { [weak message] in
-                        if let message = message {
-                            PopoverProfileView(user: Binding.constant(message.author))
-                        }
+                    .popover(isPresented: $popup, content: {
+                        PopoverProfileView(user: Binding.constant(message.author))
                     })
                     .buttonStyle(BorderlessButtonStyle())
                 }
                 VStack(alignment: .leading) {
-                    if message.isSameAuthor() {
+                    if message.isSameAuthor {
                         textElement?.padding(.leading, 41) ?? Text(message.content).padding(.leading, 41)
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
@@ -74,12 +73,30 @@ struct MessageCellView: View {
                         Text((pronouns != nil) ? " — \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
+                        +
+                        Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                            .foregroundColor(Color.secondary)
+                            .font(.subheadline)
                         textElement ?? Text(message.content)
                     }
                 }
                 Spacer()
                 // MARK: - Quick Actions
                 QuickActionsView(message: message, replyingTo: $replyingTo)
+                    .if(!hovered, transform: { $0.opacity(0) } )
+                    .frame(height: 10)
+            }
+            ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
+                HStack(spacing: 4) {
+                    Attachment("https://cdn.discordapp.com/emojis/\(reaction.emoji.id ?? "").png?size=16")
+                        .frame(width: 16, height: 16)
+                    Text(String(reaction.count))
+                        .fontWeight(Font.Weight.medium)
+                }
+                .padding(4)
+                .background(Color(NSColor.windowBackgroundColor))
+                .cornerRadius(4)
+                .padding(.leading, 41)
             }
             ForEach(message.embeds ?? [], id: \.id) { embed in
                 EmbedView(embed: embed).equatable()
@@ -126,6 +143,9 @@ struct MessageCellView: View {
                 }
             }
         })
+        .onHover { val in
+            self.hovered = val
+        }
     }
     func load(text: String) {
         textQueue.async {

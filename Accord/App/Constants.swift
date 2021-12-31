@@ -25,19 +25,17 @@ public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "disc
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
 public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.276 Chrome/91.0.4472.164 Electron/13.2.2 Safari/537.36"
 
+public let xcodeRPCAppID = "926282502937641001"
+public let musicRPCAppID = "925514277987704842"
+
 final class AccordCoreVars {
-    static var shared = AccordCoreVars()
+    
+    static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
+    static var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
 
-    var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
-    var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
-
-    public var token: String = ""
-    public var user: User?
-    public var plugins: [AccordPlugin] = []
-
-    init() {
-        token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
-    }
+    public static var token: String = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+    public static var user: User?
+    public static var plugins: [AccordPlugin] = []
 
     func loadPlugins() {
         let path = FileManager.default.urls(for: .documentDirectory,
@@ -46,7 +44,7 @@ final class AccordCoreVars {
         for item in directoryContents {
             if item.isFileURL {
                 let plugin = Plugins().loadView(url: String(item.absoluteString.dropFirst(7)))
-                plugins.append(plugin!)
+                Self.plugins.append(plugin!)
             }
         }
     }

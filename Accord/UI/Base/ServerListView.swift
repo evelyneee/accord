@@ -69,10 +69,14 @@ struct ServerListView: View {
                 let guild = guildTemp[id]
                 guild.emojis.removeAll()
                 guild.index = id
-                guild.channels?.forEach { $0.guild_id = guild.id }
+                for channel in 0..<(guild.channels?.count ?? 0) {
+                    guild.channels?[channel].guild_id = guild.id
+                    guild.channels?[channel].guild_icon = guild.icon
+                }
                 folder.guilds.append(guild)
             }
         }
+        print(folderTemp.compactMap { $0.guilds.compactMap { $0.channels?.compactMap { $0.guild_icon } } })
         Self.folders = folderTemp
         assignReadStates(full: full)
         order(full: full)
@@ -82,7 +86,7 @@ struct ServerListView: View {
         }
         MentionSender.shared.delegate = self
     }
-
+        
     @State var selection: Int?
     @State var selectedServer: Int? = 0
     @State var online: Bool = true
@@ -93,7 +97,8 @@ struct ServerListView: View {
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
     @State var bag = Set<AnyCancellable>()
-
+    @State var updater: Bool = false
+    
     var body: some View {
         lazy var dmButton: some View = {
             return Group {
@@ -282,6 +287,12 @@ struct ServerListView: View {
         }
         .buttonStyle(BorderlessButtonStyle())
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
+            let uInfo = pub.userInfo as! [Int:Int]
+            print(uInfo)
+            self.selectedServer = uInfo.keys.first!
+            self.selection = uInfo.values.first!
+        })
         .toolbar {
             ToolbarItemGroup {
                 if selection == nil {
@@ -307,7 +318,7 @@ struct ServerListView: View {
         }
         .onAppear {
             concurrentQueue.async {
-                Request.fetch([Channel].self, url: URL(string: "https://discord.com/api/users/@me/channels"), headers: standardHeaders) { channels, error in
+                Request.fetch([Channel].self, url: URL(string: "\(rootURL)/users/@me/channels"), headers: standardHeaders) { channels, error in
                     if let channels = channels {
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
@@ -323,27 +334,11 @@ struct ServerListView: View {
                         Activity.current!,
                     ])
                 } catch {}
-                MediaRemoteWrapper.getCurrentlyPlayingSong()
-                    .sink(receiveCompletion: { c in
-                        
-                    }, receiveValue: { song in
-                        guard song.isMusic else { return } 
-                        do {
-                            try wss.updatePresence(status: status ?? "dnd", since: 0, activities: [
-                                Activity.current!,
-                                Activity(
-                                    applicationID: "925514277987704842",
-                                    flags: 1,
-                                    name: "Apple Music",
-                                    type: 0,
-                                    timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                                    state: "Listening to \(song.artist ?? "cock")",
-                                    details: song.name
-                                )
-                            ])
-                        } catch {}
-                    })
-                    .store(in: &bag)
+                if let workspace = XcodeRPC.getActiveWorkspace() {
+                    XcodeRPC.updatePresence(workspace: workspace, filename: XcodeRPC.getActiveFilename())
+                } else {
+                    MediaRemoteWrapper.updatePresence()
+                }
             }
         }
     }

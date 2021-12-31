@@ -14,13 +14,13 @@ struct MentionsView: View {
     @State var bag = Set<AnyCancellable>()
     var body: some View {
         List($mentions, id: \.id) { $message in
-            MessageCellView(message: $message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: Binding.constant(nil))
+            MessageCellView(message: message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: Binding.constant(nil))
         }
         .onAppear(perform: {
             messageFetchQueue.async {
                 RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/users/@me/mentions?limit=25&roles=true&everyone=true"), headers: Headers(
                     userAgent: discordUserAgent,
-                    token: AccordCoreVars.shared.token,
+                    token: AccordCoreVars.token,
                     type: .GET,
                     discordHeaders: true,
                     referer: "https://discord.com/channels/@me"

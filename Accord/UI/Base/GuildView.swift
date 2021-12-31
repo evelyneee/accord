@@ -43,7 +43,7 @@ struct GuildView: View {
             }
             ForEach(guild?.channels ?? [], id: \.id) { channel in
                 if channel.type == .section {
-                    Text(channel.name ?? "")
+                    Text(channel.name ?? "Unknown channel")
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
@@ -65,6 +65,7 @@ struct ServerListViewCell: View {
         self.channel = channel
         self.guildID = channel.guild_id ?? "@me"
     }
+    @State var hovered: Bool = false
     var body: some View {
 
         var readStateDot: some View {
@@ -76,16 +77,6 @@ struct ServerListViewCell: View {
                     .foregroundColor(Color.white)
                     .fontWeight(.semibold)
                     .font(.caption)
-            }
-        }
-
-        var windowButton: some View {
-            return Button(action: {
-                if let channel = channel {
-                    showWindow(channel)
-                }
-            }) {
-                Image(systemName: "arrow.up.right.circle")
             }
         }
 
@@ -120,7 +111,17 @@ struct ServerListViewCell: View {
             if let readState = channel?.read_state, readState.mention_count != 0 {
                 readStateDot
             }
-            windowButton
+            if hovered {
+                Button(action: {
+                    if let channel = channel {
+                        showWindow(channel)
+                    }
+                }) {
+                    Image(systemName: "arrow.up.right.circle")
+                }
+            }
+        }.onHover { val in
+            self.hovered = val
         }
     }
 }

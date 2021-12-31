@@ -76,7 +76,7 @@ final class MediaRemoteWrapper {
                 guard song.isMusic else { return }
                 do {
                     print("sent")
-                    try wss.updatePresence(status: Self.status ?? status ?? "dnd", since: 0, activities: [
+                    try wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0, activities: [
                         Activity.current!,
                         Activity(
                             applicationID: "925514277987704842",

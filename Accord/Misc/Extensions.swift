@@ -263,6 +263,17 @@ extension String {
         }
         return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
+    func makeProperHour() -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
+        let date = formatter.date(from: self)
+        guard let date = date else {
+            return ""
+        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "hh:mm"
+        return dateFormatter.string(from: date)
+    }
 }
 
 extension DispatchQueue {
@@ -286,5 +297,35 @@ extension DispatchQueue {
                 perform()
             }
         }
+    }
+}
+
+struct ClearBackgroundView: NSViewRepresentable {
+    func makeNSView(context: Context) -> some NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            view.superview?.superview?.superview?.window?.isOpaque = false
+            view.superview?.superview?.superview?.window?.backgroundColor = NSColor.clear
+            view.superview?.superview?.superview?.window?.styleMask = [.borderless]
+            for view in view.superview?.superview?.superview?.subviews.first?.subviews ?? [] {
+                for view in view.subviews {
+                    print(view)
+                    for view in view.subviews {
+                        if let view = view as? NSTextField {
+                            view.becomeFirstResponder()
+                        } else {
+                            for view in view.subviews {
+                                if let view = view as? NSTextField {
+                                    view.becomeFirstResponder()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return view
+    }
+    func updateNSView(_ nsView: NSViewType, context: Context) {
     }
 }

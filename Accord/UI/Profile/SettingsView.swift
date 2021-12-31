@@ -22,11 +22,11 @@ struct SettingsViewRedesign: View {
     @AppStorage("enableSuffixRemover") var suffixes: Bool = false
     @AppStorage("pronounDB") var pronounDB: Bool = false
 
-    @State var user: User? = AccordCoreVars.shared.user
+    @State var user: User? = AccordCoreVars.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
     @State var loading: Bool = false
     @State var bioText: String = " "
-    @State var username: String = AccordCoreVars.shared.user?.username ?? "Unknown User"
+    @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
 
     var body: some View {
         List {
@@ -95,66 +95,13 @@ struct SettingsViewRedesign: View {
                 .cornerRadius(15)
                 .padding()
                 VSplitView {
-                    HStack(alignment: .top) {
-                        Text("Show profile pictures")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $profilePictures) {
-                        }
-                        .padding()
-                    }
-                    HStack(alignment: .top) {
-                        Text("Use stock discord settings")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $discordSettings) {
-                        }
-                        .padding()
-                    }
-                    HStack(alignment: .top) {
-                        Text("Sort servers by recent messages")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $recent) {
-                        }
-                        .padding()
-                    }
-                    HStack(alignment: .top) {
-                        Text("Enable useless suffix remover")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $suffixes) {
-                        }
-                        .padding()
-                    }
-                    HStack(alignment: .top) {
-                        Text("Enable PronounDB integration")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $pronounDB) {
-                        }
-                        .padding()
-                    }
-                    HStack(alignment: .top) {
-                        Text("Always dark mode")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $dark) {
-                        }
-                        .padding()
-                    }
+                    SettingsToggleView(toggled: $profilePictures, title: "Show profile pictures")
+                    SettingsToggleView(toggled: $discordSettings, title: "Use stock discord settings")
+                    SettingsToggleView(toggled: $recent, title: "Sort servers by recent messages")
+                    SettingsToggleView(toggled: $proxyEnable, title: "Enable Proxy")
+                    SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
+                    SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
+                    SettingsToggleView(toggled: $dark, title: "Always dark mode")
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -188,17 +135,7 @@ struct SettingsViewRedesign: View {
                     .fontWeight(.bold)
                     .padding(.leading, 20)
                 VStack {
-                    HStack(alignment: .top) {
-                        Text("Enable Proxy")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        Toggle(isOn: $proxyEnable) {
-                        }
-                        .padding()
-                        .toggleStyle(SwitchToggleStyle())
-                    }
+                    SettingsToggleView(toggled: $proxyEnable, title: "Enable Proxy")
                     HStack(alignment: .top) {
                         Text("Proxy IP")
                             .font(.title3)
@@ -256,13 +193,13 @@ struct SettingsViewRedesign: View {
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
             }
-            .onDisappear(perform: {
+            .onDisappear {
                 darkMode = dark
                 sortByMostRecent = recent
                 pfpShown = profilePictures
                 pastelColors = pastel
                 discordStockSettings = discordSettings
-            })
+            }
         }
     }
 }
@@ -282,4 +219,21 @@ extension FileManager {
         return true
     }
 
+}
+
+struct SettingsToggleView: View {
+    @Binding var toggled: Bool
+    var title: String
+    var body: some View {
+        HStack(alignment: .top) {
+            Text(title)
+                .font(.title3)
+                .fontWeight(.medium)
+                .padding()
+            Spacer()
+            Toggle(isOn: $toggled) {
+            }
+            .padding()
+        }
+    }
 }

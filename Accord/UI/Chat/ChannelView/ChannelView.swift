@@ -66,8 +66,8 @@ struct ChannelView: View, Equatable {
     var body: some View {
         ZStack(alignment: .bottom) { [weak viewModel] in
             List {
-                ForEach($viewModel.messages, id: \.id) { $message in
-                    MessageCellView(message: $message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
+                ForEach($viewModel.messages, id: \.identifier) { $message in
+                    MessageCellView(message: message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
                 }
                 Spacer().frame(height: 90)
             }

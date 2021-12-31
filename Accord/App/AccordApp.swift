@@ -9,40 +9,16 @@ import Foundation
 import SwiftUI
 import AppKit
 
-public func print(_ object: Any...) {
-    #if DEBUG
-    for item in object {
-        Swift.print("[Accord]", item)
-    }
-    #endif
-}
-
-public func print(_ object: Any) {
-    #if DEBUG
-    Swift.print("[Accord]", object)
-    #endif
-}
-
-public func releaseModePrint(_ object: Any...) {
-    Swift.print("\(Date()) [Accord] ")
-    for item in object {
-        Swift.print(String(describing: item))
-    }
-}
-
-public func releaseModePrint(_ object: Any) {
-    NSLog("[Accord] \(String(describing: object))")
-}
-
 @main
 struct AccordApp: App {
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var windowWidth: Int = Int(NSApplication.shared.keyWindow?.frame.width ?? 1000)
     @State var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
+    @State var popup: Bool = false
     var body: some Scene {
         WindowGroup {
-            if AccordCoreVars.shared.token == "" {
+            if AccordCoreVars.token == "" {
                 LoginView()
             } else {
                 GeometryReader { reader in
@@ -69,6 +45,9 @@ struct AccordApp: App {
                             UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
                             print(windowWidth, windowHeight)
                         })
+                        .sheet(isPresented: $popup, onDismiss: {}, content: {
+                            SearchView()
+                        })
                 }
             }
         }
@@ -76,6 +55,11 @@ struct AccordApp: App {
         .windowToolbarStyle(.unifiedCompact)
         .commands {
             SidebarCommands() // 1
+            CommandMenu("Navigate") {
+                Button("Show quick jump") {
+                    popup.toggle()
+                }.keyboardShortcut("k")
+            }
         }
     }
 }

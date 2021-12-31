@@ -94,7 +94,7 @@ struct LoginView: View {
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
                                 KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                             } else {
                                 do {
                                     try viewModel.login(email, password, twofactor)
@@ -141,7 +141,7 @@ struct LoginView: View {
                         )) { response, _ in
                             if let token = response?.token {
                                 KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                                 let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
@@ -154,7 +154,7 @@ struct LoginView: View {
                             if let response = response, let ticket = response.ticket {
                                 Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                                     contentType: "application/json",
-                                    token: AccordCoreVars.shared.token,
+                                    token: AccordCoreVars.token,
                                     bodyObject: ["code": twofactor, "ticket": ticket],
                                     type: .POST,
                                     discordHeaders: true,
@@ -162,7 +162,7 @@ struct LoginView: View {
                                 )) { value, _ in
                                     if let token = value?.token {
                                         KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                        AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                        AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
                                         print(token)
                                         let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
@@ -227,7 +227,7 @@ final class LoginViewViewModel: ObservableObject {
                 }
                 if let checktoken = response.token {
                     KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                    AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                     let task = Process()
@@ -246,7 +246,7 @@ final class LoginViewViewModel: ObservableObject {
                         print("[Login debug] Got ticket")
                         Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
                             contentType: "application/json",
-                            token: AccordCoreVars.shared.token,
+                            token: AccordCoreVars.token,
                             bodyObject: ["code": twofactor, "ticket": ticket],
                             type: .POST,
                             discordHeaders: true,
@@ -254,7 +254,7 @@ final class LoginViewViewModel: ObservableObject {
                         )) { value, error in
                             if let token = value?.token {
                                 KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
-                                AccordCoreVars.shared.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                 self.captcha = false
                                 let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                                 let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
