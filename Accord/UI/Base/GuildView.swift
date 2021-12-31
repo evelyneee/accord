@@ -10,12 +10,12 @@ import SwiftUI
 
 struct GuildView: View {
 
-    weak var guild: Guild?
+    var guild: Guild
     @Binding var selection: Int?
     var body: some View {
         List {
             HStack {
-                if let level = guild?.premium_tier, level != 0 {
+                if let level = guild.premium_tier, level != 0 {
                     switch level {
                     case 1:
                         Image("level1").resizable()
@@ -33,21 +33,21 @@ struct GuildView: View {
                         EmptyView()
                     }
                 }
-                Text(guild?.name ?? "Unknown guild")
+                Text(guild.name ?? "Unknown guild")
                     .fontWeight(.medium)
             }
-            if let id = guild?.id, let banner = guild?.banner {
-                Attachment("https://cdn.discordapp.com/banners/\(id)/\(banner).png")
+            if let banner = guild.banner {
+                Attachment("https://cdn.discordapp.com/banners/\(guild.id)/\(banner).png")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .cornerRadius(10)
             }
-            ForEach(guild?.channels ?? [], id: \.id) { channel in
+            ForEach(guild.channels ?? [], id: \.id) { channel in
                 if channel.type == .section {
                     Text(channel.name ?? "Unknown channel")
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild?.name).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
                         ServerListViewCell(channel: channel)
                     }
                     .buttonStyle(BorderlessButtonStyle())

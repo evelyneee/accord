@@ -29,8 +29,7 @@ final class XcodeRPC {
 
         // execute the script
         let script = NSAppleScript.init(source: scr)
-        var error: NSDictionary?
-        let result = script?.executeAndReturnError(&error)
+        let result = script?.executeAndReturnError(nil)
 
         // format the result as a Swift array
         if let desc = result {
@@ -92,7 +91,9 @@ final class XcodeRPC {
                 )
             ])
             DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                Self.updatePresence(status: status, workspace: Self.getActiveWorkspace() ?? workspace, filename: Self.getActiveFilename())
+                let active = Self.getActiveFilename()
+                guard active != filename else { return }
+                Self.updatePresence(status: status, workspace: Self.getActiveWorkspace() ?? workspace, filename: active)
             })
         } catch {}
     }

@@ -42,13 +42,15 @@ final class ChannelViewViewModel: ObservableObject {
     }
 
     func ack(channelID: String, guildID: String) {
-        guard let first = messages.first?.id else { return }
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(first)/ack"), headers: Headers(
+        guard let last = messages.last?.id else { return }
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(last)/ack"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
+            bodyObject: ["token":NSNull()], // I don't understand why this is needed, but it wasn't when I first implemented ack...
             type: .POST,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+            referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+            json: true
         ))
     }
 

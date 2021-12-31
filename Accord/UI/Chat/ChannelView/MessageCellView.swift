@@ -11,7 +11,7 @@ import AppKit
 import Combine
 
 struct MessageCellView: View {
-    unowned var message: Message
+    var message: Message
     var nick: String?
     var replyNick: String?
     var pronouns: String?
@@ -44,7 +44,7 @@ struct MessageCellView: View {
                 }
                 .padding(.leading, 47)
             }
-            HStack {
+            HStack { [unowned message] in
                 if !message.isSameAuthor {
                     Button(action: {
                         popup.toggle()
