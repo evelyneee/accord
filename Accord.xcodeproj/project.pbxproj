@@ -26,6 +26,7 @@
 		9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodeRPC.swift */; };
 		9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E746A2727499CE6009A9C22 /* Interaction.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
+		9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7834D12781F2D500ABB9F8 /* Combine++.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
 		9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA52773FC9C00A77600 /* Queues.swift */; };
 		9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA72774037F00A77600 /* MentionsView.swift */; };
@@ -49,8 +50,6 @@
 		A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC35272779F2005F9950 /* PluginLoader.swift */; };
 		A8113118268EA0B3002EA665 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113117268EA0B3002EA665 /* AVKit.framework */; };
 		A811311A268EA18F002EA665 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8113119268EA18E002EA665 /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F426D12411007B9B27 /* MessageProtocol.swift */; };
-		A82A05FA26D3F38B007B9B27 /* ChannelView+MessageProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */; };
 		A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */; };
 		A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */; };
 		A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */; };
@@ -126,6 +125,7 @@
 		9E6BCC65277E908B0085F279 /* XcodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeRPC.swift; sourceTree = "<group>"; };
 		9E746A2727499CE6009A9C22 /* Interaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interaction.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
+		9E7834D12781F2D500ABB9F8 /* Combine++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine++.swift"; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
 		9E8F8CA52773FC9C00A77600 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
 		9E8F8CA72774037F00A77600 /* MentionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionsView.swift; sourceTree = "<group>"; };
@@ -149,8 +149,6 @@
 		A80FEC35272779F2005F9950 /* PluginLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginLoader.swift; sourceTree = "<group>"; };
 		A8113117268EA0B3002EA665 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A8113119268EA18E002EA665 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		A82A05F426D12411007B9B27 /* MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageProtocol.swift; sourceTree = "<group>"; };
-		A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+MessageProtocol.swift"; sourceTree = "<group>"; };
 		A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChannelView+TextField.swift"; sourceTree = "<group>"; };
 		A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsView.swift; sourceTree = "<group>"; };
 		A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayStructure.swift; sourceTree = "<group>"; };
@@ -356,7 +354,6 @@
 			isa = PBXGroup;
 			children = (
 				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
-				A82A05F426D12411007B9B27 /* MessageProtocol.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* Request.swift */,
 				A89BE785266BDFB3007B0CBF /* Socket.swift */,
@@ -415,7 +412,6 @@
 				9E8F8CA72774037F00A77600 /* MentionsView.swift */,
 				A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */,
 				A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */,
-				A82A05F926D3F38B007B9B27 /* ChannelView+MessageProtocol.swift */,
 				A80FEC3227258457005F9950 /* EmbedView.swift */,
 				9EA2951E2752EE1C0014927D /* QuickActionsView.swift */,
 			);
@@ -442,6 +438,7 @@
 				9ECB0F3C27664B020019ADAE /* TableView.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,
 				9E6BCC63277E8E850085F279 /* Print++.swift */,
+				9E7834D12781F2D500ABB9F8 /* Combine++.swift */,
 			);
 			path = Misc;
 			sourceTree = "<group>";
@@ -576,6 +573,7 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
+				9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ChannelView.swift in Sources */,
@@ -600,9 +598,7 @@
 				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
-				A82A05FA26D3F38B007B9B27 /* ChannelView+MessageProtocol.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
-				A82A05F526D12411007B9B27 /* MessageProtocol.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,

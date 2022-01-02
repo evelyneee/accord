@@ -16,7 +16,6 @@ final class WebSocketDelegate: NSObject, URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         releaseModePrint("Web Socket did disconnect")
         let reason = String(decoding: reason ?? Data(), as: UTF8.self)
-        MessageController.shared.sendWSError(msg: reason)
         print("Error from Discord: \(reason)")
         if reason.contains("auth") {
             KeychainManager.save(key: "red.evelyn.accord.token", data: Data())

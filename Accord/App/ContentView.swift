@@ -32,9 +32,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 20, execute: {
-                wss.reset()
-            })
             concurrentQueue.async {
                 guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                 do {
@@ -42,9 +39,7 @@ struct ContentView: View {
                         throw LoadErrors.alreadyLoaded
                     }
                     let new = try Gateway.init(url: Gateway.gatewayURL)
-                    print("init")
-                    wss = new
-                    wss.ready()
+                    new.ready()
                         .sink(receiveCompletion: { completion in
                             switch completion {
                             case .finished:
@@ -70,6 +65,8 @@ struct ContentView: View {
                             })
                         })
                         .store(in: &wsCancellable)
+                    print("init")
+                    wss = new
                 } catch {
                     print(error)
                     let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")

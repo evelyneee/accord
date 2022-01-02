@@ -23,7 +23,7 @@ public var proxyEnabled: Bool = UserDefaults.standard.bool(forKey: "proxyEnabled
 public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors")
 public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "discordStockSettings")
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
-public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.276 Chrome/91.0.4472.164 Electron/13.2.2 Safari/537.36"
+public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"
 public let dscVersion = 108924
 
 public let xcodeRPCAppID = "926282502937641001"

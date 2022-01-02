@@ -79,17 +79,39 @@ struct ChannelView: View, Equatable {
             }
             if memberListShown {
                 MemberListView(list: $memberList)
+                    .frame(width: 250)
             }
         }
         .navigationTitle(Text("\(guildID == "@me" ? "" : "#")\(channelName)"))
         .navigationSubtitle(Text(guildName))
         .presentedWindowToolbarStyle(UnifiedCompactWindowToolbarStyle())
         .onAppear {
-            // Make Gateway messages receivable now
-            MessageController.shared.delegates[channelID] = self
+            wss.typingSubject
+                .sink { msg, channelID in
+                    guard channelID == self.channelID else { return }
+                    webSocketQueue.async { [weak viewModel] in
+                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg) else { return }
+                        let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
+                        if !(typing.contains(isKnownAs)) {
+                            typing.append(isKnownAs)
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                            guard !(typing.isEmpty) else { return }
+                            typing.removeLast()
+                        })
+                    }
+                }
+                .store(in: &viewModel.cancellable)
+            wss.memberListSubject
+                .sink { list in
+                    if self.memberListShown, memberList.isEmpty {
+                        self.memberList = Array(list.d.ops.compactMap { $0.items }.joined())
+                    }
+                }
+                .store(in: &viewModel.cancellable)
         }
-        .onDisappear {
-            MessageController.shared.delegates.removeValue(forKey: channelID)
+        .onDisappear { [weak viewModel] in
+            viewModel?.cancellable.invalidateAll()
         }
         .toolbar {
             ToolbarItemGroup {
@@ -111,7 +133,7 @@ struct ChannelView: View, Equatable {
                 if guildID != "@me" {
                     Button(action: {
                         memberListShown.toggle()
-                        wss.memberList(for: guildID, in: channelID)
+                        memberListShown ? wss.memberList(for: guildID, in: channelID) : self.memberList.removeAll()
                     }, label: {
                         Image(systemName: "sidebar.right")
                     })
@@ -161,13 +183,16 @@ struct MemberListView: View {
     var body: some View {
         List(list.compactMap { $0.member }, id: \.user.id) { ops in
             HStack {
-                Attachment(pfpURL(ops.user.id, ops.user.avatar))
+                Attachment(pfpURL(ops.user.id, ops.user.avatar, "24"))
                     .frame(width: 33, height: 33)
                     .clipShape(Circle())
-                HStack {
+                VStack(alignment: .leading) {
                     Text(ops.nick ?? ops.user.username)
-                    if let presence = ops.presence?.status?.rawValue {
+                        .fontWeight(.medium)
+                        .lineLimit(0)
+                    if let presence = ops.presence?.activities[safe: 0]?.state {
                         Text(presence).foregroundColor(.secondary)
+                            .lineLimit(0)
                     }
                 }
             }

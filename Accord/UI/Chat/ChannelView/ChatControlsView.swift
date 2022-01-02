@@ -349,7 +349,7 @@ final class ChatControlsViewModel: ObservableObject {
         AppKitLink<NSTextField>.introspect { [unowned self] textField, _ in
             textField.allowsEditingTextAttributes = true
             self.textField = textField
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 self.textField?.becomeFirstResponder()
             })
         }

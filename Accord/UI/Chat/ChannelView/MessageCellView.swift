@@ -27,18 +27,18 @@ struct MessageCellView: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack { [weak reply] in
-                    Attachment(pfpURL(reply?.author?.id, reply?.author?.avatar, "16")).equatable()
+                HStack { [unowned reply] in
+                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar, "16")).equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
-                    Text(replyNick ?? reply?.author?.username ?? "")
+                    Text(replyNick ?? reply.author?.username ?? "")
                         .foregroundColor(replyColor)
                         .fontWeight(.semibold)
                     if #available(macOS 12.0, *) {
-                        Text(try! AttributedString(markdown: reply?.content ?? ""))
+                        Text(try! AttributedString(markdown: reply.content))
                             .lineLimit(0)
                     } else {
-                        Text(reply?.content ?? "")
+                        Text(reply.content)
                             .lineLimit(0)
                     }
                 }

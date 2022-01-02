@@ -13,18 +13,32 @@ import AppKit
 final class Gateway {
     
     private (set) var connection: NWConnection?
-    private (set) var session_id: String? = nil
-    private (set) var interval: Int = 10000
+    private (set) var sessionID: String? = nil
+    private (set) var interval: Int = 40000
     private (set) var failedHeartbeats: Int = 0
     
     internal var bag = Set<AnyCancellable>()
     internal var pendingHeartbeat: Bool = false
     internal var seq: Int = 0
     
+    // To communicate with the view
+    private (set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
+    private (set) var editSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var typingSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var memberChunkSubject = PassthroughSubject<Data, Never>()
+    private (set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+    
+    private (set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
+        if state == .ready {
+            print("socket ready")
+        }
+    }
+    
     private let socketEndpoint: NWEndpoint
     private let params: NWParameters
     
-    private var heartbeatTimer: Timer?
+    private var heartbeatTimer: Timer? = nil
     
     private var req: Int = 0
     
@@ -40,11 +54,8 @@ final class Gateway {
     static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
     
     init(url: URL = Gateway.gatewayURL, session_id: String? = nil, seq: Int? = nil) throws {
-        self.connection = nil
         self.socketEndpoint = NWEndpoint.url(url)
-        self.heartbeatTimer = nil
         let parameters: NWParameters = .tls
-        self.params = parameters
         let websocketOptions = NWProtocolWebSocket.Options()
         websocketOptions.autoReplyPing = true
         websocketOptions.maximumMessageSize = 1_104_857_600
@@ -52,13 +63,9 @@ final class Gateway {
             websocketOptions,
             at: 0
         )
-        connection = NWConnection(to: self.socketEndpoint, using: parameters)
-        connection?.stateUpdateHandler = { [weak self] connectionState in
-            dump(connectionState)
-            if connectionState == .ready {
-                print("ready up")
-            }
-        }
+        self.params = parameters
+        self.connection = NWConnection(to: self.socketEndpoint, using: parameters)
+        self.connection?.stateUpdateHandler = self.stateUpdateHandler
         try self.connect(session_id, seq)
     }
     
@@ -68,18 +75,20 @@ final class Gateway {
     }
     
     private func hello(_ session_id: String? = nil, _ seq: Int? = nil) {
-        print("begin hello")
-        guard connection?.state != .cancelled else { print("piss"); return }
+        guard connection?.state != .cancelled else { return } // Don't listen for hello if there is no connection
         connection?.receiveMessage { [weak self] (data, context, _, error) in
             if let error = error {
-                print(error, "hello error")
+                print(error)
             }
             guard let data = data else {
-                      print(context as Any, data as Any)
-                      return
-                  }
-            guard let hello = try? JSONDecoder().decode(Hello.self, from: data) else { return }
-            self?.interval = hello.d.heartbeat_interval
+                print(context as Any, data as Any)
+                wss.hardReset()
+                return
+            }
+            guard let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
+                  let helloD = hello["d"] as? [String:Any],
+                  let interval = helloD["heartbeat_interval"] as? Int else { fatalError("[Gateway] No interval received in HELLO packet") }
+            self?.interval = interval
             do {
                 if let session_id = session_id, let seq = seq {
                     try self?.reconnect(session_id: session_id, seq: seq)
@@ -89,10 +98,11 @@ final class Gateway {
             } catch {
                 print(error)
             }
-            wssThread.asyncAfter(deadline: .now() + .milliseconds(hello.d.heartbeat_interval), execute: {
+            wssThread.asyncAfter(deadline: .now() + .milliseconds(interval), execute: {
                 do {
                     try self?.heartbeat()
                 } catch {
+                    print("[Gateway] Error sending heartbeat", error)
                     self?.failedHeartbeats++
                 }
             })
@@ -168,18 +178,6 @@ final class Gateway {
         try self.send(text: jsonString)
     }
 
-    // MARK: Decode payloads
-    func decodePayload(payload: Data) -> [String: Any]? {
-        return try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
-    }
-
-    struct Hello: Decodable {
-        var d: HelloD
-        struct HelloD: Decodable {
-            var heartbeat_interval: Int
-        }
-    }
-
     // MARK: - Ready
     @inlinable func ready() -> Future<GatewayD, Error> {
         Future { [weak self] promise in
@@ -206,7 +204,7 @@ final class Gateway {
                             self?.listen()
                         }
                         releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
-                        self?.session_id = structure.d.session_id
+                        self?.sessionID = structure.d.session_id
                         print(structure.d.session_id)
                         promise(.success(structure.d))
                         return
@@ -237,8 +235,7 @@ final class Gateway {
 
     // MARK: ACK
     private func heartbeat() throws {
-        print("sent heartbeat")
-        guard !pendingHeartbeat else {
+        if self.failedHeartbeats >= 3 {
             self.reset()
             return
         }
@@ -248,9 +245,9 @@ final class Gateway {
         ]
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
+        print("sent heartbeat")
         try self.send(text: jsonString)
         self.pendingHeartbeat = true
-        print(interval)
         wssThread.asyncAfter(deadline: .now() + .milliseconds(self.interval), execute: { [weak self] in
             do {
                 try self?.heartbeat()
@@ -280,11 +277,10 @@ final class Gateway {
             "op": 6,
             "d": [
                 "seq": seq ?? self.seq,
-                "session_id": session_id ?? self.session_id ?? "",
+                "session_id": session_id ?? self.sessionID ?? "",
                 "token": AccordCoreVars.token
             ]
         ]
-        print(packet)
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
         try self.send(text: jsonString)
@@ -293,7 +289,7 @@ final class Gateway {
         }
     }
 
-    public func subscribe(_ guild: String, _ channel: String) {
+    public func subscribe(to guild: String) {
         let packet: [String: Any] = [
             "op": 14,
             "d": [

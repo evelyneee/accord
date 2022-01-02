@@ -66,7 +66,7 @@ final class Activity {
     }
 }
 
-final class StatusEmoji {
+final class StatusEmoji: Codable {
     internal init(name: String, id: String, animated: Bool) {
         self.name = name
         self.id = id
@@ -81,3 +81,42 @@ final class StatusEmoji {
     }
 }
 
+final class ActivityCodable: Codable {
+    
+    var emoji: StatusEmoji?
+    var name: String
+    var state: String?
+    var type: Int
+    var timestamp: Int?
+    var applicationID: String?
+    var flags: Int?
+    var details: String?
+    var dictValue: [String:Any] {
+        var dict: [String:Any] = ["name":name, "type":type, "state":NSNull()]
+        if let emoji = emoji {
+            dict["emoji"] = emoji.dictValue
+        }
+        if let state = state {
+            dict["state"] = state
+        }
+        if type == 0 {
+            dict["assets"] = [:]
+            dict["party"] = [:]
+            dict["secrets"] = [:]
+        }
+        if name != "Custom Status" {
+            dict["application_id"] = applicationID ?? NSNull()
+        }
+        if let timestamp = timestamp {
+            dict["timestamps"] = ["start":timestamp]
+        }
+        if let flags = flags {
+            dict["flags"] = flags
+        }
+        if let details = details {
+            dict["details"] = details
+        }
+        print(dict)
+        return dict
+    }
+}
