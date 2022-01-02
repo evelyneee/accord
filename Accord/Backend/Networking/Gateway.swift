@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 import Network
-import AppKit
+import AppKit // Necessary for the locale & architecture
 
 // The second version of Accord's gateway.
 // This uses Network.framework instead of URLSessionWebSocketTask
@@ -184,8 +184,22 @@ final class Gateway {
         try self.send(text: jsonString)
     }
 
-    // MARK: - Ready
-    @inlinable func ready() -> Future<GatewayD, Error> {
+    private func heartbeat() throws {
+        if self.failedHeartbeats >= 3 {
+            self.reset()
+            return
+        }
+        let packet: [String: Any] = [
+            "op": 1,
+            "d": seq
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
+        let jsonString = try String(jsonData)
+        try self.send(text: jsonString)
+        self.pendingHeartbeat = true
+    }
+
+    public func ready() -> Future<GatewayD, Error> {
         Future { [weak self] promise in
             print("begin receive")
             self?.connection?.receiveMessage { (data, context, _, error) in
@@ -237,22 +251,6 @@ final class Gateway {
                 }
             }
         }
-    }
-
-    // MARK: ACK
-    private func heartbeat() throws {
-        if self.failedHeartbeats >= 3 {
-            self.reset()
-            return
-        }
-        let packet: [String: Any] = [
-            "op": 1,
-            "d": seq
-        ]
-        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
-        let jsonString = try String(jsonData)
-        try self.send(text: jsonString)
-        self.pendingHeartbeat = true
     }
 
     public func updatePresence(status: String, since: Int, activities: [Activity]) throws {
