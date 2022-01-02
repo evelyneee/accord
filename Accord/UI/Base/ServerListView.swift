@@ -300,7 +300,10 @@ struct ServerListView: View {
             self.selection = uInfo.values.first!
         })
         .onChange(of: selectedServer, perform: { [selectedServer] new in
-            guard let selectedServer = selectedServer, let new = new, let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
+            guard let selectedServer = selectedServer,
+                  selectedServer != 201,
+                  let new = new,
+                  let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
             UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
             let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[new].id)")
             if val != 0 {

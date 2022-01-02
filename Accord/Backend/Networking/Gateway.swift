@@ -38,7 +38,7 @@ final class Gateway {
     private let socketEndpoint: NWEndpoint
     private let params: NWParameters
     
-    private var heartbeatTimer: Timer? = nil
+    private var heartbeatTimer: Cancellable? = nil
     
     private var req: Int = 0
     
@@ -89,6 +89,18 @@ final class Gateway {
                   let helloD = hello["d"] as? [String:Any],
                   let interval = helloD["heartbeat_interval"] as? Int else { fatalError("[Gateway] No interval received in HELLO packet") }
             self?.interval = interval
+            self?.heartbeatTimer = Timer.publish(every: Double(interval / 1000), on: .main, in: .default)
+                .autoconnect()
+                .sink { _ in
+                    wssThread.async {
+                        do {
+                            try self?.heartbeat()
+                        } catch {
+                            print("[Gateway] Error sending heartbeat", error)
+                            self?.failedHeartbeats++
+                        }
+                    }
+                }
             do {
                 if let session_id = session_id, let seq = seq {
                     try self?.reconnect(session_id: session_id, seq: seq)
@@ -98,14 +110,6 @@ final class Gateway {
             } catch {
                 print(error)
             }
-            wssThread.asyncAfter(deadline: .now() + .milliseconds(interval), execute: {
-                do {
-                    try self?.heartbeat()
-                } catch {
-                    print("[Gateway] Error sending heartbeat", error)
-                    self?.failedHeartbeats++
-                }
-            })
         }
     }
     
@@ -245,16 +249,8 @@ final class Gateway {
         ]
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
-        print("sent heartbeat")
         try self.send(text: jsonString)
         self.pendingHeartbeat = true
-        wssThread.asyncAfter(deadline: .now() + .milliseconds(self.interval), execute: { [weak self] in
-            do {
-                try self?.heartbeat()
-            } catch {
-                self?.failedHeartbeats++
-            }
-        })
     }
 
     public func updatePresence(status: String, since: Int, activities: [Activity]) throws {
