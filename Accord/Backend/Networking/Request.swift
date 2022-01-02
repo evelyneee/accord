@@ -81,7 +81,7 @@ final class Headers {
             "os_version":String(cString: machine),
             "os_arch":NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
             "system_locale":NSLocale.current.languageCode ?? "en-US",
-            "client_build_number":108924,
+            "client_build_number":dscVersion,
             "client_event_source":NSNull()
         ]
         return try? JSONSerialization.data(withJSONObject: json, options: []).base64EncodedString()

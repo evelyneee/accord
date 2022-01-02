@@ -18,15 +18,15 @@ final class GuildMemberChunk: Decodable {
     var presences: [Presence]?
 }
 
-final class Presence: Decodable {
+final class Presence: Codable {
     var user: User?
     var guild_id: String
     var status: UserStatus?
-    // var activities
+    // var activities: [Activity]?
     //    client_status
 }
 
-enum UserStatus: String, Decodable {
+enum UserStatus: String, Codable {
     case online = "online"
     case dnd = "dnd"
     case idle = "idle"
@@ -36,8 +36,8 @@ enum UserStatus: String, Decodable {
 final class TypingEvent: Decodable {
     var channel_id: String
     var guild_id: String?
-    var member: GuildMember?
-    var user_id: String?
+    var member: GuildMember
+    var user_id: String
 }
 
 final class GuildMember: Codable {
@@ -45,6 +45,7 @@ final class GuildMember: Codable {
     var user: User
     var nick: String?
     var roles: [String]?
+    var presence: Presence?
 }
 
 final class GatewayMessage: Decodable {

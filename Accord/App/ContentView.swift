@@ -32,6 +32,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 20, execute: {
+                wss.reset()
+            })
             concurrentQueue.async {
                 guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                 do {
@@ -51,7 +54,7 @@ struct ContentView: View {
                                 break
                             }
                         }, receiveValue: { d in
-                            guard let d = d else { return }
+
                             AccordCoreVars.user = d.user
                             user_id = d.user.id
                             if let pfp = d.user.avatar {

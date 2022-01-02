@@ -51,7 +51,14 @@ struct ServerListView: View {
                                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                                 return nextDict
                             } ?? [:]
-        let guildOrder = full?.user_settings?.guild_positions ?? []
+        var guildOrder = full?.user_settings?.guild_positions ?? []
+        var folderTemp = full?.user_settings?.guild_folders ?? []
+        full?.guilds.forEach { guild in
+            if !guildOrder.contains(guild.id) {
+                guildOrder.insert(guild.id, at: 0)
+                folderTemp.insert(GuildFolder(id: nil, name: nil, color: nil, guild_ids: [guild.id]), at: 0)
+            }
+        }
         let messageDict = full?.guilds.enumerated().compactMap { (index, element) in
             return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
@@ -63,12 +70,12 @@ struct ServerListView: View {
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
-        let folderTemp = full?.user_settings?.guild_folders ?? []
         for folder in folderTemp {
             for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
                 let guild = guildTemp[id]
                 guild.emojis.removeAll()
                 guild.index = id
+                print(guild.name)
                 for channel in 0..<(guild.channels?.count ?? 0) {
                     guild.channels?[channel].guild_id = guild.id
                     guild.channels?[channel].guild_icon = guild.icon
@@ -76,7 +83,6 @@ struct ServerListView: View {
                 folder.guilds.append(guild)
             }
         }
-        print(folderTemp.compactMap { $0.guilds.compactMap { $0.channels?.compactMap { $0.guild_icon } } })
         Self.folders = folderTemp
         assignReadStates(full: full)
         order(full: full)
@@ -293,6 +299,16 @@ struct ServerListView: View {
             self.selectedServer = uInfo.keys.first!
             self.selection = uInfo.values.first!
         })
+        .onChange(of: selectedServer, perform: { [selectedServer] new in
+            guard let selectedServer = selectedServer, let new = new, let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
+            UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
+            let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[new].id)")
+            if val != 0 {
+                self.selection = val
+            } else {
+                self.selection = nil
+            }
+        })
         .toolbar {
             ToolbarItemGroup {
                 if selection == nil {
@@ -317,6 +333,10 @@ struct ServerListView: View {
             }
         }
         .onAppear {
+            if !Self.folders.isEmpty {
+                let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[0].id)")
+                self.selection = (val != 0 ? val : nil)
+            }
             concurrentQueue.async {
                 Request.fetch([Channel].self, url: URL(string: "\(rootURL)/users/@me/channels"), headers: standardHeaders) { channels, error in
                     if let channels = channels {

@@ -85,52 +85,26 @@ extension ChannelView: MessageControllerDelegate {
         guard let channelID = channelID else { return }
         guard channelID == self.channelID else { return }
         webSocketQueue.async { [weak viewModel] in
-            if !(typing.contains(msg["user_id"] as? String ?? "")) {
+            guard let uid = msg["user_id"] as? String else { return }
+            if !(typing.contains(uid)) {
                 guard let memberData = try? JSONSerialization.data(withJSONObject: msg, options: []) else { return }
                 guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: memberData) else { return }
-                guard let nickFake = viewModel?.nicks[memberDecodable.user_id ?? ""] else {
-                    guard let nick = memberDecodable.member?.nick else {
-                        withAnimation {
-                            typing.append(memberDecodable.member?.user.username ?? "")
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                            guard !(typing.isEmpty) else { return }
-                            _ = withAnimation {
-                                typing.removeLast()
-                            }
-                        })
-                        return
-                    }
-                    if !(typing.contains(nick)) {
-                        withAnimation {
-                            typing.append(nick)
-                        }
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                        guard !(typing.isEmpty) else { return }
-                        _ = withAnimation {
-                            typing.removeLast()
-                        }
-                    })
-                    return
-                }
-                if !(typing.contains(nickFake)) {
-                    withAnimation {
-                        typing.append(nickFake)
-                    }
+                let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
+                if !(typing.contains(isKnownAs)) {
+                    typing.append(isKnownAs)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                     guard !(typing.isEmpty) else { return }
-                    _ = withAnimation {
-                        typing.removeLast()
-                    }
+                    typing.removeLast()
                 })
             }
 
         }
     }
     func sendMemberList(msg: MemberListUpdate) {
-
+        if self.memberListShown {
+            self.memberList = Array(msg.d.ops.compactMap { $0.items }.joined())
+        }
     }
     func sendMemberChunk(msg: Data) {
         webSocketQueue.async { [weak viewModel] in

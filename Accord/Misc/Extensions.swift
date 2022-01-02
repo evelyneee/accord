@@ -329,3 +329,13 @@ struct ClearBackgroundView: NSViewRepresentable {
     func updateNSView(_ nsView: NSViewType, context: Context) {
     }
 }
+
+extension NSWorkspace {
+    static var kernelVersion: String {
+        var size = 0
+        sysctlbyname("kern.osrelease", nil, &size, nil, 0)
+        var vers = [CChar](repeating: 0,  count: size)
+        sysctlbyname("kern.osrelease", &vers, &size, nil, 0)
+        return String(cString: vers)
+    }
+}

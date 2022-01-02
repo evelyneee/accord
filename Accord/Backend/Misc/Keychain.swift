@@ -2,7 +2,6 @@ import Security
 import Foundation
 
 final class KeychainManager {
-    static var shared = KeychainManager()
     @discardableResult class func save(key: String, data: Data) -> OSStatus {
         let query = [
             kSecClass as String: kSecClassGenericPassword as String,

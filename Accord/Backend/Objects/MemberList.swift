@@ -7,18 +7,18 @@
 
 import Foundation
 
-final class MemberListUpdate: Codable {
+final class MemberListUpdate: Decodable {
     var d: MemberList
 }
 
-final class MemberList: Codable {
+final class MemberList: Decodable {
     var ops: [ListOPS]
 }
 
-final class ListOPS: Codable {
+final class ListOPS: Decodable {
     var items: [OPSItems]?
 }
 
-final class OPSItems: Codable {
+final class OPSItems: Decodable {
     var member: GuildMember?
 }

@@ -346,9 +346,12 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func findView() {
-        AppKitLink<NSTextField>.introspect { textField, _ in
+        AppKitLink<NSTextField>.introspect { [unowned self] textField, _ in
             textField.allowsEditingTextAttributes = true
             self.textField = textField
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                self.textField?.becomeFirstResponder()
+            })
         }
     }
 

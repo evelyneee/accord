@@ -1,110 +1,171 @@
 //
-//  Gateway.swift
+//  NIOGateway.swift
 //  Accord
 //
-//  Created by evelyn on 2021-06-05.
+//  Created by evelyn on 2022-01-01.
 //
 
 import Foundation
 import Combine
+import Network
 import AppKit
 
-final class Notifications {
-    public static var privateChannels: [String] = []
-}
-
-protocol URLQueryParameterStringConvertible {
-    var queryParameters: String { get }
-}
-
 final class Gateway {
-
-    var ws: URLSessionWebSocketTask!
-    let session: URLSession
-    weak var webSocketDelegate = WebSocketDelegate.shared
-    var session_id: String?
-    var seq: Int?
-    var heartbeat_interval: Int = 0
-    var cachedMemberRequest: [String: GuildMember] = [:]
-    var req: Int = 0
-    var waitlist: [String: [String]] = [:]
-    var timer: Timer?
-    var pendingHeartbeat: Bool = false
-
-    private var bag = Set<AnyCancellable>()
-
-    var failedHearbeats: Int = 0 {
-        didSet {
-            if failedHearbeats > 3 {
-                wss.reset()
-            }
-        }
-    }
-
-    static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
-
-    enum WebSocketErrors: Error {
+    
+    private (set) var connection: NWConnection?
+    private (set) var session_id: String? = nil
+    private (set) var interval: Int = 10000
+    private (set) var failedHeartbeats: Int = 0
+    
+    internal var bag = Set<AnyCancellable>()
+    internal var pendingHeartbeat: Bool = false
+    internal var seq: Int = 0
+    
+    private let socketEndpoint: NWEndpoint
+    private let params: NWParameters
+    
+    private var heartbeatTimer: Timer?
+    
+    private var req: Int = 0
+    
+    public var cachedMemberRequest: [String: GuildMember] = [:]
+    
+    enum GatewayErrors: Error {
+        case noStringData(String)
         case maxRequestReached
         case essentialEventFailed(String)
+        case noSession
     }
-
-    // MARK: - init
-    init(url: URL?, session_id: String? = nil, seq: Int? = nil) throws {
-
-        releaseModePrint("[Socket] Hello world!")
-
-        let config = URLSessionConfiguration.default
-
-        if proxyEnabled {
-            config.setProxy()
-        }
-        session = URLSession(configuration: config, delegate: webSocketDelegate, delegateQueue: nil)
-        ws = session.webSocketTask(with: url!)
-        print(ws.maximumMessageSize, "default size")
-        ws.maximumMessageSize = 9999999
-        DispatchQueue.main.async { [weak self] in
-            self?.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
-                print("reset req blocker")
-                wss.req = 0
-                wss.waitlist.removeAll()
+    
+    static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
+    
+    init(url: URL = Gateway.gatewayURL, session_id: String? = nil, seq: Int? = nil) throws {
+        self.connection = nil
+        self.socketEndpoint = NWEndpoint.url(url)
+        self.heartbeatTimer = nil
+        let parameters: NWParameters = .tls
+        self.params = parameters
+        let websocketOptions = NWProtocolWebSocket.Options()
+        websocketOptions.autoReplyPing = true
+        websocketOptions.maximumMessageSize = 1_104_857_600
+        parameters.defaultProtocolStack.applicationProtocols.insert(
+            websocketOptions,
+            at: 0
+        )
+        connection = NWConnection(to: self.socketEndpoint, using: parameters)
+        connection?.stateUpdateHandler = { [weak self] connectionState in
+            dump(connectionState)
+            if connectionState == .ready {
+                print("ready up")
             }
         }
-        ws.resume()
-        self.hello()
-        if let session_id = session_id, let seq = seq {
-            try self.reconnect(session_id: session_id, seq: seq)
-        } else {
-            try self.authenticate()
-        }
-        releaseModePrint("Socket initiated")
+        try self.connect(session_id, seq)
     }
-
-    func reset() {
-        ws.cancel(with: .goingAway, reason: Data())
-        concurrentQueue.async {
-            guard let new = try? Gateway.init(url: Gateway.gatewayURL, session_id: wss.session_id, seq: wss.seq) else { return }
-            new.ready().sink(receiveCompletion: { _ in }, receiveValue: { _ in }).store(in: &new.bag)
-            wss = new
-        }
+    
+    private func connect(_ session_id: String? = nil, _ seq: Int? = nil) throws {
+        connection?.start(queue: concurrentQueue)
+        self.hello(session_id, seq)
     }
-
-    func hardReset() {
-        wss = nil
-        concurrentQueue.async {
-            guard let new = try? Gateway.init(url: Gateway.gatewayURL) else { return }
-            wss = new
-        }
-    }
-
-    // MARK: - Ping
-    func ping() {
-        ws.sendPing { error in
+    
+    private func hello(_ session_id: String? = nil, _ seq: Int? = nil) {
+        print("begin hello")
+        guard connection?.state != .cancelled else { print("piss"); return }
+        connection?.receiveMessage { [weak self] (data, context, _, error) in
             if let error = error {
-                releaseModePrint("Error when sending PING \(error)")
+                print(error, "hello error")
+            }
+            guard let data = data else {
+                      print(context as Any, data as Any)
+                      return
+                  }
+            guard let hello = try? JSONDecoder().decode(Hello.self, from: data) else { return }
+            self?.interval = hello.d.heartbeat_interval
+            do {
+                if let session_id = session_id, let seq = seq {
+                    try self?.reconnect(session_id: session_id, seq: seq)
+                } else {
+                    try self?.identify()
+                }
+            } catch {
+                print(error)
+            }
+            wssThread.asyncAfter(deadline: .now() + .milliseconds(hello.d.heartbeat_interval), execute: {
+                do {
+                    try self?.heartbeat()
+                } catch {
+                    self?.failedHeartbeats++
+                }
+            })
+        }
+    }
+    
+    private func listen(repeat: Bool = true) {
+        guard connection?.state != .cancelled else { return }
+        connection?.receiveMessage { (data, context, _, error) in
+            if let error = error {
+                print(error)
             } else {
-                print("Web Socket connection is alive")
+                self.listen()
+            }
+            guard let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata,
+                  let data = data else {
+                      print(context as Any, data as Any)
+                      return
+                  }
+            switch info.opcode {
+            case .text:
+                self.handleMessage(textData: data)
+            case .cont:
+                break
+            case .binary:
+                break
+            case .close:
+                print(String(data: data, encoding: .utf8) ?? "Unknown close code")
+            case .ping:
+                break
+            case .pong:
+                break
+            @unknown default:
+                fatalError()
             }
         }
+    }
+    
+    private func identify() throws {
+        let packet: [String: Any] = [
+            "op": 2,
+            "d": [
+                "token": AccordCoreVars.token,
+                "capabilities": 253,
+                "compress": false,
+                "client_state":[
+                    "guild_hashes":[:],
+                    "highest_last_message_id":"0",
+                    "read_state_version":0,
+                    "user_guild_settings_version":-1,
+                    "user_settings_version":-1
+                ],
+                "presence":[
+                    "activities":[],
+                    "afk":false,
+                    "since":0,
+                    "status":"online"
+                ],
+                "properties": [
+                    "os": "Mac OS X",
+                    "browser": "Discord Client",
+                    "release_channel": "stable",
+                    "client_build_number": dscVersion,
+                    "client_version": "0.0.264",
+                    "os_version": NSWorkspace.kernelVersion,
+                    "os_arch": NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
+                    "system-locale": NSLocale.current.languageCode ?? "en-US"
+                ]
+            ]
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
+        let jsonString = try String(jsonData)
+        try self.send(text: jsonString)
     }
 
     // MARK: Decode payloads
@@ -119,83 +180,65 @@ final class Gateway {
         }
     }
 
-    // MARK: Initial WS setup
-    func hello() {
-        ws.receive { [weak self] result in
-            switch result {
-            case .success(let message):
-                switch message {
-                case .data:
-                    break
-                case .string(let text):
-                    if let data = text.data(using: String.Encoding.utf8) {
-                        let interval = try? JSONDecoder().decode(Hello.self, from: data).d.heartbeat_interval
-                        guard let interval = interval else {
-                            wss.hardReset()
-                            return
-                        }
-                        self?.heartbeat_interval = interval
-                        wssThread.asyncAfter(deadline: .now() + .milliseconds(interval), execute: {
-                            do {
-                                try self?.heartbeat()
-                            } catch {
-                                self?.failedHearbeats++
-                            }
-                        })
-                    }
-                @unknown default:
-                    print("unknown")
-                    break
-                }
-            case .failure(let error):
-                print("Error when init receiving \(error)")
-            }
-        }
-    }
-
     // MARK: - Ready
-    func ready() -> Future<GatewayD?, Error> {
-        return Future { [weak ws] promise in
-            ws?.receive { result in
-                switch result {
-                case .success(let message):
-                    switch message {
-                    case .data:
-                        break
-                    case .string(let text):
-                        if let data = text.data(using: String.Encoding.utf8) {
-                            do {
-                                let path = FileManager.default.urls(for: .cachesDirectory,
-                                                                    in: .userDomainMask)[0]
-                                                                    .appendingPathComponent("socketOut.json")
-                                try data.write(to: path)
-                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                                wssThread.async {
-                                    self.receive()
-                                }
-                                releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
-                                promise(.success(structure.d))
-                                return
-                            } catch {
-                                promise(.failure(error))
-                                return
-                            }
+    @inlinable func ready() -> Future<GatewayD, Error> {
+        Future { [weak self] promise in
+            print("begin receive")
+            self?.connection?.receiveMessage { (data, context, _, error) in
+                if let error = error {
+                    print(error)
+                }
+                guard let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata,
+                      let data = data else {
+                          print(context as Any, data as Any)
+                          return
+                      }
+                switch info.opcode {
+                case .text:
+                    do {
+                        print("ready")
+                        let path = FileManager.default.urls(for: .cachesDirectory,
+                                                            in: .userDomainMask)[0]
+                                                            .appendingPathComponent("socketOut.json")
+                        try data.write(to: path)
+                        let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                        wssThread.async {
+                            self?.listen()
                         }
-                    @unknown default:
-                        print("unknown")
-                        break
+                        releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
+                        self?.session_id = structure.d.session_id
+                        print(structure.d.session_id)
+                        promise(.success(structure.d))
+                        return
+                    } catch {
+                        print(error)
+                        promise(.failure(error))
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                            wss.hardReset()
+                        })
+                        return
                     }
-                case .failure(let error):
-                    print("Error when init receiving \(error)")
+                case .cont:
+                    break
+                case .binary:
+                    break
+                case .close:
+                    print(String(data: data, encoding: .utf8) ?? "Unknown close code")
+                case .ping:
+                    break
+                case .pong:
+                    break
+                @unknown default:
+                    fatalError()
                 }
             }
         }
     }
 
     // MARK: ACK
-    func heartbeat() throws {
+    private func heartbeat() throws {
         print("sent heartbeat")
-        guard let seq = seq, !pendingHeartbeat else {
+        guard !pendingHeartbeat else {
             self.reset()
             return
         }
@@ -203,63 +246,21 @@ final class Gateway {
             "op": 1,
             "d": seq
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { [weak self] error in
-                self?.pendingHeartbeat = true
-                if let _ = error {
-                    try? self?.reconnect()
-                }
-                wssThread.asyncAfter(deadline: .now() + .milliseconds(self?.heartbeat_interval ?? 10000), execute: { [weak self] in
-                    do {
-                        try self?.heartbeat()
-                    } catch {
-                        self?.failedHearbeats++
-                    }
-                })
-            }
-        }
-    }
-
-    // MARK: Authentication
-    func authenticate() throws {
-        var size = 0
-        sysctlbyname("kern.osrelease", nil, &size, nil, 0)
-        var machine = [CChar](repeating: 0,  count: size)
-        sysctlbyname("kern.osrelease", &machine, &size, nil, 0)
-        let packet: [String: Any] = [
-            "op": 2,
-            "d": [
-                "token": AccordCoreVars.token,
-                "capabilities": 125,
-                "compress": false,
-                "properties": [
-                    "os": "Mac OS X",
-                    "browser": "Discord Client",
-                    "release_channel": "stable",
-                    "client_build_number": 108924,
-                    "client_version": "0.0.264",
-                    "os_version": String(cString: machine),
-                    "os_arch": NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
-                    "system-locale": NSLocale.current.languageCode ?? "en-US"
-                ]
-            ]
-        ]
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
-        ws.sendPublisher(.string(jsonString))
-            .sink(receiveCompletion: { comp in
-                switch comp {
-                    case .finished: break
-                    case .failure(let error):
-                        MentionSender.shared.sendWSError(error: error)
-                        break
-                }
-            }) { _ in }
-            .store(in: &bag)
+        try self.send(text: jsonString)
+        self.pendingHeartbeat = true
+        print(interval)
+        wssThread.asyncAfter(deadline: .now() + .milliseconds(self.interval), execute: { [weak self] in
+            do {
+                try self?.heartbeat()
+            } catch {
+                self?.failedHeartbeats++
+            }
+        })
     }
 
-    func updatePresence(status: String, since: Int, activities: [Activity]) throws {
+    public func updatePresence(status: String, since: Int, activities: [Activity]) throws {
         let packet: [String:Any] = [
             "op":3,
             "d": [
@@ -271,92 +272,75 @@ final class Gateway {
         ]
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
-        ws.sendPublisher(.string(jsonString))
-            .sink(receiveCompletion: { comp in
-                switch comp {
-                    case .finished: break
-                    case .failure(let error):
-                        MentionSender.shared.sendWSError(error: error)
-                        break
-                }
-            }) { _ in }
-            .store(in: &bag)
-    }
-    
-    final func close() {
-        let reason = "Closing connection".data(using: .utf8)
-        ws.cancel(with: .goingAway, reason: reason)
+        try self.send(text: jsonString)
     }
 
-    final func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
+    public func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
         let packet: [String: Any] = [
             "op": 6,
             "d": [
-                "seq": seq ?? self.seq ?? 0,
+                "seq": seq ?? self.seq,
                 "session_id": session_id ?? self.session_id ?? "",
                 "token": AccordCoreVars.token
             ]
         ]
+        print(packet)
         let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
         let jsonString = try String(jsonData)
-        ws.sendPublisher(.string(jsonString))
-            .sink(receiveCompletion: { comp in
-                switch comp {
-                    case .finished: break
-                    case .failure(let error):
-                        releaseModePrint("error reconnecting ", error)
-                        self.hardReset()
-                        break
-                }
-            }) { _ in }
-            .store(in: &bag)
+        try self.send(text: jsonString)
+        wssThread.async {
+            self.listen()
+        }
     }
 
-    final func subscribe(_ guild: String, _ channel: String) {
+    public func subscribe(_ guild: String, _ channel: String) {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
                 "guild_id": guild,
                 "typing": true,
                 "activities": true,
-                "threads": false,
-                "members": []
+                "threads": true,
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
-                if let error = error {
-                    MentionSender.shared.sendWSError(error: error)
-                    releaseModePrint("WebSocket sending error: \(error)")
-                }
-            }
-        }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+              let jsonString = try? String(jsonData) else { return }
+        try? self.send(text: jsonString)
+    }
+    
+    public func memberList(for guild: String, in channel: String) {
+        let packet: [String: Any] = [
+            "op": 14,
+            "d": [
+                "channels":[
+                    channel:[[
+                        0, 99
+                    ]]
+                ],
+                "guild_id": guild
+            ]
+        ]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+              let jsonString = try? String(jsonData) else { return }
+        try? self.send(text: jsonString)
     }
 
-    final func subscribeToDM(_ channel: String) {
+    public func subscribeToDM(_ channel: String) {
         let packet: [String: Any] = [
             "op": 13,
             "d": [
                 "channel_id": channel
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
-                if let error = error {
-                    MentionSender.shared.sendWSError(error: error)
-                    releaseModePrint("WebSocket sending error: \(error)")
-                }
-            }
-        }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+              let jsonString = try? String(jsonData) else { return }
+        try? self.send(text: jsonString)
     }
 
-    final func getMembers(ids: [String], guild: String) throws {
+    public func getMembers(ids: [String], guild: String) throws {
         guard req <= 30 else {
             print("blocked req")
-            waitlist[guild]?.append(contentsOf: ids)
-            throw WebSocketErrors.maxRequestReached
+            throw GatewayErrors.maxRequestReached
         }
         print("fetched")
         let packet: [String: Any] = [
@@ -367,15 +351,8 @@ final class Gateway {
                 "guild_id": guild
             ]
         ]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-           let jsonString: String = String(data: jsonData, encoding: .utf8) {
-            ws.send(.string(jsonString)) { error in
-                self.req++
-                if let error = error {
-                    MentionSender.shared.sendWSError(error: error)
-                    releaseModePrint("WebSocket sending error: \(error)")
-                }
-            }
-        }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
+              let jsonString = try? String(jsonData) else { return }
+        try? self.send(text: jsonString)
     }
 }

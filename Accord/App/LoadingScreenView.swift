@@ -63,7 +63,7 @@ struct LoadingView: View {
                         .font(.title2)
                         .fontWeight(.medium)
                         .padding(5)
-                    Text("Connecting...")
+                    Text("Connecting")
                         .foregroundColor(Color.secondary)
                 }
                 Spacer()

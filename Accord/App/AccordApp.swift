@@ -43,7 +43,6 @@ struct AccordApp: App {
                             loaded = false
                             UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
                             UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
-                            print(windowWidth, windowHeight)
                         })
                         .sheet(isPresented: $popup, onDismiss: {}, content: {
                             SearchView()
@@ -75,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     @objc func onSleepNote(note: NSNotification) {
         guard wss != nil else { return }
-        wss.ws.cancel(with: .goingAway, reason: Data())
+        wss.close(.protocolCode(.goingAway))
     }
     func fileNotifications() {
         NSWorkspace.shared.notificationCenter.addObserver(

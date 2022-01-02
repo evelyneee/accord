@@ -32,22 +32,18 @@ extension ChannelView {
                     )
                     .cornerRadius(5)
                 }
-                Group {
-                    if typing.count == 1 && !(typing.isEmpty) {
-                        Text("\(typing.map { "\($0)" }.joined(separator: ", ")) is typing..")
-                    } else if !(typing.isEmpty) {
-                        Text("\(typing.joined(separator: ", ")) are typing...")
-                    }
+                if !(typing.isEmpty) {
+                    Text("\(typing.joined(separator: ", ")) \(typing.count == 1 ? "is" : "are") typing")
+                        .padding(4)
+                        .lineLimit(0)
+                        .background(
+                            VisualEffectView(
+                                material: NSVisualEffectView.Material.sidebar,
+                                blendingMode: NSVisualEffectView.BlendingMode.withinWindow
+                            )
+                        )
+                        .cornerRadius(5)
                 }
-                .padding(4)
-                .lineLimit(0)
-                .background(
-                    VisualEffectView(
-                        material: NSVisualEffectView.Material.sidebar,
-                        blendingMode: NSVisualEffectView.BlendingMode.withinWindow
-                    )
-                )
-                .cornerRadius(5)
             }
             ChatControls(
                 guildID: Binding.constant(guildID),

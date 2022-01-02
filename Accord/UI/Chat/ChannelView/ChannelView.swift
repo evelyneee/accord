@@ -53,7 +53,10 @@ struct ChannelView: View, Equatable {
             result.merge(next) { (_, rhs) in rhs }
         }
     }
-
+    
+    @State var memberListShown: Bool = false
+    @State var memberList = [OPSItems]()
+    
     // MARK: - init
     init(_ channel: Channel, _ guildName: String? = nil) {
         self.guildID = channel.guild_id ?? "@me"
@@ -64,14 +67,19 @@ struct ChannelView: View, Equatable {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) { [weak viewModel] in
-            List {
-                ForEach($viewModel.messages, id: \.identifier) { $message in
-                    MessageCellView(message: message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
+        HStack {
+            ZStack(alignment: .bottom) { [weak viewModel] in
+                List {
+                    ForEach($viewModel.messages, id: \.identifier) { $message in
+                        MessageCellView(message: message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
+                    }
+                    Spacer().frame(height: 90)
                 }
-                Spacer().frame(height: 90)
+                blurredTextField
             }
-            blurredTextField
+            if memberListShown {
+                MemberListView(list: $memberList)
+            }
         }
         .navigationTitle(Text("\(guildID == "@me" ? "" : "#")\(channelName)"))
         .navigationSubtitle(Text(guildName))
@@ -99,6 +107,14 @@ struct ChannelView: View, Equatable {
                 .popover(isPresented: $mentions) {
                     MentionsView()
                         .frame(width: 500, height: 600)
+                }
+                if guildID != "@me" {
+                    Button(action: {
+                        memberListShown.toggle()
+                        wss.memberList(for: guildID, in: channelID)
+                    }, label: {
+                        Image(systemName: "sidebar.right")
+                    })
                 }
             }
         }
@@ -137,5 +153,24 @@ public struct VisualEffectView: NSViewRepresentable {
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (safe index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil
+    }
+}
+
+struct MemberListView: View {
+    @Binding var list: [OPSItems]
+    var body: some View {
+        List(list.compactMap { $0.member }, id: \.user.id) { ops in
+            HStack {
+                Attachment(pfpURL(ops.user.id, ops.user.avatar))
+                    .frame(width: 33, height: 33)
+                    .clipShape(Circle())
+                HStack {
+                    Text(ops.nick ?? ops.user.username)
+                    if let presence = ops.presence?.status?.rawValue {
+                        Text(presence).foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
     }
 }

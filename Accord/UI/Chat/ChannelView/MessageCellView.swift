@@ -49,7 +49,7 @@ struct MessageCellView: View {
                     Button(action: {
                         popup.toggle()
                     }) {
-                        Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
+                        NavigationLazyView(Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable())
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }

@@ -116,6 +116,9 @@ final public class Markdown {
                 let joined: Channel? = Array(Array(Array(matches).joined()).joined())[safe: 0]
                 return promise(.success(Text("#\(joined?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
+            if word.contains("+") {
+                return promise(.success(Text(word) + Text(" ")))
+            }
             do {
                 if #available(macOS 12, *) {
                     let markdown = try AttributedString(markdown: word)

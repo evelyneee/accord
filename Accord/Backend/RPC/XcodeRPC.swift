@@ -10,54 +10,33 @@ import Cocoa
 import Combine
 
 final class XcodeRPC {
-        
-    enum XcodeScripts: String {
-        case windowNames = "return name of windows"
-        case filePaths = "return file of documents"
-        case documentNames = "return name of documents"
-        case activeWorkspaceDocument = "return active workspace document"
-    }
     
     static var started = Int(Date().timeIntervalSince1970) * 1000
     
-    class func runAPScript(_ s: XcodeScripts) -> [String] {
+    class func runXcodeScript(_ script: String) -> [String] {
         let scr = """
         tell application "Xcode"
-            \(s.rawValue)
+            \(script)
         end tell
         """
 
         // execute the script
         let script = NSAppleScript.init(source: scr)
         let result = script?.executeAndReturnError(nil)
-
-        // format the result as a Swift array
-        if let desc = result {
-            var arr: [String] = []
-            if desc.numberOfItems == 0 {
-                return arr
+        guard let desc = result?.literalArray, !desc.isEmpty else { return [] }
+        return desc.map { (value) -> String in
+            if value.hasSuffix(" — Edited") {
+                return value.dropLast(9).stringLiteral
+            } else {
+                return value
             }
-            for i in 1...desc.numberOfItems {
-                let strVal = desc.atIndex(i)!.stringValue
-                if var uwStrVal = strVal {
-                    // remove " — Edited" suffix if it exists
-                    if uwStrVal.hasSuffix(" — Edited") {
-                        uwStrVal.removeSubrange(uwStrVal.lastIndex(of: "—")!...)
-                        uwStrVal.removeLast()
-                    }
-                    arr.append(uwStrVal)
-                }
-            }
-            return arr
-        } else {
-            return []
         }
     }
 
     class func getActiveFilename() -> String {
-        let fileNames = runAPScript(.documentNames)
+        let fileNames = runXcodeScript("return name of documents")
 
-        let windows = runAPScript(.windowNames)
+        let windows = runXcodeScript("return name of windows")
 
         for name in windows {
             if fileNames.map({ $0.contains(name.components(separatedBy: " — ").last ?? name) }).contains(true) {
@@ -68,7 +47,7 @@ final class XcodeRPC {
     }
 
     class func getActiveWorkspace() -> String? {
-        let awd = runAPScript(.activeWorkspaceDocument)
+        let awd = runXcodeScript("return active workspace document")
         if awd.count >= 2 {
             return awd[1]
         }
@@ -77,7 +56,6 @@ final class XcodeRPC {
     
     class func updatePresence(status: String? = nil, workspace: String, filename: String) {
         do {
-            print("sent")
             try wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started, activities: [
                 Activity.current!,
                 Activity(
@@ -99,5 +77,12 @@ final class XcodeRPC {
     }
 }
 
-
-
+extension NSAppleEventDescriptor {
+    var literalArray: [String] {
+        var arr: [String?] = []
+        for i in 1...self.numberOfItems {
+            arr.append(self.atIndex(i)?.stringValue)
+        }
+        return arr.compactMap { $0 }
+    }
+}
