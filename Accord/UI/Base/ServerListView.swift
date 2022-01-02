@@ -321,17 +321,17 @@ struct ServerListView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                             timedOut = false
                         })
-                    }, label: {
+                    }) {
                         Image(systemName: "arrow.counterclockwise")
-                    })
+                    }
                     .disabled(timedOut)
-                    Toggle(isOn: $mentions, label: {
+                    Toggle(isOn: $mentions) {
                         Image(systemName: "bell.badge.fill")
-                    })
-                    .popover(isPresented: $mentions, content: {
+                    }
+                    .popover(isPresented: $mentions) {
                         MentionsView()
                             .frame(width: 500, height: 600)
-                    })
+                    }
                 }
             }
         }

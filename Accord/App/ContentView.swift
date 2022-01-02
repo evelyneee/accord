@@ -49,7 +49,6 @@ struct ContentView: View {
                                 break
                             }
                         }, receiveValue: { d in
-
                             AccordCoreVars.user = d.user
                             user_id = d.user.id
                             if let pfp = d.user.avatar {

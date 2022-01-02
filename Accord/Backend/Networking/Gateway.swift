@@ -1,5 +1,5 @@
 //
-//  NIOGateway.swift
+//  Gateway.swift
 //  Accord
 //
 //  Created by evelyn on 2022-01-01.
@@ -10,6 +10,8 @@ import Combine
 import Network
 import AppKit
 
+// The second version of Accord's gateway.
+// This uses Network.framework instead of URLSessionWebSocketTask
 final class Gateway {
     
     private (set) var connection: NWConnection?
