@@ -7,6 +7,7 @@ Recommended: macOS Monterey
 * Has Markdown support for messages
 * Much more stable
 * Fully tested
+
 Minimum requirement: macOS Big Sur
 * Untested
 * Many features are missing
