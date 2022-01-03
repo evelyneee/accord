@@ -1,5 +1,4 @@
 ## Accord
------
 A faster discord client for your Mac. 
 
 ### OS Requirement
