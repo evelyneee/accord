@@ -106,5 +106,137 @@ extension Gateway {
         default: break
         }
     }
+    
+    func handleMessage(event: GatewayEvent) {
+        guard let s = event.s else {
+            if event.op == 11 {
+                // no seq + op 11 means a hearbeat was done successfully
+                print("Heartbeat successful")
+                self.pendingHeartbeat = false
+            } else {
+                self.reset()
+            }
+            return
+        }
+        self.seq = s
+        switch event.t {
+        case .ready: break
+        case .readySupplemental: break
+        case .messageACK: break
+        case .sessionsReplace: break
+        case .channelCreate: break
+        case .channelUpdate: break
+        case .channelDelete: break
+        case .guildCreate: break
+        case .guildDelete: break
+        case .guildMemberAdd: break
+        case .guildMemberRemove: break
+        case .guildMemberUpdate: break
+        case .guildMemberChunk:
+            memberChunkSubject.send(event.data)
+        case .guildMemberListUpdate:
+            do {
+                let list = try JSONDecoder().decode(MemberListUpdate.self, from: event.data)
+                self.memberListSubject.send(list)
+            } catch {
+                print(error)
+            }
+        case .inviteCreate: break
+        case .inviteDelete: break
+        case .messageCreate:
+            print("message create")
+            guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { return }
+            if let channelID = event.channelID, let author = message.author {
+                print("tf")
+                self.messageSubject.send((event.data, channelID, author.id == user_id))
+            }
+            let ids = message.mentions.compactMap { $0?.id }
+            let guildID = message.guild_id ?? "@me"
+            guard let channelID = event.channelID else { break }
+            if ids.contains(user_id) {
+                print("Sending notification")
+                showNotification(title: message.author?.username ?? "Unknown User", subtitle: message.content)
+                MentionSender.shared.addMention(guild: guildID, channel: channelID)
+            } else if Notifications.privateChannels.contains(channelID) && message.author?.id != user_id {
+                showNotification(title: username, subtitle: message.content)
+                MentionSender.shared.addMention(guild: guildID, channel: channelID)
+            }
+        case .messageUpdate:
+            if let channelID = event.channelID {
+                self.editSubject.send((event.data, channelID))
+            }
+        case .messageDelete:
+            if let channelID = event.channelID {
+                deleteSubject.send((event.data, channelID))
+            }
+        case .messageReactionAdd: break
+        case .messageReactionRemove: break
+        case .messageReactionRemoveAll: break
+        case .messageReactionRemoveEmoji: break
+        case .presenceUpdate: break
+        case .typingStart:
+            if let channelID = event.channelID {
+                typingSubject.send((event.data, channelID))
+            }
+        case .userUpdate: break
+        }
+    }
 
+}
+
+struct GatewayEvent {
+    
+    init(data: Data) throws {
+        guard let packet = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
+              let tString = packet["t"] as? String else { throw Gateway.GatewayErrors.eventCorrupted }
+        guard let t = T.init(rawValue: tString) else { throw Gateway.GatewayErrors.unknownEvent(tString) }
+        print("init success")
+        self.t = t
+        self.s = packet["s"] as? Int
+        self.op = packet["op"] as? Int
+        self.d = packet["d"] as? [String:Any]
+        self.channelID = d?["channel_id"] as? String
+        self.data = data
+    }
+    
+    var t: T
+    var s: Int?
+    var d: [String:Any]?
+    var op: Int?
+    var channelID: String?
+    var data: Data
+    
+    enum T: String {
+        case ready = "READY"
+        case readySupplemental = "READY_SUPPLEMENTAL"
+        case messageACK = "MESSAGE_ACK"
+        case sessionsReplace = "SESSIONS_REPLACE"
+        
+        case channelCreate = "CHANNEL_CREATE"
+        case channelUpdate = "CHANNEL_UPDATE"
+        case channelDelete = "CHANNEL_DELETE"
+        
+        case guildCreate = "GUILD_CREATE"
+        case guildDelete = "GUILD_DELETE"
+        case guildMemberAdd = "GUILD_MEMBER_ADD"
+        case guildMemberRemove = "GUILD_MEMBER_REMOVE"
+        case guildMemberUpdate = "GUILD_MEMBER_UPDATE"
+        case guildMemberChunk = "GUILD_MEMBERS_CHUNK"
+        case guildMemberListUpdate = "GUILD_MEMBER_LIST_UPDATE"
+        
+        case inviteCreate = "INVITE_CREATE"
+        case inviteDelete = "INVITE_DELETE"
+
+        case messageCreate = "MESSAGE_CREATE"
+        case messageUpdate = "MESSAGE_UPDATE"
+        case messageDelete = "MESSAGE_DELETE"
+        case messageReactionAdd = "MESSAGE_REACTION_ADD"
+        case messageReactionRemove = "MESSAGE_REACTION_REMOVE"
+        case messageReactionRemoveAll = "MESSAGE_REACTION_REMOVE_ALL"
+        case messageReactionRemoveEmoji = "MESSAGE_REACTION_REMOVE_EMOJI"
+
+        case presenceUpdate = "PRESENCE_UPDATE"
+        case typingStart = "TYPING_START"
+        case userUpdate = "USER_UPDATE"
+    }
 }

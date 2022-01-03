@@ -36,8 +36,7 @@ final class AccordCoreVars {
     
     static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
     static var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
-    public static var token: String = "NzAyNTU3NjQyMDUyMzM3Nzk1.Yc5cNA.1mq2ppzgspMWwHsdeHorarTc0AY"
-    // public static var token: String = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+    public static var token: String = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
     public static var user: User?
     public static var plugins: [AccordPlugin] = []
 

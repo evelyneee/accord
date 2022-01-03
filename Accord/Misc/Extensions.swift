@@ -10,6 +10,9 @@ import AppKit
 import SwiftUI
 import Combine
 
+// I have made this typo too many times
+typealias Amy = Any
+
 @propertyWrapper
 public final class IgnoreFailure<Value: Decodable>: Decodable {
     public var wrappedValue: [Value] = []

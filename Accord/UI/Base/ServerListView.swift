@@ -115,6 +115,7 @@ struct ServerListView: View {
                         .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
                         .onTapGesture(count: 1, perform: {
                             selectedServer = 201
+                            selection = nil
                         })
                 } else {
                     Image(systemName: "bubble.left.fill")
@@ -123,6 +124,7 @@ struct ServerListView: View {
                         .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
                         .onTapGesture(count: 1, perform: {
                             selectedServer = 201
+                            selection = nil
                         })
                 }
             }
@@ -300,16 +302,20 @@ struct ServerListView: View {
             self.selection = uInfo.values.first!
         })
         .onChange(of: selectedServer, perform: { [selectedServer] new in
-            guard let selectedServer = selectedServer,
-                  selectedServer != 201,
-                  let new = new,
-                  let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
-            UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
-            let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[new].id)")
-            if val != 0 {
-                self.selection = val
-            } else {
-                self.selection = nil
+            concurrentQueue.async {
+                guard let selectedServer = selectedServer,
+                      new != 201,
+                      let new = new,
+                      let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
+                UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
+                let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[new].id)")
+                DispatchQueue.main.async {
+                    if val != 0 {
+                        self.selection = val
+                    } else {
+                        self.selection = nil
+                    }
+                }
             }
         })
         .toolbar {

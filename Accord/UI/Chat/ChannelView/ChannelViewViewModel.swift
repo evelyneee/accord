@@ -48,8 +48,7 @@ final class ChannelViewViewModel: ObservableObject {
                 print("received a message")
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
-                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
-                    guard let message = gatewayMessage.d else { return }
+                    guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
                     if self?.guildID != "@me" && !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                         self?.loadUser(for: message.author?.id)
                     }
@@ -137,8 +136,7 @@ final class ChannelViewViewModel: ObservableObject {
                 // Received a message from backend
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
-                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayMessage.self, from: msg) else { return }
-                    guard let message = gatewayMessage.d else { return }
+                    guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
                     let messageMap = self?.messages.enumerated().compactMap { (index, element) in
                         return [element.id: index]
                     }.reduce(into: [:]) { (result, next) in

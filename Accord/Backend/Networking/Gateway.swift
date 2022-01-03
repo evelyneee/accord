@@ -51,6 +51,8 @@ final class Gateway {
         case maxRequestReached
         case essentialEventFailed(String)
         case noSession
+        case eventCorrupted
+        case unknownEvent(String)
     }
     
     static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
@@ -82,14 +84,13 @@ final class Gateway {
             if let error = error {
                 print(error)
             }
-            guard let data = data else {
-                print(context as Any, data as Any)
-                wss.hardReset()
-                return
-            }
-            guard let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
+            guard let data = data,
+                  let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
                   let helloD = hello["d"] as? [String:Any],
-                  let interval = helloD["heartbeat_interval"] as? Int else { fatalError("[Gateway] No interval received in HELLO packet") }
+                  let interval = helloD["heartbeat_interval"] as? Int else {
+                      wss.hardReset()
+                      return
+                  }
             self?.interval = interval
             self?.heartbeatTimer = Timer.publish(every: Double(interval / 1000), on: .main, in: .default)
                 .autoconnect()
@@ -130,7 +131,12 @@ final class Gateway {
                   }
             switch info.opcode {
             case .text:
-                self.handleMessage(textData: data)
+                do {
+                    let event = try GatewayEvent(data: data)
+                    self.handleMessage(event: event)
+                } catch {
+                    print(error)
+                }
             case .cont:
                 break
             case .binary:
@@ -179,9 +185,7 @@ final class Gateway {
                 ]
             ]
         ]
-        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
-        let jsonString = try String(jsonData)
-        try self.send(text: jsonString)
+        try self.send(json: packet)
     }
 
     private func heartbeat() throws {
@@ -193,9 +197,7 @@ final class Gateway {
             "op": 1,
             "d": seq
         ]
-        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
-        let jsonString = try String(jsonData)
-        try self.send(text: jsonString)
+        try self.send(json: packet)
         self.pendingHeartbeat = true
     }
 
@@ -263,9 +265,7 @@ final class Gateway {
                 "afk":false
             ]
         ]
-        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
-        let jsonString = try String(jsonData)
-        try self.send(text: jsonString)
+        try self.send(json: packet)
     }
 
     public func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
@@ -277,9 +277,7 @@ final class Gateway {
                 "token": AccordCoreVars.token
             ]
         ]
-        let jsonData = try JSONSerialization.data(withJSONObject: packet, options: [])
-        let jsonString = try String(jsonData)
-        try self.send(text: jsonString)
+        try self.send(json: packet)
         wssThread.async {
             self.listen()
         }
@@ -295,9 +293,7 @@ final class Gateway {
                 "threads": true,
             ]
         ]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-              let jsonString = try? String(jsonData) else { return }
-        try? self.send(text: jsonString)
+        try? self.send(json: packet)
     }
     
     public func memberList(for guild: String, in channel: String) {
@@ -312,9 +308,7 @@ final class Gateway {
                 "guild_id": guild
             ]
         ]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-              let jsonString = try? String(jsonData) else { return }
-        try? self.send(text: jsonString)
+        try? self.send(json: packet)
     }
 
     public func subscribeToDM(_ channel: String) {
@@ -324,17 +318,13 @@ final class Gateway {
                 "channel_id": channel
             ]
         ]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-              let jsonString = try? String(jsonData) else { return }
-        try? self.send(text: jsonString)
+        try? self.send(json: packet)
     }
 
     public func getMembers(ids: [String], guild: String) throws {
         guard req <= 30 else {
-            print("blocked req")
             throw GatewayErrors.maxRequestReached
         }
-        print("fetched")
         let packet: [String: Any] = [
             "op": 8,
             "d": [
@@ -343,8 +333,7 @@ final class Gateway {
                 "guild_id": guild
             ]
         ]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: packet, options: []),
-              let jsonString = try? String(jsonData) else { return }
-        try? self.send(text: jsonString)
+        try? self.send(json: packet)
     }
+    
 }

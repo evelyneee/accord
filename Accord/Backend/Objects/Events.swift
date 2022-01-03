@@ -50,7 +50,7 @@ final class GuildMember: Decodable {
 }
 
 final class GatewayMessage: Decodable {
-    var d: Message?
+    var d: Message
 }
 
 final class GatewayDeletedMessage: Decodable {
