@@ -16,7 +16,7 @@ let cache = URLCache(memoryCapacity: 1_000_000_000, diskCapacity: 1_000_000_000,
 
 struct Attachment: View, Equatable {
     static func == (lhs: Attachment, rhs: Attachment) -> Bool {
-        return lhs.url == rhs.url || lhs.imageLoader.image == rhs.imageLoader.image
+        return lhs.url == rhs.url
     }
 
     @ObservedObject var imageLoader: ImageLoaderAndCache

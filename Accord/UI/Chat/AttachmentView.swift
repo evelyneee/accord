@@ -20,13 +20,13 @@ struct AttachmentView: View {
                             .cornerRadius(5)
                             .frame(maxWidth: 350, maxHeight: 350)
                     } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
-                        if var controller = VideoPlayerController(videoURL: url) {
+                        if let controller = VideoPlayerController(videoURL: url) {
                             controller
                                 .cornerRadius(5)
                                 .frame(minWidth: 300, minHeight: 300)
                                 .onDisappear {
                                     print("goodbye")
-                                    controller.player = nil
+                                    controller.player?.replaceCurrentItem(with: nil)
                                 }
                         }
                     }

@@ -124,6 +124,7 @@ extension Gateway {
         case .readySupplemental: break
         case .messageACK: break
         case .sessionsReplace: break
+        case .heartbeatACK: break
         case .channelCreate: break
         case .channelUpdate: break
         case .channelDelete: break
@@ -144,10 +145,8 @@ extension Gateway {
         case .inviteCreate: break
         case .inviteDelete: break
         case .messageCreate:
-            print("message create")
             guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { return }
             if let channelID = event.channelID, let author = message.author {
-                print("tf")
                 self.messageSubject.send((event.data, channelID, author.id == user_id))
             }
             let ids = message.mentions.compactMap { $0?.id }
@@ -175,10 +174,17 @@ extension Gateway {
         case .messageReactionRemoveEmoji: break
         case .presenceUpdate: break
         case .typingStart:
+            print(event.t)
             if let channelID = event.channelID {
                 typingSubject.send((event.data, channelID))
             }
         case .userUpdate: break
+        case .channelUnreadUpdate: break
+        case .threadListSync: break
+        case .messageDeleteBulk: break
+        case .voiceStateUpdate: break
+        case .applicationCommandUpdate: break
+        case .applicationCommandPermissionsUpdate: break
         }
     }
 
@@ -187,8 +193,8 @@ extension Gateway {
 struct GatewayEvent {
     
     init(data: Data) throws {
-        guard let packet = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
-              let tString = packet["t"] as? String else { throw Gateway.GatewayErrors.eventCorrupted }
+        guard let packet = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] else { throw Gateway.GatewayErrors.eventCorrupted }
+        let tString = packet["t"] as? String ?? "HEARTBEAT_ACK"
         guard let t = T.init(rawValue: tString) else { throw Gateway.GatewayErrors.unknownEvent(tString) }
         print("init success")
         self.t = t
@@ -211,6 +217,8 @@ struct GatewayEvent {
         case readySupplemental = "READY_SUPPLEMENTAL"
         case messageACK = "MESSAGE_ACK"
         case sessionsReplace = "SESSIONS_REPLACE"
+        case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
+        case heartbeatACK = "HEARTBEAT_ACK"
         
         case channelCreate = "CHANNEL_CREATE"
         case channelUpdate = "CHANNEL_UPDATE"
@@ -223,6 +231,7 @@ struct GatewayEvent {
         case guildMemberUpdate = "GUILD_MEMBER_UPDATE"
         case guildMemberChunk = "GUILD_MEMBERS_CHUNK"
         case guildMemberListUpdate = "GUILD_MEMBER_LIST_UPDATE"
+        case threadListSync = "THREAD_LIST_SYNC"
         
         case inviteCreate = "INVITE_CREATE"
         case inviteDelete = "INVITE_DELETE"
@@ -230,6 +239,7 @@ struct GatewayEvent {
         case messageCreate = "MESSAGE_CREATE"
         case messageUpdate = "MESSAGE_UPDATE"
         case messageDelete = "MESSAGE_DELETE"
+        case messageDeleteBulk = "MESSAGE_DELETE_BULK"
         case messageReactionAdd = "MESSAGE_REACTION_ADD"
         case messageReactionRemove = "MESSAGE_REACTION_REMOVE"
         case messageReactionRemoveAll = "MESSAGE_REACTION_REMOVE_ALL"
@@ -238,5 +248,10 @@ struct GatewayEvent {
         case presenceUpdate = "PRESENCE_UPDATE"
         case typingStart = "TYPING_START"
         case userUpdate = "USER_UPDATE"
+        
+        case voiceStateUpdate = "VOICE_STATE_UPDATE"
+        
+        case applicationCommandUpdate = "APPLICATION_COMMAND_UPDATE"
+        case applicationCommandPermissionsUpdate = "APPLICATION_COMMAND_PERMISSIONS_UPDATE"
     }
 }

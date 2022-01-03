@@ -35,10 +35,13 @@ enum UserStatus: String, Codable {
 }
 
 final class TypingEvent: Decodable {
-    var channel_id: String
-    var guild_id: String?
-    var member: GuildMember
-    var user_id: String
+    var d: TypingEventCore
+    final class TypingEventCore: Decodable {
+        var channel_id: String
+        var guild_id: String?
+        var member: GuildMember
+        var user_id: String
+    }
 }
 
 final class GuildMember: Decodable {

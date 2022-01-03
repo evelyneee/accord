@@ -80,19 +80,28 @@ struct ChannelView: View, Equatable {
             if memberListShown {
                 MemberListView(list: $memberList)
                     .frame(width: 250)
+                    .onAppear {
+                        if memberList.isEmpty {
+                            try? wss.memberList(for: guildID, in: channelID)
+                        }
+                    }
             }
         }
         .navigationTitle(Text("\(guildID == "@me" ? "" : "#")\(channelName)"))
         .navigationSubtitle(Text(guildName))
         .presentedWindowToolbarStyle(UnifiedCompactWindowToolbarStyle())
         .onAppear {
+            print("hiiiiiiiiiii")
             wss.typingSubject
                 .sink { msg, channelID in
+                    print("hi uwu")
                     guard channelID == self.channelID else { return }
                     webSocketQueue.async { [weak viewModel] in
-                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg) else { return }
+                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d else { return }
+                        print("hi again")
                         let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
                         if !(typing.contains(isKnownAs)) {
+                            print("added")
                             typing.append(isKnownAs)
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
@@ -131,12 +140,9 @@ struct ChannelView: View, Equatable {
                         .frame(width: 500, height: 600)
                 }
                 if guildID != "@me" {
-                    Button(action: {
-                        memberListShown.toggle()
-                        memberListShown ? wss.memberList(for: guildID, in: channelID) : self.memberList.removeAll()
-                    }, label: {
+                    Toggle(isOn: $memberListShown.animation()) {
                         Image(systemName: "sidebar.right")
-                    })
+                    }
                 }
             }
         }

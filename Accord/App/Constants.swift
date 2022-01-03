@@ -52,15 +52,6 @@ final class AccordCoreVars {
         }
     }
     class func loadVersion() {
-        class Res: Decodable {
-            var statistics: Response
-            class Response: Decodable {
-                class Build: Decodable {
-                    var number: Int
-                }
-                var newest_build: Build
-            }
-        }
         concurrentQueue.async {
             Self.cancellable = RequestPublisher.fetch(Res.self, url: URL(string: "https://api.discord.sale"))
                 .sink(receiveCompletion: { completion in
@@ -69,5 +60,15 @@ final class AccordCoreVars {
                     UserDefaults.standard.set(dscVersion, forKey: "clientVersion")
                 }
         }
+    }
+}
+
+class Res: Decodable {
+    var statistics: Response
+    class Response: Decodable {
+        class Build: Decodable {
+            var number: Int
+        }
+        var newest_build: Build
     }
 }

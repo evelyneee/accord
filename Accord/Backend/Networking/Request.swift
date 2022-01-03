@@ -110,7 +110,6 @@ final class Headers {
             } else {
                 fatalError("We cannot skip the X-Super-Properties. What are you trying to do, get banned?")
             }
-            
             config.httpAdditionalHeaders = [
                 "origin":"https://discord.com",
                 "authority":"discord.com",
@@ -314,27 +313,6 @@ final public class RequestPublisher {
             }
             .debugAssertNoMainThread()
             .eraseToAny()
-    }
-}
-
-fileprivate extension Data {
-    // Thanks Amy :3
-    func downsample(to size: CGSize, scale: CGFloat? = nil) -> Data? {
-        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-        guard let imageSource = CGImageSourceCreateWithData(self as CFData, imageSourceOptions) else { return nil }
-        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
-        guard let downsampled = downsampled else { return nil }
-        return downsampled
-    }
-
-    private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
-        let maxDimensionInPixels = Swift.max(size.width, size.height) * (scale ?? 1)
-        let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
-          kCGImageSourceShouldCacheImmediately: true,
-          kCGImageSourceCreateThumbnailWithTransform: true,
-          kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
-        guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
-        return downScaledImage.png
     }
 }
 

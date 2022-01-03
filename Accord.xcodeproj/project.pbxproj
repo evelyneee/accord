@@ -18,6 +18,8 @@
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
+		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
+		9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71022783A6FD00A26CB6 /* Github.swift */; };
 		9E6BCC56277E23E80085F279 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC55277E23E80085F279 /* Reaction.swift */; };
 		9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC5C277E43E10085F279 /* SearchView.swift */; };
 		9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */; };
@@ -41,9 +43,9 @@
 		9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
-		A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* IncrementNumbers.swift */; };
-		A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */; };
-		A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC292724FD35005F9950 /* NSColor+Hex.swift */; };
+		A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* Operators++.swift */; };
+		A80FEC2D2724FD35005F9950 /* Networking++.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC282724FD35005F9950 /* Networking++.swift */; };
+		A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC292724FD35005F9950 /* NSColor++.swift */; };
 		A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2A2724FD35005F9950 /* UserNotifications.swift */; };
 		A80FEC31272583B4005F9950 /* Embed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC30272583B4005F9950 /* Embed.swift */; };
 		A80FEC3327258457005F9950 /* EmbedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC3227258457005F9950 /* EmbedView.swift */; };
@@ -117,6 +119,9 @@
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
+		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
+		9E6B71022783A6FD00A26CB6 /* Github.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Github.swift; sourceTree = "<group>"; };
+		9E6B71072783ABD500A26CB6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9E6BCC55277E23E80085F279 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
 		9E6BCC5C277E43E10085F279 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Gateway+MessageHandle.swift"; sourceTree = "<group>"; };
@@ -140,9 +145,9 @@
 		9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteWrapper.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
-		A80FEC272724FD35005F9950 /* IncrementNumbers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementNumbers.swift; sourceTree = "<group>"; };
-		A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkingExtensions.swift; sourceTree = "<group>"; };
-		A80FEC292724FD35005F9950 /* NSColor+Hex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSColor+Hex.swift"; sourceTree = "<group>"; };
+		A80FEC272724FD35005F9950 /* Operators++.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Operators++.swift"; sourceTree = "<group>"; };
+		A80FEC282724FD35005F9950 /* Networking++.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Networking++.swift"; sourceTree = "<group>"; };
+		A80FEC292724FD35005F9950 /* NSColor++.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSColor++.swift"; sourceTree = "<group>"; };
 		A80FEC2A2724FD35005F9950 /* UserNotifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotifications.swift; sourceTree = "<group>"; };
 		A80FEC30272583B4005F9950 /* Embed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Embed.swift; sourceTree = "<group>"; };
 		A80FEC3227258457005F9950 /* EmbedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedView.swift; sourceTree = "<group>"; };
@@ -165,7 +170,7 @@
 		A88CD70B26E05900007D979B /* postinst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = postinst; sourceTree = "<group>"; };
 		A88CD70E26E065F3007D979B /* MentionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionProtocol.swift; path = Accord/Backend/Networking/MentionProtocol.swift; sourceTree = SOURCE_ROOT; };
 		A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Mentions.swift"; sourceTree = "<group>"; };
-		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Misc/Extensions.swift; sourceTree = SOURCE_ROOT; };
+		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Misc/PlusPlus/Extensions.swift; sourceTree = SOURCE_ROOT; };
 		A898453D26978EBA00B1C9DB /* EmotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotesView.swift; sourceTree = "<group>"; };
 		A89845402698C3FD00B1C9DB /* GifManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifManager.swift; sourceTree = "<group>"; };
 		A89BE785266BDFB3007B0CBF /* Socket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Socket.swift; sourceTree = "<group>"; };
@@ -224,6 +229,7 @@
 		32F4C94E256D7D3300343BB3 = {
 			isa = PBXGroup;
 			children = (
+				9E6B71072783ABD500A26CB6 /* README.md */,
 				32F4C959256D7D3300343BB3 /* Accord */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
@@ -262,6 +268,28 @@
 				9E4F3FC427764E200003E383 /* GifView.swift */,
 			);
 			path = Gifs;
+			sourceTree = "<group>";
+		};
+		9E6B71012783A6F200A26CB6 /* Shapes */ = {
+			isa = PBXGroup;
+			children = (
+				9E6B71022783A6FD00A26CB6 /* Github.swift */,
+			);
+			path = Shapes;
+			sourceTree = "<group>";
+		};
+		9E6B71062783A73400A26CB6 /* PlusPlus */ = {
+			isa = PBXGroup;
+			children = (
+				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				9E7834D12781F2D500ABB9F8 /* Combine++.swift */,
+				A80FEC282724FD35005F9950 /* Networking++.swift */,
+				A80FEC292724FD35005F9950 /* NSColor++.swift */,
+				A80FEC272724FD35005F9950 /* Operators++.swift */,
+				9E6BCC63277E8E850085F279 /* Print++.swift */,
+				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
+			);
+			path = PlusPlus;
 			sourceTree = "<group>";
 		};
 		9E6BCC5B277E43CF0085F279 /* Search */ = {
@@ -429,16 +457,12 @@
 		A8ECC4C1271C88CD00382E53 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
-				A8922500266ED88B00FEA21C /* Extensions.swift */,
+				9E6B71062783A73400A26CB6 /* PlusPlus */,
+				9E6B71012783A6F200A26CB6 /* Shapes */,
 				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
-				A80FEC272724FD35005F9950 /* IncrementNumbers.swift */,
-				A80FEC282724FD35005F9950 /* NetworkingExtensions.swift */,
-				A80FEC292724FD35005F9950 /* NSColor+Hex.swift */,
 				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
 				9ECB0F3C27664B020019ADAE /* TableView.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,
-				9E6BCC63277E8E850085F279 /* Print++.swift */,
-				9E7834D12781F2D500ABB9F8 /* Combine++.swift */,
 			);
 			path = Misc;
 			sourceTree = "<group>";
@@ -566,7 +590,7 @@
 				9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */,
 				9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */,
 				9E2C98792780F573008C6AFD /* Gateway.swift in Sources */,
-				A80FEC2D2724FD35005F9950 /* NetworkingExtensions.swift in Sources */,
+				A80FEC2D2724FD35005F9950 /* Networking++.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* Request.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
@@ -581,6 +605,7 @@
 				9E6BCC56277E23E80085F279 /* Reaction.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A80FEC3327258457005F9950 /* EmbedView.swift in Sources */,
+				9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */,
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
@@ -617,13 +642,14 @@
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
+				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
-				A80FEC2C2724FD35005F9950 /* IncrementNumbers.swift in Sources */,
+				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
-				A80FEC2E2724FD35005F9950 /* NSColor+Hex.swift in Sources */,
+				A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -61,3 +61,23 @@ extension NSImage {
         return nil
     }
 }
+
+extension Data {
+    func downsample(to size: CGSize, scale: CGFloat? = nil) -> Data? {
+        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+        guard let imageSource = CGImageSourceCreateWithData(self as CFData, imageSourceOptions) else { return nil }
+        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
+        guard let downsampled = downsampled else { return nil }
+        return downsampled
+    }
+
+    private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
+        let maxDimensionInPixels = Swift.max(size.width, size.height) * (scale ?? 1)
+        let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+          kCGImageSourceShouldCacheImmediately: true,
+          kCGImageSourceCreateThumbnailWithTransform: true,
+          kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+        guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
+        return downScaledImage.png
+    }
+}

@@ -21,6 +21,8 @@ struct SettingsViewRedesign: View {
     @AppStorage("discordStockSettings") var discordSettings: Bool = pastelColors
     @AppStorage("enableSuffixRemover") var suffixes: Bool = false
     @AppStorage("pronounDB") var pronounDB: Bool = false
+    @AppStorage("AppleMusicRPC") var appleMusicRPC: Bool = false
+    @AppStorage("XcodeRPC") var xcodeRPC: Bool = false
 
     @State var user: User? = AccordCoreVars.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
@@ -102,6 +104,8 @@ struct SettingsViewRedesign: View {
                     SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
                     SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
                     SettingsToggleView(toggled: $dark, title: "Always dark mode")
+                    SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
+                    SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -190,6 +194,21 @@ struct SettingsViewRedesign: View {
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
                 Text("OS: macOS \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))")
+                    .padding(.leading, 20)
+                    .foregroundColor(.secondary)
+                HStack(alignment: .center) {
+                    Text("Open source at")
+                        .padding(.leading, 20)
+                        .foregroundColor(.secondary)
+                    GithubIcon()
+                        .foregroundColor(Color.accentColor)
+                        .frame(width: 13, height: 13)
+                        .onTapGesture {
+                            NSWorkspace.shared.open(URL(string: "https://github.com/evelyneee/Accord")!)
+                        }
+                }
+                .frame(height: 5)
+                Text("Made with 🤍 by Evelyn")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
             }

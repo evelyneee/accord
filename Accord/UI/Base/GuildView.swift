@@ -83,13 +83,25 @@ struct ServerListViewCell: View {
         return HStack {
             switch channel?.type {
             case .normal:
-                Label(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel", systemImage: "number")
+                HStack {
+                    Image(systemName: "number")
+                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                }
             case .voice:
-                Label(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel", systemImage: "speaker.wave.2.fill")
+                HStack {
+                    Image(systemName: "speaker.wave.2.fill")
+                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                }
             case .guild_news:
-                Label(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel", systemImage: "megaphone.fill")
+                HStack {
+                    Image(systemName: "megaphone.fill")
+                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                }
             case .stage:
-                Label(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel", systemImage: "person.2.fill")
+                HStack {
+                    Image(systemName: "person.2.fill")
+                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                }
             case .dm:
                 HStack {
                     Attachment(pfpURL(channel?.recipients?[0].id, channel?.recipients?[0].avatar).appending("?size=48")).equatable()
@@ -105,7 +117,10 @@ struct ServerListViewCell: View {
                     Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
                 }
             default:
-                Label(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel", systemImage: "camera.metering.unknown")
+                HStack {
+                    Image(systemName: "number")
+                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                }
             }
             Spacer()
             if let readState = channel?.read_state, readState.mention_count != 0 {

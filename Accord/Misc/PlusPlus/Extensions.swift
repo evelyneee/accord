@@ -287,6 +287,7 @@ extension DispatchQueue {
             }
         }
     }
+    @available(*, unavailable)
     func asyncWithAnimation(_ perform: @escaping () -> Void) {
         self.async {
             withAnimation {
@@ -294,6 +295,7 @@ extension DispatchQueue {
             }
         }
     }
+    @available(*, unavailable)
     func asyncAfterWithAnimation(deadline: DispatchTime, _ perform: @escaping () -> Void) {
         self.asyncAfter(deadline: deadline) {
             withAnimation {

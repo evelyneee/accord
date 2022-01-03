@@ -106,27 +106,15 @@ struct ServerListView: View {
     @State var updater: Bool = false
     
     var body: some View {
-        lazy var dmButton: some View = {
-            return Group {
-                if #available(macOS 12.0, *) {
-                    Image(systemName: "bubble.left.fill")
-                        .frame(width: 45, height: 45)
-                        .background(Material.ultraThick)
-                        .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
-                        .onTapGesture(count: 1, perform: {
-                            selectedServer = 201
-                            selection = nil
-                        })
-                } else {
-                    Image(systemName: "bubble.left.fill")
-                        .frame(width: 45, height: 45)
-                        .background(Color(NSColor.windowBackgroundColor))
-                        .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
-                        .onTapGesture(count: 1, perform: {
-                            selectedServer = 201
-                            selection = nil
-                        })
-                }
+        lazy var dmButton: Button = {
+            Button(action: {
+                selectedServer = 201
+                selection = nil
+            }) {
+                Image(systemName: "bubble.left.fill")
+                    .frame(width: 45, height: 45)
+                    .background(VisualEffectView(material: .fullScreenUI, blendingMode: .withinWindow))
+                    .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
             }
         }()
         lazy var onlineButton: some View = {
@@ -159,7 +147,9 @@ struct ServerListView: View {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak guild] in
-                                    DispatchQueue.main.async {
+                                    if selectedServer == 201 {
+                                        selectedServer = guild?.index
+                                    } else {
                                         withAnimation {
                                             selectedServer = guild?.index
                                         }
@@ -188,7 +178,9 @@ struct ServerListView: View {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             Button(action: { [weak guild] in
-                                DispatchQueue.main.async {
+                                if selectedServer == 201 {
+                                    selectedServer = guild?.index
+                                } else {
                                     withAnimation {
                                         selectedServer = guild?.index
                                     }

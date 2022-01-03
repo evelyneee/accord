@@ -33,11 +33,11 @@ final class ChannelViewViewModel: ObservableObject {
     init(channelID: String, guildID: String) {
         self.channelID = channelID
         self.guildID = guildID
-        messageFetchQueue.async { [weak self] in
-            self?.guildID == "@me" ? wss.subscribeToDM(channelID) : wss.subscribe(to: guildID)
+        messageFetchQueue.async {
+            self.guildID == "@me" ? try? wss.subscribeToDM(channelID) : try? wss.subscribe(to: guildID)
             MentionSender.shared.removeMentions(server: guildID)
             // fetch messages
-            self?.getMessages(channelID: channelID, guildID: guildID)
+            self.getMessages(channelID: channelID, guildID: guildID)
         }
         self.subscribe()
     }
@@ -124,9 +124,11 @@ final class ChannelViewViewModel: ObservableObject {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
                     guard let index = messageMap?[message.id] else { return }
-                    DispatchQueue.main.asyncWithAnimation {
-                        let i: Int = index
-                        self?.messages.remove(at: i)
+                    withAnimation {
+                        DispatchQueue.main.async {
+                            let i: Int = index
+                            self?.messages.remove(at: i)
+                        }
                     }
                 }
             }

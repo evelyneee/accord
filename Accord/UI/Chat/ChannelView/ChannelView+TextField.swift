@@ -10,40 +10,31 @@ import SwiftUI
 
 extension ChannelView {
     var blurredTextField: some View {
-        return VStack(alignment: .leading) {
-            HStack {
-                if let replied = replyingTo {
-                    HStack {
-                        Text("replying to \(replied.author?.username ?? "")")
-                            .lineLimit(0)
-                        Button(action: {
-                            replyingTo = nil
-                        }, label: {
-                            Image(systemName: "xmark.circle.fill")
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
+        return VStack(alignment: .leading, spacing: 0) {
+            if replyingTo != nil || !typing.isEmpty {
+                HStack {
+                    if let replied = replyingTo {
+                        HStack {
+                            Text("replying to \(replied.author?.username ?? "")")
+                                .lineLimit(0)
+                                .font(.subheadline)
+                            Button(action: {
+                                replyingTo = nil
+                            }, label: {
+                                Image(systemName: "xmark.circle.fill")
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                        }
                     }
-                    .padding(4)
-                    .background(
-                        VisualEffectView(
-                            material: NSVisualEffectView.Material.sidebar,
-                            blendingMode: NSVisualEffectView.BlendingMode.withinWindow
-                        )
-                    )
-                    .cornerRadius(5)
+                    if !(typing.isEmpty) {
+                        Text("\(typing.joined(separator: ", ")) \(typing.count == 1 ? "is" : "are") typing")
+                            .lineLimit(0)
+                            .font(.subheadline)
+                    }
                 }
-                if !(typing.isEmpty) {
-                    Text("\(typing.joined(separator: ", ")) \(typing.count == 1 ? "is" : "are") typing")
-                        .padding(4)
-                        .lineLimit(0)
-                        .background(
-                            VisualEffectView(
-                                material: NSVisualEffectView.Material.sidebar,
-                                blendingMode: NSVisualEffectView.BlendingMode.withinWindow
-                            )
-                        )
-                        .cornerRadius(5)
-                }
+                .padding(.vertical, 4)
+                .padding(.horizontal, 10)
+                Divider()
             }
             ChatControls(
                 guildID: Binding.constant(guildID),
@@ -52,7 +43,10 @@ extension ChannelView {
                 replyingTo: $replyingTo,
                 users: Binding.constant(viewModel.messages.compactMap { $0.author })
             )
+            .padding(13)
         }
+        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+        .clipShape(RoundedCorners(tl: replyingTo != nil || !typing.isEmpty ? 7 : 12, tr: replyingTo != nil || !typing.isEmpty ? 7 : 12, bl: 12, br: 12))
         .padding(12)
         .padding(.bottom, 2)
     }

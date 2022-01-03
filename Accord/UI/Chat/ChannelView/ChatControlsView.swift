@@ -240,9 +240,6 @@ struct ChatControls: View {
                             */
                         }
                     }
-                    .padding(13)
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-                    .cornerRadius(12)
                     .onAppear(perform: {
                         viewModel.cachedUsers = self.users
                     })
@@ -346,11 +343,11 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func findView() {
-        AppKitLink<NSTextField>.introspect { [unowned self] textField, _ in
+        AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
             textField.allowsEditingTextAttributes = true
-            self.textField = textField
+            self?.textField = textField
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                self.textField?.becomeFirstResponder()
+                self?.textField?.becomeFirstResponder()
             })
         }
     }

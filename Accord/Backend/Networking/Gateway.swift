@@ -19,9 +19,11 @@ final class Gateway {
     private (set) var interval: Int = 40000
     private (set) var failedHeartbeats: Int = 0
     
-    internal var bag = Set<AnyCancellable>()
     internal var pendingHeartbeat: Bool = false
+    internal var heartbeatTimer: Cancellable? = nil
+    
     internal var seq: Int = 0
+    internal var bag = Set<AnyCancellable>()
     
     // To communicate with the view
     private (set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
@@ -38,12 +40,7 @@ final class Gateway {
     }
     
     private let socketEndpoint: NWEndpoint
-    private let params: NWParameters
-    
-    private var heartbeatTimer: Cancellable? = nil
-    
-    private var req: Int = 0
-    
+        
     public var cachedMemberRequest: [String: GuildMember] = [:]
     
     enum GatewayErrors: Error {
@@ -55,19 +52,25 @@ final class Gateway {
         case unknownEvent(String)
     }
     
+    fileprivate let additionalHeaders: [(String, String)] = [
+        ("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"),
+        ("Pragma", "no-cache"),
+        ("Origin", "https://discord.com"),
+        ("Host", "gateway.discord.gg"),
+        ("Accept-Language", NSLocale.current.languageCode ?? "en-US"),
+        ("Accept-Encoding", "gzip, deflate, br")
+    ]
+    
     static var gatewayURL: URL = URL(string: "wss://gateway.discord.gg?v=9&encoding=json")!
     
     init(url: URL = Gateway.gatewayURL, session_id: String? = nil, seq: Int? = nil) throws {
         self.socketEndpoint = NWEndpoint.url(url)
         let parameters: NWParameters = .tls
-        let websocketOptions = NWProtocolWebSocket.Options()
-        websocketOptions.autoReplyPing = true
-        websocketOptions.maximumMessageSize = 1_104_857_600
-        parameters.defaultProtocolStack.applicationProtocols.insert(
-            websocketOptions,
-            at: 0
-        )
-        self.params = parameters
+        let wsOptions = NWProtocolWebSocket.Options()
+        wsOptions.autoReplyPing = true
+        wsOptions.maximumMessageSize = 1000000000
+        wsOptions.setAdditionalHeaders(additionalHeaders)
+        parameters.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
         self.connection = NWConnection(to: self.socketEndpoint, using: parameters)
         self.connection?.stateUpdateHandler = self.stateUpdateHandler
         try self.connect(session_id, seq)
@@ -92,18 +95,24 @@ final class Gateway {
                       return
                   }
             self?.interval = interval
-            self?.heartbeatTimer = Timer.publish(every: Double(interval / 1000), on: .main, in: .default)
-                .autoconnect()
-                .sink { _ in
-                    wssThread.async {
-                        do {
-                            try self?.heartbeat()
-                        } catch {
-                            print("[Gateway] Error sending heartbeat", error)
-                            self?.failedHeartbeats++
-                        }
+            self?.heartbeatTimer = Timer.publish(
+              every: Double(interval / 1000),
+              tolerance: nil,
+              on: .main,
+              in: .default
+            )
+            .autoconnect()
+            .sink { [weak self] _ in
+                print("timer")
+                wssThread.async {
+                    do {
+                        try self?.heartbeat()
+                    } catch {
+                        print("[Gateway] Error sending heartbeat", error)
+                        self?.failedHeartbeats++
                     }
                 }
+            }
             do {
                 if let session_id = session_id, let seq = seq {
                     try self?.reconnect(session_id: session_id, seq: seq)
@@ -203,7 +212,6 @@ final class Gateway {
 
     public func ready() -> Future<GatewayD, Error> {
         Future { [weak self] promise in
-            print("begin receive")
             self?.connection?.receiveMessage { (data, context, _, error) in
                 if let error = error {
                     print(error)
@@ -216,7 +224,6 @@ final class Gateway {
                 switch info.opcode {
                 case .text:
                     do {
-                        print("ready")
                         let path = FileManager.default.urls(for: .cachesDirectory,
                                                             in: .userDomainMask)[0]
                                                             .appendingPathComponent("socketOut.json")
@@ -231,11 +238,8 @@ final class Gateway {
                         promise(.success(structure.d))
                         return
                     } catch {
-                        print(error)
                         promise(.failure(error))
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                            wss.hardReset()
-                        })
+                        wss.hardReset()
                         return
                     }
                 case .cont:
@@ -283,7 +287,7 @@ final class Gateway {
         }
     }
 
-    public func subscribe(to guild: String) {
+    public func subscribe(to guild: String) throws {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -293,10 +297,10 @@ final class Gateway {
                 "threads": true,
             ]
         ]
-        try? self.send(json: packet)
+        try self.send(json: packet)
     }
     
-    public func memberList(for guild: String, in channel: String) {
+    public func memberList(for guild: String, in channel: String) throws {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -308,23 +312,20 @@ final class Gateway {
                 "guild_id": guild
             ]
         ]
-        try? self.send(json: packet)
+        try self.send(json: packet)
     }
 
-    public func subscribeToDM(_ channel: String) {
+    public func subscribeToDM(_ channel: String) throws {
         let packet: [String: Any] = [
             "op": 13,
             "d": [
                 "channel_id": channel
             ]
         ]
-        try? self.send(json: packet)
+        try self.send(json: packet)
     }
 
     public func getMembers(ids: [String], guild: String) throws {
-        guard req <= 30 else {
-            throw GatewayErrors.maxRequestReached
-        }
         let packet: [String: Any] = [
             "op": 8,
             "d": [
