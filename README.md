@@ -22,6 +22,7 @@ Xcode is required.
 2. In the project settings, select Signing & Capabilities tab, select your development team and input a new bundle id.
 3. Open your terminal app and cd into the directory. 
 4. Run `xcodebuild` 
+
 The built product will be in the `build/Release` directory
 
 ### Licensing
