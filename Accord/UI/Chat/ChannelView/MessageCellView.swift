@@ -46,17 +46,15 @@ struct MessageCellView: View {
             }
             HStack { [unowned message] in
                 if !message.isSameAuthor {
-                    Button(action: {
-                        popup.toggle()
-                    }) {
-                        Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
-                            .frame(width: 33, height: 33)
-                            .clipShape(Circle())
-                    }
-                    .popover(isPresented: $popup, content: {
-                        PopoverProfileView(user: Binding.constant(message.author))
-                    })
-                    .buttonStyle(BorderlessButtonStyle())
+                    Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
+                        .frame(width: 33, height: 33)
+                        .clipShape(Circle())
+                        .onTapGesture {
+                            popup.toggle()
+                        }
+                        .popover(isPresented: $popup, content: {
+                            PopoverProfileView(user: Binding.constant(message.author))
+                        })
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor {

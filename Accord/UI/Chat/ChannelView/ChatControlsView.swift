@@ -8,6 +8,15 @@
 import Foundation
 import SwiftUI
 
+extension String {
+    var unicodes: [String] {
+        return unicodeScalars.map{ String($0.value, radix: 16) }
+    }
+    func paddingToLeft(maxLength: Int) -> String {
+        return repeatElement("0", count: max(0,maxLength-count)) + self
+    }
+}
+
 struct ChatControls: View {
     @State var chatTextFieldContents: String = ""
     @State var pfps: [String: NSImage] = [:]
@@ -56,7 +65,6 @@ struct ChatControls: View {
     }
     func send() {
         guard viewModel.textFieldContents != "" else { return }
-        print("sending")
         messageSendQueue.async { [weak viewModel] in
             if viewModel?.textFieldContents == "/shrug" {
                 DispatchQueue.main.async {
@@ -115,64 +123,62 @@ struct ChatControls: View {
             ZStack(alignment: .trailing) {
                 VStack {
                     if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) {
-                        ForEach(Array(zip(viewModel.matchedUsers.prefix(10).indices, viewModel.matchedUsers.prefix(10))), id: \.1) { _, user in
-                            Button(action: { [weak viewModel, weak user] in
-                                if let range = viewModel?.textFieldContents.range(of: "@") {
-                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
-                                }
-                                viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
-                            }, label: { [weak user] in
-                                HStack {
-                                    Attachment(pfpURL(user?.id, user?.avatar).appending("?size=24"), size: CGSize(width: 48, height: 48))
-                                        .clipShape(Circle())
-                                        .frame(width: 20, height: 20)
-                                    Text(user?.username ?? "Unknown User")
-                                    Spacer()
-                                }
-                            })
-                            .buttonStyle(.borderless)
-                            .padding(5)
-                            .background(Color(NSColor.windowBackgroundColor))
-                            .cornerRadius(10)
+                        VStack {
+                            ForEach(Array(zip(viewModel.matchedUsers.prefix(10).indices, viewModel.matchedUsers.prefix(10))), id: \.1) { _, user in
+                                Button(action: { [weak viewModel, weak user] in
+                                    if let range = viewModel?.textFieldContents.range(of: "@") {
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                    }
+                                    viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
+                                }, label: { [weak user] in
+                                    HStack {
+                                        Attachment(pfpURL(user?.id, user?.avatar, "24"), size: CGSize(width: 48, height: 48))
+                                            .clipShape(Circle())
+                                            .frame(width: 20, height: 20)
+                                        Text(user?.username ?? "Unknown User")
+                                        Spacer()
+                                    }
+                                })
+                                .buttonStyle(.borderless)
+                                .padding(3)
+
+                            }
+                            ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
+                                Button(action: { [weak viewModel, weak emoji] in
+                                    if let range = viewModel?.textFieldContents.range(of: ":") {
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                    }
+                                    guard let id = emoji?.id, let name = emoji?.name else { return }
+                                    viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "" : ""):\(name):\(id)>")
+                                }, label: { [weak emoji] in
+                                    HStack {
+                                        Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
+                                            .frame(width: 20, height: 20)
+                                        Text(emoji?.name ?? "Unknown Emote")
+                                        Spacer()
+                                    }
+                                })
+                                .buttonStyle(.borderless)
+                                .padding(3)
+                            }
+                            ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
+                                Button(action: { [weak viewModel, weak channel] in
+                                    if let range = viewModel?.textFieldContents.range(of: "#") {
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                    }
+                                    guard let id = channel?.id else { return }
+                                    viewModel?.textFieldContents.append("<#\(id)>")
+                                }, label: { [weak channel] in
+                                    HStack {
+                                        Text(channel?.name ?? "Unknown Channel")
+                                        Spacer()
+                                    }
+                                })
+                                .buttonStyle(.borderless)
+                                .padding(3)
+                            }
                         }
-                        ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
-                            Button(action: { [weak viewModel, weak emoji] in
-                                if let range = viewModel?.textFieldContents.range(of: ":") {
-                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
-                                }
-                                guard let id = emoji?.id, let name = emoji?.name else { return }
-                                viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "" : ""):\(name):\(id)>")
-                            }, label: { [weak emoji] in
-                                HStack {
-                                    Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
-                                        .frame(width: 20, height: 20)
-                                    Text(emoji?.name ?? "Unknown Emote")
-                                    Spacer()
-                                }
-                            })
-                            .buttonStyle(.borderless)
-                            .padding(5)
-                            .background(Color(NSColor.windowBackgroundColor))
-                            .cornerRadius(10)
-                        }
-                        ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
-                            Button(action: { [weak viewModel, weak channel] in
-                                if let range = viewModel?.textFieldContents.range(of: "#") {
-                                    viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
-                                }
-                                guard let id = channel?.id else { return }
-                                viewModel?.textFieldContents.append("<#\(id)>")
-                            }, label: { [weak channel] in
-                                HStack {
-                                    Text(channel?.name ?? "Unknown Channel")
-                                    Spacer()
-                                }
-                            })
-                            .buttonStyle(.borderless)
-                            .padding(5)
-                            .background(Color(NSColor.windowBackgroundColor))
-                            .cornerRadius(10)
-                        }
+                        .padding(.bottom, 7)
                     }
                     HStack {
                         if #available(macOS 12.0, *) {

@@ -37,6 +37,11 @@ final class Channel: Codable, Identifiable {
     // var member: User?
     // var permissions: String?
     var read_state: ReadStateEntry?
+    var guild_name: String?
+    
+    var computedName: String {
+        self.name ?? self.recipients?.compactMap { $0.username }.joined(separator: ", ") ?? "Unknown Channel"
+    }
 }
 
 enum ChannelType: Int, Codable {

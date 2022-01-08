@@ -104,3 +104,12 @@ struct RoundedCorners: Shape {
         return path
     }
 }
+
+struct FastButton<Content: View>: View {
+    var action: () -> Void
+    var label: () -> Content
+    var body: some View {
+        label()
+            .onTapGesture(perform: action)
+    }
+}

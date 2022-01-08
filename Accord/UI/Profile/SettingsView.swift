@@ -23,6 +23,8 @@ struct SettingsViewRedesign: View {
     @AppStorage("pronounDB") var pronounDB: Bool = false
     @AppStorage("AppleMusicRPC") var appleMusicRPC: Bool = false
     @AppStorage("XcodeRPC") var xcodeRPC: Bool = false
+    @AppStorage("DiscordDesktopRPCEnabled") var ddRPC: Bool = false
+    @AppStorage("VSCodeRPCEnabled") var vsRPC: Bool = false
 
     @State var user: User? = AccordCoreVars.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
@@ -104,8 +106,6 @@ struct SettingsViewRedesign: View {
                     SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
                     SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
                     SettingsToggleView(toggled: $dark, title: "Always dark mode")
-                    SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
-                    SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -126,6 +126,12 @@ struct SettingsViewRedesign: View {
                         }, label: {
                         })
                         .padding()
+                    }
+                    Group {
+                        SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
+                        SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
+                        SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
+                        SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                     }
                 }
                 .toggleStyle(SwitchToggleStyle())
@@ -243,12 +249,19 @@ extension FileManager {
 struct SettingsToggleView: View {
     @Binding var toggled: Bool
     var title: String
+    var detail: String? = nil
     var body: some View {
         HStack(alignment: .top) {
-            Text(title)
-                .font(.title3)
-                .fontWeight(.medium)
-                .padding()
+            VStack(alignment: .leading) {
+                Text(title)
+                    .font(.title3)
+                    .fontWeight(.medium)
+                if let detail = detail {
+                    Text(detail)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding()
             Spacer()
             Toggle(isOn: $toggled) {
             }

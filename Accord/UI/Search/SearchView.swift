@@ -12,6 +12,12 @@ struct SearchView: View {
     @State var text: String = ""
     @State var results = [Channel]()
     @Environment(\.presentationMode) var presentationMode
+    var matches: [Channel] {
+        var matches: [Channel] = Array(Array(Array(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(text) ?? true } } }).joined()).joined())
+        let dmMatches: [Channel] = ServerListView.privateChannels.filter { $0.computedName.contains(text) }
+        matches.append(contentsOf: dmMatches)
+        return matches
+    }
     var body: some View {
         VStack {
             HStack {
@@ -23,24 +29,34 @@ struct SearchView: View {
             }
             VStack {
                 Spacer().frame(height: 25)
-                ForEach(Array(Array(Array(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(text) ?? true } } }).joined()).joined()).prefix(5), id: \.id) { channel in
+                ForEach(matches.prefix(10), id: \.id) { channel in
                     Button(action: { [unowned channel] in
                         MentionSender.shared.select(channel: channel)
                         presentationMode.wrappedValue.dismiss()
                     }, label: { [unowned channel] in
                         HStack {
-                            Attachment(iconURL(channel.guild_id, channel.guild_icon))
-                                .clipShape(Circle())
-                                .frame(width: 37, height: 37)
-                            Text(channel.name ?? "Unknown channel")
-                                .font(.title3)
+                            if let icon = channel.guild_icon {
+                                Attachment(iconURL(channel.guild_id, icon))
+                                    .clipShape(Circle())
+                                    .frame(width: 19, height: 19)
+                            } else if channel.recipients?.count == 1 {
+                                Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar))
+                                    .clipShape(Circle())
+                                    .frame(width: 19, height: 19)
+                            }
+                            Text(channel.computedName)
+                                .foregroundColor(Color(NSColor.textColor))
+                            if let guildName = channel.guild_name {
+                                Text(" — \(guildName)")
+                                    .foregroundColor(.secondary)
+                            }
                             Spacer()
                         }
                     })
                     .buttonStyle(BorderlessButtonStyle())
                 }
                 Spacer()
-            }.frame(height: 250)
+            }.frame(height: 300)
         }
         .frame(width: 400)
         .padding()

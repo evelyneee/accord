@@ -19,7 +19,7 @@ final class XcodeRPC {
             \(script)
         end tell
         """
-
+        
         // execute the script
         let script = NSAppleScript.init(source: scr)
         let result = script?.executeAndReturnError(nil)
@@ -33,7 +33,7 @@ final class XcodeRPC {
         }
     }
 
-    class func getActiveFilename() -> String {
+    class func getActiveFilename() -> String? {
         let fileNames = runXcodeScript("return name of documents")
 
         let windows = runXcodeScript("return name of windows")
@@ -43,7 +43,7 @@ final class XcodeRPC {
                 return name.components(separatedBy: " — ").last ?? name
             }
         }
-        return "nothing"
+        return nil
     }
 
     class func getActiveWorkspace() -> String? {
@@ -54,20 +54,20 @@ final class XcodeRPC {
         return nil
     }
     
-    class func updatePresence(status: String? = nil, workspace: String, filename: String) {
+    class func updatePresence(status: String? = nil, workspace: String, filename: String?) {
         do {
-            try wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started, activities: [
-                Activity.current!,
+            try wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started) {
+                Activity.current!
                 Activity(
                     applicationID: xcodeRPCAppID,
                     flags: 1,
                     name: "Xcode",
                     type: 0,
                     timestamp: started,
-                    state: "Editing \(filename)",
+                    state: filename != nil ? "Editing \(filename!)" : "Idling.",
                     details: "In \(workspace)"
                 )
-            ])
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                 let active = Self.getActiveFilename()
                 guard active != filename else { return }

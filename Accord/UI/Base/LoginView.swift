@@ -264,13 +264,13 @@ final class LoginViewViewModel: ObservableObject {
                                 task.launch()
                                 exit(EXIT_SUCCESS)
                             } else if let error = error {
-                                releaseModePrint(error)
+                                print(error)
                             }
                         }
                     }
                 }
             } else if let error = error {
-                releaseModePrint(error)
+                print(error)
                 loginError = error
             }
         }

@@ -78,6 +78,7 @@ final class ImageLoaderAndCache: ObservableObject {
 
     func load() {
         imageQueue.async { [weak self] in
+            if self?.size?.width == 350 { print("loading attachment") }
             self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
                 .replaceError(with: NSImage())
                 .replaceNil(with: NSImage())

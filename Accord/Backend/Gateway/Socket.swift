@@ -47,8 +47,18 @@ extension Gateway {
             metadata: [NWProtocolWebSocket.Metadata(opcode: .text)]
         )
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        let jsonString = try String(jsonData)
-        guard let data = jsonString.data(using: .utf8) else { throw GatewayErrors.noStringData(jsonString) }
+        self.connection?.send(content: jsonData, contentContext: context, completion: .contentProcessed { error in
+            if let error = error {
+                print(error)
+            }
+        })
+    }
+    
+    func send(data: Data) throws {
+        let context = NWConnection.ContentContext(
+            identifier: "binaryContext",
+            metadata: [NWProtocolWebSocket.Metadata(opcode: .binary)]
+        )
         self.connection?.send(content: data, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)

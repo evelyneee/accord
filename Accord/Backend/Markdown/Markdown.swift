@@ -119,6 +119,7 @@ final public class Markdown {
             if word.contains("+") { // the markdown parser removes pluses??
                 return promise(.success(Text(word) + Text(" ")))
             }
+            assert(!Thread.isMainThread)
             do {
                 if #available(macOS 12, *) {
                     let markdown = try AttributedString(markdown: word)
@@ -141,6 +142,7 @@ final public class Markdown {
         let regex = #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#
         let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
+        assert(!Thread.isMainThread)
         return Publishers.MergeMany(pubs)
             .collect()
             .eraseToAnyPublisher()
@@ -162,7 +164,7 @@ final public class Markdown {
             .collect()
             .map { $0.reduce(Text(""), +) }
             .eraseToAnyPublisher()
-            .debugAssertNoMainThread()
+            .debugWarnNoMainThread()
     }
 
 }
@@ -206,7 +208,7 @@ private extension NSFont {
     }
 
     var boldItalic: NSFont {
-        let font = NSFont.boldSystemFont(ofSize: 13)
+        let font = NSFont.boldSystemFont(ofSize: 12)
         return font
     }
 }

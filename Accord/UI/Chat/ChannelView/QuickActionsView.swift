@@ -16,52 +16,52 @@ struct QuickActionsView: View {
     @State var opened: Bool = false
 
     var openButton: some View {
-        Button(action: {
-            withAnimation {
-                opened.toggle()
+        Image(systemName: (opened ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
+            .foregroundColor(Color.secondary)
+            .onTapGesture {
+                withAnimation {
+                    opened.toggle()
+                }
             }
-        }) {
-            Image(systemName: (opened ? "arrow.right.circle.fill" : "arrow.left.circle.fill"))
-        }
     }
 
     var replyButton: some View {
-        Button(action: {
-            replyingTo = message
-        }) {
-            Image(systemName: "arrowshape.turn.up.backward.fill")
-        }
+        Image(systemName: "arrowshape.turn.up.backward.fill")
+            .foregroundColor(Color.secondary)
+            .onTapGesture {
+                replyingTo = message
+            }
     }
 
     var deleteButton: some View {
-        Button(action: {
-            DispatchQueue.global(qos: .background).async {
-                message?.delete()
+        Image(systemName: "trash")
+            .foregroundColor(Color.secondary)
+            .onTapGesture {
+                DispatchQueue.global(qos: .background).async {
+                    message?.delete()
+                }
             }
-        }) {
-            Image(systemName: "trash")
-        }
     }
 
     var body: some View {
         lazy var clipButton = {
-            return Button(action: {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString((message?.content ?? ""), forType: .string)
-                opened.toggle()
-            }) {
-                Text("Copy")
-            }
+            Text("Copy")
+                .foregroundColor(Color.secondary)
+                .onTapGesture {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString((message?.content ?? ""), forType: .string)
+                    opened.toggle()
+                }
         }()
 
         lazy var linkButton = {
-            Button(action: {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(message!.channel_id)/\(message?.id ?? "")", forType: .string)
-                opened.toggle()
-            }) {
-                Text("Copy Message Link")
-            }
+            Text("Copy Message Link")
+                .foregroundColor(Color.secondary)
+                .onTapGesture {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(message!.channel_id)/\(message?.id ?? "")", forType: .string)
+                    opened.toggle()
+                }
         }()
 
         return HStack {

@@ -9,6 +9,7 @@
 	<key>com.apple.security.temporary-exception.apple-events</key>
 	<array>
 		<string>com.apple.dt.Xcode</string>
+		<string>com.apple.dt.Xcode-beta</string>
 	</array>
 	<key>com.apple.security.files.user-selected.read-only</key>
 	<true/>

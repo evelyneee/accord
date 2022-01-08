@@ -64,6 +64,9 @@ struct ChannelView: View, Equatable {
         self.channelName = channel.name ?? channel.recipients?[safe: 0]?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
         self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
+        if DiscordDesktopRPCEnabled {
+            DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
+        }
     }
 
     var body: some View {
@@ -91,17 +94,13 @@ struct ChannelView: View, Equatable {
         .navigationSubtitle(Text(guildName))
         .presentedWindowToolbarStyle(UnifiedCompactWindowToolbarStyle())
         .onAppear {
-            print("hiiiiiiiiiii")
             wss.typingSubject
                 .sink { msg, channelID in
-                    print("hi uwu")
                     guard channelID == self.channelID else { return }
                     webSocketQueue.async { [weak viewModel] in
                         guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d else { return }
-                        print("hi again")
                         let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
                         if !(typing.contains(isKnownAs)) {
-                            print("added")
                             typing.append(isKnownAs)
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {

@@ -9,6 +9,9 @@ import Foundation
 import Combine
 import AppKit
 import SwiftUI
+#if DEBUG
+import os
+#endif
 
 public enum RequestTypes: String {
     case GET = "GET"
@@ -145,7 +148,7 @@ var standardHeaders = Headers(
 final public class Request {
 
     // MARK: - Empty Decodable
-    struct AnyDecodable: Decodable { }
+    class AnyDecodable: Decodable { }
 
     enum FetchErrors: Error {
         case invalidRequest
@@ -154,6 +157,12 @@ final public class Request {
         case notRequired
         case decodingError(String, Error?)
         case noData
+        case discordError(code: Int?, message: String?)
+    }
+    
+    struct DiscordError: Decodable {
+        var code: Int
+        var message: String?
     }
 
     // MARK: - Perform request with completion handler
@@ -165,7 +174,7 @@ final public class Request {
             } else if let url = url {
                 return URLRequest(url: url)
             } else {
-                print("[Networking] You need to provide a request method")
+                print("You need to provide a request method")
                 return nil
             }
         }()
@@ -210,7 +219,7 @@ final public class Request {
             } else if let url = url {
                 return URLRequest(url: url)
             } else {
-                print("[Networking] You need to provide a request method")
+                print("You need to provide a request method")
                 return nil
             }
         }()
@@ -275,7 +284,7 @@ final public class RequestPublisher {
             } else if let url = url {
                 return URLRequest(url: url)
             } else {
-                print("[Networking] You need to provide a request method")
+                print("You need to provide a request method")
                 return nil
             }
         }()
@@ -287,9 +296,16 @@ final public class RequestPublisher {
 
         return URLSession(configuration: config).dataTaskPublisher(for: request)
             .retry(2)
-            .map { $0.data }
-            .decode(type: T.self, decoder: JSONDecoder())
-            .debugAssertNoMainThread()
+            .tryMap { (data, response) throws -> T in
+                guard let httpResponse = response as? HTTPURLResponse else { throw Request.FetchErrors.badResponse(response) }
+                if httpResponse.statusCode == 200 {
+                    return try JSONDecoder().decode(T.self, from: data)
+                } else {
+                    let discordError = try JSONDecoder().decode(DiscordError.self, from: data)
+                    throw Request.FetchErrors.discordError(code: discordError.code, message: discordError.message)
+                }
+            }
+            .debugWarnNoMainThread()
             .eraseToAnyPublisher()
     }
 
@@ -311,23 +327,7 @@ final public class RequestPublisher {
                     return image
                 } else { return nil }
             }
-            .debugAssertNoMainThread()
+            .debugWarnNoMainThread()
             .eraseToAny()
-    }
-}
-
-extension Publisher {
-    func eraseToAny() -> AnyPublisher<Self.Output, Error> {
-        self.mapError { $0 as Error }.eraseToAnyPublisher()
-    }
-    func assertNoMainThread() -> Self {
-        assert(!Thread.isMainThread)
-        return self
-    }
-    func debugAssertNoMainThread() -> Self {
-        #if DEBUG
-        assert(!Thread.isMainThread)
-        #endif
-        return self
     }
 }

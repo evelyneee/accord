@@ -34,8 +34,22 @@ final class Gateway {
     private (set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
     
     private (set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
-        if state == .ready {
-            print("socket ready")
+        switch state {
+        case .ready:
+            print("Ready up")
+        case .cancelled:
+            print("Connection cancelled, what happened?")
+            wss.hardReset()
+        case .failed(let error):
+            print("Connection failed \(error.debugDescription)")
+        case .preparing:
+            print("Preparing")
+        case .waiting(let error):
+            print("Spinning infinitely \(error.debugDescription)")
+        case .setup:
+            print("Setting up")
+        @unknown default:
+            fatalError()
         }
     }
     
@@ -53,10 +67,10 @@ final class Gateway {
     }
     
     fileprivate let additionalHeaders: [(String, String)] = [
-        ("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"),
+        ("User-Agent", discordUserAgent),
         ("Pragma", "no-cache"),
         ("Origin", "https://discord.com"),
-        ("Host", "gateway.discord.gg"),
+        ("Host", Gateway.gatewayURL.host ?? "gateway.discord.gg"),
         ("Accept-Language", NSLocale.current.languageCode ?? "en-US"),
         ("Accept-Encoding", "gzip, deflate, br")
     ]
@@ -95,21 +109,22 @@ final class Gateway {
                       return
                   }
             self?.interval = interval
-            self?.heartbeatTimer = Timer.publish(
-              every: Double(interval / 1000),
-              tolerance: nil,
-              on: .main,
-              in: .default
-            )
-            .autoconnect()
-            .sink { [weak self] _ in
-                print("timer")
-                wssThread.async {
-                    do {
-                        try self?.heartbeat()
-                    } catch {
-                        print("[Gateway] Error sending heartbeat", error)
-                        self?.failedHeartbeats++
+            DispatchQueue.main.async {
+                self?.heartbeatTimer = Timer.publish(
+                  every: Double(interval / 1000),
+                  tolerance: nil,
+                  on: .main,
+                  in: .default
+                )
+                .autoconnect()
+                .sink { [weak self] _ in
+                    wssThread.async {
+                        do {
+                            try self?.heartbeat()
+                        } catch {
+                            print("Error sending heartbeat", error)
+                            self?.failedHeartbeats++
+                        }
                     }
                 }
             }
@@ -133,31 +148,15 @@ final class Gateway {
             } else {
                 self.listen()
             }
-            guard let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata,
-                  let data = data else {
+            guard let data = data else {
                       print(context as Any, data as Any)
                       return
                   }
-            switch info.opcode {
-            case .text:
-                do {
-                    let event = try GatewayEvent(data: data)
-                    self.handleMessage(event: event)
-                } catch {
-                    print(error)
-                }
-            case .cont:
-                break
-            case .binary:
-                break
-            case .close:
-                print(String(data: data, encoding: .utf8) ?? "Unknown close code")
-            case .ping:
-                break
-            case .pong:
-                break
-            @unknown default:
-                fatalError()
+            do {
+                let event = try GatewayEvent(data: data)
+                self.handleMessage(event: event)
+            } catch {
+                print(error)
             }
         }
     }
@@ -232,7 +231,7 @@ final class Gateway {
                         wssThread.async {
                             self?.listen()
                         }
-                        releaseModePrint("Gateway Ready \(structure.d.user.username)#\(structure.d.user.discriminator)")
+                        print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
                         self?.sessionID = structure.d.session_id
                         print(structure.d.session_id)
                         promise(.success(structure.d))
@@ -258,14 +257,14 @@ final class Gateway {
             }
         }
     }
-
-    public func updatePresence(status: String, since: Int, activities: [Activity]) throws {
+    
+    public func updatePresence(status: String, since: Int, @ActivityBuilder _ activities: () -> [Activity]) throws {
         let packet: [String:Any] = [
             "op":3,
             "d": [
                 "status":status,
                 "since":since,
-                "activities": activities.map { $0.dictValue },
+                "activities": activities().map { $0.dictValue },
                 "afk":false
             ]
         ]
@@ -337,4 +336,20 @@ final class Gateway {
         try? self.send(json: packet)
     }
     
+    // cleanup
+    deinit {
+        self.heartbeatTimer = nil
+        self.bag.invalidateAll()
+    }
+}
+
+@resultBuilder
+struct ActivityBuilder {
+    static func buildBlock() -> [Activity] { [] }
+}
+
+extension ActivityBuilder {
+    static func buildBlock(_ activities: Activity...) -> [Activity] {
+        activities
+    }
 }

@@ -60,12 +60,12 @@ extension ServerListView {
                 }
             }
         }
-        let messageDict = privateChannels.enumerated().compactMap { (index, element) in
+        let messageDict = Self.privateChannels.enumerated().compactMap { (index, element) in
             return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
-        for channel in privateChannels {
+        for channel in Self.privateChannels {
             if let index = messageDict[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice {
                 channel.read_state = readState.entries[index]
             }

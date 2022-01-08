@@ -16,10 +16,13 @@
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
+		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
+		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
 		9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71022783A6FD00A26CB6 /* Github.swift */; };
+		9E6B710A2784EBEC00A26CB6 /* GatewayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */; };
 		9E6BCC56277E23E80085F279 /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC55277E23E80085F279 /* Reaction.swift */; };
 		9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC5C277E43E10085F279 /* SearchView.swift */; };
 		9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */; };
@@ -32,11 +35,8 @@
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
 		9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA52773FC9C00A77600 /* Queues.swift */; };
 		9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA72774037F00A77600 /* MentionsView.swift */; };
-		9E98EFB0276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E98EFAF276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift */; };
-		9E98EFB2276D945A00CFF940 /* WebSocketDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E98EFB1276D945A00CFF940 /* WebSocketDelegate.swift */; };
 		9EA2951F2752EE1D0014927D /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA2951E2752EE1C0014927D /* QuickActionsView.swift */; };
 		9EA295212753D1490014927D /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA295202753D1480014927D /* MemberList.swift */; };
-		9ECB0F3D27664B030019ADAE /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3C27664B020019ADAE /* TableView.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
 		9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED4A5AE276E334600BD485C /* AppKitLink.swift */; };
@@ -117,11 +117,14 @@
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
+		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
+		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
 		9E6B71022783A6FD00A26CB6 /* Github.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Github.swift; sourceTree = "<group>"; };
 		9E6B71072783ABD500A26CB6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayEvent.swift; sourceTree = "<group>"; };
 		9E6BCC55277E23E80085F279 /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
 		9E6BCC5C277E43E10085F279 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Gateway+MessageHandle.swift"; sourceTree = "<group>"; };
@@ -134,11 +137,8 @@
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
 		9E8F8CA52773FC9C00A77600 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
 		9E8F8CA72774037F00A77600 /* MentionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionsView.swift; sourceTree = "<group>"; };
-		9E98EFAF276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSessionWebSocketTask+Combine.swift"; sourceTree = "<group>"; };
-		9E98EFB1276D945A00CFF940 /* WebSocketDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketDelegate.swift; sourceTree = "<group>"; };
 		9EA2951E2752EE1C0014927D /* QuickActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsView.swift; sourceTree = "<group>"; };
 		9EA295202753D1480014927D /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
-		9ECB0F3C27664B020019ADAE /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
 		9ED4A5AE276E334600BD485C /* AppKitLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitLink.swift; sourceTree = "<group>"; };
@@ -185,7 +185,7 @@
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
 		A8C73D1126F5812D00CF0350 /* Songlink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Songlink.swift; path = Accord/UI/Chat/ChannelView/Songlink.swift; sourceTree = SOURCE_ROOT; };
 		A8C73D1326F583A000CF0350 /* SongLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongLink.swift; sourceTree = "<group>"; };
-		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
+		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Utils/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -206,12 +206,12 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9E6B71082784EBC400A26CB6 /* Gateway */,
 				9ED818B1277BF125004D684C /* RPC */,
 				A80FEC34272779D9005F9950 /* PluginManager */,
 				9E7BC56B27472308008E3FAB /* Markdown */,
-				A82521392687ABD40073F640 /* Objects */,
 				A82521382687ABC50073F640 /* Networking */,
-				A825213A2687ABE40073F640 /* Misc */,
+				A825213A2687ABE40073F640 /* Utils */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -250,8 +250,9 @@
 			isa = PBXGroup;
 			children = (
 				9E6BCC60277E8E420085F279 /* App */,
-				A8ECC4C1271C88CD00382E53 /* Misc */,
+				A82521392687ABD40073F640 /* Objects */,
 				A864BE5926866FDF00B244BE /* Nitroless */,
+				A8ECC4C1271C88CD00382E53 /* Misc */,
 				32AA719225EAEEF700550BA5 /* Backend */,
 				A8FA9A9B266823B4003710A4 /* UI */,
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
@@ -260,6 +261,58 @@
 				9ED6F671273702040009C78C /* dpkg */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		9E39B26627869C4800069424 /* Accessories */ = {
+			isa = PBXGroup;
+			children = (
+				A8BC5253268DF5AD00B7823E /* AttachmentView.swift */,
+				A80FEC3227258457005F9950 /* EmbedView.swift */,
+				A898453D26978EBA00B1C9DB /* EmotesView.swift */,
+				9E8F8CA72774037F00A77600 /* MentionsView.swift */,
+				9ECE08F4277286E3001BA0F7 /* PinsView.swift */,
+			);
+			path = Accessories;
+			sourceTree = "<group>";
+		};
+		9E39B26D2789166000069424 /* GatewayPayloads */ = {
+			isa = PBXGroup;
+			children = (
+				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
+				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
+				9EA295202753D1480014927D /* MemberList.swift */,
+				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
+			);
+			path = GatewayPayloads;
+			sourceTree = "<group>";
+		};
+		9E39B2702789167A00069424 /* Misc */ = {
+			isa = PBXGroup;
+			children = (
+				A8C73D1326F583A000CF0350 /* SongLink.swift */,
+			);
+			path = Misc;
+			sourceTree = "<group>";
+		};
+		9E39B2712789168D00069424 /* DiscordTypes */ = {
+			isa = PBXGroup;
+			children = (
+				A8B1F29B26CB16C400E8FDC5 /* Attachment.swift */,
+				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
+				A80FEC30272583B4005F9950 /* Embed.swift */,
+				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
+				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
+				9E746A2727499CE6009A9C22 /* Interaction.swift */,
+				A8B1F29926CB169800E8FDC5 /* Message.swift */,
+				A82A062326D98259007B9B27 /* ReadState.swift */,
+				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
+				A82A061F26D98193007B9B27 /* Settings.swift */,
+				A82A062126D981B4007B9B27 /* Status.swift */,
+				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
+				A8B1F29526CB163B00E8FDC5 /* User.swift */,
+				9E6BCC55277E23E80085F279 /* Reaction.swift */,
+			);
+			path = DiscordTypes;
 			sourceTree = "<group>";
 		};
 		9E4F3FC327764E0C0003E383 /* Gifs */ = {
@@ -290,6 +343,17 @@
 				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
 			);
 			path = PlusPlus;
+			sourceTree = "<group>";
+		};
+		9E6B71082784EBC400A26CB6 /* Gateway */ = {
+			isa = PBXGroup;
+			children = (
+				9E2C98782780F573008C6AFD /* Gateway.swift */,
+				9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */,
+				A89BE785266BDFB3007B0CBF /* Socket.swift */,
+				9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */,
+			);
+			path = Gateway;
 			sourceTree = "<group>";
 		};
 		9E6BCC5B277E43CF0085F279 /* Search */ = {
@@ -335,6 +399,8 @@
 			children = (
 				9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */,
 				9E6BCC65277E908B0085F279 /* XcodeRPC.swift */,
+				9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */,
+				9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */,
 			);
 			path = RPC;
 			sourceTree = "<group>";
@@ -350,9 +416,8 @@
 		A82521352687AB250073F640 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				9E39B26627869C4800069424 /* Accessories */,
 				A82A05FB26D3F3AC007B9B27 /* ChannelView */,
-				A898453D26978EBA00B1C9DB /* EmotesView.swift */,
-				A8BC5253268DF5AD00B7823E /* AttachmentView.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -384,12 +449,7 @@
 				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* Request.swift */,
-				A89BE785266BDFB3007B0CBF /* Socket.swift */,
-				9E2C98782780F573008C6AFD /* Gateway.swift */,
-				9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */,
-				9E98EFAF276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift */,
 				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
-				9E98EFB1276D945A00CFF940 /* WebSocketDelegate.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -397,37 +457,21 @@
 		A82521392687ABD40073F640 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
-				A8B1F29B26CB16C400E8FDC5 /* Attachment.swift */,
-				A8B1F2A326CB176900E8FDC5 /* Channel.swift */,
-				A80FEC30272583B4005F9950 /* Embed.swift */,
-				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
-				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
-				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
-				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
-				9E746A2727499CE6009A9C22 /* Interaction.swift */,
-				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
-				A8B1F29926CB169800E8FDC5 /* Message.swift */,
-				A82A062326D98259007B9B27 /* ReadState.swift */,
-				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
-				A82A061F26D98193007B9B27 /* Settings.swift */,
-				A8C73D1326F583A000CF0350 /* SongLink.swift */,
-				A82A062126D981B4007B9B27 /* Status.swift */,
-				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
-				A8B1F29526CB163B00E8FDC5 /* User.swift */,
-				9EA295202753D1480014927D /* MemberList.swift */,
-				9E6BCC55277E23E80085F279 /* Reaction.swift */,
+				9E39B2712789168D00069424 /* DiscordTypes */,
+				9E39B2702789167A00069424 /* Misc */,
+				9E39B26D2789166000069424 /* GatewayPayloads */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
 		};
-		A825213A2687ABE40073F640 /* Misc */ = {
+		A825213A2687ABE40073F640 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
 				A89845402698C3FD00B1C9DB /* GifManager.swift */,
 				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
 				9ED4A5AE276E334600BD485C /* AppKitLink.swift */,
 			);
-			path = Misc;
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		A82A05FB26D3F3AC007B9B27 /* ChannelView */ = {
@@ -436,11 +480,8 @@
 				A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */,
 				32F3742A25733D8000ADB7E6 /* ChannelView.swift */,
 				9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */,
-				9ECE08F4277286E3001BA0F7 /* PinsView.swift */,
-				9E8F8CA72774037F00A77600 /* MentionsView.swift */,
 				A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */,
 				A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */,
-				A80FEC3227258457005F9950 /* EmbedView.swift */,
 				9EA2951E2752EE1C0014927D /* QuickActionsView.swift */,
 			);
 			path = ChannelView;
@@ -461,7 +502,6 @@
 				9E6B71012783A6F200A26CB6 /* Shapes */,
 				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
 				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
-				9ECB0F3C27664B020019ADAE /* TableView.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,
 			);
 			path = Misc;
@@ -579,7 +619,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */,
-				9ECB0F3D27664B030019ADAE /* TableView.swift in Sources */,
 				A82A062226D981B4007B9B27 /* Status.swift in Sources */,
 				9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */,
 				9E6470672741B9960026686C /* GuildView.swift in Sources */,
@@ -614,7 +653,6 @@
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,
 				A8B1F29C26CB16C400E8FDC5 /* Attachment.swift in Sources */,
 				9E6BCC62277E8E570085F279 /* LoadingScreenView.swift in Sources */,
-				9E98EFB0276D820C00CFF940 /* URLSessionWebSocketTask+Combine.swift in Sources */,
 				9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */,
 				A832557826EEEC1D00F18A55 /* ServerListView+Misc.swift in Sources */,
 				9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */,
@@ -625,13 +663,14 @@
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
+				9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */,
 				9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
+				9E6B710A2784EBEC00A26CB6 /* GatewayEvent.swift in Sources */,
 				3207A24425867586006C2665 /* Constants.swift in Sources */,
 				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
-				9E98EFB2276D945A00CFF940 /* WebSocketDelegate.swift in Sources */,
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
 				9E6BCC64277E8E850085F279 /* Print++.swift in Sources */,
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
@@ -643,6 +682,7 @@
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
+				9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,

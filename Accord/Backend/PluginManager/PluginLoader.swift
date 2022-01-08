@@ -19,12 +19,12 @@ final class Plugins {
 
     func LoadPlugin<T>(onto: T.Type, dylib: String) -> T.Type? {
         guard let handle = dlopen(dylib, RTLD_NOW) else {
-            releaseModePrint("Could not open \(dylib) \(String(cString: dlerror()))")
+            print("Could not open \(dylib) \(String(cString: dlerror()))")
             return nil
         }
 
         guard let replacement = dlsym(handle, "principalClass") else {
-            releaseModePrint("Could not locate principalClass function")
+            print("Could not locate principalClass function")
             return nil
         }
 

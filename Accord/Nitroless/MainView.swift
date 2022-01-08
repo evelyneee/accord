@@ -6,17 +6,7 @@
 //
 
 import SwiftUI
-
-struct SpringyButton: ButtonStyle {
-    func makeBody(configuration: Self.Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? CGFloat(0.85) : 1.0)
-            .rotationEffect(.degrees(configuration.isPressed ? 0.0 : 0))
-            .blur(radius: configuration.isPressed ? CGFloat(0.0) : 0)
-            .animation(Animation.spring(response: 0.35, dampingFraction: 1, blendDuration: 0))
-            .padding(.bottom, 3)
-    }
-}
+import Combine
 
 struct EmoteButton: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
@@ -27,12 +17,7 @@ struct EmoteButton: ButtonStyle {
     }
 }
 
-struct Repo: Decodable {
-    var name: String
-    var emotes: [Emote]
-}
-
-struct Emote: Decodable {
+struct NitrolessEmote: Decodable {
     var name: String
     var type: String
 }
@@ -43,7 +28,9 @@ struct NitrolessView: View, Equatable {
     static func == (lhs: NitrolessView, rhs: NitrolessView) -> Bool {
         return true
     }
-
+    
+    private static let nitrolessRoot = "https://raw.githubusercontent.com/evelyneee/Repo/main/"
+    
     @State var searchenabled = true
     var columns: [GridItem] = [
         GridItem(spacing: 1),
@@ -63,44 +50,27 @@ struct NitrolessView: View, Equatable {
     @State var recentsenabled = true
     @State var allEmotes: [String: String] = [:]
     @State var search: String = ""
+    @State var cancellable: AnyCancellable? = nil
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading) {
                     TextField("Search for emotes", text: $search)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                    if search != "" {
-                        LazyVGrid(columns: columns) {
-                            ForEach(Array(allEmotes.keys.filter { $0.contains(search) }), id: \.self) { key in
-                                Button(action: {
-                                    guard let emote = allEmotes[key] else { return }
-                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(emote)")
-                                }) {
-                                    VStack {
-                                        HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
-                                            .frame(width: 20, height: 20)
-                                    }
-                                    .frame(width: 30, height: 30)
+                    LazyVGrid(columns: columns) {
+                        ForEach(Array(allEmotes.keys.filter { (search != "" ? $0.contains(search) : true) }), id: \.self) { key in
+                            Button(action: {
+                                guard let emote = allEmotes[key] else { return }
+                                chatText.append(contentsOf: "\(Self.nitrolessRoot)emotes/\(key)\(emote)")
+                            }) {
+                                VStack {
+                                    HoveredAttachment("\(Self.nitrolessRoot)emotes/\(key)\(allEmotes[key] ?? "")").equatable()
+                                        .frame(width: 20, height: 20)
                                 }
-                                .buttonStyle(BorderlessButtonStyle())
+                                .frame(width: 30, height: 30)
                             }
+                            .buttonStyle(BorderlessButtonStyle())
                         }
-                    } else {
-                        LazyVGrid(columns: columns) {
-                            ForEach(Array(allEmotes.keys), id: \.self) { key in
-                                Button(action: {
-                                    chatText.append(contentsOf: "https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")")
-                                }) {
-                                    VStack {
-                                        HoveredAttachment("https://assets.ebel.gay/nitrolessrepo/emotes/\(key)\(allEmotes[key] ?? "")").equatable()
-                                            .frame(width: 20, height: 20)
-                                    }
-                                    .frame(width: 30, height: 30)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                            }
-                        }
-
                     }
                 }
             }
@@ -108,14 +78,15 @@ struct NitrolessView: View, Equatable {
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            Request.fetch(Repo.self, url: URL(string: "https://assets.ebel.gay/nitrolessrepo/index.json")) { repo, error in
-                if let repo = repo {
-                    for emote in repo.emotes {
-                        allEmotes[emote.name] = emote.type
+            imageQueue.async {
+                self.cancellable = RequestPublisher.fetch([NitrolessEmote].self, url: URL(string: "\(Self.nitrolessRoot)emotes.json"))
+                    .replaceError(with: [])
+                    .sink { emotes in
+                        for emote in emotes {
+                            allEmotes[emote.name] = emote.type
+                        }
+                        print(allEmotes)
                     }
-                } else if let error = error {
-                    releaseModePrint(error)
-                }
             }
         }
     }

@@ -8,6 +8,8 @@
 import Foundation
 import SwiftUI
 
+// Original SVG from SimpleIcons
+// All rights reserved to Github
 struct GithubIcon: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()

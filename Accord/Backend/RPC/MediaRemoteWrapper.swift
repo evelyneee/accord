@@ -74,24 +74,21 @@ final class MediaRemoteWrapper {
                 
             }, receiveValue: { song in
                 guard song.isMusic else { return }
-                do {
-                    print("sent")
-                    try wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0, activities: [
-                        Activity.current!,
-                        Activity(
-                            applicationID: "925514277987704842",
-                            flags: 1,
-                            name: "Apple Music",
-                            type: 0,
-                            timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                            state: "Listening to \(song.artist ?? "cock")",
-                            details: song.name
-                        )
-                    ])
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                        rateLimit = false
-                    })
-                } catch {}
+                try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
+                    Activity.current!
+                    Activity(
+                        applicationID: "925514277987704842",
+                        flags: 1,
+                        name: "Apple Music",
+                        type: 0,
+                        timestamp: Int(Date().timeIntervalSince1970) * 1000,
+                        state: "Listening to \(song.artist ?? "cock")",
+                        details: song.name
+                    )
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                    rateLimit = false
+                })
             })
             .store(in: &Self.bag)
     }

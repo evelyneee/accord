@@ -75,10 +75,10 @@ struct ServerListView: View {
                 let guild = guildTemp[id]
                 guild.emojis.removeAll()
                 guild.index = id
-                print(guild.name)
                 for channel in 0..<(guild.channels?.count ?? 0) {
                     guild.channels?[channel].guild_id = guild.id
                     guild.channels?[channel].guild_icon = guild.icon
+                    guild.channels?[channel].guild_name = guild.name
                 }
                 folder.guilds.append(guild)
             }
@@ -98,7 +98,7 @@ struct ServerListView: View {
     @State var online: Bool = true
     @State var alert: Bool = true
     public static var folders: [GuildFolder] = []
-    @State var privateChannels: [Channel] = []
+    public static var privateChannels: [Channel] = []
     @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
@@ -271,7 +271,7 @@ struct ServerListView: View {
                             .fontWeight(.bold)
                             .font(.title2)
                         Divider()
-                        ForEach(self.privateChannels, id: \.id) { channel in
+                        ForEach(Self.privateChannels, id: \.id) { channel in
                             NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
                                 ServerListViewCell(channel: channel)
                             }
@@ -292,6 +292,13 @@ struct ServerListView: View {
             print(uInfo)
             self.selectedServer = uInfo.keys.first!
             self.selection = uInfo.values.first!
+        })
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
+            let uInfo = pub.userInfo as! [String:String]
+            print(uInfo)
+            let index = uInfo["index"]!
+            self.selection = Int(index) ?? 0
+            self.selectedServer = 201
         })
         .onChange(of: selectedServer, perform: { [selectedServer] new in
             concurrentQueue.async {
@@ -343,22 +350,22 @@ struct ServerListView: View {
                     if let channels = channels {
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
-                            self.privateChannels = channels
+                            Self.privateChannels = channels
                         }
-                        Notifications.privateChannels = privateChannels.map { $0.id }
+                        Notifications.privateChannels = Self.privateChannels.map { $0.id }
                     } else if let error = error {
-                        releaseModePrint(error)
+                        print(error)
                     }
                 }
-                do {
-                    try wss.updatePresence(status: "dnd", since: 0, activities: [
-                        Activity.current!,
-                    ])
-                } catch {}
-                if let workspace = XcodeRPC.getActiveWorkspace() {
+                try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
+                    Activity.current!
+                }
+                if let workspace = XcodeRPC.getActiveWorkspace(), UserDefaults.standard.bool(forKey: "XcodeRPC") {
                     XcodeRPC.updatePresence(workspace: workspace, filename: XcodeRPC.getActiveFilename())
-                } else {
+                } else if UserDefaults.standard.bool(forKey: "AppleMusicRPC") {
                     MediaRemoteWrapper.updatePresence()
+                } else if UserDefaults.standard.bool(forKey: "VSCodeRPCEnabled") {
+                    VisualStudioCodeRPC.updatePresence()
                 }
             }
         }

@@ -45,7 +45,6 @@ final class ChannelViewViewModel: ObservableObject {
     func subscribe() {
         wss.messageSubject
             .sink { [weak self] msg, channelID, isMe in
-                print("received a message")
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
                     guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
@@ -190,7 +189,7 @@ final class ChannelViewViewModel: ObservableObject {
             switch completion {
             case .finished: break
             case .failure(let error):
-                releaseModePrint(error)
+                print(error)
                 MentionSender.shared.deselect()
             }
         }) { msg in
@@ -209,7 +208,7 @@ final class ChannelViewViewModel: ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
                     AppKitLink<NSScrollView>.introspect { scrollView, count in
                         if let documentView = scrollView.documentView, count == 4 {
-                            Swift.print("[AppKitLink] Successfully found \(type(of: scrollView))")
+                            print("[AppKitLink] Successfully found \(type(of: scrollView))")
                             self?.scrollView = scrollView
                             documentView.scroll(NSPoint(x: 0, y: documentView.bounds.size.height))
                         }

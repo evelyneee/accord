@@ -8,20 +8,20 @@
 import Foundation
 import AppKit
 
-final class AppKitLink<T: NSView> {
-    class func introspectView(_ root: NSView, _ completion: @escaping ((_ nsView: T, _ subviewCount: Int) -> Void)) {
+final class AppKitLink<V: NSView> {
+    class func introspectView(_ root: NSView, _ completion: @escaping ((_ nsView: V, _ subviewCount: Int) -> Void)) {
         for child in root.subviews {
-            if let view = child as? T {
+            if let view = child as? V {
                 completion(view, child.subviews.count)
             } else {
                 introspectView(child, completion)
             }
         }
     }
-    class func introspect(_ completion: @escaping ((_ nsView: T, _ subviewCount: Int) -> Void)) {
+    class func introspect(_ completion: @escaping ((_ nsView: V, _ subviewCount: Int) -> Void)) {
         guard let view = NSApplication.shared.keyWindow?.contentView else { return }
         for child in view.subviews {
-            if let child = child as? T {
+            if let child = child as? V {
                 completion(child, child.subviews.count)
             } else {
                 introspectView(child, completion)

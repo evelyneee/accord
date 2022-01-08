@@ -61,7 +61,6 @@ final class Activity {
         if let details = details {
             dict["details"] = details
         }
-        print(dict)
         return dict
     }
 }
@@ -116,7 +115,6 @@ final class ActivityCodable: Codable {
         if let details = details {
             dict["details"] = details
         }
-        print(dict)
         return dict
     }
 }

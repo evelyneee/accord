@@ -36,7 +36,10 @@ extension ServerListView: MentionSenderDelegate {
     }
     
     func select(channel: Channel) {
-        guard let guildID = channel.guild_id else { return }
+        let guildID = channel.guild_id ?? "@me"
+        if guildID == "@me" {
+            NotificationCenter.default.post(name: NSNotification.Name.init(rawValue: "DMSelect"), object: nil, userInfo: ["index": channel.id])
+        }
         print("selecting")
         let index = Self.folders.map { ServerListView.fastIndexGuild(guildID, array: $0.guilds) }
         print(index)

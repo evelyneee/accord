@@ -85,41 +85,41 @@ struct ServerListViewCell: View {
             case .normal:
                 HStack {
                     Image(systemName: "number")
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .voice:
                 HStack {
                     Image(systemName: "speaker.wave.2.fill")
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .guild_news:
                 HStack {
                     Image(systemName: "megaphone.fill")
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .stage:
                 HStack {
                     Image(systemName: "person.2.fill")
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .dm:
                 HStack {
                     Attachment(pfpURL(channel?.recipients?[0].id, channel?.recipients?[0].avatar).appending("?size=48")).equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .group_dm:
                 HStack {
                     Attachment("https://cdn.discordapp.com/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=48").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             default:
                 HStack {
                     Image(systemName: "number")
-                    Text(channel?.name ?? channel?.recipients?[0].username ?? "Unknown Channel")
+                    Text(channel?.computedName ?? "Unknown Channel")
                 }
             }
             Spacer()

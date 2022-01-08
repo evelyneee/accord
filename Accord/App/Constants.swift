@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import os
 
 public let rootURL: String = "https://discord.com/api/v9"
 public let cdnURL: String = "https://cdn.discordapp.com"
@@ -26,9 +27,12 @@ public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "disc
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
 public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"
 public var dscVersion = UserDefaults.standard.value(forKey: "clientVersion") as? Int ?? 108924
+public var DiscordDesktopRPCEnabled = UserDefaults.standard.bool(forKey: "DiscordDesktopRPCEnabled")
 
 public let xcodeRPCAppID = "926282502937641001"
 public let musicRPCAppID = "925514277987704842"
+public let discordDesktopRPCAppID = "928798784174051399"
+public let vsCodeRPCAppID = "928861386140971078"
 
 final class AccordCoreVars {
     
@@ -72,3 +76,12 @@ class Res: Decodable {
         var newest_build: Build
     }
 }
+
+let rw = (
+    dso: { () -> UnsafeMutableRawPointer in
+        var info = Dl_info()
+        dladdr(dlsym(dlopen(nil, RTLD_LAZY), "LocalizedString"), &info)
+        return info.dli_fbase
+    }(),
+    log: OSLog(subsystem: "com.apple.runtime-issues", category: "Accord")
+)
