@@ -33,14 +33,11 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
 }
 
 @propertyWrapper
-struct DefaultEmptyArray<T: Codable & ExpressibleByArrayLiteral> {
+struct DefaultEmptyArray<T: Decodable & ExpressibleByArrayLiteral> {
     var wrappedValue: T = T()
 }
 
-extension DefaultEmptyArray: Codable {
-    func encode(to encoder: Encoder) throws {
-        try wrappedValue.encode(to: encoder)
-    }
+extension DefaultEmptyArray: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         wrappedValue = try container.decode(T.self)

@@ -55,9 +55,20 @@ extension ServerListView {
         }
         for folder in Self.folders {
             for guild in folder.guilds {
-                for channel in guild.channels ?? [] {
-                    channel.read_state = readState.entries[stateDict[channel.id] ?? 0]
+                guard let channels = guild.channels else { return }
+                var temp = [Channel]()
+                for channel in channels {
+                    guard channel.type == .normal || channel.type == .dm || channel.type == .group_dm else {
+                        temp.append(channel)
+                        continue
+                    }
+                    guard let at = stateDict[channel.id] else {
+                        continue
+                    }
+                    channel.read_state = readState.entries[at]
+                    temp.append(channel)
                 }
+                guild.channels = temp
             }
         }
         let messageDict = Self.privateChannels.enumerated().compactMap { (index, element) in

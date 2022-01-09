@@ -77,6 +77,8 @@ struct ChatControls: View {
                 fileUploadURL = nil
                 DispatchQueue.main.async {
                     viewModel?.textFieldContents = ""
+                }
+                DispatchQueue.main.async {
                     viewModel?.textField?.becomeFirstResponder()
                 }
             } else {
@@ -94,6 +96,8 @@ struct ChatControls: View {
                     replyingTo = nil
                     DispatchQueue.main.sync {
                         viewModel?.textFieldContents = ""
+                    }
+                    DispatchQueue.main.async {
                         viewModel?.textField?.becomeFirstResponder()
                     }
                 } else {
@@ -108,12 +112,16 @@ struct ChatControls: View {
                     ))
                     DispatchQueue.main.sync {
                         viewModel?.textFieldContents = ""
+                    }
+                    DispatchQueue.main.async {
                         viewModel?.textField?.becomeFirstResponder()
                     }
                 }
             }
             DispatchQueue.main.async {
                 viewModel?.textFieldContents = ""
+            }
+            DispatchQueue.main.async {
                 viewModel?.textField?.becomeFirstResponder()
             }
         }

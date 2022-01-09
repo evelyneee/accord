@@ -85,4 +85,8 @@ final class ImageLoaderAndCache: ObservableObject {
                 .sink { img in DispatchQueue.main.async { self?.image = img } }
         }
     }
+    
+    deinit {
+        self.cancellable?.cancel()
+    }
 }

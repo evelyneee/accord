@@ -51,6 +51,13 @@ struct GuildView: View {
                         ServerListViewCell(channel: channel)
                     }
                     .buttonStyle(BorderlessButtonStyle())
+                    .if(channel.read_state?.last_message_id == channel.last_message_id, transform: { $0.foregroundColor(.secondary).opacity(0.5) } )
+                    .onChange(of: self.selection, perform: { _ in
+                        if self.selection == Int(channel.id) {
+                            channel.read_state?.mention_count = 0
+                            channel.read_state?.last_message_id = channel.last_message_id
+                        }
+                    })
                 }
             }
         }

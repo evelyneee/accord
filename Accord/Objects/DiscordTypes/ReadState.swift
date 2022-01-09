@@ -7,35 +7,16 @@
 
 import Foundation
 
-class ReadState: Codable {
+class ReadState: Decodable {
     var version: Int?
     var partial: Bool?
+    @IgnoreFailure
     var entries: [ReadStateEntry]
 }
 
-class ReadStateEntry: Codable {
+class ReadStateEntry: Decodable {
     var mention_count: Int
     var last_pin_timestamp: String
-    // var last_message_id: StringOrInt?
+    var last_message_id: String?
     var id: String // Channel ID
-}
-
-struct StringOrInt: Codable {
-    var string: String?
-    var int: Int?
-
-    // Where we determine what type the value is
-    init(from decoder: Decoder) throws {
-        let container =  try decoder.singleValueContainer()
-
-        // Check for a boolean
-        do {
-            string = nil
-            string = try container.decode(String.self)
-        } catch {
-            int = nil
-            // Check for an integer
-            int = try container.decode(Int.self)
-        }
-    }
 }
