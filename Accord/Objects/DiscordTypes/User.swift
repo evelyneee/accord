@@ -29,6 +29,7 @@ final class User: Codable, Identifiable, Hashable {
     var bio: String?
     var nick: String?
     var roleColor: String?
+    var banner: String?
 
     func isMe() -> Bool { user_id == self.id }
 

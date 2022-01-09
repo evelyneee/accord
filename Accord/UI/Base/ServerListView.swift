@@ -147,6 +147,7 @@ struct ServerListView: View {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak guild] in
+                                    wss.cachedMemberRequest.removeAll()
                                     if selectedServer == 201 {
                                         selectedServer = guild?.index
                                     } else {
@@ -178,6 +179,7 @@ struct ServerListView: View {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             Button(action: { [weak guild] in
+                                wss.cachedMemberRequest.removeAll()
                                 if selectedServer == 201 {
                                     selectedServer = guild?.index
                                 } else {
@@ -334,7 +336,7 @@ struct ServerListView: View {
                         Image(systemName: "bell.badge.fill")
                     }
                     .popover(isPresented: $mentions) {
-                        MentionsView()
+                        MentionsView(replyingTo: Binding.constant(nil))
                             .frame(width: 500, height: 600)
                     }
                 }

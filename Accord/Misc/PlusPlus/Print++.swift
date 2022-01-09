@@ -7,14 +7,42 @@
 
 import Foundation
 
-public var ENABLE_LINE_LOGGING: Bool = true
-public var ENABLE_FILE_EXTENSION_LOGGING: Bool = false
+public let ENABLE_LINE_LOGGING: Bool = true
+public let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
 
-public func print<T>(_ items: T..., file: String = #file, line: Int = #line, separator: String = " ") {
+public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, separator: String = " ") {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
     file.components(separatedBy: "/").last ?? "Accord" :
     file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
-    let lineString = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
+    let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
+    log(items: items, file: file, line: line, separator: separator)
+}
+
+public func print<S: StringProtocol>(_ items: S?..., file: String = #fileID, line: Int = #line, separator: String = " ") {
+    let items: [String] = items.map { $0 ?? "nil" }.compactMap { String($0) }
+    let file = ENABLE_FILE_EXTENSION_LOGGING ?
+    file.components(separatedBy: "/").last ?? "Accord" :
+    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+    let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
+    log(items: items, file: file , line: line, separator: separator)
+}
+
+public func print(_ items: Any..., file: String = #fileID) {
+    let file = ENABLE_FILE_EXTENSION_LOGGING ?
+    file.components(separatedBy: "/").last ?? "Accord" :
+    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+    log(items: items, file: file)
+}
+
+public func print(_ item: Any, file: String = #fileID, line: Int = #line) {
+    let file = ENABLE_FILE_EXTENSION_LOGGING ?
+    file.components(separatedBy: "/").last ?? "Accord" :
+    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+    let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
+    log(items: [item], file: file, line: line)
+}
+
+fileprivate func log<T>(items: [T], file: String, line: String? = nil, separator: String = " ") {
     var out = String()
     for item in items {
         if type(of: item) is AnyClass {
@@ -24,29 +52,5 @@ public func print<T>(_ items: T..., file: String = #file, line: Int = #line, sep
         }
         out.append(separator)
     }
-    Swift.print("[\(file)\(lineString)]", out)
-}
-
-public func print(_ items: String..., file: String = #file, line: Int = #line, separator: String = " ") {
-    let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
-    let lineString = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
-    Swift.print("[\(file)\(lineString)]", items.joined(separator: " "))
-}
-
-public func print(_ items: Any..., file: String = #file) {
-    let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
-    var out = String()
-    for item in items {
-        if type(of: item) is AnyClass {
-            dump(item, to: &out)
-        } else {
-            out.append(String(describing: item))
-        }
-        out.append(" ")
-    }
-    Swift.print("[\(file)]", out )
+    Swift.print("[\(file)\(line ?? "")]", out)
 }

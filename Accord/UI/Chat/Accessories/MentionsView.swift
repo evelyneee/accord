@@ -12,13 +12,14 @@ import Combine
 struct MentionsView: View {
     @State var mentions: [Message] = []
     @State var bag = Set<AnyCancellable>()
+    @Binding var replyingTo: Message?
     var body: some View {
         List($mentions, id: \.id) { $message in
-            MessageCellView(message: message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: Binding.constant(nil))
+            MessageCellView(message: message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: $replyingTo)
         }
         .onAppear(perform: {
             messageFetchQueue.async {
-                RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/users/@me/mentions?limit=25&roles=true&everyone=true"), headers: Headers(
+                RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/users/@me/mentions?limit=50&roles=true&everyone=true"), headers: Headers(
                     userAgent: discordUserAgent,
                     token: AccordCoreVars.token,
                     type: .GET,

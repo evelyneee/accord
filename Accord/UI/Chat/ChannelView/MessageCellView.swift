@@ -111,8 +111,15 @@ struct MessageCellView: View {
         }
         .id(message.id)
         .onAppear {
-            textQueue.async { [weak message] in
-                self.load(text: message?.content ?? "")
+            textQueue.async { [unowned message] in
+                Markdown.markAll(text: message.content, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
+                    .replaceError(with: Text(""))
+                    .sink(receiveValue: { text in
+                        DispatchQueue.main.async {
+                            self.textElement = text
+                        }
+                    })
+                    .store(in: &bag)
             }
             colorQueue.async {
                 if let role = role, let color = roleColors[role]?.0 {
@@ -143,18 +150,6 @@ struct MessageCellView: View {
         })
         .onHover { val in
             self.hovered = val
-        }
-    }
-    func load(text: String) {
-        textQueue.async {
-            Markdown.markAll(text: text, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
-                .replaceError(with: Text(""))
-                .sink(receiveValue: { text in
-                    DispatchQueue.main.async {
-                        self.textElement = text
-                    }
-                })
-                .store(in: &bag)
         }
     }
 }

@@ -8,9 +8,6 @@
 import SwiftUI
 import Combine
 
-// Discord WebSocket
-var wss: Gateway!
-
 struct ContentView: View {
     @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()

@@ -13,7 +13,12 @@ struct PopoverProfileView: View {
     var body: some View {
         return ZStack(alignment: .top) {
             VStack {
-                Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
+                if let banner = user?.banner, let id = user?.id {
+                    Attachment("https://cdn.discordapp.com/banners/\(id)/\(banner).png")
+                        .frame(height: 100)
+                } else {
+                    Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
+                }
                 Spacer()
             }
             VStack {

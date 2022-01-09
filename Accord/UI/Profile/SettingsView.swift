@@ -31,6 +31,7 @@ struct SettingsViewRedesign: View {
     @State var loading: Bool = false
     @State var bioText: String = " "
     @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         List {
@@ -95,15 +96,19 @@ struct SettingsViewRedesign: View {
                     Spacer()
                 }
                 .padding(5)
-                .background(Color.black.opacity(0.25))
+                .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
                 .cornerRadius(15)
                 .padding()
+                .disabled(true)
                 VSplitView {
                     SettingsToggleView(toggled: $profilePictures, title: "Show profile pictures")
+                        .disabled(true)
                     SettingsToggleView(toggled: $discordSettings, title: "Use stock discord settings")
+                        .disabled(true)
                     SettingsToggleView(toggled: $recent, title: "Sort servers by recent messages")
-                    SettingsToggleView(toggled: $proxyEnable, title: "Enable Proxy")
+                        .disabled(true)
                     SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
+                        .disabled(true)
                     SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
                     SettingsToggleView(toggled: $dark, title: "Always dark mode")
                     HStack(alignment: .top) {
@@ -127,6 +132,7 @@ struct SettingsViewRedesign: View {
                         })
                         .padding()
                     }
+                    .disabled(true)
                     Group {
                         SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
                         SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
@@ -137,37 +143,32 @@ struct SettingsViewRedesign: View {
                 .toggleStyle(SwitchToggleStyle())
                 .pickerStyle(MenuPickerStyle())
                 .padding(5)
-                .background(Color.black.opacity(0.25))
+                .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
                 .cornerRadius(15)
                 .padding()
                 Text("Proxy Settings")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.leading, 20)
-                VStack {
+                VSplitView {
                     SettingsToggleView(toggled: $proxyEnable, title: "Enable Proxy")
+                        .toggleStyle(SwitchToggleStyle())
                     HStack(alignment: .top) {
-                        Text("Proxy IP")
+                        Text("Proxy Config")
                             .font(.title3)
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        TextField("IP", text: $proxyIP)
-                            .padding()
-                            .textFieldStyle(PlainTextFieldStyle())
-                            .frame(width: 250)
-                    }
-                    Divider()
-                    HStack(alignment: .top) {
-                        Text("Proxy Port")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .padding()
-                        Spacer()
-                        TextField("Port", text: $proxyPort)
-                            .padding()
-                            .textFieldStyle(PlainTextFieldStyle())
-                            .frame(width: 250)
+                        HStack {
+                            TextField("IP", text: $proxyIP)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .frame(width: 100)
+                            Text(":")
+                            TextField("Port", text: $proxyPort)
+                                .frame(width: 50)
+                        }
+                        .padding()
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                     HStack {
                         Text("Load plugin")
@@ -178,6 +179,8 @@ struct SettingsViewRedesign: View {
                         Button("Load") {
                             self.loading.toggle()
                         }
+                        .buttonStyle(BorderedButtonStyle())
+                        .padding()
                     }
                     .fileImporter(isPresented: $loading, allowedContentTypes: [.data], onCompletion: { result in
                         do {
@@ -193,9 +196,10 @@ struct SettingsViewRedesign: View {
                     })
                 }
                 .padding(5)
-                .background(Color.black.opacity(0.25))
+                .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
                 .cornerRadius(15)
                 .padding()
+                .disabled(true)
                 Text("Accord (red.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
@@ -251,7 +255,7 @@ struct SettingsToggleView: View {
     var title: String
     var detail: String? = nil
     var body: some View {
-        HStack(alignment: .top) {
+        HStack {
             VStack(alignment: .leading) {
                 Text(title)
                     .font(.title3)

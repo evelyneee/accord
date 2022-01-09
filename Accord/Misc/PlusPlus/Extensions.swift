@@ -240,10 +240,16 @@ func iconURL(_ id: String?, _ icon: String?, _ size: String = "32") -> String {
     return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=\(size)"
 }
 
-// BAD
 public extension Collection where Indices.Iterator.Element == Index {
     subscript (exist index: Index) -> Iterator.Element? {
         return indices.contains(index) ? self[index] : nil
+    }
+}
+
+// prevent index out of range
+public extension Collection where Indices.Iterator.Element == Index, Index: BinaryInteger {
+    subscript (safe index: Index) -> Iterator.Element? {
+        return indices.count > index ? self[index] : nil
     }
 }
 

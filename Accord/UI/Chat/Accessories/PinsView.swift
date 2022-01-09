@@ -12,6 +12,7 @@ import Combine
 struct PinsView: View {
     var guildID: String
     var channelID: String
+    @Binding var replyingTo: Message?
     @State var pins: [Message] = []
     @State var bag = Set<AnyCancellable>()
     var body: some View {
@@ -23,7 +24,7 @@ struct PinsView: View {
                 pronouns: nil,
                 role: Binding.constant(nil),
                 replyRole: Binding.constant(nil),
-                replyingTo: Binding.constant(nil)
+                replyingTo: $replyingTo
             )
         }
         .onAppear(perform: {

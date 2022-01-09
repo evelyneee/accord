@@ -128,14 +128,14 @@ struct ChannelView: View, Equatable {
                         .rotationEffect(.degrees(45))
                 }
                 .popover(isPresented: $pins) {
-                    PinsView(guildID: guildID, channelID: channelID)
+                    PinsView(guildID: guildID, channelID: channelID, replyingTo: $replyingTo)
                         .frame(width: 500, height: 600)
                 }
                 Toggle(isOn: $mentions) {
                     Image(systemName: "bell.badge.fill")
                 }
                 .popover(isPresented: $mentions) {
-                    MentionsView()
+                    MentionsView(replyingTo: $replyingTo)
                         .frame(width: 500, height: 600)
                 }
                 if guildID != "@me" {
@@ -173,13 +173,6 @@ public struct VisualEffectView: NSViewRepresentable {
     public func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
         visualEffectView.material = material
         visualEffectView.blendingMode = blendingMode
-    }
-}
-
-// prevent index out of range
-public extension Collection where Indices.Iterator.Element == Index {
-    subscript (safe index: Index) -> Iterator.Element? {
-        return indices.contains(index) ? self[index] : nil
     }
 }
 

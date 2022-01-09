@@ -10,6 +10,9 @@ import SwiftUI
 import Combine
 import os
 
+// Discord WebSocket
+var wss: Gateway!
+
 public let rootURL: String = "https://discord.com/api/v9"
 public let cdnURL: String = "https://cdn.discordapp.com"
 public var user_id: String = ""
@@ -26,7 +29,7 @@ public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors
 public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "discordStockSettings")
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
 public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"
-public var dscVersion = UserDefaults.standard.value(forKey: "clientVersion") as? Int ?? 108924
+public var dscVersion = 109976
 public var DiscordDesktopRPCEnabled = UserDefaults.standard.bool(forKey: "DiscordDesktopRPCEnabled")
 
 public let xcodeRPCAppID = "926282502937641001"
@@ -60,8 +63,10 @@ final class AccordCoreVars {
             Self.cancellable = RequestPublisher.fetch(Res.self, url: URL(string: "https://api.discord.sale"))
                 .sink(receiveCompletion: { completion in
                 }) { res in
+                    print(dscVersion)
                     dscVersion = res.statistics.newest_build.number
                     UserDefaults.standard.set(dscVersion, forKey: "clientVersion")
+                    print(dscVersion)
                 }
         }
     }

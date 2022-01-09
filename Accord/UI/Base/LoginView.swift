@@ -21,15 +21,6 @@ enum DiscordLoginErrors: Error {
     case missingFields
 }
 
-struct SwappedLabel: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack {
-            configuration.title
-            configuration.icon
-        }
-    }
-}
-
 extension NSApplication {
     func restart() {
         let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
@@ -80,16 +71,12 @@ struct LoginView: View {
                             .font(.subheadline)
                     }
                     HStack {
-                        Button(action: {
-                            exit(EXIT_SUCCESS)
-                        }, label: {
-                            HStack {
-                                Text("Cancel")
-                                    .padding(.top)
-                            }
-                        })
                         Spacer()
-                        Button(action: {
+                        Button("Cancel") {
+                            exit(EXIT_SUCCESS)
+                        }
+                        .controlSize(.large)
+                        Button("Login") {
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
@@ -108,10 +95,8 @@ struct LoginView: View {
                                 }
                             }
                             print("logging in")
-                        }) {
-                            Label("Login", systemImage: "arrowtriangle.right.fill")
-                                .labelStyle(SwappedLabel())
                         }
+                        .controlSize(.large)
                     }
                     .padding(.top, 5)
                 }
@@ -123,48 +108,29 @@ struct LoginView: View {
                     .transition(AnyTransition.moveAway)
             case .twofactor:
                 VStack {
+                    Spacer()
                     Text("Enter your two-factor code here.")
-                    TextField("2fa code", text: $twofactor)
-                    Button("Login") {
-                        self.captchaPayload = notif["key"] as? String ?? ""
-                        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
-                            userAgent: discordUserAgent,
-                            contentType: "application/json",
-                            bodyObject: [
-                                "email": email,
-                                "password": password,
-                                "captcha_key": captchaPayload ?? ""
-                            ],
-                            type: .POST,
-                            discordHeaders: true,
-                            json: true
-                        )) { response, _ in
-                            if let token = response?.token {
-                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                self.captcha = false
-                                let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                let task = Process()
-                                task.launchPath = "/usr/bin/open"
-                                task.arguments = [path]
-                                task.launch()
-                                exit(EXIT_SUCCESS)
-                            }
-                            if let response = response, let ticket = response.ticket {
+                        .font(.title3)
+                        .fontWeight(.medium)
+                    SecureField("Six-digit MFA code", text: $twofactor)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 100)
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button("Login") {
+                            if let ticket = viewModel.ticket {
                                 Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                    contentType: "application/json",
                                     token: AccordCoreVars.token,
                                     bodyObject: ["code": twofactor, "ticket": ticket],
                                     type: .POST,
                                     discordHeaders: true,
                                     json: true
-                                )) { value, _ in
+                                )) { value, error in
                                     if let token = value?.token {
-                                        KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                        KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
                                         AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
-                                        print(token)
                                         let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                                         let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                                         let task = Process()
@@ -172,17 +138,69 @@ struct LoginView: View {
                                         task.arguments = [path]
                                         task.launch()
                                         exit(EXIT_SUCCESS)
+                                    } else if let error = error {
+                                        print(error)
+                                    }
+                                }
+                                return
+                            }
+                            self.captchaPayload = notif["key"] as? String ?? ""
+                            Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+                                userAgent: discordUserAgent,
+                                bodyObject: [
+                                    "email": email,
+                                    "password": password,
+                                    "captcha_key": captchaPayload ?? ""
+                                ],
+                                type: .POST,
+                                discordHeaders: true,
+                                json: true
+                            )) { response, _ in
+                                if let token = response?.token {
+                                    KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                    self.captcha = false
+                                    let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+                                    let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+                                    let task = Process()
+                                    task.launchPath = "/usr/bin/open"
+                                    task.arguments = [path]
+                                    task.launch()
+                                    exit(EXIT_SUCCESS)
+                                }
+                                if let response = response, let ticket = response.ticket {
+                                    Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
+                                        contentType: "application/json",
+                                        token: AccordCoreVars.token,
+                                        bodyObject: ["code": twofactor, "ticket": ticket],
+                                        type: .POST,
+                                        discordHeaders: true,
+                                        json: true
+                                    )) { value, _ in
+                                        if let token = value?.token {
+                                            KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
+                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                            self.captcha = false
+                                            print(token)
+                                            let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+                                            let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+                                            let task = Process()
+                                            task.launchPath = "/usr/bin/open"
+                                            task.arguments = [path]
+                                            task.launch()
+                                            exit(EXIT_SUCCESS)
+                                        }
                                     }
                                 }
                             }
                         }
+                        .controlSize(.large)
                     }
                 }
-                .transition(AnyTransition.moveAway)
             }
 
         }
-        .frame(minHeight: 250)
+        .frame(width: 500, height: 275)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
             self.viewModel.state = .twofactor
             self.notif = notif.userInfo as? [String: Any] ?? [:]
@@ -198,6 +216,7 @@ final class LoginViewViewModel: ObservableObject {
     @Published var captcha: Bool = false
     @Published var captchaVCKey: String?
     @Published var captchaPayload: String?
+    @Published var ticket: String? = nil
 
     init() {
 
@@ -243,30 +262,9 @@ final class LoginViewViewModel: ObservableObject {
                             self.state = .captcha
                         }
                     } else if let ticket = response.ticket {
+                        self.state = .twofactor
+                        self.ticket = ticket
                         print("[Login debug] Got ticket")
-                        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                            contentType: "application/json",
-                            token: AccordCoreVars.token,
-                            bodyObject: ["code": twofactor, "ticket": ticket],
-                            type: .POST,
-                            discordHeaders: true,
-                            json: true
-                        )) { value, error in
-                            if let token = value?.token {
-                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
-                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
-                                self.captcha = false
-                                let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                let task = Process()
-                                task.launchPath = "/usr/bin/open"
-                                task.arguments = [path]
-                                task.launch()
-                                exit(EXIT_SUCCESS)
-                            } else if let error = error {
-                                print(error)
-                            }
-                        }
                     }
                 }
             } else if let error = error {

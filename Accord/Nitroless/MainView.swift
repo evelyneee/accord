@@ -2,7 +2,7 @@
 // Views.swift
 // NitrolessMac
 //
-// Created by evelyn on 12.02.21
+// Created by evelyn on 12/02/21
 //
 
 import SwiftUI
@@ -29,7 +29,7 @@ struct NitrolessView: View, Equatable {
         return true
     }
     
-    private static let nitrolessRoot = "https://raw.githubusercontent.com/evelyneee/Repo/main/"
+    fileprivate static let nitrolessRoot = "https://raw.githubusercontent.com/evelyneee/Repo/main/"
     
     @State var searchenabled = true
     var columns: [GridItem] = [
@@ -43,39 +43,32 @@ struct NitrolessView: View, Equatable {
         GridItem(spacing: 1)
     ]
     @Binding var chatText: String
-    @State var SearchText: String = ""
-    @State var minimumWidth = 275
-    @State var recentMax = 8
-    @Environment(\.openURL) var openURL
-    @State var recentsenabled = true
     @State var allEmotes: [String: String] = [:]
     @State var search: String = ""
     @State var cancellable: AnyCancellable? = nil
     var body: some View {
-        VStack {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    TextField("Search for emotes", text: $search)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    LazyVGrid(columns: columns) {
-                        ForEach(Array(allEmotes.keys.filter { (search != "" ? $0.contains(search) : true) }), id: \.self) { key in
-                            Button(action: {
-                                guard let emote = allEmotes[key] else { return }
-                                chatText.append(contentsOf: "\(Self.nitrolessRoot)emotes/\(key)\(emote)")
-                            }) {
-                                VStack {
-                                    HoveredAttachment("\(Self.nitrolessRoot)emotes/\(key)\(allEmotes[key] ?? "")").equatable()
-                                        .frame(width: 20, height: 20)
-                                }
-                                .frame(width: 30, height: 30)
+        ScrollView {
+            VStack(alignment: .leading) {
+                TextField("Search for emotes", text: $search)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                LazyVGrid(columns: columns) {
+                    ForEach(Array(allEmotes.keys.filter { (search != "" ? $0.contains(search) : true) }), id: \.self) { key in
+                        Button(action: {
+                            guard let emote = allEmotes[key] else { return }
+                            chatText.append(contentsOf: "\(Self.nitrolessRoot)emotes/\(key)\(emote)")
+                        }) {
+                            VStack {
+                                HoveredAttachment("\(Self.nitrolessRoot)emotes/\(key)\(allEmotes[key] ?? "")").equatable()
+                                    .frame(width: 20, height: 20)
                             }
-                            .buttonStyle(BorderlessButtonStyle())
+                            .frame(width: 30, height: 30)
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
             }
-            .padding()
         }
+        .padding()
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             imageQueue.async {
@@ -85,7 +78,6 @@ struct NitrolessView: View, Equatable {
                         for emote in emotes {
                             allEmotes[emote.name] = emote.type
                         }
-                        print(allEmotes)
                     }
             }
         }

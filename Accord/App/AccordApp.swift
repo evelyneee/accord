@@ -26,7 +26,7 @@ struct AccordApp: App {
                         .frame(minWidth: 800, minHeight: 600)
                         .preferredColorScheme(darkMode ? .dark : nil)
                         .onAppear(perform: {
-                            AccordCoreVars.loadVersion()
+                            // AccordCoreVars.loadVersion()
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
                             if self.windowWidth == 0 {
@@ -59,6 +59,11 @@ struct AccordApp: App {
                 Button("Show quick jump") {
                     popup.toggle()
                 }.keyboardShortcut("k")
+            }
+            CommandMenu("Account") {
+                Button("Log out") {
+                    logOut()
+                }
             }
         }
     }

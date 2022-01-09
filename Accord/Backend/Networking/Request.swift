@@ -93,7 +93,7 @@ final class Headers {
             request.addValue(contentType, forHTTPHeaderField: "Content-Type")
         }
         if let token = self.token {
-            request.addValue(token, forHTTPHeaderField: "authorization")
+            request.addValue(token, forHTTPHeaderField: "Authorization")
         }
         if self.json {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -109,23 +109,12 @@ final class Headers {
         if self.discordHeaders {
             request.addValue(self.userAgent, forHTTPHeaderField: "user-agent")
             if let superProps = superProps {
-                request.addValue(superProps, forHTTPHeaderField: "x-super-properties")
+                request.addValue(superProps, forHTTPHeaderField: "X-Super-Properties")
             } else {
                 fatalError("We cannot skip the X-Super-Properties. What are you trying to do, get banned?")
             }
             config.httpAdditionalHeaders = [
-                "origin":"https://discord.com",
-                "authority":"discord.com",
-                "method":request.httpMethod ?? "GET",
-                "path":request.url?.path ?? "/api/v9/",
-                "scheme":"https",
                 "x-discord-locale":NSLocale.current.languageCode ?? "en-US",
-                "accept":"*/*",
-                "accept-encoding":"gzip, deflate, br",
-                "accept-language":"en-US,en;q=0.9,en-CA;q=0.8,fr-CA;q=0.7", // hardcoded for now i have no idea what it does
-                "sec-fetch-dest":"empty",
-                "sec-fetch-mode":"cors",
-                "sec-fetch-site":"same-origin",
             ]
         }
         if let referer = self.referer {
@@ -266,7 +255,6 @@ final public class Request {
             return completion(image)
         }).resume()
     }
-
 }
 
 final public class RequestPublisher {

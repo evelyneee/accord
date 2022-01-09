@@ -37,7 +37,7 @@ struct ChatControls: View {
     weak var textField: NSTextField?
 
     fileprivate func uploadFile(temp: String, url: URL? = nil) {
-        var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
+        var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages")!)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
@@ -81,13 +81,13 @@ struct ChatControls: View {
                 }
             } else {
                 if replyingTo != nil {
-                    Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                    Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
                         token: AccordCoreVars.token,
-                        bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))", "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": channelID, "message_id": replyingTo?.id ?? ""]],
+                        bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))", "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": (replyingTo?.channel_id ?? channelID), "message_id": replyingTo?.id ?? ""]],
                         type: .POST,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+                        referer: "https://discord.com/channels/\(guildID)/\(replyingTo?.channel_id ?? channelID)",
                         empty: true,
                         json: true
                     ))
@@ -97,7 +97,7 @@ struct ChatControls: View {
                         viewModel?.textField?.becomeFirstResponder()
                     }
                 } else {
-                    Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+                    Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
                         token: AccordCoreVars.token,
                         bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))"],
@@ -149,7 +149,7 @@ struct ChatControls: View {
                                         viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                     }
                                     guard let id = emoji?.id, let name = emoji?.name else { return }
-                                    viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "" : ""):\(name):\(id)>")
+                                    viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "a" : ""):\(name):\(id)>")
                                 }, label: { [weak emoji] in
                                     HStack {
                                         Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
@@ -213,7 +213,7 @@ struct ChatControls: View {
                         Button(action: {
                             emotes.toggle()
                         }) {
-                            Text("🥺")
+                            Image(systemName: "face.smiling.fill")
                         }
                         .buttonStyle(BorderlessButtonStyle())
                         .keyboardShortcut("e", modifiers: [.command])

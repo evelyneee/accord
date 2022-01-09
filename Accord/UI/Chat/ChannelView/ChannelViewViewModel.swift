@@ -79,9 +79,8 @@ final class ChannelViewViewModel: ObservableObject {
             }
             .store(in: &cancellable)
         wss.memberChunkSubject
-            .sink { [weak self] msg in
+            .sink { [unowned self] msg in
                 webSocketQueue.async {
-                    guard let self = self else { return }
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
                     let cache = Dictionary(uniqueKeysWithValues: zip(users.compactMap { $0?.user.id }, users.compactMap { $0?.nick ?? $0?.user.username }))
                     ChannelMembers.shared.channelMembers[self.channelID] = cache

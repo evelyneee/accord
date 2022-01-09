@@ -11,10 +11,8 @@ extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
         let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
         for (i, v) in index.enumerated() {
-            print("joe mama")
             guard let v = v else { continue }
             if let index = self.fastIndexChannels(channel, array: Self.folders[i].guilds[v].channels ?? []) {
-                print("cock")
                 Self.folders[i].guilds[v].channels?[index].read_state?.mention_count += 1
             }
         }
