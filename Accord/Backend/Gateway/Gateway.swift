@@ -17,7 +17,6 @@ final class Gateway {
     private (set) var connection: NWConnection?
     private (set) var sessionID: String? = nil
     private (set) var interval: Int = 40000
-    private (set) var failedHeartbeats: Int = 0
     
     internal var pendingHeartbeat: Bool = false
     internal var heartbeatTimer: Cancellable? = nil
@@ -105,6 +104,7 @@ final class Gateway {
                   let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
                   let helloD = hello["d"] as? [String:Any],
                   let interval = helloD["heartbeat_interval"] as? Int else {
+                      print("Failed to get a heartbeat interval")
                       wss.hardReset()
                       return
                   }
@@ -120,10 +120,10 @@ final class Gateway {
                 .sink { [weak self] _ in
                     wssThread.async {
                         do {
+                            print("Heartbeating")
                             try self?.heartbeat()
                         } catch {
                             print("Error sending heartbeat", error)
-                            self?.failedHeartbeats++
                         }
                     }
                 }
@@ -197,7 +197,7 @@ final class Gateway {
     }
 
     private func heartbeat() throws {
-        if self.failedHeartbeats >= 3 {
+        if self.pendingHeartbeat {
             self.reset()
             return
         }

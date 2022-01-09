@@ -104,14 +104,14 @@ struct ServerListViewCell: View {
                 }
             case .dm:
                 HStack {
-                    Attachment(pfpURL(channel?.recipients?[0].id, channel?.recipients?[0].avatar).appending("?size=48")).equatable()
+                    Attachment(pfpURL(channel?.recipients?[0].id, channel?.recipients?[0].avatar)).equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
                     Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .group_dm:
                 HStack {
-                    Attachment("https://cdn.discordapp.com/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=48").equatable()
+                    Attachment("https://cdn.discordapp.com/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=24").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
                     Text(channel?.computedName ?? "Unknown Channel")

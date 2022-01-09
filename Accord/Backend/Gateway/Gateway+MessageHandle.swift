@@ -20,9 +20,8 @@ extension Gateway {
         case .hello:
             print("missed hello?")
         case .invalidSession:
+            print(String(data: event.data, encoding: .utf8))
             self.hardReset()
-        case .heartbeat:
-            break
         default: break
         }
         if let s = event.s {

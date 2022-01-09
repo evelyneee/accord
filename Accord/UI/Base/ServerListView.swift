@@ -146,8 +146,8 @@ struct ServerListView: View {
                     Folder(icon: Array(folder.guilds.prefix(4)), color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
-                                Button(action: { [weak guild] in
-                                    wss.cachedMemberRequest.removeAll()
+                                Button(action: { [weak guild, weak wss] in
+                                    wss?.cachedMemberRequest.removeAll()
                                     if selectedServer == 201 {
                                         selectedServer = guild?.index
                                     } else {
@@ -178,8 +178,8 @@ struct ServerListView: View {
                 } else {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
-                            Button(action: { [weak guild] in
-                                wss.cachedMemberRequest.removeAll()
+                            Button(action: { [weak guild, weak wss] in
+                                wss?.cachedMemberRequest.removeAll()
                                 if selectedServer == 201 {
                                     selectedServer = guild?.index
                                 } else {
@@ -267,21 +267,20 @@ struct ServerListView: View {
                 Divider()
                 // MARK: - Loading UI
                 if selectedServer == 201 {
-                    // MARK: - Private channels (DMs)
                     List {
                         Text("Messages")
                             .fontWeight(.bold)
                             .font(.title2)
                         Divider()
                         ForEach(Self.privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                                 ServerListViewCell(channel: channel)
                             }
                         }
                     }
                     .padding(.top, 5)
+                    .listStyle(.sidebar)
                 } else if let selected = selectedServer {
-                    // MARK: - Guild channels
                     GuildView(guild: Array(Self.folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection)
                 }
             }
@@ -319,29 +318,6 @@ struct ServerListView: View {
                 }
             }
         })
-        .toolbar {
-            ToolbarItemGroup {
-                if selection == nil {
-                    Button(action: { [weak wss] in
-                        wss?.reset()
-                        timedOut = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                            timedOut = false
-                        })
-                    }) {
-                        Image(systemName: "arrow.counterclockwise")
-                    }
-                    .disabled(timedOut)
-                    Toggle(isOn: $mentions) {
-                        Image(systemName: "bell.badge.fill")
-                    }
-                    .popover(isPresented: $mentions) {
-                        MentionsView(replyingTo: Binding.constant(nil))
-                            .frame(width: 500, height: 600)
-                    }
-                }
-            }
-        }
         .onAppear {
             if !Self.folders.isEmpty {
                 let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[0].id)")
@@ -368,6 +344,16 @@ struct ServerListView: View {
                     MediaRemoteWrapper.updatePresence()
                 } else if UserDefaults.standard.bool(forKey: "VSCodeRPCEnabled") {
                     VisualStudioCodeRPC.updatePresence()
+                }
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup {
+                if selection == nil {
+                    Toggle(isOn: Binding.constant(false)) {
+                        Image(systemName: "bell.badge.fill")
+                    }
+                    .hidden()
                 }
             }
         }

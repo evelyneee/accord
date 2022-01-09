@@ -313,7 +313,7 @@ final class ChatControlsViewModel: ObservableObject {
     @Published var matchedChannels = [Channel]()
     @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
-    @Published var cachedUsers = [User]()
+    @Published var cachedUsers = [User]()    
     weak var textField: NSTextField?
     var currentValue: String?
     var currentRange: Int?
@@ -352,9 +352,6 @@ final class ChatControlsViewModel: ObservableObject {
         AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
             textField.allowsEditingTextAttributes = true
             self?.textField = textField
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                self?.textField?.becomeFirstResponder()
-            })
         }
     }
 

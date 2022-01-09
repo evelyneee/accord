@@ -50,9 +50,9 @@ final class ChannelViewViewModel: ObservableObject {
                     guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
                     if self?.guildID != "@me" && !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                         self?.loadUser(for: message.author?.id)
-                    }
-                    for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
-                        self?.loadUser(for: user)
+                        for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
+                            self?.loadUser(for: user)
+                        }
                     }
                     if let firstMessage = self?.messages.last {
                         message.lastMessage = firstMessage
@@ -67,6 +67,7 @@ final class ChannelViewViewModel: ObservableObject {
                                 if let floatValue = self?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.8 && floatValue != 1.0, let height = view?.bounds.size.height {
                                     withAnimation(Animation.linear) {
                                         view?.scroll(NSPoint(x: 0, y: height))
+                                        view?.resignFirstResponder()
                                     }
                                 }
                             }
@@ -316,7 +317,6 @@ final class ChannelViewViewModel: ObservableObject {
             }
         }
         if !(allUserIDs.isEmpty) {
-            print(allUserIDs)
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
         }
     }

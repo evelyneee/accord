@@ -76,9 +76,9 @@ struct GatewayEvent {
     }
     
     enum Opcode: Int {
-        case dispatch, heartbeat, identify, presenceUpdate, unknown,
-             resume, reconnect, guildMemberRequest, invalidSession,
-             hello, heartbeatACK, guildSync, privateChannelSubscribe,
-             guildSubscribe
+        case dispatch = 0, heartbeat, identify, presenceUpdate,
+             voiceStateUpdate, unknown, resume, reconnect, guildMemberRequest,
+             invalidSession, hello, heartbeatACK, guildSync,
+             privateChannelSubscribe, guildSubscribe
     }
 }

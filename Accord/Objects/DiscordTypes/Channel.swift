@@ -8,7 +8,6 @@
 import Foundation
 
 final class Channel: Codable, Identifiable {
-
     let id: String
     let type: ChannelType
     var guild_id: String?

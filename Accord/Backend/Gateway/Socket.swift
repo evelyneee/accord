@@ -66,7 +66,8 @@ extension Gateway {
         })
     }
     
-    func reset() {
+    func reset(function: String = #function) {
+        print("resetting from function", function)
         self.close(.protocolCode(.protocolError))
         concurrentQueue.async {
             guard let new = try? Gateway.init(url: Gateway.gatewayURL, session_id: wss.sessionID, seq: wss.seq) else { return }
@@ -74,7 +75,8 @@ extension Gateway {
         }
     }
 
-    func hardReset() {
+    func hardReset(function: String = #function) {
+        print("resetting from function", function)
         self.close(.protocolCode(.normalClosure))
         concurrentQueue.async {
             guard let new = try? Gateway.init(url: Gateway.gatewayURL) else { return }

@@ -80,7 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     @objc func onSleepNote(note: NSNotification) {
         guard wss != nil else { return }
-        wss.close(.protocolCode(.goingAway))
+        wss.close(.protocolCode(.protocolError))
     }
     func fileNotifications() {
         NSWorkspace.shared.notificationCenter.addObserver(

@@ -123,19 +123,24 @@ struct ChannelView: View, Equatable {
         }
         .toolbar {
             ToolbarItemGroup {
+                Toggle(isOn: Binding.constant(false)) {
+                    Image(systemName: "pin.fill")
+                }
+                .hidden()
+                /*
                 Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))
                 }
-                .popover(isPresented: $pins) {
-                    PinsView(guildID: guildID, channelID: channelID, replyingTo: $replyingTo)
+                .sheet(isPresented: $pins) {
+                    PinsView(guildID: guildID, channelID: channelID, replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
                 }
                 Toggle(isOn: $mentions) {
                     Image(systemName: "bell.badge.fill")
                 }
                 .popover(isPresented: $mentions) {
-                    MentionsView(replyingTo: $replyingTo)
+                    MentionsView(replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
                 }
                 if guildID != "@me" {
@@ -143,6 +148,7 @@ struct ChannelView: View, Equatable {
                         Image(systemName: "sidebar.right")
                     }
                 }
+                 */
             }
         }
     }
