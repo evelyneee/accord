@@ -112,6 +112,16 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
+		495021FB278CD29400826503 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; lastKnownFileType = file; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		495021FC278CD29400826503 /* Accord */ = {isa = PBXFileReference; lastKnownFileType = text; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
+		495021FD278CD29400826503 /* Accord.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; path = Accord.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		495021FE278CD29400826503 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; lastKnownFileType = file; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		495021FF278CD29400826503 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
+		49502200278CD2E300826503 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; lastKnownFileType = file; name = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; path = "../Release/me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		49502201278CD2E300826503 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = Accord_1.0.0_Universal.zip; path = ../Release/Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
+		49502203278CD2E400826503 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; lastKnownFileType = file; name = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; path = "../Release/me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		49502204278CD31000826503 /* Accord */ = {isa = PBXFileReference; lastKnownFileType = text; name = Accord; path = ../Release/Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
+		49502205278CD31600826503 /* Accord.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = Accord.app; path = ../Release/Accord.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -231,6 +241,7 @@
 			children = (
 				9E6B71072783ABD500A26CB6 /* README.md */,
 				32F4C959256D7D3300343BB3 /* Accord */,
+				497167B6278CCA9A00942DE4 /* Products */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -261,6 +272,39 @@
 				9ED6F671273702040009C78C /* dpkg */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		495021F9278CD28000826503 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				495021FD278CD29400826503 /* Accord.app */,
+				495021FC278CD29400826503 /* Accord */,
+				495021FF278CD29400826503 /* Accord_1.0.0_Universal.zip */,
+				495021FE278CD29400826503 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */,
+				495021FB278CD29400826503 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */,
+			);
+			name = Debug;
+			sourceTree = "<group>";
+		};
+		495021FA278CD28300826503 /* Release */ = {
+			isa = PBXGroup;
+			children = (
+				49502205278CD31600826503 /* Accord.app */,
+				49502204278CD31000826503 /* Accord */,
+				49502201278CD2E300826503 /* Accord_1.0.0_Universal.zip */,
+				49502200278CD2E300826503 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */,
+				49502203278CD2E400826503 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */,
+			);
+			name = Release;
+			sourceTree = "<group>";
+		};
+		497167B6278CCA9A00942DE4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				495021F9278CD28000826503 /* Debug */,
+				495021FA278CD28300826503 /* Release */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		9E39B26627869C4800069424 /* Accessories */ = {
