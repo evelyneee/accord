@@ -70,7 +70,7 @@ final class Gateway {
         ("Pragma", "no-cache"),
         ("Origin", "https://discord.com"),
         ("Host", Gateway.gatewayURL.host ?? "gateway.discord.gg"),
-        ("Accept-Language", NSLocale.current.languageCode ?? "en-US"),
+        ("Accept-Language", "en-CA,en-US;q=0.9,en;q=0.8"),
         ("Accept-Encoding", "gzip, deflate, br")
     ]
     
@@ -189,7 +189,7 @@ final class Gateway {
                     "client_version": "0.0.264",
                     "os_version": NSWorkspace.kernelVersion,
                     "os_arch": NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
-                    "system-locale": NSLocale.current.languageCode ?? "en-US"
+                    "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")"
                 ]
             ]
         ]

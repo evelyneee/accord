@@ -78,7 +78,7 @@ final class Headers {
             "client_version":"0.0.264",
             "os_version":NSWorkspace.kernelVersion,
             "os_arch":NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
-            "system_locale":NSLocale.current.languageCode ?? "en-US",
+            "system_locale":"\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
             "client_build_number":dscVersion,
             "client_event_source":NSNull()
         ]
@@ -108,13 +108,17 @@ final class Headers {
         }
         if self.discordHeaders {
             request.addValue(self.userAgent, forHTTPHeaderField: "user-agent")
+            request.addValue("https://discord.com", forHTTPHeaderField: "origin")
+            request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
+            request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
+            request.addValue("same-origin", forHTTPHeaderField: "sec-fetch-site")
             if let superProps = superProps {
                 request.addValue(superProps, forHTTPHeaderField: "X-Super-Properties")
             } else {
                 fatalError("We cannot skip the X-Super-Properties. What are you trying to do, get banned?")
             }
             config.httpAdditionalHeaders = [
-                "x-discord-locale":NSLocale.current.languageCode ?? "en-US",
+                "x-discord-locale":"\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
             ]
         }
         if let referer = self.referer {
