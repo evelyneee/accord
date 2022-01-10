@@ -27,8 +27,8 @@ struct ChatControls: View {
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
-    @State var fileUpload: Data?
-    @State var fileUploadURL: URL?
+    @Binding var fileUpload: Data?
+    @Binding var fileUploadURL: URL?
     @State var dragOver: Bool = false
     @State var pluginPoppedUp: [Bool] = []
     @Binding var users: [User]
@@ -292,15 +292,6 @@ struct ChatControls: View {
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
                     fileUpload = try! Data(contentsOf: try! result.get())
                     fileUploadURL = try! result.get()
-                }
-                .onDrop(of: ["public.file-url"], isTargeted: $dragOver) { providers -> Bool in
-                    providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { (data, _) in
-                        if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                            fileUpload = try! Data(contentsOf: url)
-                            fileUploadURL = url
-                        }
-                    })
-                    return true
                 }
             }
         }

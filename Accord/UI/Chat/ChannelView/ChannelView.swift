@@ -56,6 +56,8 @@ struct ChannelView: View, Equatable {
     
     @State var memberListShown: Bool = false
     @State var memberList = [OPSItems]()
+    @State var fileUpload: Data?
+    @State var fileUploadURL: URL?
     
     // MARK: - init
     init(_ channel: Channel, _ guildName: String? = nil) {
@@ -99,6 +101,7 @@ struct ChannelView: View, Equatable {
                     guard channelID == self.channelID else { return }
                     webSocketQueue.async { [weak viewModel] in
                         guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d else { return }
+                        guard memberDecodable.user_id != AccordCoreVars.user?.id else { return }
                         let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
                         if !(typing.contains(isKnownAs)) {
                             typing.append(isKnownAs)
@@ -121,13 +124,17 @@ struct ChannelView: View, Equatable {
         .onDisappear { [weak viewModel] in
             viewModel?.cancellable.invalidateAll()
         }
+        .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
+            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { (data, _) in
+                if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
+                    fileUpload = try! Data(contentsOf: url)
+                    fileUploadURL = url
+                }
+            })
+            return true
+        }
         .toolbar {
             ToolbarItemGroup {
-                Toggle(isOn: Binding.constant(false)) {
-                    Image(systemName: "pin.fill")
-                }
-                .hidden()
-                /*
                 Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))
@@ -145,10 +152,9 @@ struct ChannelView: View, Equatable {
                 }
                 if guildID != "@me" {
                     Toggle(isOn: $memberListShown.animation()) {
-                        Image(systemName: "sidebar.right")
+                        Image(systemName: "person.2.fill")
                     }
                 }
-                 */
             }
         }
     }

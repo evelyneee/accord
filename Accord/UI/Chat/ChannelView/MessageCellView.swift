@@ -64,17 +64,18 @@ struct MessageCellView: View {
                             .foregroundColor(color)
                             .fontWeight(.semibold)
                         +
-                        Text(" — \(message.timestamp.makeProperDate())")
-                            .foregroundColor(Color.secondary)
-                            .font(.subheadline)
-                        +
-                        Text((pronouns != nil) ? " — \(pronouns ?? "Use my name")" : "")
+                        Text("  \(message.timestamp.makeProperDate())")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
                         +
                         Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
+                        +
+                        Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                            .foregroundColor(Color.secondary)
+                            .font(.subheadline)
+
                         textElement ?? Text(message.content)
                     }
                 }

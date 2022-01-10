@@ -106,7 +106,7 @@ struct ServerListViewCell: View {
                 }
             case .stage:
                 HStack {
-                    Image(systemName: "person.2.fill")
+                    Image(systemName: "person.wave.2.fill")
                     Text(channel?.computedName ?? "Unknown Channel")
                 }
             case .dm:

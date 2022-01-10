@@ -222,6 +222,20 @@ func pronounDBFormed(pronoun: inout String?) {
         pronoun = "she/he"
     case "sh":
         pronoun = "she/her"
+    case "si":
+        pronoun = "she/it"
+    case "st":
+        pronoun = "she/they"
+    case "th":
+        pronoun = "they/he"
+    case "ti":
+        pronoun = "they/it"
+    case "ts":
+        pronoun = "they/she"
+    case "tt":
+        pronoun = "they/them"
+    case "any":
+        pronoun = "any/any"
     default:
         pronoun = nil
     }

@@ -41,6 +41,8 @@ extension ChannelView {
                 channelID: Binding.constant(channelID),
                 chatText: Binding.constant("Message #\(channelName)"),
                 replyingTo: $replyingTo,
+                fileUpload: $fileUpload,
+                fileUploadURL: $fileUploadURL,
                 users: Binding.constant(viewModel.messages.compactMap { $0.author })
             )
             .padding(13)
