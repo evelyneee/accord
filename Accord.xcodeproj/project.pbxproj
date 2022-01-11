@@ -112,9 +112,16 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
+		490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AB4278D21FD00EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; path = "../Release/me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AB5278D21FD00EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; path = "../Release/me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AB6278D21FD00EA4F31 /* Accord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Accord.app; path = ../Release/Accord.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AB7278D21FD00EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; name = Accord_1.0.0_Universal.zip; path = ../Release/Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
+		490B2AB8278D220E00EA4F31 /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = ../Release/Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
-		49F29FAF26A0A53B00C1205A /* Accord.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = Accord.deb; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
@@ -239,9 +246,8 @@
 		32F4C958256D7D3300343BB3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32F4C957256D7D3300343BB3 /* Accord.app */,
-				49F29FAE26A0A52900C1205A /* Accord */,
-				49F29FAF26A0A53B00C1205A /* Accord.deb */,
+				490B2AAE278D20B100EA4F31 /* Debug */,
+				490B2AAD278D20AA00EA4F31 /* Release */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -261,6 +267,30 @@
 				9ED6F671273702040009C78C /* dpkg */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		490B2AAD278D20AA00EA4F31 /* Release */ = {
+			isa = PBXGroup;
+			children = (
+				490B2AB6278D21FD00EA4F31 /* Accord.app */,
+				490B2AB8278D220E00EA4F31 /* Accord */,
+				490B2AB7278D21FD00EA4F31 /* Accord_1.0.0_Universal.zip */,
+				490B2AB4278D21FD00EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */,
+				490B2AB5278D21FD00EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */,
+			);
+			name = Release;
+			sourceTree = "<group>";
+		};
+		490B2AAE278D20B100EA4F31 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				32F4C957256D7D3300343BB3 /* Accord.app */,
+				49F29FAE26A0A52900C1205A /* Accord */,
+				490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */,
+				490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */,
+				490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */,
+			);
+			name = Debug;
 			sourceTree = "<group>";
 		};
 		9E39B26627869C4800069424 /* Accessories */ = {
@@ -568,7 +598,6 @@
 			mainGroup = 32F4C94E256D7D3300343BB3;
 			packageReferences = (
 			);
-			productRefGroup = 32F4C958256D7D3300343BB3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
