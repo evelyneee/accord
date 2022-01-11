@@ -80,8 +80,7 @@ final class ImageLoaderAndCache: ObservableObject {
         imageQueue.async { [weak self] in
             if self?.size?.width == 350 { print("loading attachment") }
             self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
-                .replaceError(with: NSImage())
-                .replaceNil(with: NSImage())
+                .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .sink { img in DispatchQueue.main.async { self?.image = img } }
         }
     }

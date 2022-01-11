@@ -188,7 +188,7 @@ final class Gateway {
                     "client_build_number": dscVersion,
                     "client_version": "0.0.264",
                     "os_version": NSWorkspace.kernelVersion,
-                    "os_arch": NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
+                    "os_arch": "x64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")"
                 ]
             ]

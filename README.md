@@ -34,5 +34,4 @@ Welcome to the first Accord beta.
 
 This beta has a few known issues: 
 - Many features are disabled due to them being unfinished
-- Login will not work in a new location. To log in, you must open a private browser tab, log in to the account and try again.
-- 
+- Login will not work in a new location. To log in, you must open a private browser tab, log in to the account and try again

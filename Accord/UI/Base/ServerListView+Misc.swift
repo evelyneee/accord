@@ -71,15 +71,20 @@ extension ServerListView {
                 guild.channels = temp
             }
         }
-        let messageDict = Self.privateChannels.enumerated().compactMap { (index, element) in
+    }
+    func assignPrivateReadStates() {
+        let messageDict = Self.readStates.enumerated().compactMap { (index, element) in
             return [element.id: index]
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
+        print(messageDict)
         for channel in Self.privateChannels {
-            if let index = messageDict[channel.id], channel.type != .section || channel.type != .stage || channel.type != .voice {
-                channel.read_state = readState.entries[index]
+            if let index = messageDict[channel.id] {
+                print("Assigned to private channel")
+                channel.read_state = Self.readStates[index]
             }
         }
+        Self.readStates.removeAll()
     }
 }

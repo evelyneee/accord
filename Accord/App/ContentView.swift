@@ -45,7 +45,7 @@ struct ContentView: View {
                                 print(error)
                                 break
                             }
-                        }, receiveValue: { d in
+                        }) { d in
                             AccordCoreVars.user = d.user
                             user_id = d.user.id
                             if let pfp = d.user.avatar {
@@ -59,7 +59,7 @@ struct ContentView: View {
                                     loaded = true
                                 }
                             })
-                        })
+                        }
                         .store(in: &wsCancellable)
                     print("init")
                     wss = new

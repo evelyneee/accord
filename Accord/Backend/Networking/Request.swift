@@ -77,7 +77,7 @@ final class Headers {
             "release_channel":"stable",
             "client_version":"0.0.264",
             "os_version":NSWorkspace.kernelVersion,
-            "os_arch":NSRunningApplication.current.executableArchitecture == NSBundleExecutableArchitectureX86_64 ? "x64" : "arm64",
+            "os_arch":"x64",
             "system_locale":"\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
             "client_build_number":dscVersion,
             "client_event_source":NSNull()
@@ -263,9 +263,13 @@ final public class Request {
 
 final public class RequestPublisher {
 
-    static var EmptyImagePublisher: AnyPublisher<NSImage?, Error> = {
-        return Empty<NSImage?, Error>.init().eraseToAnyPublisher()
+    static var EmptyImagePublisher: AnyPublisher<NSImage, Error> = {
+        return Empty<NSImage, Error>.init().eraseToAnyPublisher()
     }()
+    
+    enum ImageErrors: Error {
+        case noImage
+    }
 
     // MARK: - Get a publisher for the request
     class func fetch<T: Decodable>(_ type: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) -> AnyPublisher<T, Error> {
@@ -302,22 +306,21 @@ final public class RequestPublisher {
     }
 
     // MARK: - Combine Image getter
-    class func image(url: URL?, to size: CGSize? = nil) -> AnyPublisher<NSImage?, Error> {
+    class func image(url: URL?, to size: CGSize? = nil) -> AnyPublisher<NSImage, Error> {
         guard let url = url else { return EmptyImagePublisher }
         let request = URLRequest(url: url)
-        if let cachedImage = cache.cachedResponse(for: request) {
-            let img = NSImage(data: cachedImage.data)
+        if let cachedImage = cache.cachedResponse(for: request), let img = NSImage(data: cachedImage.data) {
             return Just.init(img).eraseToAny()
         }
         return URLSession.shared.dataTaskPublisher(for: url)
-            .map { (data, response) -> NSImage? in
+            .tryMap { (data, response) -> NSImage in
                 if let size = size, let downsampled = data.downsample(to: size), let image = NSImage(data: downsampled) {
                     cache.storeCachedResponse(CachedURLResponse(response: response, data: downsampled), for: request)
                     return image
                 } else if let image = NSImage(data: data) {
                     cache.storeCachedResponse(CachedURLResponse(response: response, data: data), for: request)
                     return image
-                } else { return nil }
+                } else { throw ImageErrors.noImage }
             }
             .debugWarnNoMainThread()
             .eraseToAny()

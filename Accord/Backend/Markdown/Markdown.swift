@@ -75,16 +75,16 @@ final public class Markdown {
         let emoteIDs = word.matches(for: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
         if let id = emoteIDs.first, let emoteURL = URL(string: "https://cdn.discordapp.com/emojis/\(id).png?size=16") {
             return RequestPublisher.image(url: emoteURL)
-                .replaceNil(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
+                .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
-                .eraseToAnyPublisher()
+                .eraseToAny()
         }
         let inlineImages = word.matches(for: #"(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpg|gif|png))(?:\?([^#]*))?(?:#(.*))?"#).filter { $0.contains("nitroless") || $0.contains("emote") || $0.contains("emoji") } // nitroless emoji
         if let url = inlineImages.first, let emoteURL = URL(string: url) {
             return RequestPublisher.image(url: emoteURL)
-                .replaceNil(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
+                .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
-                .eraseToAnyPublisher()
+                .eraseToAny()
         }
         return Deferred { Future { promise in
             let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)

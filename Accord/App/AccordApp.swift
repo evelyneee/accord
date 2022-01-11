@@ -25,7 +25,7 @@ struct AccordApp: App {
                     ContentView(loaded: $loaded)
                         .frame(minWidth: 800, minHeight: 600)
                         .preferredColorScheme(darkMode ? .dark : nil)
-                        .onAppear(perform: {
+                        .onAppear {
                             // AccordCoreVars.loadVersion()
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
@@ -36,18 +36,18 @@ struct AccordApp: App {
                                 self.windowHeight = 800
                             }
                             appDelegate.fileNotifications()
-                            DispatchQueue.main.asyncAfter(deadline: .now(), execute: {
+                            DispatchQueue.main.async {
                                 NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
-                            })
-                        })
-                        .onDisappear(perform: {
+                            }
+                        }
+                        .onDisappear {
                             loaded = false
                             UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
                             UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
-                        })
-                        .sheet(isPresented: $popup, onDismiss: {}, content: {
+                        }
+                        .sheet(isPresented: $popup, onDismiss: {}) {
                             SearchView()
-                        })
+                        }
                 }
             }
         }
@@ -91,9 +91,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSWorkspace.willSleepNotification, object: nil)
         NotificationCenter.default.addObserver(forName: NSNotification.Name.init(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil, using: { notif in
             print("Song Changed")
-            DispatchQueue.global().asyncAfter(deadline: .now() + 2, execute: {
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
                 MediaRemoteWrapper.updatePresence()
-            })
+            }
         })
     }
 }

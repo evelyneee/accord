@@ -86,6 +86,8 @@ struct ServerListView: View {
         Self.folders = folderTemp
         assignReadStates(full: full)
         order(full: full)
+        Self.readStates = full?.read_state?.entries ?? []
+        print(Self.readStates)
         concurrentQueue.async {
             guard let guilds = full?.guilds else { return }
             roleColors = RoleManager.arrangeRoleColors(guilds: guilds)
@@ -99,6 +101,7 @@ struct ServerListView: View {
     @State var alert: Bool = true
     public static var folders: [GuildFolder] = []
     public static var privateChannels: [Channel] = []
+    internal static var readStates: [ReadStateEntry] = []
     @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
@@ -329,6 +332,9 @@ struct ServerListView: View {
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
                             Self.privateChannels = channels
+                            concurrentQueue.async {
+                                assignPrivateReadStates()
+                            }
                         }
                         Notifications.privateChannels = Self.privateChannels.map { $0.id }
                     } else if let error = error {

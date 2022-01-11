@@ -23,11 +23,17 @@ final class Embed: Codable, Hashable, Identifiable {
 //    var video?    embe
 //    var provider?    eion
 //    var author?    emb
-//    var fields?
+    var fields: [EmbedField]?
     var id: String? = UUID().uuidString
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+final class EmbedField: Codable {
+    var name: String
+    var inline: Bool?
+    var value: String
 }
 
 class EmbedImage: Codable {

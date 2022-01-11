@@ -85,17 +85,19 @@ struct MessageCellView: View {
                     .if(!hovered, transform: { $0.opacity(0) } )
                     .frame(height: 10)
             }
-            ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
-                HStack(spacing: 4) {
-                    Attachment("https://cdn.discordapp.com/emojis/\(reaction.emoji.id ?? "").png?size=16")
-                        .frame(width: 16, height: 16)
-                    Text(String(reaction.count))
-                        .fontWeight(Font.Weight.medium)
+            HStack {
+                ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
+                    HStack(spacing: 4) {
+                        Attachment("https://cdn.discordapp.com/emojis/\(reaction.emoji.id ?? "").png?size=16")
+                            .frame(width: 16, height: 16)
+                        Text(String(reaction.count))
+                            .fontWeight(Font.Weight.medium)
+                    }
+                    .padding(4)
+                    .background(Color(NSColor.windowBackgroundColor))
+                    .cornerRadius(4)
+                    .padding(.leading, 41)
                 }
-                .padding(4)
-                .background(Color(NSColor.windowBackgroundColor))
-                .cornerRadius(4)
-                .padding(.leading, 41)
             }
             ForEach(message.embeds ?? [], id: \.id) { embed in
                 EmbedView(embed: embed).equatable()
@@ -109,6 +111,7 @@ struct MessageCellView: View {
             }
             AttachmentView(media: message.attachments)
                 .padding(.leading, 41)
+                .padding(.top, 5)
         }
         .id(message.id)
         .onAppear {
@@ -125,26 +128,38 @@ struct MessageCellView: View {
             colorQueue.async {
                 if let role = role, let color = roleColors[role]?.0 {
                     let hex = String(format: "%06X", color)
-                    self.color = Color.init(hex: hex)
-                }
-                if let role = replyRole, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    self.replyColor = Color.init(hex: hex)
-                }
-            }
-        }
-        .onChange(of: self.role, perform: { _ in
-            colorQueue.async {
-                if let role = role, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    withAnimation {
-                        self.color = Color.init(hex: hex)
+                    let color = Color.init(hex: hex)
+                    DispatchQueue.main.async {
+                        self.color = color
                     }
                 }
                 if let role = replyRole, let color = roleColors[role]?.0 {
                     let hex = String(format: "%06X", color)
-                    withAnimation {
-                        self.replyColor = Color.init(hex: hex)
+                    let color = Color.init(hex: hex)
+                    DispatchQueue.main.async {
+                        self.replyColor = color
+                    }
+                }
+            }
+        }
+        .onChange(of: self.role, perform: { new in
+            colorQueue.async {
+                if let role = new, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    let color = Color.init(hex: hex)
+                    DispatchQueue.main.async {
+                        self.color = color
+                    }
+                }
+            }
+        })
+        .onChange(of: self.replyRole, perform: { new in
+            colorQueue.async {
+                if let role = new, let color = roleColors[role]?.0 {
+                    let hex = String(format: "%06X", color)
+                    let color = Color.init(hex: hex)
+                    DispatchQueue.main.async {
+                        self.replyColor = color
                     }
                 }
             }
