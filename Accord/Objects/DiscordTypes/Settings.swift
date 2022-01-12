@@ -16,6 +16,7 @@ class Settings: Decodable {
     var inline_embed_media: Bool?
     var inline_attachment_media: Bool?
     var guild_positions: [String]
+    @IgnoreFailure
     var guild_folders: [GuildFolder]
     var gif_auto_play: Bool?
     var custom_status: Status?
@@ -29,7 +30,7 @@ class Settings: Decodable {
 
 final class GuildFolder: Decodable, Hashable {
     internal init(id: Int? = nil, name: String? = nil, color: Int? = nil, guild_ids: [String]) {
-        self.id = String(id)
+        self.id = id
         self.name = name
         self.color = color
         self.guild_ids = guild_ids
@@ -38,7 +39,7 @@ final class GuildFolder: Decodable, Hashable {
     static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
         return lhs.guild_ids == rhs.guild_ids
     }
-    var id: String?
+    var id: Int?
     var name: String?
     var color: Int?
     var guild_ids: [String]
