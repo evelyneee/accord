@@ -32,7 +32,7 @@ struct MessageCellView: View {
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
                     Text(replyNick ?? reply.author?.username ?? "")
-                        .foregroundColor(replyColor)
+                        .foregroundColor(replyRole != nil && roleColors[replyRole!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[replyRole!]!.0) : Color(NSColor.textColor))
                         .fontWeight(.semibold)
                     if #available(macOS 12.0, *) {
                         Text(try! AttributedString(markdown: reply.content))
@@ -61,7 +61,7 @@ struct MessageCellView: View {
                         textElement?.padding(.leading, 41) ?? Text(message.content).padding(.leading, 41)
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
-                            .foregroundColor(color)
+                            .foregroundColor(role != nil && roleColors[role!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[role!]!.0) : Color(NSColor.textColor))
                             .fontWeight(.semibold)
                         +
                         Text("  \(message.timestamp.makeProperDate())")
@@ -125,45 +125,7 @@ struct MessageCellView: View {
                     })
                     .store(in: &bag)
             }
-            colorQueue.async {
-                if let role = role, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    let color = Color.init(hex: hex)
-                    DispatchQueue.main.async {
-                        self.color = color
-                    }
-                }
-                if let role = replyRole, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    let color = Color.init(hex: hex)
-                    DispatchQueue.main.async {
-                        self.replyColor = color
-                    }
-                }
-            }
         }
-        .onChange(of: self.role, perform: { new in
-            colorQueue.async {
-                if let role = new, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    let color = Color.init(hex: hex)
-                    DispatchQueue.main.async {
-                        self.color = color
-                    }
-                }
-            }
-        })
-        .onChange(of: self.replyRole, perform: { new in
-            colorQueue.async {
-                if let role = new, let color = roleColors[role]?.0 {
-                    let hex = String(format: "%06X", color)
-                    let color = Color.init(hex: hex)
-                    DispatchQueue.main.async {
-                        self.replyColor = color
-                    }
-                }
-            }
-        })
         .onHover { val in
             self.hovered = val
         }

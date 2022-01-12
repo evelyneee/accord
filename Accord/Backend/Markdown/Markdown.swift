@@ -86,7 +86,7 @@ final public class Markdown {
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
                 .eraseToAny()
         }
-        return Deferred { Future { promise in
+        return Future { promise in
             let mentions = word.matches(for: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
             let channels = word.matches(for: ##"(?<=\#)(\d+)(.+?)(?=\>)"##)
             let songIDs = word.matches(for: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
@@ -128,7 +128,7 @@ final public class Markdown {
             } catch {
                 return promise(.success(Text(word) + Text(" ")))
             }
-        } }.eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
     }
 
     /**
