@@ -29,7 +29,7 @@ class Settings: Decodable {
 
 final class GuildFolder: Decodable, Hashable {
     internal init(id: Int? = nil, name: String? = nil, color: Int? = nil, guild_ids: [String]) {
-        self.id = id
+        self.id = String(id)
         self.name = name
         self.color = color
         self.guild_ids = guild_ids
@@ -38,7 +38,7 @@ final class GuildFolder: Decodable, Hashable {
     static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
         return lhs.guild_ids == rhs.guild_ids
     }
-    var id: Int?
+    var id: String?
     var name: String?
     var color: Int?
     var guild_ids: [String]
