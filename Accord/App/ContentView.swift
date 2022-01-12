@@ -10,14 +10,17 @@ import Combine
 
 struct ContentView: View {
     @State var modalIsPresented: Bool = false
+    @State var showErrorAlert: Bool = false
+    // If an error gets encountered, set it's value to errorStr
+    @State var errorStr: String?
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
     @State var serverListView: ServerListView?
-
+    
     enum LoadErrors: Error {
         case alreadyLoaded
     }
-
+    
     var body: some View {
         Group {
             if modalIsPresented {
@@ -42,7 +45,8 @@ struct ContentView: View {
                             case .finished:
                                 break
                             case .failure(let error):
-                                print(error)
+                                errorStr = error.localizedDescription
+                                showErrorAlert = true
                                 break
                             }
                         }) { d in
@@ -76,10 +80,18 @@ struct ContentView: View {
                             }
                         })
                     } catch {
-                        print(error)
+                        showErrorAlert = true
+                        errorStr = error.localizedDescription
                     }
                 }
             }
+        }
+        .alert(isPresented: $showErrorAlert) {
+            // Due to the fact that Accord supports Big Sur
+            // We will have to use this deprecated struct
+            Alert(title: Text("Error Encountered"), message: Text("Error encountered: \(errorStr ?? "Unknown Error")"), dismissButton: nil)
+        }.onAppear {
+            print(errorStr ?? "Unknown Error Occured")
         }
     }
 }
