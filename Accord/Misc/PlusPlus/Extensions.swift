@@ -339,4 +339,14 @@ extension NSWorkspace {
         sysctlbyname("kern.osrelease", &vers, &size, nil, 0)
         return String(cString: vers)
     }
+    
+    static var deviceArch: String {
+        guard let archCString = NXGetLocalArchInfo().pointee.name else {
+            return "x86" // use x86 as a fallback if we can't get the local arch
+        }
+        
+        let archString = String(cString: archCString)
+        print("archStr: \(archString)")
+        return archString.contains("x86") ? "x86" : "arm"
+    }
 }
