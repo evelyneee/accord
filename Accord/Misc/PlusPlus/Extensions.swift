@@ -346,7 +346,6 @@ extension NSWorkspace {
         }
         
         let archString = String(cString: archCString)
-        print("archStr: \(archString)")
         return archString.contains("x86") ? "x86" : "arm"
     }
 }
