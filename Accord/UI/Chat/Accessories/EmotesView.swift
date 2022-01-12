@@ -15,18 +15,8 @@ struct EmotesView: View, Equatable {
     }
 
     @State var searchenabled = true
-    var columns: [GridItem] = [
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0),
-        GridItem(spacing: 0)
-    ]
+    var columns: [GridItem] = Array(repeating: GridItem(spacing: 0), count: 9)
+    
     @Binding var chatText: String
     @State var SearchText: String = ""
     @State var minimumWidth = 275
