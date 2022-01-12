@@ -34,6 +34,7 @@ extension ServerListView {
     }
     func order(full: GatewayD?) {
         for guild in full?.guilds ?? [] {
+            let rejects = guild.channels?.filter { $0.parent_id == nil && $0.type != .section }
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             let parents: [Channel] = guild.channels?.filter({ $0.type == .section }) ?? []
             let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []
@@ -43,6 +44,7 @@ extension ServerListView {
                 ret.append(id)
                 ret.append(contentsOf: matching ?? [])
             }
+            ret.insert(contentsOf: rejects ?? [], at: 0)
             guild.channels = ret
         }
     }
