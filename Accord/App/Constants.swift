@@ -48,15 +48,14 @@ final class AccordCoreVars {
     public static var plugins: [AccordPlugin] = []
 
     func loadPlugins() {
-        let path = FileManager.default.urls(for: .documentDirectory,
+        let url = FileManager.default.urls(for: .documentDirectory,
                                                in: .userDomainMask)[0]
-        let directoryContents = try! FileManager.default.contentsOfDirectory(at: path, includingPropertiesForKeys: nil)
-        for item in directoryContents {
-            if item.isFileURL {
-                let plugin = Plugins().loadView(url: String(item.absoluteString.dropFirst(7)))
-                Self.plugins.append(plugin!)
-            }
-        }
+        
+        let directoryContents = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+        let pluginsFromDirectoryContents = directoryContents
+            .filter { $0.isFileURL }
+            .compactMap { Plugins().loadView(url: String($0.absoluteString.dropFirst(7))) }
+        Self.plugins.append(contentsOf: pluginsFromDirectoryContents)
     }
     class func loadVersion() {
         concurrentQueue.async {
