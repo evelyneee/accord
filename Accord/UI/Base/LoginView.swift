@@ -21,6 +21,21 @@ enum DiscordLoginErrors: Error {
     case missingFields
 }
 
+extension DiscordLoginErrors: CustomStringConvertible, LocalizedError {
+    var description: String {
+        switch self {
+        case .invalidForm:
+            return "Invalid Password/Email combination Entered"
+        case .missingFields:
+            return "Missing fields"
+        }
+    }
+    
+    var errorDescription: String? {
+        return description
+    }
+}
+
 extension NSApplication {
     func restart() {
         let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
@@ -77,20 +92,20 @@ struct LoginView: View {
                         }
                         .controlSize(.large)
                         Button("Login") {
+                            error = ""
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
                                 KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                             } else {
-                                do {
-                                    try viewModel.login(email, password, twofactor)
-                                } catch {
-                                    switch error {
-                                    case DiscordLoginErrors.invalidForm:
-                                        self.error = "Invalid login and/or password"
-                                    default:
-                                        self.error = "An error occured"
+                                if email.isEmpty || password.isEmpty {
+                                    self.error = "Must provide both Email AND Password if the user is not logging in with a token"
+                                    return
+                                }
+                                viewModel.login(usingEmail: email, withPassword: password, twoFactorCode: twofactor) { errorEncountered in
+                                    if let errorEncountered = errorEncountered {
+                                        error = errorEncountered.localizedDescription
                                     }
                                 }
                             }
@@ -102,7 +117,7 @@ struct LoginView: View {
                 }
                 .transition(AnyTransition.moveAway)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-
+                
             case .captcha:
                 CaptchaViewControllerSwiftUI(token: captchaPublicKey)
                     .transition(AnyTransition.moveAway)
@@ -121,12 +136,12 @@ struct LoginView: View {
                         Button("Login") {
                             if let ticket = viewModel.ticket {
                                 Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                    token: AccordCoreVars.token,
-                                    bodyObject: ["code": twofactor, "ticket": ticket],
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    json: true
-                                )) { value, error in
+                                                                                                                                                 token: AccordCoreVars.token,
+                                                                                                                                                 bodyObject: ["code": twofactor, "ticket": ticket],
+                                                                                                                                                 type: .POST,
+                                                                                                                                                 discordHeaders: true,
+                                                                                                                                                 json: true
+                                                                                                                                                )) { value, error in
                                     if let token = value?.token {
                                         KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
                                         AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -170,13 +185,13 @@ struct LoginView: View {
                                 }
                                 if let response = response, let ticket = response.ticket {
                                     Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                        contentType: "application/json",
-                                        token: AccordCoreVars.token,
-                                        bodyObject: ["code": twofactor, "ticket": ticket],
-                                        type: .POST,
-                                        discordHeaders: true,
-                                        json: true
-                                    )) { value, _ in
+                                                                                                                                                     contentType: "application/json",
+                                                                                                                                                     token: AccordCoreVars.token,
+                                                                                                                                                     bodyObject: ["code": twofactor, "ticket": ticket],
+                                                                                                                                                     type: .POST,
+                                                                                                                                                     discordHeaders: true,
+                                                                                                                                                     json: true
+                                                                                                                                                    )) { value, _ in
                                         if let token = value?.token {
                                             KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                             AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
@@ -198,7 +213,7 @@ struct LoginView: View {
                     }
                 }
             }
-
+            
         }
         .frame(width: 500, height: 275)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
@@ -211,20 +226,19 @@ struct LoginView: View {
 }
 
 final class LoginViewViewModel: ObservableObject {
-
+    
     @Published var state: LoginState = .initial
     @Published var captcha: Bool = false
     @Published var captchaVCKey: String?
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
-
+    
     init() {
-
+        
     }
-
-    func login(_ email: String, _ password: String, _ twofactor: String) throws {
-        var loginError: Error?
-        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
+    
+    func login(usingEmail email: String, withPassword password: String, twoFactorCode: String, completionHandler: @escaping (Error?) -> Void) {
+        let headers = Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
             bodyObject: [
@@ -234,19 +248,26 @@ final class LoginViewViewModel: ObservableObject {
             type: .POST,
             discordHeaders: true,
             json: true
-        )) { response, error in
-            if let response = response {
-                if let error = response.message {
-                    switch error {
-                    case "Invalid Form Body":
-                        loginError = DiscordLoginErrors.invalidForm
-                    default:
-                        loginError = DiscordLoginErrors.invalidForm
-                    }
+        )
+        
+        print("initialized headers..")
+        
+        Request.fetch(
+            LoginResponse.self,
+            url: URL(string: "https://discord.com/api/v9/auth/login"),
+            headers: headers) { response, error in
+                guard let response = response, error == nil else {
+                    return completionHandler(error)
                 }
-                if let checktoken = response.token {
-                    KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                
+                if let message = response.message, message.contains("Invalid Form Body") {
+                    return completionHandler(DiscordLoginErrors.invalidForm)
+                }
+                
+                if let responseToken = response.token {
+                    KeychainManager.save(key: "red.evelyn.accord.token", data: responseToken.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    // TO DO: Make the following lines a function because its repeated like 4 times.. evelyn wtf are you doing girl
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                     let task = Process()
@@ -267,14 +288,7 @@ final class LoginViewViewModel: ObservableObject {
                         print("[Login debug] Got ticket")
                     }
                 }
-            } else if let error = error {
-                print(error)
-                loginError = error
             }
-        }
-        if let loginError = loginError {
-            throw loginError
-        }
     }
 }
 
@@ -285,24 +299,24 @@ extension AnyTransition {
 }
 
 struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
-
+    
     init(token: String) {
         self.siteKey = token
         print(token, siteKey)
     }
     let siteKey: String
-
+    
     func makeNSView(context: Context) -> WKWebView {
-
+        
         var webView = WKWebView()
         let webConfiguration = WKWebViewConfiguration()
         let contentController = WKUserContentController()
         let scriptHandler = ScriptHandler()
         contentController.add(scriptHandler, name: "hCaptcha")
         webConfiguration.userContentController = contentController
-
+        
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-
+        
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: webView.topAnchor),
@@ -315,9 +329,9 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         }
         return webView
     }
-
+    
     func updateNSView(_ nsView: WKWebView, context: Context) {
-
+        
     }
 }
 
@@ -365,7 +379,7 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
  */
 
 extension CaptchaViewControllerSwiftUI {
-
+    
     private var generateHTML: String {
         return """
         <html>
