@@ -78,7 +78,7 @@ struct ChannelView: View, Equatable {
                     ForEach($viewModel.messages, id: \.identifier) { $message in
                         MessageCellView(message: message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
                     }
-                    Spacer().frame(height: 90)
+                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                 }
                 blurredTextField
             }

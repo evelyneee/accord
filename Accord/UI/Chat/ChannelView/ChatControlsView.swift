@@ -35,6 +35,8 @@ struct ChatControls: View {
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
     weak var textField: NSTextField?
+    @State private var observation: NSKeyValueObservation?
+    @State var percent: String? = nil
 
     fileprivate func uploadFile(temp: String, url: URL? = nil) {
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages")!)
@@ -60,8 +62,15 @@ struct ChatControls: View {
         body.append(string: "\r\n", encoding: .utf8)
         body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
         request.httpBody = body
-        URLSession.shared.dataTask(with: request, completionHandler: { (_: Data?, _: URLResponse?, _: Error?) in
-        }).resume()
+        let task = URLSession.shared.dataTask(with: request)
+        observation = task.progress.observe(\.fractionCompleted) { progress, _ in
+            self.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
+            if progress.fractionCompleted == 1.0 {
+                self.observation = nil
+                self.percent = nil
+            }
+        }
+        task.resume()
     }
     func send() {
         guard viewModel.textFieldContents != "" else { return }
@@ -190,13 +199,13 @@ struct ChatControls: View {
                     }
                     HStack {
                         if #available(macOS 12.0, *) {
-                            TextField(chatText, text: $viewModel.textFieldContents)
+                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents)
                                 .onSubmit {
                                     typing = false
                                     send()
                                 }
                         } else {
-                            TextField(chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
+                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
                             }, onCommit: {
                                 typing = false
                                 send()
