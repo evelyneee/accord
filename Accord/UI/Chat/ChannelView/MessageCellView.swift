@@ -118,11 +118,11 @@ struct MessageCellView: View {
             textQueue.async { [unowned message] in
                 Markdown.markAll(text: message.content, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
                     .replaceError(with: Text(""))
-                    .sink(receiveValue: { text in
+                    .sink { text in
                         DispatchQueue.main.async {
                             self.textElement = text
                         }
-                    })
+                    }
                     .store(in: &bag)
             }
         }
