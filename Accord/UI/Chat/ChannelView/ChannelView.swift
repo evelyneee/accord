@@ -75,11 +75,43 @@ struct ChannelView: View, Equatable {
         HStack {
             ZStack(alignment: .bottom) { [weak viewModel] in
                 List {
-                    ForEach($viewModel.messages, id: \.identifier) { $message in
-                        MessageCellView(message: message, nick: viewModel?.nicks[message.author?.id ?? ""], replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""], pronouns: viewModel?.pronouns[message.author?.id ?? ""], role: $viewModel.roles[message.author?.id ?? ""], replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""], replyingTo: $replyingTo)
-                    }
                     Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
+                    ForEach($viewModel.messages, id: \.identifier) { $message in
+                        if let author = message.author {
+                            MessageCellView(
+                                message: message,
+                                nick: viewModel?.nicks[author.id],
+                                replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
+                                pronouns: viewModel?.pronouns[author.id],
+                                role: $viewModel.roles[author.id],
+                                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+                                replyingTo: $replyingTo
+                            )
+                            .contextMenu { [weak message] in
+                                Button("Reply") {
+                                    replyingTo = message
+                                }
+                                Button("Delete") {
+                                    message?.delete()
+                                }
+                                Button("Copy") {
+                                    guard let content = message?.content else { return }
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(content, forType: .string)
+                                }
+                                Button("Copy Message Link") {
+                                    guard let channelID = message?.channel_id, let id = message?.id else { return }
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
+                                }
+                            }
+                        }
+                    }
+                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                    .rotationEffect(.init(degrees: 180))
                 }
+                .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                .rotationEffect(.init(degrees: 180))
                 blurredTextField
             }
             if memberListShown {
@@ -100,8 +132,8 @@ struct ChannelView: View, Equatable {
                 .sink { msg, channelID in
                     guard channelID == self.channelID else { return }
                     webSocketQueue.async { [weak viewModel] in
-                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d else { return }
-                        guard memberDecodable.user_id != AccordCoreVars.user?.id else { return }
+                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
+                                memberDecodable.user_id != AccordCoreVars.user?.id else { return }
                         let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
                         if !(typing.contains(isKnownAs)) {
                             typing.append(isKnownAs)

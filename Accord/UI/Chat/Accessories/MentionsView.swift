@@ -15,7 +15,15 @@ struct MentionsView: View {
     @Binding var replyingTo: Message?
     var body: some View {
         List($mentions, id: \.id) { $message in
-            MessageCellView(message: message, nick: nil, replyNick: nil, pronouns: nil, role: Binding.constant(nil), replyRole: Binding.constant(nil), replyingTo: $replyingTo)
+            MessageCellView(
+                message: message,
+                nick: nil,
+                replyNick: nil,
+                pronouns: nil,
+                role: Binding.constant(nil),
+                replyRole: Binding.constant(nil),
+                replyingTo: $replyingTo
+            )
         }
         .onAppear(perform: {
             messageFetchQueue.async {

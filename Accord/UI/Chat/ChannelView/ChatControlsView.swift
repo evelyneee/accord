@@ -185,12 +185,12 @@ struct ChatControls: View {
                                     }
                                     guard let id = channel?.id else { return }
                                     viewModel?.textFieldContents.append("<#\(id)>")
-                                }, label: { [weak channel] in
+                                }) { [weak channel] in
                                     HStack {
                                         Text(channel?.name ?? "Unknown Channel")
                                         Spacer()
                                     }
-                                })
+                                }
                                 .buttonStyle(.borderless)
                                 .padding(3)
                             }

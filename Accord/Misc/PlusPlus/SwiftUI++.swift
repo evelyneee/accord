@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import WebKit
 
 extension Button {
     init(action: @escaping () throws -> Void, catch: @escaping () -> Void, label: @escaping () -> Label) {
@@ -111,5 +112,39 @@ struct FastButton<Content: View>: View {
     var body: some View {
         label()
             .onTapGesture(perform: action)
+    }
+}
+
+struct WebVideoPlayer: NSViewRepresentable {
+
+    init(url: URL) {
+        self.url = url
+    }
+    
+    let url: URL
+
+    func makeNSView(context: Context) -> WKWebView {
+
+        var webView = WKWebView()
+        let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.mediaTypesRequiringUserActionForPlayback = []
+
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: webView.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: webView.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
+        ])
+        let html = "<video playsinline controls width=\"100%\" src=\"\(url.absoluteString)\"> </video>"
+        webView.loadHTMLString(html, baseURL: self.url)
+        print(html, webView)
+        return webView
+    }
+
+    func updateNSView(_ nsView: WKWebView, context: Context) {
+
     }
 }

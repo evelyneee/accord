@@ -23,7 +23,6 @@ struct MessageCellView: View {
     @State var replyColor: Color = Color(NSColor.textColor)
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
-    @State var hovered: Bool = false
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
@@ -80,11 +79,8 @@ struct MessageCellView: View {
                     }
                 }
                 Spacer()
-                // MARK: - Quick Actions
-                QuickActionsView(message: message, replyingTo: $replyingTo)
-                    .if(!hovered, transform: { $0.opacity(0) } )
-                    .frame(height: 10)
             }
+
             HStack {
                 ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
                     HStack(spacing: 4) {
@@ -125,9 +121,6 @@ struct MessageCellView: View {
                     }
                     .store(in: &bag)
             }
-        }
-        .onHover { val in
-            self.hovered = val
         }
     }
 }

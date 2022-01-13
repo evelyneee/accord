@@ -265,6 +265,7 @@ struct ServerListView: View {
                     }
                     .padding(.vertical)
                 }
+                .buttonStyle(BorderlessButtonStyle())
                 .frame(width: 80)
                 .padding(.top, 5)
                 Divider()
@@ -289,7 +290,6 @@ struct ServerListView: View {
             }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
-        .buttonStyle(BorderlessButtonStyle())
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             let uInfo = pub.userInfo as! [Int:Int]

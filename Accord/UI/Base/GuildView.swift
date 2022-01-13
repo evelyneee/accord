@@ -141,6 +141,7 @@ struct ServerListViewCell: View {
                 }) {
                     Image(systemName: "arrow.up.right.circle")
                 }
+                .buttonStyle(BorderlessButtonStyle())
             }
         }.onHover { val in
             self.hovered = val

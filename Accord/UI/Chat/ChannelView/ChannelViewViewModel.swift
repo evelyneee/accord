@@ -22,13 +22,8 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var pronouns: [String: String] = [:]
     var cancellable = Set<AnyCancellable>()
     
-    var offset: Float = 0
-
     var guildID: String
     var channelID: String
-
-    // save scrollview so we can scroll programmatically the good way
-    weak var scrollView: NSScrollView?
 
     init(channelID: String, guildID: String) {
         self.channelID = channelID
@@ -54,24 +49,14 @@ final class ChannelViewViewModel: ObservableObject {
                             self?.loadUser(for: user)
                         }
                     }
-                    if let firstMessage = self?.messages.last {
-                        message.lastMessage = firstMessage
+                    if let firstMessage = self?.messages.first {
+                        message.sameAuthor = firstMessage.author?.id == message.author?.id
                     }
                     DispatchQueue.main.async {
                         if let count = self?.messages.count, count == 50 {
-                            self?.messages.removeFirst()
+                            self?.messages.removeLast()
                         }
-                        self?.messages.append(message)
-                        if let view = self?.scrollView?.documentView {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak view] in
-                                if let floatValue = self?.scrollView?.verticalScroller?.floatValue, floatValue >= 0.8 && floatValue != 1.0, let height = view?.bounds.size.height {
-                                    withAnimation(Animation.linear) {
-                                        view?.scroll(NSPoint(x: 0, y: height))
-                                        view?.resignFirstResponder()
-                                    }
-                                }
-                            }
-                        }
+                        self?.messages.insert(message, at: 0)
                     }
                     guard let author = message.author,
                           let channelID = self?.channelID else { return }
@@ -153,7 +138,7 @@ final class ChannelViewViewModel: ObservableObject {
     }
     
     func ack(channelID: String, guildID: String) {
-        guard let last = messages.last?.id else { return }
+        guard let last = messages.first?.id else { return }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(last)/ack"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
@@ -163,12 +148,6 @@ final class ChannelViewViewModel: ObservableObject {
             referer: "https://discord.com/channels/\(guildID)/\(channelID)",
             json: true
         ))
-    }
-
-    func scrollTo(_ index: Int) {
-        guard let scrollView = scrollView else { return }
-        guard let height = scrollView.documentView?.bounds.height else { print("no position"); return }
-        scrollView.documentView?.scroll(NSPoint(x: 0, y: Int(height) / self.messages.count * index))
     }
 
     func getMessages(channelID: String, guildID: String) {
@@ -195,25 +174,16 @@ final class ChannelViewViewModel: ObservableObject {
         }) { msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
                 guard element != msg.last else { return element }
-                element.lastMessage = msg[index + 1]
+                element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 return element
             }
             DispatchQueue.main.async { [weak self] in
-                self?.messages = messages.reversed()
+                self?.messages = messages
                 messageFetchQueue.async {
                     guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
                     self?.loadPronouns()
                     self?.ack(channelID: channelID, guildID: guildID)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                    AppKitLink<NSScrollView>.introspect { scrollView, count in
-                        if let documentView = scrollView.documentView, count == 4 {
-                            print("[AppKitLink] Successfully found \(type(of: scrollView))")
-                            self?.scrollView = scrollView
-                            documentView.scroll(NSPoint(x: 0, y: documentView.bounds.size.height))
-                        }
-                    }
-                })
             }
         }
         .store(in: &cancellable)
@@ -290,19 +260,20 @@ final class ChannelViewViewModel: ObservableObject {
         for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
             let nickname = person.nick ?? person.user.username
             DispatchQueue.main.async {
-                self.nicks[(person.user.id)] = nickname
+                self.nicks[person.user.id] = nickname
             }
 
             if let roles = person.roles {
-                var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
-                for role in roles {
-                    if let roleColor = roleColors[role]?.1 {
-                        rolesTemp[roleColor] = role
+                print(person.user.username, roles)
+                for role in roles.sorted(by: { (lhs, rhs) -> Bool in
+                    guard let lhs = roleColors[lhs]?.1, let rhs = roleColors[rhs]?.1 else { return false }
+                    return lhs < rhs
+                }) {
+                    DispatchQueue.main.async {
+                        print(person.user.username, role)
+                        self.roles[person.user.id] = role
+                        return
                     }
-                }
-                let temp: [String] = rolesTemp.compactMap { $0 }.reversed()
-                DispatchQueue.main.asyncIf(temp.isEmpty) {
-                    self.roles[(person.user.id)] = temp[safe: 0]
                 }
             }
         }

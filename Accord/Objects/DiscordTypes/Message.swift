@@ -30,7 +30,6 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
     // var message_reference: Reply? // in the mentions endpoint
-    weak var lastMessage: Message?
     let sticker_items: [StickerItem]?
     var reactions: [Reaction]?
     
@@ -43,27 +42,32 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     }
 
     func delete() {
-        let headers = Headers(userAgent: discordUserAgent,
-                              contentType: nil,
-                              token: AccordCoreVars.token,
-                              type: .DELETE,
-                              discordHeaders: true,
-                              referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
-                              empty: true)
+        let headers = Headers(
+                        userAgent: discordUserAgent,
+                        contentType: nil,
+                        token: AccordCoreVars.token,
+                        type: .DELETE,
+                        discordHeaders: true,
+                        referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+                        empty: true
+                    )
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
     func edit(now: String) {
-        let headers = Headers(userAgent: discordUserAgent,
-                              contentType: nil,
-                              token: AccordCoreVars.token,
-                              bodyObject: ["content": now],
-                              type: .PATCH,
-                              discordHeaders: true,
-                              referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
-                              empty: true)
+        let headers = Headers(
+                        userAgent: discordUserAgent,
+                        token: AccordCoreVars.token,
+                        bodyObject: ["content": now],
+                        type: .PATCH,
+                        discordHeaders: true,
+                        referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+                        empty: true,
+                        json: true
+                    )
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
-    var isSameAuthor: Bool { lastMessage?.author?.id == self.author?.id }
+    var sameAuthor: Bool?
+    var isSameAuthor: Bool { self.sameAuthor ?? false }
 }
 
 final class Reply: Codable, Equatable, Identifiable, Hashable {
