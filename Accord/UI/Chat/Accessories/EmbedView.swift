@@ -14,7 +14,12 @@ struct EmbedView: View, Equatable {
         return true
     }
     
-    var columns: [GridItem] = Array(repeating: GridItem(), count: 4)
+    var columns: [GridItem] = [
+        GridItem(),
+        GridItem(),
+        GridItem(),
+        GridItem()
+    ]
     
     var body: some View {
         HStack(spacing: 0) {
