@@ -29,7 +29,6 @@ final class VisualStudioCodeRPC {
     }
 
     class func getRPCInfo() -> (file: String?, workspace: String?) {
-        print(self.getVSCodeWindowName())
         guard let name: String = self.getVSCodeWindowName().first else { return (file: nil, workspace: nil) }
         var array = [String]()
         if name.contains("—") {
