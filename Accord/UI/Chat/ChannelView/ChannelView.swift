@@ -154,6 +154,7 @@ struct ChannelView: View, Equatable {
                 .store(in: &viewModel.cancellable)
         }
         .onDisappear { [weak viewModel] in
+            ChannelMembers.shared.channelMembers.removeAll()
             viewModel?.cancellable.invalidateAll()
         }
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
@@ -241,3 +242,5 @@ struct MemberListView: View {
         }
     }
 }
+
+
