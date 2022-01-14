@@ -9,9 +9,6 @@ import Foundation
 import Combine
 import AppKit
 import SwiftUI
-#if DEBUG
-import os
-#endif
 
 public enum RequestTypes: String {
     case GET = "GET"

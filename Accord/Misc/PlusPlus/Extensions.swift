@@ -121,10 +121,7 @@ struct Folder<Content: View>: View {
 
     @State private var collapsed: Bool = true
 
-    let gridLayout: [GridItem] = [
-        GridItem(spacing: 0),
-        GridItem(spacing: 0)
-    ]
+    let gridLayout: [GridItem] = GridItem.multiple(count: 2, spacing: 0)
 
     var body: some View {
         VStack {
@@ -133,7 +130,7 @@ struct Folder<Content: View>: View {
                 label: {
                     VStack(spacing: 3) {
                         HStack(spacing: 3) {
-                            if let guild = icon[safe: 0], let icon = guild.icon {
+                            if let guild = icon.first, let icon = guild.icon {
                                 Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
                                     .clipShape(Circle())
                                     .frame(width: 16, height: 16)

@@ -45,14 +45,6 @@ struct ChannelView: View, Equatable {
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
-
-    var messageMap: [String: Int?] {
-        return viewModel.messages.enumerated().compactMap { (index, element) in
-            return [element.id: index]
-        }.reduce(into: [:]) { (result, next) in
-            result.merge(next) { (_, rhs) in rhs }
-        }
-    }
     
     @State var memberListShown: Bool = false
     @State var memberList = [OPSItems]()
@@ -63,7 +55,7 @@ struct ChannelView: View, Equatable {
     init(_ channel: Channel, _ guildName: String? = nil) {
         self.guildID = channel.guild_id ?? "@me"
         self.channelID = channel.id
-        self.channelName = channel.name ?? channel.recipients?[safe: 0]?.username ?? "Unknown channel"
+        self.channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
         self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
         if DiscordDesktopRPCEnabled {
@@ -233,7 +225,7 @@ struct MemberListView: View {
                     Text(ops.nick ?? ops.user.username)
                         .fontWeight(.medium)
                         .lineLimit(0)
-                    if let presence = ops.presence?.activities[safe: 0]?.state {
+                    if let presence = ops.presence?.activities.first?.state {
                         Text(presence).foregroundColor(.secondary)
                             .lineLimit(0)
                     }
@@ -242,5 +234,3 @@ struct MemberListView: View {
         }
     }
 }
-
-

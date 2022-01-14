@@ -148,3 +148,9 @@ struct WebVideoPlayer: NSViewRepresentable {
 
     }
 }
+
+extension GridItem {
+    static func multiple(count: Int, size: Self.Size = .flexible(), spacing: CGFloat? = nil, alignment: SwiftUI.Alignment? = nil) -> [GridItem] {
+        return Array.init(repeating: GridItem.init(size, spacing: spacing, alignment: alignment), count: count)
+    }
+}

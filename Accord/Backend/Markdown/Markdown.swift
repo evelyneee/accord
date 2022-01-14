@@ -109,17 +109,16 @@ final public class Markdown {
                 }
             }
             for id in mentions {
-                return promise(.success(Text("@\(members[id] ?? "Unknown user")").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                return promise(.success(Text("@\(members[id] ?? "Unknown user")").foregroundColor(id == user_id ? Color.yellow : Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             for id in channels {
                 let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == id } } }
-                let joined: Channel? = Array(Array(Array(matches).joined()).joined())[safe: 0]
+                let joined: Channel? = Array(Array(Array(matches).joined()).joined()).first
                 return promise(.success(Text("#\(joined?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             if word.contains("+") { // the markdown parser removes pluses??
                 return promise(.success(Text(word) + Text(" ")))
             }
-            assert(!Thread.isMainThread)
             do {
                 if #available(macOS 12, *) {
                     let markdown = try AttributedString(markdown: word)
@@ -128,7 +127,9 @@ final public class Markdown {
             } catch {
                 return promise(.success(Text(word) + Text(" ")))
             }
-        }.eraseToAnyPublisher()
+        }
+        .debugWarnNoMainThread()
+        .eraseToAnyPublisher()
     }
 
     /**
