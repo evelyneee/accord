@@ -75,6 +75,8 @@ struct ChannelView: View, Equatable {
                                 nick: viewModel?.nicks[author.id],
                                 replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
                                 pronouns: viewModel?.pronouns[author.id],
+                                avatar: viewModel?.avatars[author.id],
+                                guildID: guildID,
                                 role: $viewModel.roles[author.id],
                                 replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                                 replyingTo: $replyingTo

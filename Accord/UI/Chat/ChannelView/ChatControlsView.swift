@@ -76,7 +76,7 @@ struct ChatControls: View {
         guard viewModel.textFieldContents != "" else { return }
         messageSendQueue.async { [weak viewModel] in
             if viewModel?.textFieldContents == "/shrug" {
-                DispatchQueue.main.async {
+                DispatchQueue.main.sync {
                     viewModel?.textFieldContents = #"¯\_(ツ)_/¯"#
                 }
             }
@@ -89,7 +89,9 @@ struct ChatControls: View {
                 }
                 DispatchQueue.main.async {
                     viewModel?.textField?.becomeFirstResponder()
+                    viewModel?.textField?.allowsEditingTextAttributes = true
                 }
+                return
             } else {
                 if replyingTo != nil {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
@@ -108,7 +110,9 @@ struct ChatControls: View {
                     }
                     DispatchQueue.main.async {
                         viewModel?.textField?.becomeFirstResponder()
+                        viewModel?.textField?.allowsEditingTextAttributes = true
                     }
+                    return
                 } else {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
@@ -124,14 +128,10 @@ struct ChatControls: View {
                     }
                     DispatchQueue.main.async {
                         viewModel?.textField?.becomeFirstResponder()
+                        viewModel?.textField?.allowsEditingTextAttributes = true
                     }
+                    return
                 }
-            }
-            DispatchQueue.main.async {
-                viewModel?.textFieldContents = ""
-            }
-            DispatchQueue.main.async {
-                viewModel?.textField?.becomeFirstResponder()
             }
         }
     }

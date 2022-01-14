@@ -19,6 +19,7 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var messages = [Message]()
     @Published var nicks: [String: String] = [:]
     @Published var roles: [String: String] = [:]
+    @Published var avatars: [String: String] = [:]
     @Published var pronouns: [String: String] = [:]
     var cancellable = Set<AnyCancellable>()
     
@@ -73,9 +74,13 @@ final class ChannelViewViewModel: ObservableObject {
                     let allUsers: [GuildMember] = users.compactMap { $0 }
                     for person in allUsers {
                         wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
-                        let nickname = person.nick ?? person.user.username
-                        DispatchQueue.main.async {
-                            self.nicks[person.user.id] = nickname
+                        if let nickname = person.nick {
+                            DispatchQueue.main.async {
+                                self.nicks[person.user.id] = nickname
+                            }
+                        }
+                        if let avatar = person.avatar {
+                            self.avatars[person.user.id] = avatar
                         }
                         if let roles = person.roles {
                             var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
@@ -204,7 +209,9 @@ final class ChannelViewViewModel: ObservableObject {
         DispatchQueue.main.async {
             self.nicks[(person.user.id)] = nickname
         }
-
+        if let avatar = person.avatar {
+            self.avatars[person.user.id] = avatar
+        }
         if let roles = person.roles {
             var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
             for role in roles {
@@ -262,7 +269,9 @@ final class ChannelViewViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.nicks[person.user.id] = nickname
             }
-
+            if let avatar = person.avatar {
+                self.avatars[person.user.id] = avatar
+            }
             if let roles = person.roles {
                 print(person.user.username, roles)
                 for role in roles.sorted(by: { (lhs, rhs) -> Bool in

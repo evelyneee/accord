@@ -15,6 +15,8 @@ struct MessageCellView: View {
     var nick: String?
     var replyNick: String?
     var pronouns: String?
+    var avatar: String?
+    var guildID: String?
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
@@ -46,12 +48,14 @@ struct MessageCellView: View {
             HStack { [unowned message] in
                 if !message.isSameAuthor {
                     Button(action: {
+                        print("https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=24")
                         popup.toggle()
                     }) { [unowned message] in
-                        Attachment(pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
+                        Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=24" : pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                     }
+                    .buttonStyle(.borderless)
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor {

@@ -109,14 +109,14 @@ final public class Markdown {
                 }
             }
             for id in mentions {
-                return promise(.success(Text("@\(members[id] ?? "Unknown user")").foregroundColor(id == user_id ? Color.yellow : Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                return promise(.success(Text("@\(members[id] ?? "Unknown User")").foregroundColor(id == user_id ? Color.yellow : Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             for id in channels {
                 let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == id } } }
                 let joined: Channel? = Array(Array(Array(matches).joined()).joined()).first
                 return promise(.success(Text("#\(joined?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
-            if word.contains("+") { // the markdown parser removes pluses??
+            if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
             do {
@@ -143,7 +143,6 @@ final public class Markdown {
         let regex = #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#
         let words = line.ranges(of: regex, options: .regularExpression).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members) }
-        assert(!Thread.isMainThread)
         return Publishers.MergeMany(pubs)
             .collect()
             .eraseToAnyPublisher()

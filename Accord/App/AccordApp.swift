@@ -29,15 +29,18 @@ struct AccordApp: App {
                             // AccordCoreVars.loadVersion()
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
+                            print(windowWidth, windowHeight)
                             if self.windowWidth == 0 {
                                 self.windowWidth = 1000
+                                UserDefaults.standard.set(1000, forKey: "windowWidth")
                             }
                             if self.windowHeight == 0 {
                                 self.windowHeight = 800
+                                UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
                             }
                             appDelegate.fileNotifications()
                             DispatchQueue.main.async {
-                                NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 0, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 0, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                                NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
                             }
                         }
                         .onDisappear {
