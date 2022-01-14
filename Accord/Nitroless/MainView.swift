@@ -32,8 +32,16 @@ struct NitrolessView: View, Equatable {
     fileprivate static let nitrolessRoot = "https://raw.githubusercontent.com/evelyneee/Repo/main/"
     
     @State var searchenabled = true
-    var columns: [GridItem] = Array(repeating: GridItem(spacing: 1), count: 7)
-    
+    var columns: [GridItem] = [
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1),
+        GridItem(spacing: 1)
+    ]
     @Binding var chatText: String
     @State var allEmotes: [String: String] = [:]
     @State var search: String = ""

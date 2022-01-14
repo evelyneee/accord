@@ -121,7 +121,10 @@ struct Folder<Content: View>: View {
 
     @State private var collapsed: Bool = true
 
-    let gridLayout: [GridItem] = Array(repeating: GridItem(spacing: 0), count: 2)
+    let gridLayout: [GridItem] = [
+        GridItem(spacing: 0),
+        GridItem(spacing: 0)
+    ]
 
     var body: some View {
         VStack {
