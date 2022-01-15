@@ -54,8 +54,19 @@ extension Array where Element == String {
 
 final public class Markdown {
 
-    enum MarkdownErrors: Error {
+    enum MarkdownErrors: Error, LocalizedError, CustomStringConvertible {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
+        
+        public var description: String {
+            switch self {
+            case .unsupported:
+                return "The Markdown Parser is currently unavailable on macOS Big Sur and below"
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
 
     public typealias TextPublisher = AnyPublisher<Text, Error>

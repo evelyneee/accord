@@ -56,13 +56,34 @@ final class Gateway {
         
     public var cachedMemberRequest: [String: GuildMember] = [:]
     
-    enum GatewayErrors: Error {
+    enum GatewayErrors: Error, LocalizedError, CustomStringConvertible {
         case noStringData(String)
         case maxRequestReached
         case essentialEventFailed(String)
         case noSession
         case eventCorrupted
         case unknownEvent(String)
+        
+        public var description: String {
+            switch self {
+            case .noStringData(let string):
+                return "No Data from String \"\(string)\""
+            case .maxRequestReached:
+                return "Reached maximum number of requests"
+            case .essentialEventFailed(let event):
+                return "Essential event \"\(event)\" failed"
+            case .noSession:
+                return "No Session happening"
+            case .eventCorrupted:
+                return "An event has been corrupted"
+            case .unknownEvent(let event):
+                return "Unknown Event \"\(event)\" occured"
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
     
     fileprivate let additionalHeaders: [(String, String)] = [

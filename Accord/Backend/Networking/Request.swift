@@ -140,7 +140,7 @@ final public class Request {
     // MARK: - Empty Decodable
     class AnyDecodable: Decodable { }
 
-    enum FetchErrors: Error {
+    enum FetchErrors: Error, LocalizedError, CustomStringConvertible {
         case invalidRequest
         case invalidForm
         case badResponse(URLResponse?)
@@ -148,6 +148,29 @@ final public class Request {
         case decodingError(String, Error?)
         case noData
         case discordError(code: Int?, message: String?)
+        
+        public var description: String {
+            switch self {
+            case .invalidRequest:
+                return "An invalid request was made"
+            case .invalidForm:
+                return "Invalid form was submitted (Invalid Password/Email combination, Possibly?)"
+            case .badResponse(_):
+                return "A Bad response was returned"
+            case .notRequired:
+                return "Not required"
+            case .decodingError(let string, let errorEncountered):
+                return "Error encountered while decoding \(string): \(errorEncountered?.localizedDescription ?? "Unknown Error")"
+            case .noData:
+                return "No data returned"
+            case .discordError(let code, let message):
+                return "Discord Error encountered: Code \(code?.description ?? "Unknown Code"), Message: \(message ?? "Unknown Error Message") "
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
     
     struct DiscordError: Decodable {

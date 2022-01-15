@@ -52,12 +52,24 @@ extension KeyedDecodingContainer {
 }
 
 extension String {
-    enum DataErrors: Error {
-        case notString
+    enum DataErrors: Error, LocalizedError, CustomStringConvertible {
+        case cantConvertDataToString
+        
+        public var description: String {
+            switch self {
+            case .cantConvertDataToString:
+                return "Cannot convert given Data object to String"
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
+    
     init(_ data: Data) throws {
         let initialize = Self.init(data: data, encoding: .utf8)
-        guard let initialize = initialize else { throw DataErrors.notString }
+        guard let initialize = initialize else { throw DataErrors.cantConvertDataToString }
         self = initialize
     }
     var cString: UnsafePointer<CChar>? {

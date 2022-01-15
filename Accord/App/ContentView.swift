@@ -14,8 +14,19 @@ struct ContentView: View {
     @Binding var loaded: Bool
     @State var serverListView: ServerListView?
 
-    enum LoadErrors: Error {
+    enum LoadErrors: Error, LocalizedError, CustomStringConvertible {
         case alreadyLoaded
+        
+        public var description: String {
+            switch self {
+            case .alreadyLoaded:
+                return "Already Loaded"
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
 
     var body: some View {

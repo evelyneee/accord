@@ -27,9 +27,22 @@ final class MediaRemoteWrapper {
         var isMusic: Bool
     }
     
-    enum NowPlayingErrors: Error {
+    enum NowPlayingErrors: Error, LocalizedError, CustomStringConvertible {
         case errorGettingNowInfoPtr
         case noName
+        
+        public var description: String {
+            switch self {
+            case .errorGettingNowInfoPtr:
+                return "An error occured while getting \"Now Playing\" info"
+            case .noName:
+                return "Couldn't get the name of the Song currently playing"
+            }
+        }
+        
+        public var errorDescription: String? {
+            return description
+        }
     }
     
     static let appID: String = "925514277987704842"

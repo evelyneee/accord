@@ -16,9 +16,22 @@ enum LoginState {
     case twofactor
 }
 
-enum DiscordLoginErrors: Error {
+enum DiscordLoginErrors: Error, LocalizedError, CustomStringConvertible {
     case invalidForm
     case missingFields
+    
+    public var description: String {
+        switch self {
+        case .invalidForm:
+            return "Invalid Form, make sure the Email/Password combination is correct"
+        case .missingFields:
+            return "Missing Fields submitted trying to log in to discord"
+        }
+    }
+    
+    public var errorDescription: String? {
+        return description
+    }
 }
 
 extension NSApplication {
