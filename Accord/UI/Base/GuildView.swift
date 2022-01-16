@@ -66,7 +66,7 @@ struct GuildView: View {
 }
 
 struct ServerListViewCell: View {
-    weak var channel: Channel?
+    var channel: Channel?
     var guildID: String
     init(channel: Channel) {
         self.channel = channel

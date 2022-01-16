@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Channel: Decodable, Identifiable {
+struct Channel: Decodable, Identifiable {
     let id: String
     let type: ChannelType
     var guild_id: String?

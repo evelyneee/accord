@@ -179,15 +179,14 @@ struct ChatControls: View {
                                 .padding(3)
                             }
                             ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
-                                Button(action: { [weak viewModel, weak channel] in
+                                Button(action: { [weak viewModel] in
                                     if let range = viewModel?.textFieldContents.range(of: "#") {
                                         viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                     }
-                                    guard let id = channel?.id else { return }
-                                    viewModel?.textFieldContents.append("<#\(id)>")
-                                }) { [weak channel] in
+                                    viewModel?.textFieldContents.append("<#\(channel.id)>")
+                                }) {
                                     HStack {
-                                        Text(channel?.name ?? "Unknown Channel")
+                                        Text(channel.name ?? "Unknown Channel")
                                         Spacer()
                                     }
                                 }

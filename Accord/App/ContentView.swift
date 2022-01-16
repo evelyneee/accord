@@ -81,5 +81,9 @@ struct ContentView: View {
                 }
             }
         }
+        .onDisappear {
+            print("uh bye")
+            Emotes.emotes.removeAll()
+        }
     }
 }

@@ -7,34 +7,27 @@
 
 import Foundation
 import UserNotifications
+import AppKit
 
-func showNotification(title: String, subtitle: String) {
+func showNotification(title: String, subtitle: String, description: String? = nil) {
     let content = UNMutableNotificationContent()
     content.title = title
-    content.body = subtitle
-    let date = Date() // 2018-10-10T10:00:00+00:00
+    content.subtitle = subtitle
+    if let description = description {
+        content.body = description
+    }
+    let date = Date()
     let calendar = Calendar.current
     let dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
-    // Create the trigger as a repeating event.
     let trigger = UNCalendarNotificationTrigger(
              dateMatching: dateComponents, repeats: false)
-    let uuidString = UUID().uuidString
+    let uuidString = "Accord"
     let request = UNNotificationRequest(identifier: uuidString,
                                         content: content, trigger: trigger)
-
+    print(request)
     // Schedule the request with the system.
     let notificationCenter = UNUserNotificationCenter.current()
     notificationCenter.add(request) { (error) in
-       if error != nil {
-          // Handle any errors.
-       }
+        print(error)
     }
-}
-
-func userNotificationCenter(_ center: UNUserNotificationCenter, shouldPresent notification: UNNotification) -> Bool {
-        return true
-}
-
-func clearAllNotifications() {
-    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-}
+} 

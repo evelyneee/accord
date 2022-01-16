@@ -32,8 +32,9 @@ extension ServerListView {
         }
         return messageDict[entry]
     }
-    func order(full: GatewayD?) {
-        for guild in full?.guilds ?? [] {
+    func order(full: inout GatewayD?) {
+        for (index, _guild) in (full?.guilds ?? []).enumerated() {
+            var guild = _guild
             let rejects = guild.channels?.filter { $0.parent_id == nil && $0.type != .section }
             guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
             let parents: [Channel] = guild.channels?.filter({ $0.type == .section }) ?? []
@@ -46,9 +47,11 @@ extension ServerListView {
             }
             ret.insert(contentsOf: rejects ?? [], at: 0)
             guild.channels = ret
+            print(ret.count)
+            full?.guilds[index] = guild
         }
     }
-    func assignReadStates(full: GatewayD?) {
+    func assignReadStates(full: inout GatewayD?) {
         guard let readState = full?.read_state else { return }
         let stateDict = readState.entries.enumerated().compactMap { (index, element) in
             return [element.id: index]
@@ -56,10 +59,11 @@ extension ServerListView {
             result.merge(next) { (_, rhs) in rhs }
         }
         for folder in Self.folders {
-            for guild in folder.guilds {
-                guard let channels = guild.channels else { return }
+            for (index, guild) in folder.guilds.enumerated() {
+                var guild = guild
+                guard var channels = guild.channels else { return }
                 var temp = [Channel]()
-                for channel in channels {
+                for (index, channel) in channels.enumerated() {
                     guard channel.type == .normal || channel.type == .dm || channel.type == .group_dm else {
                         temp.append(channel)
                         continue
@@ -67,10 +71,11 @@ extension ServerListView {
                     guard let at = stateDict[channel.id] else {
                         continue
                     }
-                    channel.read_state = readState.entries[at]
+                    channels[index].read_state = readState.entries[at]
                     temp.append(channel)
                 }
                 guild.channels = temp
+                folder.guilds[index] = guild
             }
         }
     }
@@ -80,11 +85,10 @@ extension ServerListView {
         }.reduce(into: [:]) { (result, next) in
             result.merge(next) { (_, rhs) in rhs }
         }
-        print(messageDict)
-        for channel in Self.privateChannels {
+        for (i, channel) in Self.privateChannels.enumerated() {
             if let index = messageDict[channel.id] {
                 print("Assigned to private channel")
-                channel.read_state = Self.readStates[index]
+                Self.privateChannels[i].read_state = Self.readStates[index]
             }
         }
         Self.readStates.removeAll()

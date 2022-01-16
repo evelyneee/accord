@@ -130,14 +130,6 @@ struct WebVideoPlayer: NSViewRepresentable {
         webConfiguration.mediaTypesRequiringUserActionForPlayback = []
 
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: webView.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: webView.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
-        ])
         let html = "<video playsinline controls width=\"100%\" src=\"\(url.absoluteString)\"> </video>"
         webView.loadHTMLString(html, baseURL: self.url)
         print(html, webView)

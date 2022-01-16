@@ -50,19 +50,22 @@ extension Gateway {
         case .inviteCreate: break
         case .inviteDelete: break
         case .messageCreate:
-            guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { return }
+            guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { print("uhhhhh"); return }
             if let channelID = event.channelID, let author = message.author {
                 self.messageSubject.send((event.data, channelID, author.id == user_id))
             }
             let ids = message.mentions.compactMap { $0?.id }
             let guildID = message.guild_id ?? "@me"
-            guard let channelID = event.channelID else { break }
-            if ids.contains(user_id) {
+            guard let channelID = event.channelID else { print("wat"); break }
+            if ids.contains(user_id) || (ServerListView.privateChannels.map({ $0.id }).contains(channelID) && message.author?.id != user_id) {
                 print("Sending notification")
-                showNotification(title: message.author?.username ?? "Unknown User", subtitle: message.content)
-                MentionSender.shared.addMention(guild: guildID, channel: channelID)
-            } else if Notifications.privateChannels.contains(channelID) && message.author?.id != user_id {
-                showNotification(title: username, subtitle: message.content)
+                let guildArray = ServerListView.folders.map { $0.guilds.filter { $0.id == message.guild_id } }
+                let channelArray = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == channelID } } }
+                var joined: [Channel] = Array(Array(Array(channelArray).joined()).joined())
+                joined.append(contentsOf: ServerListView.privateChannels.filter { $0.id == channelID })
+                let joinedGuilds: Guild? = Array(guildArray.joined()).first
+                print(message.guild_id)
+                showNotification(title: message.author?.username ?? "Unknown User", subtitle: joinedGuilds == nil ? joined.first?.name ?? "Direct Messages" : "#\(joined.first?.computedName ?? "") • \(joinedGuilds?.name ?? "")", description: message.content)
                 MentionSender.shared.addMention(guild: guildID, channel: channelID)
             }
         case .messageUpdate:

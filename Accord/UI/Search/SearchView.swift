@@ -30,10 +30,10 @@ struct SearchView: View {
             VStack {
                 Spacer().frame(height: 25)
                 ForEach(matches.prefix(10), id: \.id) { channel in
-                    Button(action: { [unowned channel] in
+                    Button(action: {
                         MentionSender.shared.select(channel: channel)
                         presentationMode.wrappedValue.dismiss()
-                    }, label: { [unowned channel] in
+                    }, label: {
                         HStack {
                             if let icon = channel.guild_icon {
                                 Attachment(iconURL(channel.guild_id, icon))

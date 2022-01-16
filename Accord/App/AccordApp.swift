@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import UserNotifications
 
 @main
 struct AccordApp: App {
@@ -27,6 +28,21 @@ struct AccordApp: App {
                         .preferredColorScheme(darkMode ? .dark : nil)
                         .onAppear {
                             // AccordCoreVars.loadVersion()
+                            // DispatchQueue(label: "socket").async {
+                            //     let rpc = IPC().start()
+                            // }
+                            UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { settings in
+                                if settings.authorizationStatus != .authorized {
+                                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
+                                        (granted, error) in
+                                        if granted {
+                                            print("lol")
+                                        } else {
+                                            print(error)
+                                        }
+                                    }
+                                }
+                            })
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
                             print(windowWidth, windowHeight)
