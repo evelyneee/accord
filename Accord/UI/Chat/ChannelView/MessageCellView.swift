@@ -21,8 +21,6 @@ struct MessageCellView: View {
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
     @State var popup: Bool = false
-    @State var color: Color = Color(NSColor.textColor)
-    @State var replyColor: Color = Color(NSColor.textColor)
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
     var body: some View {
@@ -47,16 +45,15 @@ struct MessageCellView: View {
             }
             HStack { [unowned message] in
                 if !message.isSameAuthor {
-                    Button(action: {
-                        print("https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=24")
-                        popup.toggle()
-                    }) { [unowned message] in
-                        Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=24" : pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
-                            .frame(width: 33, height: 33)
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.borderless)
+                    Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=24" : pfpURL(message.author?.id, message.author?.avatar, "24")).equatable()
+                        .frame(width: 33, height: 33)
+                        .clipShape(Circle())
+                        .highPriorityGesture(TapGesture())
+                        .onTapGesture {
+                            popup.toggle()
+                        }
                 }
+                
                 VStack(alignment: .leading) {
                     if message.isSameAuthor {
                         textElement?.padding(.leading, 41) ?? Text(message.content).padding(.leading, 41)

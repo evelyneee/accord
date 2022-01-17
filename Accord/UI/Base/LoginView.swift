@@ -23,13 +23,7 @@ enum DiscordLoginErrors: Error {
 
 extension NSApplication {
     func restart() {
-        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-        let task = Process()
-        task.launchPath = "/usr/bin/open"
-        task.arguments = [path]
-        task.launch()
-        exit(EXIT_SUCCESS)
+        NotificationCenter.default.post(name: NSNotification.Name.init(rawValue: "LoggedIn"), object: nil, userInfo: [:])
     }
 }
 
@@ -132,13 +126,7 @@ struct LoginView: View {
                                         KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
                                         AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                         self.captcha = false
-                                        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                        let task = Process()
-                                        task.launchPath = "/usr/bin/open"
-                                        task.arguments = [path]
-                                        task.launch()
-                                        exit(EXIT_SUCCESS)
+                                        NSApplication.shared.restart()
                                     } else if let error = error {
                                         print(error)
                                     }
@@ -161,13 +149,7 @@ struct LoginView: View {
                                     KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                     self.captcha = false
-                                    let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                    let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                    let task = Process()
-                                    task.launchPath = "/usr/bin/open"
-                                    task.arguments = [path]
-                                    task.launch()
-                                    exit(EXIT_SUCCESS)
+                                    NSApplication.shared.restart()
                                 }
                                 if let response = response, let ticket = response.ticket {
                                     Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
@@ -182,14 +164,7 @@ struct LoginView: View {
                                             KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                             AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
                                             self.captcha = false
-                                            print(token)
-                                            let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                                            let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                                            let task = Process()
-                                            task.launchPath = "/usr/bin/open"
-                                            task.arguments = [path]
-                                            task.launch()
-                                            exit(EXIT_SUCCESS)
+                                            NSApplication.shared.restart()
                                         }
                                     }
                                 }

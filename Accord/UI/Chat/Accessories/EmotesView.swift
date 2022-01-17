@@ -34,11 +34,11 @@ struct EmotesView: View, Equatable {
                                 Section(header: Text(key.components(separatedBy: "$")[1])) {
                                     LazyVGrid(columns: columns) {
                                         ForEach((Emotes.emotes[key] ?? []), id: \.id) { emote in
-                                            Button(action: { [weak emote] in
-                                                chatText.append(contentsOf: "<\(emote?.animated ?? false ? "a" : ""):\(emote?.name ?? ""):\(emote?.id ?? "")>")
+                                            Button(action: {
+                                                chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                             }) {
-                                                VStack { [weak emote] in
-                                                    HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote?.id ?? "")").equatable()
+                                                VStack {
+                                                    HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()
                                                         .frame(width: 25, height: 25)
                                                 }
                                                 .frame(width: 30, height: 30)
@@ -52,10 +52,10 @@ struct EmotesView: View, Equatable {
                         } else {
                             LazyVGrid(columns: columns) {
                                 ForEach(Emotes.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
-                                    Button(action: { [weak emote] in
-                                        chatText.append(contentsOf: "<\(emote?.animated ?? false ? "a" : ""):\(emote?.name ?? ""):\(emote?.id ?? "")>")
-                                    }) { [weak emote] in
-                                        HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote?.id ?? "")").equatable()
+                                    Button(action: {
+                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
+                                    }) {
+                                        HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()
                                             .frame(width: 30, height: 30)
                                     }
                                     .buttonStyle(EmoteButton())

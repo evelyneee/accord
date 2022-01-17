@@ -63,32 +63,35 @@ struct ChatControls: View {
         body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
         request.httpBody = body
         let task = URLSession.shared.dataTask(with: request)
-        observation = task.progress.observe(\.fractionCompleted) { progress, _ in
-            self.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
-            if progress.fractionCompleted == 1.0 {
-                self.observation = nil
-                self.percent = nil
+        DispatchQueue.main.async {
+            observation = task.progress.observe(\.fractionCompleted) { progress, _ in
+                self.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
+                if progress.fractionCompleted == 1.0 {
+                    self.observation = nil
+                    self.percent = nil
+                }
             }
         }
         task.resume()
     }
+    
     func send() {
-        guard viewModel.textFieldContents != "" else { return }
         messageSendQueue.async { [weak viewModel] in
-            if viewModel?.textFieldContents == "/shrug" {
-                DispatchQueue.main.sync {
-                    viewModel?.textFieldContents = #"¯\_(ツ)_/¯"#
-                }
+            guard var text = viewModel?.textFieldContents, text != "" else { return }
+            if text == "/shrug" {
+                text = #"¯\_(ツ)_/¯"#
             }
             if fileUpload != nil {
-                uploadFile(temp: viewModel?.textFieldContents ?? "")
-                fileUpload = nil
-                fileUploadURL = nil
+                uploadFile(temp: text)
                 DispatchQueue.main.async {
+                    fileUpload = nil
+                    fileUploadURL = nil
                     viewModel?.textFieldContents = ""
-                }
-                DispatchQueue.main.async {
-                    viewModel?.textField?.becomeFirstResponder()
+                    if viewModel?.textField?.acceptsFirstResponder ?? false {
+                        viewModel?.textField?.becomeFirstResponder()
+                    } else {
+                        print("sorry textfield :c")
+                    }
                     viewModel?.textField?.allowsEditingTextAttributes = true
                 }
                 return
@@ -97,7 +100,7 @@ struct ChatControls: View {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
                         token: AccordCoreVars.token,
-                        bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))", "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": (replyingTo?.channel_id ?? channelID), "message_id": replyingTo?.id ?? ""]],
+                        bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": (replyingTo?.channel_id ?? channelID), "message_id": replyingTo?.id ?? ""]],
                         type: .POST,
                         discordHeaders: true,
                         referer: "https://discord.com/channels/\(guildID)/\(replyingTo?.channel_id ?? channelID)",
@@ -117,7 +120,7 @@ struct ChatControls: View {
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
                         userAgent: discordUserAgent,
                         token: AccordCoreVars.token,
-                        bodyObject: ["content": "\(String(viewModel?.textFieldContents ?? ""))"],
+                        bodyObject: ["content": text],
                         type: .POST,
                         discordHeaders: true,
                         empty: true,
@@ -127,7 +130,7 @@ struct ChatControls: View {
                         viewModel?.textFieldContents = ""
                     }
                     DispatchQueue.main.async {
-                        viewModel?.textField?.becomeFirstResponder()
+                        //viewModel?.textField?.becomeFirstResponder()
                         viewModel?.textField?.allowsEditingTextAttributes = true
                     }
                     return
@@ -161,17 +164,16 @@ struct ChatControls: View {
 
                             }
                             ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
-                                Button(action: { [weak viewModel, weak emoji] in
+                                Button(action: { [weak viewModel] in
                                     if let range = viewModel?.textFieldContents.range(of: ":") {
                                         viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
                                     }
-                                    guard let id = emoji?.id, let name = emoji?.name else { return }
-                                    viewModel?.textFieldContents.append("<\((emoji?.animated ?? false) ? "a" : ""):\(name):\(id)>")
-                                }, label: { [weak emoji] in
+                                    viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
+                                }, label: {
                                     HStack {
-                                        Attachment("https://cdn.discordapp.com/emojis/\(emoji?.id ?? "").png?size=80", size: CGSize(width: 48, height: 48))
+                                        Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
                                             .frame(width: 20, height: 20)
-                                        Text(emoji?.name ?? "Unknown Emote")
+                                        Text(emoji.name)
                                         Spacer()
                                     }
                                 })
@@ -197,19 +199,11 @@ struct ChatControls: View {
                         .padding(.bottom, 7)
                     }
                     HStack {
-                        if #available(macOS 12.0, *) {
-                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents)
-                                .onSubmit {
-                                    typing = false
-                                    send()
-                                }
-                        } else {
-                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
-                            }, onCommit: {
-                                typing = false
-                                send()
-                            })
-                        }
+                        TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
+                        }, onCommit: {
+                            typing = false
+                            send()
+                        })
                         Button(action: {
                             fileImport.toggle()
                         }) {

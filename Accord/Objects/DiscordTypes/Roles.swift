@@ -27,7 +27,7 @@ final class RoleManager {
     }
 }
 
-final class Role: Codable {
+struct Role: Codable {
     var id: String
     var name: String
     var color: Int?

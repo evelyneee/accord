@@ -8,6 +8,7 @@
 import Foundation
 import Cocoa
 import Combine
+import OSAKit
 
 final class XcodeRPC {
     
@@ -19,7 +20,7 @@ final class XcodeRPC {
             \(script)
         end tell
         """
-        
+                
         // execute the script
         let script = NSAppleScript.init(source: scr)
         let result = script?.executeAndReturnError(nil)

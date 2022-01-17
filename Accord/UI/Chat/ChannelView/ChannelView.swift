@@ -68,7 +68,7 @@ struct ChannelView: View, Equatable {
             ZStack(alignment: .bottom) { [weak viewModel] in
                 List {
                     Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
-                    ForEach($viewModel.messages, id: \.identifier) { $message in
+                    ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
                         if let author = message.author {
                             MessageCellView(
                                 message: message,
@@ -81,19 +81,21 @@ struct ChannelView: View, Equatable {
                                 replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                                 replyingTo: $replyingTo
                             )
-                            .contextMenu { [weak message] in
-                                Button("Reply") {
+                            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                            .rotationEffect(.init(degrees: 180))
+                            .contextMenu {
+                                Button("Reply") { [weak message] in
                                     replyingTo = message
                                 }
-                                Button("Delete") {
+                                Button("Delete") { [weak message] in
                                     message?.delete()
                                 }
-                                Button("Copy") {
+                                Button("Copy") { [weak message] in
                                     guard let content = message?.content else { return }
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString(content, forType: .string)
                                 }
-                                Button("Copy Message Link") {
+                                Button("Copy Message Link") { [weak message] in
                                     guard let channelID = message?.channel_id, let id = message?.id else { return }
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
@@ -101,8 +103,6 @@ struct ChannelView: View, Equatable {
                             }
                         }
                     }
-                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                    .rotationEffect(.init(degrees: 180))
                 }
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 .rotationEffect(.init(degrees: 180))

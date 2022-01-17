@@ -82,6 +82,7 @@ class Res: Decodable {
     }
 }
 
+#if DEBUG
 let rw = (
     dso: { () -> UnsafeMutableRawPointer in
         var info = Dl_info()
@@ -90,3 +91,4 @@ let rw = (
     }(),
     log: OSLog(subsystem: "com.apple.runtime-issues", category: "Accord")
 )
+#endif

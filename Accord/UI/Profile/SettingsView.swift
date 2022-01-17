@@ -77,7 +77,7 @@ struct SettingsViewRedesign: View {
                     .padding()
                     Divider()
                     VStack(alignment: .leading) {
-                        GifView(url: "https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif")
+                        Attachment("https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").png")
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)

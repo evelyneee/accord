@@ -17,10 +17,15 @@ struct AccordApp: App {
     @State var windowWidth: Int = Int(NSApplication.shared.keyWindow?.frame.width ?? 1000)
     @State var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
     @State var popup: Bool = false
+    @State var token = AccordCoreVars.token
     var body: some Scene {
         WindowGroup {
-            if AccordCoreVars.token == "" {
+            if self.token == "" {
                 LoginView()
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
+                        self.token = AccordCoreVars.token
+                        print("posted", self.token)
+                    }
             } else {
                 GeometryReader { reader in
                     ContentView(loaded: $loaded)
@@ -55,9 +60,7 @@ struct AccordApp: App {
                                 UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
                             }
                             appDelegate.fileNotifications()
-                            DispatchQueue.main.async {
-                                NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
-                            }
+                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
                         }
                         .onDisappear {
                             loaded = false

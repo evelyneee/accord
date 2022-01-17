@@ -350,7 +350,8 @@ struct ServerListView: View {
                 try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
                     Activity.current!
                 }
-                if let workspace = XcodeRPC.getActiveWorkspace(), UserDefaults.standard.bool(forKey: "XcodeRPC") {
+                if UserDefaults.standard.bool(forKey: "XcodeRPC") {
+                    guard let workspace = XcodeRPC.getActiveWorkspace() else { return }
                     XcodeRPC.updatePresence(workspace: workspace, filename: XcodeRPC.getActiveFilename())
                 } else if UserDefaults.standard.bool(forKey: "AppleMusicRPC") {
                     MediaRemoteWrapper.updatePresence()

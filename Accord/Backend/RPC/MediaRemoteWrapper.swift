@@ -47,7 +47,7 @@ final class MediaRemoteWrapper {
             // Get song info
             MRMediaRemoteGetNowPlayingInfo(DispatchQueue.main, { (information) in
                 guard let name = information["kMRMediaRemoteNowPlayingInfoTitle"] as? String else { return promise(.failure(NowPlayingErrors.noName)) }
-                let isMusic = information["kMRMediaRemoteNowPlayingInfoIsMusicApp"] as! Bool
+                let isMusic = information["kMRMediaRemoteNowPlayingInfoIsMusicApp"] as? Bool ?? false
                 let progress = information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double
                 let song = Song(
                     name: name,
