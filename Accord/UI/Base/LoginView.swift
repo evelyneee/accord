@@ -95,6 +95,7 @@ struct LoginView: View {
                             if token != "" {
                                 KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                NSApplication.shared.restart()
                             } else {
                                 do {
                                     try viewModel.login(email, password, twofactor)

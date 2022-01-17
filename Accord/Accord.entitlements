@@ -6,15 +6,17 @@
 	<true/>
 	<key>com.apple.security.automation.apple-events</key>
 	<true/>
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
 	<key>com.apple.security.temporary-exception.apple-events</key>
 	<array>
 		<string>com.apple.dt.Xcode</string>
 		<string>com.apple.dt.Xcode-beta</string>
 	</array>
-	<key>com.apple.security.files.user-selected.read-only</key>
-	<true/>
-	<key>com.apple.security.network.client</key>
-	<true/>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)group.evelyn.accord</string>

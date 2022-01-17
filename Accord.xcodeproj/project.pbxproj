@@ -14,6 +14,8 @@
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
+		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
+		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
@@ -122,6 +124,8 @@
 		490B2AB8278D220E00EA4F31 /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = ../Release/Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
+		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
@@ -310,8 +314,8 @@
 			children = (
 				9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */,
 				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
-				9EA295202753D1480014927D /* MemberList.swift */,
 				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
+				9EA295202753D1480014927D /* MemberList.swift */,
 			);
 			path = GatewayPayloads;
 			sourceTree = "<group>";
@@ -431,6 +435,8 @@
 				9E6BCC65277E908B0085F279 /* XcodeRPC.swift */,
 				9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */,
 				9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */,
+				9E0088CD279366FD00F36D6B /* NativeRPC.swift */,
+				9E0088CF27937F5300F36D6B /* IPC.swift */,
 			);
 			path = RPC;
 			sourceTree = "<group>";
@@ -665,6 +671,7 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
+				9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */,
 				9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
@@ -719,6 +726,7 @@
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */,
+				9E0088D027937F5300F36D6B /* IPC.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

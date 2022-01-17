@@ -32,7 +32,11 @@ func pingCount(guild: Guild) -> Int {
 struct ServerListView: View {
 
     init(full: GatewayD?) {
+        var full = full
         status = full?.user_settings?.status
+        guard Self.folders.isEmpty else {
+            return
+        }
         MediaRemoteWrapper.status = full?.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
@@ -51,6 +55,8 @@ struct ServerListView: View {
                                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                                 return nextDict
                             } ?? [:]
+        assignReadStates(full: &full)
+        order(full: &full)
         var guildOrder = full?.user_settings?.guild_positions ?? []
         var folderTemp = full?.user_settings?.guild_folders ?? []
         full?.guilds.forEach { guild in
@@ -72,7 +78,7 @@ struct ServerListView: View {
         }
         for folder in folderTemp {
             for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
-                let guild = guildTemp[id]
+                var guild = guildTemp[id]
                 guild.emojis.removeAll()
                 guild.index = id
                 for channel in 0..<(guild.channels?.count ?? 0) {
@@ -84,10 +90,9 @@ struct ServerListView: View {
             }
         }
         Self.folders = folderTemp
-        assignReadStates(full: full)
-        order(full: full)
         Self.readStates = full?.read_state?.entries ?? []
         print(Self.readStates)
+        selection = nil
         concurrentQueue.async {
             guard let guilds = full?.guilds else { return }
             roleColors = RoleManager.arrangeRoleColors(guilds: guilds)
@@ -149,19 +154,20 @@ struct ServerListView: View {
                     Folder(icon: Array(folder.guilds.prefix(4)), color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
-                                Button(action: { [weak guild, weak wss] in
+                                Button(action: { [weak wss] in
+                                    ChannelMembers.shared.channelMembers.removeAll()
                                     wss?.cachedMemberRequest.removeAll()
                                     if selectedServer == 201 {
-                                        selectedServer = guild?.index
+                                        selectedServer = guild.index
                                     } else {
                                         withAnimation {
-                                            selectedServer = guild?.index
+                                            selectedServer = guild.index
                                         }
                                     }
-                                }) { [weak guild] in
-                                    Attachment(iconURL(guild?.id ?? "", guild?.icon ?? "")).equatable()
+                                }) {
+                                    Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
                                         .frame(width: 45, height: 45)
-                                        .cornerRadius(selectedServer == guild?.index ? 15.0 : 23.5)
+                                        .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
                                 }
                                 if pingCount(guild: guild) != 0 {
                                     ZStack {
@@ -181,19 +187,19 @@ struct ServerListView: View {
                 } else {
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
-                            Button(action: { [weak guild, weak wss] in
+                            Button(action: { [weak wss] in
                                 wss?.cachedMemberRequest.removeAll()
                                 if selectedServer == 201 {
-                                    selectedServer = guild?.index
+                                    selectedServer = guild.index
                                 } else {
                                     withAnimation {
-                                        selectedServer = guild?.index
+                                        selectedServer = guild.index
                                     }
                                 }
-                            }) { [weak guild] in
-                                Attachment(iconURL(guild?.id ?? "", guild?.icon ?? ""), size: nil).equatable()
+                            }) {
+                                Attachment(iconURL(guild.id, guild.icon ?? ""), size: nil).equatable()
                                     .frame(width: 45, height: 45)
-                                    .cornerRadius((selectedServer == guild?.index) ? 15.0 : 23.5)
+                                    .cornerRadius((selectedServer == guild.index) ? 15.0 : 23.5)
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             if pingCount(guild: guild) != 0 {
