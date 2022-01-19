@@ -20,7 +20,7 @@ struct AttachmentView: View {
                             .cornerRadius(5)
                             .frame(maxWidth: 350, maxHeight: 350)
                     } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
-                        WebVideoPlayer(url: url)
+                        VideoPlayerController(url: url)
                             .cornerRadius(5)
                             .frame(minWidth: 300, minHeight: 300)
                             .onDisappear {
@@ -75,8 +75,8 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
 }
 
 struct VideoPlayerController: NSViewRepresentable {
-    init(videoURL: URL) {
-        self.player = AVPlayer(url: videoURL)
+    init(url: URL) {
+        self.player = AVPlayer(url: url)
     }
     var player: AVPlayer?
     func makeNSView(context: Context) -> AVPlayerView {

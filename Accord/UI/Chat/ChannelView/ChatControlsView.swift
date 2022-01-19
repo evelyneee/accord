@@ -130,7 +130,7 @@ struct ChatControls: View {
                         viewModel?.textFieldContents = ""
                     }
                     DispatchQueue.main.async {
-                        //viewModel?.textField?.becomeFirstResponder()
+                        viewModel?.textField?.becomeFirstResponder()
                         viewModel?.textField?.allowsEditingTextAttributes = true
                     }
                     return

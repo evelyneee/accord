@@ -41,11 +41,8 @@ struct LoadingView: View {
         Text("Entering girlmode"),
         Text("Stay dry"),
         Text("Gaslight. Gatekeep. Girlboss.").italic(),
-        Text("eval deez nuts"),
         Text("Not a car"),
         Text("Ratio + Civic better"),
-        Text("Now available on Rejail!"),
-        Text("The more mature, hot older sister."),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
         Text("Never gonna give you up, never gonna use electron"),
         Text("Tell ur oomfies")

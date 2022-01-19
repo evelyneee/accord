@@ -116,6 +116,7 @@ struct ServerListView: View {
     var body: some View {
         lazy var dmButton: Button = {
             Button(action: {
+                wss.cachedMemberRequest.removeAll()
                 selectedServer = 201
                 selection = nil
             }) {
