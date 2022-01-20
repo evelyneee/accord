@@ -83,10 +83,12 @@ struct ChatControls: View {
             }
             if fileUpload != nil {
                 uploadFile(temp: text)
+                DispatchQueue.main.sync {
+                    viewModel?.textFieldContents = ""
+                }
                 DispatchQueue.main.async {
                     fileUpload = nil
                     fileUploadURL = nil
-                    viewModel?.textFieldContents = ""
                     if viewModel?.textField?.acceptsFirstResponder ?? false {
                         viewModel?.textField?.becomeFirstResponder()
                     } else {
@@ -199,11 +201,20 @@ struct ChatControls: View {
                         .padding(.bottom, 7)
                     }
                     HStack {
-                        TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
-                        }, onCommit: {
-                            typing = false
-                            send()
-                        })
+                        if #available(macOS 12.0, * ) {
+                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents)
+                                .onSubmit {
+                                    typing = false
+                                    send()
+                                }
+                        } else {
+                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
+                            }, onCommit: {
+                                typing = false
+                                send()
+                            })
+                        }
+
                         Button(action: {
                             fileImport.toggle()
                         }) {
@@ -361,6 +372,13 @@ final class ChatControlsViewModel: ObservableObject {
         textField?.allowsEditingTextAttributes = true
         let attributed = NSAttributedMarkdown.markdown(textFieldContents, font: textField?.font)
         textField?.attributedStringValue = attributed
+        let emotes = textFieldContents.matches(for: "(?<!<|<a):.+:")
+        print(emotes)
+        emotes.forEach { emoji in
+            let emote = emoji.dropLast().dropFirst().stringLiteral
+            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased() == emote.lowercased() }.first else { return }
+            textFieldContents = textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
+        }
     }
 }
 
