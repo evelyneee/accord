@@ -66,43 +66,45 @@ struct ChannelView: View, Equatable {
     var body: some View {
         HStack {
             ZStack(alignment: .bottom) { [weak viewModel] in
-                List {
-                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
-                    ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
-                        if let author = message.author {
-                            MessageCellView(
-                                message: message,
-                                nick: viewModel?.nicks[author.id],
-                                replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
-                                pronouns: viewModel?.pronouns[author.id],
-                                avatar: viewModel?.avatars[author.id],
-                                guildID: guildID,
-                                role: $viewModel.roles[author.id],
-                                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                                replyingTo: $replyingTo
-                            )
-                            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                            .rotationEffect(.init(degrees: 180))
-                            .contextMenu {
-                                Button("Reply") { [weak message] in
-                                    replyingTo = message
-                                }
-                                Button("Delete") { [weak message] in
-                                    message?.delete()
-                                }
-                                Button("Copy") { [weak message] in
-                                    guard let content = message?.content else { return }
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(content, forType: .string)
-                                }
-                                Button("Copy Message Link") { [weak message] in
-                                    guard let channelID = message?.channel_id, let id = message?.id else { return }
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
+                ScrollView {
+                    LazyVStack(spacing: 5) {
+                        ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
+                            if let author = message.author {
+                                MessageCellView(
+                                    message: message,
+                                    nick: viewModel?.nicks[author.id],
+                                    replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
+                                    pronouns: viewModel?.pronouns[author.id],
+                                    avatar: viewModel?.avatars[author.id],
+                                    guildID: guildID,
+                                    role: $viewModel.roles[author.id],
+                                    replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+                                    replyingTo: $replyingTo
+                                )
+                                .contextMenu {
+                                    Button("Reply") { [weak message] in
+                                        replyingTo = message
+                                    }
+                                    Button("Delete") { [weak message] in
+                                        message?.delete()
+                                    }
+                                    Button("Copy") { [weak message] in
+                                        guard let content = message?.content else { return }
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString(content, forType: .string)
+                                    }
+                                    Button("Copy Message Link") { [weak message] in
+                                        guard let channelID = message?.channel_id, let id = message?.id else { return }
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
+                                    }
                                 }
                             }
                         }
+                        Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                     }
+                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                    .rotationEffect(.init(degrees: 180))
                 }
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 .rotationEffect(.init(degrees: 180))

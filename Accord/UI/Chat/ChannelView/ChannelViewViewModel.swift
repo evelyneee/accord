@@ -68,7 +68,9 @@ final class ChannelViewViewModel: ObservableObject {
                     guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
                     let allUsers: [GuildMember] = users.compactMap { $0 }
                     for person in allUsers {
-                        wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
+                        DispatchQueue.main.async {
+                            wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
+                        }
                         if let nickname = person.nick {
                             DispatchQueue.main.async {
                                 self.nicks[person.user.id] = nickname
