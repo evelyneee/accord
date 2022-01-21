@@ -28,10 +28,6 @@ The built product will be in the `build/Release` directory
 ### Licensing
 tbd
 
-### TestFlight
-
-Public link: https://testflight.apple.com/join/YmTwJT8u
-
 ### Latest testflight description
 
 Welcome to the first Accord beta. 
