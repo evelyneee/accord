@@ -234,11 +234,12 @@ final class ChatControlsViewModel: ObservableObject {
     @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
     @Published var cachedUsers = [User]()
-    @Published var percent: String? = nil
+    var percent: String? = nil
+    var observation: NSKeyValueObservation?
+
     weak var textField: NSTextField?
     var currentValue: String?
     var currentRange: Int?
-    private var observation: NSKeyValueObservation?
 
     func checkText(guildID: String) {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
@@ -364,6 +365,8 @@ final class ChatControlsViewModel: ObservableObject {
         let task = URLSession.shared.dataTask(with: request)
         DispatchQueue.main.async {
             self.observation = task.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
+                print("updating")
+                self?.objectWillChange.send()
                 self?.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
                 if progress.fractionCompleted == 1.0 {
                     self?.observation = nil
