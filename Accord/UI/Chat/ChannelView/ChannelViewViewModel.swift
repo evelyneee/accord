@@ -29,6 +29,7 @@ final class ChannelViewViewModel: ObservableObject {
     init(channelID: String, guildID: String) {
         self.channelID = channelID
         self.guildID = guildID
+        guard wss != nil else { return }
         messageFetchQueue.async {
             self.guildID == "@me" ? try? wss.subscribeToDM(channelID) : try? wss.subscribe(to: guildID)
             MentionSender.shared.removeMentions(server: guildID)
@@ -300,7 +301,6 @@ final class ChannelViewViewModel: ObservableObject {
     
     deinit {
         print("Closing \(channelID)")
-        ChannelMembers.shared.channelMembers = [:]
     }
 }
 

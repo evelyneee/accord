@@ -60,8 +60,5 @@ struct SearchView: View {
         }
         .frame(width: 400)
         .padding()
-        .onAppear {
-            print(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels?.compactMap { $0.guild_icon } } })
-        }
     }
 }

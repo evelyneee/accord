@@ -17,6 +17,7 @@ struct MessageCellView: View {
     var pronouns: String?
     var avatar: String?
     var guildID: String?
+    var members: [String:String]
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
@@ -111,7 +112,7 @@ struct MessageCellView: View {
         .id(message.id)
         .onAppear {
             textQueue.async { [unowned message] in
-                Markdown.markAll(text: message.content, ChannelMembers.shared.channelMembers[message.channel_id] ?? [:])
+                Markdown.markAll(text: message.content, members)
                     .replaceError(with: Text(""))
                     .sink { text in
                         DispatchQueue.main.async {

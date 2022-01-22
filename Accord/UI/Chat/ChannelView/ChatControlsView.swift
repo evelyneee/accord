@@ -35,118 +35,32 @@ struct ChatControls: View {
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
     weak var textField: NSTextField?
-    @State private var observation: NSKeyValueObservation?
-    @State var percent: String? = nil
-
-    fileprivate func uploadFile(temp: String, url: URL? = nil) {
-        var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages")!)
-        request.httpMethod = "POST"
-        let boundary = "Boundary-\(UUID().uuidString)"
-        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let params: [String: String] = [
-            "content": String(temp)
-        ]
-        request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
-        var body = Data()
-        let boundaryPrefix = "--\(boundary)\r\n"
-        for key in params.keys {
-            body.append(string: boundaryPrefix, encoding: .utf8)
-            body.append(string: "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n", encoding: .utf8)
-            body.append(string: "\(params["content"]!)\r\n", encoding: .utf8)
-        }
-        body.append(string: boundaryPrefix, encoding: .utf8)
-        let mimeType = fileUploadURL?.mimeType()
-        body.append(string: "Content-Disposition: form-data; name=\"file\"; filename=\"\(fileUploadURL?.pathComponents.last ?? "file.txt")\"\r\n", encoding: .utf8)
-        body.append(string: "Content-Type: \(mimeType ?? "application/octet-stream") \r\n\r\n", encoding: .utf8)
-        body.append(fileUpload!)
-        body.append(string: "\r\n", encoding: .utf8)
-        body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
-        request.httpBody = body
-        let task = URLSession.shared.dataTask(with: request)
-        DispatchQueue.main.async {
-            observation = task.progress.observe(\.fractionCompleted) { progress, _ in
-                self.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
-                if progress.fractionCompleted == 1.0 {
-                    self.observation = nil
-                    self.percent = nil
+    
+    private func send() {
+        guard viewModel.textFieldContents != "" else { return }
+        messageSendQueue.async {
+            if let fileUpload = fileUpload, let fileUploadURL = fileUploadURL {
+                viewModel.send(text: viewModel.textFieldContents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
+                DispatchQueue.main.async {
+                    self.fileUpload = nil
+                    self.fileUploadURL = nil
                 }
+            } else if let replyingTo = replyingTo {
+                self.replyingTo = nil
+                viewModel.send(text: viewModel.textFieldContents, replyingTo: replyingTo, mention: true, guildID: guildID)
+            } else {
+                viewModel.send(text: viewModel.textFieldContents, guildID: guildID, channelID: channelID)
             }
         }
-        task.resume()
     }
     
-    func send() {
-        messageSendQueue.async { [weak viewModel] in
-            guard var text = viewModel?.textFieldContents, text != "" else { return }
-            if text == "/shrug" {
-                text = #"¯\_(ツ)_/¯"#
-            }
-            if fileUpload != nil {
-                uploadFile(temp: text)
-                DispatchQueue.main.sync {
-                    viewModel?.textFieldContents = ""
-                }
-                DispatchQueue.main.async {
-                    fileUpload = nil
-                    fileUploadURL = nil
-                    if viewModel?.textField?.acceptsFirstResponder ?? false {
-                        viewModel?.textField?.becomeFirstResponder()
-                    } else {
-                        print("sorry textfield :c")
-                    }
-                    viewModel?.textField?.allowsEditingTextAttributes = true
-                }
-                return
-            } else {
-                if replyingTo != nil {
-                    Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
-                        userAgent: discordUserAgent,
-                        token: AccordCoreVars.token,
-                        bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": true], "message_reference": ["channel_id": (replyingTo?.channel_id ?? channelID), "message_id": replyingTo?.id ?? ""]],
-                        type: .POST,
-                        discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(replyingTo?.channel_id ?? channelID)",
-                        empty: true,
-                        json: true
-                    ))
-                    replyingTo = nil
-                    DispatchQueue.main.sync {
-                        viewModel?.textFieldContents = ""
-                    }
-                    DispatchQueue.main.async {
-                        viewModel?.textField?.becomeFirstResponder()
-                        viewModel?.textField?.allowsEditingTextAttributes = true
-                    }
-                    return
-                } else {
-                    Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo?.channel_id ?? channelID)/messages"), headers: Headers(
-                        userAgent: discordUserAgent,
-                        token: AccordCoreVars.token,
-                        bodyObject: ["content": text],
-                        type: .POST,
-                        discordHeaders: true,
-                        empty: true,
-                        json: true
-                    ))
-                    DispatchQueue.main.sync {
-                        viewModel?.textFieldContents = ""
-                    }
-                    DispatchQueue.main.async {
-                        viewModel?.textField?.becomeFirstResponder()
-                        viewModel?.textField?.allowsEditingTextAttributes = true
-                    }
-                    return
-                }
-            }
-        }
-    }
     var body: some View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
                 VStack {
                     if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) {
                         VStack {
-                            ForEach(Array(zip(viewModel.matchedUsers.prefix(10).indices, viewModel.matchedUsers.prefix(10))), id: \.1) { _, user in
+                            ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
                                 Button(action: { [weak viewModel, weak user] in
                                     if let range = viewModel?.textFieldContents.range(of: "@") {
                                         viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
@@ -201,14 +115,14 @@ struct ChatControls: View {
                         .padding(.bottom, 7)
                     }
                     HStack {
-                        if #available(macOS 12.0, * ) {
-                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents)
+                        if #available(macOS 12.0, *) {
+                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
                                 .onSubmit {
                                     typing = false
                                     send()
                                 }
                         } else {
-                            TextField(self.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
+                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
                             }, onCommit: {
                                 typing = false
                                 send()
@@ -276,13 +190,7 @@ struct ChatControls: View {
                     .onReceive(viewModel.$textFieldContents, perform: { [weak viewModel] _ in
                         if !(typing) && viewModel?.textFieldContents != "" {
                             messageSendQueue.async {
-                                Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
-                                    userAgent: discordUserAgent,
-                                    token: AccordCoreVars.token,
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    referer: "https://discord.com/channels/\(guildID)/\(channelID)"
-                                ))
+
                             }
                             typing = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
@@ -325,10 +233,12 @@ final class ChatControlsViewModel: ObservableObject {
     @Published var matchedChannels = [Channel]()
     @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
-    @Published var cachedUsers = [User]()    
+    @Published var cachedUsers = [User]()
+    @Published var percent: String? = nil
     weak var textField: NSTextField?
     var currentValue: String?
     var currentRange: Int?
+    private var observation: NSKeyValueObservation?
 
     func checkText(guildID: String) {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
@@ -373,12 +283,105 @@ final class ChatControlsViewModel: ObservableObject {
         let attributed = NSAttributedMarkdown.markdown(textFieldContents, font: textField?.font)
         textField?.attributedStringValue = attributed
         let emotes = textFieldContents.matches(for: "(?<!<|<a):.+:")
-        print(emotes)
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
-            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased() == emote.lowercased() }.first else { return }
+            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
             textFieldContents = textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
         }
+    }
+    
+    func send(text: String, guildID: String, channelID: String) {
+        DispatchQueue.main.sync {
+            self.textFieldContents = ""
+        }
+        DispatchQueue.main.async {
+            self.textField?.becomeFirstResponder()
+            self.textField?.allowsEditingTextAttributes = true
+        }
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            bodyObject: ["content": text],
+            type: .POST,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guildID)/\(channelID)",
+            empty: true,
+            json: true
+        ))
+    }
+    
+    func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
+        DispatchQueue.main.sync {
+            self.textFieldContents = ""
+        }
+        DispatchQueue.main.async {
+            self.textField?.becomeFirstResponder()
+            self.textField?.allowsEditingTextAttributes = true
+        }
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id]],
+            type: .POST,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channel_id)",
+            empty: true,
+            json: true
+        ))
+    }
+    
+    func send(text: String, file: URL, data: Data, channelID: String) {
+        DispatchQueue.main.sync {
+            self.textFieldContents = ""
+        }
+        DispatchQueue.main.async {
+            self.textField?.becomeFirstResponder()
+            self.textField?.allowsEditingTextAttributes = true
+        }
+        var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
+        request.httpMethod = "POST"
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        let params: [String: String] = [
+            "content": String(text)
+        ]
+        request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
+        var body = Data()
+        let boundaryPrefix = "--\(boundary)\r\n"
+        for key in params.keys {
+            body.append(string: boundaryPrefix, encoding: .utf8)
+            body.append(string: "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n", encoding: .utf8)
+            body.append(string: "\(params["content"]!)\r\n", encoding: .utf8)
+        }
+        body.append(string: boundaryPrefix, encoding: .utf8)
+        let mimeType = file.mimeType()
+        body.append(string: "Content-Disposition: form-data; name=\"file\"; filename=\"\(file.pathComponents.last ?? "file.txt")\"\r\n", encoding: .utf8)
+        body.append(string: "Content-Type: \(mimeType) \r\n\r\n", encoding: .utf8)
+        body.append(data)
+        body.append(string: "\r\n", encoding: .utf8)
+        body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
+        request.httpBody = body
+        let task = URLSession.shared.dataTask(with: request)
+        DispatchQueue.main.async {
+            self.observation = task.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
+                self?.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
+                if progress.fractionCompleted == 1.0 {
+                    self?.observation = nil
+                    self?.percent = nil
+                }
+            }
+        }
+        task.resume()
+    }
+    
+    func type(channelID: String, guildID: String) {
+        Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            type: .POST,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+        ))
     }
 }
 

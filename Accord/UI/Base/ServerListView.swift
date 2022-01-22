@@ -91,7 +91,6 @@ struct ServerListView: View {
         }
         Self.folders = folderTemp
         Self.readStates = full?.read_state?.entries ?? []
-        print(Self.readStates)
         selection = nil
         concurrentQueue.async {
             guard let guilds = full?.guilds else { return }
@@ -116,7 +115,7 @@ struct ServerListView: View {
     var body: some View {
         lazy var dmButton: Button = {
             Button(action: {
-                wss.cachedMemberRequest.removeAll()
+                wss?.cachedMemberRequest.removeAll()
                 selectedServer = 201
                 selection = nil
             }) {
@@ -127,7 +126,7 @@ struct ServerListView: View {
             }
         }()
         lazy var onlineButton: some View = {
-            Button("Error") {
+            Button("Offline") {
                 alert.toggle()
             }
             .alert(isPresented: $alert) {
@@ -143,7 +142,15 @@ struct ServerListView: View {
                     secondaryButton: .destructive(
                         Text("Reconnect"),
                         action: {
-                            wss.reset()
+                            if let wss = wss {
+                                wss.reset()
+                            } else {
+                                concurrentQueue.async {
+                                    guard let new = try? Gateway.init(url: Gateway.gatewayURL) else { return }
+                                    new.ready().sink(receiveCompletion: { _ in }, receiveValue: { _ in }).store(in: &new.bag)
+                                    wss = new
+                                }
+                            }
                         }
                     )
                 )
@@ -156,7 +163,6 @@ struct ServerListView: View {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak wss] in
-                                    ChannelMembers.shared.channelMembers.removeAll()
                                     wss?.cachedMemberRequest.removeAll()
                                     if selectedServer == 201 {
                                         selectedServer = guild.index
@@ -263,7 +269,7 @@ struct ServerListView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
                     LazyVStack {
-                        if !online {
+                        if !online || !NetworkCore.shared.connected {
                             onlineButton
                         }
                         dmButton
@@ -348,7 +354,7 @@ struct ServerListView: View {
                         print(error)
                     }
                 }
-                try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
+                try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
                     Activity.current!
                 }
                 if UserDefaults.standard.bool(forKey: "XcodeRPC") {

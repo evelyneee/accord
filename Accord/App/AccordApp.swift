@@ -36,6 +36,9 @@ struct AccordApp: App {
                             // DispatchQueue(label: "socket").async {
                             //     let rpc = IPC().start()
                             // }
+                            concurrentQueue.async {
+                                _ = NetworkCore.shared
+                            }
                             UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { settings in
                                 if settings.authorizationStatus != .authorized {
                                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
@@ -50,7 +53,6 @@ struct AccordApp: App {
                             })
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
-                            print(windowWidth, windowHeight)
                             if self.windowWidth == 0 {
                                 self.windowWidth = 1000
                                 UserDefaults.standard.set(1000, forKey: "windowWidth")
@@ -60,7 +62,7 @@ struct AccordApp: App {
                                 UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
                             }
                             appDelegate.fileNotifications()
-                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApp.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApp.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
                         }
                         .onDisappear {
                             loaded = false

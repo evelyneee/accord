@@ -81,6 +81,7 @@ final class Headers {
         ]
         return try? JSONSerialization.data(withJSONObject: json, options: []).base64EncodedString()
     }
+    
     func set(request: inout URLRequest, config: inout URLSessionConfiguration) throws {
         config.httpAdditionalHeaders = ["User-Agent": userAgent]
         if cached {

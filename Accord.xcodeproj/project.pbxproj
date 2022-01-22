@@ -31,10 +31,14 @@
 		9E6BCC62277E8E570085F279 /* LoadingScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC61277E8E570085F279 /* LoadingScreenView.swift */; };
 		9E6BCC64277E8E850085F279 /* Print++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC63277E8E850085F279 /* Print++.swift */; };
 		9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodeRPC.swift */; };
-		9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E746A2727499CE6009A9C22 /* Interaction.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7834D12781F2D500ABB9F8 /* Combine++.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
+		9E7E4D28279B63E8008FAF15 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D27279B63E8008FAF15 /* Models.swift */; };
+		9E7E4D2A279B64BA008FAF15 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D29279B64BA008FAF15 /* Engine.swift */; };
+		9E7E4D2C279B6508008FAF15 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D2B279B6508008FAF15 /* Views.swift */; };
+		9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D2F279B69D7008FAF15 /* Storage.swift */; };
+		9E7E4D32279BA105008FAF15 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D31279BA105008FAF15 /* Core.swift */; };
 		9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA52773FC9C00A77600 /* Queues.swift */; };
 		9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA72774037F00A77600 /* MentionsView.swift */; };
 		9EA2951F2752EE1D0014927D /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA2951E2752EE1C0014927D /* QuickActionsView.swift */; };
@@ -142,10 +146,14 @@
 		9E6BCC61277E8E570085F279 /* LoadingScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingScreenView.swift; sourceTree = "<group>"; };
 		9E6BCC63277E8E850085F279 /* Print++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Print++.swift"; sourceTree = "<group>"; };
 		9E6BCC65277E908B0085F279 /* XcodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeRPC.swift; sourceTree = "<group>"; };
-		9E746A2727499CE6009A9C22 /* Interaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interaction.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7834D12781F2D500ABB9F8 /* Combine++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine++.swift"; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
+		9E7E4D27279B63E8008FAF15 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9E7E4D29279B64BA008FAF15 /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
+		9E7E4D2B279B6508008FAF15 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		9E7E4D2F279B69D7008FAF15 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		9E7E4D31279BA105008FAF15 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
 		9E8F8CA52773FC9C00A77600 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
 		9E8F8CA72774037F00A77600 /* MentionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionsView.swift; sourceTree = "<group>"; };
 		9EA2951E2752EE1C0014927D /* QuickActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsView.swift; sourceTree = "<group>"; };
@@ -261,6 +269,7 @@
 			children = (
 				9E6BCC60277E8E420085F279 /* App */,
 				A82521392687ABD40073F640 /* Objects */,
+				9E7E4D26279B63BF008FAF15 /* Commands */,
 				A864BE5926866FDF00B244BE /* Nitroless */,
 				A8ECC4C1271C88CD00382E53 /* Misc */,
 				32AA719225EAEEF700550BA5 /* Backend */,
@@ -336,7 +345,6 @@
 				A80FEC30272583B4005F9950 /* Embed.swift */,
 				A8B1F29D26CB16DE00E8FDC5 /* Emote.swift */,
 				A8B1F29F26CB16F500E8FDC5 /* Guild.swift */,
-				9E746A2727499CE6009A9C22 /* Interaction.swift */,
 				A8B1F29926CB169800E8FDC5 /* Message.swift */,
 				A82A062326D98259007B9B27 /* ReadState.swift */,
 				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
@@ -418,6 +426,17 @@
 			path = Markdown;
 			sourceTree = "<group>";
 		};
+		9E7E4D26279B63BF008FAF15 /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				9E7E4D27279B63E8008FAF15 /* Models.swift */,
+				9E7E4D29279B64BA008FAF15 /* Engine.swift */,
+				9E7E4D2B279B6508008FAF15 /* Views.swift */,
+				9E7E4D2F279B69D7008FAF15 /* Storage.swift */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
 		9ED6F671273702040009C78C /* dpkg */ = {
 			isa = PBXGroup;
 			children = (
@@ -482,6 +501,7 @@
 		A82521382687ABC50073F640 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				9E7E4D31279BA105008FAF15 /* Core.swift */,
 				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
 				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* Request.swift */,
@@ -655,6 +675,7 @@
 			files = (
 				A82A060126D3F5A4007B9B27 /* ChatControlsView.swift in Sources */,
 				A82A062226D981B4007B9B27 /* Status.swift in Sources */,
+				9E7E4D32279BA105008FAF15 /* Core.swift in Sources */,
 				9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */,
 				9E6470672741B9960026686C /* GuildView.swift in Sources */,
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
@@ -668,6 +689,7 @@
 				32AA719125EAEEDA00550BA5 /* Request.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
+				9E7E4D28279B63E8008FAF15 /* Models.swift in Sources */,
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
@@ -692,11 +714,12 @@
 				9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */,
 				A832557826EEEC1D00F18A55 /* ServerListView+Misc.swift in Sources */,
 				9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */,
-				9E746A2827499CE6009A9C22 /* Interaction.swift in Sources */,
+				9E7E4D2A279B64BA008FAF15 /* Engine.swift in Sources */,
 				A8B1F29A26CB169800E8FDC5 /* Message.swift in Sources */,
 				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
+				9E7E4D2C279B6508008FAF15 /* Views.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */,
@@ -728,6 +751,7 @@
 				A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */,
 				9E0088D027937F5300F36D6B /* IPC.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
+				9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

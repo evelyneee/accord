@@ -9,11 +9,6 @@ import SwiftUI
 import AppKit
 import AVKit
 
-final class ChannelMembers {
-    static var shared = ChannelMembers()
-    var channelMembers: [String: [String: String]] = [:]
-}
-
 struct ChannelView: View, Equatable {
 
     // MARK: - Equatable protocol
@@ -66,45 +61,44 @@ struct ChannelView: View, Equatable {
     var body: some View {
         HStack {
             ZStack(alignment: .bottom) { [weak viewModel] in
-                ScrollView {
-                    LazyVStack(spacing: 5) {
-                        ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
-                            if let author = message.author {
-                                MessageCellView(
-                                    message: message,
-                                    nick: viewModel?.nicks[author.id],
-                                    replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
-                                    pronouns: viewModel?.pronouns[author.id],
-                                    avatar: viewModel?.avatars[author.id],
-                                    guildID: guildID,
-                                    role: $viewModel.roles[author.id],
-                                    replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                                    replyingTo: $replyingTo
-                                )
-                                .contextMenu {
-                                    Button("Reply") { [weak message] in
-                                        replyingTo = message
-                                    }
-                                    Button("Delete") { [weak message] in
-                                        message?.delete()
-                                    }
-                                    Button("Copy") { [weak message] in
-                                        guard let content = message?.content else { return }
-                                        NSPasteboard.general.clearContents()
-                                        NSPasteboard.general.setString(content, forType: .string)
-                                    }
-                                    Button("Copy Message Link") { [weak message] in
-                                        guard let channelID = message?.channel_id, let id = message?.id else { return }
-                                        NSPasteboard.general.clearContents()
-                                        NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
-                                    }
+                List {
+                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
+                    ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
+                        if let author = message.author {
+                            MessageCellView(
+                                message: message,
+                                nick: viewModel?.nicks[author.id],
+                                replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
+                                pronouns: viewModel?.pronouns[author.id],
+                                avatar: viewModel?.avatars[author.id],
+                                guildID: guildID,
+                                members: [:],
+                                role: $viewModel.roles[author.id],
+                                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+                                replyingTo: $replyingTo
+                            )
+                            .contextMenu {
+                                Button("Reply") { [weak message] in
+                                    replyingTo = message
+                                }
+                                Button("Delete") { [weak message] in
+                                    message?.delete()
+                                }
+                                Button("Copy") { [weak message] in
+                                    guard let content = message?.content else { return }
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(content, forType: .string)
+                                }
+                                Button("Copy Message Link") { [weak message] in
+                                    guard let channelID = message?.channel_id, let id = message?.id else { return }
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
                                 }
                             }
+                            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                            .rotationEffect(.init(degrees: 180))
                         }
-                        Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                     }
-                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                    .rotationEffect(.init(degrees: 180))
                 }
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 .rotationEffect(.init(degrees: 180))
@@ -124,6 +118,7 @@ struct ChannelView: View, Equatable {
         .navigationSubtitle(Text(guildName))
         .presentedWindowToolbarStyle(UnifiedCompactWindowToolbarStyle())
         .onAppear {
+            guard wss != nil else { return MentionSender.shared.deselect() }
             wss.typingSubject
                 .sink { msg, channelID in
                     guard channelID == self.channelID else { return }
@@ -150,7 +145,6 @@ struct ChannelView: View, Equatable {
                 .store(in: &viewModel.cancellable)
         }
         .onDisappear { [weak viewModel] in
-            ChannelMembers.shared.channelMembers.removeAll()
             viewModel?.cancellable.invalidateAll()
         }
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in

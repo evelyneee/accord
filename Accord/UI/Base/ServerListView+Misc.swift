@@ -47,7 +47,6 @@ extension ServerListView {
             }
             ret.insert(contentsOf: rejects ?? [], at: 0)
             guild.channels = ret
-            print(ret.count)
             full?.guilds[index] = guild
         }
     }
@@ -78,6 +77,7 @@ extension ServerListView {
                 folder.guilds[index] = guild
             }
         }
+        print("Binded to guild channels")
     }
     func assignPrivateReadStates() {
         let messageDict = Self.readStates.enumerated().compactMap { (index, element) in
@@ -87,10 +87,10 @@ extension ServerListView {
         }
         for (i, channel) in Self.privateChannels.enumerated() {
             if let index = messageDict[channel.id] {
-                print("Assigned to private channel")
                 Self.privateChannels[i].read_state = Self.readStates[index]
             }
         }
+        print("Binded to private channel")
         Self.readStates.removeAll()
     }
 }

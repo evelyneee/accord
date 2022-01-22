@@ -16,6 +16,7 @@ struct ContentView: View {
 
     enum LoadErrors: Error {
         case alreadyLoaded
+        case offline
     }
 
     var body: some View {
@@ -34,6 +35,9 @@ struct ContentView: View {
                 do {
                     guard wss == nil else {
                         throw LoadErrors.alreadyLoaded
+                    }
+                    guard NetworkCore.shared.connected else {
+                        throw LoadErrors.offline
                     }
                     let new = try Gateway.init(url: Gateway.gatewayURL)
                     new.ready()
