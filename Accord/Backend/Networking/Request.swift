@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import AppKit
 import SwiftUI
+import Network
 
 public enum RequestTypes: String {
     case GET = "GET"
@@ -40,7 +41,7 @@ extension String {
 }
 
 func logOut() {
-    KeychainManager.save(key: "red.evelyn.accord.token", data: Data())
+    KeychainManager.save(key: keychainItemName, data: Data())
     NSApp.restart()
 }
 
@@ -172,7 +173,10 @@ final public class Request {
         guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-
+        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
+            print("No active websocket connection")
+            return
+        }
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
 
@@ -217,10 +221,14 @@ final public class Request {
         guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-
+        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
+            print("No active websocket connection")
+            return
+        }
+        
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
-
+        
         URLSession(configuration: config).dataTask(with: request, completionHandler: { (data, _, error) in
             if let data = data {
                 return completion(data, error)
@@ -284,7 +292,10 @@ final public class RequestPublisher {
         }()
         guard var request = request else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
         var config = URLSessionConfiguration.default
-
+        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
+            print("No active websocket connection")
+            return Empty(completeImmediately: true).eraseToAnyPublisher()
+        }
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }
 

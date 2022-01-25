@@ -292,6 +292,12 @@ struct ServerListView: View {
                         ForEach(Self.privateChannels, id: \.id) { channel in
                             NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                                 ServerListViewCell(channel: channel)
+                                    .onChange(of: self.selection, perform: { _ in
+                                        if self.selection == Int(channel.id) {
+                                            channel.read_state?.mention_count = 0
+                                            channel.read_state?.last_message_id = channel.last_message_id
+                                        }
+                                    })
                             }
                         }
                     }

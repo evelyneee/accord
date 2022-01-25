@@ -299,6 +299,23 @@ final class ChannelViewViewModel: ObservableObject {
         }
     }
     
+    func loadMoreMessages() {
+        RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?before=\(messages.last?.id ?? "")&limit=50"), headers: Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            type: .GET,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+        ))
+        .sink(receiveCompletion: { completion in
+            
+        }) { messages in
+            print(messages)
+            self.messages.append(contentsOf: messages)
+        }
+        .store(in: &cancellable)
+    }
+    
     deinit {
         print("Closing \(channelID)")
     }

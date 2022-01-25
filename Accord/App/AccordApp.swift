@@ -29,7 +29,6 @@ struct AccordApp: App {
             } else {
                 GeometryReader { reader in
                     ContentView(loaded: $loaded)
-                        .frame(minWidth: 800, minHeight: 600)
                         .preferredColorScheme(darkMode ? .dark : nil)
                         .onAppear {
                             // AccordCoreVars.loadVersion()
@@ -39,7 +38,7 @@ struct AccordApp: App {
                             concurrentQueue.async {
                                 _ = NetworkCore.shared
                             }
-                            UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { settings in
+                            UNUserNotificationCenter.current().getNotificationSettings { settings in
                                 if settings.authorizationStatus != .authorized {
                                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
                                         (granted, error) in
@@ -50,7 +49,7 @@ struct AccordApp: App {
                                         }
                                     }
                                 }
-                            })
+                            }
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                             self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
                             if self.windowWidth == 0 {
@@ -113,11 +112,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(note:)),
             name: NSWorkspace.willSleepNotification, object: nil)
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.init(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil, using: { notif in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.init(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { notif in
             print("Song Changed")
             DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
                 MediaRemoteWrapper.updatePresence()
             }
-        })
+        }
+    }
+    
+    var popover = NSPopover.init()
+    var statusBarItem: NSStatusItem?
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        
+        guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
+        
+        let contentView = MentionsView(replyingTo: Binding.constant(nil))
+
+        popover.behavior = .transient
+        popover.animates = false
+        popover.contentViewController = NSViewController()
+        popover.contentViewController?.view = NSHostingView(rootView: contentView)
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = self.statusBarItem?.button {
+             button.image = NSImage(systemSymbolName: "ellipsis.bubble.fill", accessibilityDescription: "Accord")
+             button.action = #selector(togglePopover(_:))
+        }
+        statusBarItem?.button?.action = #selector(AppDelegate.togglePopover(_:))
+    }
+    @objc func showPopover(_ sender: AnyObject?) {
+        if let button = statusBarItem?.button {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+        }
+    }
+    @objc func closePopover(_ sender: AnyObject?) {
+        popover.performClose(sender)
+    }
+    @objc func togglePopover(_ sender: AnyObject?) {
+        if popover.isShown {
+            closePopover(sender)
+        } else {
+            showPopover(sender)
+        }
     }
 }

@@ -74,8 +74,8 @@ struct LoginView: View {
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
-                                KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
+                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                 NSApplication.shared.restart()
                             } else {
                                 do {
@@ -123,8 +123,8 @@ struct LoginView: View {
                                     json: true
                                 )) { value, error in
                                     if let token = value?.token {
-                                        KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: .utf8) ?? Data())
-                                        AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                        KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
+                                        AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                         self.captcha = false
                                         NSApplication.shared.restart()
                                     } else if let error = error {
@@ -146,8 +146,8 @@ struct LoginView: View {
                                 json: true
                             )) { response, _ in
                                 if let token = response?.token {
-                                    KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                    KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
+                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                     self.captcha = false
                                     NSApplication.shared.restart()
                                 }
@@ -161,8 +161,8 @@ struct LoginView: View {
                                         json: true
                                     )) { value, _ in
                                         if let token = value?.token {
-                                            KeychainManager.save(key: "red.evelyn.accord.token", data: token.data(using: String.Encoding.utf8) ?? Data())
-                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                                            KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
+                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                             self.captcha = false
                                             NSApplication.shared.restart()
                                         }
@@ -221,8 +221,8 @@ final class LoginViewViewModel: ObservableObject {
                     }
                 }
                 if let checktoken = response.token {
-                    KeychainManager.save(key: "red.evelyn.accord.token", data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+                    KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
+                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                     let task = Process()

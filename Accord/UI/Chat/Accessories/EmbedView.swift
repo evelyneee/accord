@@ -46,7 +46,7 @@ struct EmbedView: View, Equatable {
                                 Text(field.name)
                                     .lineLimit(0)
                                     .font(.subheadline)
-                                Text(field.value)
+                                AsyncMarkdown(field.value)
                             }
                         }
                     }

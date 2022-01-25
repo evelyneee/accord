@@ -25,6 +25,7 @@ struct SettingsViewRedesign: View {
     @AppStorage("XcodeRPC") var xcodeRPC: Bool = false
     @AppStorage("DiscordDesktopRPCEnabled") var ddRPC: Bool = false
     @AppStorage("VSCodeRPCEnabled") var vsRPC: Bool = false
+    @AppStorage("MentionsMenuBarItemEnabled") var menuBarItem: Bool = false
 
     @State var user: User? = AccordCoreVars.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
@@ -111,6 +112,7 @@ struct SettingsViewRedesign: View {
                         .disabled(true)
                     SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
                     SettingsToggleView(toggled: $dark, title: "Always dark mode")
+                    SettingsToggleView(toggled: $menuBarItem, title: "Enable the mentions menu bar popup")
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)

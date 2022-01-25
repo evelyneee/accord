@@ -24,10 +24,11 @@ func showNotification(title: String, subtitle: String, description: String? = ni
     let uuidString = "Accord"
     let request = UNNotificationRequest(identifier: uuidString,
                                         content: content, trigger: trigger)
-    print(request)
     // Schedule the request with the system.
     let notificationCenter = UNUserNotificationCenter.current()
     notificationCenter.add(request) { (error) in
-        print(error)
+        if let error = error {
+            print(error)
+        }
     }
 } 

@@ -322,6 +322,7 @@ final class Gateway {
             ]
         ]
         try self.send(json: packet)
+        print("sent packet")
     }
 
     public func getMembers(ids: [String], guild: String) throws {

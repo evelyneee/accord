@@ -37,13 +37,19 @@ public let musicRPCAppID = "925514277987704842"
 public let discordDesktopRPCAppID = "928798784174051399"
 public let vsCodeRPCAppID = "928861386140971078"
 
+#if DEBUG
+public let keychainItemName = "red.evelyn.accord.token.debug"
+#else
+public let keychainItemName = "red.evelyn.accord.token"
+#endif
+
 final class AccordCoreVars {
     
     static var cancellable: Cancellable? = nil
     
     static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
     static var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
-    public static var token: String = String(decoding: KeychainManager.load(key: "red.evelyn.accord.token") ?? Data(), as: UTF8.self)
+    public static var token: String = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
     public static var user: User?
     public static var plugins: [AccordPlugin] = []
 

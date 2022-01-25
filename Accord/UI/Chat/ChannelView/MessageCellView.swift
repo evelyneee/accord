@@ -57,7 +57,8 @@ struct MessageCellView: View {
                 
                 VStack(alignment: .leading) {
                     if message.isSameAuthor {
-                        textElement?.padding(.leading, 41) ?? Text(message.content).padding(.leading, 41)
+                        AsyncMarkdown(message.content)
+                            .padding(.leading, 41)
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
                             .foregroundColor(role != nil && roleColors[role!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[role!]!.0) : Color(NSColor.textColor))
@@ -74,8 +75,7 @@ struct MessageCellView: View {
                         Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-
-                        textElement ?? Text(message.content)
+                        AsyncMarkdown(message.content)
                     }
                 }
                 Spacer()
@@ -110,17 +110,5 @@ struct MessageCellView: View {
                 .padding(.top, 5)
         }
         .id(message.id)
-        .onAppear {
-            textQueue.async { [unowned message] in
-                Markdown.markAll(text: message.content, members)
-                    .replaceError(with: Text(""))
-                    .sink { text in
-                        DispatchQueue.main.async {
-                            self.textElement = text
-                        }
-                    }
-                    .store(in: &bag)
-            }
-        }
     }
 }

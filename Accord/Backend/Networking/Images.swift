@@ -29,12 +29,12 @@ struct Attachment: View, Equatable {
 
     var body: some View {
         Image(nsImage: imageLoader.image)
-              .resizable()
-              .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
-              .scaledToFit()
-              .onDisappear(perform: {
-                  imageLoader.cancellable?.cancel()
-              })
+            .resizable()
+            .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
+            .scaledToFit()
+            .onDisappear(perform: {
+                imageLoader.cancellable?.cancel()
+            })
     }
 }
 

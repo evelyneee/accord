@@ -29,8 +29,6 @@ struct ChannelView: View, Equatable {
     // Nicknames/Usernames of users typing
     @State var typing: [String] = []
 
-    // Collapsed message quick action indexes
-
     // WebSocket error
     @State var error: String?
 
@@ -77,6 +75,14 @@ struct ChannelView: View, Equatable {
                                 replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                                 replyingTo: $replyingTo
                             )
+                            .onAppear {
+                                if (viewModel?.messages.count ?? 0) >= 50 {
+                                    print(message.id, viewModel?.messages[viewModel!.messages.count - 2])
+                                    if message == viewModel?.messages[viewModel!.messages.count - 2] {
+                                        viewModel?.loadMoreMessages()
+                                    }
+                                }
+                            }
                             .contextMenu {
                                 Button("Reply") { [weak message] in
                                     replyingTo = message
@@ -116,7 +122,7 @@ struct ChannelView: View, Equatable {
         }
         .navigationTitle(Text("\(guildID == "@me" ? "" : "#")\(channelName)"))
         .navigationSubtitle(Text(guildName))
-        .presentedWindowToolbarStyle(UnifiedCompactWindowToolbarStyle())
+        .presentedWindowToolbarStyle(.unifiedCompact)
         .onAppear {
             guard wss != nil else { return MentionSender.shared.deselect() }
             wss.typingSubject
@@ -124,8 +130,8 @@ struct ChannelView: View, Equatable {
                     guard channelID == self.channelID else { return }
                     webSocketQueue.async { [weak viewModel] in
                         guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                                memberDecodable.user_id != AccordCoreVars.user?.id else { return }
-                        let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member.nick ?? memberDecodable.member.user.username
+                              memberDecodable.user_id != AccordCoreVars.user?.id else { return }
+                        let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member?.nick ?? memberDecodable.member?.user.username ?? "Unknown User"
                         if !(typing.contains(isKnownAs)) {
                             typing.append(isKnownAs)
                         }

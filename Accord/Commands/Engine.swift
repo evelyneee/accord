@@ -113,7 +113,6 @@ final class SlashCommands {
         request.httpBody = body
         print(String(data: request.httpBody!, encoding: .utf8))
         let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error in
-            print(String(data: data!, encoding: .utf8), response, error)
         })
         
         task.resume()

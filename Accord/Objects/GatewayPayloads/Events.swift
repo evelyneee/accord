@@ -39,7 +39,7 @@ final class TypingEvent: Decodable {
     final class TypingEventCore: Decodable {
         var channel_id: String
         var guild_id: String?
-        var member: GuildMember
+        var member: GuildMember?
         var user_id: String
     }
 }
