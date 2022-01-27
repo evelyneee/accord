@@ -425,6 +425,7 @@
 		9E7BC56B27472308008E3FAB /* Markdown */ = {
 			isa = PBXGroup;
 			children = (
+				9E7E4D33279C7E2F008FAF15 /* AsyncMarkdown.swift */,
 				9E7BC56C27472317008E3FAB /* Markdown.swift */,
 			);
 			path = Markdown;
@@ -572,7 +573,6 @@
 				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
 				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,
-				9E7E4D33279C7E2F008FAF15 /* AsyncMarkdown.swift */,
 			);
 			path = Misc;
 			sourceTree = "<group>";
@@ -897,7 +897,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

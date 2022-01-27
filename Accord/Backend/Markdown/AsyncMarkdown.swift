@@ -21,7 +21,7 @@ struct AsyncMarkdown: View {
     
     private func make() {
         textQueue.async {
-            self.cancellable = Markdown.markAll(text: self._text, [:])
+            self.cancellable = Markdown.markAll(text: self._text, Storage.usernames)
                 .replaceError(with: Text(self._text))
                 .sink { res in
                     self.markdown = res

@@ -44,6 +44,8 @@ struct ChannelView: View, Equatable {
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
     
+    @AppStorage("MetalRenderer") var metalRenderer: Bool = false
+    
     // MARK: - init
     init(_ channel: Channel, _ guildName: String? = nil) {
         self.guildID = channel.guild_id ?? "@me"
@@ -63,21 +65,19 @@ struct ChannelView: View, Equatable {
                     Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                     ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
                         if let author = message.author {
-                            MessageCellView(
+                            MessageCellView (
                                 message: message,
                                 nick: viewModel?.nicks[author.id],
                                 replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
                                 pronouns: viewModel?.pronouns[author.id],
                                 avatar: viewModel?.avatars[author.id],
                                 guildID: guildID,
-                                members: [:],
                                 role: $viewModel.roles[author.id],
                                 replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                                 replyingTo: $replyingTo
                             )
                             .onAppear {
                                 if (viewModel?.messages.count ?? 0) >= 50 {
-                                    print(message.id, viewModel?.messages[viewModel!.messages.count - 2])
                                     if message == viewModel?.messages[viewModel!.messages.count - 2] {
                                         viewModel?.loadMoreMessages()
                                     }
@@ -101,10 +101,11 @@ struct ChannelView: View, Equatable {
                                     NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
                                 }
                             }
-                            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                            .rotationEffect(.init(degrees: 180))
                         }
                     }
+                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                    .rotationEffect(.init(degrees: 180))
+                    .if(metalRenderer, transform: { $0.drawingGroup() })
                 }
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 .rotationEffect(.init(degrees: 180))
@@ -126,9 +127,9 @@ struct ChannelView: View, Equatable {
         .onAppear {
             guard wss != nil else { return MentionSender.shared.deselect() }
             wss.typingSubject
-                .sink { msg, channelID in
+                .sink { [weak viewModel] msg, channelID in
                     guard channelID == self.channelID else { return }
-                    webSocketQueue.async { [weak viewModel] in
+                    webSocketQueue.async {
                         guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
                               memberDecodable.user_id != AccordCoreVars.user?.id else { return }
                         let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member?.nick ?? memberDecodable.member?.user.username ?? "Unknown User"

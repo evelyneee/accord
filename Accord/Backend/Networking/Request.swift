@@ -84,7 +84,6 @@ final class Headers {
     }
     
     func set(request: inout URLRequest, config: inout URLSessionConfiguration) throws {
-        config.httpAdditionalHeaders = ["User-Agent": userAgent]
         if cached {
             config.requestCachePolicy = .returnCacheDataElseLoad
         }
@@ -106,7 +105,7 @@ final class Headers {
             }
         }
         if self.discordHeaders {
-            request.addValue(self.userAgent, forHTTPHeaderField: "user-agent")
+            request.addValue(self.userAgent, forHTTPHeaderField: "User-Agent")
             request.addValue("https://discord.com", forHTTPHeaderField: "origin")
             request.addValue("empty", forHTTPHeaderField: "sec-fetch-dest")
             request.addValue("cors", forHTTPHeaderField: "sec-fetch-mode")
@@ -117,6 +116,7 @@ final class Headers {
                 fatalError("We cannot skip the X-Super-Properties. What are you trying to do, get banned?")
             }
             config.httpAdditionalHeaders = [
+                "User-Agent":self.userAgent,
                 "x-discord-locale":"\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
             ]
         }

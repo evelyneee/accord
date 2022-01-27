@@ -24,7 +24,6 @@ struct PinsView: View {
                 pronouns: nil,
                 avatar: nil,
                 guildID: nil,
-                members: [:],
                 role: Binding.constant(nil),
                 replyRole: Binding.constant(nil),
                 replyingTo: $replyingTo

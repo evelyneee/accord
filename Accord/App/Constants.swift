@@ -43,6 +43,10 @@ public let keychainItemName = "red.evelyn.accord.token.debug"
 public let keychainItemName = "red.evelyn.accord.token"
 #endif
 
+final class Storage {
+    static var usernames: [String:String] = [:]
+}
+
 final class AccordCoreVars {
     
     static var cancellable: Cancellable? = nil

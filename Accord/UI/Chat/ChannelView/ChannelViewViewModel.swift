@@ -47,9 +47,9 @@ final class ChannelViewViewModel: ObservableObject {
                     guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
                     if self?.guildID != "@me" && !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                         self?.loadUser(for: message.author?.id)
-                        for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
-                            self?.loadUser(for: user)
-                        }
+//                        for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
+//                            self?.loadUser(for: user)
+//                        }
                     }
                     if let firstMessage = self?.messages.first {
                         message.sameAuthor = firstMessage.author?.id == message.author?.id
@@ -58,6 +58,8 @@ final class ChannelViewViewModel: ObservableObject {
                         if let count = self?.messages.count, count == 50 {
                             self?.messages.removeLast()
                         }
+                        guard let author = message.author else { return }
+                        Storage.usernames[author.id] = author.username
                         self?.messages.insert(message, at: 0)
                     }
                 }
@@ -174,18 +176,19 @@ final class ChannelViewViewModel: ObservableObject {
                 print(error)
                 MentionSender.shared.deselect()
             }
-        }) { msg in
+        }) { [weak self] msg in
             let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
                 guard element != msg.last else { return element }
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 return element
             }
-            DispatchQueue.main.async { [weak self] in
+            DispatchQueue.main.async {
                 self?.messages = messages
                 messageFetchQueue.async {
                     guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
                     self?.loadPronouns()
                     self?.ack(channelID: channelID, guildID: guildID)
+                    self?.cacheUsernames()
                 }
             }
         }
@@ -196,7 +199,14 @@ final class ChannelViewViewModel: ObservableObject {
     func offlineMessages() {
     }
     #endif
-
+    
+    func cacheUsernames() {
+        self.messages.forEach { message in
+            guard let author = message.author else { return }
+            Storage.usernames[author.id] = author.username
+        }
+    }
+    
     func loadUser(for id: String?) {
         guard let id = id else { return }
         guard let person = wss.cachedMemberRequest["\(guildID)$\(id)"] else {
@@ -243,17 +253,20 @@ final class ChannelViewViewModel: ObservableObject {
     func loadPronouns() {
         guard AccordCoreVars.pronounDB else { return }
         RequestPublisher.fetch([String: String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
-            bodyObject: ["platform": "discord", "ids": messages.compactMap({ $0.author?.id}).joined(separator: ",")],
+            bodyObject: [
+                "platform": "discord",
+                "ids": messages.compactMap({ $0.author?.id}).joined(separator: ",")
+            ],
             type: .GET
         ))
         .replaceError(with: [:])
-        .sink { value in
+        .sink { [weak self] value in
             var value = value
             for key in value.keys {
                 pronounDBFormed(pronoun: &value[key])
             }
             DispatchQueue.main.async {
-                self.pronouns = value
+                self?.pronouns = value
             }
         }
         .store(in: &cancellable)
@@ -277,7 +290,6 @@ final class ChannelViewViewModel: ObservableObject {
                     return lhs < rhs
                 }) {
                     DispatchQueue.main.async {
-                        print(person.user.username, role)
                         self.roles[person.user.id] = role
                         return
                     }
@@ -288,7 +300,7 @@ final class ChannelViewViewModel: ObservableObject {
 
     func performSecondStageLoad() {
         var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
-        getCachedMemberChunk()
+        //getCachedMemberChunk()
         for (index, item) in allUserIDs.enumerated {
             if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") && [Int](allUserIDs.indices).contains(index) {
                 allUserIDs.remove(at: index)
@@ -309,9 +321,13 @@ final class ChannelViewViewModel: ObservableObject {
         ))
         .sink(receiveCompletion: { completion in
             
-        }) { messages in
-            print(messages)
-            self.messages.append(contentsOf: messages)
+        }) { [weak self] msg in
+            let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
+                guard element != msg.last else { return element }
+                element.sameAuthor = msg[index + 1].author?.id == element.author?.id
+                return element
+            }
+            self?.messages.append(contentsOf: messages)
         }
         .store(in: &cancellable)
     }

@@ -173,9 +173,6 @@ struct ChatControls: View {
                             */
                         }
                     }
-                    .onAppear {
-                        viewModel.cachedUsers = self.users
-                    }
                     .onChange(of: users) { [weak viewModel] value in
                         viewModel?.cachedUsers = value
                     }
@@ -196,10 +193,8 @@ struct ChatControls: View {
                     }
                 }
                 .onAppear {
+                    viewModel.cachedUsers = self.users
                     viewModel.findView()
-                    AccordCoreVars.plugins.forEach { _ in
-                        pluginPoppedUp.append(false)
-                    }
                 }
                 .textFieldStyle(PlainTextFieldStyle())
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in

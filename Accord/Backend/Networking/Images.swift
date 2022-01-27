@@ -28,13 +28,18 @@ struct Attachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: imageLoader.image)
-            .resizable()
-            .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
-            .scaledToFit()
-            .onDisappear(perform: {
-                imageLoader.cancellable?.cancel()
-            })
+        HStack {
+            Image(nsImage: imageLoader.image)
+                .resizable()
+                .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
+                .scaledToFit()
+                .onDisappear(perform: {
+                    imageLoader.cancellable?.cancel()
+                })
+        }
+        .onAppear {
+            imageLoader.load()
+        }
     }
 }
 
@@ -73,15 +78,14 @@ final class ImageLoaderAndCache: ObservableObject {
     init(imageURL: String, size: CGSize? = nil) {
         self.url = URL(string: imageURL)
         self.size = size
-        self.load()
     }
 
     func load() {
-        imageQueue.async { [weak self] in
-            if self?.size?.width == 350 { print("loading attachment") }
-            self?.cancellable = RequestPublisher.image(url: self?.url, to: self?.size)
+        imageQueue.async {
+            if self.size?.width == 350 { print("loading attachment") }
+            self.cancellable = RequestPublisher.image(url: self.url, to: self.size)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-                .sink { img in DispatchQueue.main.async { self?.image = img } }
+                .sink { [weak self] img in DispatchQueue.main.async { self?.image = img } }
         }
     }
     

@@ -31,24 +31,24 @@ final class ChatControlsViewModel: ObservableObject {
         if !(mentions.isEmpty) {
             let search = mentions[0]
             let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }
-            DispatchQueue.main.async { [weak self] in
-                self?.matchedUsers = matched.removingDuplicates()
+            DispatchQueue.main.async {
+                self.matchedUsers = matched.removingDuplicates()
             }
         } else if !(channels.isEmpty) {
             let search = channels[0]
             let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
             let joined: [Channel] = Array(Array(Array(matches).joined()).joined()).filter { $0.guild_id == guildID }
             print(joined)
-            DispatchQueue.main.async { [weak self] in
-                self?.matchedChannels = joined
+            DispatchQueue.main.async {
+                self.matchedChannels = joined
             }
         } else if !(slashes.isEmpty) {
             // TODO: Slash command implementation here
         } else if !(emoji.isEmpty) {
             let key = emoji[0]
             let matched: [DiscordEmote] = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased().contains(key) }
-            DispatchQueue.main.async { [weak self] in
-                self?.matchedEmoji = matched
+            DispatchQueue.main.async {
+                self.matchedEmoji = matched
             }
         }
     }

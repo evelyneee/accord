@@ -250,12 +250,12 @@ func pronounDBFormed(pronoun: inout String?) {
     }
 }
 
-func pfpURL(_ uid: String?, _ hash: String?, _ size: String = "32") -> String {
+func pfpURL(_ uid: String?, _ hash: String?, _ size: String = "64") -> String {
     guard let uid = uid, let hash = hash else { return "" }
     return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=\(size)"
 }
 
-func iconURL(_ id: String?, _ icon: String?, _ size: String = "32") -> String {
+func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
     guard let id = id, let icon = icon else { return "" }
     return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=\(size)"
 }
