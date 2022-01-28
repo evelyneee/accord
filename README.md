@@ -32,6 +32,10 @@ tbd
 
 [Join the Accord TestFlight](https://testflight.apple.com/join/YmTwJT8u)
 
+### Support
+
+[Discord Server](https://discord.gg/nUGnmA9yFH)
+
 ### Latest testflight description
 
 Welcome to the first Accord beta. 
