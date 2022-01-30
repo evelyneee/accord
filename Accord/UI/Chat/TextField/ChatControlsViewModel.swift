@@ -28,24 +28,20 @@ final class ChatControlsViewModel: ObservableObject {
         let channels = textFieldContents.matches(for: #"(?<=#)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
-        if !(mentions.isEmpty) {
-            let search = mentions[0]
+        if let search = mentions.first {
             let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }
             DispatchQueue.main.async {
                 self.matchedUsers = matched.removingDuplicates()
             }
-        } else if !(channels.isEmpty) {
-            let search = channels[0]
+        } else if let search = channels.first {
             let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
             let joined: [Channel] = Array(Array(Array(matches).joined()).joined()).filter { $0.guild_id == guildID }
-            print(joined)
             DispatchQueue.main.async {
                 self.matchedChannels = joined
             }
         } else if !(slashes.isEmpty) {
             // TODO: Slash command implementation here
-        } else if !(emoji.isEmpty) {
-            let key = emoji[0]
+        } else if let key = emoji.first {
             let matched: [DiscordEmote] = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased().contains(key) }
             DispatchQueue.main.async {
                 self.matchedEmoji = matched
@@ -78,8 +74,8 @@ final class ChatControlsViewModel: ObservableObject {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            self.textField?.becomeFirstResponder()
-            self.textField?.allowsEditingTextAttributes = true
+            //self.textField?.becomeFirstResponder()
+            //self.textField?.allowsEditingTextAttributes = true
         }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
             userAgent: discordUserAgent,
@@ -98,8 +94,8 @@ final class ChatControlsViewModel: ObservableObject {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            self.textField?.becomeFirstResponder()
-            self.textField?.allowsEditingTextAttributes = true
+            //self.textField?.becomeFirstResponder()
+            //self.textField?.allowsEditingTextAttributes = true
         }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
             userAgent: discordUserAgent,
@@ -118,8 +114,8 @@ final class ChatControlsViewModel: ObservableObject {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            self.textField?.becomeFirstResponder()
-            self.textField?.allowsEditingTextAttributes = true
+            //self.textField?.becomeFirstResponder()
+            //self.textField?.allowsEditingTextAttributes = true
         }
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"

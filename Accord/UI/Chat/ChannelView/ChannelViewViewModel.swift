@@ -60,7 +60,9 @@ final class ChannelViewViewModel: ObservableObject {
                         }
                         guard let author = message.author else { return }
                         Storage.usernames[author.id] = author.username
-                        self?.messages.insert(message, at: 0)
+                        withAnimation {
+                            self?.messages.insert(message, at: 0)
+                        }
                     }
                 }
             }
@@ -113,8 +115,8 @@ final class ChannelViewViewModel: ObservableObject {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
                     guard let index = messageMap?[message.id] else { return }
-                    withAnimation {
-                        DispatchQueue.main.async {
+                    DispatchQueue.main.async {
+                        withAnimation {
                             let i: Int = index
                             self?.messages.remove(at: i)
                         }

@@ -44,7 +44,7 @@ struct MessageCellView: View {
                 .padding(.leading, 47)
             }
             HStack { [unowned message] in
-                if !message.isSameAuthor {
+                if !(message.isSameAuthor && message.referenced_message == nil) {
                     Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar)).equatable()
                         .frame(width: 33, height: 33)
                         .clipShape(Circle())
@@ -55,7 +55,7 @@ struct MessageCellView: View {
                 }
                 
                 VStack(alignment: .leading) {
-                    if message.isSameAuthor {
+                    if message.isSameAuthor && message.referenced_message == nil {
                         AsyncMarkdown(message.content)
                             .padding(.leading, 41)
                     } else {
@@ -94,7 +94,7 @@ struct MessageCellView: View {
                     .padding(.leading, 41)
                 }
             }
-            ForEach(message.embeds ?? []) { embed in
+            ForEach(message.embeds ?? [], id: \.hashValue) { embed in
                 EmbedView(embed: embed).equatable()
                     .padding(.leading, 41)
             }

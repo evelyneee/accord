@@ -46,7 +46,7 @@ fileprivate func log<T>(items: [T], file: String, line: String? = nil, separator
     var out = String()
     for item in items {
         if type(of: item) is AnyClass {
-            dump(item, to: &out)
+            out.append(String(reflecting: item))
         } else {
             out.append(String(describing: item))
         }

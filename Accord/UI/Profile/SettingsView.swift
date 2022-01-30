@@ -27,6 +27,7 @@ struct SettingsViewRedesign: View {
     @AppStorage("VSCodeRPCEnabled") var vsRPC: Bool = false
     @AppStorage("MentionsMenuBarItemEnabled") var menuBarItem: Bool = false
     @AppStorage("MetalRenderer") var metalRenderer: Bool = false
+    @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
 
     @State var user: User? = AccordCoreVars.user
     @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
@@ -103,18 +104,21 @@ struct SettingsViewRedesign: View {
                 .padding()
                 .disabled(true)
                 VSplitView {
-                    SettingsToggleView(toggled: $profilePictures, title: "Show profile pictures")
-                        .disabled(true)
-                    SettingsToggleView(toggled: $discordSettings, title: "Use stock discord settings")
-                        .disabled(true)
-                    SettingsToggleView(toggled: $recent, title: "Sort servers by recent messages")
-                        .disabled(true)
-                    SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
-                        .disabled(true)
-                    SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
-                    SettingsToggleView(toggled: $dark, title: "Always dark mode")
-                    SettingsToggleView(toggled: $menuBarItem, title: "Enable the mentions menu bar popup")
-                    SettingsToggleView(toggled: $metalRenderer, title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
+                    Group {
+                        SettingsToggleView(toggled: $profilePictures, title: "Show profile pictures")
+                        SettingsToggleView(toggled: $discordSettings, title: "Use stock discord settings")
+                        SettingsToggleView(toggled: $recent, title: "Sort servers by recent messages")
+                        SettingsToggleView(toggled: $suffixes, title: "Enable useless suffix remover")
+                    }
+                    .disabled(true)
+                    Group {
+                        SettingsToggleView(toggled: $pronounDB, title: "Enable PronounDB integration")
+                        SettingsToggleView(toggled: $dark, title: "Always dark mode")
+                        SettingsToggleView(toggled: $menuBarItem, title: "Enable the mentions menu bar popup")
+                        SettingsToggleView(toggled: $nitrolessEnabled, title: "Enable Nitroless support")
+                        SettingsToggleView(toggled: $metalRenderer, title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
+                    }
+
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -143,6 +147,7 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
                         SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                     }
+
                 }
                 .toggleStyle(SwitchToggleStyle())
                 .pickerStyle(MenuPickerStyle())

@@ -5,17 +5,17 @@
 //  Created by evelyn on 2020-11-24.
 //
 
+import AppKit
 import Foundation
 import SwiftUI
-import AppKit
 import UserNotifications
 
 @main
 struct AccordApp: App {
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State var windowWidth: Int = Int(NSApplication.shared.keyWindow?.frame.width ?? 1000)
-    @State var windowHeight: Int = Int(NSApplication.shared.keyWindow?.frame.height ?? 800)
+    @State var windowWidth: Int = .init(NSApplication.shared.keyWindow?.frame.width ?? 1000)
+    @State var windowHeight: Int = .init(NSApplication.shared.keyWindow?.frame.height ?? 800)
     @State var popup: Bool = false
     @State var token = AccordCoreVars.token
     var body: some Scene {
@@ -38,10 +38,10 @@ struct AccordApp: App {
                             concurrentQueue.async {
                                 _ = NetworkCore.shared
                             }
-                            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                            UNUserNotificationCnter.current().getNotificationSettings { settings in
                                 if settings.authorizationStatus != .authorized {
                                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
-                                        (granted, error) in
+                                        granted, error in
                                         if granted {
                                             print("lol")
                                         } else {
@@ -93,7 +93,7 @@ struct AccordApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    @objc func onWakeNote(note: NSNotification) {
+    @objc func onWakeNote(note _: NSNotification) {
         print("hi")
         if wss != nil {
             concurrentQueue.async {
@@ -101,34 +101,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-    
-    @objc func onSleepNote(note: NSNotification) {
+
+    @objc func onSleepNote(note _: NSNotification) {
         guard wss != nil else { return }
         wss.close(.protocolCode(.protocolError))
     }
-    
+
     func fileNotifications() {
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onWakeNote(note:)),
-            name: NSWorkspace.didWakeNotification, object: nil)
+            name: NSWorkspace.didWakeNotification, object: nil
+        )
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(note:)),
-            name: NSWorkspace.willSleepNotification, object: nil)
-        NotificationCenter.default.addObserver(forName: NSNotification.Name.init(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { notif in
+            name: NSWorkspace.willSleepNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
             print("Song Changed")
             DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
                 MediaRemoteWrapper.updatePresence()
             }
         }
     }
-    
-    var popover = NSPopover.init()
+
+    var popover = NSPopover()
     var statusBarItem: NSStatusItem?
-    
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        
+
+    func applicationDidFinishLaunching(_: Notification) {
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
-        
+
         let contentView = MentionsView(replyingTo: Binding.constant(nil))
 
         popover.behavior = .transient
@@ -136,20 +137,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentViewController = NSViewController()
         popover.contentViewController?.view = NSHostingView(rootView: contentView)
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = self.statusBarItem?.button {
-             button.image = NSImage(systemSymbolName: "ellipsis.bubble.fill", accessibilityDescription: "Accord")
-             button.action = #selector(togglePopover(_:))
+        if let button = statusBarItem?.button {
+            button.image = NSImage(systemSymbolName: "ellipsis.bubble.fill", accessibilityDescription: "Accord")
+            button.action = #selector(togglePopover(_:))
         }
         statusBarItem?.button?.action = #selector(AppDelegate.togglePopover(_:))
     }
-    @objc func showPopover(_ sender: AnyObject?) {
+
+    @objc func showPopover(_: AnyObject?) {
         if let button = statusBarItem?.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
         }
     }
+
     @objc func closePopover(_ sender: AnyObject?) {
         popover.performClose(sender)
     }
+
     @objc func togglePopover(_ sender: AnyObject?) {
         if popover.isShown {
             closePopover(sender)

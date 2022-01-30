@@ -27,6 +27,7 @@ struct ChatControls: View {
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
     weak var textField: NSTextField?
+    @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
     
     private func send() {
         guard viewModel.textFieldContents != "" else { return }
@@ -127,16 +128,18 @@ struct ChatControls: View {
                             Image(systemName: "plus.circle.fill")
                         }
                         .buttonStyle(BorderlessButtonStyle())
-                        Button(action: {
-                            nitroless.toggle()
-                        }) {
-                            Image(systemName: "rectangle.grid.3x2.fill")
+                        if nitrolessEnabled {
+                            Button(action: {
+                                nitroless.toggle()
+                            }) {
+                                Image(systemName: "rectangle.grid.3x2.fill")
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+                            .popover(isPresented: $nitroless, content: {
+                                NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
+                                    .frame(width: 300, height: 400)
+                            })
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        .popover(isPresented: $nitroless, content: {
-                            NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
-                                .frame(width: 300, height: 400)
-                        })
                         Button(action: {
                             emotes.toggle()
                         }) {

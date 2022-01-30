@@ -22,9 +22,9 @@ final class Embed: Codable, Hashable, Identifiable {
 //    var thumbnail?    mation
 //    var video?    embe
 //    var provider?    eion
-//    var author?    emb
+    var author: EmbedAuthor?
     var fields: [EmbedField]?
-    var id: String? = UUID().uuidString
+    var id: String { UUID().uuidString }
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -34,6 +34,13 @@ final class EmbedField: Codable {
     var name: String
     var inline: Bool?
     var value: String
+}
+
+final class EmbedAuthor: Codable {
+    var name: String
+    var url: String?
+    var icon_url: String?
+    var proxy_icon_url: String?
 }
 
 class EmbedImage: Codable {

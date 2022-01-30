@@ -22,6 +22,24 @@ struct EmbedView: View, Equatable {
                 Color(NSColor.color(from: color) ?? NSColor.gray).frame(width: 3).padding(.trailing, 5)
             }
             VStack(alignment: .leading) {
+                if let author = embed?.author {
+                    HStack {
+                        if let iconURL = author.proxy_icon_url {
+                            Attachment(iconURL, size: CGSize(width: 24, height: 24))
+                                .frame(width: 24, height: 24)
+                                .clipShape(Circle())
+                        } else if let iconURL = author.icon_url {
+                            Attachment(iconURL, size: CGSize(width: 24, height: 24))
+                                .frame(width: 24, height: 24)
+                                .clipShape(Circle())
+                        }
+                        if let urlString = author.url, let url = URL(string: urlString) {
+                            Link(author.name, destination: url)
+                        } else {
+                            Text(author.name)
+                        }
+                    }
+                }
                 if let title = embed?.title {
                     Text(title)
                         .fontWeight(.bold)
