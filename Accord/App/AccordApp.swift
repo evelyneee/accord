@@ -38,7 +38,7 @@ struct AccordApp: App {
                             concurrentQueue.async {
                                 _ = NetworkCore.shared
                             }
-                            UNUserNotificationCnter.current().getNotificationSettings { settings in
+                            UNUserNotificationCenter.current().getNotificationSettings { settings in
                                 if settings.authorizationStatus != .authorized {
                                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
                                         granted, error in
