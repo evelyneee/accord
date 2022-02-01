@@ -5,13 +5,14 @@
 //  Created by evelyn on 2021-08-16.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 final class Message: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        return lhs.id == rhs.id && lhs.content == rhs.content
+        lhs.id == rhs.id && lhs.content == rhs.content
     }
+
     var author: User?
     var nick: String?
     var channel_id: String
@@ -26,53 +27,55 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var pinned: Bool?
     var timestamp: String
     var tts: Bool
-    var type: Int
+    var type: MessageType
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
     // var message_reference: Reply? // in the mentions endpoint
     let sticker_items: [StickerItem]?
     var reactions: [Reaction]?
-    
+
     var identifier: String {
-        return self.content.appending(self.id)
+        content.appending(id)
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id.appending(content))
     }
 
     func delete() {
         let headers = Headers(
-                        userAgent: discordUserAgent,
-                        contentType: nil,
-                        token: AccordCoreVars.token,
-                        type: .DELETE,
-                        discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
-                        empty: true
-                    )
+            userAgent: discordUserAgent,
+            contentType: nil,
+            token: AccordCoreVars.token,
+            type: .DELETE,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+            empty: true
+        )
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
+
     func edit(now: String) {
         let headers = Headers(
-                        userAgent: discordUserAgent,
-                        token: AccordCoreVars.token,
-                        bodyObject: ["content": now],
-                        type: .PATCH,
-                        discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
-                        empty: true,
-                        json: true
-                    )
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            bodyObject: ["content": now],
+            type: .PATCH,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+            empty: true,
+            json: true
+        )
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
     }
+
     var sameAuthor: Bool?
-    var isSameAuthor: Bool { self.sameAuthor ?? false }
+    var isSameAuthor: Bool { sameAuthor ?? false }
 }
 
 final class Reply: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Reply, rhs: Reply) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
 
     var author: User?
@@ -87,12 +90,24 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
     var pinned: Bool?
     var timestamp: String
     var tts: Bool
-    var type: Int
+    var type: MessageType
     var attachments: [AttachedFiles]
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+enum MessageType: Int, Codable {
+    case `default`, recipientAdd, recipientRemove, `call`,
+    channelNameChange, channelIconChange, channelMessagePin,
+    guildMemberJoin, userBoostedServer, guildReachedLevelOne,
+    guildReachedLevelTwo, guildReachedLevelThree,
+    channelFollowAdd, guildDiscoveryDisqualified,
+    guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
+    guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,
+    chatInputCommand, threadStarterMessage, guildInviteReminder,
+    contextMenuCommand
 }
 
 // TODO: Component object

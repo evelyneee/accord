@@ -7,9 +7,7 @@
 
 import Foundation
 
-final class Command: Codable {
-    
-}
+final class Command: Codable {}
 
 final class Interaction: Codable {
     var id: String

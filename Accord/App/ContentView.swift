@@ -5,8 +5,8 @@
 //  Created by evelyn on 2020-11-24.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct ContentView: View {
     @State var modalIsPresented: Bool = false
@@ -39,15 +39,14 @@ struct ContentView: View {
                     guard NetworkCore.shared.connected else {
                         throw LoadErrors.offline
                     }
-                    let new = try Gateway.init(url: Gateway.gatewayURL)
+                    let new = try Gateway(url: Gateway.gatewayURL)
                     new.ready()
                         .sink(receiveCompletion: { completion in
                             switch completion {
                             case .finished:
                                 break
-                            case .failure(let error):
+                            case let .failure(error):
                                 print(error)
-                                break
                             }
                         }) { d in
                             AccordCoreVars.user = d.user
@@ -58,11 +57,11 @@ struct ContentView: View {
                             username = d.user.username
                             discriminator = d.user.discriminator
                             self.serverListView = ServerListView(full: d)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation {
                                     loaded = true
                                 }
-                            })
+                            }
                         }
                         .store(in: &wsCancellable)
                     print("init")
@@ -74,11 +73,11 @@ struct ContentView: View {
                         let data = try Data(contentsOf: path)
                         let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
                         self.serverListView = ServerListView(full: structure.d)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             withAnimation {
                                 loaded = true
                             }
-                        })
+                        }
                     } catch {
                         print(error)
                     }

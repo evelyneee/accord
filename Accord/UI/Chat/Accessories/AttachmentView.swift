@@ -5,9 +5,9 @@
 //  Created by evelyn on 2021-07-01
 //
 
-import SwiftUI
 import AVKit
 import Combine
+import SwiftUI
 
 struct AttachmentView: View {
     var media: [AttachedFiles]
@@ -62,9 +62,10 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
     windowRef = NSWindow(
         contentRect: NSRect(x: 0, y: 0, width: CGFloat(width ?? 0), height: CGFloat(height ?? 0)),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
-        backing: .buffered, defer: false)
+        backing: .buffered, defer: false
+    )
     if let player = player {
-         windowRef.contentView = NSHostingView(rootView: VideoPlayer(player: player).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).padding(.horizontal, 45).cornerRadius(5))
+        windowRef.contentView = NSHostingView(rootView: VideoPlayer(player: player).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).padding(.horizontal, 45).cornerRadius(5))
     } else if let url = url {
         windowRef.contentView = NSHostingView(rootView: Attachment(url).frame(idealWidth: CGFloat(width ?? 0), idealHeight: CGFloat(height ?? 0)).cornerRadius(5))
     }
@@ -75,16 +76,15 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
 
 struct VideoPlayerController: NSViewRepresentable {
     init(url: URL) {
-        self.player = AVPlayer(url: url)
+        player = AVPlayer(url: url)
     }
+
     var player: AVPlayer?
-    func makeNSView(context: Context) -> AVPlayerView {
+    func makeNSView(context _: Context) -> AVPlayerView {
         let playerView = AVPlayerView()
         playerView.player = player
         return playerView
     }
 
-    func updateNSView(_ nsView: AVPlayerView, context: Context) {
-
-    }
+    func updateNSView(_: AVPlayerView, context _: Context) {}
 }

@@ -15,7 +15,7 @@ final class Status: Codable {
 }
 
 final class Activity {
-    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, timestamp: Int? = nil, state: String? = nil, details: String? = nil) {
+    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, timestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String:String] = [:]) {
         self.applicationID = applicationID
         self.flags = flags
         self.emoji = emoji
@@ -24,10 +24,11 @@ final class Activity {
         self.timestamp = timestamp
         self.state = state
         self.details = details
+        self.assets = assets
     }
-    
-    static var current: Activity? = nil
-    
+
+    static var current: Activity?
+
     var emoji: StatusEmoji?
     var name: String
     var state: String?
@@ -36,8 +37,9 @@ final class Activity {
     var applicationID: String?
     var flags: Int?
     var details: String?
-    var dictValue: [String:Any] {
-        var dict: [String:Any] = ["name":name, "type":type, "state":NSNull()]
+    var assets: [String:String]
+    var dictValue: [String: Any] {
+        var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
             dict["emoji"] = emoji.dictValue
         }
@@ -45,7 +47,7 @@ final class Activity {
             dict["state"] = state
         }
         if type == 0 {
-            dict["assets"] = [:]
+            dict["assets"] = self.assets
             dict["party"] = [:]
             dict["secrets"] = [:]
         }
@@ -53,7 +55,7 @@ final class Activity {
             dict["application_id"] = applicationID ?? NSNull()
         }
         if let timestamp = timestamp {
-            dict["timestamps"] = ["start":timestamp]
+            dict["timestamps"] = ["start": timestamp]
         }
         if let flags = flags {
             dict["flags"] = flags
@@ -61,6 +63,7 @@ final class Activity {
         if let details = details {
             dict["details"] = details
         }
+        print(dict)
         return dict
     }
 }
@@ -71,17 +74,16 @@ final class StatusEmoji: Codable {
         self.id = id
         self.animated = animated
     }
-    
+
     var name: String
     var id: String
     var animated: Bool
-    var dictValue: [String:Any] {
-        return ["name":name, "id":id, "animated":animated]
+    var dictValue: [String: Any] {
+        ["name": name, "id": id, "animated": animated]
     }
 }
 
 final class ActivityCodable: Codable {
-    
     var emoji: StatusEmoji?
     var name: String
     var state: String?
@@ -90,8 +92,8 @@ final class ActivityCodable: Codable {
     var applicationID: String?
     var flags: Int?
     var details: String?
-    var dictValue: [String:Any] {
-        var dict: [String:Any] = ["name":name, "type":type, "state":NSNull()]
+    var dictValue: [String: Any] {
+        var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
             dict["emoji"] = emoji.dictValue
         }
@@ -107,7 +109,7 @@ final class ActivityCodable: Codable {
             dict["application_id"] = applicationID ?? NSNull()
         }
         if let timestamp = timestamp {
-            dict["timestamps"] = ["start":timestamp]
+            dict["timestamps"] = ["start": timestamp]
         }
         if let flags = flags {
             dict["flags"] = flags

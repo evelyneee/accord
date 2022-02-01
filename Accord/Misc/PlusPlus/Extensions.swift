@@ -5,13 +5,15 @@
 //  Created by evelyn on 2021-06-07.
 //
 
-import Foundation
 import AppKit
-import SwiftUI
 import Combine
+import Foundation
+import SwiftUI
 
 // I have made this typo too many times
 typealias Amy = Any
+
+public var doNothing: (Any) -> Void = { _ in }
 
 @propertyWrapper
 public final class IgnoreFailure<Value: Decodable>: Decodable {
@@ -34,7 +36,7 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
 
 @propertyWrapper
 struct DefaultEmptyArray<T: Decodable & ExpressibleByArrayLiteral> {
-    var wrappedValue: T = T()
+    var wrappedValue: T = .init()
 }
 
 extension DefaultEmptyArray: Decodable {
@@ -42,7 +44,6 @@ extension DefaultEmptyArray: Decodable {
         let container = try decoder.singleValueContainer()
         wrappedValue = try container.decode(T.self)
     }
-
 }
 
 extension KeyedDecodingContainer {
@@ -55,11 +56,13 @@ extension String {
     enum DataErrors: Error {
         case notString
     }
+
     init(_ data: Data) throws {
-        let initialize = Self.init(data: data, encoding: .utf8)
+        let initialize = Self(data: data, encoding: .utf8)
         guard let initialize = initialize else { throw DataErrors.notString }
         self = initialize
     }
+
     var cString: UnsafePointer<CChar>? {
         let nsString = self as NSString
         return nsString.utf8String
@@ -91,6 +94,7 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
+
     init(int: Int) {
         let int = UInt64(int)
         let r, g, b: UInt64
@@ -181,17 +185,18 @@ struct Folder<Content: View>: View {
 
 extension Collection where Self.Element: Identifiable {
     subscript(id id: Self.Element.ID) -> Self.Element? {
-        self.enumerated().compactMap { (_, element) in
-            return [element.id: element]
-        }.reduce(into: [Self.Element.ID: Self.Element]()) { (result, next) in
-            result.merge(next) { (_, rhs) in rhs }
+        enumerated().compactMap { _, element in
+            [element.id: element]
+        }.reduce(into: [Self.Element.ID: Self.Element]()) { result, next in
+            result.merge(next) { _, rhs in rhs }
         }[id]
     }
+
     subscript(num num: Self.Element.ID) -> Int? {
-        self.enumerated().compactMap { (index, element) in
-            return [element.id: index]
-        }.reduce(into: [Self.Element.ID: Int]()) { (result, next) in
-            result.merge(next) { (_, rhs) in rhs }
+        enumerated().compactMap { index, element in
+            [element.id: index]
+        }.reduce(into: [Self.Element.ID: Int]()) { result, next in
+            result.merge(next) { _, rhs in rhs }
         }[num]
     }
 }
@@ -261,24 +266,24 @@ func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
 }
 
 public extension Collection where Indices.Iterator.Element == Index {
-    subscript (exist index: Index) -> Iterator.Element? {
-        return indices.contains(index) ? self[index] : nil
+    subscript(exist index: Index) -> Iterator.Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
 // prevent index out of range
 public extension Collection where Indices.Iterator.Element == Index, Index: BinaryInteger {
-    subscript (safe index: Index) -> Iterator.Element? {
-        return indices.count > index ? self[index] : nil
+    subscript(safe index: Index) -> Iterator.Element? {
+        indices.count > index ? self[index] : nil
     }
 }
 
 // Hide the TextField Focus Ring on Big Sur
 
 extension NSTextField {
-    open override var focusRingType: NSFocusRingType {
+    override open var focusRingType: NSFocusRingType {
         get { .none }
-        set { }
+        set {}
     }
 }
 
@@ -292,6 +297,7 @@ extension String {
         }
         return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
+
     func makeProperHour() -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
@@ -308,22 +314,24 @@ extension String {
 extension DispatchQueue {
     func asyncIf(_ condition: @autoclosure () -> Bool, _ perform: @escaping () -> Void) {
         if condition() {
-            self.async {
+            async {
                 perform()
             }
         }
     }
+
     @available(*, unavailable)
     func asyncWithAnimation(_ perform: @escaping () -> Void) {
-        self.async {
+        async {
             withAnimation {
                 perform()
             }
         }
     }
+
     @available(*, unavailable)
     func asyncAfterWithAnimation(deadline: DispatchTime, _ perform: @escaping () -> Void) {
-        self.asyncAfter(deadline: deadline) {
+        asyncAfter(deadline: deadline) {
             withAnimation {
                 perform()
             }
@@ -335,7 +343,7 @@ extension NSWorkspace {
     static var kernelVersion: String {
         var size = 0
         sysctlbyname("kern.osrelease", nil, &size, nil, 0)
-        var vers = [CChar](repeating: 0,  count: size)
+        var vers = [CChar](repeating: 0, count: size)
         sysctlbyname("kern.osrelease", &vers, &size, nil, 0)
         return String(cString: vers)
     }

@@ -5,11 +5,10 @@
 //  Created by evelyn on 2022-01-15.
 //
 
-import Foundation
 import Darwin
+import Foundation
 
 class IPC {
-
     let servicePort = "6463"
 
     func start() {
@@ -56,14 +55,13 @@ class IPC {
 
             if clientFD != -1 {
                 print("Accepted new client with file descriptor: \(clientFD)")
-            } else {
-            }
+            } else {}
             var buffer = UnsafeMutableRawPointer.allocate(byteCount: MTU, alignment: MemoryLayout<CChar>.size)
             func receive() {
                 let readResult = read(clientFD, &buffer, MTU)
 
-                if (readResult == 0) {
-                } else if (readResult == -1) {
+                if readResult == 0 {
+                } else if readResult == -1 {
                     print("Error reading form client\(clientFD) - \(errno)")
                     return
                 } else {
@@ -86,5 +84,4 @@ class IPC {
         }
         listener()
     }
-
 }

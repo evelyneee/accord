@@ -5,15 +5,15 @@
 //  Created by evelyn on 2020-11-27.
 //
 
-import SwiftUI
 import AppKit
 import AVKit
+import SwiftUI
 
 struct ChannelView: View, Equatable {
-
     // MARK: - Equatable protocol
+
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
-        return lhs.viewModel.messages == rhs.viewModel.messages
+        lhs.viewModel.messages == rhs.viewModel.messages
     }
 
     @ObservedObject var viewModel: ChannelViewViewModel
@@ -38,21 +38,22 @@ struct ChannelView: View, Equatable {
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
-    
+
     @State var memberListShown: Bool = false
     @State var memberList = [OPSItems]()
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
-    
+
     @AppStorage("MetalRenderer") var metalRenderer: Bool = false
-    
+
     // MARK: - init
+
     init(_ channel: Channel, _ guildName: String? = nil) {
-        self.guildID = channel.guild_id ?? "@me"
-        self.channelID = channel.id
-        self.channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
+        guildID = channel.guild_id ?? "@me"
+        channelID = channel.id
+        channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
-        self.viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
+        viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
         if DiscordDesktopRPCEnabled {
             DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
@@ -65,7 +66,7 @@ struct ChannelView: View, Equatable {
                     Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                     ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
                         if let author = message.author {
-                            MessageCellView (
+                            MessageCellView(
                                 message: message,
                                 nick: viewModel?.nicks[author.id],
                                 replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
@@ -98,7 +99,7 @@ struct ChannelView: View, Equatable {
                                 Button("Copy Message Link") { [weak message] in
                                     guard let channelID = message?.channel_id, let id = message?.id else { return }
                                     NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)",forType: .string)
+                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)", forType: .string)
                                 }
                             }
                         }
@@ -136,17 +137,17 @@ struct ChannelView: View, Equatable {
                         if !(typing.contains(isKnownAs)) {
                             typing.append(isKnownAs)
                         }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                             guard !(typing.isEmpty) else { return }
                             typing.removeLast()
-                        })
+                        }
                     }
                 }
                 .store(in: &viewModel.cancellable)
             wss.memberListSubject
                 .sink { list in
                     if self.memberListShown, memberList.isEmpty {
-                        self.memberList = Array(list.d.ops.compactMap { $0.items }.joined())
+                        self.memberList = Array(list.d.ops.compactMap(\.items).joined())
                     }
                 }
                 .store(in: &viewModel.cancellable)
@@ -155,7 +156,7 @@ struct ChannelView: View, Equatable {
             viewModel?.cancellable.invalidateAll()
         }
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
-            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { (data, _) in
+            providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
                     fileUpload = try! Data(contentsOf: url)
                     fileUploadURL = url
@@ -204,7 +205,7 @@ public struct VisualEffectView: NSViewRepresentable {
         self.blendingMode = blendingMode
     }
 
-    public func makeNSView(context: Context) -> NSVisualEffectView {
+    public func makeNSView(context _: Context) -> NSVisualEffectView {
         let visualEffectView = NSVisualEffectView()
         visualEffectView.material = material
         visualEffectView.blendingMode = blendingMode
@@ -212,7 +213,7 @@ public struct VisualEffectView: NSViewRepresentable {
         return visualEffectView
     }
 
-    public func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
+    public func updateNSView(_ visualEffectView: NSVisualEffectView, context _: Context) {
         visualEffectView.material = material
         visualEffectView.blendingMode = blendingMode
     }
@@ -221,7 +222,7 @@ public struct VisualEffectView: NSViewRepresentable {
 struct MemberListView: View {
     @Binding var list: [OPSItems]
     var body: some View {
-        List(list.compactMap { $0.member }, id: \.user.id) { ops in
+        List(list.compactMap(\.member), id: \.user.id) { ops in
             HStack {
                 Attachment(pfpURL(ops.user.id, ops.user.avatar, "24"))
                     .frame(width: 33, height: 33)

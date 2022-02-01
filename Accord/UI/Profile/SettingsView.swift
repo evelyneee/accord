@@ -10,27 +10,47 @@ import SwiftUI
 
 @available(macOS 11.0, *)
 struct SettingsViewRedesign: View {
-
-    @AppStorage("pfpShown") var profilePictures: Bool = pfpShown
-    @AppStorage("sortByMostRecent") var recent: Bool = sortByMostRecent
-    @AppStorage("darkMode") var dark: Bool = darkMode
-    @AppStorage("proxyIP") var proxyIP: String = ""
-    @AppStorage("proxyPort") var proxyPort: String = ""
-    @AppStorage("proxyEnabled") var proxyEnable: Bool = proxyEnabled
-    @AppStorage("pastelColors") var pastel: Bool = pastelColors
-    @AppStorage("discordStockSettings") var discordSettings: Bool = pastelColors
-    @AppStorage("enableSuffixRemover") var suffixes: Bool = false
-    @AppStorage("pronounDB") var pronounDB: Bool = false
-    @AppStorage("AppleMusicRPC") var appleMusicRPC: Bool = false
-    @AppStorage("XcodeRPC") var xcodeRPC: Bool = false
-    @AppStorage("DiscordDesktopRPCEnabled") var ddRPC: Bool = false
-    @AppStorage("VSCodeRPCEnabled") var vsRPC: Bool = false
-    @AppStorage("MentionsMenuBarItemEnabled") var menuBarItem: Bool = false
-    @AppStorage("MetalRenderer") var metalRenderer: Bool = false
-    @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
-
+    
+    @AppStorage("pfpShown")
+    var profilePictures: Bool = pfpShown
+    @AppStorage("sortByMostRecent")
+    var recent: Bool = sortByMostRecent
+    @AppStorage("darkMode")
+    var dark: Bool = darkMode
+    @AppStorage("proxyIP")
+    var proxyIP: String = ""
+    @AppStorage("proxyPort")
+    var proxyPort: String = ""
+    @AppStorage("proxyEnabled")
+    var proxyEnable: Bool = proxyEnabled
+    @AppStorage("pastelColors")
+    var pastel: Bool = pastelColors
+    @AppStorage("discordStockSettings")
+    var discordSettings: Bool = pastelColors
+    @AppStorage("enableSuffixRemover")
+    var suffixes: Bool = false
+    @AppStorage("pronounDB")
+    var pronounDB: Bool = false
+    @AppStorage("AppleMusicRPC")
+    var appleMusicRPC: Bool = false
+    @AppStorage("XcodeRPC")
+    var xcodeRPC: Bool = false
+    @AppStorage("DiscordDesktopRPCEnabled")
+    var ddRPC: Bool = false
+    @AppStorage("VSCodeRPCEnabled")
+    var vsRPC: Bool = false
+    @AppStorage("MentionsMenuBarItemEnabled")
+    var menuBarItem: Bool = false
+    @AppStorage("MetalRenderer")
+    var metalRenderer: Bool = false
+    @AppStorage("Nitroless")
+    var nitrolessEnabled: Bool = false
+    @AppStorage("SilentTyping")
+    var silentTyping: Bool = false
+    @AppStorage("MusicPlatform")
+    var selectedPlatform: Platforms = Platforms.appleMusic
+    
     @State var user: User? = AccordCoreVars.user
-    @State var selectedPlatform: Platforms = musicPlatform ?? Platforms.appleMusic
     @State var loading: Bool = false
     @State var bioText: String = " "
     @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
@@ -116,6 +136,7 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $dark, title: "Always dark mode")
                         SettingsToggleView(toggled: $menuBarItem, title: "Enable the mentions menu bar popup")
                         SettingsToggleView(toggled: $nitrolessEnabled, title: "Enable Nitroless support")
+                        SettingsToggleView(toggled: $metalRenderer, title: "Enable silent typing")
                         SettingsToggleView(toggled: $metalRenderer, title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
                     }
 
@@ -136,9 +157,8 @@ struct SettingsViewRedesign: View {
                             Text("Spotify").tag(Platforms.spotify)
                             Text("Tidal").tag(Platforms.tidal)
                             Text("Youtube Music").tag(Platforms.youtubeMusic)
-                        }, label: {
-                        })
-                        .padding()
+                        }, label: {})
+                            .padding()
                     }
                     .disabled(true)
                     Group {
@@ -147,7 +167,6 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
                         SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                     }
-
                 }
                 .toggleStyle(SwitchToggleStyle())
                 .pickerStyle(MenuPickerStyle())
@@ -195,13 +214,11 @@ struct SettingsViewRedesign: View {
                         do {
                             let url = try result.get()
                             let path = FileManager.default.urls(for: .documentDirectory,
-                                                                   in: .userDomainMask)[0].appendingPathComponent(UUID().uuidString)
+                                                                in: .userDomainMask)[0].appendingPathComponent(UUID().uuidString)
                             if FileManager.default.secureCopyItem(at: url, to: path) {
                                 print("Plugin successfully copied")
                             }
-                        } catch {
-
-                        }
+                        } catch {}
                     })
                 }
                 .padding(5)
@@ -243,26 +260,24 @@ struct SettingsViewRedesign: View {
 }
 
 extension FileManager {
-
     open func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
         do {
             if FileManager.default.fileExists(atPath: dstURL.path) {
                 try FileManager.default.removeItem(at: dstURL)
             }
             try FileManager.default.copyItem(at: srcURL, to: dstURL)
-        } catch let error {
+        } catch {
             print("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
             return false
         }
         return true
     }
-
 }
 
 struct SettingsToggleView: View {
     @Binding var toggled: Bool
     var title: String
-    var detail: String? = nil
+    var detail: String?
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -276,9 +291,8 @@ struct SettingsToggleView: View {
             }
             .padding()
             Spacer()
-            Toggle(isOn: $toggled) {
-            }
-            .padding()
+            Toggle(isOn: $toggled) {}
+                .padding()
         }
     }
 }

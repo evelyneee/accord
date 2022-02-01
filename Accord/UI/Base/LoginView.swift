@@ -23,7 +23,7 @@ enum DiscordLoginErrors: Error {
 
 extension NSApplication {
     func restart() {
-        NotificationCenter.default.post(name: NSNotification.Name.init(rawValue: "LoggedIn"), object: nil, userInfo: [:])
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "LoggedIn"), object: nil, userInfo: [:])
     }
 }
 
@@ -116,12 +116,12 @@ struct LoginView: View {
                         Button("Login") {
                             if let ticket = viewModel.ticket {
                                 Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                    token: AccordCoreVars.token,
-                                    bodyObject: ["code": twofactor, "ticket": ticket],
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    json: true
-                                )) { value, error in
+                                                                                                                                                 token: AccordCoreVars.token,
+                                                                                                                                                 bodyObject: ["code": twofactor, "ticket": ticket],
+                                                                                                                                                 type: .POST,
+                                                                                                                                                 discordHeaders: true,
+                                                                                                                                                 json: true))
+                                { value, error in
                                     if let token = value?.token {
                                         KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
                                         AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -139,7 +139,7 @@ struct LoginView: View {
                                 bodyObject: [
                                     "email": email,
                                     "password": password,
-                                    "captcha_key": captchaPayload ?? ""
+                                    "captcha_key": captchaPayload ?? "",
                                 ],
                                 type: .POST,
                                 discordHeaders: true,
@@ -153,13 +153,13 @@ struct LoginView: View {
                                 }
                                 if let response = response, let ticket = response.ticket {
                                     Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                        contentType: "application/json",
-                                        token: AccordCoreVars.token,
-                                        bodyObject: ["code": twofactor, "ticket": ticket],
-                                        type: .POST,
-                                        discordHeaders: true,
-                                        json: true
-                                    )) { value, _ in
+                                                                                                                                                     contentType: "application/json",
+                                                                                                                                                     token: AccordCoreVars.token,
+                                                                                                                                                     bodyObject: ["code": twofactor, "ticket": ticket],
+                                                                                                                                                     type: .POST,
+                                                                                                                                                     discordHeaders: true,
+                                                                                                                                                     json: true))
+                                    { value, _ in
                                         if let token = value?.token {
                                             KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
                                             AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -174,7 +174,6 @@ struct LoginView: View {
                     }
                 }
             }
-
         }
         .frame(width: 500, height: 275)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notif in
@@ -187,25 +186,22 @@ struct LoginView: View {
 }
 
 final class LoginViewViewModel: ObservableObject {
-
     @Published var state: LoginState = .initial
     @Published var captcha: Bool = false
     @Published var captchaVCKey: String?
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
 
-    init() {
+    init() {}
 
-    }
-
-    func login(_ email: String, _ password: String, _ twofactor: String) throws {
+    func login(_ email: String, _ password: String, _: String) throws {
         var loginError: Error?
         Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
             bodyObject: [
                 "email": email,
-                "password": password
+                "password": password,
             ],
             type: .POST,
             discordHeaders: true,
@@ -256,20 +252,19 @@ final class LoginViewViewModel: ObservableObject {
 
 extension AnyTransition {
     static var moveAway: AnyTransition {
-        return .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
+        .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
     }
 }
 
 struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
-
     init(token: String) {
-        self.siteKey = token
+        siteKey = token
         print(token, siteKey)
     }
+
     let siteKey: String
 
-    func makeNSView(context: Context) -> WKWebView {
-
+    func makeNSView(context _: Context) -> WKWebView {
         var webView = WKWebView()
         let webConfiguration = WKWebViewConfiguration()
         let contentController = WKUserContentController()
@@ -284,7 +279,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
             webView.topAnchor.constraint(equalTo: webView.topAnchor),
             webView.leadingAnchor.constraint(equalTo: webView.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor)
+            webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor),
         ])
         if siteKey != "" {
             webView.loadHTMLString(generateHTML, baseURL: URL(string: "https://discord.com")!)
@@ -292,13 +287,11 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         return webView
     }
 
-    func updateNSView(_ nsView: WKWebView, context: Context) {
-
-    }
+    func updateNSView(_: WKWebView, context _: Context) {}
 }
 
 final class ScriptHandler: NSObject, WKScriptMessageHandler {
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key": message.body as! String])
         }
@@ -307,7 +300,7 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
 
 /*
  - extracted from Discord iOS v100
- 
+
  function documentReady() {
    var PAGE_BG_COLOR = RECAPTCHA_THEME == 'dark' ? '#222' : '#fff';
    document.body.style.backgroundColor = PAGE_BG_COLOR;
@@ -341,9 +334,8 @@ final class ScriptHandler: NSObject, WKScriptMessageHandler {
  */
 
 extension CaptchaViewControllerSwiftUI {
-
     private var generateHTML: String {
-        return """
+        """
         <html>
             <head>
             <title>Discord Login Captcha</title>
@@ -397,6 +389,6 @@ extension CaptchaViewControllerSwiftUI {
                   <br />
             </body>
         </html>
-        """.replacingOccurrences(of: "${sitekey}", with: self.siteKey)
+        """.replacingOccurrences(of: "${sitekey}", with: siteKey)
     }
 }

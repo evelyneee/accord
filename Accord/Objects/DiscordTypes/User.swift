@@ -5,12 +5,12 @@
 //  Created by Evelyn on 2021-08-16.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 final class User: Codable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
 
     var id: String
@@ -31,10 +31,11 @@ final class User: Codable, Identifiable, Hashable {
     var roleColor: String?
     var banner: String?
 
-    func isMe() -> Bool { user_id == self.id }
+    func isMe() -> Bool { user_id == id }
 
     // MARK: - Relationships
-    func addFriend(_ guild: String, _ channel: String) {
+
+    func addFriend(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
 //            token: AccordCoreVars.token,
@@ -44,7 +45,8 @@ final class User: Codable, Identifiable, Hashable {
 //        )
 //         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
-    func removeFriend(_ guild: String, _ channel: String) {
+
+    func removeFriend(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
 //            token: AccordCoreVars.token,
@@ -54,7 +56,8 @@ final class User: Codable, Identifiable, Hashable {
 //        )
 //         Request.fetch(url: URL(string: "\(rootURL)/users/@me/relationships/\(id)"), headers: headers)
     }
-    func block(_ guild: String, _ channel: String) {
+
+    func block(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
 //            token: AccordCoreVars.token,

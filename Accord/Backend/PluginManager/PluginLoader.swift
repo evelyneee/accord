@@ -5,10 +5,10 @@
 //  Created by evelyn on 2021-10-25.
 //
 
+import AppKit
+import Darwin
 import Foundation
 import ObjectiveC
-import Darwin
-import AppKit
 import SwiftUI
 
 final class Plugins {
@@ -17,7 +17,7 @@ final class Plugins {
         return pluginClass
     }
 
-    func LoadPlugin<T>(onto: T.Type, dylib: String) -> T.Type? {
+    func LoadPlugin<T>(onto _: T.Type, dylib: String) -> T.Type? {
         guard let handle = dlopen(dylib, RTLD_NOW) else {
             print("Could not open \(dylib) \(String(cString: dlerror()))")
             return nil
@@ -29,20 +29,18 @@ final class Plugins {
         }
 
         let principalClass = unsafeBitCast(replacement,
-                to: (@convention (c) () -> UnsafeRawPointer).self)
+                                           to: (@convention(c) () -> UnsafeRawPointer).self)
         return unsafeBitCast(principalClass(), to: T.Type.self)
     }
 }
 
 @objc open class AccordPlugin: NSObject {
-
-    override required public init() { }
+    override public required init() {}
 
     open var body: NSView?
     open var name = ""
     open var descript = ""
     open var symbol = ""
-
 }
 
 struct NSViewWrapper: NSViewRepresentable {
@@ -50,11 +48,12 @@ struct NSViewWrapper: NSViewRepresentable {
     init(_ view: NSView) {
         self.view = view
     }
-    func makeNSView(context: Context) -> NSView {
-        return self.view
+
+    func makeNSView(context _: Context) -> NSView {
+        view
     }
-    func updateNSView(_ nsView: NSView, context: Context) {
-    }
+
+    func updateNSView(_: NSView, context _: Context) {}
 
     typealias NSViewType = NSView
 }

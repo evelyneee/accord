@@ -5,15 +5,14 @@
 //  Created by evelyn on 2021-10-22.
 //
 
-import Foundation
 import AppKit
 import Combine
+import Foundation
 import SwiftUI
 
 final class ChannelViewViewModel: ObservableObject {
-
     #if DEBUG
-    internal static let developingOffline: Bool = false
+        internal static let developingOffline: Bool = false
     #endif
 
     @Published var messages = [Message]()
@@ -22,7 +21,7 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var avatars: [String: String] = [:]
     @Published var pronouns: [String: String] = [:]
     var cancellable = Set<AnyCancellable>()
-    
+
     var guildID: String
     var channelID: String
 
@@ -36,16 +35,16 @@ final class ChannelViewViewModel: ObservableObject {
             // fetch messages
             self.getMessages(channelID: channelID, guildID: guildID)
         }
-        self.subscribe()
+        subscribe()
     }
-    
+
     func subscribe() {
         wss.messageSubject
-            .sink { [weak self] msg, channelID, isMe in
+            .sink { [weak self] msg, channelID, _ in
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
                     guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
-                    if self?.guildID != "@me" && !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
+                    if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                         self?.loadUser(for: message.author?.id)
 //                        for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
 //                            self?.loadUser(for: user)
@@ -85,7 +84,7 @@ final class ChannelViewViewModel: ObservableObject {
                             self.avatars[person.user.id] = avatar
                         }
                         if let roles = person.roles {
-                            var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
+                            var rolesTemp: [String?] = Array(repeating: nil, count: 100)
                             for role in roles {
                                 if let roleColor = roleColors[role]?.1 {
                                     rolesTemp[roleColor] = role
@@ -100,17 +99,16 @@ final class ChannelViewViewModel: ObservableObject {
                         }
                     }
                 }
-
             }
             .store(in: &cancellable)
         wss.deleteSubject
             .sink { [weak self] msg, channelID in
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
-                    let messageMap = self?.messages.enumerated().compactMap { (index, element) in
-                        return [element.id: index]
-                    }.reduce(into: [:]) { (result, next) in
-                        result.merge(next) { (_, rhs) in rhs }
+                    let messageMap = self?.messages.enumerated().compactMap { index, element in
+                        [element.id: index]
+                    }.reduce(into: [:]) { result, next in
+                        result.merge(next) { _, rhs in rhs }
                     }
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
                     guard let message = gatewayMessage.d else { return }
@@ -130,10 +128,10 @@ final class ChannelViewViewModel: ObservableObject {
                 guard channelID == self?.channelID else { return }
                 webSocketQueue.async {
                     guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
-                    let messageMap = self?.messages.enumerated().compactMap { (index, element) in
-                        return [element.id: index]
-                    }.reduce(into: [:]) { (result, next) in
-                        result.merge(next) { (_, rhs) in rhs }
+                    let messageMap = self?.messages.enumerated().compactMap { index, element in
+                        [element.id: index]
+                    }.reduce(into: [:]) { result, next in
+                        result.merge(next) { _, rhs in rhs }
                     }
                     guard let index = messageMap?[message.id] else { return }
                     DispatchQueue.main.async {
@@ -143,13 +141,13 @@ final class ChannelViewViewModel: ObservableObject {
             }
             .store(in: &cancellable)
     }
-    
+
     func ack(channelID: String, guildID: String) {
         guard let last = messages.first?.id else { return }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(last)/ack"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["token":NSNull()], // I don't understand why this is needed, but it wasn't when I first implemented ack...
+            bodyObject: ["token": NSNull()], // I don't understand why this is needed, but it wasn't when I first implemented ack...
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)",
@@ -159,10 +157,10 @@ final class ChannelViewViewModel: ObservableObject {
 
     func getMessages(channelID: String, guildID: String) {
         #if DEBUG
-        guard !ChannelViewViewModel.developingOffline else {
-            self.offlineMessages()
-            return
-        }
+            guard !ChannelViewViewModel.developingOffline else {
+                offlineMessages()
+                return
+            }
         #endif
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
@@ -174,12 +172,12 @@ final class ChannelViewViewModel: ObservableObject {
         .sink(receiveCompletion: { completion in
             switch completion {
             case .finished: break
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
                 MentionSender.shared.deselect()
             }
         }) { [weak self] msg in
-            let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
+            let messages: [Message] = msg.enumerated().compactMap { index, element -> Message in
                 guard element != msg.last else { return element }
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 return element
@@ -198,17 +196,16 @@ final class ChannelViewViewModel: ObservableObject {
     }
 
     #if DEBUG
-    func offlineMessages() {
-    }
+        func offlineMessages() {}
     #endif
-    
+
     func cacheUsernames() {
-        self.messages.forEach { message in
+        messages.forEach { message in
             guard let author = message.author else { return }
             Storage.usernames[author.id] = author.username
         }
     }
-    
+
     func loadUser(for id: String?) {
         guard let id = id else { return }
         guard let person = wss.cachedMemberRequest["\(guildID)$\(id)"] else {
@@ -217,13 +214,13 @@ final class ChannelViewViewModel: ObservableObject {
         }
         let nickname = person.nick ?? person.user.username
         DispatchQueue.main.async {
-            self.nicks[(person.user.id)] = nickname
+            self.nicks[person.user.id] = nickname
         }
         if let avatar = person.avatar {
-            self.avatars[person.user.id] = avatar
+            avatars[person.user.id] = avatar
         }
         if let roles = person.roles {
-            var rolesTemp: [String?] = Array.init(repeating: nil, count: 100)
+            var rolesTemp: [String?] = Array(repeating: nil, count: 100)
             for role in roles {
                 if let roleColor = roleColors[role]?.1 {
                     rolesTemp[roleColor] = role
@@ -232,21 +229,21 @@ final class ChannelViewViewModel: ObservableObject {
             let temp: [String] = rolesTemp.compactMap { $0 }.reversed()
             if !(temp.isEmpty) {
                 DispatchQueue.main.async {
-                    self.roles[(person.user.id)] = temp[0]
+                    self.roles[person.user.id] = temp[0]
                 }
             }
         }
     }
 
     func fakeNicksObject() {
-        guard self.guildID == "@me" else { return }
-        let _nicks: [String: String] = messages.compactMap { [ $0.author?.id ?? "": $0.author?.username ?? "" ] }
-        .flatMap { $0 }
-        .reduce([String: String]()) { (dict, tuple) in
-            var nextDict = dict
-            nextDict.updateValue(tuple.1, forKey: tuple.0)
-            return nextDict
-        }
+        guard guildID == "@me" else { return }
+        let _nicks: [String: String] = messages.compactMap { [$0.author?.id ?? "": $0.author?.username ?? ""] }
+            .flatMap { $0 }
+            .reduce([String: String]()) { dict, tuple in
+                var nextDict = dict
+                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                return nextDict
+            }
         DispatchQueue.main.async {
             self.nicks = _nicks
         }
@@ -257,7 +254,7 @@ final class ChannelViewViewModel: ObservableObject {
         RequestPublisher.fetch([String: String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
             bodyObject: [
                 "platform": "discord",
-                "ids": messages.compactMap({ $0.author?.id}).joined(separator: ",")
+                "ids": messages.compactMap { $0.author?.id }.joined(separator: ","),
             ],
             type: .GET
         ))
@@ -276,24 +273,23 @@ final class ChannelViewViewModel: ObservableObject {
 
     func getCachedMemberChunk() {
         let allUserIDs = messages.map { $0.author?.id ?? "" }
-                            .removingDuplicates()
+            .removingDuplicates()
         for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
             let nickname = person.nick ?? person.user.username
             DispatchQueue.main.async {
                 self.nicks[person.user.id] = nickname
             }
             if let avatar = person.avatar {
-                self.avatars[person.user.id] = avatar
+                avatars[person.user.id] = avatar
             }
             if let roles = person.roles {
                 print(person.user.username, roles)
-                for role in roles.sorted(by: { (lhs, rhs) -> Bool in
+                for role in roles.sorted(by: { lhs, rhs -> Bool in
                     guard let lhs = roleColors[lhs]?.1, let rhs = roleColors[rhs]?.1 else { return false }
                     return lhs < rhs
                 }) {
                     DispatchQueue.main.async {
                         self.roles[person.user.id] = role
-                        return
                     }
                 }
             }
@@ -302,9 +298,9 @@ final class ChannelViewViewModel: ObservableObject {
 
     func performSecondStageLoad() {
         var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
-        //getCachedMemberChunk()
+        // getCachedMemberChunk()
         for (index, item) in allUserIDs.enumerated {
-            if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)") && [Int](allUserIDs.indices).contains(index) {
+            if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)"), [Int](allUserIDs.indices).contains(index) {
                 allUserIDs.remove(at: index)
             }
         }
@@ -312,7 +308,7 @@ final class ChannelViewViewModel: ObservableObject {
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
         }
     }
-    
+
     func loadMoreMessages() {
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?before=\(messages.last?.id ?? "")&limit=50"), headers: Headers(
             userAgent: discordUserAgent,
@@ -321,10 +317,10 @@ final class ChannelViewViewModel: ObservableObject {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-        .sink(receiveCompletion: { completion in
-            
+        .sink(receiveCompletion: { _ in
+
         }) { [weak self] msg in
-            let messages: [Message] = msg.enumerated().compactMap { (index, element) -> Message in
+            let messages: [Message] = msg.enumerated().compactMap { index, element -> Message in
                 guard element != msg.last else { return element }
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 return element
@@ -333,7 +329,7 @@ final class ChannelViewViewModel: ObservableObject {
         }
         .store(in: &cancellable)
     }
-    
+
     deinit {
         print("Closing \(channelID)")
     }
@@ -341,12 +337,12 @@ final class ChannelViewViewModel: ObservableObject {
 
 extension Array where Array.Element: Hashable {
     func unique() -> some Collection {
-        return Array(Set(self))
+        Array(Set(self))
     }
 }
 
 extension Array {
     var enumerated: EnumeratedSequence<[Element]> {
-        return self.enumerated()
+        self.enumerated()
     }
 }

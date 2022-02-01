@@ -5,9 +5,9 @@
 //  Created by evelyn on 2021-10-17.
 //
 
+import AppKit
 import Foundation
 import UserNotifications
-import AppKit
 
 func showNotification(title: String, subtitle: String, description: String? = nil) {
     let content = UNMutableNotificationContent()
@@ -20,15 +20,16 @@ func showNotification(title: String, subtitle: String, description: String? = ni
     let calendar = Calendar.current
     let dateComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
     let trigger = UNCalendarNotificationTrigger(
-             dateMatching: dateComponents, repeats: false)
+        dateMatching: dateComponents, repeats: false
+    )
     let uuidString = "Accord"
     let request = UNNotificationRequest(identifier: uuidString,
                                         content: content, trigger: trigger)
     // Schedule the request with the system.
     let notificationCenter = UNUserNotificationCenter.current()
-    notificationCenter.add(request) { (error) in
+    notificationCenter.add(request) { error in
         if let error = error {
             print(error)
         }
     }
-} 
+}

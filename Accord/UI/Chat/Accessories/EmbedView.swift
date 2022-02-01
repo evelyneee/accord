@@ -10,12 +10,12 @@ import SwiftUI
 struct EmbedView: View, Equatable {
     weak var embed: Embed?
 
-    static func == (lhs: EmbedView, rhs: EmbedView) -> Bool {
-        return true
+    static func == (_: EmbedView, _: EmbedView) -> Bool {
+        true
     }
-    
+
     var columns: [GridItem] = GridItem.multiple(count: 4)
-    
+
     var body: some View {
         HStack(spacing: 0) {
             if let color = embed?.color {

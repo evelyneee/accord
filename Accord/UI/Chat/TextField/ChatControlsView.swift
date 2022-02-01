@@ -10,6 +10,13 @@ import SwiftUI
 
 struct ChatControls: View {
     
+    enum FocusedElements: Hashable {
+      case mainTextField
+    }
+    
+    @available(macOS 12.0, *)
+    @FocusState private var focusedField: FocusedElements?
+    
     @State var chatTextFieldContents: String = ""
     @State var pfps: [String: NSImage] = [:]
     @Binding var guildID: String
@@ -28,7 +35,7 @@ struct ChatControls: View {
     @State var typing: Bool = false
     weak var textField: NSTextField?
     @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
-    
+
     private func send() {
         guard viewModel.textFieldContents != "" else { return }
         messageSendQueue.async {
@@ -44,9 +51,14 @@ struct ChatControls: View {
             } else {
                 viewModel.send(text: viewModel.textFieldContents, guildID: guildID, channelID: channelID)
             }
+            if #available(macOS 12.0, *) {
+                DispatchQueue.main.async {
+                    self.focusedField = .mainTextField
+                }
+            }
         }
     }
-    
+
     var body: some View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
@@ -56,7 +68,7 @@ struct ChatControls: View {
                             ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
                                 Button(action: { [weak viewModel, weak user] in
                                     if let range = viewModel?.textFieldContents.range(of: "@") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                                     }
                                     viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
                                 }, label: { [weak user] in
@@ -70,12 +82,11 @@ struct ChatControls: View {
                                 })
                                 .buttonStyle(.borderless)
                                 .padding(3)
-
                             }
                             ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
                                 Button(action: { [weak viewModel] in
                                     if let range = viewModel?.textFieldContents.range(of: ":") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                                     }
                                     viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
                                 }, label: {
@@ -92,7 +103,7 @@ struct ChatControls: View {
                             ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
                                 Button(action: { [weak viewModel] in
                                     if let range = viewModel?.textFieldContents.range(of: "#") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound..<viewModel!.textFieldContents.endIndex)
+                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                                     }
                                     viewModel?.textFieldContents.append("<#\(channel.id)>")
                                 }) {
@@ -113,6 +124,10 @@ struct ChatControls: View {
                                 .onSubmit {
                                     typing = false
                                     send()
+                                }
+                                .focused($focusedField, equals: .mainTextField)
+                                .task {
+                                    self.focusedField = .mainTextField
                                 }
                         } else {
                             TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
@@ -157,37 +172,37 @@ struct ChatControls: View {
                                     .foregroundColor(Color.secondary)
                             }
                             /*
-                            if AccordCoreVars.plugins != [] {
-                                ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
-                                    if pluginPoppedUp.indices.contains(offset) {
-                                        Button(action: {
-                                            pluginPoppedUp[offset].toggle()
-                                        }) {
-                                            Image(systemName: plugin.symbol)
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                        .popover(isPresented: $pluginPoppedUp[offset], content: {
-                                            NSViewWrapper(plugin.body ?? NSView())
-                                                .frame(width: 200, height: 200)
-                                        })
-                                    }
-                                }
-                            }
-                            */
+                             if AccordCoreVars.plugins != [] {
+                                 ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+                                     if pluginPoppedUp.indices.contains(offset) {
+                                         Button(action: {
+                                             pluginPoppedUp[offset].toggle()
+                                         }) {
+                                             Image(systemName: plugin.symbol)
+                                         }
+                                         .buttonStyle(BorderlessButtonStyle())
+                                         .popover(isPresented: $pluginPoppedUp[offset], content: {
+                                             NSViewWrapper(plugin.body ?? NSView())
+                                                 .frame(width: 200, height: 200)
+                                         })
+                                     }
+                                 }
+                             }
+                             */
                         }
                     }
                     .onChange(of: users) { [weak viewModel] value in
                         viewModel?.cachedUsers = value
                     }
                     .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
-                        if !(typing) && viewModel?.textFieldContents != "" {
+                        if !typing, viewModel?.textFieldContents != "" {
                             messageSendQueue.async {
                                 viewModel?.type(channelID: self.channelID, guildID: self.guildID)
                             }
                             typing = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 typing = false
-                            })
+                            }
                         }
                         viewModel?.markdown()
                         textQueue.async {
@@ -227,6 +242,6 @@ extension Array where Element: Hashable {
     }
 
     mutating func removeDuplicates() {
-        self = self.removingDuplicates()
+        self = removingDuplicates()
     }
 }

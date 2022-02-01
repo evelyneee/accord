@@ -12,8 +12,8 @@ public let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
 
 public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, separator: String = " ") {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+        file.components(separatedBy: "/").last ?? "Accord" :
+        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
     let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
     log(items: items, file: file, line: line, separator: separator)
 }
@@ -21,28 +21,28 @@ public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, s
 public func print<S: StringProtocol>(_ items: S?..., file: String = #fileID, line: Int = #line, separator: String = " ") {
     let items: [String] = items.map { $0 ?? "nil" }.compactMap { String($0) }
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+        file.components(separatedBy: "/").last ?? "Accord" :
+        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
     let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
-    log(items: items, file: file , line: line, separator: separator)
+    log(items: items, file: file, line: line, separator: separator)
 }
 
 public func print(_ items: Any..., file: String = #fileID) {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+        file.components(separatedBy: "/").last ?? "Accord" :
+        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
     log(items: items, file: file)
 }
 
 public func print(_ item: Any, file: String = #fileID, line: Int = #line) {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
-    file.components(separatedBy: "/").last ?? "Accord" :
-    file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+        file.components(separatedBy: "/").last ?? "Accord" :
+        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
     let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
     log(items: [item], file: file, line: line)
 }
 
-fileprivate func log<T>(items: [T], file: String, line: String? = nil, separator: String = " ") {
+private func log<T>(items: [T], file: String, line: String? = nil, separator: String = " ") {
     var out = String()
     for item in items {
         if type(of: item) is AnyClass {

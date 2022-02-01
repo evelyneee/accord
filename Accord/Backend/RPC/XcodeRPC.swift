@@ -5,27 +5,26 @@
 //  Created by evelyn on 2021-12-30.
 //
 
-import Foundation
 import Cocoa
 import Combine
+import Foundation
 import OSAKit
 
 final class XcodeRPC {
-    
     static var started = Int(Date().timeIntervalSince1970) * 1000
-    
+
     class func runXcodeScript(_ script: String) -> [String] {
         let scr = """
         tell application "Xcode"
             \(script)
         end tell
         """
-                
+
         // execute the script
-        let script = NSAppleScript.init(source: scr)
+        let script = NSAppleScript(source: scr)
         let result = script?.executeAndReturnError(nil)
         guard let desc = result?.literalArray, !desc.isEmpty else { return [] }
-        return desc.map { (value) -> String in
+        return desc.map { value -> String in
             if value.hasSuffix(" — Edited") {
                 return value.dropLast(9).stringLiteral
             } else {
@@ -54,7 +53,7 @@ final class XcodeRPC {
         }
         return nil
     }
-    
+
     class func updatePresence(status: String? = nil, workspace: String, filename: String?) {
         do {
             try wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started) {
@@ -69,11 +68,11 @@ final class XcodeRPC {
                     details: "In \(workspace)"
                 )
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                 let active = Self.getActiveFilename()
                 guard active != filename else { return }
                 Self.updatePresence(status: status, workspace: Self.getActiveWorkspace() ?? workspace, filename: active)
-            })
+            }
         } catch {}
     }
 }
@@ -81,9 +80,9 @@ final class XcodeRPC {
 extension NSAppleEventDescriptor {
     var literalArray: [String] {
         var arr: [String?] = []
-        for i in 1...self.numberOfItems {
-            arr.append(self.atIndex(i)?.stringValue)
+        for i in 1 ... numberOfItems {
+            arr.append(atIndex(i)?.stringValue)
         }
-        return arr.compactMap { $0 }
+        return arr.compactMap(\.self)
     }
 }

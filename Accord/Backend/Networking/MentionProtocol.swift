@@ -21,15 +21,19 @@ class MentionSender {
     func addMention(guild: String, channel: String) {
         delegate?.addMention(guild: guild, channel: channel)
     }
+
     func deselect() {
         delegate?.deselect()
     }
+
     func removeMentions(server: String) {
         delegate?.removeMentions(server: server)
     }
+
     func sendWSError(error: Error) {
         delegate?.sendWSError(error: error)
     }
+
     func select(channel: Channel) {
         delegate?.select(channel: channel)
     }

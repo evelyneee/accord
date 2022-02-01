@@ -47,6 +47,8 @@
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
 		9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */; };
+		9ED3011127A6C76300D6235D /* Keypath++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED3011027A6C76300D6235D /* Keypath++.swift */; };
+		9ED3011327A8C40600D6235D /* RegisterImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED3011227A8C40600D6235D /* RegisterImages.swift */; };
 		9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED4A5AE276E334600BD485C /* AppKitLink.swift */; };
 		9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
@@ -164,6 +166,8 @@
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
 		9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsViewModel.swift; sourceTree = "<group>"; };
+		9ED3011027A6C76300D6235D /* Keypath++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Keypath++.swift"; sourceTree = "<group>"; };
+		9ED3011227A8C40600D6235D /* RegisterImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterImages.swift; sourceTree = "<group>"; };
 		9ED4A5AE276E334600BD485C /* AppKitLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitLink.swift; sourceTree = "<group>"; };
 		9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteWrapper.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
@@ -387,6 +391,7 @@
 				A80FEC272724FD35005F9950 /* Operators++.swift */,
 				9E6BCC63277E8E850085F279 /* Print++.swift */,
 				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
+				9ED3011027A6C76300D6235D /* Keypath++.swift */,
 			);
 			path = PlusPlus;
 			sourceTree = "<group>";
@@ -522,6 +527,7 @@
 				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* Request.swift */,
 				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
+				9ED3011227A8C40600D6235D /* RegisterImages.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -703,7 +709,9 @@
 				32AA719125EAEEDA00550BA5 /* Request.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
+				9ED3011127A6C76300D6235D /* Keypath++.swift in Sources */,
 				9E7E4D28279B63E8008FAF15 /* Models.swift in Sources */,
+				9ED3011327A8C40600D6235D /* RegisterImages.swift in Sources */,
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
@@ -897,7 +905,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

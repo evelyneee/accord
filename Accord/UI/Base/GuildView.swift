@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 
 struct GuildView: View {
-
     var guild: Guild
     @Binding var selection: Int?
     var body: some View {
@@ -47,11 +46,11 @@ struct GuildView: View {
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: (Int(channel.id) ?? 0), selection: self.$selection) {
+                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                         ServerListViewCell(channel: channel)
                     }
                     .buttonStyle(BorderlessButtonStyle())
-                    .if(channel.read_state?.last_message_id == channel.last_message_id, transform: { $0.foregroundColor(.secondary).opacity(0.5) } )
+                    .if(channel.read_state?.last_message_id == channel.last_message_id, transform: { $0.foregroundColor(.secondary).opacity(0.5) })
                     .onChange(of: self.selection, perform: { _ in
                         if self.selection == Int(channel.id) {
                             channel.read_state?.mention_count = 0
@@ -70,13 +69,13 @@ struct ServerListViewCell: View {
     var guildID: String
     init(channel: Channel) {
         self.channel = channel
-        self.guildID = channel.guild_id ?? "@me"
+        guildID = channel.guild_id ?? "@me"
     }
+
     @State var hovered: Bool = false
     var body: some View {
-
         var readStateDot: some View {
-            return ZStack {
+            ZStack {
                 Circle()
                     .foregroundColor(Color.red)
                     .frame(width: 15, height: 15)

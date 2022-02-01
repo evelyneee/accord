@@ -10,7 +10,7 @@ import SwiftUI
 
 extension ChannelView {
     var blurredTextField: some View {
-        return VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             if replyingTo != nil || !typing.isEmpty {
                 HStack {
                     if let replied = replyingTo {
@@ -43,7 +43,7 @@ extension ChannelView {
                 replyingTo: $replyingTo,
                 fileUpload: $fileUpload,
                 fileUploadURL: $fileUploadURL,
-                users: Binding.constant(viewModel.messages.compactMap { $0.author })
+                users: Binding.constant(viewModel.messages.compactMap(\.author))
             )
             .padding(13)
         }

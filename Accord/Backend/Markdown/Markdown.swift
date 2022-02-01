@@ -5,16 +5,16 @@
 //  Created by evelyn on 2021-11-18.
 //
 
-import Foundation
 import AppKit
-import SwiftUI
 import Combine
+import Foundation
+import SwiftUI
 
 extension String {
     func matches(for regex: String) -> [String] {
         let regex = try? NSRegularExpression(pattern: regex)
-        let results = regex?.matches(in: self, range: NSRange(self.startIndex..., in: self))
-        guard let mapped = results?.compactMap({ (result) -> String? in
+        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
+        guard let mapped = results?.compactMap({ result -> String? in
             if let range = Range(result.range, in: self) {
                 return String(self[range])
             } else {
@@ -25,22 +25,25 @@ extension String {
         }
         return mapped
     }
+
     func matchRange(for regex: String) -> [Range<String.Index>] {
         let regex = try? NSRegularExpression(pattern: regex)
-        let results = regex?.matches(in: self, range: NSRange(self.startIndex..., in: self))
+        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
         guard let mapped = results?.compactMap({ Range($0.range, in: self) }) else {
             return []
         }
         return mapped
     }
+
     func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
         var result: [Range<Index>] = []
-        var startIndex = self.startIndex
+        var startIndex = startIndex
         while startIndex < endIndex,
-            let range = self[startIndex...].range(of: string, options: options) {
-                result.append(range)
-                startIndex = range.lowerBound < range.upperBound ? range.upperBound :
-                    index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+              let range = self[startIndex...].range(of: string, options: options)
+        {
+            result.append(range)
+            startIndex = range.lowerBound < range.upperBound ? range.upperBound :
+                index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
         }
         return result
     }
@@ -48,12 +51,11 @@ extension String {
 
 extension Array where Element == String {
     @inlinable func replaceAllOccurences(of original: String, with string: String) -> [String] {
-        self.map { $0.replacingOccurrences(of: original, with: string) }
+        map { $0.replacingOccurrences(of: original, with: string) }
     }
 }
 
-final public class Markdown {
-
+public final class Markdown {
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
@@ -62,8 +64,8 @@ final public class Markdown {
     public typealias TextArrayPublisher = AnyPublisher<[Text], Error>
 
     // Publisher that sends a SwiftUI Text view with a newline
-    static public var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
-    static fileprivate let blankCharacter = "‎" // Not an empty string
+    public static var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
+    fileprivate static let blankCharacter = "‎" // Not an empty string
 
     /**
      markWord: Simple Publisher that sends a text view with the processed word
@@ -166,7 +168,6 @@ final public class Markdown {
             .eraseToAnyPublisher()
             .debugWarnNoMainThread()
     }
-
 }
 
 final class NSAttributedMarkdown {
@@ -189,7 +190,7 @@ final class NSAttributedMarkdown {
             mut.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSRange(match, in: mut.string))
         }
         monospace.forEach { match in
-            mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular   ), range: NSRange(match, in: mut.string))
+            mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular), range: NSRange(match, in: mut.string))
         }
         return mut
     }

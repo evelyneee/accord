@@ -11,7 +11,7 @@ struct PopoverProfileView: View {
     @Binding var user: User?
     @State var hovered: Int?
     var body: some View {
-        return ZStack(alignment: .top) {
+        ZStack(alignment: .top) {
             VStack {
                 if let banner = user?.banner, let id = user?.id {
                     Attachment("https://cdn.discordapp.com/banners/\(id)/\(banner).png")
@@ -42,9 +42,7 @@ struct PopoverProfileView: View {
                         .font(.subheadline)
                         .foregroundColor(Color.secondary)
                     HStack(alignment: .bottom) {
-                        Button(action: {
-
-                        }, label: {
+                        Button(action: {}, label: {
                             VStack {
                                 Image(systemName: "bubble.right.fill")
                                     .imageScale(.medium)
@@ -55,22 +53,20 @@ struct PopoverProfileView: View {
                             .frame(width: 60, height: 45)
                             .background(hovered == 1 ? Color.gray.opacity(0.25).cornerRadius(5) : Color.clear.cornerRadius(5))
                         })
-                            .buttonStyle(BorderlessButtonStyle())
-                            .onHover(perform: { hover in
-                                switch hover {
-                                case true:
-                                    withAnimation {
-                                        hovered = 1
-                                    }
-                                case false:
-                                    withAnimation {
-                                        hovered = nil
-                                    }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .onHover(perform: { hover in
+                            switch hover {
+                            case true:
+                                withAnimation {
+                                    hovered = 1
                                 }
-                            })
-                        Button(action: {
-
-                        }, label: {
+                            case false:
+                                withAnimation {
+                                    hovered = nil
+                                }
+                            }
+                        })
+                        Button(action: {}, label: {
                             VStack {
                                 Image(systemName: "phone.fill")
                                     .imageScale(.large)
@@ -81,22 +77,20 @@ struct PopoverProfileView: View {
                             .frame(width: 60, height: 45)
                             .background(hovered == 2 ? Color.gray.opacity(0.25).cornerRadius(5) : Color.clear.cornerRadius(5))
                         })
-                            .buttonStyle(BorderlessButtonStyle())
-                            .onHover(perform: { hover in
-                                switch hover {
-                                case true:
-                                    withAnimation {
-                                        hovered = 2
-                                    }
-                                case false:
-                                    withAnimation {
-                                        hovered = nil
-                                    }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .onHover(perform: { hover in
+                            switch hover {
+                            case true:
+                                withAnimation {
+                                    hovered = 2
                                 }
-                            })
-                        Button(action: {
-
-                        }, label: {
+                            case false:
+                                withAnimation {
+                                    hovered = nil
+                                }
+                            }
+                        })
+                        Button(action: {}, label: {
                             VStack {
                                 Image(systemName: "camera.circle.fill")
                                     .imageScale(.large)
@@ -107,22 +101,20 @@ struct PopoverProfileView: View {
                             .frame(width: 60, height: 45)
                             .background(hovered == 3 ? Color.gray.opacity(0.25).cornerRadius(5) : Color.clear.cornerRadius(5))
                         })
-                            .buttonStyle(BorderlessButtonStyle())
-                            .onHover(perform: { hover in
-                                switch hover {
-                                case true:
-                                    withAnimation {
-                                        hovered = 3
-                                    }
-                                case false:
-                                    withAnimation {
-                                        hovered = nil
-                                    }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .onHover(perform: { hover in
+                            switch hover {
+                            case true:
+                                withAnimation {
+                                    hovered = 3
                                 }
-                            })
-                        Button(action: {
-
-                        }, label: {
+                            case false:
+                                withAnimation {
+                                    hovered = nil
+                                }
+                            }
+                        })
+                        Button(action: {}, label: {
                             VStack {
                                 Image(systemName: "person.crop.circle.badge.plus")
                                     .imageScale(.large)
@@ -133,19 +125,19 @@ struct PopoverProfileView: View {
                             .frame(width: 60, height: 45)
                             .background(hovered == 4 ? Color.gray.opacity(0.25).cornerRadius(5) : Color.clear.cornerRadius(5))
                         })
-                            .buttonStyle(BorderlessButtonStyle())
-                            .onHover(perform: { hover in
-                                switch hover {
-                                case true:
-                                    withAnimation {
-                                        hovered = 4
-                                    }
-                                case false:
-                                    withAnimation {
-                                        hovered = nil
-                                    }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .onHover(perform: { hover in
+                            switch hover {
+                            case true:
+                                withAnimation {
+                                    hovered = 4
                                 }
-                            })
+                            case false:
+                                withAnimation {
+                                    hovered = nil
+                                }
+                            }
+                        })
                     }
                     .transition(AnyTransition.opacity)
                 }

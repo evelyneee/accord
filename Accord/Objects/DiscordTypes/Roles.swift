@@ -5,25 +5,23 @@
 //  Created by evelyn on 2021-06-27.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 final class RoleManager {
     final class func arrangeRoleColors(guilds: [Guild]) -> [String: (Int, Int)] {
-        var returnArray: [String: (Int, Int)] = [:]
-        for guild in guilds {
-            if var roles = guild.roles {
-                roles.sort { $0.position > $1.position }
-                for role in roles {
-                    if !(Array(returnArray.keys).contains(role.id)) {
-                        if let color = role.color, role.color != 0 {
-                            returnArray[role.id] = (color, role.position)
-                        }
-                    }
-                }
+        let value: [String: (Int, Int)] = guilds
+            .compactMap(\.roles)
+            .joined()
+            .sorted(by: { $0.position > $1.position })
+            .compactMap { (role) -> [String:(Int, Int)]? in
+                guard let color = role.color, color != 0 else { return nil }
+                return [role.id: (color, role.position)]
             }
-        }
-        return returnArray
+            .reduce(into: [:]) { result, next in
+                result.merge(next) { _, rhs in rhs }
+            }
+        return value
     }
 }
 

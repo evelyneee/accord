@@ -8,6 +8,7 @@
 import Foundation
 
 // MARK: - Base
+
 struct SongLinkBase: Codable {
     let entityUniqueID: String?
     let userCountry: Country
@@ -25,6 +26,7 @@ struct SongLinkBase: Codable {
 }
 
 // MARK: - EntitiesByUniqueID
+
 struct EntitiesByUniqueID: Codable {
     let id: String
     let type: TypeEnum
@@ -43,10 +45,11 @@ struct EntitiesByUniqueID: Codable {
 }
 
 enum TypeEnum: String, Codable {
-    case song = "song"
+    case song
 }
 
 // MARK: - LinksByPlatform
+
 struct LinksByPlatform: Codable {
     let amazonMusic, amazonStore, deezer: AmazonMusic?
     let appleMusic, itunes: AppleMusic
@@ -55,6 +58,7 @@ struct LinksByPlatform: Codable {
 }
 
 // MARK: - AmazonMusic
+
 struct AmazonMusic: Codable {
     let country: Country
     let url: String
@@ -74,6 +78,7 @@ enum Country: String, Codable {
 }
 
 // MARK: - AppleMusic
+
 struct AppleMusic: Codable {
     let country: Country
     let url: String
@@ -89,5 +94,5 @@ struct AppleMusic: Codable {
 
 public enum Platforms: String, CaseIterable, Identifiable {
     case amazonMusic, amazonStore, deezer, appleMusic, itunes, napster, pandora, soundcloud, spotify, tidal, yandex, youtube, youtubeMusic
-    public var id: String { self.rawValue }
+    public var id: String { rawValue }
 }

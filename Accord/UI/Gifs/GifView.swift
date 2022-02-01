@@ -5,14 +5,14 @@
 //  Created by evelyn on 2021-12-24.
 //
 
-import Foundation
-import SwiftUI
 import AppKit
 import Combine
+import Foundation
+import SwiftUI
 
 struct GifView: View {
     var url: String
-    @State var currentImage: NSImage = NSImage()
+    @State var currentImage: NSImage = .init()
     @State var animatedImages: [NSImage] = []
     @State var counterValue: Int = 0
     @State var duration: Double = 0
@@ -31,10 +31,11 @@ struct GifView: View {
         .onAppear { print("hi"); prep() }
         .onDisappear { timer?.cancel(); timer = nil }
     }
+
     func prep() {
         gifQueue.async {
             can = URLSession.shared.dataTaskPublisher(for: URL(string: url)!)
-                .map { $0.data }
+                .map(\.data)
                 .replaceError(with: Data())
                 .sink { data in
                     let gif = Gif(data: data)
@@ -46,16 +47,15 @@ struct GifView: View {
                             tolerance: nil,
                             on: .main,
                             in: .default
-                          )
-                          .autoconnect()
-                          .sink { _ in
-                              print("beep")
-                              if value + 1 == animatedImages.count {
-                                  self.value = 0
-                                  return
-                              }
-                              (self.value) += 1 % (animatedImages.count)
-                          }
+                        )
+                        .autoconnect()
+                        .sink { _ in
+                            if value + 1 == animatedImages.count {
+                                self.value = 0
+                                return
+                            }
+                            (self.value) += 1 % (animatedImages.count)
+                        }
                     }
                 }
         }
@@ -74,7 +74,7 @@ struct HoverGifView: View {
     var body: some View {
         HStack {
             if !animatedImages.isEmpty {
-                Image(nsImage: animated ? animatedImages[value] : animatedImages[0] )
+                Image(nsImage: animated ? animatedImages[value] : animatedImages[0])
                     .resizable()
                     .scaledToFit()
                     .onHover { _ in animated.toggle() }
@@ -82,17 +82,19 @@ struct HoverGifView: View {
             } else {
                 Text("...")
                     .onAppear {
-                        guard animatedImages.isEmpty else {print("uh fuk");return}
+                        guard animatedImages.isEmpty else { print("uh fuk"); return }
                         print("instance created", url)
                         prep()
                     }
             }
         }
     }
+
     func prep() {
         gifQueue.async {
-            can = URLSession.shared.dataTaskPublisher(for: URL(string: url)!)
-                .map { $0.data }
+            guard let url = URL(string: url) else { return }
+            can = URLSession.shared.dataTaskPublisher(for: url)
+                .map(\.data)
                 .replaceError(with: Data())
                 .sink { data in
                     let gif = Gif(data: data)
@@ -104,16 +106,15 @@ struct HoverGifView: View {
                             tolerance: nil,
                             on: .main,
                             in: .default
-                          )
-                          .autoconnect()
-                          .sink { _ in
-                              print("beep", url)
-                              if value + 1 == animatedImages.count {
-                                  self.value = 0
-                                  return
-                              }
-                              (self.value) += 1 % (animatedImages.count)
-                          }
+                        )
+                        .autoconnect()
+                        .sink { _ in
+                            if value + 1 == animatedImages.count {
+                                self.value = 0
+                                return
+                            }
+                            (self.value) += 1 % (animatedImages.count)
+                        }
                     }
                 }
         }

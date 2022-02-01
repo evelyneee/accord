@@ -5,8 +5,8 @@
 // Created by evelyn on 12/02/21
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct EmoteButton: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
@@ -25,12 +25,12 @@ struct NitrolessEmote: Decodable {
 // actual view
 @available(macOS 11.0, *)
 struct NitrolessView: View, Equatable {
-    static func == (lhs: NitrolessView, rhs: NitrolessView) -> Bool {
-        return true
+    static func == (_: NitrolessView, _: NitrolessView) -> Bool {
+        true
     }
-    
+
     fileprivate static let nitrolessRoot = "https://raw.githubusercontent.com/evelyneee/Repo/main/"
-    
+
     @State var searchenabled = true
     var columns: [GridItem] = GridItem.multiple(count: 8, spacing: 1)
     @Binding var chatText: String
@@ -43,7 +43,7 @@ struct NitrolessView: View, Equatable {
                 TextField("Search for emotes", text: $search)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 LazyVGrid(columns: columns) {
-                    ForEach(Array(allEmotes.keys.filter { (search != "" ? $0.contains(search) : true) }), id: \.self) { key in
+                    ForEach(Array(allEmotes.keys.filter { search != "" ? $0.contains(search) : true }), id: \.self) { key in
                         Button(action: {
                             guard let emote = allEmotes[key] else { return }
                             chatText.append(contentsOf: "\(Self.nitrolessRoot)emotes/\(key)\(emote)")

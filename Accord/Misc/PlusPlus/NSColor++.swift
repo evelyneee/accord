@@ -5,12 +5,12 @@
 //  Created by evelyn on 2021-10-17.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 extension String {
     func conformsTo(_ pattern: String) -> Bool {
-        return NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: self)
+        NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: self)
     }
 }
 
@@ -46,8 +46,8 @@ extension NSImage {
         }
 
         // Create a CGImage from the NSImage
-        var imageRect = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
-        let cgImageRef = self.cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
+        var imageRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+        let cgImageRef = cgImage(forProposedRect: &imageRect, context: nil, hints: nil)
 
         // Create vector and apply filter
         let inputImage = CIImage(cgImage: cgImageRef!)

@@ -8,30 +8,29 @@
 import Foundation
 
 struct GatewayEvent {
-    
     init(data: Data) throws {
-        guard let packet = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] else { throw Gateway.GatewayErrors.eventCorrupted }
+        guard let packet = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else { throw Gateway.GatewayErrors.eventCorrupted }
         let tString = packet["t"] as? String ?? "HEARTBEAT_ACK"
-        guard let t = T.init(rawValue: tString) else { throw Gateway.GatewayErrors.unknownEvent(tString) }
+        guard let t = T(rawValue: tString) else { throw Gateway.GatewayErrors.unknownEvent(tString) }
         self.t = t
-        self.s = packet["s"] as? Int
+        s = packet["s"] as? Int
         if let op = packet["op"] as? Int {
-            self.op = Opcode.init(rawValue: op)
+            self.op = Opcode(rawValue: op)
         } else {
-            self.op = nil
+            op = nil
         }
-        self.d = packet["d"] as? [String:Any]
-        self.channelID = d?["channel_id"] as? String
+        d = packet["d"] as? [String: Any]
+        channelID = d?["channel_id"] as? String
         self.data = data
     }
-    
+
     var t: T
     var s: Int?
-    var d: [String:Any]?
+    var d: [String: Any]?
     var op: Opcode?
     var channelID: String?
     var data: Data
-    
+
     enum T: String {
         case ready = "READY"
         case readySupplemental = "READY_SUPPLEMENTAL"
@@ -39,11 +38,11 @@ struct GatewayEvent {
         case sessionsReplace = "SESSIONS_REPLACE"
         case channelUnreadUpdate = "CHANNEL_UNREAD_UPDATE"
         case heartbeatACK = "HEARTBEAT_ACK"
-        
+
         case channelCreate = "CHANNEL_CREATE"
         case channelUpdate = "CHANNEL_UPDATE"
         case channelDelete = "CHANNEL_DELETE"
-        
+
         case guildCreate = "GUILD_CREATE"
         case guildDelete = "GUILD_DELETE"
         case guildMemberAdd = "GUILD_MEMBER_ADD"
@@ -52,7 +51,7 @@ struct GatewayEvent {
         case guildMemberChunk = "GUILD_MEMBERS_CHUNK"
         case guildMemberListUpdate = "GUILD_MEMBER_LIST_UPDATE"
         case threadListSync = "THREAD_LIST_SYNC"
-        
+
         case inviteCreate = "INVITE_CREATE"
         case inviteDelete = "INVITE_DELETE"
 
@@ -68,13 +67,13 @@ struct GatewayEvent {
         case presenceUpdate = "PRESENCE_UPDATE"
         case typingStart = "TYPING_START"
         case userUpdate = "USER_UPDATE"
-        
+
         case voiceStateUpdate = "VOICE_STATE_UPDATE"
-        
+
         case applicationCommandUpdate = "APPLICATION_COMMAND_UPDATE"
         case applicationCommandPermissionsUpdate = "APPLICATION_COMMAND_PERMISSIONS_UPDATE"
     }
-    
+
     enum Opcode: Int {
         case dispatch = 0, heartbeat, identify, presenceUpdate,
              voiceStateUpdate, unknown, resume, reconnect, guildMemberRequest,

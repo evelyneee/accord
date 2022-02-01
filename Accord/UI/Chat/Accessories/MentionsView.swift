@@ -5,9 +5,9 @@
 //  Created by evelyn on 2021-12-21.
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 struct MentionsView: View {
     @State var mentions: [Message] = []

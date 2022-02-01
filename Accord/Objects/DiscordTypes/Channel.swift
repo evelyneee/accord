@@ -37,9 +37,9 @@ struct Channel: Decodable, Identifiable {
     // var permissions: String?
     var read_state: ReadStateEntry?
     var guild_name: String?
-    
+
     var computedName: String {
-        self.name ?? self.recipients?.compactMap { $0.username }.joined(separator: ", ") ?? "Unknown Channel"
+        name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
     }
 }
 

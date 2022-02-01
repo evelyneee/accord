@@ -7,6 +7,4 @@
 
 import Foundation
 
-final class SlashCommandStorage {
-    
-}
+final class SlashCommandStorage {}

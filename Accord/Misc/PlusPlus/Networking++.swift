@@ -7,31 +7,31 @@
 
 import Foundation
 
-extension NSString {
-    public func mimeType() -> String {
-        return MimeType(ext: self.pathExtension)
+public extension NSString {
+    func mimeType() -> String {
+        MimeType(ext: pathExtension)
     }
 }
 
 extension URLSessionConfiguration {
     func setProxy() {
         guard proxyEnabled else { return }
-        self.connectionProxyDictionary = [AnyHashable: Any]()
-        self.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+        connectionProxyDictionary = [AnyHashable: Any]()
+        connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
         if let ip = proxyIP {
-            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
-            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
+            connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = ip
+            connectionProxyDictionary?[kCFNetworkProxiesHTTPSProxy as String] = ip
         }
         if let port = proxyPort {
-            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
-            self.connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
+            connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = Int(port)
+            connectionProxyDictionary?[kCFNetworkProxiesHTTPSPort as String] = Int(port)
         }
     }
 }
 
 extension URL {
     func appendingQueryParameters(_ parametersDictionary: [String: String]) -> URL {
-        let URLString: String = String(format: "%@?%@", self.absoluteString, parametersDictionary.queryParameters)
+        let URLString = String(format: "%@?%@", absoluteString, parametersDictionary.queryParameters)
         return URL(string: URLString)!
     }
 }
@@ -132,22 +132,22 @@ internal let mimeTypes = [
     "asx": "video/x-ms-asf",
     "asf": "video/x-ms-asf",
     "wmv": "video/x-ms-wmv",
-    "avi": "video/x-msvideo"
+    "avi": "video/x-msvideo",
 ]
 
 internal func MimeType(ext: String?) -> String {
-    return mimeTypes[ext?.lowercased() ?? "" ] ?? DEFAULT_MIME_TYPE
+    mimeTypes[ext?.lowercased() ?? ""] ?? DEFAULT_MIME_TYPE
 }
 
-extension URL {
-    public func mimeType() -> String {
-        return MimeType(ext: self.pathExtension)
+public extension URL {
+    func mimeType() -> String {
+        MimeType(ext: pathExtension)
     }
 }
 
-extension String {
-    public func mimeType() -> String {
-        return (self as NSString).mimeType()
+public extension String {
+    func mimeType() -> String {
+        (self as NSString).mimeType()
     }
 }
 
@@ -156,11 +156,10 @@ extension Dictionary {
         var parts: [String] = []
         for (key, value) in self {
             let part = String(format: "%@=%@",
-                String(describing: key).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!,
-                String(describing: value).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
+                              String(describing: key).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!,
+                              String(describing: value).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
             parts.append(part as String)
         }
         return parts.joined(separator: "&")
     }
-
 }

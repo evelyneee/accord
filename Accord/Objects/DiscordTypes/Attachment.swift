@@ -10,7 +10,7 @@ import SwiftUI
 
 final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
     static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
 
     var id: String

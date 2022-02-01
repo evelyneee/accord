@@ -35,21 +35,22 @@ final class GuildFolder: Decodable, Hashable {
         self.color = color
         self.guild_ids = guild_ids
     }
-    
+
     static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
-        return lhs.guild_ids == rhs.guild_ids
+        lhs.guild_ids == rhs.guild_ids
     }
+
     var id: Int?
     var name: String?
     var color: Int?
     var guild_ids: [String]
     @DefaultEmptyArray var guilds: [Guild]
     func hash(into hasher: inout Hasher) {
-        return hasher.combine(guild_ids)
+        hasher.combine(guild_ids)
     }
 }
 
 enum SyncedTheme: String, Codable {
-    case dark = "dark"
-    case light = "light"
+    case dark
+    case light
 }

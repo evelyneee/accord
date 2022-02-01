@@ -5,8 +5,8 @@
 //  Created by evelyn on 2021-06-05.
 //
 
-import Foundation
 import Combine
+import Foundation
 import Network
 
 final class Notifications {
@@ -19,14 +19,14 @@ extension Gateway {
         metadata.closeCode = closeCode
         let context = NWConnection.ContentContext(identifier: "closeContext",
                                                   metadata: [metadata])
-        
-        self.connection?.send(content: nil, contentContext: context, isComplete: true, completion: .contentProcessed { error in
+
+        connection?.send(content: nil, contentContext: context, isComplete: true, completion: .contentProcessed { error in
             if let error = error {
                 print(error, "close error")
             }
         })
     }
-    
+
     func send<S>(text: S) throws where S: Collection, S.Element == Character {
         let context = NWConnection.ContentContext(
             identifier: "textContext",
@@ -34,58 +34,58 @@ extension Gateway {
         )
         let string = String(text)
         guard let data = string.data(using: .utf8) else { throw GatewayErrors.noStringData(string) }
-        self.connection?.send(content: data, contentContext: context, completion: .contentProcessed { error in
+        connection?.send(content: data, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)
             }
         })
     }
-    
+
     func send<C: Collection>(json: C) throws {
         let context = NWConnection.ContentContext(
             identifier: "textContext",
             metadata: [NWProtocolWebSocket.Metadata(opcode: .text)]
         )
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        self.connection?.send(content: jsonData, contentContext: context, completion: .contentProcessed { error in
+        connection?.send(content: jsonData, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)
             }
         })
     }
-    
+
     func send(data: Data) throws {
         let context = NWConnection.ContentContext(
             identifier: "binaryContext",
             metadata: [NWProtocolWebSocket.Metadata(opcode: .binary)]
         )
-        self.connection?.send(content: data, contentContext: context, completion: .contentProcessed { error in
+        connection?.send(content: data, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)
             }
         })
     }
-    
+
     func reset(function: String = #function) {
         print("resetting from function", function)
-        self.close(.protocolCode(.protocolError))
+        close(.protocolCode(.protocolError))
         concurrentQueue.async {
-            guard let new = try? Gateway.init(url: Gateway.gatewayURL, session_id: wss.sessionID, seq: wss.seq) else { return }
+            guard let new = try? Gateway(url: Gateway.gatewayURL, session_id: wss.sessionID, seq: wss.seq) else { return }
             wss = new
         }
     }
 
     func hardReset(function: String = #function) {
         print("hard resetting from function", function)
-        self.close(.protocolCode(.normalClosure))
+        close(.protocolCode(.normalClosure))
         concurrentQueue.async {
-            guard let new = try? Gateway.init(url: Gateway.gatewayURL) else { return }
-            new.ready().sink(receiveCompletion: { _ in }, receiveValue: { _ in }).store(in: &new.bag)
+            guard let new = try? Gateway(url: Gateway.gatewayURL) else { return }
+            new.ready().sink(receiveCompletion: doNothing, receiveValue: doNothing).store(in: &new.bag)
             wss = new
         }
     }
-    
+
     func decodePayload(payload: Data) -> [String: Any]? {
-        return try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
+        try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
     }
 }

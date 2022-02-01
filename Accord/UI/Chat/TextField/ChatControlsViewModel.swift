@@ -5,12 +5,11 @@
 //  Created by evelyn on 2022-01-23.
 //
 
-import Foundation
 import AppKit
 import Combine
+import Foundation
 
 final class ChatControlsViewModel: ObservableObject {
-
     @Published var matchedUsers = [User]()
     @Published var matchedChannels = [Channel]()
     @Published var matchedEmoji = [DiscordEmote]()
@@ -68,14 +67,14 @@ final class ChatControlsViewModel: ObservableObject {
             textFieldContents = textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
         }
     }
-    
+
     func send(text: String, guildID: String, channelID: String) {
         DispatchQueue.main.sync {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            //self.textField?.becomeFirstResponder()
-            //self.textField?.allowsEditingTextAttributes = true
+            // self.textField?.becomeFirstResponder()
+            // self.textField?.allowsEditingTextAttributes = true
         }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
             userAgent: discordUserAgent,
@@ -88,14 +87,14 @@ final class ChatControlsViewModel: ObservableObject {
             json: true
         ))
     }
-    
+
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
         DispatchQueue.main.sync {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            //self.textField?.becomeFirstResponder()
-            //self.textField?.allowsEditingTextAttributes = true
+            // self.textField?.becomeFirstResponder()
+            // self.textField?.allowsEditingTextAttributes = true
         }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
             userAgent: discordUserAgent,
@@ -108,21 +107,21 @@ final class ChatControlsViewModel: ObservableObject {
             json: true
         ))
     }
-    
+
     func send(text: String, file: URL, data: Data, channelID: String) {
         DispatchQueue.main.sync {
             self.textFieldContents = ""
         }
         DispatchQueue.main.async {
-            //self.textField?.becomeFirstResponder()
-            //self.textField?.allowsEditingTextAttributes = true
+            // self.textField?.becomeFirstResponder()
+            // self.textField?.allowsEditingTextAttributes = true
         }
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         let params: [String: String] = [
-            "content": String(text)
+            "content": String(text),
         ]
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
         var body = Data()
@@ -155,7 +154,7 @@ final class ChatControlsViewModel: ObservableObject {
         }
         task.resume()
     }
-    
+
     func type(channelID: String, guildID: String) {
         Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
             userAgent: discordUserAgent,

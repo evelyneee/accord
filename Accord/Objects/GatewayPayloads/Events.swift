@@ -28,10 +28,10 @@ final class Presence: Decodable {
 }
 
 enum UserStatus: String, Codable {
-    case online = "online"
-    case dnd = "dnd"
-    case idle = "idle"
-    case offline = "offline"
+    case online
+    case dnd
+    case idle
+    case offline
 }
 
 final class TypingEvent: Decodable {

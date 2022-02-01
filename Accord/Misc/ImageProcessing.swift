@@ -5,13 +5,13 @@
 //  Created by evelyn on 2021-10-17.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 extension CGImage {
     var png: Data? {
         guard let mutableData = CFDataCreateMutable(nil, 0),
-            let destination = CGImageDestinationCreateWithData(mutableData, "public.png" as CFString, 1, nil) else { return nil }
+              let destination = CGImageDestinationCreateWithData(mutableData, "public.png" as CFString, 1, nil) else { return nil }
         CGImageDestinationAddImage(destination, self, nil)
         guard CGImageDestinationFinalize(destination) else { return nil }
         return mutableData as Data
@@ -19,14 +19,13 @@ extension CGImage {
 }
 
 extension NSImage {
-
     // Thanks Amy 🙂
     func downsample(to pointSize: CGSize? = nil, scale: CGFloat? = nil) -> Data? {
-        let size = pointSize ?? CGSize(width: self.size.width, height: self.size.height)
+        let size = pointSize ?? CGSize(width: size.width, height: size.height)
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-        guard let data = self.tiffRepresentation as CFData?,
+        guard let data = tiffRepresentation as CFData?,
               let imageSource = CGImageSourceCreateWithData(data, imageSourceOptions) else { return nil }
-        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
+        let downsampled = downsample(source: imageSource, size: size, scale: scale)
         guard let downsampled = downsampled else { return nil }
         return downsampled
     }
@@ -34,9 +33,9 @@ extension NSImage {
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
         let maxDimensionInPixels = max(size.width, size.height) * (scale ?? 1)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
-          kCGImageSourceShouldCacheImmediately: true,
-          kCGImageSourceCreateThumbnailWithTransform: true,
-          kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+                                  kCGImageSourceShouldCacheImmediately: true,
+                                  kCGImageSourceCreateThumbnailWithTransform: true,
+                                  kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }
@@ -66,7 +65,7 @@ extension Data {
     func downsample(to size: CGSize, scale: CGFloat? = nil) -> Data? {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let imageSource = CGImageSourceCreateWithData(self as CFData, imageSourceOptions) else { return nil }
-        let downsampled = self.downsample(source: imageSource, size: size, scale: scale)
+        let downsampled = downsample(source: imageSource, size: size, scale: scale)
         guard let downsampled = downsampled else { return nil }
         return downsampled
     }
@@ -74,9 +73,9 @@ extension Data {
     private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
         let maxDimensionInPixels = Swift.max(size.width, size.height) * (scale ?? 1)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
-          kCGImageSourceShouldCacheImmediately: true,
-          kCGImageSourceCreateThumbnailWithTransform: true,
-          kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+                                  kCGImageSourceShouldCacheImmediately: true,
+                                  kCGImageSourceCreateThumbnailWithTransform: true,
+                                  kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }

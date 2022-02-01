@@ -5,21 +5,20 @@
 //  Created by evelyn on 2022-01-06.
 //
 
-import Foundation
 import Cocoa
+import Foundation
 
 final class VisualStudioCodeRPC {
-    
     static var started = Int(Date().timeIntervalSince1970) * 1000
-    
+
     class func getVSCodeWindowName() -> [String] {
-        
         _ = CGWindowListCreateImage(
             CGRect(x: 0, y: 0, width: 1, height: 1),
             .optionOnScreenOnly,
             kCGNullWindowID,
-            [])
-        
+            []
+        )
+
         let options = CGWindowListOption(arrayLiteral: .excludeDesktopElements)
         let cgWindowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
         let cgWindowListInfo2 = cgWindowListInfo as NSArray? as? [[String: Any]]
@@ -29,7 +28,7 @@ final class VisualStudioCodeRPC {
     }
 
     class func getRPCInfo() -> (file: String?, workspace: String?) {
-        guard let name: String = self.getVSCodeWindowName().first else { return (file: nil, workspace: nil) }
+        guard let name: String = getVSCodeWindowName().first else { return (file: nil, workspace: nil) }
         var array = [String]()
         if name.contains("—") {
             array = name.components(separatedBy: " — ")
@@ -46,7 +45,7 @@ final class VisualStudioCodeRPC {
             return (file: nil, workspace: nil)
         }
     }
-    
+
     class func updatePresence(status: String? = nil) {
         let info = Self.getRPCInfo()
         try? wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started) {
@@ -58,7 +57,7 @@ final class VisualStudioCodeRPC {
                 type: 0,
                 timestamp: started,
                 state: info.file != nil ? "Editing \(info.file!)" : "Idling.",
-                details: info.workspace != nil ? "In \( info.workspace!)" : "No workspace"
+                details: info.workspace != nil ? "In \(info.workspace!)" : "No workspace"
             )
         }
     }

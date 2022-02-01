@@ -1,5 +1,5 @@
-import Security
 import Foundation
+import Security
 
 final class KeychainManager {
     @discardableResult class func save(key: String, data: Data) -> OSStatus {
@@ -7,7 +7,8 @@ final class KeychainManager {
             kSecClass as String: kSecClassGenericPassword as String,
             kSecAttrAccount as String: key,
             kSecAttrAccessGroup as String: "group.evelyn.accord",
-            kSecValueData as String: data ] as [String: Any]
+            kSecValueData as String: data,
+        ] as [String: Any]
 
         SecItemDelete(query as CFDictionary)
 
@@ -20,7 +21,7 @@ final class KeychainManager {
             kSecAttrAccount as String: key,
             kSecReturnData as String: kCFBooleanTrue!,
             kSecAttrAccessGroup as String: "group.evelyn.accord",
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
         ] as [String: Any]
 
         var dataTypeRef: AnyObject?
@@ -41,6 +42,7 @@ final class KeychainManager {
         let swiftString: String = cfStr as String
         return swiftString
     }
+
     deinit {
         print("login ended")
     }

@@ -10,8 +10,8 @@ import SwiftUI
 // actual view
 @available(macOS 11.0, *)
 struct EmotesView: View, Equatable {
-    static func == (lhs: EmotesView, rhs: EmotesView) -> Bool {
-        return true
+    static func == (_: EmotesView, _: EmotesView) -> Bool {
+        true
     }
 
     @State var searchenabled = true
@@ -25,7 +25,6 @@ struct EmotesView: View, Equatable {
     var body: some View {
         HStack {
             ZStack(alignment: .top) {
-
                 ScrollView {
                     Spacer().frame(height: 45)
                     LazyVStack(alignment: .leading) {
@@ -33,7 +32,7 @@ struct EmotesView: View, Equatable {
                             ForEach(Array(Emotes.emotes.keys), id: \.self) { key in
                                 Section(header: Text(key.components(separatedBy: "$")[1])) {
                                     LazyVGrid(columns: columns) {
-                                        ForEach((Emotes.emotes[key] ?? []), id: \.id) { emote in
+                                        ForEach(Emotes.emotes[key] ?? [], id: \.id) { emote in
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                             }) {
@@ -61,7 +60,6 @@ struct EmotesView: View, Equatable {
                                     .buttonStyle(EmoteButton())
                                 }
                             }
-
                         }
                     }
                 }
@@ -70,7 +68,6 @@ struct EmotesView: View, Equatable {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-
             }
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)

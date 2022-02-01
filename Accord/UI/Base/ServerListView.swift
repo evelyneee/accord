@@ -5,8 +5,8 @@
 //  Created by evelyn on 2021-06-18.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 public var roleColors: [String: (Int, Int)] = [:]
 
@@ -15,13 +15,14 @@ struct NavigationLazyView<Content: View>: View {
     init(_ build: @autoclosure @escaping () -> Content) {
         self.build = build
     }
+
     var body: Content {
         build()
     }
 }
 
-final class Emotes {
-    static public var emotes: [String: [DiscordEmote]] = [:]
+enum Emotes {
+    public static var emotes: [String: [DiscordEmote]] = [:]
 }
 
 func pingCount(guild: Guild) -> Int {
@@ -30,7 +31,6 @@ func pingCount(guild: Guild) -> Int {
 }
 
 struct ServerListView: View {
-
     init(full: GatewayD?) {
         var full = full
         status = full?.user_settings?.status
@@ -48,13 +48,13 @@ struct ServerListView: View {
             type: 4
         )
         Emotes.emotes = full?.guilds
-                            .map { ["\($0.id)$\($0.name)": $0.emojis] }
-                            .flatMap { $0 }
-                            .reduce([String: [DiscordEmote]]()) { (dict, tuple) in
-                                var nextDict = dict
-                                nextDict.updateValue(tuple.1, forKey: tuple.0)
-                                return nextDict
-                            } ?? [:]
+            .map { ["\($0.id)$\($0.name)": $0.emojis] }
+            .flatMap { $0 }
+            .reduce([String: [DiscordEmote]]()) { dict, tuple in
+                var nextDict = dict
+                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                return nextDict
+            } ?? [:]
         assignReadStates(full: &full)
         order(full: &full)
         var guildOrder = full?.user_settings?.guild_positions ?? []
@@ -65,23 +65,23 @@ struct ServerListView: View {
                 folderTemp.insert(GuildFolder(id: nil, name: nil, color: nil, guild_ids: [guild.id]), at: 0)
             }
         }
-        let messageDict = full?.guilds.enumerated().compactMap { (index, element) in
-            return [element.id: index]
-        }.reduce(into: [:]) { (result, next) in
-            result.merge(next) { (_, rhs) in rhs }
+        let messageDict = full?.guilds.enumerated().compactMap { index, element in
+            [element.id: index]
+        }.reduce(into: [:]) { result, next in
+            result.merge(next) { _, rhs in rhs }
         } ?? [:]
         let guildTemp = guildOrder.compactMap { messageDict[$0] }.compactMap { full?.guilds[$0] }
-        let guildDict = guildTemp.enumerated().compactMap { (index, element) in
-            return [element.id: index]
-        }.reduce(into: [:]) { (result, next) in
-            result.merge(next) { (_, rhs) in rhs }
+        let guildDict = guildTemp.enumerated().compactMap { index, element in
+            [element.id: index]
+        }.reduce(into: [:]) { result, next in
+            result.merge(next) { _, rhs in rhs }
         }
         for folder in folderTemp {
             for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
                 var guild = guildTemp[id]
                 guild.emojis.removeAll()
                 guild.index = id
-                for channel in 0..<(guild.channels?.count ?? 0) {
+                for channel in 0 ..< (guild.channels?.count ?? 0) {
                     guild.channels?[channel].guild_id = guild.id
                     guild.channels?[channel].guild_icon = guild.icon
                     guild.channels?[channel].guild_name = guild.name
@@ -98,7 +98,7 @@ struct ServerListView: View {
         }
         MentionSender.shared.delegate = self
     }
-        
+
     @State var selection: Int?
     @State var selectedServer: Int? = 0
     @State var online: Bool = true
@@ -111,51 +111,47 @@ struct ServerListView: View {
     @State var mentions: Bool = false
     @State var bag = Set<AnyCancellable>()
     @State var updater: Bool = false
-    
+
     var body: some View {
-        lazy var dmButton: Button = {
-            Button(action: {
-                wss?.cachedMemberRequest.removeAll()
-                selectedServer = 201
-                selection = nil
-            }) {
-                Image(systemName: "bubble.left.fill")
-                    .frame(width: 45, height: 45)
-                    .background(VisualEffectView(material: .fullScreenUI, blendingMode: .withinWindow))
-                    .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
-            }
-        }()
-        lazy var onlineButton: some View = {
-            Button("Offline") {
-                alert.toggle()
-            }
-            .alert(isPresented: $alert) {
-                Alert(
-                    title: Text("Could not connect"),
-                    message: Text("There was an error connecting to Discord"),
-                    primaryButton: .default(
-                        Text("Ok"),
-                        action: {
-                            alert.toggle()
-                        }
-                    ),
-                    secondaryButton: .destructive(
-                        Text("Reconnect"),
-                        action: {
-                            if let wss = wss {
-                                wss.reset()
-                            } else {
-                                concurrentQueue.async {
-                                    guard let new = try? Gateway.init(url: Gateway.gatewayURL) else { return }
-                                    new.ready().sink(receiveCompletion: { _ in }, receiveValue: { _ in }).store(in: &new.bag)
-                                    wss = new
-                                }
+        lazy var dmButton = Button(action: {
+            wss?.cachedMemberRequest.removeAll()
+            selectedServer = 201
+            selection = nil
+        }) {
+            Image(systemName: "bubble.left.fill")
+                .frame(width: 45, height: 45)
+                .background(VisualEffectView(material: .fullScreenUI, blendingMode: .withinWindow))
+                .cornerRadius(selectedServer == 999 ? 15.0 : 23.5)
+        }
+        lazy var onlineButton: some View = Button("Offline") {
+            alert.toggle()
+        }
+        .alert(isPresented: $alert) {
+            Alert(
+                title: Text("Could not connect"),
+                message: Text("There was an error connecting to Discord"),
+                primaryButton: .default(
+                    Text("Ok"),
+                    action: {
+                        alert.toggle()
+                    }
+                ),
+                secondaryButton: .destructive(
+                    Text("Reconnect"),
+                    action: {
+                        if let wss = wss {
+                            wss.reset()
+                        } else {
+                            concurrentQueue.async {
+                                guard let new = try? Gateway(url: Gateway.gatewayURL) else { return }
+                                new.ready().sink(receiveCompletion: doNothing, receiveValue: doNothing).store(in: &new.bag)
+                                wss = new
                             }
                         }
-                    )
+                    }
                 )
-            }
-        }()
+            )
+        }
         lazy var foldersList: some View = {
             ForEach(Self.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
@@ -191,83 +187,81 @@ struct ServerListView: View {
                         }
                     }
                     .padding(.bottom, 1)
-                } else {
-                    ZStack(alignment: .bottomTrailing) {
-                        ForEach(folder.guilds, id: \.hashValue) { guild in
-                            Button(action: { [weak wss] in
-                                wss?.cachedMemberRequest.removeAll()
-                                if selectedServer == 201 {
+            } else {
+                ZStack(alignment: .bottomTrailing) {
+                    ForEach(folder.guilds, id: \.hashValue) { guild in
+                        Button(action: { [weak wss] in
+                            wss?.cachedMemberRequest.removeAll()
+                            if selectedServer == 201 {
+                                selectedServer = guild.index
+                            } else {
+                                withAnimation {
                                     selectedServer = guild.index
-                                } else {
-                                    withAnimation {
-                                        selectedServer = guild.index
-                                    }
                                 }
-                            }) {
-                                Attachment(iconURL(guild.id, guild.icon ?? ""), size: nil).equatable()
-                                    .frame(width: 45, height: 45)
-                                    .cornerRadius((selectedServer == guild.index) ? 15.0 : 23.5)
                             }
-                            .buttonStyle(BorderlessButtonStyle())
-                            if pingCount(guild: guild) != 0 {
-                                ZStack {
-                                    Circle()
-                                        .foregroundColor(Color.red)
-                                        .frame(width: 15, height: 15)
-                                    Text(String(pingCount(guild: guild)))
-                                        .foregroundColor(Color.white)
-                                        .fontWeight(.semibold)
-                                        .font(.caption)
-                                }
+                        }) {
+                            Attachment(iconURL(guild.id, guild.icon ?? ""), size: nil).equatable()
+                                .frame(width: 45, height: 45)
+                                .cornerRadius((selectedServer == guild.index) ? 15.0 : 23.5)
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        if pingCount(guild: guild) != 0 {
+                            ZStack {
+                                Circle()
+                                    .foregroundColor(Color.red)
+                                    .frame(width: 15, height: 15)
+                                Text(String(pingCount(guild: guild)))
+                                    .foregroundColor(Color.white)
+                                    .fontWeight(.semibold)
+                                    .font(.caption)
                             }
                         }
                     }
                 }
             }
+        }
+
         }()
-        lazy var statusIndicator: some View = {
-            return Group {
-                switch self.status {
-                case "online":
-                    Circle()
-                        .foregroundColor(Color.green)
-                        .frame(width: 12, height: 12)
-                case "invisible":
-                    Image("invisible")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 14, height: 14)
-                case "dnd":
-                    Image("dnd")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 14, height: 14)
-                case "idle":
-                    Circle()
-                        .foregroundColor(Color(NSColor.systemOrange))
-                        .frame(width: 12, height: 12)
-                default:
-                    Circle()
-                        .foregroundColor(Color.clear)
-                        .frame(width: 12, height: 12)
-                }
+        lazy var statusIndicator: some View = Group {
+            switch self.status {
+            case "online":
+                Circle()
+                    .foregroundColor(Color.green)
+                    .frame(width: 12, height: 12)
+            case "invisible":
+                Image("invisible")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 14, height: 14)
+            case "dnd":
+                Image("dnd")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 14, height: 14)
+            case "idle":
+                Circle()
+                    .foregroundColor(Color(NSColor.systemOrange))
+                    .frame(width: 12, height: 12)
+            default:
+                Circle()
+                    .foregroundColor(Color.clear)
+                    .frame(width: 12, height: 12)
             }
-        }()
-        lazy var settingsLink: some View = {
-            NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$selection) {
-                ZStack(alignment: .bottomTrailing) {
-                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                        .scaledToFit()
-                        .clipShape(Circle())
-                        .frame(width: 45, height: 45)
-                    statusIndicator
-                }
+        }
+        lazy var settingsLink: some View = NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$selection) {
+            ZStack(alignment: .bottomTrailing) {
+                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                    .scaledToFit()
+                    .clipShape(Circle())
+                    .frame(width: 45, height: 45)
+                statusIndicator
             }
-        }()
+        }
         return NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
+
                     LazyVStack {
                         if !online || !NetworkCore.shared.connected {
                             onlineButton
@@ -282,7 +276,9 @@ struct ServerListView: View {
                 .frame(width: 80)
                 .padding(.top, 5)
                 Divider()
+
                 // MARK: - Loading UI
+
                 if selectedServer == 201 {
                     List {
                         Text("Messages")
@@ -311,13 +307,13 @@ struct ServerListView: View {
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
-            let uInfo = pub.userInfo as! [Int:Int]
+            let uInfo = pub.userInfo as! [Int: Int]
             print(uInfo)
             self.selectedServer = uInfo.keys.first!
             self.selection = uInfo.values.first!
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
-            let uInfo = pub.userInfo as! [String:String]
+            let uInfo = pub.userInfo as! [String: String]
             print(uInfo)
             let index = uInfo["index"]!
             self.selection = Int(index) ?? 0
@@ -355,7 +351,7 @@ struct ServerListView: View {
                                 assignPrivateReadStates()
                             }
                         }
-                        Notifications.privateChannels = Self.privateChannels.map { $0.id }
+                        Notifications.privateChannels = Self.privateChannels.map(\.id)
                     } else if let error = error {
                         print(error)
                     }

@@ -5,11 +5,11 @@
 //  Created by evelyn on 2022-01-01.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 extension AccordApp {
-    public static func error(_ error: Error, additionalDescription: String? = nil) {
+    static func error(_ error: Error, additionalDescription: String? = nil) {
         let alert = NSAlert()
         alert.messageText = error.localizedDescription
         if let additionalDescription = additionalDescription {

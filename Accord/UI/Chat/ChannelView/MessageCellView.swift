@@ -5,10 +5,10 @@
 //  Created by evelyn on 2021-12-12.
 //
 
-import Foundation
-import SwiftUI
 import AppKit
 import Combine
+import Foundation
+import SwiftUI
 
 struct MessageCellView: View {
     var message: Message
@@ -44,7 +44,7 @@ struct MessageCellView: View {
                 .padding(.leading, 47)
             }
             HStack { [unowned message] in
-                if !(message.isSameAuthor && message.referenced_message == nil) {
+                if !(message.isSameAuthor && message.referenced_message == nil && message.author?.avatar != nil) {
                     Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar)).equatable()
                         .frame(width: 33, height: 33)
                         .clipShape(Circle())
@@ -53,25 +53,25 @@ struct MessageCellView: View {
                             popup.toggle()
                         }
                 }
-                
+
                 VStack(alignment: .leading) {
-                    if message.isSameAuthor && message.referenced_message == nil {
+                    if message.isSameAuthor, message.referenced_message == nil {
                         AsyncMarkdown(message.content)
                             .padding(.leading, 41)
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
                             .foregroundColor(role != nil && roleColors[role!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[role!]!.0) : Color(NSColor.textColor))
                             .fontWeight(.semibold)
-                        +
-                        Text("  \(message.timestamp.makeProperDate())")
+                            +
+                            Text("  \(message.timestamp.makeProperDate())")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                        +
-                        Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                            +
+                            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                        +
-                        Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                            +
+                            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
                         AsyncMarkdown(message.content)

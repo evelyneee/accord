@@ -5,15 +5,15 @@
 //  Created by evelyn on 2021-12-30.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension Gateway {
     func handleMessage(event: GatewayEvent) {
         switch event.op {
         case .heartbeatACK:
             print("Heartbeat successful")
-            self.pendingHeartbeat = false
+            pendingHeartbeat = false
             return
         case .reconnect:
             print("reconnecting..")
@@ -21,11 +21,11 @@ extension Gateway {
             print("missed hello?")
         case .invalidSession:
             print(String(data: event.data, encoding: .utf8))
-            self.hardReset()
+            hardReset()
         default: break
         }
         if let s = event.s {
-            self.seq = s
+            seq = s
         }
         switch event.t {
         case .messageACK: break
@@ -43,7 +43,7 @@ extension Gateway {
         case .guildMemberListUpdate:
             do {
                 let list = try JSONDecoder().decode(MemberListUpdate.self, from: event.data)
-                self.memberListSubject.send(list)
+                memberListSubject.send(list)
             } catch {
                 print(error)
             }
@@ -52,12 +52,12 @@ extension Gateway {
         case .messageCreate:
             guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { print("uhhhhh"); return }
             if let channelID = event.channelID, let author = message.author {
-                self.messageSubject.send((event.data, channelID, author.id == user_id))
+                messageSubject.send((event.data, channelID, author.id == user_id))
             }
             let ids = message.mentions.compactMap { $0?.id }
             let guildID = message.guild_id ?? "@me"
             guard let channelID = event.channelID else { print("wat"); break }
-            if ids.contains(user_id) || (ServerListView.privateChannels.map({ $0.id }).contains(channelID) && message.author?.id != user_id) {
+            if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
                 print("Sending notification")
                 let guildArray = ServerListView.folders.map { $0.guilds.filter { $0.id == message.guild_id } }
                 let channelArray = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == channelID } } }
@@ -70,7 +70,7 @@ extension Gateway {
             }
         case .messageUpdate:
             if let channelID = event.channelID {
-                self.editSubject.send((event.data, channelID))
+                editSubject.send((event.data, channelID))
             }
         case .messageDelete:
             if let channelID = event.channelID {
@@ -94,5 +94,4 @@ extension Gateway {
         default: break
         }
     }
-
 }

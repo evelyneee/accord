@@ -5,16 +5,16 @@
 //  Created by evelyn on 2021-12-30.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension Gateway {
     final func receive() {
         ws.receive { [weak self] result in
             switch result {
-            case .success(let message):
+            case let .success(message):
                 switch message {
-                case .string(let text):
+                case let .string(text):
                     if let textData = text.data(using: .utf8) {
                         guard let payload = self?.decodePayload(payload: textData), let op = payload["op"] as? Int else { return }
                         guard let s = payload["s"] as? Int else {
@@ -43,15 +43,16 @@ extension Gateway {
                             guard let structure = try? JSONDecoder().decode(GatewayStructure.self, from: textData) else { break }
                             releaseModePrint(" Gateway ready (\(structure.d.v ?? 0), \(structure.d.user.username)#\(structure.d.user.discriminator))")
                             self?.session_id = structure.d.session_id
-                            break
 
                         // MARK: Channel Event Handlers
+
                         case "CHANNEL_CREATE": break
                         case "CHANNEL_UPDATE": break
                         case "CHANNEL_DELETE": break
 
                         // MARK: Guild Event Handlers
-                        case "GUILD_CREATE": print("guild created"); break
+
+                        case "GUILD_CREATE": print("guild created")
                         case "GUILD_DELETE": break
                         case "GUILD_MEMBER_ADD": break
                         case "GUILD_MEMBER_REMOVE": break
@@ -60,13 +61,14 @@ extension Gateway {
                             DispatchQueue.main.async {
                                 MessageController.shared.sendMemberChunk(msg: textData)
                             }
-                            break
 
                         // MARK: Invite Event Handlers
+
                         case "INVITE_CREATE": break
                         case "INVITE_DELETE": break
 
                         // MARK: Message Event Handlers
+
                         case "MESSAGE_CREATE":
                             guard let dict = payload["d"] as? [String: Any] else { break }
                             if let channelID = dict["channel_id"] as? String, let author = dict["author"] as? [String: Any], let id = author["id"] as? String, id == user_id {
@@ -89,30 +91,28 @@ extension Gateway {
                                 print("notification")
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
-                            } else if Notifications.privateChannels.contains(channel_id) && userID != user_id {
+                            } else if Notifications.privateChannels.contains(channel_id), userID != user_id {
                                 showNotification(title: username, subtitle: content)
                                 MentionSender.shared.addMention(guild: guild_id, channel: channel_id)
                             }
-                            break
                         case "MESSAGE_UPDATE":
                             let data = payload["d"] as! [String: Any]
                             if let channelid = data["channel_id"] as? String {
                                 MessageController.shared.editMessage(msg: textData, channelID: channelid)
                             }
-                            break
                         case "MESSAGE_DELETE":
                             let data = payload["d"] as! [String: Any]
                             if let channelid = data["channel_id"] as? String {
                                 MessageController.shared.deleteMessage(msg: textData, channelID: channelid)
                             }
-                            break
-                        case "MESSAGE_REACTION_ADD": print("something was created"); break
-                        case "MESSAGE_REACTION_REMOVE": print("something was created"); break
-                        case "MESSAGE_REACTION_REMOVE_ALL": print("something was created"); break
-                        case "MESSAGE_REACTION_REMOVE_EMOJI": print("something was created"); break
+                        case "MESSAGE_REACTION_ADD": print("something was created")
+                        case "MESSAGE_REACTION_REMOVE": print("something was created")
+                        case "MESSAGE_REACTION_REMOVE_ALL": print("something was created")
+                        case "MESSAGE_REACTION_REMOVE_EMOJI": print("something was created")
 
                         // MARK: Presence Event Handlers
-                        case "PRESENCE_UPDATE": print(text); break
+
+                        case "PRESENCE_UPDATE": print(text)
                         case "TYPING_START":
                             let data = payload["d"] as! [String: Any]
                             if let channelid = data["channel_id"] as? String {
@@ -120,7 +120,7 @@ extension Gateway {
                             }
                         case "USER_UPDATE": break
                         case "READY_SUPPLEMENTAL": break
-                        case "MESSAGE_ACK": print(text); break
+                        case "MESSAGE_ACK": print(text)
                         case "GUILD_MEMBER_LIST_UPDATE":
 //                            do {
 //                                let list = try JSONDecoder().decode(MemberListUpdate.self, from: textData)
@@ -134,7 +134,7 @@ extension Gateway {
                 case .data: break
                 @unknown default: break
                 }
-            case .failure(let error):
+            case let .failure(error):
                 releaseModePrint(" Error when receiving loop \(error)")
                 print("RECONNECT")
                 MentionSender.shared.sendWSError(error: error)

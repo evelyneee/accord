@@ -18,6 +18,7 @@ struct SearchView: View {
         matches.append(contentsOf: dmMatches)
         return matches
     }
+
     var body: some View {
         VStack {
             HStack {
