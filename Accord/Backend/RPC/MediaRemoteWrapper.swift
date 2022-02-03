@@ -109,8 +109,8 @@ final class MediaRemoteWrapper {
                                     name: "Apple Music",
                                     type: 0,
                                     timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                                    state: "Listening to \(song.artist ?? "")",
-                                    details: song.name,
+                                    state: "Listening to \(song.artist ?? "someone")",
+                                    details: "\(song.name)\(song.albumName != nil ? " - \(song.albumName!)": "")",
                                     assets: [
                                         "large_image":"mp:\(url)",
                                         "large_text":song.albumName ?? song.name
@@ -128,7 +128,7 @@ final class MediaRemoteWrapper {
                             name: "Apple Music",
                             type: 0,
                             timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                            state: "Listening to \(song.artist ?? "cock")",
+                            state: "Listening to \(song.artist ?? "someone")",
                             details: song.name
                         )
                     }

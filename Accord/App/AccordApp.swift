@@ -122,6 +122,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 MediaRemoteWrapper.updatePresence()
             }
         }
+        NotificationCenter.default.addObserver(forName: nil, object: nil, queue: .main, using: { notif in
+            if notif.name.rawValue.contains("MR") {
+                print(notif)
+            }
+        })
     }
 
     var popover = NSPopover()

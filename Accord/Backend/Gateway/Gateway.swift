@@ -247,7 +247,17 @@ final class Gateway {
                 case .binary:
                     break
                 case .close:
-                    print(String(data: data, encoding: .utf8) ?? "Unknown close code")
+                    if let closeMessage = String(data: data, encoding: .utf8) {
+                        print("Closed with #\(closeMessage)#")
+                        switch closeMessage {
+                        case "Authentication failed.":
+                            logOut()
+                            NSApplication.shared.restart()
+                        default: break
+                        }
+                    } else {
+                        print("Closed with unknown close code")
+                    }
                 case .ping:
                     break
                 case .pong:

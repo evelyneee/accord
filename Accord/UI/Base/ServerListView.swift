@@ -261,7 +261,6 @@ struct ServerListView: View {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-
                     LazyVStack {
                         if !online || !NetworkCore.shared.connected {
                             onlineButton
@@ -276,9 +275,7 @@ struct ServerListView: View {
                 .frame(width: 80)
                 .padding(.top, 5)
                 Divider()
-
                 // MARK: - Loading UI
-
                 if selectedServer == 201 {
                     List {
                         Text("Messages")
