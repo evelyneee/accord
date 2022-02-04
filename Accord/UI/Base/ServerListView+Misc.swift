@@ -52,6 +52,18 @@ extension ServerListView {
             guild.channels = ret
             full?.guilds[index] = guild
         }
+        for (index, _guild) in (full?.guilds ?? []).enumerated() {
+            var guild = _guild
+            let ids = Array(NSOrderedSet(array: guild.channels ?? [])) as? [Channel] ?? []
+            var ret = [Channel]()
+            for id in ids {
+                let matching = guild.threads?.filter { $0.parent_id == id.id }
+                ret.append(id)
+                ret.append(contentsOf: matching ?? [])
+            }
+            guild.channels = ret
+            full?.guilds[index] = guild
+        }
     }
 
     func assignReadStates(full: inout GatewayD?) {

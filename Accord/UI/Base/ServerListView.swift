@@ -304,31 +304,32 @@ struct ServerListView: View {
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
-            let uInfo = pub.userInfo as! [Int: Int]
-            print(uInfo)
-            self.selectedServer = uInfo.keys.first!
-            self.selection = uInfo.values.first!
+            guard let uInfo = pub.userInfo as? [Int: Int],
+                  let firstKey = uInfo.first else { return }
+            self.selectedServer = firstKey.key
+            self.selection = firstKey.value
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
-            let uInfo = pub.userInfo as! [String: String]
-            print(uInfo)
-            let index = uInfo["index"]!
-            self.selection = Int(index) ?? 0
+            guard let uInfo = pub.userInfo as? [String: String],
+                  let index = uInfo["index"], let number = Int(index) else { return }
             self.selectedServer = 201
+            self.selection = number
         })
         .onChange(of: selectedServer, perform: { [selectedServer] new in
             concurrentQueue.async {
+                print("selected")
+                let map = Array(Self.folders.compactMap { $0.guilds }.joined())
                 guard let selectedServer = selectedServer,
                       new != 201,
                       let new = new,
-                      let id = Array(Self.folders.compactMap { $0.guilds }.joined())[safe: selectedServer]?.id else { return }
+                      let id = map[safe: selectedServer]?.id,
+                      let newID = map[safe: new]?.id else { return }
+                print("selected new at id", newID, id)
                 UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
-                let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[new].id)")
+                let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(newID)")
                 DispatchQueue.main.async {
                     if val != 0 {
                         self.selection = val
-                    } else {
-                        self.selection = nil
                     }
                 }
             }

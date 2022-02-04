@@ -51,6 +51,7 @@ struct GuildView: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .if(channel.read_state?.last_message_id == channel.last_message_id, transform: { $0.foregroundColor(.secondary).opacity(0.5) })
+                    .if((channel.type == .guild_public_thread || channel.type == .guild_private_thread), transform: { $0.padding(.leading) })
                     .onChange(of: self.selection, perform: { _ in
                         if self.selection == Int(channel.id) {
                             channel.read_state?.mention_count = 0
@@ -120,6 +121,16 @@ struct ServerListViewCell: View {
                     Attachment("https://cdn.discordapp.com/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=24").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
+                    Text(channel?.computedName ?? "Unknown Channel")
+                }
+            case .guild_public_thread:
+                HStack {
+                    Image(systemName: "tray.full")
+                    Text(channel?.computedName ?? "Unknown Channel")
+                }
+            case .guild_private_thread:
+                HStack {
+                    Image(systemName: "tray.full")
                     Text(channel?.computedName ?? "Unknown Channel")
                 }
             default:

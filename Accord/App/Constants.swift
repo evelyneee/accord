@@ -29,7 +29,7 @@ public var pastelColors: Bool = UserDefaults.standard.bool(forKey: "pastelColors
 public var discordStockSettings: Bool = UserDefaults.standard.bool(forKey: "discordStockSettings")
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
 public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.264 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"
-public var dscVersion = 109_976
+public var dscVersion = 113_404
 public var DiscordDesktopRPCEnabled = UserDefaults.standard.bool(forKey: "DiscordDesktopRPCEnabled")
 
 public let xcodeRPCAppID = "926282502937641001"

@@ -121,13 +121,15 @@ struct ChatControls: View {
                     HStack {
                         if #available(macOS 12.0, *) {
                             TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
+                                .focused($focusedField, equals: .mainTextField)
                                 .onSubmit {
                                     typing = false
                                     send()
                                 }
-                                .focused($focusedField, equals: .mainTextField)
                                 .task {
-                                    self.focusedField = .mainTextField
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                        self.focusedField = .mainTextField
+                                    })
                                 }
                         } else {
                             TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in

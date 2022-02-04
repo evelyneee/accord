@@ -49,7 +49,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // var members: [GuildMember]?
     var channels: [Channel]?
     // TODO: Thread object
-    // var threads: [Thread]?
+    var threads: [Channel]?
     // TODO: PresenceUpdate object
     // var presences: [PresenceUpdate]?
     let max_presences: Int?
