@@ -47,6 +47,8 @@ struct SettingsViewRedesign: View {
     var nitrolessEnabled: Bool = false
     @AppStorage("SilentTyping")
     var silentTyping: Bool = false
+    @AppStorage("GifProfilePictures")
+    var gifPfp: Bool = false
     @AppStorage("MusicPlatform")
     var selectedPlatform: Platforms = Platforms.appleMusic
     
@@ -136,8 +138,9 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $dark, title: "Always dark mode")
                         SettingsToggleView(toggled: $menuBarItem, title: "Enable the mentions menu bar popup")
                         SettingsToggleView(toggled: $nitrolessEnabled, title: "Enable Nitroless support")
-                        SettingsToggleView(toggled: $metalRenderer, title: "Enable silent typing")
+                        SettingsToggleView(toggled: $silentTyping, title: "Enable silent typing")
                         SettingsToggleView(toggled: $metalRenderer, title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
+                        SettingsToggleView(toggled: $gifPfp, title: "Enable Gif Profile Pictures", detail: "Experimental")
                     }
 
                     HStack(alignment: .top) {

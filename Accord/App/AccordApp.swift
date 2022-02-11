@@ -38,16 +38,12 @@ struct AccordApp: App {
                             concurrentQueue.async {
                                 _ = NetworkCore.shared
                             }
-                            UNUserNotificationCenter.current().getNotificationSettings { settings in
-                                if settings.authorizationStatus != .authorized {
-                                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
-                                        granted, error in
-                                        if granted {
-                                            print("lol")
-                                        } else {
-                                            print(error)
-                                        }
-                                    }
+                            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
+                                granted, error in
+                                if granted {
+                                    print("lol")
+                                } else {
+                                    print(error)
                                 }
                             }
                             self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")

@@ -71,6 +71,7 @@ func attachmentWindows(player: AVPlayer? = nil, url: String? = nil, name: String
     }
     windowRef.minSize = NSSize(width: CGFloat(width ?? 0), height: CGFloat(height ?? 0))
     windowRef.title = name
+    windowRef.isReleasedWhenClosed = false
     windowRef.makeKeyAndOrderFront(nil)
 }
 

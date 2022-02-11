@@ -8,6 +8,7 @@
 import AppKit
 import Combine
 import Foundation
+import SwiftUI
 
 final class ChatControlsViewModel: ObservableObject {
     @Published var matchedUsers = [String:String]()
@@ -20,6 +21,8 @@ final class ChatControlsViewModel: ObservableObject {
     weak var textField: NSTextField?
     var currentValue: String?
     var currentRange: Int?
+    
+    @AppStorage("SilentTyping") var silentTyping: Bool = false
 
     func checkText(guildID: String) {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
@@ -161,6 +164,7 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func type(channelID: String, guildID: String) {
+        guard !silentTyping else { return }
         Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,

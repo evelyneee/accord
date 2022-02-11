@@ -118,13 +118,16 @@ struct LoginView: View {
                                     type: .POST,
                                     discordHeaders: true,
                                     json: true
-                                )) { value, error in
-                                    if let token = value?.token {
-                                        KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
-                                        AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                                        self.captcha = false
-                                        NSApplication.shared.restart()
-                                    } else if let error = error {
+                                )) { completion in
+                                    switch completion {
+                                    case .success(let value):
+                                        if let token = value.token {
+                                            KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
+                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                            self.captcha = false
+                                            NSApplication.shared.restart()
+                                        }
+                                    case .failure(let error):
                                         print(error)
                                     }
                                 }
@@ -141,31 +144,40 @@ struct LoginView: View {
                                 type: .POST,
                                 discordHeaders: true,
                                 json: true
-                            )) { response, _ in
-                                if let token = response?.token {
-                                    KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
-                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                                    self.captcha = false
-                                    NSApplication.shared.restart()
-                                }
-                                if let response = response, let ticket = response.ticket {
-                                    Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(
-                                        userAgent: discordUserAgent,
-                                        contentType: "application/json",
-                                        token: AccordCoreVars.token,
-                                        bodyObject: ["code": twofactor, "ticket": ticket],
-                                        type: .POST,
-                                        discordHeaders: true,
-                                        json: true
-                                    ))
-                                    { value, _ in
-                                        if let token = value?.token {
-                                            KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
-                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                                            self.captcha = false
-                                            NSApplication.shared.restart()
+                            )) { completion in
+                                switch completion {
+                                case .success(let response):
+                                    if let token = response.token {
+                                        KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
+                                        AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                        self.captcha = false
+                                        NSApplication.shared.restart()
+                                    }
+                                    if let ticket = response.ticket {
+                                        Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(
+                                            userAgent: discordUserAgent,
+                                            contentType: "application/json",
+                                            token: AccordCoreVars.token,
+                                            bodyObject: ["code": twofactor, "ticket": ticket],
+                                            type: .POST,
+                                            discordHeaders: true,
+                                            json: true
+                                        )) { completion in
+                                            switch completion {
+                                            case .success(let response):
+                                                if let token = response.token {
+                                                    KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
+                                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                                    self.captcha = false
+                                                    NSApplication.shared.restart()
+                                                }
+                                            case .failure(let error):
+                                                print(error)
+                                            }
                                         }
                                     }
+                                case .failure(let error):
+                                    print(error)
                                 }
                             }
                         }
@@ -204,16 +216,9 @@ final class LoginViewViewModel: ObservableObject {
             type: .POST,
             discordHeaders: true,
             json: true
-        )) { [weak self] response, error in
-            if let response = response {
-                if let error = response.message {
-                    switch error {
-                    case "Invalid Form Body":
-                        self?.loginError = DiscordLoginErrors.invalidForm
-                    default:
-                        self?.loginError = DiscordLoginErrors.invalidForm
-                    }
-                }
+        )) { [weak self] completion in
+            switch completion {
+            case .success(let response):
                 if let checktoken = response.token {
                     KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -237,7 +242,15 @@ final class LoginViewViewModel: ObservableObject {
                         print("[Login debug] Got ticket")
                     }
                 }
-            } else if let error = error {
+                if let error = response.message {
+                    switch error {
+                    case "Invalid Form Body":
+                        self?.loginError = DiscordLoginErrors.invalidForm
+                    default:
+                        self?.loginError = DiscordLoginErrors.invalidForm
+                    }
+                }
+            case .failure(let error):
                 print(error)
                 self?.loginError = error
             }

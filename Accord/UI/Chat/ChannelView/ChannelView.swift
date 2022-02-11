@@ -87,27 +87,6 @@ struct ChannelView: View, Equatable {
                                     }
                                 }
                             }
-                            .contextMenu {
-                                Button("Reply") { [weak message] in
-                                    replyingTo = message
-                                }
-                                Button("Edit") { [weak message] in
-                                    self.editing = message?.id
-                                }
-                                Button("Delete") { [weak message] in
-                                    message?.delete()
-                                }
-                                Button("Copy") { [weak message] in
-                                    guard let content = message?.content else { return }
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(content, forType: .string)
-                                }
-                                Button("Copy Message Link") { [weak message] in
-                                    guard let channelID = message?.channel_id, let id = message?.id else { return }
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)", forType: .string)
-                                }
-                            }
                         }
                     }
                     .scaleEffect(x: -1.0, y: 1.0, anchor: .center)

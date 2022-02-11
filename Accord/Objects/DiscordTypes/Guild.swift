@@ -13,7 +13,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     }
 
     let id: String
-    let name: String
+    let name: String?
     var icon: String?
     var icon_hash: String?
     // var splash: String?

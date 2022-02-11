@@ -32,7 +32,7 @@ struct GuildView: View {
                         EmptyView()
                     }
                 }
-                Text(guild.name)
+                Text(guild.name ?? "Unknown Guild")
                     .fontWeight(.medium)
             }
             if let banner = guild.banner {

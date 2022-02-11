@@ -334,6 +334,7 @@ struct KeyModifier: ViewModifier {
             }
     }
 }
+
 extension View {
     func onPress(keys: [CGKeyCode], execute: @escaping ((_ keys: [String]) -> Void)) -> some View {
         self.modifier(KeyModifier.init(keyCodes: keys, execute: execute))

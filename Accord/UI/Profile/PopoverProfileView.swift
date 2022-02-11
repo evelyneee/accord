@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PopoverProfileView: View {
-    @Binding var user: User?
+    var user: User?
     @State var hovered: Int?
     var body: some View {
         ZStack(alignment: .top) {

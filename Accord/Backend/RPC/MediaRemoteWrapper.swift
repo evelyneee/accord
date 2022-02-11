@@ -51,19 +51,24 @@ final class MediaRemoteWrapper {
                 let progress = information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double
                 print("done")
                 if let id = information["kMRMediaRemoteNowPlayingInfoAlbumiTunesStoreAdamIdentifier"] as? Int {
-                    Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { data, error in
-                        if let data = data, let dict = try? JSONSerialization.jsonObject(with: data) as? [String:Any] ?? [:] {
-                            let artworkURL = (dict["results"] as? [[String:Any]])?.first?["artworkUrl100"] as? String
-                            let song = Song(
-                                name: name,
-                                artist: information["kMRMediaRemoteNowPlayingInfoArtist"] as? String,
-                                duration: information["kMRMediaRemoteNowPlayingInfoDuration"] as? Double,
-                                albumName: information["kMRMediaRemoteNowPlayingInfoAlbum"] as? String,
-                                elapsed: progress,
-                                isMusic: isMusic,
-                                artworkURL: artworkURL
-                            )
-                            promise(.success(song))
+                    Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { completion in
+                        switch completion {
+                        case .success(let data):
+                            if let dict = try? JSONSerialization.jsonObject(with: data) as? [String:Any] ?? [:] {
+                                let artworkURL = (dict["results"] as? [[String:Any]])?.first?["artworkUrl100"] as? String
+                                let song = Song(
+                                    name: name,
+                                    artist: information["kMRMediaRemoteNowPlayingInfoArtist"] as? String,
+                                    duration: information["kMRMediaRemoteNowPlayingInfoDuration"] as? Double,
+                                    albumName: information["kMRMediaRemoteNowPlayingInfoAlbum"] as? String,
+                                    elapsed: progress,
+                                    isMusic: isMusic,
+                                    artworkURL: artworkURL
+                                )
+                                promise(.success(song))
+                            }
+                        case .failure(let error):
+                            print(error)
                         }
                     })
                 } else {

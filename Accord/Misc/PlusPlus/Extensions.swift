@@ -24,11 +24,12 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
     public required init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         while !container.isAtEnd {
-            if let decoded = try? container.decode(Value.self) {
+            do {
+                let decoded = try container.decode(Value.self)
                 wrappedValue.append(decoded)
-            } else {
-                print("failed to decode")
-                _ = try? container.decode(_None.self)
+            } catch let error {
+                print("failed to decode", error)
+                _ = try container.decode(_None.self)
             }
         }
     }

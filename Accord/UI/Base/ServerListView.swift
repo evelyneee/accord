@@ -48,7 +48,7 @@ struct ServerListView: View {
             type: 4
         )
         Emotes.emotes = full?.guilds
-            .map { ["\($0.id)$\($0.name)": $0.emojis] }
+            .map { ["\($0.id)$\($0.name ?? "Unknown Guild")": $0.emojis] }
             .flatMap { $0 }
             .reduce([String: [DiscordEmote]]()) { dict, tuple in
                 var nextDict = dict
@@ -61,7 +61,7 @@ struct ServerListView: View {
         full?.guilds.forEach { guild in
             if !guildOrder.contains(guild.id) {
                 guildOrder.insert(guild.id, at: 0)
-                folderTemp.insert(GuildFolder(id: nil, name: nil, color: nil, guild_ids: [guild.id]), at: 0)
+                folderTemp.insert(GuildFolder(name: nil, color: nil, guild_ids: [guild.id]), at: 0)
             }
         }
         let messageDict = full?.guilds.enumerated().compactMap { index, element in
@@ -83,7 +83,7 @@ struct ServerListView: View {
                 for channel in 0 ..< (guild.channels?.count ?? 0) {
                     guild.channels?[channel].guild_id = guild.id
                     guild.channels?[channel].guild_icon = guild.icon
-                    guild.channels?[channel].guild_name = guild.name
+                    guild.channels?[channel].guild_name = guild.name ?? "Unknown Guild"
                 }
                 folder.guilds.append(guild)
             }
@@ -349,8 +349,9 @@ struct ServerListView: View {
                 self.selection = (val != 0 ? val : nil)
             }
             concurrentQueue.async {
-                Request.fetch([Channel].self, url: URL(string: "\(rootURL)/users/@me/channels"), headers: standardHeaders) { channels, error in
-                    if let channels = channels {
+                Request.fetch([Channel].self, url: URL(string: "\(rootURL)/users/@me/channels"), headers: standardHeaders) { completion in
+                    switch completion {
+                    case .success(let channels):
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
                             Self.privateChannels = channels
@@ -359,7 +360,7 @@ struct ServerListView: View {
                             }
                         }
                         Notifications.privateChannels = Self.privateChannels.map(\.id)
-                    } else if let error = error {
+                    case .failure(let error):
                         print(error)
                     }
                 }

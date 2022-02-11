@@ -52,7 +52,14 @@ struct ContentView: View {
                             AccordCoreVars.user = d.user
                             user_id = d.user.id
                             if let pfp = d.user.avatar {
-                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(d.user.id)/\(pfp).png?size=80")) { avatar = $0 ?? Data(); _ = $1 }
+                                Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(d.user.id)/\(pfp).png?size=80")) { completion in
+                                    switch completion {
+                                    case .success(let data):
+                                        avatar = data
+                                    case .failure(let error):
+                                        print(error)
+                                    }
+                                }
                             }
                             username = d.user.username
                             discriminator = d.user.discriminator

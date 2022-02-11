@@ -160,7 +160,7 @@ public final class Request {
 
     // MARK: - Perform request with completion handler
 
-    class func fetch<T: Decodable>(_: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: T?, _ error: Error?) -> Void)) {
+    class func fetch<T: Decodable>(_: T.Type, request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping (Result<T, Error>) -> Void) {
         let request: URLRequest? = {
             if let request = request {
                 return request
@@ -171,7 +171,7 @@ public final class Request {
                 return nil
             }
         }()
-        guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
+        guard var request = request else { return completion(.failure(FetchErrors.invalidRequest)) }
         var config = URLSessionConfiguration.default
         config.setProxy()
         guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
@@ -179,24 +179,24 @@ public final class Request {
             return
         }
         // Set headers
-        do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
+        do { try headers?.set(request: &request, config: &config) } catch { return completion(.failure(error)) }
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
             if let data = data {
                 guard error == nil else {
                     print(error?.localizedDescription ?? "Unknown Error")
-                    return completion(nil, FetchErrors.badResponse(response))
+                    return completion(.failure(FetchErrors.badResponse(response)))
                 }
                 if T.self == AnyDecodable.self {
-                    return completion(nil, FetchErrors.notRequired) // Bail out if we don't ask for a type
+                    return completion(.failure(FetchErrors.notRequired)) // Bail out if we don't ask for a type
                 }
                 do {
                     let value = try JSONDecoder().decode(T.self, from: data)
-                    return completion(value, nil)
+                    return completion(.success(value))
                 } catch {
                     guard let error = try? JSONDecoder().decode(DiscordError.self, from: data) else {
                         guard let strError = String(data: data, encoding: .utf8) else { return }
-                        return completion(nil, FetchErrors.decodingError(strError, error))
+                        return completion(.failure(FetchErrors.decodingError(strError, error)))
                     }
                     if let message = error.message, message.contains("Unauthorized") {
                         logOut()
@@ -208,7 +208,7 @@ public final class Request {
 
     // MARK: - Perform data request with completion handler
 
-    class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping ((_ value: Data?, _ error: Error?) -> Void)) {
+    class func fetch(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
         let request: URLRequest? = {
             if let request = request {
                 return request
@@ -219,7 +219,7 @@ public final class Request {
                 return nil
             }
         }()
-        guard var request = request else { return completion(nil, FetchErrors.invalidRequest) }
+        guard var request = request else { return completion(.failure(FetchErrors.invalidRequest)) }
         var config = URLSessionConfiguration.default
         config.setProxy()
         guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
@@ -228,11 +228,13 @@ public final class Request {
         }
 
         // Set headers
-        do { try headers?.set(request: &request, config: &config) } catch { return completion(nil, error) }
+        do { try headers?.set(request: &request, config: &config) } catch { return completion(.failure(error)) }
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, _, error in
             if let data = data {
-                return completion(data, error)
+                return completion(.success(data))
+            } else if let error = error {
+                return completion(.failure(error))
             }
         }).resume()
     }
@@ -240,7 +242,7 @@ public final class Request {
     // MARK: - fetch() wrapper for empty requests without completion handlers
 
     class func ping(request: URLRequest? = nil, url: URL? = nil, headers: Headers? = nil) {
-        fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _, _ in }
+        fetch(AnyDecodable.self, request: request, url: url, headers: headers) { _ in }
     }
 
     // MARK: - Image getter

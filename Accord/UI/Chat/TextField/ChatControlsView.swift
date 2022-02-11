@@ -138,9 +138,7 @@ struct ChatControls: View {
                                     }
                                 }
                                 .task {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                                        self.focusedField = .mainTextField
-                                    })
+                                    self.focusedField = .mainTextField
                                 }
                         } else {
                             TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {

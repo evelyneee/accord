@@ -23,6 +23,7 @@ func showNotification(title: String, subtitle: String, description: String? = ni
         dateMatching: dateComponents, repeats: false
     )
     let uuidString = "Accord"
+    content.sound = UNNotificationSound.default
     let request = UNNotificationRequest(identifier: uuidString,
                                         content: content, trigger: trigger)
     // Schedule the request with the system.

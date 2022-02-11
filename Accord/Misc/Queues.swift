@@ -23,9 +23,6 @@ let webSocketQueue = DispatchQueue(label: "AccordWSDecodingQueue", attributes: .
 // queue where the websocket lives
 let concurrentQueue = DispatchQueue(label: "AccordMainWSQueue", attributes: .concurrent)
 
-// Queue for decoding colors
-let colorQueue = DispatchQueue(label: "AccordColorDecodingQueue")
-
 // Message fetching queue - Used by PinsView, ChannelView's view model for fetching messages and loading the rest of the things
 let messageFetchQueue = DispatchQueue(label: "AccordMessageFetchQueue", attributes: .concurrent)
 

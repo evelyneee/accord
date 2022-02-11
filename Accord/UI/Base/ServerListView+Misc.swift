@@ -88,7 +88,6 @@ extension ServerListView {
                     channels[index].read_state = readState.entries[at]
                     temp.append(channels[index])
                 }
-                print(temp.count)
                 guild.channels = temp
                 folder.guilds[index] = guild
             }
