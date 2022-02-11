@@ -34,8 +34,6 @@ final class MediaRemoteWrapper {
         case noName
     }
 
-    static let appID: String = "925514277987704842"
-
     class func getCurrentlyPlayingSong() -> Future<Song, Error> {
         Future { promise in
             // Load framework
@@ -104,7 +102,7 @@ final class MediaRemoteWrapper {
                             try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
                                 Activity.current!
                                 Activity(
-                                    applicationID: "925514277987704842",
+                                    applicationID: musicRPCAppID,
                                     flags: 1,
                                     name: "Apple Music",
                                     type: 0,
@@ -123,7 +121,7 @@ final class MediaRemoteWrapper {
                     try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
                         Activity.current!
                         Activity(
-                            applicationID: "925514277987704842",
+                            applicationID: musicRPCAppID,
                             flags: 1,
                             name: "Apple Music",
                             type: 0,

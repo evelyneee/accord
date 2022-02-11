@@ -130,7 +130,7 @@ struct Folder<Content: View>: View {
     var body: some View {
         VStack {
             Button(
-                action: { withAnimation { self.collapsed.toggle() } },
+                action: { withAnimation(Animation.spring()) { self.collapsed.toggle() } },
                 label: {
                     VStack(spacing: 3) {
                         HStack(spacing: 3) {
@@ -178,7 +178,6 @@ struct Folder<Content: View>: View {
                     self.content()
                 }
             }
-            .transition(.slide)
         }
     }
 }
@@ -208,50 +207,51 @@ func showWindow(_ channel: Channel) {
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false
     )
+    windowRef.delegate = nil
     windowRef.contentView = NSHostingView(rootView: ChannelView(channel))
-    windowRef.minSize = NSSize(width: 500, height: 300)
     windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
+    windowRef.isReleasedWhenClosed = false
     windowRef.makeKeyAndOrderFront(nil)
 }
 
-func pronounDBFormed(pronoun: inout String?) {
+func pronounDBFormed(pronoun: String?) -> String {
     switch pronoun {
     case "hh":
-        pronoun = "he/him"
+        return "he/him"
     case "hi":
-        pronoun = "he/it"
+        return "he/it"
     case "hs":
-        pronoun = "he/she"
+        return "he/she"
     case "ht":
-        pronoun = "he/they"
+        return "he/they"
     case "ih":
-        pronoun = "it/him"
+        return "it/him"
     case "ii":
-        pronoun = "it/its"
+        return "it/its"
     case "is":
-        pronoun = "it/she"
+        return "it/she"
     case "it":
-        pronoun = "it/they"
+        return "it/they"
     case "shh":
-        pronoun = "she/he"
+        return "she/he"
     case "sh":
-        pronoun = "she/her"
+        return "she/her"
     case "si":
-        pronoun = "she/it"
+        return "she/it"
     case "st":
-        pronoun = "she/they"
+        return "she/they"
     case "th":
-        pronoun = "they/he"
+        return "they/he"
     case "ti":
-        pronoun = "they/it"
+        return "they/it"
     case "ts":
-        pronoun = "they/she"
+        return "they/she"
     case "tt":
-        pronoun = "they/them"
+        return "they/them"
     case "any":
-        pronoun = "any/any"
+        return "any"
     default:
-        pronoun = nil
+        return ""
     }
 }
 

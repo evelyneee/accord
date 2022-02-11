@@ -18,34 +18,46 @@ final class Embed: Codable, Hashable, Identifiable {
     var url: String?
     var timestamp: String?
     var color: Int?
-    var image: EmbedImage?
-//    var thumbnail?    mation
-//    var video?    embe
-//    var provider?    eion
-    var author: EmbedAuthor?
-    var fields: [EmbedField]?
+    var image: Embed.Image?
+    var thumbnail: Embed.Image?
+    var video: Embed.Video?
+    var provider: Embed.Provider?
+    var author: Embed.Author?
+    var fields: [Embed.Field]?
     var id: String { UUID().uuidString }
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-}
+    
+    final class Field: Codable {
+        var name: String
+        var inline: Bool?
+        var value: String
+    }
+    
+    final class Author: Codable {
+        var name: String
+        var url: String?
+        var icon_url: String?
+        var proxy_icon_url: String?
+    }
+    
+    final class Image: Codable {
+        var url: String
+        var proxy_url: String?
+        var height: Int?
+        var width: Int?
+    }
 
-final class EmbedField: Codable {
-    var name: String
-    var inline: Bool?
-    var value: String
-}
-
-final class EmbedAuthor: Codable {
-    var name: String
-    var url: String?
-    var icon_url: String?
-    var proxy_icon_url: String?
-}
-
-class EmbedImage: Codable {
-    var url: String
-    var proxy_url: String?
-    var height: Int?
-    var width: Int?
+    final class Video: Codable {
+        var url: String?
+        var proxy_url: String?
+        var height: Int?
+        var width: Int?
+    }
+    
+    final class Provider: Codable {
+        var name: String?
+        var url: String?
+    }
 }

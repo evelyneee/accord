@@ -79,12 +79,12 @@ final class ImageLoaderAndCache: ObservableObject {
     }
 
     func load() {
-        imageQueue.async {
-            if self.size?.width == 350 { print("loading attachment") }
-            self.cancellable = RequestPublisher.image(url: self.url, to: self.size)
-                .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-                .sink { [weak self] img in DispatchQueue.main.async { self?.image = img } }
-        }
+        if self.size?.width == 350 { print("loading attachment") }
+        self.cancellable = RequestPublisher.image(url: self.url, to: self.size)
+            .subscribe(on: imageQueue)
+            .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.image = $0 }
     }
 
     deinit {

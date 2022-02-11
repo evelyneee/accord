@@ -16,6 +16,7 @@
 		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
 		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
+		9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
@@ -133,6 +134,7 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
+		9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGKeyCode++.swift"; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				9E6BCC63277E8E850085F279 /* Print++.swift */,
 				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
 				9ED3011027A6C76300D6235D /* Keypath++.swift */,
+				9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */,
 			);
 			path = PlusPlus;
 			sourceTree = "<group>";
@@ -724,6 +727,7 @@
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
+				9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */,
 				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,

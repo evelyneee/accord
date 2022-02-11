@@ -58,6 +58,13 @@ struct GuildView: View {
                             channel.read_state?.last_message_id = channel.last_message_id
                         }
                     })
+                        .contextMenu {
+                            Button(action: {
+                                showWindow(channel)
+                            }) {
+                                Text("Open in new window")
+                            }
+                        }
                 }
             }
         }
@@ -73,7 +80,6 @@ struct ServerListViewCell: View {
         guildID = channel.guild_id ?? "@me"
     }
 
-    @State var hovered: Bool = false
     var body: some View {
         var readStateDot: some View {
             ZStack {
@@ -143,18 +149,7 @@ struct ServerListViewCell: View {
             if let readState = channel?.read_state, readState.mention_count != 0 {
                 readStateDot
             }
-            if hovered {
-                Button(action: {
-                    if let channel = channel {
-                        showWindow(channel)
-                    }
-                }) {
-                    Image(systemName: "arrow.up.right.circle")
-                }
-                .buttonStyle(BorderlessButtonStyle())
-            }
-        }.onHover { val in
-            self.hovered = val
+
         }
     }
 }

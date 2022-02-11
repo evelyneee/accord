@@ -33,68 +33,63 @@ final class ChannelViewViewModel: ObservableObject {
             self.guildID == "@me" ? try? wss.subscribeToDM(channelID) : try? wss.subscribe(to: guildID)
             MentionSender.shared.removeMentions(server: guildID)
             // fetch messages
-            self.getMessages(channelID: channelID, guildID: guildID)
         }
+        self.getMessages(channelID: channelID, guildID: guildID)
         subscribe()
     }
 
     func subscribe() {
         wss.messageSubject
+            .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in
                 guard channelID == self?.channelID else { return }
-                webSocketQueue.async {
-                    guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
-                    if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
-                        self?.loadUser(for: message.author?.id)
-//                        for user in message.mentions.compactMap { $0?.id }.filter({ !(self?.roles.keys.contains($0) ?? false) }) {
-//                            self?.loadUser(for: user)
-//                        }
+                guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
+                if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
+                    self?.loadUser(for: message.author?.id)
+                }
+                if let firstMessage = self?.messages.first {
+                    message.sameAuthor = firstMessage.author?.id == message.author?.id
+                }
+                DispatchQueue.main.async {
+                    if let count = self?.messages.count, count == 50 {
+                        self?.messages.removeLast()
                     }
-                    if let firstMessage = self?.messages.first {
-                        message.sameAuthor = firstMessage.author?.id == message.author?.id
-                    }
-                    DispatchQueue.main.async {
-                        if let count = self?.messages.count, count == 50 {
-                            self?.messages.removeLast()
-                        }
-                        guard let author = message.author else { return }
-                        Storage.usernames[author.id] = author.username
-                        withAnimation {
-                            self?.messages.insert(message, at: 0)
-                        }
+                    guard let author = message.author else { return }
+                    Storage.usernames[author.id] = author.username
+                    withAnimation {
+                        self?.messages.insert(message, at: 0)
                     }
                 }
             }
             .store(in: &cancellable)
         wss.memberChunkSubject
+            .receive(on: webSocketQueue)
             .sink { [unowned self] msg in
-                webSocketQueue.async {
-                    guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
-                    let allUsers: [GuildMember] = users.compactMap { $0 }
-                    for person in allUsers {
+                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
+                let allUsers: [GuildMember] = users.compactMap { $0 }
+                for person in allUsers {
+                    DispatchQueue.main.async {
+                        wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
+                    }
+                    if let nickname = person.nick {
                         DispatchQueue.main.async {
-                            wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
+                            self.nicks[person.user.id] = nickname
                         }
-                        if let nickname = person.nick {
+                    }
+                    if let avatar = person.avatar {
+                        self.avatars[person.user.id] = avatar
+                    }
+                    if let roles = person.roles {
+                        var rolesTemp: [String?] = Array(repeating: nil, count: 100)
+                        for role in roles {
+                            if let roleColor = roleColors[role]?.1 {
+                                rolesTemp[roleColor] = role
+                            }
+                        }
+                        let temp: [String] = (rolesTemp.compactMap { $0 }).reversed()
+                        if !(temp.isEmpty) {
                             DispatchQueue.main.async {
-                                self.nicks[person.user.id] = nickname
-                            }
-                        }
-                        if let avatar = person.avatar {
-                            self.avatars[person.user.id] = avatar
-                        }
-                        if let roles = person.roles {
-                            var rolesTemp: [String?] = Array(repeating: nil, count: 100)
-                            for role in roles {
-                                if let roleColor = roleColors[role]?.1 {
-                                    rolesTemp[roleColor] = role
-                                }
-                            }
-                            let temp: [String] = (rolesTemp.compactMap { $0 }).reversed()
-                            if !(temp.isEmpty) {
-                                DispatchQueue.main.async {
-                                    self.roles[person.user.id] = temp[0]
-                                }
+                                self.roles[person.user.id] = temp[0]
                             }
                         }
                     }
@@ -102,41 +97,39 @@ final class ChannelViewViewModel: ObservableObject {
             }
             .store(in: &cancellable)
         wss.deleteSubject
+            .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
                 guard channelID == self?.channelID else { return }
-                webSocketQueue.async {
-                    let messageMap = self?.messages.enumerated().compactMap { index, element in
-                        [element.id: index]
-                    }.reduce(into: [:]) { result, next in
-                        result.merge(next) { _, rhs in rhs }
-                    }
-                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
-                    guard let message = gatewayMessage.d else { return }
-                    guard let index = messageMap?[message.id] else { return }
-                    DispatchQueue.main.async {
-                        withAnimation {
-                            let i: Int = index
-                            self?.messages.remove(at: i)
-                        }
+                let messageMap = self?.messages.enumerated().compactMap { index, element in
+                    [element.id: index]
+                }.reduce(into: [:]) { result, next in
+                    result.merge(next) { _, rhs in rhs }
+                }
+                guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
+                guard let message = gatewayMessage.d else { return }
+                guard let index = messageMap?[message.id] else { return }
+                DispatchQueue.main.async {
+                    withAnimation {
+                        let i: Int = index
+                        self?.messages.remove(at: i)
                     }
                 }
             }
             .store(in: &cancellable)
         wss.editSubject
+            .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
                 // Received a message from backend
                 guard channelID == self?.channelID else { return }
-                webSocketQueue.async {
-                    guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
-                    let messageMap = self?.messages.enumerated().compactMap { index, element in
-                        [element.id: index]
-                    }.reduce(into: [:]) { result, next in
-                        result.merge(next) { _, rhs in rhs }
-                    }
-                    guard let index = messageMap?[message.id] else { return }
-                    DispatchQueue.main.async {
-                        self?.messages[index] = message
-                    }
+                guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: msg).d else { return }
+                let messageMap = self?.messages.enumerated().compactMap { index, element in
+                    [element.id: index]
+                }.reduce(into: [:]) { result, next in
+                    result.merge(next) { _, rhs in rhs }
+                }
+                guard let index = messageMap?[message.id] else { return }
+                DispatchQueue.main.async {
+                    self?.messages[index] = message
                 }
             }
             .store(in: &cancellable)
@@ -156,12 +149,6 @@ final class ChannelViewViewModel: ObservableObject {
     }
 
     func getMessages(channelID: String, guildID: String) {
-        #if DEBUG
-            guard !ChannelViewViewModel.developingOffline else {
-                offlineMessages()
-                return
-            }
-        #endif
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
@@ -169,6 +156,16 @@ final class ChannelViewViewModel: ObservableObject {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
+        .subscribe(on: messageFetchQueue)
+        .receive(on: messageFetchQueue)
+        .map { output -> [Message] in
+            output.enumerated().compactMap { index, element -> Message in
+                guard element != output.last else { return element }
+                element.sameAuthor = output[index + 1].author?.id == element.author?.id
+                return element
+            }
+        }
+        .receive(on: DispatchQueue.main)
         .sink(receiveCompletion: { completion in
             switch completion {
             case .finished: break
@@ -176,28 +173,17 @@ final class ChannelViewViewModel: ObservableObject {
                 print(error)
                 MentionSender.shared.deselect()
             }
-        }) { [weak self] msg in
-            let messages: [Message] = msg.enumerated().compactMap { index, element -> Message in
-                guard element != msg.last else { return element }
-                element.sameAuthor = msg[index + 1].author?.id == element.author?.id
-                return element
-            }
-            DispatchQueue.main.async {
-                self?.messages = messages
-                messageFetchQueue.async {
-                    guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
-                    self?.loadPronouns()
-                    self?.ack(channelID: channelID, guildID: guildID)
-                    self?.cacheUsernames()
-                }
+        }) { [weak self] messages in
+            self?.messages = messages
+            messageFetchQueue.async {
+                guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
+                self?.loadPronouns()
+                self?.ack(channelID: channelID, guildID: guildID)
+                self?.cacheUsernames()
             }
         }
         .store(in: &cancellable)
     }
-
-    #if DEBUG
-        func offlineMessages() {}
-    #endif
 
     func cacheUsernames() {
         messages.forEach { message in
@@ -259,20 +245,17 @@ final class ChannelViewViewModel: ObservableObject {
             type: .GET
         ))
         .replaceError(with: [:])
+        .receive(on: DispatchQueue.main)
         .sink { [weak self] value in
-            var value = value
-            for key in value.keys {
-                pronounDBFormed(pronoun: &value[key])
-            }
-            DispatchQueue.main.async {
-                self?.pronouns = value
+            self?.pronouns = value.mapValues {
+                pronounDBFormed(pronoun: $0)
             }
         }
         .store(in: &cancellable)
     }
 
     func getCachedMemberChunk() {
-        let allUserIDs = messages.map { $0.author?.id ?? "" }
+        let allUserIDs = messages.compactMap { $0.author?.id }
             .removingDuplicates()
         for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
             let nickname = person.nick ?? person.user.username

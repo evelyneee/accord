@@ -20,9 +20,13 @@ struct MessageCellView: View {
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
+    @Binding var editing: String?
     @State var popup: Bool = false
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
+    
+    @State var editedText: String = ""
+    
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
@@ -53,28 +57,66 @@ struct MessageCellView: View {
                             popup.toggle()
                         }
                 }
-
                 VStack(alignment: .leading) {
                     if message.isSameAuthor, message.referenced_message == nil {
-                        AsyncMarkdown(message.content)
+                        if let editingID = self.editing, editingID == message.id {
+                            TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
+                                Request.ping(url: URL(string: "\(rootURL)/channels/\(message.channel_id)/messages/\(editingID)"), headers: Headers(
+                                    userAgent: discordUserAgent,
+                                    token: AccordCoreVars.token,
+                                    bodyObject: ["content":editedText],
+                                    type: .PATCH,
+                                    discordHeaders: true,
+                                    json: true
+                                ))
+                                self.editing = nil
+                                self.editedText = ""
+                            }
+                            .textFieldStyle(SquareBorderTextFieldStyle())
+                            .onAppear {
+                                self.editedText = message.content
+                            }
                             .padding(.leading, 41)
+                        } else {
+                            AsyncMarkdown(message.content)
+                                .padding(.leading, 41)
+                        }
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
                             .foregroundColor(role != nil && roleColors[role!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[role!]!.0) : Color(NSColor.textColor))
                             .fontWeight(.semibold)
-                            +
-                            Text("  \(message.timestamp.makeProperDate())")
+                        +
+                        Text("  \(message.timestamp.makeProperDate())")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                            +
-                            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                        +
+                        Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                            +
-                            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                        +
+                        Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                        AsyncMarkdown(message.content)
+                        if let editingID = self.editing, editingID == message.id {
+                            TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
+                                Request.ping(url: URL(string: "\(rootURL)/channels/\(message.channel_id)/messages/\(editingID)"), headers: Headers(
+                                    userAgent: discordUserAgent,
+                                    token: AccordCoreVars.token,
+                                    bodyObject: ["content":editedText],
+                                    type: .PATCH,
+                                    discordHeaders: true,
+                                    json: true
+                                ))
+                                self.editing = nil
+                                self.editedText = ""
+                            }
+                            .textFieldStyle(SquareBorderTextFieldStyle())
+                            .onAppear {
+                                self.editedText = message.content
+                            }
+                        } else {
+                            AsyncMarkdown(message.content)
+                        }
                     }
                 }
                 Spacer()

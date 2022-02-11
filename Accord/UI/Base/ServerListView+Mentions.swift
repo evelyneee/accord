@@ -49,15 +49,4 @@ extension ServerListView: MentionSenderDelegate {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Refresh"), object: nil, userInfo: [Self.folders[i].guilds[v].index ?? 0: Int(channel.id) ?? 0])
         }
     }
-
-    // This does not work unfortunately, needs some work
-    /*
-     func fastBindReadState(channels: [Channel], read_state: [ReadStateEntry]) -> [Channel] {
-         let dict =  Dictionary(uniqueKeysWithValues: zip(channels, read_state))
-         return dict.map { (element) -> (Channel) in
-             element.key.read_state = element.value
-             return element.key
-         }
-     }
-     */
 }

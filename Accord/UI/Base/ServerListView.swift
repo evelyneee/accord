@@ -55,7 +55,6 @@ struct ServerListView: View {
                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                 return nextDict
             } ?? [:]
-        assignReadStates(full: &full)
         order(full: &full)
         var guildOrder = full?.user_settings?.guild_positions ?? []
         var folderTemp = full?.user_settings?.guild_folders ?? []
@@ -90,8 +89,10 @@ struct ServerListView: View {
             }
         }
         Self.folders = folderTemp
+            .filter { !$0.guilds.isEmpty }
+        assignReadStates(full: &full)
         Self.readStates = full?.read_state?.entries ?? []
-        selection = nil
+        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(full?.guilds.first?.id ?? "")")
         concurrentQueue.async {
             guard let guilds = full?.guilds else { return }
             roleColors = RoleManager.arrangeRoleColors(guilds: guilds)
@@ -248,7 +249,7 @@ struct ServerListView: View {
                     .frame(width: 12, height: 12)
             }
         }
-        lazy var settingsLink: some View = NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 1, selection: self.$selection) {
+        lazy var settingsLink: some View = NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 0, selection: self.$selection) {
             ZStack(alignment: .bottomTrailing) {
                 Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
                     .scaledToFit()
@@ -266,7 +267,15 @@ struct ServerListView: View {
                             onlineButton
                         }
                         dmButton
+                        Color.gray
+                            .frame(height: 1)
+                            .opacity(0.75)
+                            .padding(.horizontal)
                         foldersList
+                        Color.gray
+                            .frame(height: 1)
+                            .opacity(0.75)
+                            .padding(.horizontal)
                         settingsLink
                     }
                     .padding(.vertical)

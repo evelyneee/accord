@@ -36,32 +36,26 @@ extension ServerListView {
     }
 
     func order(full: inout GatewayD?) {
-        for (index, _guild) in (full?.guilds ?? []).enumerated() {
+        full?.guilds.enumerated().forEach { index, _guild in
             var guild = _guild
-            let rejects = guild.channels?.filter { $0.parent_id == nil && $0.type != .section }
-            guild.channels = guild.channels?.sorted(by: { $1.position ?? 0 > $0.position ?? 0 })
-            let parents: [Channel] = guild.channels?.filter { $0.type == .section } ?? []
-            let ids = Array(NSOrderedSet(array: parents)) as? [Channel] ?? []
-            var ret = [Channel]()
-            for id in ids {
-                let matching = guild.channels?.filter { $0.parent_id == id.id }
-                ret.append(id)
-                ret.append(contentsOf: matching ?? [])
+            guild.channels = guild.channels?.sorted { ($0.type.rawValue, $0.position ?? 0, $0.id) < ($1.type.rawValue, $1.position ?? 0, $1.id) }
+            guard let rejects = guild.channels?.filter({ $0.parent_id == nil && $0.type != .section }),
+                  let parents: [Channel] = guild.channels?.filter({ $0.type == .section }),
+                  let sections = Array(NSOrderedSet(array: parents)) as? [Channel] else { return }
+            var sectionFormatted = [Channel]()
+            sections.forEach { channel in
+                guard let matching = guild.channels?.filter({ $0.parent_id == channel.id }) else { return }
+                sectionFormatted.append(channel)
+                sectionFormatted.append(contentsOf: matching)
             }
-            ret.insert(contentsOf: rejects ?? [], at: 0)
-            guild.channels = ret
-            full?.guilds[index] = guild
-        }
-        for (index, _guild) in (full?.guilds ?? []).enumerated() {
-            var guild = _guild
-            let ids = Array(NSOrderedSet(array: guild.channels ?? [])) as? [Channel] ?? []
-            var ret = [Channel]()
-            for id in ids {
-                let matching = guild.threads?.filter { $0.parent_id == id.id }
-                ret.append(id)
-                ret.append(contentsOf: matching ?? [])
+            var threadFormatted = [Channel]()
+            sectionFormatted.forEach { channel in
+                guard let matching = guild.threads?.filter({ $0.parent_id == channel.id }) else { return }
+                threadFormatted.append(channel)
+                threadFormatted.append(contentsOf: matching)
             }
-            guild.channels = ret
+            threadFormatted.insert(contentsOf: rejects, at: 0)
+            guild.channels = threadFormatted
             full?.guilds[index] = guild
         }
     }
@@ -79,16 +73,22 @@ extension ServerListView {
                 guard var channels = guild.channels else { return }
                 var temp = [Channel]()
                 for (index, channel) in channels.enumerated() {
-                    guard channel.type == .normal || channel.type == .dm || channel.type == .group_dm else {
-                        temp.append(channel)
-                        continue
+                    guard channel.type == .normal ||
+                            channel.type == .dm ||
+                            channel.type == .group_dm ||
+                            channel.type == .guild_news ||
+                            channel.type == .guild_private_thread ||
+                            channel.type == .guild_private_thread else {
+                                temp.append(channel)
+                                continue
                     }
                     guard let at = stateDict[channel.id] else {
                         continue
                     }
                     channels[index].read_state = readState.entries[at]
-                    temp.append(channel)
+                    temp.append(channels[index])
                 }
+                print(temp.count)
                 guild.channels = temp
                 folder.guilds[index] = guild
             }
@@ -97,17 +97,17 @@ extension ServerListView {
     }
 
     func assignPrivateReadStates() {
-        let messageDict = Self.readStates.enumerated().compactMap { index, element in
+        let privateReadStateDict = Self.readStates.enumerated().compactMap { index, element in
             [element.id: index]
         }.reduce(into: [:]) { result, next in
             result.merge(next) { _, rhs in rhs }
         }
         for (i, channel) in Self.privateChannels.enumerated() {
-            if let index = messageDict[channel.id] {
+            if let index = privateReadStateDict[channel.id] {
                 Self.privateChannels[i].read_state = Self.readStates[index]
             }
         }
-        print("Binded to private channel")
+        print("Binded to private channels")
         Self.readStates.removeAll()
     }
 }

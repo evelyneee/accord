@@ -15,6 +15,9 @@ struct PinsView: View {
     @Binding var replyingTo: Message?
     @State var pins: [Message] = []
     @State var bag = Set<AnyCancellable>()
+    
+    @Environment(\.presentationMode) private var presentationMode
+    
     var body: some View {
         List($pins, id: \.id) { $message in
             MessageCellView(
@@ -26,7 +29,8 @@ struct PinsView: View {
                 guildID: nil,
                 role: Binding.constant(nil),
                 replyRole: Binding.constant(nil),
-                replyingTo: $replyingTo
+                replyingTo: $replyingTo,
+                editing: Binding.constant(nil)
             )
         }
         .onAppear(perform: {
@@ -48,5 +52,9 @@ struct PinsView: View {
                 .store(in: &bag)
             }
         })
+        .onExitCommand {
+            print("bye!")
+            self.presentationMode.wrappedValue.dismiss()
+        }
     }
 }

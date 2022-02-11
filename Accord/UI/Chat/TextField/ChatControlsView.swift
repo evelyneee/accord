@@ -30,7 +30,6 @@ struct ChatControls: View {
     @Binding var fileUploadURL: URL?
     @State var dragOver: Bool = false
     @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: AccordCoreVars.plugins.count)
-    @Binding var users: [User]
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
     weak var textField: NSTextField?
@@ -65,18 +64,15 @@ struct ChatControls: View {
                 VStack {
                     if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) {
                         VStack {
-                            ForEach(viewModel.matchedUsers.prefix(10), id: \.id) { user in
-                                Button(action: { [weak viewModel, weak user] in
+                            ForEach(viewModel.matchedUsers.sorted(by: >).prefix(10), id: \.key) { id, username in
+                                Button(action: { [weak viewModel] in
                                     if let range = viewModel?.textFieldContents.range(of: "@") {
                                         viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                                     }
-                                    viewModel?.textFieldContents.append("<@!\(user?.id ?? "")>")
-                                }, label: { [weak user] in
+                                    viewModel?.textFieldContents.append("<@!\(id)>")
+                                }, label: {
                                     HStack {
-                                        Attachment(pfpURL(user?.id, user?.avatar, "24"), size: CGSize(width: 48, height: 48))
-                                            .clipShape(Circle())
-                                            .frame(width: 20, height: 20)
-                                        Text(user?.username ?? "Unknown User")
+                                        Text(username)
                                         Spacer()
                                     }
                                 })
@@ -126,17 +122,43 @@ struct ChatControls: View {
                                     typing = false
                                     send()
                                 }
+                                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+                                    if String(describing: pub.userInfo).contains("Command-V") && self.focusedField == .mainTextField {
+                                        let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
+                                        if let rawData = data,
+                                            let string = String(data: rawData, encoding: .utf8),
+                                            let url = URL(string: string),
+                                            let data = try? Data(contentsOf: url) {
+                                                self.fileUpload = data
+                                                self.fileUploadURL = url
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                                                    self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                                                })
+                                        }
+                                    }
+                                }
                                 .task {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                                         self.focusedField = .mainTextField
                                     })
                                 }
                         } else {
-                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in
-                            }, onCommit: {
+                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
                                 typing = false
                                 send()
-                            })
+                            }
+                            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+                                if String(describing: pub.userInfo).contains("Command-V") {
+                                    let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
+                                    if let rawData = data, let string = String(data: rawData, encoding: .utf8), let url = URL(string: string), let data = try? Data(contentsOf: url) {
+                                        self.fileUpload = data
+                                        self.fileUploadURL = url
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                                            self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                                        })
+                                    }
+                                }
+                            }
                         }
 
                         Button(action: {
@@ -193,9 +215,6 @@ struct ChatControls: View {
                              */
                         }
                     }
-                    .onChange(of: users) { [weak viewModel] value in
-                        viewModel?.cachedUsers = value
-                    }
                     .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
                         if !typing, viewModel?.textFieldContents != "" {
                             messageSendQueue.async {
@@ -213,7 +232,6 @@ struct ChatControls: View {
                     }
                 }
                 .onAppear {
-                    viewModel.cachedUsers = self.users
                     viewModel.findView()
                 }
                 .textFieldStyle(PlainTextFieldStyle())

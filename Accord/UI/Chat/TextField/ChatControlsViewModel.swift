@@ -10,11 +10,10 @@ import Combine
 import Foundation
 
 final class ChatControlsViewModel: ObservableObject {
-    @Published var matchedUsers = [User]()
+    @Published var matchedUsers = [String:String]()
     @Published var matchedChannels = [Channel]()
     @Published var matchedEmoji = [DiscordEmote]()
     @Published var textFieldContents: String = ""
-    @Published var cachedUsers = [User]()
     @Published var percent: String? = nil
     var observation: NSKeyValueObservation?
 
@@ -28,9 +27,9 @@ final class ChatControlsViewModel: ObservableObject {
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
         if let search = mentions.first {
-            let matched = cachedUsers.filter { $0.username.lowercased().contains(search.lowercased()) }
+            let matched = Storage.usernames.filter { $0.value.lowercased().contains(search.lowercased()) }
             DispatchQueue.main.async {
-                self.matchedUsers = matched.removingDuplicates()
+                self.matchedUsers = matched
             }
         } else if let search = channels.first {
             let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
@@ -68,6 +67,12 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
+    func clearMatches() {
+        self.matchedEmoji.removeAll()
+        self.matchedUsers.removeAll()
+        self.matchedChannels.removeAll()
+    }
+    
     func send(text: String, guildID: String, channelID: String) {
         DispatchQueue.main.sync {
             self.textFieldContents = ""
@@ -87,7 +92,7 @@ final class ChatControlsViewModel: ObservableObject {
             json: true
         ))
     }
-
+    
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
         DispatchQueue.main.sync {
             self.textFieldContents = ""

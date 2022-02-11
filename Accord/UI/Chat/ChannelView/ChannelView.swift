@@ -43,7 +43,9 @@ struct ChannelView: View, Equatable {
     @State var memberList = [OPSItems]()
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
-
+    
+    @State var editing: String? = nil
+    
     @AppStorage("MetalRenderer") var metalRenderer: Bool = false
 
     // MARK: - init
@@ -75,7 +77,8 @@ struct ChannelView: View, Equatable {
                                 guildID: guildID,
                                 role: $viewModel.roles[author.id],
                                 replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                                replyingTo: $replyingTo
+                                replyingTo: $replyingTo,
+                                editing: $editing
                             )
                             .onAppear {
                                 if (viewModel?.messages.count ?? 0) >= 50 {
@@ -87,6 +90,9 @@ struct ChannelView: View, Equatable {
                             .contextMenu {
                                 Button("Reply") { [weak message] in
                                     replyingTo = message
+                                }
+                                Button("Edit") { [weak message] in
+                                    self.editing = message?.id
                                 }
                                 Button("Delete") { [weak message] in
                                     message?.delete()
@@ -177,7 +183,7 @@ struct ChannelView: View, Equatable {
                 Toggle(isOn: $mentions) {
                     Image(systemName: "bell.badge.fill")
                 }
-                .popover(isPresented: $mentions) {
+                .sheet(isPresented: $mentions) {
                     MentionsView(replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
                 }

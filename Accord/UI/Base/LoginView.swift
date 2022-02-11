@@ -59,10 +59,14 @@ struct LoginView: View {
                     TextField("Token (optional)", text: $token)
                     TextField("Proxy IP (optional)", text: $proxyIP)
                     TextField("Proxy Port (optional)", text: $proxyPort)
-                    if let error = error {
-                        Text(error)
-                            .foregroundColor(Color.red)
-                            .font(.subheadline)
+                    #warning("TODO: test this")
+                    if let error = viewModel.loginError {
+                        switch error {
+                        case DiscordLoginErrors.invalidForm:
+                            Text("Wrong username/password")
+                        default:
+                            EmptyView()
+                        }
                     }
                     HStack {
                         Spacer()
@@ -70,7 +74,8 @@ struct LoginView: View {
                             exit(EXIT_SUCCESS)
                         }
                         .controlSize(.large)
-                        Button("Login") {
+                        Button("Login") { [weak viewModel] in
+                            viewModel?.loginError = nil
                             UserDefaults.standard.set(self.proxyIP, forKey: "proxyIP")
                             UserDefaults.standard.set(self.proxyPort, forKey: "proxyPort")
                             if token != "" {
@@ -78,16 +83,7 @@ struct LoginView: View {
                                 AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                 NSApplication.shared.restart()
                             } else {
-                                do {
-                                    try viewModel.login(email, password, twofactor)
-                                } catch {
-                                    switch error {
-                                    case DiscordLoginErrors.invalidForm:
-                                        self.error = "Invalid login and/or password"
-                                    default:
-                                        self.error = "An error occured"
-                                    }
-                                }
+                                try? viewModel?.login(email, password, twofactor)
                             }
                             print("logging in")
                         }
@@ -115,13 +111,14 @@ struct LoginView: View {
                         Spacer()
                         Button("Login") {
                             if let ticket = viewModel.ticket {
-                                Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                                                                                                                                 token: AccordCoreVars.token,
-                                                                                                                                                 bodyObject: ["code": twofactor, "ticket": ticket],
-                                                                                                                                                 type: .POST,
-                                                                                                                                                 discordHeaders: true,
-                                                                                                                                                 json: true))
-                                { value, error in
+                                Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(
+                                    userAgent: discordUserAgent,
+                                    token: AccordCoreVars.token,
+                                    bodyObject: ["code": twofactor, "ticket": ticket],
+                                    type: .POST,
+                                    discordHeaders: true,
+                                    json: true
+                                )) { value, error in
                                     if let token = value?.token {
                                         KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
                                         AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -152,13 +149,15 @@ struct LoginView: View {
                                     NSApplication.shared.restart()
                                 }
                                 if let response = response, let ticket = response.ticket {
-                                    Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(userAgent: discordUserAgent,
-                                                                                                                                                     contentType: "application/json",
-                                                                                                                                                     token: AccordCoreVars.token,
-                                                                                                                                                     bodyObject: ["code": twofactor, "ticket": ticket],
-                                                                                                                                                     type: .POST,
-                                                                                                                                                     discordHeaders: true,
-                                                                                                                                                     json: true))
+                                    Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/mfa/totp"), headers: Headers(
+                                        userAgent: discordUserAgent,
+                                        contentType: "application/json",
+                                        token: AccordCoreVars.token,
+                                        bodyObject: ["code": twofactor, "ticket": ticket],
+                                        type: .POST,
+                                        discordHeaders: true,
+                                        json: true
+                                    ))
                                     { value, _ in
                                         if let token = value?.token {
                                             KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
@@ -191,11 +190,10 @@ final class LoginViewViewModel: ObservableObject {
     @Published var captchaVCKey: String?
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
-
+    @Published var loginError: Error? = nil
     init() {}
 
     func login(_ email: String, _ password: String, _: String) throws {
-        var loginError: Error?
         Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
             contentType: "application/json",
@@ -206,14 +204,14 @@ final class LoginViewViewModel: ObservableObject {
             type: .POST,
             discordHeaders: true,
             json: true
-        )) { response, error in
+        )) { [weak self] response, error in
             if let response = response {
                 if let error = response.message {
                     switch error {
                     case "Invalid Form Body":
-                        loginError = DiscordLoginErrors.invalidForm
+                        self?.loginError = DiscordLoginErrors.invalidForm
                     default:
-                        loginError = DiscordLoginErrors.invalidForm
+                        self?.loginError = DiscordLoginErrors.invalidForm
                     }
                 }
                 if let checktoken = response.token {
@@ -229,23 +227,20 @@ final class LoginViewViewModel: ObservableObject {
                 } else {
                     if let captchaKey = response.captcha_sitekey {
                         DispatchQueue.main.async {
-                            self.captchaVCKey = captchaKey
-                            captchaPublicKey = self.captchaVCKey!
-                            self.state = .captcha
+                            self?.captchaVCKey = captchaKey
+                            captchaPublicKey = captchaKey
+                            self?.state = .captcha
                         }
                     } else if let ticket = response.ticket {
-                        self.state = .twofactor
-                        self.ticket = ticket
+                        self?.state = .twofactor
+                        self?.ticket = ticket
                         print("[Login debug] Got ticket")
                     }
                 }
             } else if let error = error {
                 print(error)
-                loginError = error
+                self?.loginError = error
             }
-        }
-        if let loginError = loginError {
-            throw loginError
         }
     }
 }

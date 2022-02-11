@@ -70,6 +70,22 @@ struct AccordApp: App {
                         }
                         .sheet(isPresented: $popup, onDismiss: {}) {
                             SearchView()
+                                .focusable()
+                                .touchBar {
+                                    Button(action: {
+                                        popup.toggle()
+                                    }) {
+                                        Image(systemName: "magnifyingglass")
+                                    }
+                                }
+                        }
+                        .focusable()
+                        .touchBar {
+                            Button(action: {
+                                popup.toggle()
+                            }) {
+                                Image(systemName: "magnifyingglass")
+                            }
                         }
                 }
             }

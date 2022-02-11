@@ -61,5 +61,8 @@ struct SearchView: View {
         }
         .frame(width: 400)
         .padding()
+        .onExitCommand {
+            self.presentationMode.wrappedValue.dismiss()
+        }
     }
 }
