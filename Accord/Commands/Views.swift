@@ -14,7 +14,7 @@ import SwiftUI
         @State var mainText: String = ""
         @State var arguments: [(label: String, text: String, type: String)] = [(label: "user", text: "", type: "user"), (label: "reason", text: "", type: "value")]
 
-        init() {}
+        init () {}
 
         var body: some View {
             HStack {

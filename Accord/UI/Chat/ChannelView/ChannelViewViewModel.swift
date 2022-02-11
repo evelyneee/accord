@@ -64,8 +64,9 @@ final class ChannelViewViewModel: ObservableObject {
             .store(in: &cancellable)
         wss.memberChunkSubject
             .receive(on: webSocketQueue)
-            .sink { [unowned self] msg in
+            .sink { [weak self] msg in
                 guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
+                guard let self = self else { return }
                 let allUsers: [GuildMember] = users.compactMap { $0 }
                 for person in allUsers {
                     DispatchQueue.main.async {

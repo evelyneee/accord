@@ -61,7 +61,7 @@ struct NSViewWrapper: NSViewRepresentable {
 /* Example plugin
  @objc open class AccordPlugin: NSObject {
 
-     override init() {
+     override init () {
      }
 
      open var body: NSView? = NSHostingView(rootView: MainView())

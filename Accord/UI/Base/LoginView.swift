@@ -203,7 +203,8 @@ final class LoginViewViewModel: ObservableObject {
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
     @Published var loginError: Error? = nil
-    init() {}
+    
+    init () {}
 
     func login(_ email: String, _ password: String, _: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "https://discord.com/api/v9/auth/login"), headers: Headers(
