@@ -16,7 +16,7 @@ class ExternalImages {
     }
     
     class func proxiedURL(appID: String, url: String) -> AnyPublisher<[RPCResponse], Error> {
-        return RequestPublisher.fetch([RPCResponse].self, url: URL(string: "https://discord.com/api/v9/applications/\(appID)/external-assets"), headers: Headers(
+        return RequestPublisher.fetch([RPCResponse].self, url: URL(string: "\(rootURL)/applications/\(appID)/external-assets"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
             bodyObject: ["urls": [url]],

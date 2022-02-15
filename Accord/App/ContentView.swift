@@ -63,7 +63,9 @@ struct ContentView: View {
                             }
                             username = d.user.username
                             discriminator = d.user.discriminator
-                            self.serverListView = ServerListView(full: d)
+                            DispatchQueue.main.async {
+                                self.serverListView = ServerListView(full: d)
+                            }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation {
                                     loaded = true
@@ -71,7 +73,6 @@ struct ContentView: View {
                             }
                         }
                         .store(in: &wsCancellable)
-                    print("init")
                     wss = new
                 } catch {
                     print(error)
@@ -79,7 +80,9 @@ struct ContentView: View {
                     do {
                         let data = try Data(contentsOf: path)
                         let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                        self.serverListView = ServerListView(full: structure.d)
+                        DispatchQueue.main.async {
+                            self.serverListView = ServerListView(full: structure.d)
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             withAnimation {
                                 loaded = true

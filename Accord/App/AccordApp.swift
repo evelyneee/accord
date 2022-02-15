@@ -40,9 +40,7 @@ struct AccordApp: App {
                             }
                             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
                                 granted, error in
-                                if granted {
-                                    print("lol")
-                                } else {
+                                if !granted {
                                     print(error)
                                 }
                             }
@@ -107,16 +105,13 @@ struct AccordApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func onWakeNote(note _: NSNotification) {
         print("hi")
-        if wss != nil {
-            concurrentQueue.async {
-                wss.reset()
-            }
+        concurrentQueue.async {
+            wss?.reset()
         }
     }
 
     @objc func onSleepNote(note _: NSNotification) {
-        guard wss != nil else { return }
-        wss.close(.protocolCode(.protocolError))
+        wss?.close(.protocolCode(.protocolError))
     }
 
     func fileNotifications() {

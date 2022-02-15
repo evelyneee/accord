@@ -58,13 +58,14 @@ struct GuildView: View {
                             channel.read_state?.last_message_id = channel.last_message_id
                         }
                     })
-                        .contextMenu {
-                            Button(action: {
-                                showWindow(channel)
-                            }) {
-                                Text("Open in new window")
-                            }
+                    .contextMenu {
+                        Button(action: {
+                            showWindow(channel)
+                        }) {
+                            Text("Open in new window")
                         }
+                    }
+                    .animation(nil, value: UUID())
                 }
             }
         }
@@ -149,7 +150,6 @@ struct ServerListViewCell: View {
             if let readState = channel?.read_state, readState.mention_count != 0 {
                 readStateDot
             }
-
         }
     }
 }

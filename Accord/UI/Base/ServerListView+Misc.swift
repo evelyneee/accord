@@ -39,7 +39,8 @@ extension ServerListView {
         full?.guilds.enumerated().forEach { index, _guild in
             var guild = _guild
             guild.channels = guild.channels?.sorted { ($0.type.rawValue, $0.position ?? 0, $0.id) < ($1.type.rawValue, $1.position ?? 0, $1.id) }
-            guard let rejects = guild.channels?.filter({ $0.parent_id == nil && $0.type != .section }),
+            guard let rejects = guild.channels?
+                    .filter({ $0.parent_id == nil && $0.type != .section }),
                   let parents: [Channel] = guild.channels?.filter({ $0.type == .section }),
                   let sections = Array(NSOrderedSet(array: parents)) as? [Channel] else { return }
             var sectionFormatted = [Channel]()

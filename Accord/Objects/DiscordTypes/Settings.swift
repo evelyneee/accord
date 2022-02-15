@@ -43,7 +43,15 @@ final class GuildFolder: Decodable, Hashable {
     var name: String?
     var color: Int?
     var guild_ids: [String]
-    @DefaultEmptyArray var guilds: [Guild]
+    @DefaultEmptyArray
+    var guilds: [Guild]
+    
+    var unreadMessages: Bool {
+        return self.guilds
+            .map { Accord.unreadMessages(guild: $0) }
+            .contains(true)
+    }
+    
     func hash(into hasher: inout Hasher) {
         hasher.combine(guild_ids)
     }

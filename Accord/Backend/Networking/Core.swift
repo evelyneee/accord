@@ -11,7 +11,7 @@ final class NetworkCore {
     static var shared = NetworkCore()
     private(set) var connected = true
     init () {
-        let url = URL(string: "https://discord.com/api/v9/gateway")!
+        let url = URL(string: "\(rootURL)/gateway")!
         let data = try? Data(contentsOf: url)
         connected = data != nil
     }

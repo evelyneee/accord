@@ -41,6 +41,8 @@
 		9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D2F279B69D7008FAF15 /* Storage.swift */; };
 		9E7E4D32279BA105008FAF15 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D31279BA105008FAF15 /* Core.swift */; };
 		9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7E4D33279C7E2F008FAF15 /* AsyncMarkdown.swift */; };
+		9E82874D27BB515F00953A7B /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E82874C27BB515F00953A7B /* FolderListView.swift */; };
+		9E82874F27BB522600953A7B /* ServerListView+Init.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E82874E27BB522600953A7B /* ServerListView+Init.swift */; };
 		9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA52773FC9C00A77600 /* Queues.swift */; };
 		9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA72774037F00A77600 /* MentionsView.swift */; };
 		9EA295212753D1490014927D /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA295202753D1480014927D /* MemberList.swift */; };
@@ -160,6 +162,8 @@
 		9E7E4D2F279B69D7008FAF15 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		9E7E4D31279BA105008FAF15 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
 		9E7E4D33279C7E2F008FAF15 /* AsyncMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncMarkdown.swift; sourceTree = "<group>"; };
+		9E82874C27BB515F00953A7B /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
+		9E82874E27BB522600953A7B /* ServerListView+Init.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Init.swift"; sourceTree = "<group>"; };
 		9E8F8CA52773FC9C00A77600 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
 		9E8F8CA72774037F00A77600 /* MentionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionsView.swift; sourceTree = "<group>"; };
 		9EA295202753D1480014927D /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
@@ -507,6 +511,8 @@
 				A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */,
 				A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */,
 				9E6470662741B9960026686C /* GuildView.swift */,
+				9E82874C27BB515F00953A7B /* FolderListView.swift */,
+				9E82874E27BB522600953A7B /* ServerListView+Init.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -699,7 +705,9 @@
 				9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */,
 				9E6470672741B9960026686C /* GuildView.swift in Sources */,
 				A8B1F29626CB163B00E8FDC5 /* User.swift in Sources */,
+				9E82874D27BB515F00953A7B /* FolderListView.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
+				9E82874F27BB522600953A7B /* ServerListView+Init.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */,
 				9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */,
@@ -921,7 +929,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accordbeta;
@@ -958,7 +966,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accordbeta;

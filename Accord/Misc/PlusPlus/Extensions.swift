@@ -10,9 +10,6 @@ import Combine
 import Foundation
 import SwiftUI
 
-// I have made this typo too many times
-typealias Amy = Any
-
 public var doNothing: (Any) -> Void = { _ in }
 
 @propertyWrapper
@@ -180,6 +177,7 @@ struct Folder<Content: View>: View {
                 }
             }
         }
+        .frame(width: 45)
     }
 }
 

@@ -171,18 +171,28 @@ struct MessageCellView: View {
             Button("Delete") { [weak message] in
                 message?.delete()
             }
-            Button("Copy") { [weak message] in
+            Button("Show profile") {
+                popup.toggle()
+            }
+            Button("Copy message text") { [weak message] in
                 guard let content = message?.content else { return }
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(content, forType: .string)
             }
-            Button("Copy Message Link") { [weak message] in
+            Button("Copy message link") { [weak message] in
                 guard let channelID = message?.channel_id, let id = message?.id else { return }
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)", forType: .string)
             }
-            Button("Show profile") {
-                popup.toggle()
+            Button("Copy user ID") { [weak message] in
+                guard let id = message?.author?.id else { return }
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(id, forType: .string)
+            }
+            Button("Copy message ID") { [weak message] in
+                guard let id = message?.id else { return }
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(id, forType: .string)
             }
         }
         .id(message.id)

@@ -67,8 +67,11 @@ extension Gateway {
     }
 
     func reset(function: String = #function) {
-        print("resetting from function", function)
-        close(.protocolCode(.protocolError))
+        print("resetting from function", function, wss.connection?.state as Any)
+
+        if let state = wss.connection?.state, case NWConnection.State.failed = state {
+            close(.protocolCode(.protocolError))
+        }
         concurrentQueue.async {
             guard let new = try? Gateway(url: Gateway.gatewayURL, session_id: wss.sessionID, seq: wss.seq) else { return }
             wss = new

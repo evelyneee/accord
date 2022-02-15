@@ -27,10 +27,12 @@ struct EmbedView: View, Equatable {
                     HStack {
                         if let iconURL = author.proxy_icon_url {
                             Attachment(iconURL, size: CGSize(width: 24, height: 24))
+                                .equatable()
                                 .frame(width: 24, height: 24)
                                 .clipShape(Circle())
                         } else if let iconURL = author.icon_url {
                             Attachment(iconURL, size: CGSize(width: 24, height: 24))
+                                .equatable()
                                 .frame(width: 24, height: 24)
                                 .clipShape(Circle())
                         }
@@ -55,18 +57,20 @@ struct EmbedView: View, Equatable {
                 }
                 if let image = embed?.image {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
+                        .equatable()
                         .cornerRadius(5)
-                        .frame(width: 250)
+                        .frame(maxWidth: 250)
                 }
                 if let video = embed?.video, let urlString = video.proxy_url ?? video.url, let url = URL(string: urlString) {
-                    VideoPlayer(player: AVPlayer(url: url))
+                    VideoPlayerController(url: url)
                         .cornerRadius(5)
-                        .frame(width: 250)
+                        .frame(maxWidth: 250)
                 }
                 if let thumbnail = embed?.thumbnail {
                     Attachment(thumbnail.url, size: CGSize(width: thumbnail.width ?? 400, height: thumbnail.width ?? 300))
+                        .equatable()
                         .cornerRadius(5)
-                        .frame(width: 250)
+                        .frame(maxWidth: 250)
                 }
                 if let fields = embed?.fields {
                     LazyVGrid(columns: columns, alignment: .leading) {

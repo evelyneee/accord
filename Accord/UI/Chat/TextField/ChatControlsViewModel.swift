@@ -165,7 +165,7 @@ final class ChatControlsViewModel: ObservableObject {
 
     func type(channelID: String, guildID: String) {
         guard !silentTyping else { return }
-        Request.ping(url: URL(string: "https://discord.com/api/v9/channels/\(channelID)/typing"), headers: Headers(
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/typing"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
             type: .POST,

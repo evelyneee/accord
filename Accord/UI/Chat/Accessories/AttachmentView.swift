@@ -22,7 +22,7 @@ struct AttachmentView: View {
                     } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
                         VideoPlayer(player: AVPlayer.init(url: url))
                             .cornerRadius(5)
-                            .frame(minWidth: 300, minHeight: 300)
+                            .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
                             .onDisappear {
                                 print("goodbye")
                             }

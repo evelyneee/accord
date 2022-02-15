@@ -137,7 +137,7 @@ struct ChatControls: View {
                                         }
                                     }
                                 }
-                                .task {
+                                .onAppear {
                                     self.focusedField = .mainTextField
                                 }
                         } else {

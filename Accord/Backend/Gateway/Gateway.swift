@@ -234,7 +234,7 @@ final class Gateway {
                         }
                         print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
                         self?.sessionID = structure.d.session_id
-                        print(structure.d.session_id)
+                        print("Connected with session ID", structure.d.session_id)
                         promise(.success(structure.d))
                         return
                     } catch {
