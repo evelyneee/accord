@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SearchView: View {
     @State var text: String = ""
-    @State var results = [Channel]()
+    @State var results: [Channel] = .init()
     @Environment(\.presentationMode) var presentationMode
     var matches: [Channel] {
         var matches: [Channel] = Array(Array(Array(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels?.filter { $0.name?.lowercased().contains(text.lowercased()) ?? true } } }).joined()).joined())
@@ -38,10 +38,12 @@ struct SearchView: View {
                         HStack {
                             if let icon = channel.guild_icon {
                                 Attachment(iconURL(channel.guild_id, icon))
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 19, height: 19)
                             } else if channel.recipients?.count == 1 {
                                 Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar))
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 19, height: 19)
                             }

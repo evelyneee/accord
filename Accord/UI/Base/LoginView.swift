@@ -59,7 +59,6 @@ struct LoginView: View {
                     TextField("Token (optional)", text: $token)
                     TextField("Proxy IP (optional)", text: $proxyIP)
                     TextField("Proxy Port (optional)", text: $proxyPort)
-                    #warning("TODO: test this")
                     if let error = viewModel.loginError {
                         switch error {
                         case DiscordLoginErrors.invalidForm:

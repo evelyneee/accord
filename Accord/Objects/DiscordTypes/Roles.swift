@@ -30,4 +30,5 @@ struct Role: Codable {
     var name: String
     var color: Int?
     var position: Int
+    var permissions: String?
 }

@@ -187,7 +187,7 @@ final class Gateway {
                     "release_channel": "stable",
                     "client_build_number": dscVersion,
                     "client_version": "0.0.264",
-                    "os_version": NSWorkspace.kernelVersion,
+                    "os_version": NSWorkspace.shared.kernelVersion,
                     "os_arch": "x64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
                 ],
@@ -242,10 +242,6 @@ final class Gateway {
                         wss.hardReset()
                         return
                     }
-                case .cont:
-                    break
-                case .binary:
-                    break
                 case .close:
                     if let closeMessage = String(data: data, encoding: .utf8) {
                         print("Closed with #\(closeMessage)#")
@@ -258,12 +254,12 @@ final class Gateway {
                     } else {
                         print("Closed with unknown close code")
                     }
-                case .ping:
-                    break
-                case .pong:
-                    break
+                case .cont: break
+                case .binary: break
+                case .ping: print("ping")
+                case .pong:  print("pong")
                 @unknown default:
-                    fatalError()
+                    break
                 }
             }
         }
@@ -345,9 +341,26 @@ final class Gateway {
                 "guild_id": guild,
             ],
         ]
-        try? send(json: packet)
+        try send(json: packet)
     }
 
+    public func getCommands(guildID: String, commandIDs: [String] = [], limit: Int = 10) throws {
+        let packet: [String: Any] = [
+            "op": 24,
+            "d": [
+                "applications": true,
+                "command_ids": commandIDs,
+                "guild_id": guildID,
+                "limit":limit,
+                "locale":NSNull(),
+                "nonce":generateFakeNonce(),
+                "offset":0,
+                "type":1
+            ],
+        ]
+        try send(json: packet)
+    }
+    
     // cleanup
     deinit {
         self.heartbeatTimer = nil

@@ -9,14 +9,9 @@ import AppKit
 import AVKit
 import SwiftUI
 
-struct ChannelView: View, Equatable {
-    // MARK: - Equatable protocol
+struct ChannelView: View {
 
-    static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
-        lhs.viewModel.messages == rhs.viewModel.messages
-    }
-
-    @ObservedObject var viewModel: ChannelViewViewModel
+    @StateObject var viewModel: ChannelViewViewModel
 
     var guildID: String
     var channelID: String
@@ -40,22 +35,22 @@ struct ChannelView: View, Equatable {
     @State var mentions: Bool = false
 
     @State var memberListShown: Bool = false
-    @State var memberList = [OPSItems]()
+    @State var memberList: [OPSItems] = .init()
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
     
     @State var editing: String? = nil
     
-    @AppStorage("MetalRenderer") var metalRenderer: Bool = false
+    @AppStorage("MetalRenderer")
+    var metalRenderer: Bool = false
 
     // MARK: - init
-
     init(_ channel: Channel, _ guildName: String? = nil) {
         guildID = channel.guild_id ?? "@me"
         channelID = channel.id
         channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
-        viewModel = ChannelViewViewModel(channelID: channelID, guildID: guildID)
+        _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
         if DiscordDesktopRPCEnabled {
             DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
@@ -68,7 +63,7 @@ struct ChannelView: View, Equatable {
                     Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
                     ForEach(viewModel?.messages ?? [], id: \.identifier) { message in
                         if let author = message.author {
-                            MessageCellView(
+                            MessageCellView (
                                 message: message,
                                 nick: viewModel?.nicks[author.id],
                                 replyNick: viewModel?.nicks[message.referenced_message?.author?.id ?? ""],
@@ -83,7 +78,9 @@ struct ChannelView: View, Equatable {
                             .onAppear {
                                 if (viewModel?.messages.count ?? 0) >= 50 {
                                     if message == viewModel?.messages[viewModel!.messages.count - 2] {
-                                        viewModel?.loadMoreMessages()
+                                        messageFetchQueue.async {
+                                            viewModel?.loadMoreMessages()
+                                        }
                                     }
                                 }
                             }
@@ -113,19 +110,18 @@ struct ChannelView: View, Equatable {
         .onAppear {
             guard wss != nil else { return MentionSender.shared.deselect() }
             wss.typingSubject
+                .receive(on: webSocketQueue)
                 .sink { [weak viewModel] msg, channelID in
                     guard channelID == self.channelID else { return }
-                    webSocketQueue.async {
-                        guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                              memberDecodable.user_id != AccordCoreVars.user?.id else { return }
-                        let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member?.nick ?? memberDecodable.member?.user.username ?? "Unknown User"
-                        if !(typing.contains(isKnownAs)) {
-                            typing.append(isKnownAs)
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                            guard !(typing.isEmpty) else { return }
-                            typing.removeLast()
-                        }
+                    guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
+                          memberDecodable.user_id != AccordCoreVars.user?.id else { return }
+                    let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member?.nick ?? memberDecodable.member?.user.username ?? "Unknown User"
+                    if !(typing.contains(isKnownAs)) {
+                        typing.append(isKnownAs)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        guard !(typing.isEmpty) else { return }
+                        typing.removeLast()
                     }
                 }
                 .store(in: &viewModel.cancellable)
@@ -136,9 +132,6 @@ struct ChannelView: View, Equatable {
                     }
                 }
                 .store(in: &viewModel.cancellable)
-        }
-        .onDisappear { [weak viewModel] in
-            viewModel?.cancellable.invalidateAll()
         }
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { data, _ in
@@ -210,6 +203,7 @@ struct MemberListView: View {
         List(list.compactMap(\.member), id: \.user.id) { ops in
             HStack {
                 Attachment(pfpURL(ops.user.id, ops.user.avatar, "24"))
+                    .equatable()
                     .frame(width: 33, height: 33)
                     .clipShape(Circle())
                 VStack(alignment: .leading) {

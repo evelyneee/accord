@@ -133,7 +133,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var popover = NSPopover()
     var statusBarItem: NSStatusItem?
-
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        wss.close(.protocolCode(.noStatusReceived))
+    }
+    
     func applicationDidFinishLaunching(_: Notification) {
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
 

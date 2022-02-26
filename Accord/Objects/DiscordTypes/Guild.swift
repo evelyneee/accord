@@ -20,7 +20,6 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // var discovery_splash: String?
     var owner: Bool?
     var owner_id: String
-    // var permissions: String?
     // var region: String?
     // var afk_channel_id: String?
     // var afk_timeout: Int
@@ -70,9 +69,17 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
     // var stickers: [Sticker]?
+    
     var index: Int?
-
+    var mergedMember: MergedMember?
+    var guildPermissions: String?
+    
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+    
+    struct MergedMember: Decodable {
+        var hoisted_role: String?
+        var nick: String?
     }
 }

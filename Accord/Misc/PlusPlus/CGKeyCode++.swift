@@ -233,14 +233,14 @@ extension CGKeyCode
     static public func beginListener(for keys: [CGKeyCode]) {
         if Thread.isMainThread {
             DispatchQueue(label: "AccordKeyListener\(keys.compactMap(\.stringRepresentation).joined(separator: ","))").async {
-                var previouslySent = [String?]()
+                var previouslySent: [String?] = .init()
                 while true {
                     if stop {
                         print("stopping")
                         self.stop = false
                         break
                     }
-                    var array = [String?]()
+                    var array: [String?] = .init()
                     for key in keys {
                         if key.isPressed {
                             array.append(key.stringRepresentation)
@@ -256,14 +256,14 @@ extension CGKeyCode
                 }
             }
         } else {
-            var previouslySent = [String?]()
+            var previouslySent: [String?] = .init()
             while true {
                 if stop {
                     print("stopping")
                     self.stop = false
                     break
                 }
-                var array = [String?]()
+                var array: [String?] = .init()
                 for key in keys {
                     if key.isPressed {
                         array.append(key.stringRepresentation)

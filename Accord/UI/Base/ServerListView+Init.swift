@@ -9,50 +9,68 @@ import Foundation
 import SwiftUI
 
 extension ServerListView {
-    init(full: GatewayD?) {
-        var full = full
-        status = full?.user_settings?.status
+    
+    // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
+    init(_ readyPacket: GatewayD) {
+        
+        // Set status for the indicator
+        status = readyPacket.user_settings?.status
+        
+        // If there are no folders there's nothing to do
         guard Self.folders.isEmpty else {
             return
         }
-        MediaRemoteWrapper.status = full?.user_settings?.status
+        
+        // Bind the merged member objects to the guilds
+        readyPacket.guilds.enumerated().forEach { index, guild in
+            readyPacket.guilds[index].mergedMember = readyPacket.merged_members[safe: index]?.first
+            
+            // Bind permissions
+            if let role = readyPacket.guilds[index].roles?.filter( { $0.id == readyPacket.merged_members[safe: index]?.first?.hoisted_role } ).first {
+                readyPacket.guilds[index].guildPermissions = role.permissions
+            }
+        }
+        
+        // Set presence
+        MediaRemoteWrapper.status = readyPacket.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
-                name: full?.user_settings?.custom_status?.emoji_name ?? "",
-                id: full?.user_settings?.custom_status?.emoji_id ?? "",
+                name: readyPacket.user_settings?.custom_status?.emoji_name ?? "",
+                id: readyPacket.user_settings?.custom_status?.emoji_id ?? "",
                 animated: false
             ),
             name: "Custom Status",
             type: 4
         )
-        Emotes.emotes = full?.guilds
+        
+        // Save the emotes for easy access
+        Emotes.emotes = readyPacket.guilds
             .map { ["\($0.id)$\($0.name ?? "Unknown Guild")": $0.emojis] }
             .flatMap { $0 }
             .reduce([String: [DiscordEmote]]()) { dict, tuple in
                 var nextDict = dict
                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                 return nextDict
-            } ?? [:]
-        order(full: &full)
-        var guildOrder = full?.user_settings?.guild_positions ?? []
-        var folderTemp = full?.user_settings?.guild_folders ?? []
-        full?.guilds.forEach { guild in
+            }
+                
+        // Order the channels
+        readyPacket.assignReadStates()
+        readyPacket.order()
+        var guildOrder = readyPacket.user_settings?.guild_positions ?? []
+        var folderTemp = readyPacket.user_settings?.guild_folders ?? []
+        
+        // Create a folder for every guild outside folders
+        readyPacket.guilds.forEach { guild in
             if !guildOrder.contains(guild.id) {
                 guildOrder.insert(guild.id, at: 0)
                 folderTemp.insert(GuildFolder(name: nil, color: nil, guild_ids: [guild.id]), at: 0)
             }
         }
-        let messageDict = full?.guilds.enumerated().compactMap { index, element in
-            [element.id: index]
-        }.reduce(into: [:]) { result, next in
-            result.merge(next) { _, rhs in rhs }
-        } ?? [:]
-        let guildTemp = guildOrder.compactMap { messageDict[$0] }.compactMap { full?.guilds[$0] }
-        let guildDict = guildTemp.enumerated().compactMap { index, element in
-            [element.id: index]
-        }.reduce(into: [:]) { result, next in
-            result.merge(next) { _, rhs in rhs }
-        }
+        
+        // Form the folders and fix the guild objects
+        let guildKeyMap = readyPacket.guilds.generateKeyMap()
+        let guildTemp = guildOrder.compactMap { guildKeyMap[$0] }.compactMap { readyPacket.guilds[$0] }
+        let guildDict = guildTemp.generateKeyMap()
         for folder in folderTemp {
             for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
                 var guild = guildTemp[id]
@@ -66,16 +84,21 @@ extension ServerListView {
                 folder.guilds.append(guild)
             }
         }
+        
+        // Remove empty folders
         Self.folders = folderTemp
             .filter { !$0.guilds.isEmpty }
-        assignReadStates(full: &full)
-        Self.readStates = full?.read_state?.entries ?? []
-        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(full?.guilds.first?.id ?? "")")
+        
+        // Put the read states for access for the private channels
+        Self.readStates = readyPacket.read_state?.entries ?? []
+        
+        // Guild selection
+        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(readyPacket.guilds.first?.id ?? "")")
         concurrentQueue.async {
-            guard let guilds = full?.guilds else { return }
-            roleColors = RoleManager.arrangeRoleColors(guilds: guilds)
+            roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
         }
+        
+        // Remote control now switched on
         MentionSender.shared.delegate = self
     }
-
 }

@@ -13,15 +13,16 @@ extension ServerListView {
     struct FolderListView: View {
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
+        @StateObject var updater: ServerListView.UpdateView
         var body: some View {
             ForEach(ServerListView.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
                     HStack {
                         Circle()
                             .fill()
-                            .foregroundColor(Color.white)
+                            .foregroundColor(Color.primary)
                             .frame(width: 5, height: 5)
-                            .if(!folder.unreadMessages, transform: { $0.opacity(0) })
+                            .opacity(folder.unreadMessages ? 1 : 0)
                         Folder(icon: Array(folder.guilds.prefix(4)), color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor) {
                             ForEach(folder.guilds, id: \.hashValue) { guild in
                                 ZStack(alignment: .bottomTrailing) {
@@ -53,9 +54,9 @@ extension ServerListView {
                                         HStack {
                                             Circle()
                                                 .fill()
-                                                .foregroundColor(Color.white)
+                                                .foregroundColor(Color.primary)
                                                 .frame(width: 5, height: 5)
-                                                .if(!unreadMessages(guild: guild), transform: { $0.opacity(0) })
+                                                .opacity(unreadMessages(guild: guild) ? 1 : 0)
                                             Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
                                                 .frame(width: 45, height: 45)
                                                 .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
@@ -108,9 +109,9 @@ extension ServerListView {
                                 HStack {
                                     Circle()
                                         .fill()
-                                        .foregroundColor(Color.white)
+                                        .foregroundColor(Color.primary)
                                         .frame(width: 5, height: 5)
-                                        .if(!unreadMessages(guild: guild), transform: { $0.opacity(0) })
+                                        .opacity(unreadMessages(guild: guild) ? 1 : 0)
                                     Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
                                         .frame(width: 45, height: 45)
                                         .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)

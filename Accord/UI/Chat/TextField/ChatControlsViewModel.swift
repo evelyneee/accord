@@ -11,12 +11,14 @@ import Foundation
 import SwiftUI
 
 final class ChatControlsViewModel: ObservableObject {
-    @Published var matchedUsers = [String:String]()
-    @Published var matchedChannels = [Channel]()
-    @Published var matchedEmoji = [DiscordEmote]()
-    @Published var textFieldContents: String = ""
+    @Published var matchedUsers: [String:String] = .init()
+    @Published var matchedChannels: [Channel] = .init()
+    @Published var matchedEmoji: [DiscordEmote] = .init()
+    @Published var matchedCommands: [SlashCommandStorage.Command] = .init()
+    @Published var textFieldContents: String = .init()
     @Published var percent: String? = nil
     var observation: NSKeyValueObservation?
+    var command: SlashCommandStorage.Command?
 
     weak var textField: NSTextField?
     var currentValue: String?
@@ -29,21 +31,27 @@ final class ChatControlsViewModel: ObservableObject {
         let channels = textFieldContents.matches(for: #"(?<=#)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
-        if let search = mentions.first {
+        if let search = mentions.last {
             let matched = Storage.usernames.filter { $0.value.lowercased().contains(search.lowercased()) }
             DispatchQueue.main.async {
                 self.matchedUsers = matched
             }
-        } else if let search = channels.first {
+        } else if let search = channels.last {
             let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
             let joined: [Channel] = Array(Array(Array(matches).joined()).joined()).filter { $0.guild_id == guildID }
             DispatchQueue.main.async {
                 self.matchedChannels = joined
             }
-        } else if !(slashes.isEmpty) {
-            // TODO: Slash command implementation here
-        } else if let key = emoji.first {
+        } else if let command = slashes.last {
+            let commands = SlashCommandStorage.commands[guildID]?.filter { $0.name.lowercased().contains(command) }
+            DispatchQueue.main.async {
+                if self.command == nil {
+                    self.matchedCommands = commands ?? []
+                }
+            }
+        } else if let key = emoji.last {
             let matched: [DiscordEmote] = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased().contains(key) }
+            print(Emotes.emotes)
             DispatchQueue.main.async {
                 self.matchedEmoji = matched
             }
@@ -77,17 +85,11 @@ final class ChatControlsViewModel: ObservableObject {
     }
     
     func send(text: String, guildID: String, channelID: String) {
-        DispatchQueue.main.sync {
-            self.textFieldContents = ""
-        }
-        DispatchQueue.main.async {
-            // self.textField?.becomeFirstResponder()
-            // self.textField?.allowsEditingTextAttributes = true
-        }
+        self.emptyTextField()
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content": text],
+            bodyObject: ["content": text, "tts":false, "nonce":self.nonce],
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)",
@@ -96,18 +98,59 @@ final class ChatControlsViewModel: ObservableObject {
         ))
     }
     
+    func emptyTextField() {
+        if #available(macOS 12.0, *) {
+            DispatchQueue.main.async {
+                self.textFieldContents = ""
+            }
+        } else {
+            DispatchQueue.main.sync {
+                self.textFieldContents = ""
+            }
+        }
+    }
+    
+    func executeCommand(guildID: String, channelID: String) throws {
+        guard let command = self.command else { return }
+        var options: [[String:Any]] = []
+        if command.options?.count != 0 {
+            let args: [(key: String, value: Any)] = self.textFieldContents
+                .matches(for: #"(\S+):((?:(?! \S+:).)+)"#)
+                .compactMap { (arg) -> (key: String, value: Any)? in
+                    let components = arg.components(separatedBy: ":")
+                    if let key = components.first, let value = components.last {
+                        return (key: key, value: value)
+                    } else {
+                        return nil
+                    }
+                }
+            options = args.map { (arg) -> [String:Any] in
+                ["name":arg.key, "type":3, "value":arg.value]
+            }
+        }
+        
+        try SlashCommands.interact (
+            applicationID: command.application_id,
+            guildID: guildID,
+            channelID: channelID,
+            appVersion: command.version,
+            id: command.id,
+            dataType: 1,
+            appName: command.name,
+            appDescription: command.description,
+            options: command.options ?? [],
+            optionValues: options
+        )
+        self.matchedCommands.removeAll()
+        self.emptyTextField()
+    }
+    
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
-        DispatchQueue.main.sync {
-            self.textFieldContents = ""
-        }
-        DispatchQueue.main.async {
-            // self.textField?.becomeFirstResponder()
-            // self.textField?.allowsEditingTextAttributes = true
-        }
+        self.emptyTextField()
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id]],
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts":false, "nonce":self.nonce],
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channel_id)",
@@ -117,40 +160,17 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func send(text: String, file: URL, data: Data, channelID: String) {
-        DispatchQueue.main.sync {
-            self.textFieldContents = ""
-        }
-        DispatchQueue.main.async {
-            // self.textField?.becomeFirstResponder()
-            // self.textField?.allowsEditingTextAttributes = true
-        }
+        self.emptyTextField()
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let params: [String: String] = [
-            "content": String(text),
-        ]
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
-        var body = Data()
-        let boundaryPrefix = "--\(boundary)\r\n"
-        for key in params.keys {
-            body.append(string: boundaryPrefix, encoding: .utf8)
-            body.append(string: "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n", encoding: .utf8)
-            body.append(string: "\(params["content"]!)\r\n", encoding: .utf8)
-        }
-        body.append(string: boundaryPrefix, encoding: .utf8)
-        let mimeType = file.mimeType()
-        body.append(string: "Content-Disposition: form-data; name=\"file\"; filename=\"\(file.pathComponents.last ?? "file.txt")\"\r\n", encoding: .utf8)
-        body.append(string: "Content-Type: \(mimeType) \r\n\r\n", encoding: .utf8)
-        body.append(data)
-        body.append(string: "\r\n", encoding: .utf8)
-        body.append(string: "--".appending(boundary.appending("--")), encoding: .utf8)
-        request.httpBody = body
+        guard let string = try? ["content":text].jsonString() else { return }
+        request.httpBody = try? Request.createMultipartBody(with: string, fileURL: file.absoluteString, boundary: boundary)
         let task = URLSession.shared.dataTask(with: request)
         DispatchQueue.main.async {
             self.observation = task.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
-                print("updating")
                 DispatchQueue.main.async {
                     self?.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
                     if task.progress.isFinished {
@@ -173,4 +193,16 @@ final class ChatControlsViewModel: ObservableObject {
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
     }
+    
+    var nonce: String {
+        let date: Double = Date().timeIntervalSince1970
+        let nonceNumber = (Int(date)*1000 - 1420070400000) * 4194304
+        return String(nonceNumber)
+    }
+}
+
+func generateFakeNonce() -> String {
+    let date: Double = Date().timeIntervalSince1970
+    let nonceNumber = (Int(date)*1000 - 1420070400000) * 4194304
+    return String(nonceNumber)
 }

@@ -11,12 +11,12 @@ import SwiftUI
 import WebKit
 
 extension Button {
-    init(action: @escaping () throws -> Void, catch: @escaping () -> Void, label: @escaping () -> Label) {
+    init(action: @escaping () throws -> Void, catch: @escaping (_ error: Error?) -> Void, label: @escaping () -> Label) {
         self.init(action: {
             do {
                 try action()
-            } catch {
-                `catch`()
+            } catch let error {
+                `catch`(error)
             }
         }, label: label)
     }

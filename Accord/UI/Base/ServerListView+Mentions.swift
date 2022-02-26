@@ -17,6 +17,7 @@ extension ServerListView: MentionSenderDelegate {
                 Self.folders[i].guilds[v].channels?[index].read_state?.mention_count += 1
             }
         }
+        viewUpdater.updateView()
     }
 
     func deselect() {
@@ -29,6 +30,7 @@ extension ServerListView: MentionSenderDelegate {
             guard let index2 = index2 else { return }
             Self.folders[index1].guilds[index2].channels?.forEach { $0.read_state?.mention_count = 0 }
         }
+        viewUpdater.updateView()
     }
 
     func sendWSError(error _: Error) {

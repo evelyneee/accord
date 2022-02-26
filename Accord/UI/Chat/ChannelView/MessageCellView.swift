@@ -33,7 +33,8 @@ struct MessageCellView: View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
                 HStack { [unowned reply] in
-                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar, "16")).equatable()
+                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar, "16"))
+                        .equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
                     Text(replyNick ?? reply.author?.username ?? "")
@@ -59,7 +60,8 @@ struct MessageCellView: View {
                                 PopoverProfileView(user: message.author)
                             })
                     } else {
-                        Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar)).equatable()
+                        Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar))
+                            .equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
@@ -90,6 +92,7 @@ struct MessageCellView: View {
                             .padding(.leading, 41)
                         } else {
                             AsyncMarkdown(message.content)
+                                .equatable()
                                 .padding(.leading, 41)
                         }
                     } else {
@@ -127,6 +130,7 @@ struct MessageCellView: View {
                             }
                         } else {
                             AsyncMarkdown(message.content)
+                                .equatable()
                         }
                     }
                 }
@@ -137,6 +141,7 @@ struct MessageCellView: View {
                 ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
                     HStack(spacing: 4) {
                         Attachment("https://cdn.discordapp.com/emojis/\(reaction.emoji.id ?? "").png?size=16")
+                            .equatable()
                             .frame(width: 16, height: 16)
                         Text(String(reaction.count))
                             .fontWeight(Font.Weight.medium)
@@ -147,12 +152,14 @@ struct MessageCellView: View {
                     .padding(.leading, 41)
                 }
             }
-            ForEach(message.embeds ?? [], id: \.hashValue) { embed in
-                EmbedView(embed: embed).equatable()
+            ForEach(message.embeds ?? [], id: \.id) { embed in
+                EmbedView(embed: embed)
+                    .equatable()
                     .padding(.leading, 41)
             }
             ForEach(message.sticker_items ?? [], id: \.id) { sticker in
                 Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=160")
+                    .equatable()
                     .frame(width: 160, height: 160)
                     .cornerRadius(3)
                     .padding(.leading, 41)
@@ -171,28 +178,37 @@ struct MessageCellView: View {
             Button("Delete") { [weak message] in
                 message?.delete()
             }
+            Divider()
             Button("Show profile") {
                 popup.toggle()
             }
-            Button("Copy message text") { [weak message] in
-                guard let content = message?.content else { return }
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(content, forType: .string)
-            }
-            Button("Copy message link") { [weak message] in
-                guard let channelID = message?.channel_id, let id = message?.id else { return }
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? "@me")/\(channelID)/\(id)", forType: .string)
-            }
-            Button("Copy user ID") { [weak message] in
-                guard let id = message?.author?.id else { return }
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(id, forType: .string)
-            }
-            Button("Copy message ID") { [weak message] in
-                guard let id = message?.id else { return }
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(id, forType: .string)
+            Divider()
+            Group {
+                Button("Copy message text") { [weak message] in
+                    guard let content = message?.content else { return }
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(content, forType: .string)
+                }
+                Button("Copy message link") { [weak message] in
+                    guard let channelID = message?.channel_id, let id = message?.id else { return }
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? guildID ?? "@me")/\(channelID)/\(id)", forType: .string)
+                }
+                Button("Copy user ID") { [weak message] in
+                    guard let id = message?.author?.id else { return }
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(id, forType: .string)
+                }
+                Button("Copy message ID") { [weak message] in
+                    guard let id = message?.id else { return }
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(id, forType: .string)
+                }
+                Button("Copy username and tag", action: { [weak message] in
+                    guard let author = message?.author else { return }
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("\(author.username)#\(author.discriminator)", forType: .string)
+                })
             }
         }
         .id(message.id)

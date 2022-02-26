@@ -9,6 +9,26 @@ import AVKit
 import Combine
 import SwiftUI
 
+func frameSize(width: CGFloat, height: CGFloat, originalWidth: Int?, originalHeight: Int?) -> (CGFloat, CGFloat) {
+    guard let widthInt = originalWidth,
+          let heighthInt = originalHeight else { return (width, height) }
+    let originalWidth = CGFloat(widthInt)
+    let originalHeight = CGFloat(heighthInt)
+    let max: CGFloat = max(width, height)
+    if originalWidth > originalHeight {
+        return (max, originalHeight / originalWidth * max)
+    } else {
+        return (originalWidth / originalHeight * max, max)
+    }
+}
+
+public extension View {
+    func maxFrame(width: CGFloat, height: CGFloat, originalWidth: Int?, originalHeight: Int?) -> some View {
+        let size = frameSize(width: width, height: height, originalWidth: originalWidth, originalHeight: originalHeight)
+        return frame(width: size.0, height: size.1)
+    }
+}
+
 struct AttachmentView: View {
     var media: [AttachedFiles]
     var body: some View {
@@ -18,9 +38,9 @@ struct AttachmentView: View {
                     if obj.content_type?.prefix(6).stringLiteral == "image/" {
                         Attachment(obj.url, size: CGSize(width: 350, height: 350)).equatable()
                             .cornerRadius(5)
-                            .frame(maxWidth: 350, maxHeight: 350)
+                            .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
-                        VideoPlayer(player: AVPlayer.init(url: url))
+                        VideoPlayerController(url: url)
                             .cornerRadius(5)
                             .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
                             .onDisappear {

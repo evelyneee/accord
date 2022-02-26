@@ -19,12 +19,12 @@ struct Attachment: View, Equatable {
         lhs.url == rhs.url
     }
 
-    @ObservedObject var imageLoader: ImageLoaderAndCache
+    @StateObject private var imageLoader: ImageLoaderAndCache
     var url: String
 
     init(_ url: String, size: CGSize? = nil) {
         self.url = url
-        imageLoader = ImageLoaderAndCache(imageURL: url, size: size)
+        _imageLoader = StateObject(wrappedValue: ImageLoaderAndCache(imageURL: url, size: size))
     }
 
     var body: some View {

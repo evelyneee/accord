@@ -51,17 +51,22 @@ struct EmbedView: View, Equatable {
                 if let description = embed?.description {
                     if #available(macOS 12.0, *) {
                         Text((try? AttributedString(markdown: description)) ?? AttributedString(description))
+                            .lineLimit(2)
                     } else {
                         Text(description)
+                            .lineLimit(2)
                     }
                 }
                 if let image = embed?.image {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
                         .equatable()
                         .cornerRadius(5)
-                        .frame(maxWidth: 250)
+                        .maxFrame(width: 400, height: 300, originalWidth: image.width ?? 0, originalHeight: image.height ?? 0)
                 }
-                if let video = embed?.video, let urlString = video.proxy_url ?? video.url, let url = URL(string: urlString) {
+                if let video = embed?.video,
+                    let urlString = video.proxy_url ?? video.url,
+                    let url = URL(string: urlString),
+                    !urlString.contains("youtube") {
                     VideoPlayerController(url: url)
                         .cornerRadius(5)
                         .frame(maxWidth: 250)
@@ -80,6 +85,7 @@ struct EmbedView: View, Equatable {
                                     .lineLimit(0)
                                     .font(.subheadline)
                                 AsyncMarkdown(field.value)
+                                    .equatable()
                             }
                         }
                     }

@@ -37,6 +37,7 @@ struct GuildView: View {
             }
             if let banner = guild.banner {
                 Attachment("https://cdn.discordapp.com/banners/\(guild.id)/\(banner).png")
+                    .equatable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .cornerRadius(10)
             }
@@ -46,12 +47,13 @@ struct GuildView: View {
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
+                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name)), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                         ServerListViewCell(channel: channel)
                     }
                     .buttonStyle(BorderlessButtonStyle())
-                    .if(channel.read_state?.last_message_id == channel.last_message_id, transform: { $0.foregroundColor(.secondary).opacity(0.5) })
-                    .if((channel.type == .guild_public_thread || channel.type == .guild_private_thread), transform: { $0.padding(.leading) })
+                    .foregroundColor(channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
+                    .opacity(channel.read_state?.last_message_id == channel.last_message_id ? 0.5 : 1)
+                    .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
                     .onChange(of: self.selection, perform: { _ in
                         if self.selection == Int(channel.id) {
                             channel.read_state?.mention_count = 0

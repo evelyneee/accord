@@ -15,7 +15,7 @@ final class Gif: NSImage {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let metadata = CGImageSourceCopyPropertiesAtIndex(source, 0, nil),
               let delayTime = ((metadata as NSDictionary)["{GIF}"] as? NSDictionary)?["DelayTime"] as? Double else { return nil }
-        var images = [NSImage]()
+        var images: [NSImage] = .init()
         let imageCount = CGImageSourceGetCount(source)
         let width = (metadata as NSDictionary)["PixelWidth"] as? Double
         let height = (metadata as NSDictionary)["PixelHeight"] as? Double

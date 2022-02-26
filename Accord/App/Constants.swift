@@ -45,6 +45,7 @@ public let vsCodeRPCAppID = "928861386140971078"
 
 enum Storage {
     static var usernames: [String: String] = [:]
+    static var bag = Set<AnyCancellable>()
 }
 
 final class AccordCoreVars {

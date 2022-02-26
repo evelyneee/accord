@@ -134,6 +134,7 @@ struct Folder<Content: View>: View {
                         HStack(spacing: 3) {
                             if let guild = icon.first, let icon = guild.icon {
                                 Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 16, height: 16)
                             } else {
@@ -141,6 +142,7 @@ struct Folder<Content: View>: View {
                             }
                             if let guild = icon[safe: 1], let icon = guild.icon {
                                 Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 16, height: 16)
                             } else {
@@ -150,6 +152,7 @@ struct Folder<Content: View>: View {
                         HStack(spacing: 3) {
                             if let guild = icon[safe: 2], let icon = guild.icon {
                                 Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 16, height: 16)
                             } else {
@@ -157,6 +160,7 @@ struct Folder<Content: View>: View {
                             }
                             if let guild = icon[safe: 3], let icon = guild.icon {
                                 Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 16, height: 16)
                             } else {
@@ -178,24 +182,6 @@ struct Folder<Content: View>: View {
             }
         }
         .frame(width: 45)
-    }
-}
-
-extension Collection where Self.Element: Identifiable {
-    subscript(id id: Self.Element.ID) -> Self.Element? {
-        enumerated().compactMap { _, element in
-            [element.id: element]
-        }.reduce(into: [Self.Element.ID: Self.Element]()) { result, next in
-            result.merge(next) { _, rhs in rhs }
-        }[id]
-    }
-
-    subscript(num num: Self.Element.ID) -> Int? {
-        enumerated().compactMap { index, element in
-            [element.id: index]
-        }.reduce(into: [Self.Element.ID: Int]()) { result, next in
-            result.merge(next) { _, rhs in rhs }
-        }[num]
     }
 }
 
@@ -318,32 +304,30 @@ extension DispatchQueue {
             }
         }
     }
-
-    @available(*, unavailable)
-    func asyncWithAnimation(_ perform: @escaping () -> Void) {
-        async {
-            withAnimation {
-                perform()
-            }
-        }
-    }
-
-    @available(*, unavailable)
-    func asyncAfterWithAnimation(deadline: DispatchTime, _ perform: @escaping () -> Void) {
-        asyncAfter(deadline: deadline) {
-            withAnimation {
-                perform()
-            }
-        }
-    }
 }
 
 extension NSWorkspace {
-    static var kernelVersion: String {
+    var kernelVersion: String {
         var size = 0
         sysctlbyname("kern.osrelease", nil, &size, nil, 0)
         var vers = [CChar](repeating: 0, count: size)
         sysctlbyname("kern.osrelease", &vers, &size, nil, 0)
         return String(cString: vers)
+    }
+}
+
+extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
+extension Collection {
+    func jsonString() throws -> String? {
+        let data = try JSONSerialization.data(withJSONObject: self, options: [])
+        let jsonString = String(data: data, encoding: .utf8)
+        return jsonString
     }
 }

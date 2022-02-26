@@ -14,7 +14,13 @@ struct Channel: Decodable, Identifiable {
     var guild_icon: String?
     let position: Int?
     // TODO: Overwrite objects
-    // var permission_overwrites: ?
+    var permission_overwrites: [PermissionOverwrites]?
+    struct PermissionOverwrites: Decodable {
+        var allow: String?
+        var deny: String?
+        var id: String?
+        var type: Int?
+    }
     var name: String?
     var topic: String?
     var nsfw: Bool?
@@ -34,7 +40,7 @@ struct Channel: Decodable, Identifiable {
     // var thread_metadata?
     // TODO: Thread member object
     // var member: User?
-    // var permissions: String?
+    var permissions: Int64?
     var read_state: ReadStateEntry?
     var guild_name: String?
     var threads: [Channel]?

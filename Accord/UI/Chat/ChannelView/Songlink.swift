@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 final class SongLink {
+    
     // MARK: - Song getter
-
     public class func getSong(song: String, block: @escaping ((SongLinkBase?) -> Void)) {
         guard let encoded = song.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
               let url = URL(string: "https://api.song.link/v1-alpha.1/links?url=\(encoded)") else { print("ripbozo"); return block(nil) }

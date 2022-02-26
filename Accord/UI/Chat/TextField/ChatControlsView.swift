@@ -47,6 +47,8 @@ struct ChatControls: View {
             } else if let replyingTo = replyingTo {
                 self.replyingTo = nil
                 viewModel.send(text: viewModel.textFieldContents, replyingTo: replyingTo, mention: true, guildID: guildID)
+            } else if viewModel.textFieldContents.prefix(1) == "/" {
+                try? viewModel.executeCommand(guildID: guildID, channelID: channelID)
             } else {
                 viewModel.send(text: viewModel.textFieldContents, guildID: guildID, channelID: channelID)
             }
@@ -57,44 +59,97 @@ struct ChatControls: View {
             }
         }
     }
-
+    
+    var matchedUsersView: some View {
+        ForEach(viewModel.matchedUsers.sorted(by: >).prefix(10), id: \.key) { id, username in
+            Button(action: { [weak viewModel] in
+                if let range = viewModel?.textFieldContents.range(of: "@") {
+                    viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                }
+                viewModel?.textFieldContents.append("<@!\(id)>")
+            }, label: {
+                HStack {
+                    Text(username)
+                    Spacer()
+                }
+            })
+            .buttonStyle(.borderless)
+            .padding(3)
+        }
+    }
+    
+    var matchedCommandsView: some View {
+        ForEach(viewModel.matchedCommands.prefix(10), id: \.id) { command in
+            Button.init(action: { [weak command, weak viewModel] in
+                guard let command = command else { return }
+                var contents = "/\(command.name)"
+                command.options?.forEach { arg in
+                    contents.append(" \(arg.name)\(arg.type == 1 ? "" : ":")")
+                }
+                viewModel?.command = command
+                viewModel?.textFieldContents = contents
+                viewModel?.matchedCommands.removeAll()
+            }, catch: { error in
+                print("Interaction Failed", error as Any)
+            }, label: { [weak command] in
+                HStack {
+                    if let command = command, let avatar = command.avatar {
+                        Attachment("https://cdn.discordapp.com/avatars/\(command.application_id)/\(avatar).png?size=48")
+                            .equatable()
+                            .frame(width: 22, height: 22)
+                            .clipShape(Circle())
+                    }
+                    VStack(alignment: .leading) {
+                        Text(command?.name ?? "Unknown Command")
+                            .fontWeight(.semibold)
+                        Text(command?.description ?? "Some slash command")
+                    }
+                    Spacer()
+                }
+            })
+            .buttonStyle(.borderless)
+            .padding(3)
+        }
+    }
+    
     var body: some View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
                 VStack {
-                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) {
+                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) || !(viewModel.matchedCommands.isEmpty) {
                         VStack {
-                            ForEach(viewModel.matchedUsers.sorted(by: >).prefix(10), id: \.key) { id, username in
-                                Button(action: { [weak viewModel] in
-                                    if let range = viewModel?.textFieldContents.range(of: "@") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
-                                    }
-                                    viewModel?.textFieldContents.append("<@!\(id)>")
-                                }, label: {
-                                    HStack {
-                                        Text(username)
-                                        Spacer()
-                                    }
-                                })
-                                .buttonStyle(.borderless)
-                                .padding(3)
-                            }
+                            matchedUsersView
+                            matchedCommandsView
                             ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
-                                Button(action: { [weak viewModel] in
-                                    if let range = viewModel?.textFieldContents.range(of: ":") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                                HStack {
+                                    Button(action: { [weak viewModel] in
+                                        if let range = viewModel?.textFieldContents.range(of: ":") {
+                                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                                        }
+                                        viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
+                                        viewModel?.matchedEmoji.removeAll()
+                                    }, label: {
+                                        HStack {
+                                            Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
+                                                .equatable()
+                                                .frame(width: 20, height: 20)
+                                            Text(emoji.name)
+                                            Spacer()
+                                        }
+                                    })
+                                    .buttonStyle(.borderless)
+                                    .padding(3)
+                                    Button("Send link") { [weak viewModel] in
+                                        if let range = viewModel?.textFieldContents.range(of: ":") {
+                                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                                        }
+                                        viewModel?.textFieldContents.append("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=48")
+                                        viewModel?.matchedEmoji.removeAll()
                                     }
-                                    viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
-                                }, label: {
-                                    HStack {
-                                        Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
-                                            .frame(width: 20, height: 20)
-                                        Text(emoji.name)
-                                        Spacer()
-                                    }
-                                })
-                                .buttonStyle(.borderless)
-                                .padding(3)
+                                    .buttonStyle(.borderless)
+                                    .padding(3)
+                                }
+
                             }
                             ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
                                 Button(action: { [weak viewModel] in
@@ -111,6 +166,7 @@ struct ChatControls: View {
                                 .buttonStyle(.borderless)
                                 .padding(3)
                             }
+                            Divider()
                         }
                         .padding(.bottom, 7)
                     }
@@ -252,7 +308,7 @@ extension Data {
 
 extension Array where Element: Hashable {
     func removingDuplicates() -> [Element] {
-        var addedDict = [Element: Bool]()
+        var addedDict: [Element: Bool] = .init()
 
         return filter {
             addedDict.updateValue(true, forKey: $0) == nil

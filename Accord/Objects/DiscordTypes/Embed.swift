@@ -24,9 +24,10 @@ final class Embed: Codable, Hashable, Identifiable {
     var provider: Embed.Provider?
     var author: Embed.Author?
     var fields: [Embed.Field]?
-    var id: String { UUID().uuidString }
+    var id: Int? { self.hashValue }
+    
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine((self.timestamp ?? .init()) + (self.url ?? .init()) + (self.title ?? .init()))
     }
     
     final class Field: Codable {

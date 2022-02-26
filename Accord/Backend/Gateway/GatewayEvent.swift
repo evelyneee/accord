@@ -21,6 +21,7 @@ struct GatewayEvent {
         }
         d = packet["d"] as? [String: Any]
         channelID = d?["channel_id"] as? String
+        guildID = d?["guild_id"] as? String
         self.data = data
     }
 
@@ -29,6 +30,7 @@ struct GatewayEvent {
     var d: [String: Any]?
     var op: Opcode?
     var channelID: String?
+    var guildID: String?
     var data: Data
 
     enum T: String {
@@ -72,6 +74,8 @@ struct GatewayEvent {
 
         case applicationCommandUpdate = "APPLICATION_COMMAND_UPDATE"
         case applicationCommandPermissionsUpdate = "APPLICATION_COMMAND_PERMISSIONS_UPDATE"
+        
+        case guildApplicationCommandsUpdate = "GUILD_APPLICATION_COMMANDS_UPDATE"
     }
 
     enum Opcode: Int {

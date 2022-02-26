@@ -22,7 +22,11 @@ struct NavigationLazyView<Content: View>: View {
 }
 
 enum Emotes {
-    public static var emotes: [String: [DiscordEmote]] = [:]
+    public static var emotes: [String: [DiscordEmote]] = [:] {
+        didSet {
+            print(#function)
+        }
+    }
 }
 
 func pingCount(guild: Guild) -> Int {
@@ -38,7 +42,16 @@ func unreadMessages(guild: Guild) -> Bool {
 }
 
 struct ServerListView: View {
-
+    
+    // i feel bad about this but i need some way to use static vars
+    public class UpdateView: ObservableObject {
+        @Published var updater: Bool = false
+        func updateView() {
+            self.updater.toggle()
+            self.objectWillChange.send()
+        }
+    }
+    
     @State var selection: Int?
     @State var selectedServer: Int? = 0
     @State var online: Bool = true
@@ -50,10 +63,10 @@ struct ServerListView: View {
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
     @State var bag = Set<AnyCancellable>()
-    @State var updater: Bool = false
+    @StateObject var viewUpdater = UpdateView()
 
-    var body: some View {
-        lazy var dmButton = Button(action: {
+    var dmButton: some View {
+        Button(action: {
             wss?.cachedMemberRequest.removeAll()
             selectedServer = 201
             selection = nil
@@ -63,7 +76,10 @@ struct ServerListView: View {
                 .background(VisualEffectView(material: .fullScreenUI, blendingMode: .withinWindow))
                 .cornerRadius(selectedServer == 201 ? 15.0 : 23.5)
         }
-        lazy var onlineButton: some View = Button("Offline") {
+    }
+    
+    var onlineButton: some View {
+        Button("Offline") {
             alert.toggle()
         }
         .alert(isPresented: $alert) {
@@ -92,33 +108,38 @@ struct ServerListView: View {
                 )
             )
         }
-        lazy var statusIndicator: some View = Group {
-            switch self.status {
-            case "online":
-                Circle()
-                    .foregroundColor(Color.green)
-                    .frame(width: 12, height: 12)
-            case "invisible":
-                Image("invisible")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 14, height: 14)
-            case "dnd":
-                Image("dnd")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 14, height: 14)
-            case "idle":
-                Circle()
-                    .foregroundColor(Color(NSColor.systemOrange))
-                    .frame(width: 12, height: 12)
-            default:
-                Circle()
-                    .foregroundColor(Color.clear)
-                    .frame(width: 12, height: 12)
-            }
+    }
+    
+    @ViewBuilder
+    var statusIndicator: some View {
+        switch self.status {
+        case "online":
+            Circle()
+                .foregroundColor(Color.green)
+                .frame(width: 12, height: 12)
+        case "invisible":
+            Image("invisible")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
+        case "dnd":
+            Image("dnd")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
+        case "idle":
+            Circle()
+                .foregroundColor(Color(NSColor.systemOrange))
+                .frame(width: 12, height: 12)
+        default:
+            Circle()
+                .foregroundColor(Color.clear)
+                .frame(width: 12, height: 12)
         }
-        lazy var settingsLink: some View = NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 0, selection: self.$selection) {
+    }
+    
+    var settingsLink: some View {
+        NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 0, selection: self.$selection) {
             ZStack(alignment: .bottomTrailing) {
                 Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
                     .scaledToFit()
@@ -127,6 +148,9 @@ struct ServerListView: View {
                 statusIndicator
             }
         }
+    }
+    
+    var body: some View {
         return NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
@@ -140,7 +164,7 @@ struct ServerListView: View {
                             .frame(height: 1)
                             .opacity(0.75)
                             .padding(.horizontal)
-                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection)
+                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, updater: self.viewUpdater)
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)
@@ -161,7 +185,7 @@ struct ServerListView: View {
                             .font(.title2)
                         Divider()
                         ForEach(Self.privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
+                            NavigationLink(destination: NavigationLazyView(ChannelView(channel)), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                                 ServerListViewCell(channel: channel)
                                     .onChange(of: self.selection, perform: { _ in
                                         if self.selection == Int(channel.id) {

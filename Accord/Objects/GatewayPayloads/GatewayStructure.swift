@@ -24,6 +24,8 @@ struct GatewayD: Decodable {
     var guilds: [Guild]
     var friend_suggestion_count: Int?
     var country_code: String
+    @IgnoreFailure
+    var merged_members: [[Guild.MergedMember]]
 }
 
 final class Relationship: Codable {

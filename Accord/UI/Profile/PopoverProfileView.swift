@@ -15,6 +15,7 @@ struct PopoverProfileView: View {
             VStack {
                 if let banner = user?.banner, let id = user?.id {
                     Attachment("https://cdn.discordapp.com/banners/\(id)/\(banner).png")
+                        .equatable()
                         .frame(height: 100)
                 } else {
                     Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
@@ -31,6 +32,7 @@ struct PopoverProfileView: View {
                             .shadow(radius: 5)
                     } else {
                         Attachment(pfpURL(user?.id, user?.avatar))
+                            .equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)

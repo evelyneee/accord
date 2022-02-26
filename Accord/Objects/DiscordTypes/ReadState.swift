@@ -14,7 +14,7 @@ class ReadState: Decodable {
     var entries: [ReadStateEntry]
 }
 
-class ReadStateEntry: Decodable {
+class ReadStateEntry: Decodable, Identifiable {
     var mention_count: Int
     var last_pin_timestamp: String
     var last_message_id: String?

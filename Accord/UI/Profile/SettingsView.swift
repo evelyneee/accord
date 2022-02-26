@@ -103,6 +103,7 @@ struct SettingsViewRedesign: View {
                     Divider()
                     VStack(alignment: .leading) {
                         Attachment("https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").png")
+                            .equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)
