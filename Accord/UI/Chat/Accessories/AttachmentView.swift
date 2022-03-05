@@ -33,45 +33,14 @@ struct AttachmentView: View {
     var media: [AttachedFiles]
     var body: some View {
         ForEach(media, id: \.url) { obj in
-            HStack(alignment: .top) {
-                VStack { [unowned obj] in
-                    if obj.content_type?.prefix(6).stringLiteral == "image/" {
-                        Attachment(obj.url, size: CGSize(width: 350, height: 350)).equatable()
-                            .cornerRadius(5)
-                            .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
-                    } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.url) {
-                        VideoPlayerController(url: url)
-                            .cornerRadius(5)
-                            .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
-                            .onDisappear {
-                                print("goodbye")
-                            }
-                    }
-                }
-                Button(action: { [weak obj] in
-                    if obj?.content_type?.prefix(6).stringLiteral == "video/" {
-                        attachmentWindows(
-                            player: AVPlayer(url: URL(string: obj?.url ?? "")!),
-                            url: nil,
-                            name: (obj?.filename)!,
-                            width: (obj?.width)!,
-                            height: (obj?.height)!
-                        )
-                    } else if obj?.content_type?.prefix(6).stringLiteral == "image/" {
-                        attachmentWindows(
-                            player: nil,
-                            url: (obj?.url)!,
-                            name: (obj?.filename)!,
-                            width: (obj?.width)!,
-                            height: (obj?.height)!
-                        )
-                    } else {
-                        NSWorkspace.shared.open(URL(string: obj?.url ?? "")!)
-                    }
-                }) {
-                    Image(systemName: "arrow.up.forward.circle")
-                }
-                .buttonStyle(BorderlessButtonStyle())
+            if obj.content_type?.prefix(6).stringLiteral == "image/" {
+                Attachment(obj.url, size: CGSize(width: 350, height: 350)).equatable()
+                    .cornerRadius(5)
+                    .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
+            } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxy_url) {
+                WebVideoPlayer(url: url)
+                    .cornerRadius(5)
+                    .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
             }
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 extension Collection where Element: Identifiable {
     func generateKeyMap() -> [Element.ID: Int] {
@@ -15,5 +16,32 @@ extension Collection where Element: Identifiable {
             .reduce(into: [:]) { result, next in
                 result.merge(next) { _, rhs in rhs }
             }
+    }
+}
+
+extension Dictionary {
+    func filterValues(isIncluded: (Self.Value) throws -> Bool) rethrows -> Self {
+        return try self.filter { try isIncluded($0.value) }
+    }
+}
+
+extension Collection {
+    func jsonString() throws -> String? {
+        let data = try JSONSerialization.data(withJSONObject: self, options: [])
+        let jsonString = String(data: data, encoding: .utf8)
+        return jsonString
+    }
+}
+
+extension ArraySlice {
+    typealias LiteralType = Array<Self.Element>
+    func literal() -> LiteralType {
+        return LiteralType(self)
+    }
+}
+
+extension Slice where Base: Sequence {
+    func literal() -> Base {
+        return self.base
     }
 }

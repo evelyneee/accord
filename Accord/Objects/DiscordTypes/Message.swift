@@ -33,6 +33,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     // var message_reference: Reply? // in the mentions endpoint
     let sticker_items: [StickerItem]?
     var reactions: [Reaction]?
+    var interaction: Interaction?
 
     var identifier: String {
         content.appending(id)
@@ -56,17 +57,14 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     }
 
     func edit(now: String) {
-        let headers = Headers(
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(self.channel_id)/messages/\(self.id)"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content": now],
+            bodyObject: ["content":now],
             type: .PATCH,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
-            empty: true,
             json: true
-        )
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        ))
     }
 
     var sameAuthor: Bool?
@@ -107,7 +105,7 @@ enum MessageType: Int, Codable {
     guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
     guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,
     chatInputCommand, threadStarterMessage, guildInviteReminder,
-    contextMenuCommand
+    contextMenuCommand, likelyScammer
 }
 
 // TODO: Component object

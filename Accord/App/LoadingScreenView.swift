@@ -38,14 +38,10 @@ internal extension View {
 
 struct LoadingView: View {
     fileprivate static let greetings: [Text] = [
-        Text("Entering girlmode"),
-        Text("Stay dry"),
+        Text("Made in Canada!"),
         Text("Gaslight. Gatekeep. Girlboss.").italic(),
         Text("Not a car"),
-        Text("Ratio + Civic better"),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
-        Text("Never gonna give you up, never gonna use electron"),
-        Text("Tell ur oomfies"),
     ]
 
     var body: some View {

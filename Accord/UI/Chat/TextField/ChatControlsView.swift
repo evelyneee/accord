@@ -112,6 +112,140 @@ struct ChatControls: View {
         }
     }
     
+    var matchedEmojiView: some View {
+        ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
+            HStack {
+                Button(action: { [weak viewModel] in
+                    if let range = viewModel?.textFieldContents.range(of: ":") {
+                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                    }
+                    viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
+                    viewModel?.matchedEmoji.removeAll()
+                }, label: {
+                    HStack {
+                        Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
+                            .equatable()
+                            .frame(width: 20, height: 20)
+                        Text(emoji.name)
+                        Spacer()
+                    }
+                })
+                .buttonStyle(.borderless)
+                .padding(3)
+                Button("Send link") { [weak viewModel] in
+                    if let range = viewModel?.textFieldContents.range(of: ":") {
+                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                    }
+                    viewModel?.textFieldContents.append("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=48")
+                    viewModel?.matchedEmoji.removeAll()
+                }
+                .buttonStyle(.borderless)
+                .padding(3)
+            }
+        }
+    }
+    
+    var matchedChannelsView: some View {
+        ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
+            Button(action: { [weak viewModel] in
+                if let range = viewModel?.textFieldContents.range(of: "#") {
+                    viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                }
+                viewModel?.textFieldContents.append("<#\(channel.id)>")
+            }) {
+                HStack {
+                    Text(channel.name ?? "Unknown Channel")
+                    Spacer()
+                }
+            }
+            .buttonStyle(.borderless)
+            .padding(3)
+        }
+    }
+    
+    @available(macOS 12.0, *)
+    var montereyTextField: some View {
+        TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
+            .focused($focusedField, equals: .mainTextField)
+            .onSubmit {
+                typing = false
+                send()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+                if String(describing: pub.userInfo).contains("Command-V") && self.focusedField == .mainTextField {
+                    let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
+                    if let rawData = data,
+                        let string = String(data: rawData, encoding: .utf8),
+                        let url = URL(string: string),
+                        let data = try? Data(contentsOf: url) {
+                            self.fileUpload = data
+                            self.fileUploadURL = url
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                                self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                            })
+                    }
+                }
+            }
+            .onAppear {
+                self.focusedField = .mainTextField
+            }
+    }
+    
+    var bigSurTextField: some View {
+        TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
+            typing = false
+            send()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+            if String(describing: pub.userInfo).contains("Command-V") {
+                let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
+                if let rawData = data, let string = String(data: rawData, encoding: .utf8), let url = URL(string: string), let data = try? Data(contentsOf: url) {
+                    self.fileUpload = data
+                    self.fileUploadURL = url
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                        self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                    })
+                }
+            }
+        }
+    }
+    
+    var fileImportButton: some View {
+        Button(action: {
+            fileImport.toggle()
+        }) {
+            Image(systemName: "plus.circle.fill")
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    var nitrolessButton: some View {
+        Button(action: {
+            nitroless.toggle()
+        }) {
+            Image(systemName: "rectangle.grid.3x2.fill")
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .popover(isPresented: $nitroless, content: {
+            NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
+                .frame(width: 300, height: 400)
+        })
+    }
+    
+    var emotesButton: some View {
+        Button(action: {
+            emotes.toggle()
+        }) {
+            Image(systemName: "face.smiling.fill")
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .keyboardShortcut("e", modifiers: [.command])
+        .popover(isPresented: $emotes, content: {
+            NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
+                .frame(width: 300, height: 400)
+        })
+    }
+    
     var body: some View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
@@ -120,130 +254,23 @@ struct ChatControls: View {
                         VStack {
                             matchedUsersView
                             matchedCommandsView
-                            ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
-                                HStack {
-                                    Button(action: { [weak viewModel] in
-                                        if let range = viewModel?.textFieldContents.range(of: ":") {
-                                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
-                                        }
-                                        viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
-                                        viewModel?.matchedEmoji.removeAll()
-                                    }, label: {
-                                        HStack {
-                                            Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
-                                                .equatable()
-                                                .frame(width: 20, height: 20)
-                                            Text(emoji.name)
-                                            Spacer()
-                                        }
-                                    })
-                                    .buttonStyle(.borderless)
-                                    .padding(3)
-                                    Button("Send link") { [weak viewModel] in
-                                        if let range = viewModel?.textFieldContents.range(of: ":") {
-                                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
-                                        }
-                                        viewModel?.textFieldContents.append("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=48")
-                                        viewModel?.matchedEmoji.removeAll()
-                                    }
-                                    .buttonStyle(.borderless)
-                                    .padding(3)
-                                }
-
-                            }
-                            ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
-                                Button(action: { [weak viewModel] in
-                                    if let range = viewModel?.textFieldContents.range(of: "#") {
-                                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
-                                    }
-                                    viewModel?.textFieldContents.append("<#\(channel.id)>")
-                                }) {
-                                    HStack {
-                                        Text(channel.name ?? "Unknown Channel")
-                                        Spacer()
-                                    }
-                                }
-                                .buttonStyle(.borderless)
-                                .padding(3)
-                            }
+                            matchedEmojiView
+                            matchedChannelsView
                             Divider()
                         }
                         .padding(.bottom, 7)
                     }
                     HStack {
                         if #available(macOS 12.0, *) {
-                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
-                                .focused($focusedField, equals: .mainTextField)
-                                .onSubmit {
-                                    typing = false
-                                    send()
-                                }
-                                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
-                                    if String(describing: pub.userInfo).contains("Command-V") && self.focusedField == .mainTextField {
-                                        let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
-                                        if let rawData = data,
-                                            let string = String(data: rawData, encoding: .utf8),
-                                            let url = URL(string: string),
-                                            let data = try? Data(contentsOf: url) {
-                                                self.fileUpload = data
-                                                self.fileUploadURL = url
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                                    self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                                                })
-                                        }
-                                    }
-                                }
-                                .onAppear {
-                                    self.focusedField = .mainTextField
-                                }
+                            montereyTextField
                         } else {
-                            TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
-                                typing = false
-                                send()
-                            }
-                            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
-                                if String(describing: pub.userInfo).contains("Command-V") {
-                                    let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
-                                    if let rawData = data, let string = String(data: rawData, encoding: .utf8), let url = URL(string: string), let data = try? Data(contentsOf: url) {
-                                        self.fileUpload = data
-                                        self.fileUploadURL = url
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                            self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                                        })
-                                    }
-                                }
-                            }
+                            bigSurTextField
                         }
-
-                        Button(action: {
-                            fileImport.toggle()
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
+                        fileImportButton
                         if nitrolessEnabled {
-                            Button(action: {
-                                nitroless.toggle()
-                            }) {
-                                Image(systemName: "rectangle.grid.3x2.fill")
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            .popover(isPresented: $nitroless, content: {
-                                NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
-                                    .frame(width: 300, height: 400)
-                            })
+                            nitrolessButton
                         }
-                        Button(action: {
-                            emotes.toggle()
-                        }) {
-                            Image(systemName: "face.smiling.fill")
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
-                        .keyboardShortcut("e", modifiers: [.command])
-                        .popover(isPresented: $emotes, content: {
-                            NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
-                                .frame(width: 300, height: 400)
-                        })
+                        emotesButton
                         HStack {
                             if fileUpload != nil {
                                 Image(systemName: "doc.fill")

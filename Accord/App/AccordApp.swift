@@ -97,6 +97,14 @@ struct AccordApp: App {
                 Button("Log out") {
                     logOut()
                 }
+                Menu("Debug") {
+                    Button("Reconnect") {
+                        wss.reset()
+                    }
+                    Button("Force reconnect") {
+                        wss.hardReset()
+                    }
+                }
             }
         }
     }

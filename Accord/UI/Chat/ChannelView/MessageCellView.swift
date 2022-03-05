@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import AVKit
 import Combine
 import Foundation
 import SwiftUI
@@ -20,40 +21,84 @@ struct MessageCellView: View {
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
-    @Binding var editing: String?
+    @State var editing: Bool = false
     @State var popup: Bool = false
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
-    
     @State var editedText: String = ""
     
-    @AppStorage("GifProfilePictures") var gifPfp: Bool = false
+    @AppStorage("GifProfilePictures")
+    var gifPfp: Bool = false
     
+    var editingTextField: some View {
+        TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
+            message.edit(now: self.editedText)
+            self.editing = false
+            self.editedText = ""
+        }
+        .textFieldStyle(SquareBorderTextFieldStyle())
+        .onAppear {
+            self.editedText = message.content
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                HStack { [unowned reply] in
+                HStack(alignment: .bottom) { [unowned reply] in
                     Attachment(pfpURL(reply.author?.id, reply.author?.avatar, "16"))
                         .equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
                     Text(replyNick ?? reply.author?.username ?? "")
-                        .foregroundColor(replyRole != nil && roleColors[replyRole!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[replyRole!]!.0) : Color(NSColor.textColor))
+                        .font(.subheadline)
+                        .foregroundColor({ () -> Color in
+                            if let replyRole = replyRole, let color = roleColors[replyRole]?.0, !message.isSameAuthor {
+                                return Color(int: color)
+                            }
+                            return Color.primary
+                        }())
                         .fontWeight(.semibold)
                     if #available(macOS 12.0, *) {
                         Text(try! AttributedString(markdown: reply.content))
+                            .font(.subheadline)
                             .lineLimit(0)
+                            .foregroundColor(.secondary)
                     } else {
                         Text(reply.content)
+                            .font(.subheadline)
                             .lineLimit(0)
+                            .foregroundColor(.secondary)
                     }
+                }
+                .padding(.leading, 47)
+            }
+            if let interaction = message.interaction {
+                HStack { [unowned interaction] in
+                    Attachment(pfpURL(interaction.user?.id, interaction.user?.avatar, "16"))
+                        .equatable()
+                        .frame(width: 15, height: 15)
+                        .clipShape(Circle())
+                    Text(interaction.user?.username ?? "")
+                        .font(.subheadline)
+                        .foregroundColor({ () -> Color in
+                            if let replyRole = replyRole, let color = roleColors[replyRole]?.0, !message.isSameAuthor {
+                                return Color(int: color)
+                            }
+                            return Color.primary
+                        }())
+                        .fontWeight(.semibold)
+                    Text("/" + interaction.name)
+                        .font(.subheadline)
+                        .lineLimit(0)
+                        .foregroundColor(.secondary)
                 }
                 .padding(.leading, 47)
             }
             HStack { [unowned message] in
                 if !(message.isSameAuthor && message.referenced_message == nil && message.author?.avatar != nil) {
                     if let author = message.author, let avatar = author.avatar, gifPfp && message.author?.avatar?.prefix(2) == "a_" {
-                        HoverGifView.init(url: "https://cdn.discordapp.com/avatars/\(author.id)/\(avatar).gif?size=48")
+                        HoverGifView(url: "https://cdn.discordapp.com/avatars/\(author.id)/\(avatar).gif?size=48")
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
@@ -72,24 +117,9 @@ struct MessageCellView: View {
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor, message.referenced_message == nil {
-                        if let editingID = self.editing, editingID == message.id {
-                            TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
-                                Request.ping(url: URL(string: "\(rootURL)/channels/\(message.channel_id)/messages/\(editingID)"), headers: Headers(
-                                    userAgent: discordUserAgent,
-                                    token: AccordCoreVars.token,
-                                    bodyObject: ["content":editedText],
-                                    type: .PATCH,
-                                    discordHeaders: true,
-                                    json: true
-                                ))
-                                self.editing = nil
-                                self.editedText = ""
-                            }
-                            .textFieldStyle(SquareBorderTextFieldStyle())
-                            .onAppear {
-                                self.editedText = message.content
-                            }
-                            .padding(.leading, 41)
+                        if self.editing {
+                            editingTextField
+                                .padding(.leading, 41)
                         } else {
                             AsyncMarkdown(message.content)
                                 .equatable()
@@ -97,7 +127,12 @@ struct MessageCellView: View {
                         }
                     } else {
                         Text(nick ?? message.author?.username ?? "Unknown User")
-                            .foregroundColor(role != nil && roleColors[role!]?.0 != nil && !message.isSameAuthor ? Color(int: roleColors[role!]!.0) : Color(NSColor.textColor))
+                            .foregroundColor({ () -> Color in
+                                if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
+                                    return Color(int: color)
+                                }
+                                return Color.primary
+                            }())
                             .fontWeight(.semibold)
                         +
                         Text("  \(message.timestamp.makeProperDate())")
@@ -111,23 +146,8 @@ struct MessageCellView: View {
                         Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                             .foregroundColor(Color.secondary)
                             .font(.subheadline)
-                        if let editingID = self.editing, editingID == message.id {
-                            TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
-                                Request.ping(url: URL(string: "\(rootURL)/channels/\(message.channel_id)/messages/\(editingID)"), headers: Headers(
-                                    userAgent: discordUserAgent,
-                                    token: AccordCoreVars.token,
-                                    bodyObject: ["content":editedText],
-                                    type: .PATCH,
-                                    discordHeaders: true,
-                                    json: true
-                                ))
-                                self.editing = nil
-                                self.editedText = ""
-                            }
-                            .textFieldStyle(SquareBorderTextFieldStyle())
-                            .onAppear {
-                                self.editedText = message.content
-                            }
+                        if self.editing {
+                            editingTextField
                         } else {
                             AsyncMarkdown(message.content)
                                 .equatable()
@@ -172,8 +192,8 @@ struct MessageCellView: View {
             Button("Reply") { [weak message] in
                 replyingTo = message
             }
-            Button("Edit") { [weak message] in
-                self.editing = message?.id
+            Button("Edit") {
+                self.editing.toggle()
             }
             Button("Delete") { [weak message] in
                 message?.delete()
@@ -183,7 +203,7 @@ struct MessageCellView: View {
                 popup.toggle()
             }
             Divider()
-            Group {
+            Menu("Copy") {
                 Button("Copy message text") { [weak message] in
                     guard let content = message?.content else { return }
                     NSPasteboard.general.clearContents()
@@ -209,6 +229,45 @@ struct MessageCellView: View {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString("\(author.username)#\(author.discriminator)", forType: .string)
                 })
+            }
+            if !message.attachments.isEmpty {
+                Divider()
+                ForEach(message.attachments, id: \.url) { attachment in
+                    Menu(attachment.filename) {
+                        if !attachment.isFile {
+                            Button("Open in window") { [weak attachment] in
+                                guard let attachment = attachment else { return }
+                                if attachment.isVideo, let url = URL(string: attachment.url) {
+                                    attachmentWindows (
+                                        player: AVPlayer(url: url),
+                                        url: nil,
+                                        name: attachment.filename,
+                                        width: attachment.width ?? 500,
+                                        height: attachment.height ?? 500
+                                    )
+                                } else if attachment.isImage {
+                                    attachmentWindows (
+                                        player: nil,
+                                        url: attachment.url,
+                                        name: attachment.filename,
+                                        width: attachment.width ?? 500,
+                                        height: attachment.height ?? 500
+                                    )
+                                }
+                            }
+                        }
+                        if let stringURL = attachment.url, let url = URL(string: stringURL) {
+                            Button("Open URL in browser") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                        Button("Copy image URL") { [weak attachment] in
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(attachment?.url ?? "", forType: .string)
+                        }
+                    }
+                }
+
             }
         }
         .id(message.id)

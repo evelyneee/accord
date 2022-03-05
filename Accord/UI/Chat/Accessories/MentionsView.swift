@@ -27,8 +27,7 @@ struct MentionsView: View {
                 guildID: nil,
                 role: Binding.constant(nil),
                 replyRole: Binding.constant(nil),
-                replyingTo: $replyingTo,
-                editing: Binding.constant(nil)
+                replyingTo: $replyingTo
             )
         }
         .onAppear(perform: {

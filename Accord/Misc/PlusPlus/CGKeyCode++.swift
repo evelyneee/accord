@@ -232,7 +232,7 @@ extension CGKeyCode
     
     static public func beginListener(for keys: [CGKeyCode]) {
         if Thread.isMainThread {
-            DispatchQueue(label: "AccordKeyListener\(keys.compactMap(\.stringRepresentation).joined(separator: ","))").async {
+            DispatchQueue(label: "AccordKeyListener\(keys.compactMap(\.stringRepresentation).joined(separator: ","))", attributes: .concurrent).async {
                 var previouslySent: [String?] = .init()
                 while true {
                     if stop {

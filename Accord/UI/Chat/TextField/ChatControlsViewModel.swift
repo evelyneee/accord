@@ -24,34 +24,48 @@ final class ChatControlsViewModel: ObservableObject {
     var currentValue: String?
     var currentRange: Int?
     
-    @AppStorage("SilentTyping") var silentTyping: Bool = false
+    @AppStorage("SilentTyping")
+    var silentTyping: Bool = false
 
     func checkText(guildID: String) {
         let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
         let channels = textFieldContents.matches(for: #"(?<=#)(?:(?!\ ).)*"#)
         let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
         let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
-        if let search = mentions.last {
-            let matched = Storage.usernames.filter { $0.value.lowercased().contains(search.lowercased()) }
+        if let search = mentions.last?.lowercased() {
+            let matched: [String:String] = Storage.usernames
+                .mapValues { $0.lowercased() }
+                .filterValues { $0.contains(search) }
+                .prefix(10)
+                .literal()
             DispatchQueue.main.async {
                 self.matchedUsers = matched
             }
         } else if let search = channels.last {
             let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
-            let joined: [Channel] = Array(Array(Array(matches).joined()).joined()).filter { $0.guild_id == guildID }
+            let joined: [Channel] = Array(Array(Array(matches).joined()).joined())
+                .filter { $0.guild_id == guildID }
+                .prefix(10)
+                .literal()
             DispatchQueue.main.async {
                 self.matchedChannels = joined
             }
         } else if let command = slashes.last {
-            let commands = SlashCommandStorage.commands[guildID]?.filter { $0.name.lowercased().contains(command) }
+            try? wss.getCommands(guildID: guildID, query: command)
+            let commands = SlashCommandStorage.commands[guildID]?
+                .filter { $0.name.lowercased().contains(command) }
+                .prefix(10)
+                .literal()
             DispatchQueue.main.async {
-                if self.command == nil {
-                    self.matchedCommands = commands ?? []
+                if self.command == nil, let commands = commands {
+                    self.matchedCommands = commands
                 }
             }
         } else if let key = emoji.last {
-            let matched: [DiscordEmote] = Array(Emotes.emotes.values.joined()).filter { $0.name.lowercased().contains(key) }
-            print(Emotes.emotes)
+            let matched = Array(Emotes.emotes.values.joined())
+                .filter { $0.name.lowercased().contains(key) }
+                .prefix(10)
+                .literal()
             DispatchQueue.main.async {
                 self.matchedEmoji = matched
             }
@@ -168,16 +182,17 @@ final class ChatControlsViewModel: ObservableObject {
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
         guard let string = try? ["content":text].jsonString() else { return }
         request.httpBody = try? Request.createMultipartBody(with: string, fileURL: file.absoluteString, boundary: boundary)
-        let task = URLSession.shared.dataTask(with: request)
-        DispatchQueue.main.async {
-            self.observation = task.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, res, error in
+            if let response = res as? HTTPURLResponse, response.statusCode == 200 {
                 DispatchQueue.main.async {
-                    self?.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
-                    if task.progress.isFinished {
-                        self?.observation = nil
-                        self?.percent = nil
-                    }
+                    self?.observation = nil
+                    self?.percent = nil
                 }
+            }
+        }
+        self.observation = task.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
+            DispatchQueue.main.async {
+                self?.percent = "Uploading \(String(Int(progress.fractionCompleted * 100)))%"
             }
         }
         task.resume()

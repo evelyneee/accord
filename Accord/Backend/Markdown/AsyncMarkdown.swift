@@ -17,17 +17,14 @@ final class AsyncMarkdownModel: ObservableObject {
     }
     
     @Published var markdown: Text
-    private var cancellable: AnyCancellable? = nil
     
     private func make(text: String) {
-        self.cancellable = Markdown.markAll(text: text, Storage.usernames)
-            .subscribe(on: textQueue)
-            .receive(on: textQueue)
-            .replaceError(with: Text(text))
-            .receive(on: DispatchQueue.main)
-            .sink { res in
-                self.markdown = res
-            }
+        DispatchQueue.global(qos: .userInitiated).async {
+            Markdown.markAll(text: text, Storage.usernames)
+                .replaceError(with: Text(text))
+                .receive(on: RunLoop.main)
+                .assign(to: &self.$markdown)
+        }
     }
 }
 

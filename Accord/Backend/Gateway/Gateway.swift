@@ -361,6 +361,21 @@ final class Gateway {
         try send(json: packet)
     }
     
+    public func getCommands(guildID: String, query: String, limit: Int = 10) throws {
+        let packet: [String: Any] = [
+            "op": 24,
+            "d": [
+                "locale": NSNull(),
+                "query": query,
+                "guild_id": guildID,
+                "limit":limit,
+                "nonce":generateFakeNonce(),
+                "type":1
+            ],
+        ]
+        try send(json: packet)
+    }
+    
     // cleanup
     deinit {
         self.heartbeatTimer = nil

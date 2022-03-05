@@ -18,7 +18,7 @@ final class ChannelViewViewModel: ObservableObject {
     @Published var avatars: [String: String] = .init()
     @Published var pronouns: [String: String] = .init()
     var cancellable: Set<AnyCancellable> = .init()
-
+    
     var guildID: String
     var channelID: String
 
@@ -31,7 +31,6 @@ final class ChannelViewViewModel: ObservableObject {
                 try? wss.subscribeToDM(channelID)
             } else {
                 try? wss.subscribe(to: guildID)
-                try? wss.getCommands(guildID: guildID)
             }
             MentionSender.shared.removeMentions(server: guildID)
         }
@@ -67,16 +66,15 @@ final class ChannelViewViewModel: ObservableObject {
             .receive(on: webSocketQueue)
             .sink { [weak self] msg in
                 guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
-                guard let self = self else { return }
                 let allUsers: [GuildMember] = users.compactMap { $0 }
                 for person in allUsers {
                     DispatchQueue.main.async {
-                        wss.cachedMemberRequest["\(self.guildID)$\(person.user.id)"] = person
+                        wss.cachedMemberRequest["\(self?.guildID ?? "")$\(person.user.id)"] = person
                         if let nickname = person.nick {
-                            self.nicks[person.user.id] = nickname
+                            self?.nicks[person.user.id] = nickname
                         }
                         if let avatar = person.avatar {
-                            self.avatars[person.user.id] = avatar
+                            self?.avatars[person.user.id] = avatar
                         }
                     }
                     if let roles = person.roles {
@@ -85,7 +83,7 @@ final class ChannelViewViewModel: ObservableObject {
                             .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
                         if let foregroundRoleColor = temp.first {
                             DispatchQueue.main.async {
-                                self.roles[person.user.id] = foregroundRoleColor
+                                self?.roles[person.user.id] = foregroundRoleColor
                             }
                         }
                     }
@@ -144,8 +142,8 @@ final class ChannelViewViewModel: ObservableObject {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-        .subscribe(on: messageFetchQueue)
-        .receive(on: messageFetchQueue)
+        .subscribe(on: DispatchQueue.global(qos: .userInitiated))
+        .receive(on: DispatchQueue.global(qos: .userInitiated))
         .map { output -> [Message] in
             output.enumerated().compactMap { index, element -> Message in
                 guard element != output.last else { return element }
@@ -163,7 +161,7 @@ final class ChannelViewViewModel: ObservableObject {
             }
         }) { [weak self] messages in
             self?.messages = messages
-            messageFetchQueue.async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
                 self?.loadPronouns()
                 self?.ack(channelID: channelID, guildID: guildID)
@@ -298,7 +296,6 @@ final class ChannelViewViewModel: ObservableObject {
 
     deinit {
         print("Closing \(channelID)")
-        self.cancellable.invalidateAll()
         SlashCommandStorage.commands[guildID]?.removeAll()
     }
 }

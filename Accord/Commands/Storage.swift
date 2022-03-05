@@ -32,7 +32,7 @@ final class SlashCommandStorage {
         var d: D
         final class D: Decodable {
             var application_commands: [SlashCommandStorage.Command]
-            @IgnoreFailure
+            @DefaultEmptyArray
             var applications: [Bot]
             final class Bot: Decodable, Identifiable {
                 var icon: String?

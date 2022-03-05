@@ -27,7 +27,7 @@ let concurrentQueue = DispatchQueue(label: "AccordMainWSQueue", attributes: .con
 let messageFetchQueue = DispatchQueue(label: "AccordMessageFetchQueue", attributes: .concurrent)
 
 // Message sending queue - Used by ChatControlsView
-let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue")
+let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue", attributes: .concurrent)
 
 // Gif loading queue
 let gifQueue = DispatchQueue(label: "AccordGifQueue")

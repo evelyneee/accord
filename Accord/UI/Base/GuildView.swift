@@ -17,17 +17,17 @@ struct GuildView: View {
                 if let level = guild.premium_tier, level != 0 {
                     switch level {
                     case 1:
-                        Image("level1").resizable()
+                        Image(systemName: "star").resizable()
                             .scaledToFit()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 15, height: 15)
                     case 2:
-                        Image("level2").resizable()
+                        Image(systemName: "star.leadinghalf.filled").resizable()
                             .scaledToFit()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 15, height: 15)
                     case 3:
-                        Image("level3").resizable()
+                        Image(systemName: "star.fill").resizable()
                             .scaledToFit()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 15, height: 15)
                     default:
                         EmptyView()
                     }
@@ -40,8 +40,9 @@ struct GuildView: View {
                     .equatable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .cornerRadius(10)
+                    .animation(nil, value: UUID())
             }
-            ForEach(guild.channels ?? [], id: \.id) { channel in
+            ForEach(guild.channels ?? .init(), id: \.id) { channel in
                 if channel.type == .section {
                     Text(channel.name ?? "Unknown channel")
                         .foregroundColor(Color.secondary)

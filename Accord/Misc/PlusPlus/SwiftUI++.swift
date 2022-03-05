@@ -9,6 +9,7 @@ import Combine
 import Foundation
 import SwiftUI
 import WebKit
+import AVKit
 
 extension Button {
     init(action: @escaping () throws -> Void, catch: @escaping (_ error: Error?) -> Void, label: @escaping () -> Label) {
@@ -139,5 +140,44 @@ struct WebVideoPlayer: NSViewRepresentable {
 extension GridItem {
     static func multiple(count: Int, size: Self.Size = .flexible(), spacing: CGFloat? = nil, alignment: SwiftUI.Alignment? = nil) -> [GridItem] {
         Array(repeating: GridItem(size, spacing: spacing, alignment: alignment), count: count)
+    }
+}
+
+struct SafeVideoPlayer: View {
+    
+    @StateObject var model: VideoPlayerModel
+    
+    final class VideoPlayerModel: ObservableObject {
+        
+        init(url: URL) {
+            self.url = url
+        }
+        
+        func loadVideo() {
+            if self.player == nil {
+                let playerItem = AVPlayerItem(url: url)
+                self.player = AVPlayer(playerItem: playerItem)
+            }
+        }
+        
+        private (set) var url: URL
+        @Published var player: AVPlayer?
+    }
+    
+    init?(url: String) {
+        guard let url = URL.init(string: url) else { return nil }
+        self._model = StateObject.init(wrappedValue: VideoPlayerModel.init(url: url))
+    }
+    
+    var body: some View {
+        VideoPlayer(player: model.player)
+            .onAppear {
+                print("loading")
+                model.loadVideo()
+            }
+            .onDisappear { [weak model] in
+                print("bye")
+                model?.player?.replaceCurrentItem(with: nil)
+            }
     }
 }

@@ -9,52 +9,7 @@ import AppKit
 import Combine
 import Foundation
 import SwiftUI
-
-extension String {
-    func matches(for regex: String) -> [String] {
-        let regex = try? NSRegularExpression(pattern: regex)
-        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
-        guard let mapped = results?.compactMap({ result -> String? in
-            if let range = Range(result.range, in: self) {
-                return String(self[range])
-            } else {
-                return nil
-            }
-        }) else {
-            return []
-        }
-        return mapped
-    }
-
-    func matchRange(for regex: String) -> [Range<String.Index>] {
-        let regex = try? NSRegularExpression(pattern: regex)
-        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
-        guard let mapped = results?.compactMap({ Range($0.range, in: self) }) else {
-            return []
-        }
-        return mapped
-    }
-
-    func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
-        var result: [Range<Index>] = []
-        var startIndex = startIndex
-        while startIndex < endIndex,
-              let range = self[startIndex...].range(of: string, options: options)
-        {
-            result.append(range)
-            startIndex = range.lowerBound < range.upperBound ? range.upperBound :
-                index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
-        }
-        return result
-    }
-}
-
-extension Array where Element == String {
-    @inlinable func replaceAllOccurences(of original: String, with string: String) -> [String] {
-        map { $0.replacingOccurrences(of: original, with: string) }
-    }
-}
-
+                                                                
 public final class Markdown {
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
@@ -67,6 +22,39 @@ public final class Markdown {
     public static var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     fileprivate static let blankCharacter = "‎" // Not an empty string
 
+    /***
+     
+     Overengineered processing for Markdown using Combine
+
+
+                        +------------------------------+
+                        |  Call the Markdown.markAll   |
+        +---------------|  function and subscribe to   |
+        |               |  the publisher               |
+        |               +------------------------------+
+        |                               |
+     Combine the final                  |                     \*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+
+     result in AnyPublisher             |                                         |
+        |                               |                                         |
+        |                       Split text by `\n`                                |
+        |                               |                        +----Split text with custom regex---+
+        |                               |                        |                                   |
+        |                               |                        |                                   |
+     +-------------------------------+  |        +------------------------------+                    |
+     |  Collect the markLine         |  |--------| Call the Markdown.markLine   |                    |
+     |  publishers and combine them  |           | function for each split line |                    |
+     |  with `\n`                    |           +------------------------------+                    |
+     +-------------------------------+                                                               |
+                         |                                                                           |
+                         |                     +---------------------------------+      +-------------------------------+
+                         |                     | Collect the markWord publishers |      |  Call the Markdown.markWord   |
+                         +---------------------| and combine them using          |------|  function for each component  |
+                                               | reduce(Text(""), +)             |      +-------------------------------+
+                                               +---------------------------------+
+
+
+     ***/
+    
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
@@ -211,5 +199,50 @@ private extension NSFont {
     var boldItalic: NSFont {
         let font = NSFont.boldSystemFont(ofSize: 12)
         return font
+    }
+}
+
+extension String {
+    func matches(for regex: String) -> [String] {
+        let regex = try? NSRegularExpression(pattern: regex)
+        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
+        guard let mapped = results?.compactMap({ result -> String? in
+            if let range = Range(result.range, in: self) {
+                return String(self[range])
+            } else {
+                return nil
+            }
+        }) else {
+            return []
+        }
+        return mapped
+    }
+
+    func matchRange(for regex: String) -> [Range<String.Index>] {
+        let regex = try? NSRegularExpression(pattern: regex)
+        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
+        guard let mapped = results?.compactMap({ Range($0.range, in: self) }) else {
+            return []
+        }
+        return mapped
+    }
+
+    func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var startIndex = startIndex
+        while startIndex < endIndex,
+              let range = self[startIndex...].range(of: string, options: options)
+        {
+            result.append(range)
+            startIndex = range.lowerBound < range.upperBound ? range.upperBound :
+                index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
+    }
+}
+
+extension Array where Element == String {
+    func replaceAllOccurences(of original: String, with string: String) -> [String] {
+        map { $0.replacingOccurrences(of: original, with: string) }
     }
 }
