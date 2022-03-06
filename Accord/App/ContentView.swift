@@ -48,7 +48,7 @@ struct ContentView: View {
                                     AccordCoreVars.user = d.user
                                     user_id = d.user.id
                                     if let pfp = d.user.avatar {
-                                        Request.fetch(url: URL(string: "https://cdn.discordapp.com/avatars/\(d.user.id)/\(pfp).png?size=80")) { completion in
+                                        Request.fetch(url: URL(string: cdnURL + "/avatars/\(d.user.id)/\(pfp).png?size=80")) { completion in
                                             switch completion {
                                             case .success(let data):
                                                 avatar = data

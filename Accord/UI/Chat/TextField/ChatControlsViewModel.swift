@@ -125,7 +125,23 @@ final class ChatControlsViewModel: ObservableObject {
     }
     
     func executeCommand(guildID: String, channelID: String) throws {
-        guard let command = self.command else { return }
+        guard let command = self.command else {
+            if self.textFieldContents.prefix(6) == "/nick " {
+                let nick = self.textFieldContents.dropFirst(6).stringLiteral
+                Request.ping(url: URL(string: "\(rootURL)/guilds/\(guildID)/members/%40me/nick"), headers: Headers (
+                    userAgent: discordUserAgent,
+                    token: AccordCoreVars.token,
+                    bodyObject: ["nick":nick],
+                    type: .PATCH,
+                    discordHeaders: true,
+                    json: true
+                ))
+                self.emptyTextField()
+            } else if self.textFieldContents.prefix(6) == "/shrug" {
+                self.send(text: #"¯\_(ツ)_/¯"#, guildID: guildID, channelID: channelID)
+            }
+            return
+        }
         var options: [[String:Any]] = []
         if command.options?.count != 0 {
             let args: [(key: String, value: Any)] = self.textFieldContents

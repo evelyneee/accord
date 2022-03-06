@@ -42,6 +42,7 @@ struct LoadingView: View {
         Text("Gaslight. Gatekeep. Girlboss.").italic(),
         Text("Not a car"),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
+        Text("You can change your nickname with") + Text("/nick").font(Font.system(.title2, design: .monospaced))
     ]
 
     var body: some View {

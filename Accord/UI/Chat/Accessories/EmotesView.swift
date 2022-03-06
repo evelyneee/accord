@@ -37,7 +37,7 @@ struct EmotesView: View, Equatable {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                             }) {
                                                 VStack {
-                                                    HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()
+                                                    HoveredAttachment(cdnURL + "/emojis/\(emote.id)").equatable()
                                                         .frame(width: 25, height: 25)
                                                 }
                                                 .frame(width: 30, height: 30)
@@ -54,7 +54,7 @@ struct EmotesView: View, Equatable {
                                     Button(action: {
                                         chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                     }) {
-                                        HoveredAttachment("https://cdn.discordapp.com/emojis/\(emote.id)").equatable()
+                                        HoveredAttachment(cdnURL + "/emojis/\(emote.id)").equatable()
                                             .frame(width: 30, height: 30)
                                     }
                                     .buttonStyle(EmoteButton())

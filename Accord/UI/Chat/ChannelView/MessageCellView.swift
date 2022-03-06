@@ -98,14 +98,14 @@ struct MessageCellView: View {
             HStack { [unowned message] in
                 if !(message.isSameAuthor && message.referenced_message == nil && message.author?.avatar != nil) {
                     if let author = message.author, let avatar = author.avatar, gifPfp && message.author?.avatar?.prefix(2) == "a_" {
-                        HoverGifView(url: "https://cdn.discordapp.com/avatars/\(author.id)/\(avatar).gif?size=48")
+                        HoverGifView(url: cdnURL + "/avatars/\(author.id)/\(avatar).gif?size=48")
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
                                 PopoverProfileView(user: message.author)
                             })
                     } else {
-                        Attachment(avatar != nil ? "https://cdn.discordapp.com/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar))
+                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar))
                             .equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
@@ -160,7 +160,7 @@ struct MessageCellView: View {
             HStack {
                 ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
                     HStack(spacing: 4) {
-                        Attachment("https://cdn.discordapp.com/emojis/\(reaction.emoji.id ?? "").png?size=16")
+                        Attachment(cdnURL + "/emojis/\(reaction.emoji.id ?? "").png?size=16")
                             .equatable()
                             .frame(width: 16, height: 16)
                         Text(String(reaction.count))

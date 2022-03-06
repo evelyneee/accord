@@ -75,7 +75,11 @@ final class Gateway {
 
     static var gatewayURL: URL = .init(string: "wss://gateway.discord.gg?v=9&encoding=json")!
 
-    init(url: URL = Gateway.gatewayURL, session_id: String? = nil, seq: Int? = nil) throws {
+    public init (
+        url: URL = Gateway.gatewayURL,
+        session_id: String? = nil,
+        seq: Int? = nil
+    ) throws {
         socketEndpoint = NWEndpoint.url(url)
         let parameters: NWParameters = .tls
         let wsOptions = NWProtocolWebSocket.Options()
@@ -97,7 +101,7 @@ final class Gateway {
         guard connection?.state != .cancelled else { return } // Don't listen for hello if there is no connection
         connection?.receiveMessage { [weak self] data, _, _, error in
             if let error = error {
-                print(error)
+                return print(error)
             }
             guard let data = data,
                   let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
@@ -105,8 +109,7 @@ final class Gateway {
                   let interval = helloD["heartbeat_interval"] as? Int
             else {
                 print("Failed to get a heartbeat interval")
-                wss.hardReset()
-                return
+                return wss.hardReset()
             }
             self?.interval = interval
             DispatchQueue.main.async {
@@ -149,8 +152,7 @@ final class Gateway {
                 self.listen()
             }
             guard let data = data else {
-                print(context as Any, data as Any)
-                return
+                return print(context as Any, data as Any)
             }
             do {
                 let event = try GatewayEvent(data: data)
@@ -186,7 +188,7 @@ final class Gateway {
                     "browser": "Discord Client",
                     "release_channel": "stable",
                     "client_build_number": dscVersion,
-                    "client_version": "0.0.264",
+                    "client_version": "0.0.265",
                     "os_version": NSWorkspace.shared.kernelVersion,
                     "os_arch": "x64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",

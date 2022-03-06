@@ -94,7 +94,7 @@ struct ChatControls: View {
             }, label: { [weak command] in
                 HStack {
                     if let command = command, let avatar = command.avatar {
-                        Attachment("https://cdn.discordapp.com/avatars/\(command.application_id)/\(avatar).png?size=48")
+                        Attachment(cdnURL + "/avatars/\(command.application_id)/\(avatar).png?size=48")
                             .equatable()
                             .frame(width: 22, height: 22)
                             .clipShape(Circle())
@@ -123,7 +123,7 @@ struct ChatControls: View {
                     viewModel?.matchedEmoji.removeAll()
                 }, label: {
                     HStack {
-                        Attachment("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
+                        Attachment(cdnURL + "/emojis/\(emoji.id).png?size=80", size: CGSize(width: 48, height: 48))
                             .equatable()
                             .frame(width: 20, height: 20)
                         Text(emoji.name)
@@ -136,7 +136,7 @@ struct ChatControls: View {
                     if let range = viewModel?.textFieldContents.range(of: ":") {
                         viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                     }
-                    viewModel?.textFieldContents.append("https://cdn.discordapp.com/emojis/\(emoji.id).png?size=48")
+                    viewModel?.textFieldContents.append(cdnURL + "/emojis/\(emoji.id).png?size=48")
                     viewModel?.matchedEmoji.removeAll()
                 }
                 .buttonStyle(.borderless)

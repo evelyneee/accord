@@ -45,7 +45,7 @@ func logOut() {
 }
 
 final class Headers {
-    init(
+    init (
         userAgent: String = discordUserAgent,
         contentType: String? = nil,
         token: String? = nil,
@@ -84,7 +84,7 @@ final class Headers {
             "os": "Mac OS X",
             "browser": "Discord Client",
             "release_channel": "stable",
-            "client_version": "0.0.264",
+            "client_version": "0.0.265",
             "os_version": NSWorkspace.shared.kernelVersion,
             "os_arch": "x64",
             "system_locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
@@ -128,6 +128,7 @@ final class Headers {
             if let superProps = superProps {
                 request.addValue(superProps, forHTTPHeaderField: "X-Super-Properties")
             } else {
+                wss.close(.protocolCode(.abnormalClosure))
                 fatalError("We cannot skip the X-Super-Properties. What are you trying to do, get banned?")
             }
             config.httpAdditionalHeaders = [

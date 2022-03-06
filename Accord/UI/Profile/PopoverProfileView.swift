@@ -14,7 +14,7 @@ struct PopoverProfileView: View {
         ZStack(alignment: .top) {
             VStack {
                 if let banner = user?.banner, let id = user?.id {
-                    Attachment("https://cdn.discordapp.com/banners/\(id)/\(banner).png")
+                    Attachment(cdnURL + "/banners/\(id)/\(banner).png")
                         .equatable()
                         .frame(height: 100)
                 } else {
@@ -26,7 +26,7 @@ struct PopoverProfileView: View {
                 Spacer().frame(height: 100)
                 VStack(alignment: .leading) {
                     if user?.avatar?.prefix(2) == "a_" {
-                        GifView(url: "https://cdn.discordapp.com/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
+                        GifView(url: cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)

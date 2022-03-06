@@ -36,7 +36,7 @@ struct GuildView: View {
                     .fontWeight(.medium)
             }
             if let banner = guild.banner {
-                Attachment("https://cdn.discordapp.com/banners/\(guild.id)/\(banner).png")
+                Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png")
                     .equatable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .cornerRadius(10)
@@ -128,7 +128,7 @@ struct ServerListViewCell: View {
                 }
             case .group_dm:
                 HStack {
-                    Attachment("https://cdn.discordapp.com/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=24").equatable()
+                    Attachment(cdnURL + "/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=24").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
                     Text(channel?.computedName ?? "Unknown Channel")

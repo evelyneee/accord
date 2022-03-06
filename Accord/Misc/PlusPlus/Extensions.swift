@@ -140,7 +140,7 @@ struct Folder<Content: View>: View {
                         VStack(spacing: 3) {
                             HStack(spacing: 3) {
                                 if let guild = icon.first, let icon = guild.icon {
-                                    Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
                                         .equatable()
                                         .clipShape(Circle())
                                         .frame(width: 16, height: 16)
@@ -148,7 +148,7 @@ struct Folder<Content: View>: View {
                                     Spacer().frame(width: 16, height: 16)
                                 }
                                 if let guild = icon[safe: 1], let icon = guild.icon {
-                                    Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
                                         .equatable()
                                         .clipShape(Circle())
                                         .frame(width: 16, height: 16)
@@ -158,7 +158,7 @@ struct Folder<Content: View>: View {
                             }
                             HStack(spacing: 3) {
                                 if let guild = icon[safe: 2], let icon = guild.icon {
-                                    Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
                                         .equatable()
                                         .clipShape(Circle())
                                         .frame(width: 16, height: 16)
@@ -166,7 +166,7 @@ struct Folder<Content: View>: View {
                                     Spacer().frame(width: 16, height: 16)
                                 }
                                 if let guild = icon[safe: 3], let icon = guild.icon {
-                                    Attachment("https://cdn.discordapp.com/icons/\(guild.id)/\(icon).png?size=24")
+                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
                                         .equatable()
                                         .clipShape(Circle())
                                         .frame(width: 16, height: 16)
@@ -250,12 +250,12 @@ func pronounDBFormed(pronoun: String?) -> String {
 
 func pfpURL(_ uid: String?, _ hash: String?, _ size: String = "64") -> String {
     guard let uid = uid, let hash = hash else { return "" }
-    return "https://cdn.discordapp.com/avatars/\(uid)/\(hash).png?size=\(size)"
+    return cdnURL + "/avatars/\(uid)/\(hash).png?size=\(size)"
 }
 
 func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
     guard let id = id, let icon = icon else { return "" }
-    return "https://cdn.discordapp.com/icons/\(id)/\(icon).png?size=\(size)"
+    return cdnURL + "/icons/\(id)/\(icon).png?size=\(size)"
 }
 
 public extension Collection where Indices.Iterator.Element == Index {
