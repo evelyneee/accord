@@ -33,11 +33,6 @@ extension ServerListView: MentionSenderDelegate {
         viewUpdater.updateView()
     }
 
-    func sendWSError(error _: Error) {
-        print("bad")
-        online = false
-    }
-
     func select(channel: Channel) {
         let guildID = channel.guild_id ?? "@me"
         if guildID == "@me" {

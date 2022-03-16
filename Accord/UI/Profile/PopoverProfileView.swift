@@ -31,7 +31,7 @@ struct PopoverProfileView: View {
                             .frame(width: 45, height: 45)
                             .shadow(radius: 5)
                     } else {
-                        Attachment(pfpURL(user?.id, user?.avatar))
+                        Attachment(pfpURL(user?.id, user?.avatar, discriminator: user?.discriminator ?? "0005"))
                             .equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)

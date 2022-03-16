@@ -53,6 +53,7 @@ struct GatewayEvent {
         case guildMemberChunk = "GUILD_MEMBERS_CHUNK"
         case guildMemberListUpdate = "GUILD_MEMBER_LIST_UPDATE"
         case threadListSync = "THREAD_LIST_SYNC"
+        case threadUpdate = "THREAD_UPDATE"
 
         case inviteCreate = "INVITE_CREATE"
         case inviteDelete = "INVITE_DELETE"

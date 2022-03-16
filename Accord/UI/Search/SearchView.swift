@@ -42,7 +42,7 @@ struct SearchView: View {
                                     .clipShape(Circle())
                                     .frame(width: 19, height: 19)
                             } else if channel.recipients?.count == 1 {
-                                Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar))
+                                Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar, discriminator: channel.recipients?[0].discriminator ?? "0005"))
                                     .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 19, height: 19)

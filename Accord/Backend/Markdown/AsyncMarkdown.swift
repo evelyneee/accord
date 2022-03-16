@@ -11,16 +11,16 @@ import SwiftUI
 
 final class AsyncMarkdownModel: ObservableObject {
     
-    init (text: String) {
+    init (text: String, font: Bool) {
         self.markdown = Text(text)
-        self.make(text: text)
+        self.make(text: text, font: font)
     }
     
     @Published var markdown: Text
     
-    private func make(text: String) {
+    private func make(text: String, font: Bool) {
         DispatchQueue.global(qos: .userInitiated).async {
-            Markdown.markAll(text: text, Storage.usernames)
+            Markdown.markAll(text: text, Storage.usernames, font: font)
                 .replaceError(with: Text(text))
                 .receive(on: RunLoop.main)
                 .assign(to: &self.$markdown)
@@ -35,12 +35,15 @@ struct AsyncMarkdown: View, Equatable {
     }
     
     @StateObject var model: AsyncMarkdownModel
+    var font: Bool
     
-    init(_ text: String) {
-        _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
+    init(_ text: String, font: Bool = false) {
+        _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text, font: font))
+        self.font = font
     }
     
     var body: some View {
         model.markdown
+            .font(self.font ? .largeTitle : .body)
     }
 }

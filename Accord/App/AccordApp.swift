@@ -29,39 +29,12 @@ struct AccordApp: App {
             } else {
                 GeometryReader { reader in
                     ContentView(loaded: $loaded)
-                        .preferredColorScheme(darkMode ? .dark : nil)
-                        .onAppear {
-                            // AccordCoreVars.loadVersion()
-                            // DispatchQueue(label: "socket").async {
-                            //     let rpc = IPC().start()
-                            // }
-                            concurrentQueue.async {
-                                _ = NetworkCore.shared
-                            }
-                            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
-                                granted, error in
-                                if !granted {
-                                    print(error)
-                                }
-                            }
-                            self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
-                            self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
-                            if self.windowWidth == 0 {
-                                self.windowWidth = 1000
-                                UserDefaults.standard.set(1000, forKey: "windowWidth")
-                            }
-                            if self.windowHeight == 0 {
-                                self.windowHeight = 800
-                                UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
-                            }
-                            appDelegate.fileNotifications()
-                            NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
-                        }
                         .onDisappear {
                             loaded = false
                             UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
                             UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
                         }
+                        .preferredColorScheme(darkMode ? .dark : nil)
                         .sheet(isPresented: $popup, onDismiss: {}) {
                             SearchView()
                                 .focusable()
@@ -82,6 +55,36 @@ struct AccordApp: App {
                             }
                         }
                 }
+                .onAppear {
+                    // AccordCoreVars.loadVersion()
+                    // DispatchQueue(label: "socket").async {
+                    //     let rpc = IPC().start()
+                    // }
+                    concurrentQueue.async {
+                        NetworkCore.shared = NetworkCore()
+                    }
+                    DispatchQueue.global(qos: .background).async {
+                        Regex.precompute()
+                    }
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
+                        granted, error in
+                        if !granted {
+                            print(error)
+                        }
+                    }
+                    self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
+                    self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
+                    if self.windowWidth == 0 {
+                        self.windowWidth = 1000
+                        UserDefaults.standard.set(1000, forKey: "windowWidth")
+                    }
+                    if self.windowHeight == 0 {
+                        self.windowHeight = 800
+                        UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
+                    }
+                    appDelegate.fileNotifications()
+                    NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                }
             }
         }
         .windowStyle(.automatic)
@@ -92,6 +95,9 @@ struct AccordApp: App {
                 Button("Show quick jump") {
                     popup.toggle()
                 }.keyboardShortcut("k")
+                Button("Error", action: {
+                    Self.error(Request.FetchErrors.invalidRequest, additionalDescription: "uwu")
+                })
             }
             CommandMenu("Account") {
                 Button("Log out") {
@@ -143,7 +149,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem?
     
     func applicationWillTerminate(_ notification: Notification) {
-        wss.close(.protocolCode(.noStatusReceived))
+        wss?.close(.protocolCode(.noStatusReceived))
     }
     
     func applicationDidFinishLaunching(_: Notification) {

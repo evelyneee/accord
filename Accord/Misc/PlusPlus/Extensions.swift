@@ -50,23 +50,6 @@ extension KeyedDecodingContainer {
     }
 }
 
-extension String {
-    enum DataErrors: Error {
-        case notString
-    }
-
-    init(_ data: Data) throws {
-        let initialize = Self(data: data, encoding: .utf8)
-        guard let initialize = initialize else { throw DataErrors.notString }
-        self = initialize
-    }
-
-    var cString: UnsafePointer<CChar>? {
-        let nsString = self as NSString
-        return nsString.utf8String
-    }
-}
-
 extension Color {
     init(hex: String) {
         let hex = hex
@@ -248,9 +231,14 @@ func pronounDBFormed(pronoun: String?) -> String {
     }
 }
 
-func pfpURL(_ uid: String?, _ hash: String?, _ size: String = "64") -> String {
-    guard let uid = uid, let hash = hash else { return "" }
-    return cdnURL + "/avatars/\(uid)/\(hash).png?size=\(size)"
+func pfpURL(_ uid: String?, _ hash: String?, discriminator: String = "0005", _ size: String = "64") -> String {
+    guard let uid = uid else { return "" }
+    if let avatar = hash {
+        return cdnURL + "/avatars/\(uid)/\(avatar).png?size=\(size)"
+    } else {
+        print("/embed/avatars/\(String(((Int(discriminator) ?? 0) % 5))).png")
+        return cdnURL + ("/embed/avatars/\(String(((Int(discriminator) ?? 0) % 5))).png")
+    }
 }
 
 func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
@@ -277,30 +265,6 @@ extension NSTextField {
     override open var focusRingType: NSFocusRingType {
         get { .none }
         set {}
-    }
-}
-
-extension String {
-    func makeProperDate() -> String {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
-        let date = formatter.date(from: self)
-        guard let date = date else {
-            return ""
-        }
-        return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
-    }
-
-    func makeProperHour() -> String {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
-        let date = formatter.date(from: self)
-        guard let date = date else {
-            return ""
-        }
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "hh:mm"
-        return dateFormatter.string(from: date)
     }
 }
 

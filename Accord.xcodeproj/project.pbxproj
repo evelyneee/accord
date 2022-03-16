@@ -46,6 +46,7 @@
 		9E82875127BD6C5400953A7B /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E82875027BD6C5400953A7B /* Permissions.swift */; };
 		9E8F8CA62773FC9C00A77600 /* Queues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA52773FC9C00A77600 /* Queues.swift */; };
 		9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8F8CA72774037F00A77600 /* MentionsView.swift */; };
+		9E96EB7A27DEC33D00BB3C8A /* Gateway+VoiceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */; };
 		9EA295212753D1490014927D /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA295202753D1480014927D /* MemberList.swift */; };
 		9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3582327BFFD3E0046A136 /* Collection++.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
@@ -55,6 +56,8 @@
 		9ED3011327A8C40600D6235D /* RegisterImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED3011227A8C40600D6235D /* RegisterImages.swift */; };
 		9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED4A5AE276E334600BD485C /* AppKitLink.swift */; };
 		9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */; };
+		9EDD136627D5A55A000685E6 /* String++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136527D5A55A000685E6 /* String++.swift */; };
+		9EDD136827D6F951000685E6 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136727D6F951000685E6 /* Regex.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
 		A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* Operators++.swift */; };
@@ -169,6 +172,7 @@
 		9E82875027BD6C5400953A7B /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
 		9E8F8CA52773FC9C00A77600 /* Queues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queues.swift; sourceTree = "<group>"; };
 		9E8F8CA72774037F00A77600 /* MentionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionsView.swift; sourceTree = "<group>"; };
+		9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Gateway+VoiceState.swift"; sourceTree = "<group>"; };
 		9EA295202753D1480014927D /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
 		9EB3582327BFFD3E0046A136 /* Collection++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection++.swift"; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
@@ -178,6 +182,8 @@
 		9ED3011227A8C40600D6235D /* RegisterImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterImages.swift; sourceTree = "<group>"; };
 		9ED4A5AE276E334600BD485C /* AppKitLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppKitLink.swift; sourceTree = "<group>"; };
 		9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteWrapper.swift; sourceTree = "<group>"; };
+		9EDD136527D5A55A000685E6 /* String++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String++.swift"; sourceTree = "<group>"; };
+		9EDD136727D6F951000685E6 /* Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		A80FEC272724FD35005F9950 /* Operators++.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Operators++.swift"; sourceTree = "<group>"; };
@@ -241,6 +247,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9E96EB7827DEC32B00BB3C8A /* Voice */,
 				9E6B71082784EBC400A26CB6 /* Gateway */,
 				9ED818B1277BF125004D684C /* RPC */,
 				A80FEC34272779D9005F9950 /* PluginManager */,
@@ -403,6 +410,7 @@
 				9ED3011027A6C76300D6235D /* Keypath++.swift */,
 				9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */,
 				9EB3582327BFFD3E0046A136 /* Collection++.swift */,
+				9EDD136527D5A55A000685E6 /* String++.swift */,
 			);
 			path = PlusPlus;
 			sourceTree = "<group>";
@@ -456,6 +464,14 @@
 				9E7E4D2F279B69D7008FAF15 /* Storage.swift */,
 			);
 			path = Commands;
+			sourceTree = "<group>";
+		};
+		9E96EB7827DEC32B00BB3C8A /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */,
+			);
+			path = Voice;
 			sourceTree = "<group>";
 		};
 		9ECE42B9279E131B00883D0A /* TextField */ = {
@@ -589,6 +605,7 @@
 				9E6B71062783A73400A26CB6 /* PlusPlus */,
 				9E6B71012783A6F200A26CB6 /* Shapes */,
 				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
+				9EDD136727D6F951000685E6 /* Regex.swift */,
 				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,
 			);
@@ -738,6 +755,7 @@
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,
 				A80FEC3327258457005F9950 /* EmbedView.swift in Sources */,
 				9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */,
+				9EDD136827D6F951000685E6 /* Regex.swift in Sources */,
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
@@ -769,12 +787,14 @@
 				3207A24425867586006C2665 /* Constants.swift in Sources */,
 				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
+				9E96EB7A27DEC33D00BB3C8A /* Gateway+VoiceState.swift in Sources */,
 				9E6BCC64277E8E850085F279 /* Print++.swift in Sources */,
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
 				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
+				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
 				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
@@ -921,7 +941,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -937,7 +957,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accordbeta;
@@ -974,7 +994,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accordbeta;

@@ -34,7 +34,9 @@ extension Gateway {
         case .channelUpdate: break
         case .channelDelete: break
         case .guildCreate: break
-        case .guildDelete: break
+        case .guildDelete:
+            print(String(data: event.data, encoding: .utf8))
+            break
         case .guildMemberAdd: break
         case .guildMemberRemove: break
         case .guildMemberUpdate: break

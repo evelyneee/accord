@@ -62,6 +62,26 @@ final class Gateway {
         case noSession
         case eventCorrupted
         case unknownEvent(String)
+        case heartbeatMissed
+        
+        var localizedDescription: String {
+            switch self {
+            case .essentialEventFailed(let event):
+                return "Essential Gateway Event failed: \(event)"
+            case .noStringData(let string):
+                return "Invalid data \(string)"
+            case .maxRequestReached:
+                return "Internal rate limit hit, you're going too fast!"
+            case .noSession:
+                return "Session missing?"
+            case .eventCorrupted:
+                return "Bad event sent"
+            case .unknownEvent(let event):
+                return "Unknown event: \(event)"
+            case .heartbeatMissed:
+                return "Heartbeat ACK missed"
+            }
+        }
     }
 
     private let additionalHeaders: [(String, String)] = [
@@ -199,9 +219,8 @@ final class Gateway {
     }
 
     private func heartbeat() throws {
-        if pendingHeartbeat {
-            reset()
-            return
+        guard !pendingHeartbeat else {
+            return AccordApp.error(GatewayErrors.heartbeatMissed, additionalDescription: "Check your network connection")
         }
         let packet: [String: Any] = [
             "op": 1,
@@ -220,12 +239,12 @@ final class Gateway {
                 guard let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata,
                       let data = data
                 else {
-                    print(context as Any, data as Any)
-                    return
+                    return AccordApp.error(GatewayErrors.essentialEventFailed("READY"), additionalDescription: "Try reconnecting?")
                 }
                 switch info.opcode {
                 case .text:
                     do {
+                        try wss.updateVoiceState(guildID: nil, channelID: nil)
                         let path = FileManager.default.urls(for: .cachesDirectory,
                                                             in: .userDomainMask)[0]
                             .appendingPathComponent("socketOut.json")
@@ -241,7 +260,7 @@ final class Gateway {
                         return
                     } catch {
                         promise(.failure(error))
-                        wss.hardReset()
+                        AccordApp.error(error)
                         return
                     }
                 case .close:

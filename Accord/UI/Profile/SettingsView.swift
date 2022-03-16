@@ -49,6 +49,8 @@ struct SettingsViewRedesign: View {
     var silentTyping: Bool = false
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
+    @AppStorage("ShowHiddenChannels")
+    var showHiddenChannels: Bool = false
     @AppStorage("MusicPlatform")
     var selectedPlatform: Platforms = Platforms.appleMusic
     
@@ -142,6 +144,7 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $silentTyping, title: "Enable silent typing")
                         SettingsToggleView(toggled: $metalRenderer, title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
                         SettingsToggleView(toggled: $gifPfp, title: "Enable Gif Profile Pictures", detail: "Experimental")
+                        SettingsToggleView(toggled: $showHiddenChannels, title: "Show hidden channels", detail: "Please don't use this")
                     }
 
                     HStack(alignment: .top) {

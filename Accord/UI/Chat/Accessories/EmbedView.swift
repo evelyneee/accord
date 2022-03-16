@@ -57,7 +57,7 @@ struct EmbedView: View, Equatable {
                             .lineLimit(2)
                     }
                 }
-                if let image = embed?.image {
+                if let image = embed?.image, embed?.video == nil {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
                         .equatable()
                         .cornerRadius(5)
@@ -65,8 +65,7 @@ struct EmbedView: View, Equatable {
                 }
                 if let video = embed?.video,
                     let urlString = video.proxy_url ?? video.url,
-                    let url = URL(string: urlString),
-                    !urlString.contains("youtube") {
+                    let url = URL(string: urlString) {
                     VideoPlayerController(url: url)
                         .cornerRadius(5)
                         .frame(maxWidth: 250)

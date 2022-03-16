@@ -26,7 +26,7 @@ struct TiltAnimation: ViewModifier {
 
 internal extension View {
     @ViewBuilder func `if`<Content: View>(_ condition: @autoclosure () -> Bool,
-                                          transform: (Self) -> Content) -> some View
+                                          transform: (Self) -> Content) -> _ConditionalContent<Content, Self>
     {
         if condition() {
             transform(self)
@@ -42,7 +42,12 @@ struct LoadingView: View {
         Text("Gaslight. Gatekeep. Girlboss.").italic(),
         Text("Not a car"),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
-        Text("You can change your nickname with") + Text("/nick").font(Font.system(.title2, design: .monospaced))
+        Text("You can change your nickname with ") + Text("/nick").font(Font.system(.title2, design: .monospaced)),
+        Text(verbatim: #"¯\_(ツ)_/¯"#),
+        Text("uwu owo"),
+        Text("Accord for iOS, releasing alongside GTA VI"),
+        Text("What's a X-Super-Properties?"),
+        Text("😼")
     ]
 
     var body: some View {

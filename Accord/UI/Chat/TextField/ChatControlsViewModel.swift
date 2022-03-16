@@ -28,10 +28,10 @@ final class ChatControlsViewModel: ObservableObject {
     var silentTyping: Bool = false
 
     func checkText(guildID: String) {
-        let mentions = textFieldContents.matches(for: #"(?<=@)(?:(?!\ ).)*"#)
-        let channels = textFieldContents.matches(for: #"(?<=#)(?:(?!\ ).)*"#)
-        let slashes = textFieldContents.matches(for: #"(?<=\/)(?:(?!\ ).)*"#)
-        let emoji = textFieldContents.matches(for: #"(?<=:).*"#)
+        let mentions = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
+        let channels = textFieldContents.matches(precomputed: Regex.chatTextChannelsRegex)
+        let slashes = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
+        let emoji = textFieldContents.matches(precomputed: Regex.chatTextEmojiRegex)
         if let search = mentions.last?.lowercased() {
             let matched: [String:String] = Storage.usernames
                 .mapValues { $0.lowercased() }

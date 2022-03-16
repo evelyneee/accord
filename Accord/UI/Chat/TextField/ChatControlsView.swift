@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ChatControls: View {
     
+    @available(macOS 12.0, *)
     enum FocusedElements: Hashable {
       case mainTextField
     }
@@ -37,20 +38,24 @@ struct ChatControls: View {
 
     private func send() {
         guard viewModel.textFieldContents != "" else { return }
+        let contents = viewModel.textFieldContents
+        if contents.prefix(1) != "/" {
+            viewModel.emptyTextField()
+        }
         messageSendQueue.async {
             if let fileUpload = fileUpload, let fileUploadURL = fileUploadURL {
-                viewModel.send(text: viewModel.textFieldContents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
+                viewModel.send(text: contents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
                 DispatchQueue.main.async {
                     self.fileUpload = nil
                     self.fileUploadURL = nil
                 }
             } else if let replyingTo = replyingTo {
                 self.replyingTo = nil
-                viewModel.send(text: viewModel.textFieldContents, replyingTo: replyingTo, mention: true, guildID: guildID)
+                viewModel.send(text: contents, replyingTo: replyingTo, mention: true, guildID: guildID)
             } else if viewModel.textFieldContents.prefix(1) == "/" {
                 try? viewModel.executeCommand(guildID: guildID, channelID: channelID)
             } else {
-                viewModel.send(text: viewModel.textFieldContents, guildID: guildID, channelID: channelID)
+                viewModel.send(text: contents, guildID: guildID, channelID: channelID)
             }
             if #available(macOS 12.0, *) {
                 DispatchQueue.main.async {
@@ -276,24 +281,6 @@ struct ChatControls: View {
                                 Image(systemName: "doc.fill")
                                     .foregroundColor(Color.secondary)
                             }
-                            /*
-                             if AccordCoreVars.plugins != [] {
-                                 ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
-                                     if pluginPoppedUp.indices.contains(offset) {
-                                         Button(action: {
-                                             pluginPoppedUp[offset].toggle()
-                                         }) {
-                                             Image(systemName: plugin.symbol)
-                                         }
-                                         .buttonStyle(BorderlessButtonStyle())
-                                         .popover(isPresented: $pluginPoppedUp[offset], content: {
-                                             NSViewWrapper(plugin.body ?? NSView())
-                                                 .frame(width: 200, height: 200)
-                                         })
-                                     }
-                                 }
-                             }
-                             */
                         }
                     }
                     .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
@@ -346,3 +333,22 @@ extension Array where Element: Hashable {
         self = removingDuplicates()
     }
 }
+
+/*
+ if AccordCoreVars.plugins != [] {
+     ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+         if pluginPoppedUp.indices.contains(offset) {
+             Button(action: {
+                 pluginPoppedUp[offset].toggle()
+             }) {
+                 Image(systemName: plugin.symbol)
+             }
+             .buttonStyle(BorderlessButtonStyle())
+             .popover(isPresented: $pluginPoppedUp[offset], content: {
+                 NSViewWrapper(plugin.body ?? NSView())
+                     .frame(width: 200, height: 200)
+             })
+         }
+     }
+ }
+ */

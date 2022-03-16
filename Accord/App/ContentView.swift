@@ -29,6 +29,10 @@ struct ContentView: View {
                     concurrentQueue.async {
                         guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                         do {
+                            guard serverListView == nil else {
+                                loaded = true
+                                return
+                            }
                             guard wss == nil else {
                                 throw LoadErrors.alreadyLoaded
                             }

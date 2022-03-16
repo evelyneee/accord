@@ -81,5 +81,6 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     struct MergedMember: Decodable {
         var hoisted_role: String?
         var nick: String?
+        var roles: [String]
     }
 }

@@ -46,7 +46,7 @@ struct MessageCellView: View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
                 HStack(alignment: .bottom) { [unowned reply] in
-                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar, "16"))
+                    Attachment(pfpURL(reply.author?.id, reply.author?.avatar, discriminator: reply.author?.discriminator ?? "0005", "16"))
                         .equatable()
                         .frame(width: 15, height: 15)
                         .clipShape(Circle())
@@ -105,7 +105,7 @@ struct MessageCellView: View {
                                 PopoverProfileView(user: message.author)
                             })
                     } else {
-                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar))
+                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
                             .equatable()
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
@@ -121,35 +121,45 @@ struct MessageCellView: View {
                             editingTextField
                                 .padding(.leading, 41)
                         } else {
-                            AsyncMarkdown(message.content)
+                            AsyncMarkdown(message.content, font: message.content.hasEmojisOnly)
                                 .equatable()
                                 .padding(.leading, 41)
                         }
                     } else {
-                        Text(nick ?? message.author?.username ?? "Unknown User")
-                            .foregroundColor({ () -> Color in
-                                if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
-                                    return Color(int: color)
-                                }
-                                return Color.primary
-                            }())
-                            .fontWeight(.semibold)
-                        +
-                        Text("  \(message.timestamp.makeProperDate())")
-                            .foregroundColor(Color.secondary)
-                            .font(.subheadline)
-                        +
-                        Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
-                            .foregroundColor(Color.secondary)
-                            .font(.subheadline)
-                        +
-                        Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
-                            .foregroundColor(Color.secondary)
-                            .font(.subheadline)
+                        HStack(spacing: 1) {
+                            Text(nick ?? message.author?.username ?? "Unknown User")
+                                .foregroundColor({ () -> Color in
+                                    if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
+                                        return Color(int: color)
+                                    }
+                                    return Color.primary
+                                }())
+                                .fontWeight(.semibold)
+                            +
+                            Text("  \(message.timestamp.makeProperDate())")
+                                .foregroundColor(Color.secondary)
+                                .font(.subheadline)
+                            +
+                            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                                .foregroundColor(Color.secondary)
+                                .font(.subheadline)
+                            +
+                            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                                .foregroundColor(Color.secondary)
+                                .font(.subheadline)
+                            if (message.author?.bot ?? false) {
+                                Text("Bot")
+                                    .padding(.horizontal, 4)
+                                    .foregroundColor(Color.white)
+                                    .font(.subheadline)
+                                    .background(Capsule().fill().foregroundColor(Color.red))
+                                    .padding(.horizontal, 4)
+                            }
+                        }
                         if self.editing {
                             editingTextField
                         } else {
-                            AsyncMarkdown(message.content)
+                            AsyncMarkdown(message.content, font: message.content.hasEmojisOnly)
                                 .equatable()
                         }
                     }

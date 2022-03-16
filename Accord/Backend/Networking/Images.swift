@@ -68,6 +68,7 @@ final class ImageLoaderAndCache: ObservableObject {
     @Published var image: NSImage = .init()
     private var url: URL?
     private var size: CGSize?
+    private let queue = DispatchQueue.global(qos: .userInteractive)
 
     init(imageURL: String, size: CGSize? = nil) {
         url = URL(string: imageURL)
@@ -75,12 +76,11 @@ final class ImageLoaderAndCache: ObservableObject {
     }
 
     func load() {
-        if self.size?.width == 350 { print("loading attachment") }
-        RequestPublisher.image(url: self.url, to: self.size)
-            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
-            .receive(on: DispatchQueue.global(qos: .userInitiated))
-            .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-            .receive(on: RunLoop.main)
-            .assign(to: &$image)
+        queue.async {
+            RequestPublisher.image(url: self.url, to: self.size)
+                .replaceError(with: NSImage())
+                .receive(on: RunLoop.main)
+                .assign(to: &self.$image)
+        }
     }
 }
