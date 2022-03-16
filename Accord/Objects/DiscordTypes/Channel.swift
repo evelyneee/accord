@@ -67,4 +67,5 @@ enum ChannelType: Int, Codable {
     case guild_private_thread = 12
     case stage = 13
     case unknown4 = 14
+    case unknown5 = 15
 }
