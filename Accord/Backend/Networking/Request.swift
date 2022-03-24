@@ -345,7 +345,8 @@ public final class Request {
     class func createMultipartBody(
         with payloadJson: String?,
         fileURL: String? = nil,
-        boundary: String = "Boundary-\(UUID().uuidString)"
+        boundary: String = "Boundary-\(UUID().uuidString)",
+        fileData: Data? = nil
     ) throws -> Data {
         var body = Data()
         
@@ -361,7 +362,7 @@ public final class Request {
         if let fileURL = fileURL,
            let url = URL(string: fileURL) {
             let filename = url.lastPathComponent
-            let data = try Data(contentsOf: url)
+            let data = try fileData ?? Data(contentsOf: url)
             let mimetype = url.mimeType()
             
             body.append("--\(boundary)\r\n")
@@ -428,7 +429,11 @@ public final class RequestPublisher {
             .tryMap { data, response throws -> T in
                 guard let httpResponse = response as? HTTPURLResponse else { throw Request.FetchErrors.badResponse(response) }
                 if httpResponse.statusCode == 200 {
-                    return try JSONDecoder().decode(T.self, from: data)
+                    print(try! String(data))
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+                    print(decoder.dateDecodingStrategy)
+                    return try decoder.decode(T.self, from: data)
                 } else {
                     let discordError = try JSONDecoder().decode(DiscordError.self, from: data)
                     throw Request.FetchErrors.discordError(code: discordError.code, message: discordError.message)
@@ -461,5 +466,28 @@ public final class RequestPublisher {
             }
             .debugWarnNoMainThread()
             .eraseToAny()
+    }
+}
+
+enum DateDecodingErrors: Error {
+    case badDate(String)
+}
+
+let ISO8601FormatterGlobal: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
+    return formatter
+}()
+
+
+extension JSONDecoder.DateDecodingStrategy {
+    static let iso8601withFractionalSeconds = custom {
+        let container = try $0.singleValueContainer()
+        let string = try container.decode(String.self)
+        let date = ISO8601FormatterGlobal.date(from: string)
+        guard let date = date else {
+            throw DateDecodingErrors.badDate(string)
+        }
+        return date
     }
 }

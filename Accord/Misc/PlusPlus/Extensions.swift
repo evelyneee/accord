@@ -90,14 +90,6 @@ extension Color {
     }
 }
 
-@discardableResult func runCommand(command: String) -> Int32 {
-    let systemPtr = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "system")
-    let system = unsafeBitCast(systemPtr, to: (@convention(c) (_: UnsafePointer<CChar>) -> Int32).self)
-    guard let cString = command.cString else { return 1 }
-    let res = system(cString)
-    return res
-}
-
 @available(macOS 11.0, *)
 struct Folder<Content: View>: View {
     var icon: [Guild]
@@ -266,6 +258,21 @@ extension NSTextField {
         get { .none }
         set {}
     }
+    
+    override open func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.type == NSEvent.EventType.keyDown {
+            if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == NSEvent.ModifierFlags.command.rawValue {
+                switch event.charactersIgnoringModifiers! {
+                case "v":
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "red.evelyn.accord.PasteEvent"), object: nil, userInfo: [:])
+                    break
+                default:
+                    break
+                }
+            }
+        }
+        return super.performKeyEquivalent(with: event)
+    }
 }
 
 extension DispatchQueue {
@@ -296,4 +303,18 @@ extension Data {
     }
 }
 
+extension NSBitmapImageRep {
+    var png: Data? { representation(using: .png, properties: [:]) }
+}
+extension Data {
+    var bitmap: NSBitmapImageRep? { NSBitmapImageRep(data: self) }
+}
+extension NSImage {
+    var png: Data? { tiffRepresentation?.bitmap?.png }
+}
 
+extension Date {
+    func makeProperDate() -> String {
+        return DateFormatter.localizedString(from: self, dateStyle: .medium, timeStyle: .short)
+    }
+}

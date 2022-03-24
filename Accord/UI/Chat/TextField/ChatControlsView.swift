@@ -175,8 +175,8 @@ struct ChatControls: View {
                 typing = false
                 send()
             }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { [weak viewModel] pub in
-                if String(describing: pub.userInfo).contains("Command-V") && self.focusedField == .mainTextField {
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
+                if self.focusedField == .mainTextField {
                     let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                     if let rawData = data,
                         let string = String(data: rawData, encoding: .utf8),
@@ -189,6 +189,9 @@ struct ChatControls: View {
                                     viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
                                 }
                             })
+                    } else if let image = NSImage(pasteboard: NSPasteboard.general) {
+                        self.fileUpload = image.png
+                        self.fileUploadURL = URL(string: "file:///image0.png")!
                     }
                 }
             }

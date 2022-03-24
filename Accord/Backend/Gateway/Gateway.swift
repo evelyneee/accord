@@ -174,11 +174,13 @@ final class Gateway {
             guard let data = data else {
                 return print(context as Any, data as Any)
             }
-            do {
-                let event = try GatewayEvent(data: data)
-                self.handleMessage(event: event)
-            } catch {
-                print(error)
+            wssThread.async {
+                do {
+                    let event = try GatewayEvent(data: data)
+                    self.handleMessage(event: event)
+                } catch {
+                    print(error)
+                }
             }
         }
     }
@@ -243,25 +245,27 @@ final class Gateway {
                 }
                 switch info.opcode {
                 case .text:
-                    do {
-                        try wss.updateVoiceState(guildID: nil, channelID: nil)
-                        let path = FileManager.default.urls(for: .cachesDirectory,
-                                                            in: .userDomainMask)[0]
-                            .appendingPathComponent("socketOut.json")
-                        try data.write(to: path)
-                        let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                        wssThread.async {
-                            self?.listen()
+                    wssThread.async {
+                        do {
+                            try wss.updateVoiceState(guildID: nil, channelID: nil)
+                            let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                in: .userDomainMask)[0]
+                                .appendingPathComponent("socketOut.json")
+                            try data.write(to: path)
+                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                            wssThread.async {
+                                self?.listen()
+                            }
+                            print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
+                            self?.sessionID = structure.d.session_id
+                            print("Connected with session ID", structure.d.session_id)
+                            promise(.success(structure.d))
+                            return
+                        } catch {
+                            promise(.failure(error))
+                            AccordApp.error(error)
+                            return
                         }
-                        print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
-                        self?.sessionID = structure.d.session_id
-                        print("Connected with session ID", structure.d.session_id)
-                        promise(.success(structure.d))
-                        return
-                    } catch {
-                        promise(.failure(error))
-                        AccordApp.error(error)
-                        return
                     }
                 case .close:
                     if let closeMessage = String(data: data, encoding: .utf8) {

@@ -52,7 +52,9 @@ extension Gateway {
         case .inviteCreate: break
         case .inviteDelete: break
         case .messageCreate:
-            guard let message = try? JSONDecoder().decode(GatewayMessage.self, from: event.data).d else { print("uhhhhh"); return }
+            let decoder = JSONDecoder.init()
+            decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+            guard let message = try? decoder.decode(GatewayMessage.self, from: event.data).d else { print("uhhhhh"); return }
             if let channelID = event.channelID, let author = message.author {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
