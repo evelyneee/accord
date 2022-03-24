@@ -36,11 +36,11 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var interaction: Interaction?
 
     var identifier: String {
-        content.appending(id)
+        content + id
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id.appending(content))
+        hasher.combine(id)
     }
 
     func delete() {
@@ -100,7 +100,7 @@ enum MessageType: Int, Codable {
     case `default`, recipientAdd, recipientRemove, `call`,
     channelNameChange, channelIconChange, channelMessagePin,
     guildMemberJoin, userBoostedServer, guildReachedLevelOne,
-    guildReachedLevelTwo, guildReachedLevelThree,
+    guildReachedLevelTwo, guildReachedLevelThree, unused,
     channelFollowAdd, guildDiscoveryDisqualified,
     guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
     guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,

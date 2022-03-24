@@ -35,9 +35,10 @@ struct EmotesView: View, Equatable {
                                         ForEach(Emotes.emotes[key] ?? [], id: \.id) { emote in
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
+                                                print(cdnURL + "/emojis/\(emote.id).png?size=24")
                                             }) {
                                                 VStack {
-                                                    HoveredAttachment(cdnURL + "/emojis/\(emote.id)").equatable()
+                                                    HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=24").equatable()
                                                         .frame(width: 25, height: 25)
                                                 }
                                                 .frame(width: 30, height: 30)
@@ -54,7 +55,7 @@ struct EmotesView: View, Equatable {
                                     Button(action: {
                                         chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
                                     }) {
-                                        HoveredAttachment(cdnURL + "/emojis/\(emote.id)").equatable()
+                                        HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=24").equatable()
                                             .frame(width: 30, height: 30)
                                     }
                                     .buttonStyle(EmoteButton())

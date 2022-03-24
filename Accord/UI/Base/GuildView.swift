@@ -11,6 +11,7 @@ import SwiftUI
 struct GuildView: View {
     var guild: Guild
     @Binding var selection: Int?
+    @StateObject var updater: ServerListView.UpdateView
     var body: some View {
         List {
             HStack {
@@ -48,8 +49,8 @@ struct GuildView: View {
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name)), tag: Int(channel.id) ?? 0, selection: self.$selection) {
-                        ServerListViewCell(channel: channel)
+                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
+                        ServerListViewCell(channel: channel, updater: self.updater)
                     }
                     .buttonStyle(BorderlessButtonStyle())
                     .foregroundColor(channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
@@ -87,20 +88,16 @@ struct GuildView: View {
 }
 
 struct ServerListViewCell: View {
-    var channel: Channel?
-    var guildID: String
-    init(channel: Channel) {
-        self.channel = channel
-        guildID = channel.guild_id ?? "@me"
-    }
-
+    var channel: Channel
+    @StateObject var updater: ServerListView.UpdateView
+    var guildID: String { self.channel.guild_id ?? "@me" }
     var body: some View {
         var readStateDot: some View {
             ZStack {
                 Circle()
                     .foregroundColor(Color.red)
                     .frame(width: 15, height: 15)
-                Text(String(channel?.read_state?.mention_count ?? 0))
+                Text(String(channel.read_state?.mention_count ?? 0))
                     .foregroundColor(Color.white)
                     .fontWeight(.semibold)
                     .font(.caption)
@@ -108,59 +105,59 @@ struct ServerListViewCell: View {
         }
 
         return HStack {
-            switch channel?.type {
+            switch channel.type {
             case .normal:
                 HStack {
                     Image(systemName: "number")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .voice:
                 HStack {
                     Image(systemName: "speaker.wave.2.fill")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .guild_news:
                 HStack {
                     Image(systemName: "megaphone.fill")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .stage:
                 HStack {
                     Image(systemName: "person.wave.2.fill")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .dm:
                 HStack {
-                    Attachment(pfpURL(channel?.recipients?[0].id, channel?.recipients?[0].avatar, discriminator: channel?.recipients?[0].discriminator ?? "0005")).equatable()
+                    Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar, discriminator: channel.recipients?[0].discriminator ?? "0005")).equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .group_dm:
                 HStack {
-                    Attachment(cdnURL + "/channel-icons/\(channel?.id ?? "")/\(channel?.icon ?? "").png?size=24").equatable()
+                    Attachment(cdnURL + "/channel-icons/\(channel.id )/\(channel.icon ?? "").png?size=24").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .guild_public_thread:
                 HStack {
                     Image(systemName: "tray.full")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             case .guild_private_thread:
                 HStack {
                     Image(systemName: "tray.full")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             default:
                 HStack {
                     Image(systemName: "number")
-                    Text(channel?.computedName ?? "Unknown Channel")
+                    Text(channel.computedName)
                 }
             }
             Spacer()
-            if let readState = channel?.read_state, readState.mention_count != 0 {
+            if let readState = channel.read_state, readState.mention_count != 0 {
                 readStateDot
             }
         }

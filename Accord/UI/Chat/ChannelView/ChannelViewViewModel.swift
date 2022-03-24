@@ -10,7 +10,11 @@ import Combine
 import Foundation
 import SwiftUI
 
-final class ChannelViewViewModel: ObservableObject {
+final class ChannelViewViewModel: ObservableObject, Equatable {
+    
+    static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
+        return lhs.messages == rhs.messages && lhs.nicks == rhs.nicks && lhs.roles == rhs.roles && lhs.avatars == rhs.avatars && lhs.pronouns == rhs.pronouns
+    }
 
     @Published var messages: [Message] = .init()
     @Published var nicks: [String: String] = .init()

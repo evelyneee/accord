@@ -63,7 +63,7 @@ public final class Markdown {
      **/
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool) -> TextPublisher {
         let emoteIDs = word.matches(precomputed: Regex.emojiIDRegex)
-        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "32" : "16")") {
+        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "48" : "16")") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }

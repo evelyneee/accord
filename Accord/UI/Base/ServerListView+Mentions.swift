@@ -9,6 +9,10 @@ import Foundation
 
 extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
+        if guild == "@me" {
+            guard let index = Self.privateChannels.generateKeyMap()[channel] else { return }
+            Self.privateChannels[index].read_state?.mention_count += 1
+        }
         let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
         for (i, v) in index.enumerated() {
             guard let v = v, var folderList = Self.folders[i].guilds[v].channels else { continue }
@@ -18,6 +22,7 @@ extension ServerListView: MentionSenderDelegate {
             }
         }
         viewUpdater.updateView()
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Updater"), object: nil, userInfo: [:])
     }
 
     func deselect() {

@@ -47,6 +47,8 @@ private func log<T>(items: [T], file: String, line: String? = nil, separator: St
     for item in items {
         if type(of: item) is AnyClass {
             out.append(String(reflecting: item))
+        } else if let data = item as? Data {
+            out.append(String(data: data, encoding: .utf8) ?? String(describing: item))
         } else {
             out.append(String(describing: item))
         }

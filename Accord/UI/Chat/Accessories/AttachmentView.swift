@@ -38,7 +38,7 @@ struct AttachmentView: View {
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
             } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxy_url) {
-                WebVideoPlayer(url: url)
+                VideoPlayer(player: AVPlayer.init(url: url))
                     .cornerRadius(5)
                     .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
             }

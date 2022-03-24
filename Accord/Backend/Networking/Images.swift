@@ -53,14 +53,19 @@ struct HoveredAttachment: View, Equatable {
     }
 
     var body: some View {
-        Image(nsImage: imageLoader.image)
-            .resizable()
-            .scaledToFit()
-            .padding(2)
-            .background(hovering ? Color.gray.opacity(0.75).cornerRadius(1) : Color.clear.cornerRadius(0))
-            .onHover(perform: { _ in
-                hovering.toggle()
-            })
+        HStack {
+            Image(nsImage: imageLoader.image)
+                .resizable()
+                .scaledToFit()
+                .padding(2)
+                .background(hovering ? Color.gray.opacity(0.75).cornerRadius(1) : Color.clear.cornerRadius(0))
+                .onHover(perform: { _ in
+                    hovering.toggle()
+                })
+        }
+        .onAppear {
+            imageLoader.load()
+        }
     }
 }
 
@@ -76,7 +81,7 @@ final class ImageLoaderAndCache: ObservableObject {
     }
 
     func load() {
-        queue.async {
+        queue.async { [unowned self] in
             RequestPublisher.image(url: self.url, to: self.size)
                 .replaceError(with: NSImage())
                 .receive(on: RunLoop.main)

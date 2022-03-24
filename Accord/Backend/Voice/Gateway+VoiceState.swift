@@ -15,11 +15,11 @@ extension Gateway {
         muted: Bool = false,
         streaming: Bool = false
     ) throws {
-        let packet: [String:Any?] = [
+        let packet: [String:Any] = [
             "op":4,
             "d":[
-                "guild_id":guildID,
-                "channel_id":channelID,
+                "guild_id":guildID as Any,
+                "channel_id":channelID as Any,
                 "self_deaf":deafened,
                 "self_mute":muted,
                 "self_video":streaming

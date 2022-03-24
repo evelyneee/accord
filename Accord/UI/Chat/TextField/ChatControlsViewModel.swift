@@ -73,10 +73,10 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func findView() {
-        AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
-            textField.allowsEditingTextAttributes = true
-            self?.textField = textField
-        }
+//        AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
+//            textField.allowsEditingTextAttributes = true
+//            self?.textField = textField
+//        }
     }
 
     func markdown() {
@@ -93,17 +93,18 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func clearMatches() {
-        self.matchedEmoji.removeAll()
-        self.matchedUsers.removeAll()
-        self.matchedChannels.removeAll()
+        DispatchQueue.main.async {
+            self.matchedEmoji.removeAll()
+            self.matchedUsers.removeAll()
+            self.matchedChannels.removeAll()
+        }
     }
     
     func send(text: String, guildID: String, channelID: String) {
-        self.emptyTextField()
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content": text, "tts":false, "nonce":self.nonce],
+            bodyObject: ["content": text, "tts":false, "nonce":generateFakeNonce()],
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)",
@@ -171,16 +172,17 @@ final class ChatControlsViewModel: ObservableObject {
             options: command.options ?? [],
             optionValues: options
         )
-        self.matchedCommands.removeAll()
-        self.emptyTextField()
+        DispatchQueue.main.async {
+            self.matchedCommands.removeAll()
+            self.emptyTextField()
+        }
     }
     
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
-        self.emptyTextField()
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts":false, "nonce":self.nonce],
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts":false, "nonce":generateFakeNonce()],
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channel_id)",
@@ -190,7 +192,6 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func send(text: String, file: URL, data: Data, channelID: String) {
-        self.emptyTextField()
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
@@ -216,19 +217,13 @@ final class ChatControlsViewModel: ObservableObject {
 
     func type(channelID: String, guildID: String) {
         guard !silentTyping else { return }
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/typing"), headers: Headers(
+        Request.ping(url: URL(string: rootURL + "/channels/\(channelID)/typing"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-    }
-    
-    var nonce: String {
-        let date: Double = Date().timeIntervalSince1970
-        let nonceNumber = (Int(date)*1000 - 1420070400000) * 4194304
-        return String(nonceNumber)
     }
 }
 

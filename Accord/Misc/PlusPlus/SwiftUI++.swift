@@ -181,3 +181,7 @@ struct SafeVideoPlayer: View {
             }
     }
 }
+
+extension Font {
+    static var chatTextFont = Font.system(size: 14)
+}

@@ -19,7 +19,8 @@ final class AsyncMarkdownModel: ObservableObject {
     @Published var markdown: Text
     
     private func make(text: String, font: Bool) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
             Markdown.markAll(text: text, Storage.usernames, font: font)
                 .replaceError(with: Text(text))
                 .receive(on: RunLoop.main)
@@ -44,6 +45,6 @@ struct AsyncMarkdown: View, Equatable {
     
     var body: some View {
         model.markdown
-            .font(self.font ? .largeTitle : .body)
+            .font(self.font ? .system(size: 48) : .chatTextFont)
     }
 }

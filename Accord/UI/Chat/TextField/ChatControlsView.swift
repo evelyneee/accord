@@ -37,25 +37,24 @@ struct ChatControls: View {
     @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
 
     private func send() {
-        guard viewModel.textFieldContents != "" else { return }
-        let contents = viewModel.textFieldContents
-        if contents.prefix(1) != "/" {
-            viewModel.emptyTextField()
-        }
-        messageSendQueue.async {
+        messageSendQueue.async { [weak viewModel] in
+            guard viewModel?.textFieldContents != "", let contents = viewModel?.textFieldContents else { return }
+            if contents.prefix(1) != "/" {
+                viewModel?.emptyTextField()
+            }
             if let fileUpload = fileUpload, let fileUploadURL = fileUploadURL {
-                viewModel.send(text: contents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
+                viewModel?.send(text: contents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
                 DispatchQueue.main.async {
                     self.fileUpload = nil
                     self.fileUploadURL = nil
                 }
             } else if let replyingTo = replyingTo {
                 self.replyingTo = nil
-                viewModel.send(text: contents, replyingTo: replyingTo, mention: true, guildID: guildID)
-            } else if viewModel.textFieldContents.prefix(1) == "/" {
-                try? viewModel.executeCommand(guildID: guildID, channelID: channelID)
+                viewModel?.send(text: contents, replyingTo: replyingTo, mention: true, guildID: guildID)
+            } else if viewModel?.textFieldContents.prefix(1) == "/" {
+                try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
             } else {
-                viewModel.send(text: contents, guildID: guildID, channelID: channelID)
+                viewModel?.send(text: contents, guildID: guildID, channelID: channelID)
             }
             if #available(macOS 12.0, *) {
                 DispatchQueue.main.async {
@@ -176,7 +175,7 @@ struct ChatControls: View {
                 typing = false
                 send()
             }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { [weak viewModel] pub in
                 if String(describing: pub.userInfo).contains("Command-V") && self.focusedField == .mainTextField {
                     let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                     if let rawData = data,
@@ -186,7 +185,9 @@ struct ChatControls: View {
                             self.fileUpload = data
                             self.fileUploadURL = url
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                                if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
+                                    viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                                }
                             })
                     }
                 }
@@ -201,15 +202,20 @@ struct ChatControls: View {
             typing = false
             send()
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { pub in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { [weak viewModel] pub in
             if String(describing: pub.userInfo).contains("Command-V") {
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
-                if let rawData = data, let string = String(data: rawData, encoding: .utf8), let url = URL(string: string), let data = try? Data(contentsOf: url) {
-                    self.fileUpload = data
-                    self.fileUploadURL = url
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                        self.viewModel.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                    })
+                if let rawData = data,
+                    let string = String(data: rawData, encoding: .utf8),
+                    let url = URL(string: string),
+                    let data = try? Data(contentsOf: url) {
+                        self.fileUpload = data
+                        self.fileUploadURL = url
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                            if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
+                                viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                            }
+                        })
                 }
             }
         }

@@ -11,7 +11,12 @@ import Combine
 import Foundation
 import SwiftUI
 
-struct MessageCellView: View {
+struct MessageCellView: View, Equatable {
+    
+    static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
+        return lhs.message == rhs.message
+    }
+    
     var message: Message
     var nick: String?
     var replyNick: String?
@@ -95,25 +100,15 @@ struct MessageCellView: View {
                 }
                 .padding(.leading, 47)
             }
-            HStack { [unowned message] in
-                if !(message.isSameAuthor && message.referenced_message == nil && message.author?.avatar != nil) {
-                    if let author = message.author, let avatar = author.avatar, gifPfp && message.author?.avatar?.prefix(2) == "a_" {
-                        HoverGifView(url: cdnURL + "/avatars/\(author.id)/\(avatar).gif?size=48")
-                            .frame(width: 33, height: 33)
-                            .clipShape(Circle())
-                            .popover(isPresented: $popup, content: {
-                                PopoverProfileView(user: message.author)
-                            })
-                    } else {
-                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
-                            .equatable()
-                            .frame(width: 33, height: 33)
-                            .clipShape(Circle())
-                            .popover(isPresented: $popup, content: {
-                                PopoverProfileView(user: message.author)
-                            })
-                    }
-
+            HStack(alignment: .top) { [unowned message] in
+                if !(message.isSameAuthor && message.referenced_message == nil) {
+                    Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
+                        .equatable()
+                        .frame(width: 33, height: 33)
+                        .clipShape(Circle())
+                        .popover(isPresented: $popup, content: {
+                            PopoverProfileView(user: message.author)
+                        })
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor, message.referenced_message == nil {
@@ -134,6 +129,7 @@ struct MessageCellView: View {
                                     }
                                     return Color.primary
                                 }())
+                                .font(.chatTextFont)
                                 .fontWeight(.semibold)
                             +
                             Text("  \(message.timestamp.makeProperDate())")
@@ -204,10 +200,10 @@ struct MessageCellView: View {
             }
             Button("Edit") {
                 self.editing.toggle()
-            }
+            }.disabled(message.author?.id != AccordCoreVars.user?.id)
             Button("Delete") { [weak message] in
                 message?.delete()
-            }
+            }.disabled(message.author?.id != AccordCoreVars.user?.id)
             Divider()
             Button("Show profile") {
                 popup.toggle()
@@ -243,9 +239,9 @@ struct MessageCellView: View {
             if !message.attachments.isEmpty {
                 Divider()
                 ForEach(message.attachments, id: \.url) { attachment in
-                    Menu(attachment.filename) {
-                        if !attachment.isFile {
-                            Button("Open in window") { [weak attachment] in
+                    Menu(attachment.filename) { [weak attachment] in
+                        if attachment?.isFile == false {
+                            Button("Open in window") {
                                 guard let attachment = attachment else { return }
                                 if attachment.isVideo, let url = URL(string: attachment.url) {
                                     attachmentWindows (
@@ -266,12 +262,12 @@ struct MessageCellView: View {
                                 }
                             }
                         }
-                        if let stringURL = attachment.url, let url = URL(string: stringURL) {
+                        if let stringURL = attachment?.url, let url = URL(string: stringURL) {
                             Button("Open URL in browser") {
                                 NSWorkspace.shared.open(url)
                             }
                         }
-                        Button("Copy image URL") { [weak attachment] in
+                        Button("Copy image URL") {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(attachment?.url ?? "", forType: .string)
                         }

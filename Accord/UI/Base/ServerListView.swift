@@ -54,9 +54,9 @@ struct ServerListView: View {
     
     @State var selection: Int?
     @State var selectedServer: Int? = 0
-    public static var folders: [GuildFolder] = []
-    public static var privateChannels: [Channel] = []
-    internal static var readStates: [ReadStateEntry] = []
+    public static var folders: [GuildFolder] = .init()
+    public static var privateChannels: [Channel] = .init()
+    internal static var readStates: [ReadStateEntry] = .init()
     @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
@@ -131,7 +131,20 @@ struct ServerListView: View {
                         if !NetworkCore.shared.connected {
                             onlineButton
                         }
-                        dmButton
+                        ZStack(alignment: .bottomTrailing) {
+                            dmButton
+                            if Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +) != 0 {
+                                ZStack {
+                                    Circle()
+                                        .foregroundColor(Color.red)
+                                        .frame(width: 15, height: 15)
+                                    Text(String(Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +)))
+                                        .foregroundColor(Color.white)
+                                        .fontWeight(.semibold)
+                                        .font(.caption)
+                                }
+                            }
+                        }
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)
@@ -157,8 +170,8 @@ struct ServerListView: View {
                             .font(.title2)
                         Divider()
                         ForEach(Self.privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(channel)), tag: Int(channel.id) ?? 0, selection: self.$selection) {
-                                ServerListViewCell(channel: channel)
+                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
+                                ServerListViewCell(channel: channel, updater: self.viewUpdater)
                                     .onChange(of: self.selection, perform: { _ in
                                         if self.selection == Int(channel.id) {
                                             channel.read_state?.mention_count = 0
@@ -202,7 +215,7 @@ struct ServerListView: View {
                     .padding(.top, 5)
                     .listStyle(.sidebar)
                 } else if let selected = selectedServer {
-                    GuildView(guild: Array(Self.folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection)
+                    GuildView(guild: Array(Self.folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection, updater: self.viewUpdater)
                         .animation(nil, value: UUID())
                 }
             }
@@ -221,6 +234,9 @@ struct ServerListView: View {
             self.selectedServer = 201
             self.selection = number
         })
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Updater")), perform: { pub in
+            viewUpdater.updateView()
+        })
         .onAppear {
             concurrentQueue.async {
                 if !Self.folders.isEmpty {
@@ -237,6 +253,7 @@ struct ServerListView: View {
                             Self.privateChannels = channels
                             concurrentQueue.async {
                                 assignPrivateReadStates()
+                                self.viewUpdater.updateView()
                             }
                         }
                         Notifications.privateChannels = Self.privateChannels.map(\.id)
