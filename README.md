@@ -26,7 +26,7 @@ Xcode is required.
 The built product will be in the `build/Release` directory
 
 ### Licensing
-tbd
+This project is licensed under the BSD 3 clause license.
 
 ### TestFlight
 
