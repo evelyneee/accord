@@ -30,7 +30,7 @@ final class ChatControlsViewModel: ObservableObject {
     func checkText(guildID: String) {
         let mentions = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
         let channels = textFieldContents.matches(precomputed: Regex.chatTextChannelsRegex)
-        let slashes = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
+        let slashes = textFieldContents.matches(precomputed: Regex.chatTextSlashCommandRegex)
         let emoji = textFieldContents.matches(precomputed: Regex.chatTextEmojiRegex)
         if let search = mentions.last?.lowercased() {
             let matched: [String:String] = Storage.usernames
@@ -51,6 +51,7 @@ final class ChatControlsViewModel: ObservableObject {
                 self.matchedChannels = joined
             }
         } else if let command = slashes.last {
+            print("querying", command)
             try? wss.getCommands(guildID: guildID, query: command)
             let commands = SlashCommandStorage.commands[guildID]?
                 .filter { $0.name.lowercased().contains(command) }
@@ -172,7 +173,9 @@ final class ChatControlsViewModel: ObservableObject {
             options: command.options ?? [],
             optionValues: options
         )
+        
         DispatchQueue.main.async {
+            self.command = nil
             self.matchedCommands.removeAll()
             self.emptyTextField()
         }

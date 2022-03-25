@@ -103,9 +103,11 @@ extension Gateway {
                         SlashCommandStorage.GuildApplicationCommandsUpdateEvent.self,
                         from: event.data
                     )
+                    print(commands)
                     let userKeyMap = commands.d.applications.generateKeyMap()
                     SlashCommandStorage.commands[guildID] = commands.d.application_commands
                         .map { (command) -> SlashCommandStorage.Command in
+                            print(command)
                             if let index = userKeyMap[command.application_id],
                                let avatar = commands.d.applications[index].icon {
                                 command.avatar = avatar
