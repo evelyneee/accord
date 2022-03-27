@@ -178,11 +178,13 @@ struct GuildListPreview: View {
                 Text(name)
                     .equatable()
                     .frame(width: 45, height: 45)
+                    .background(Color.secondary)
                     .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
             } else {
                 Image(systemName: "questionmark")
                     .equatable()
                     .frame(width: 45, height: 45)
+                    .background(Color.secondary)
                     .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
             }
         }
