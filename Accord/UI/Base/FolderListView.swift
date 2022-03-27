@@ -55,9 +55,7 @@ extension ServerListView {
                                             .foregroundColor(Color.primary)
                                             .frame(width: 5, height: 5)
                                             .opacity(unreadMessages(guild: guild) ? 1 : 0)
-                                        Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
-                                            .frame(width: 45, height: 45)
-                                            .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+                                        GuildListPreview(guild: guild, selectedServer: selectedServer)
                                     }
                                 }
                                 if pingCount(guild: guild) != 0 {
@@ -109,9 +107,10 @@ extension ServerListView {
                                         .foregroundColor(Color.primary)
                                         .frame(width: 5, height: 5)
                                         .opacity(unreadMessages(guild: guild) ? 1 : 0)
-                                    Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
-                                        .frame(width: 45, height: 45)
-                                        .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+//                                    Attachment(iconURL(guild.id, guild.icon ?? "")).equatable()
+//                                        .frame(width: 45, height: 45)
+//                                        .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+                                    GuildListPreview(guild: guild, selectedServer: selectedServer)
                                 }
                             }
                             .buttonStyle(BorderlessButtonStyle())
