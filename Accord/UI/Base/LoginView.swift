@@ -66,39 +66,36 @@ struct LoginView: View {
         .padding()
     }
     
+    @ViewBuilder
     private var initialViewTopView: some View {
-        Group {
-            Text("Welcome to Accord")
-                .font(.title)
-                .fontWeight(.bold)
-                .padding(.bottom, 5)
-                .padding(.top)
-            
-            Text("Choose how you want to login")
-                .foregroundColor(Color.secondary)
-                .padding(.bottom)
-        }
+        Text("Welcome to Accord")
+            .font(.title)
+            .fontWeight(.bold)
+            .padding(.bottom, 5)
+            .padding(.top)
+        
+        Text("Choose how you want to login")
+            .foregroundColor(Color.secondary)
+            .padding(.bottom)
     }
     
+    @ViewBuilder
     private var initialViewFields: some View {
-        Group {
-            TextField("Email", text: $loginViewDataModel.email)
-            SecureField("Password", text: $loginViewDataModel.password)
-            TextField("Token (optional)", text: $loginViewDataModel.token)
-            TextField("Proxy IP (optional)", text: $loginViewDataModel.proxyIP)
-            TextField("Proxy Port (optional)", text: $loginViewDataModel.proxyPort)
-        }
+        TextField("Email", text: $loginViewDataModel.email)
+        SecureField("Password", text: $loginViewDataModel.password)
+        TextField("Token (optional)", text: $loginViewDataModel.token)
+        TextField("Proxy IP (optional)", text: $loginViewDataModel.proxyIP)
+        TextField("Proxy Port (optional)", text: $loginViewDataModel.proxyPort)
     }
     
+    @ViewBuilder
     private var errorView: some View {
-        Group {
-            if let error = viewModel.loginError {
-                switch error {
-                case DiscordLoginErrors.invalidForm:
-                    Text("Wrong username/password")
-                default:
-                    EmptyView()
-                }
+        if let error = viewModel.loginError {
+            switch error {
+            case DiscordLoginErrors.invalidForm:
+                Text("Wrong username/password")
+            default:
+                EmptyView()
             }
         }
     }
@@ -246,7 +243,7 @@ final class LoginViewViewModel: ObservableObject {
     @Published var loginError: Error? = nil
     
     init () {}
-
+    
     func login(_ email: String, _ password: String, _: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
@@ -311,9 +308,9 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         siteKey = token
         print(token, siteKey)
     }
-
+    
     let siteKey: String
-
+    
     func makeNSView(context _: Context) -> WKWebView {
         var webView = WKWebView()
         let webConfiguration = WKWebViewConfiguration()
@@ -321,9 +318,9 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         let scriptHandler = ScriptHandler()
         contentController.add(scriptHandler, name: "hCaptcha")
         webConfiguration.userContentController = contentController
-
+        
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-
+        
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: webView.topAnchor),
@@ -336,7 +333,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         }
         return webView
     }
-
+    
     func updateNSView(_: WKWebView, context _: Context) {}
 }
 
