@@ -69,5 +69,6 @@ struct LoadingView: View {
             }
             Spacer()
         }
+        .focusable(false)
     }
 }

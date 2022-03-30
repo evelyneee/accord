@@ -50,10 +50,12 @@ final class MediaRemoteWrapper {
                 let isMusic = information["kMRMediaRemoteNowPlayingInfoIsMusicApp"] as? Bool ?? false
                 let progress = information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double
                 print("done")
-                if let id = information["kMRMediaRemoteNowPlayingInfoAlbumiTunesStoreAdamIdentifier"] as? Int {
+                if let id = (information["kMRMediaRemoteNowPlayingInfoAlbumiTunesStoreAdamIdentifier"] as? Int) ?? (information["kMRMediaRemoteNowPlayingInfoiTunesStoreIdentifier"] as? Int) {
+                    print("Song has Adam ID")
                     Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { completion in
                         switch completion {
                         case .success(let data):
+                            print("Success fetching iTunes Store ID")
                             if let dict = try? JSONSerialization.jsonObject(with: data) as? [String:Any] ?? [:] {
                                 let artworkURL = (dict["results"] as? [[String:Any]])?.first?["artworkUrl100"] as? String
                                 let song = Song(
@@ -72,6 +74,7 @@ final class MediaRemoteWrapper {
                         }
                     })
                 } else {
+                    print("where is da adam id??", information.keys)
                     let song = Song(
                         name: name,
                         artist: information["kMRMediaRemoteNowPlayingInfoArtist"] as? String,

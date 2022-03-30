@@ -119,8 +119,6 @@ extension Gateway {
                     print(error)
                 }
             }
-        case .readySupplemental:
-            print(event.data)
         default: break
         }
     }

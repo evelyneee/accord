@@ -166,7 +166,7 @@ struct ServerListViewCell: View {
 
 struct GuildListPreview: View {
     @State var guild: Guild
-    @State var selectedServer: Int?
+    @Binding var selectedServer: Int?
     @StateObject var updater: ServerListView.UpdateView
     var body: some View {
         if let icon = guild.icon {

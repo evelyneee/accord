@@ -175,6 +175,9 @@ struct ChatControls: View {
                 typing = false
                 send()
             }
+            .layoutPriority(1)
+            .animation(nil)
+            .fixedSize(horizontal: false, vertical: true)
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
                 if self.focusedField == .mainTextField {
                     let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
@@ -205,6 +208,8 @@ struct ChatControls: View {
             typing = false
             send()
         }
+        .animation(nil)
+        .fixedSize(horizontal: false, vertical: true)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { [weak viewModel] pub in
             if String(describing: pub.userInfo).contains("Command-V") {
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)

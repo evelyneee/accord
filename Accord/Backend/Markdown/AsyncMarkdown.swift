@@ -46,5 +46,7 @@ struct AsyncMarkdown: View, Equatable {
     var body: some View {
         model.markdown
             .font(self.font ? .system(size: 48) : .chatTextFont)
+            .animation(nil)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

@@ -429,10 +429,8 @@ public final class RequestPublisher {
             .tryMap { data, response throws -> T in
                 guard let httpResponse = response as? HTTPURLResponse else { throw Request.FetchErrors.badResponse(response) }
                 if httpResponse.statusCode == 200 {
-                    print(try! String(data))
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-                    print(decoder.dateDecodingStrategy)
                     return try decoder.decode(T.self, from: data)
                 } else {
                     let discordError = try JSONDecoder().decode(DiscordError.self, from: data)
