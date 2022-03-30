@@ -20,7 +20,7 @@ struct EmbedView: View, Equatable {
     var body: some View {
         HStack(spacing: 0) {
             if let color = embed?.color {
-                Color(NSColor.color(from: color) ?? NSColor.gray).frame(width: 3).padding(.trailing, 5)
+                Color(int: color).frame(width: 3).padding(.trailing, 5)
             }
             VStack(alignment: .leading) {
                 if let author = embed?.author {

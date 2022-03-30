@@ -93,7 +93,7 @@ extension Color {
 @available(macOS 11.0, *)
 struct Folder<Content: View>: View {
     var icon: [Guild]
-    var color: NSColor
+    var color: Color
     @Binding var read: Bool
     var content: () -> Content
     
@@ -151,7 +151,7 @@ struct Folder<Content: View>: View {
                             }
                         }
                         .frame(width: 45, height: 45)
-                        .background(Color(color.withAlphaComponent(0.75)))
+                        .background(color.opacity(0.75))
                         .cornerRadius(15)
                         .frame(width: 45, height: 45)
                     }
@@ -316,5 +316,10 @@ extension NSImage {
 extension Date {
     func makeProperDate() -> String {
         return DateFormatter.localizedString(from: self, dateStyle: .medium, timeStyle: .short)
+    }
+    func makeProperHour() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "hh:mm"
+        return dateFormatter.string(from: self)
     }
 }

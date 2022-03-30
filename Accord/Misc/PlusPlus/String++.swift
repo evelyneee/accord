@@ -10,12 +10,15 @@ import Foundation
 extension String {
     var hasEmojisOnly: Bool {
         var mut = self
-        var count = 0
-        let discordEmojis = mut.matchRange(precomputed: Regex.fullEmojiRegex)
-        count += discordEmojis.count
-        discordEmojis.reversed().forEach { mut.removeSubrange($0) }
-        mut.removeAll(where: { $0 == " "})
-        return mut.filter({ !$0.isEmoji }).count == 0
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let discordEmojis = mut
+            .matchRange(precomputed: Regex.fullEmojiRegex)
+        discordEmojis
+            .reversed()
+            .forEach { mut.removeSubrange($0) }
+        return mut
+            .filter { !$0.isEmoji }
+            .count == 0
     }
 }
 

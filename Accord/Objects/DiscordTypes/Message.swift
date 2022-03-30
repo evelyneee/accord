@@ -18,15 +18,13 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var channel_id: String
     var guild_id: String?
     var content: String
-    var edited_timestamp: String?
+    var edited_timestamp: Date?
     var id: String
     var embeds: [Embed]?
     var mention_everyone: Bool?
     var mentions: [User?]
-    var nonce: String?
     var pinned: Bool?
     var timestamp: Date
-    var tts: Bool
     var type: MessageType
     var attachments: [AttachedFiles]
     var referenced_message: Reply?

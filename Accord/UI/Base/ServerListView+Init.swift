@@ -22,14 +22,17 @@ extension ServerListView {
         }
         
         // Bind the merged member objects to the guilds
-        readyPacket.guilds.enumerated().forEach { index, guild in
-            readyPacket.guilds[index].mergedMember = readyPacket.merged_members[safe: index]?.first
-            
-            // Bind permissions
-            if let role = readyPacket.guilds[index].roles?.filter( { $0.id == readyPacket.merged_members[safe: index]?.first?.hoisted_role } ).first {
-                readyPacket.guilds[index].guildPermissions = role.permissions
+        readyPacket.guilds = readyPacket.guilds.enumerated()
+            .map { (index, guild) -> Guild in
+                var guild = guild
+                
+                guild.mergedMember = readyPacket.merged_members[safe: index]?.first
+                
+                if let role = guild.roles?.filter( { $0.id == guild.mergedMember?.hoisted_role } ).first {
+                    guild.guildPermissions = role.permissions
+                }
+                return guild
             }
-        }
         
         // Set presence
         MediaRemoteWrapper.status = readyPacket.user_settings?.status
@@ -69,24 +72,33 @@ extension ServerListView {
         
         // Form the folders and fix the guild objects
         let guildKeyMap = readyPacket.guilds.generateKeyMap()
-        let guildTemp = guildOrder.compactMap { guildKeyMap[$0] }.compactMap { readyPacket.guilds[$0] }
-        let guildDict = guildTemp.generateKeyMap()
-        for folder in folderTemp {
-            for id in folder.guild_ids.compactMap({ guildDict[$0] }) {
-                var guild = guildTemp[id]
-                guild.emojis.removeAll()
-                guild.index = id
-                for channel in 0 ..< (guild.channels?.count ?? 0) {
-                    guild.channels?[channel].guild_id = guild.id
-                    guild.channels?[channel].guild_icon = guild.icon
-                    guild.channels?[channel].guild_name = guild.name ?? "Unknown Guild"
-                }
-                folder.guilds.append(guild)
-            }
-        }
+        let guildTemp = guildOrder
+            .compactMap { guildKeyMap[$0] }
+            .map { readyPacket.guilds[$0] }
         
-        // Remove empty folders
+        // format folders
+        let guildDict = guildTemp.generateKeyMap()
         Self.folders = folderTemp
+            .map { (folder) -> GuildFolder in
+                let folder = folder
+                folder.guilds = folder.guild_ids
+                    .compactMap { guildDict[$0] }
+                    .map { (id) -> Guild in
+                        var guild = guildTemp[id]
+                        guild.emojis.removeAll()
+                        guild.index = id
+                        guild.channels = guild.channels?
+                            .compactMap { (channel) -> Channel in
+                                var channel = channel
+                                channel.guild_id = guild.id
+                                channel.guild_icon = guild.icon
+                                channel.guild_name = guild.name ?? "Unknown Guild"
+                                return channel
+                            }
+                        return guild
+                    }
+                return folder
+            }
             .filter { !$0.guilds.isEmpty }
         
         // Put the read states for access for the private channels

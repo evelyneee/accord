@@ -47,8 +47,10 @@ struct ServerListView: View {
     public class UpdateView: ObservableObject {
         @Published var updater: Bool = false
         func updateView() {
-            self.updater.toggle()
-            self.objectWillChange.send()
+            DispatchQueue.main.async {
+                self.updater.toggle()
+                self.objectWillChange.send()
+            }
         }
     }
     

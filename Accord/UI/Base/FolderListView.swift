@@ -19,7 +19,7 @@ extension ServerListView {
                 if folder.guilds.count != 1 {
                     Folder(
                         icon: Array(folder.guilds.prefix(4)),
-                        color: NSColor.color(from: folder.color ?? 0) ?? NSColor.windowBackgroundColor,
+                        color: Color(int: folder.color ?? 0),
                         read: Binding.constant(folder.guilds.map({ unreadMessages(guild: $0) }).contains(true))
                     ) {
                         ForEach(folder.guilds, id: \.hashValue) { guild in

@@ -485,9 +485,16 @@ extension JSONDecoder.DateDecodingStrategy {
         let container = try $0.singleValueContainer()
         let string = try container.decode(String.self)
         let date = ISO8601FormatterGlobal.date(from: string)
-        guard let date = date else {
-            throw DateDecodingErrors.badDate(string)
+        if let date = date {
+            return date
+        } else {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = .withInternetDateTime
+            let date = formatter.date(from: string)
+            if let date = date {
+                return date
+            }
         }
-        return date
+        throw DateDecodingErrors.badDate(string)
     }
 }
