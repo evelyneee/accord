@@ -163,3 +163,31 @@ struct ServerListViewCell: View {
         }
     }
 }
+
+struct GuildListPreview: View {
+    @State var guild: Guild
+    @State var selectedServer: Int?
+    @StateObject var updater: ServerListView.UpdateView
+    var body: some View {
+        if let icon = guild.icon {
+            Attachment(iconURL(guild.id, icon))
+                .equatable()
+                .frame(width: 45, height: 45)
+                .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+        } else {
+            if let name = guild.name {
+                Text(name)
+                    .equatable()
+                    .frame(width: 45, height: 45)
+                    .background(Color.secondary)
+                    .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+            } else {
+                Image(systemName: "questionmark")
+                    .equatable()
+                    .frame(width: 45, height: 45)
+                    .background(Color.secondary)
+                    .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+            }
+        }
+    }
+}
