@@ -46,7 +46,7 @@ final class Activity {
         if let state = state {
             dict["state"] = state
         }
-        if type == 0 {
+        if type != 4 {
             dict["assets"] = self.assets
             dict["party"] = [:]
             dict["secrets"] = [:]

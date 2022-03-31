@@ -14,6 +14,23 @@ extension ServerListView {
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
         @StateObject var updater: ServerListView.UpdateView
+        
+        func updateSelection(old: Int?, new: Int?) {
+            concurrentQueue.async {
+                let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
+                guard let selectedServer = old,
+                      let new = new,
+                      let id = map[safe: selectedServer]?.id,
+                      let newID = map[safe: new]?.id else { return }
+                UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
+                DispatchQueue.main.async {
+                    if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(newID)") as? Int {
+                        self.selection = value
+                    }
+                }
+            }
+        }
+        
         var body: some View {
             ForEach(ServerListView.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
@@ -26,21 +43,7 @@ extension ServerListView {
                             ZStack(alignment: .bottomTrailing) {
                                 Button(action: { [weak wss] in
                                     wss?.cachedMemberRequest.removeAll()
-                                    let oldSelection = selectedServer
-                                    concurrentQueue.async {
-                                        let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
-                                        guard let selectedServer = oldSelection,
-                                              let new = guild.index,
-                                              let id = map[safe: selectedServer]?.id,
-                                              let newID = map[safe: new]?.id else { return }
-                                        UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
-                                        let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(newID)")
-                                        DispatchQueue.main.async {
-                                            if val != 0 {
-                                                self.selection = val
-                                            }
-                                        }
-                                    }
+                                    self.updateSelection(old: selectedServer, new: guild.index)
                                     selectedServer = guild.index
                                 }) {
                                     HStack {
@@ -52,6 +55,7 @@ extension ServerListView {
                                         GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                                     }
                                 }
+                                .accessibility(label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages"))
                                 if pingCount(guild: guild) != 0 {
                                     ZStack {
                                         Circle()
@@ -72,21 +76,7 @@ extension ServerListView {
                         ForEach(folder.guilds, id: \.hashValue) { guild in
                             Button(action: { [weak wss] in
                                 wss?.cachedMemberRequest.removeAll()
-                                let oldSelection = selectedServer
-                                concurrentQueue.async {
-                                    let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
-                                    guard let selectedServer = oldSelection,
-                                          let new = guild.index,
-                                          let id = map[safe: selectedServer]?.id,
-                                          let newID = map[safe: new]?.id else { return }
-                                    UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
-                                    let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(newID)")
-                                    DispatchQueue.main.async {
-                                        if val != 0 {
-                                            self.selection = val
-                                        }
-                                    }
-                                }
+                                self.updateSelection(old: selectedServer, new: guild.index)
                                 selectedServer = guild.index
                             }) {
                                 HStack {
@@ -98,6 +88,7 @@ extension ServerListView {
                                     GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                                 }
                             }
+                            .accessibility(label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages"))
                             .buttonStyle(BorderlessButtonStyle())
                             if pingCount(guild: guild) != 0 {
                                 ZStack {

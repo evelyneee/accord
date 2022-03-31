@@ -51,7 +51,7 @@ final class MediaRemoteWrapper {
                 let progress = information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double
                 print("done")
                 if let id = (information["kMRMediaRemoteNowPlayingInfoAlbumiTunesStoreAdamIdentifier"] as? Int) ?? (information["kMRMediaRemoteNowPlayingInfoiTunesStoreIdentifier"] as? Int) {
-                    print("Song has Adam ID")
+                    print("Song has iTunes Store ID")
                     Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { completion in
                         switch completion {
                         case .success(let data):
@@ -113,13 +113,13 @@ final class MediaRemoteWrapper {
                                     applicationID: musicRPCAppID,
                                     flags: 1,
                                     name: "Apple Music",
-                                    type: 0,
+                                    type: 2,
                                     timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                                    state: "Listening to \(song.artist ?? "someone")",
-                                    details: "\(song.name)\(song.albumName != nil ? " - \(song.albumName!)": "")",
+                                    state: song.albumName ?? song.name + " (Single)",
+                                    details: song.name,
                                     assets: [
                                         "large_image":"mp:\(url)",
-                                        "large_text":song.albumName ?? song.name
+                                        "large_text":"By " + (song.artist ?? "Unnamed Artist")
                                     ]
                                 )
                             }
@@ -132,9 +132,9 @@ final class MediaRemoteWrapper {
                             applicationID: musicRPCAppID,
                             flags: 1,
                             name: "Apple Music",
-                            type: 0,
+                            type: 2,
                             timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                            state: "Listening to \(song.artist ?? "someone")",
+                            state: "In \(song.albumName ?? song.name) by \(song.artist ?? "someone")",
                             details: song.name
                         )
                     }

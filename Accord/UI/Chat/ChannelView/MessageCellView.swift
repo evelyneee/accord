@@ -14,7 +14,7 @@ import SwiftUI
 struct MessageCellView: View, Equatable {
     
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
-        return lhs.message == rhs.message
+        lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
     
     var message: Message

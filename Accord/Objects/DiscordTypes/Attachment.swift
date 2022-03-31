@@ -15,6 +15,7 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
 
     var id: String
     var filename: String
+    var description: String?
     var content_type: String?
     var size: Int
     var url: String

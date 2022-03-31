@@ -81,7 +81,8 @@ final class ImageLoaderAndCache: ObservableObject {
     }
 
     func load() {
-        queue.async { [unowned self] in
+        queue.async { [weak self] in
+            guard let self = self else { return }
             RequestPublisher.image(url: self.url, to: self.size)
                 .replaceError(with: NSImage())
                 .receive(on: RunLoop.main)

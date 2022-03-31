@@ -50,7 +50,8 @@ final class ChatControlsViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.matchedChannels = joined
             }
-        } else if let command = slashes.last {
+        } else if let command = slashes.last?.trimmingCharacters(in: .letters.inverted),
+                    textFieldContents.prefix(1) == "/" && guildID != "@me" {
             print("querying", command)
             try? wss.getCommands(guildID: guildID, query: command)
             let commands = SlashCommandStorage.commands[guildID]?
