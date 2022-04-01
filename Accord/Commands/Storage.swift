@@ -8,9 +8,8 @@
 import Foundation
 
 final class SlashCommandStorage {
-    
-    static var commands: [String:[Command]] = .init()
-    
+    static var commands: [String: [Command]] = .init()
+
     final class Command: Codable {
         var application_id: String
         var description: String
@@ -27,7 +26,7 @@ final class SlashCommandStorage {
             var required: Bool?
         }
     }
-    
+
     final class GuildApplicationCommandsUpdateEvent: Decodable {
         var d: D
         final class D: Decodable {

@@ -94,7 +94,7 @@ struct GuildView: View {
 struct ServerListViewCell: View {
     var channel: Channel
     @StateObject var updater: ServerListView.UpdateView
-    var guildID: String { self.channel.guild_id ?? "@me" }
+    var guildID: String { channel.guild_id ?? "@me" }
     var body: some View {
         var readStateDot: some View {
             ZStack {
@@ -139,7 +139,7 @@ struct ServerListViewCell: View {
                 }
             case .group_dm:
                 HStack {
-                    Attachment(cdnURL + "/channel-icons/\(channel.id )/\(channel.icon ?? "").png?size=24").equatable()
+                    Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channel.icon ?? "").png?size=24").equatable()
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
                     Text(channel.computedName)

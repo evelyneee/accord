@@ -12,12 +12,12 @@ import Network
 import SwiftUI
 
 public enum RequestTypes: String {
-    case DELETE = "DELETE"
-    case GET = "GET"
-    case HEAD = "HEAD"
-    case PATCH = "PATCH"
-    case POST = "POST"
-    case PUT = "PUT"
+    case DELETE
+    case GET
+    case HEAD
+    case PATCH
+    case POST
+    case PUT
 }
 
 final class DiscordError: Codable {
@@ -45,7 +45,7 @@ func logOut() {
 }
 
 final class Headers {
-    init (
+    init(
         userAgent: String = discordUserAgent,
         contentType: String? = nil,
         token: String? = nil,
@@ -228,6 +228,7 @@ public final class Request {
     }
 
     // MARK: - Perform data request with completion handler
+
     class func fetch(
         request: URLRequest? = nil,
         url: URL? = nil,
@@ -265,6 +266,7 @@ public final class Request {
     }
 
     // MARK: - fetch() wrapper for empty requests without completion handlers
+
     class func ping(
         request: URLRequest? = nil,
         url: URL? = nil,
@@ -274,6 +276,7 @@ public final class Request {
     }
 
     // MARK: - Image getter
+
     class func image(
         url: URL?,
         to size: CGSize? = nil,
@@ -302,10 +305,10 @@ public final class Request {
             return completion(image)
         }).resume()
     }
-    
+
     class func fetch(
         url: URL?,
-        with payloadJson: [String:Any]? = nil,
+        with payloadJson: [String: Any]? = nil,
         fileURL: String? = nil,
         boundary: String = "Boundary-\(UUID().uuidString)",
         headers: Headers? = nil,
@@ -341,7 +344,7 @@ public final class Request {
             }
         }).resume()
     }
-    
+
     class func createMultipartBody(
         with payloadJson: String?,
         fileURL: String? = nil,
@@ -349,22 +352,23 @@ public final class Request {
         fileData: Data? = nil
     ) throws -> Data {
         var body = Data()
-        
+
         body.append("--\(boundary)\r\n")
-        
+
         if let payloadJson = payloadJson {
             body.append(
                 "Content-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n"
             )
             body.append("\(payloadJson)\r\n")
         }
-        
+
         if let fileURL = fileURL,
-           let url = URL(string: fileURL) {
+           let url = URL(string: fileURL)
+        {
             let filename = url.lastPathComponent
             let data = try fileData ?? Data(contentsOf: url)
             let mimetype = url.mimeType()
-            
+
             body.append("--\(boundary)\r\n")
             body.append(
                 "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n"
@@ -373,7 +377,7 @@ public final class Request {
             body.append(data)
             body.append("\r\n")
         }
-        
+
         body.append("--\(boundary)--\r\n")
         print(String(data: body, encoding: .utf8))
         return body
@@ -476,7 +480,6 @@ let ISO8601FormatterGlobal: ISO8601DateFormatter = {
     formatter.formatOptions = [.withFractionalSeconds, .withInternetDateTime]
     return formatter
 }()
-
 
 extension JSONDecoder.DateDecodingStrategy {
     static let iso8601withFractionalSeconds = custom {

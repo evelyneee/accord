@@ -39,7 +39,7 @@ struct AttachmentView: View {
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))
             } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxy_url) {
-                VideoPlayer(player: AVPlayer.init(url: url))
+                VideoPlayer(player: AVPlayer(url: url))
                     .cornerRadius(5)
                     .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
             }

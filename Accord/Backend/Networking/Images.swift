@@ -49,7 +49,7 @@ struct HoveredAttachment: View, Equatable {
     @State var hovering = false
 
     init(_ url: String) {
-        _imageLoader = StateObject.init(wrappedValue: ImageLoaderAndCache(imageURL: url))
+        _imageLoader = StateObject(wrappedValue: ImageLoaderAndCache(imageURL: url))
     }
 
     var body: some View {

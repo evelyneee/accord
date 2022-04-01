@@ -69,15 +69,15 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
     // var stickers: [Sticker]?
-    
+
     var index: Int?
     var mergedMember: MergedMember?
     var guildPermissions: String?
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-    
+
     struct MergedMember: Decodable {
         var hoisted_role: String?
         var nick: String?

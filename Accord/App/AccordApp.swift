@@ -117,24 +117,24 @@ struct AccordApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    @objc func onWakeNote(note _: NSNotification) {
+    @objc func onWakeNote(_: NSNotification) {
         print("hi")
         concurrentQueue.async {
             wss?.reset()
         }
     }
 
-    @objc func onSleepNote(note _: NSNotification) {
+    @objc func onSleepNote(_: NSNotification) {
         wss?.close(.protocolCode(.protocolError))
     }
 
     func fileNotifications() {
         NSWorkspace.shared.notificationCenter.addObserver(
-            self, selector: #selector(onWakeNote(note:)),
+            self, selector: #selector(onWakeNote(_:)),
             name: NSWorkspace.didWakeNotification, object: nil
         )
         NSWorkspace.shared.notificationCenter.addObserver(
-            self, selector: #selector(onSleepNote(note:)),
+            self, selector: #selector(onSleepNote(_:)),
             name: NSWorkspace.willSleepNotification, object: nil
         )
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
@@ -147,11 +147,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var popover = NSPopover()
     var statusBarItem: NSStatusItem?
-    
-    func applicationWillTerminate(_ notification: Notification) {
+
+    func applicationWillTerminate(_: Notification) {
         wss?.close(.protocolCode(.noStatusReceived))
     }
-    
+
     func applicationDidFinishLaunching(_: Notification) {
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
 

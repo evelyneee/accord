@@ -15,11 +15,11 @@ struct PinsView: View {
     @Binding var replyingTo: Message?
     @State var pins: [Message] = []
     @State var bag = Set<AnyCancellable>()
-    
+
     @Environment(\.presentationMode) private var presentationMode
-    
+
     var body: some View {
-        List($pins, id: \.id) { $message in
+        List(pins, id: \.id) { message in
             MessageCellView(
                 message: message,
                 nick: nil,

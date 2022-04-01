@@ -24,25 +24,25 @@ final class Embed: Codable, Hashable, Identifiable {
     var provider: Embed.Provider?
     var author: Embed.Author?
     var fields: [Embed.Field]?
-    var id: Int? { self.hashValue }
-    
+    var id: Int? { hashValue }
+
     func hash(into hasher: inout Hasher) {
-        hasher.combine((self.timestamp ?? .init()) + (self.url ?? .init()) + (self.title ?? .init()))
+        hasher.combine((timestamp ?? .init()) + (url ?? .init()) + (title ?? .init()))
     }
-    
+
     final class Field: Codable {
         var name: String
         var inline: Bool?
         var value: String
     }
-    
+
     final class Author: Codable {
         var name: String
         var url: String?
         var icon_url: String?
         var proxy_icon_url: String?
     }
-    
+
     final class Image: Codable {
         var url: String
         var proxy_url: String?
@@ -56,7 +56,7 @@ final class Embed: Codable, Hashable, Identifiable {
         var height: Int?
         var width: Int?
     }
-    
+
     final class Provider: Codable {
         var name: String?
         var url: String?

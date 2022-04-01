@@ -45,7 +45,7 @@ struct LoginViewDataModel {
 struct LoginView: View {
     @StateObject var viewModel: LoginViewViewModel = .init()
     @State var loginViewDataModel: LoginViewDataModel = .init()
-    
+
     var body: some View {
         VStack {
             switch viewModel.state {
@@ -65,7 +65,7 @@ struct LoginView: View {
         }
         .padding()
     }
-    
+
     @ViewBuilder
     private var initialViewTopView: some View {
         Text("Welcome to Accord")
@@ -73,12 +73,12 @@ struct LoginView: View {
             .fontWeight(.bold)
             .padding(.bottom, 5)
             .padding(.top)
-        
+
         Text("Choose how you want to login")
             .foregroundColor(Color.secondary)
             .padding(.bottom)
     }
-    
+
     @ViewBuilder
     private var initialViewFields: some View {
         TextField("Email", text: $loginViewDataModel.email)
@@ -87,7 +87,7 @@ struct LoginView: View {
         TextField("Proxy IP (optional)", text: $loginViewDataModel.proxyIP)
         TextField("Proxy Port (optional)", text: $loginViewDataModel.proxyPort)
     }
-    
+
     @ViewBuilder
     private var errorView: some View {
         if let error = viewModel.loginError {
@@ -99,7 +99,7 @@ struct LoginView: View {
             }
         }
     }
-    
+
     private var bottomView: some View {
         HStack {
             Spacer()
@@ -124,7 +124,7 @@ struct LoginView: View {
         }
         .padding(.top, 5)
     }
-    
+
     private var initialView: some View {
         VStack {
             initialViewTopView
@@ -135,20 +135,20 @@ struct LoginView: View {
         .transition(AnyTransition.moveAway)
         .textFieldStyle(RoundedBorderTextFieldStyle())
     }
-    
+
     private var twoFactorView: some View {
         VStack {
             Spacer()
             Text("Enter your two-factor code here.")
                 .font(.title3)
                 .fontWeight(.medium)
-            
+
             SecureField("Six-digit MFA code", text: $loginViewDataModel.twoFactor)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 100)
-            
+
             Spacer()
-            
+
             HStack {
                 Spacer()
                 Button("Login") {
@@ -162,14 +162,14 @@ struct LoginView: View {
                             json: true
                         )) { completion in
                             switch completion {
-                            case .success(let value):
+                            case let .success(value):
                                 if let token = value.token {
                                     KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
                                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                     self.loginViewDataModel.captcha = false
                                     NSApplication.shared.restart()
                                 }
-                            case .failure(let error):
+                            case let .failure(error):
                                 print(error)
                             }
                         }
@@ -188,7 +188,7 @@ struct LoginView: View {
                         json: true
                     )) { completion in
                         switch completion {
-                        case .success(let response):
+                        case let .success(response):
                             if let token = response.token {
                                 KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
                                 AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -206,19 +206,19 @@ struct LoginView: View {
                                     json: true
                                 )) { completion in
                                     switch completion {
-                                    case .success(let response):
+                                    case let .success(response):
                                         if let token = response.token {
                                             KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
                                             AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                             self.loginViewDataModel.captcha = false
                                             NSApplication.shared.restart()
                                         }
-                                    case .failure(let error):
+                                    case let .failure(error):
                                         print(error)
                                     }
                                 }
                             }
-                        case .failure(let error):
+                        case let .failure(error):
                             print(error)
                         }
                     }
@@ -227,7 +227,7 @@ struct LoginView: View {
             }
         }
     }
-    
+
     private var captchaView: some View {
         CaptchaViewControllerSwiftUI(token: captchaPublicKey)
             .transition(AnyTransition.moveAway)
@@ -241,9 +241,9 @@ final class LoginViewViewModel: ObservableObject {
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
     @Published var loginError: Error? = nil
-    
-    init () {}
-    
+
+    init() {}
+
     func login(_ email: String, _ password: String, _: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
             userAgent: discordUserAgent,
@@ -257,7 +257,7 @@ final class LoginViewViewModel: ObservableObject {
             json: true
         )) { [weak self] completion in
             switch completion {
-            case .success(let response):
+            case let .success(response):
                 if let checktoken = response.token {
                     KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
@@ -289,7 +289,7 @@ final class LoginViewViewModel: ObservableObject {
                         self?.loginError = DiscordLoginErrors.invalidForm
                     }
                 }
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
                 self?.loginError = error
             }
@@ -308,9 +308,9 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         siteKey = token
         print(token, siteKey)
     }
-    
+
     let siteKey: String
-    
+
     func makeNSView(context _: Context) -> WKWebView {
         var webView = WKWebView()
         let webConfiguration = WKWebViewConfiguration()
@@ -318,9 +318,9 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         let scriptHandler = ScriptHandler()
         contentController.add(scriptHandler, name: "hCaptcha")
         webConfiguration.userContentController = contentController
-        
+
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
-        
+
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: webView.topAnchor),
@@ -333,7 +333,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
         }
         return webView
     }
-    
+
     func updateNSView(_: WKWebView, context _: Context) {}
 }
 

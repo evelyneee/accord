@@ -5,8 +5,8 @@
 //  Created by evelyn on 2021-10-24.
 //
 
-import SwiftUI
 import AVKit
+import SwiftUI
 
 struct EmbedView: View, Equatable {
     weak var embed: Embed?
@@ -64,8 +64,9 @@ struct EmbedView: View, Equatable {
                         .maxFrame(width: 400, height: 300, originalWidth: image.width ?? 0, originalHeight: image.height ?? 0)
                 }
                 if let video = embed?.video,
-                    let urlString = video.proxy_url ?? video.url,
-                    let url = URL(string: urlString) {
+                   let urlString = video.proxy_url ?? video.url,
+                   let url = URL(string: urlString)
+                {
                     VideoPlayer(player: AVPlayer(url: url))
                         .cornerRadius(5)
                         .frame(maxWidth: 250)

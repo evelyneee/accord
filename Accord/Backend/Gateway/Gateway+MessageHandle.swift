@@ -36,7 +36,6 @@ extension Gateway {
         case .guildCreate: break
         case .guildDelete:
             print(String(data: event.data, encoding: .utf8))
-            break
         case .guildMemberAdd: break
         case .guildMemberRemove: break
         case .guildMemberUpdate: break
@@ -52,7 +51,7 @@ extension Gateway {
         case .inviteCreate: break
         case .inviteDelete: break
         case .messageCreate:
-            let decoder = JSONDecoder.init()
+            let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
             guard let message = try? decoder.decode(GatewayMessage.self, from: event.data).d else { print("uhhhhh"); return }
             if let channelID = event.channelID, let author = message.author {
@@ -106,16 +105,17 @@ extension Gateway {
                     print(commands)
                     let userKeyMap = commands.d.applications.generateKeyMap()
                     SlashCommandStorage.commands[guildID] = commands.d.application_commands
-                        .map { (command) -> SlashCommandStorage.Command in
+                        .map { command -> SlashCommandStorage.Command in
                             print(command)
                             if let index = userKeyMap[command.application_id],
-                               let avatar = commands.d.applications[index].icon {
+                               let avatar = commands.d.applications[index].icon
+                            {
                                 command.avatar = avatar
                                 return command
                             }
                             return command
                         }
-                } catch let error {
+                } catch {
                     print(error)
                 }
             }

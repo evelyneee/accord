@@ -9,23 +9,21 @@ import Foundation
 import SwiftUI
 
 extension ServerListView {
-        
     struct FolderListView: View {
-        
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
         @StateObject var updater: ServerListView.UpdateView
-        
+
         var body: some View {
             ForEach(ServerListView.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
-                    Folder (
+                    Folder(
                         icon: Array(folder.guilds.prefix(4)),
                         color: Color(int: folder.color ?? 0),
-                        read: Binding.constant(folder.guilds.map({ unreadMessages(guild: $0) }).contains(true))
+                        read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true))
                     ) {
-                        ForEach(folder.guilds, id: \.hashValue) { guild in
-                            ServerIconCell (
+                        ForEach(folder.guilds, id: \.hashValue) { _ in
+                            ServerIconCell(
                                 folder: folder,
                                 selectedServer: self.$selectedServer,
                                 selection: self.$selection,
@@ -35,7 +33,7 @@ extension ServerListView {
                     }
                     .padding(.bottom, 1)
                 } else {
-                    ServerIconCell (
+                    ServerIconCell(
                         folder: folder,
                         selectedServer: self.$selectedServer,
                         selection: self.$selection,
@@ -53,7 +51,7 @@ struct ServerIconCell: View {
     @Binding var selectedServer: Int?
     @Binding var selection: Int?
     @StateObject var updater: ServerListView.UpdateView
-    
+
     func updateSelection(old: Int?, new: Int?) {
         concurrentQueue.async {
             let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
@@ -69,7 +67,7 @@ struct ServerIconCell: View {
             }
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             ForEach(folder.guilds, id: \.hashValue) { guild in
@@ -87,7 +85,7 @@ struct ServerIconCell: View {
                         GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                     }
                 }
-                .accessibility (
+                .accessibility(
                     label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
                 )
                 .buttonStyle(BorderlessButtonStyle())

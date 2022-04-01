@@ -10,14 +10,13 @@ import Foundation
 import SwiftUI
 
 final class AsyncMarkdownModel: ObservableObject {
-    
-    init (text: String, font: Bool) {
-        self.markdown = Text(text)
-        self.make(text: text, font: font)
+    init(text: String, font: Bool) {
+        markdown = Text(text)
+        make(text: text, font: font)
     }
-    
+
     @Published var markdown: Text
-    
+
     private func make(text: String, font: Bool) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
@@ -30,19 +29,18 @@ final class AsyncMarkdownModel: ObservableObject {
 }
 
 struct AsyncMarkdown: View, Equatable {
-    
-    static func == (lhs: AsyncMarkdown, rhs: AsyncMarkdown) -> Bool {
-        return true
+    static func == (_: AsyncMarkdown, _: AsyncMarkdown) -> Bool {
+        true
     }
-    
+
     @StateObject var model: AsyncMarkdownModel
     var font: Bool
-    
+
     init(_ text: String, font: Bool = false) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text, font: font))
         self.font = font
     }
-    
+
     var body: some View {
         model.markdown
             .font(self.font ? .system(size: 48) : .chatTextFont)

@@ -10,7 +10,6 @@ import SwiftUI
 
 @available(macOS 11.0, *)
 struct SettingsViewRedesign: View {
-    
     @AppStorage("pfpShown")
     var profilePictures: Bool = pfpShown
     @AppStorage("sortByMostRecent")
@@ -52,8 +51,8 @@ struct SettingsViewRedesign: View {
     @AppStorage("ShowHiddenChannels")
     var showHiddenChannels: Bool = false
     @AppStorage("MusicPlatform")
-    var selectedPlatform: Platforms = Platforms.appleMusic
-    
+    var selectedPlatform: Platforms = .appleMusic
+
     @State var user: User? = AccordCoreVars.user
     @State var loading: Bool = false
     @State var bioText: String = " "

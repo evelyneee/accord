@@ -9,7 +9,7 @@ import AppKit
 import Foundation
 
 extension AccordApp {
-    static func error( _ error: Error? = nil, text: String? = nil, additionalDescription: String? = nil, reconnectOption: Bool = true) {
+    static func error(_ error: Error? = nil, text: String? = nil, additionalDescription: String? = nil, reconnectOption _: Bool = true) {
         DispatchQueue.main.async {
             let alert = NSAlert()
             alert.messageText = error?.localizedDescription ?? text ?? "Unknown error occured"

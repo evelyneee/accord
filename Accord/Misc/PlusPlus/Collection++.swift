@@ -5,13 +5,12 @@
 //  Created by evelyn on 2022-02-18.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension Collection where Element: Identifiable {
     func generateKeyMap() -> [Element.ID: Int] {
-        return self
-            .enumerated()
+        enumerated()
             .compactMap { [$1.id: $0] }
             .reduce(into: [:]) { result, next in
                 result.merge(next) { _, rhs in rhs }
@@ -21,7 +20,7 @@ extension Collection where Element: Identifiable {
 
 extension Dictionary {
     func filterValues(isIncluded: (Self.Value) throws -> Bool) rethrows -> Self {
-        return try self.filter { try isIncluded($0.value) }
+        try filter { try isIncluded($0.value) }
     }
 }
 
@@ -34,14 +33,14 @@ extension Collection {
 }
 
 extension ArraySlice {
-    typealias LiteralType = Array<Self.Element>
+    typealias LiteralType = [Self.Element]
     func literal() -> LiteralType {
-        return LiteralType(self)
+        LiteralType(self)
     }
 }
 
 extension Slice where Base: Sequence {
     func literal() -> Base {
-        return self.base
+        base
     }
 }

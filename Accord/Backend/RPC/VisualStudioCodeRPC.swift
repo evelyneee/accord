@@ -50,7 +50,7 @@ final class VisualStudioCodeRPC {
         let info = Self.getRPCInfo()
         try? wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: started) {
             Activity.current!
-            Activity (
+            Activity(
                 applicationID: vsCodeRPCAppID,
                 flags: 1,
                 name: "Visual Studio Code",

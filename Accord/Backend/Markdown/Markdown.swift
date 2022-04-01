@@ -9,7 +9,7 @@ import AppKit
 import Combine
 import Foundation
 import SwiftUI
-                                                                
+
 public final class Markdown {
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
@@ -23,9 +23,8 @@ public final class Markdown {
     fileprivate static let blankCharacter = "‎" // Not an empty string
 
     /***
-     
-     Overengineered processing for Markdown using Combine
 
+     Overengineered processing for Markdown using Combine
 
                         +------------------------------+
                         |  Call the Markdown.markAll   |
@@ -52,9 +51,8 @@ public final class Markdown {
                                                | reduce(Text(""), +)             |      +-------------------------------+
                                                +---------------------------------+
 
-
      ***/
-    
+
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
@@ -101,10 +99,10 @@ public final class Markdown {
             for id in mentions {
                 return promise(.success(
                     Text("@\(members[id] ?? "Unknown User")")
-                        .foregroundColor(id == user_id ? Color.init(Color.RGBColorSpace.sRGB, red: 1, green: 0.843, blue: 0, opacity: 1) : Color(NSColor.controlAccentColor))
+                        .foregroundColor(id == user_id ? Color(Color.RGBColorSpace.sRGB, red: 1, green: 0.843, blue: 0, opacity: 1) : Color(NSColor.controlAccentColor))
                         .underline()
-                    +
-                    Text(" ")
+                        +
+                        Text(" ")
                 ))
             }
             for id in channels {
