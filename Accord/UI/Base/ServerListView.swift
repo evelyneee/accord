@@ -152,6 +152,7 @@ struct ServerListView: View {
                             .opacity(0.75)
                             .padding(.horizontal)
                         FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, updater: self.viewUpdater)
+                            .padding(.trailing, 3.5)
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)

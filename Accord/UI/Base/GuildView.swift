@@ -49,7 +49,11 @@ struct GuildView: View {
                         .foregroundColor(Color.secondary)
                         .font(.subheadline)
                 } else {
-                    NavigationLink(destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
+                    NavigationLink(
+                        destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()),
+                        tag: Int(channel.id) ?? 0,
+                        selection: self.$selection
+                    ) {
                         ServerListViewCell(channel: channel, updater: self.updater)
                     }
                     .buttonStyle(BorderlessButtonStyle())

@@ -13,7 +13,7 @@ import SwiftUI
 // Discord WebSocket
 var wss: Gateway!
 
-public let rootURL: String = "https://discord.com/api/v10"
+public let rootURL: String = "https://discord.com/api/v9"
 public let cdnURL: String = "https://cdn.discordapp.com"
 public var user_id: String = .init()
 public var avatar: Data = .init()
