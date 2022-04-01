@@ -21,6 +21,20 @@ enum DiscordLoginErrors: Error {
     case missingFields
 }
 
+enum LoginMethods: CustomStringConvertible, CaseIterable {
+    case Token
+    case EmailAndPass
+    
+    var description: String {
+        switch self {
+        case .Token:
+            return "Token"
+        case .EmailAndPass:
+            return "Email and Password"
+        }
+    }
+}
+
 extension NSApplication {
     func restart() {
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "LoggedIn"), object: nil, userInfo: [:])
@@ -45,6 +59,7 @@ struct LoginViewDataModel {
 struct LoginView: View {
     @StateObject var viewModel: LoginViewViewModel = .init()
     @State var loginViewDataModel: LoginViewDataModel = .init()
+    @State var loginMethod: LoginMethods = .EmailAndPass
     
     var body: some View {
         VStack {
@@ -81,9 +96,21 @@ struct LoginView: View {
     
     @ViewBuilder
     private var initialViewFields: some View {
-        TextField("Email", text: $loginViewDataModel.email)
-        SecureField("Password", text: $loginViewDataModel.password)
-        TextField("Token (optional)", text: $loginViewDataModel.token)
+        
+        Picker("Login Method", selection: $loginMethod) {
+            ForEach(LoginMethods.allCases, id: \.self) {
+                Text($0.description)
+            }
+        }.frame(width: 290, height: 40, alignment: .center)
+        
+        
+        if loginMethod == .EmailAndPass {
+            TextField("Email", text: $loginViewDataModel.email)
+            SecureField("Password", text: $loginViewDataModel.password)
+        } else {
+            TextField("Token", text: $loginViewDataModel.token)
+        }
+        
         TextField("Proxy IP (optional)", text: $loginViewDataModel.proxyIP)
         TextField("Proxy Port (optional)", text: $loginViewDataModel.proxyPort)
     }
