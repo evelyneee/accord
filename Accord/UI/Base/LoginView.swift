@@ -21,19 +21,6 @@ enum DiscordLoginErrors: Error {
     case missingFields
 }
 
-enum LoginMethods: CustomStringConvertible, CaseIterable {
-    case Token
-    case EmailAndPass
-    
-    var description: String {
-        switch self {
-        case .Token:
-            return "Token"
-        case .EmailAndPass:
-            return "Email and Password"
-        }
-    }
-}
 
 extension NSApplication {
     func restart() {
@@ -59,7 +46,6 @@ struct LoginViewDataModel {
 struct LoginView: View {
     @StateObject var viewModel: LoginViewViewModel = .init()
     @State var loginViewDataModel: LoginViewDataModel = .init()
-    @State var loginMethod: LoginMethods = .EmailAndPass
     
     var body: some View {
         VStack {
@@ -72,47 +58,11 @@ struct LoginView: View {
                 twoFactorView
             }
         }
-        .frame(width: 500, height: 275)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notification in
             self.viewModel.state = .twoFactor
             self.loginViewDataModel.notification = notification.userInfo as? [String: Any] ?? [:]
             print(notification)
         }
-        .padding()
-    }
-    
-    @ViewBuilder
-    private var initialViewTopView: some View {
-        Text("Welcome to Accord")
-            .font(.title)
-            .fontWeight(.bold)
-            .padding(.bottom, 5)
-            .padding(.top)
-        
-        Text("Choose how you want to login")
-            .foregroundColor(Color.secondary)
-            .padding(.bottom)
-    }
-    
-    @ViewBuilder
-    private var initialViewFields: some View {
-        
-        Picker("Login Method", selection: $loginMethod) {
-            ForEach(LoginMethods.allCases, id: \.self) {
-                Text($0.description)
-            }
-        }.frame(width: 290, height: 40, alignment: .center)
-        
-        
-        if loginMethod == .EmailAndPass {
-            TextField("Email", text: $loginViewDataModel.email)
-            SecureField("Password", text: $loginViewDataModel.password)
-        } else {
-            TextField("Token", text: $loginViewDataModel.token)
-        }
-        
-        TextField("Proxy IP (optional)", text: $loginViewDataModel.proxyIP)
-        TextField("Proxy Port (optional)", text: $loginViewDataModel.proxyPort)
     }
     
     @ViewBuilder
@@ -133,12 +83,13 @@ struct LoginView: View {
             Button("Cancel") {
                 exit(EXIT_SUCCESS)
             }
+            .accentColor(.clear)
             .controlSize(.large)
             Button("Login") { [weak viewModel] in
                 viewModel?.loginError = nil
                 UserDefaults.standard.set(self.loginViewDataModel.proxyIP, forKey: "proxyIP")
                 UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
-                if loginViewDataModel.token != "" {
+                if !loginViewDataModel.token.isEmpty {
                     KeychainManager.save(key: keychainItemName, data: loginViewDataModel.token.data(using: String.Encoding.utf8) ?? Data())
                     AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                     NSApplication.shared.restart()
@@ -147,20 +98,70 @@ struct LoginView: View {
                 }
                 print("logging in")
             }
+            .keyboardShortcut(.return)
             .controlSize(.large)
         }
         .padding(.top, 5)
     }
     
+    private var AccordIconView: some View {
+        VStack {
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: 150)
+                .padding()
+        }
+    }
+    
+    private var AccordTabView: some View {
+        TabView {
+            Form {
+                TextField("Email:", text: $loginViewDataModel.email)
+                    .textFieldStyle(.roundedBorder)
+                SecureField("Password:", text: $loginViewDataModel.password)
+                    .textFieldStyle(.roundedBorder)
+            }.tabItem {
+                Text("Email and Password")
+            }
+            .frame(maxHeight: 200)
+            .padding()
+            Form {
+                TextField("Token:", text: $loginViewDataModel.token)
+            }.tabItem {
+                Text("Token")
+            }
+            .padding()
+        }
+    }
+    
     private var initialView: some View {
         VStack {
-            initialViewTopView
-            initialViewFields
-            errorView
-            bottomView
+            HStack {
+                AccordIconView
+                    .padding()
+                VStack {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("Welcome!")
+                                .font(.system(size: 50))
+                            Text("You'll need to log in to continue.")
+                                .font(.title)
+                        }
+                        Spacer()
+                    }
+                    .padding([.bottom], 20)
+                    AccordTabView
+                }
+            }
+            .padding()
+            HStack {
+                Spacer()
+                bottomView
+            }
+            .padding([.trailing])
         }
-        .transition(AnyTransition.moveAway)
-        .textFieldStyle(RoundedBorderTextFieldStyle())
+        .padding()
     }
     
     private var twoFactorView: some View {
