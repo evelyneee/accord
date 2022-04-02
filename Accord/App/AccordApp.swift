@@ -22,6 +22,7 @@ struct AccordApp: App {
         WindowGroup {
             if self.token == "" {
                 LoginView()
+                    .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
                         self.token = AccordCoreVars.token
                         print("posted", self.token)
