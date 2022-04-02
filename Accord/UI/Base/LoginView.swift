@@ -21,7 +21,6 @@ enum DiscordLoginErrors: Error {
     case missingFields
 }
 
-
 extension NSApplication {
     func restart() {
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "LoggedIn"), object: nil, userInfo: [:])
@@ -126,7 +125,7 @@ struct LoginView: View {
         }
         .padding(.top, 5)
     }
-    
+
     private var AccordIconView: some View {
         VStack {
             Image(nsImage: NSApplication.shared.applicationIconImage)
@@ -136,7 +135,7 @@ struct LoginView: View {
                 .padding()
         }
     }
-    
+
     private var AccordTabView: some View {
         TabView {
             Form {
@@ -157,7 +156,7 @@ struct LoginView: View {
             .padding()
         }
     }
-    
+
     private var initialView: some View {
         VStack {
             HStack {
