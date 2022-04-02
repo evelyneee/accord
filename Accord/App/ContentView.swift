@@ -18,7 +18,7 @@ struct ContentView: View {
         case alreadyLoaded
         case offline
     }
-    
+
     @ViewBuilder
     var body: some View {
         if modalIsPresented {
@@ -54,9 +54,9 @@ struct ContentView: View {
                                     if let pfp = d.user.avatar {
                                         Request.fetch(url: URL(string: cdnURL + "/avatars/\(d.user.id)/\(pfp).png?size=80")) { completion in
                                             switch completion {
-                                            case .success(let data):
+                                            case let .success(data):
                                                 avatar = data
-                                            case .failure(let error):
+                                            case let .failure(error):
                                                 print(error)
                                             }
                                         }

@@ -42,7 +42,6 @@ func unreadMessages(guild: Guild) -> Bool {
 }
 
 struct ServerListView: View {
-    
     // i feel bad about this but i need some way to use static vars
     public class UpdateView: ObservableObject {
         @Published var updater: Bool = false
@@ -53,7 +52,7 @@ struct ServerListView: View {
             }
         }
     }
-    
+
     @State var selection: Int?
     @State var selectedServer: Int? = 0
     public static var folders: [GuildFolder] = .init()
@@ -77,13 +76,13 @@ struct ServerListView: View {
                 .cornerRadius(selectedServer == 201 ? 15.0 : 23.5)
         }
     }
-    
+
     var onlineButton: some View {
         Button("Offline") {
             AccordApp.error(text: "Offline", additionalDescription: "Check your network connection")
         }
     }
-    
+
     @ViewBuilder
     var statusIndicator: some View {
         switch self.status {
@@ -111,7 +110,7 @@ struct ServerListView: View {
                 .frame(width: 12, height: 12)
         }
     }
-    
+
     var settingsLink: some View {
         NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 0, selection: self.$selection) {
             ZStack(alignment: .bottomTrailing) {
@@ -123,12 +122,13 @@ struct ServerListView: View {
             }
         }
     }
-    
+
     var body: some View {
-        return NavigationView {
+        NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
+
                     LazyVStack {
                         if !NetworkCore.shared.connected {
                             onlineButton
@@ -140,7 +140,7 @@ struct ServerListView: View {
                                     Circle()
                                         .foregroundColor(Color.red)
                                         .frame(width: 15, height: 15)
-                                    Text(String(Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +)))
+                                    Text(String(Self.privateChannels.compactMap { $0.read_state?.mention_count }.reduce(0, +)))
                                         .foregroundColor(Color.white)
                                         .fontWeight(.semibold)
                                         .font(.caption)
@@ -152,6 +152,7 @@ struct ServerListView: View {
                             .opacity(0.75)
                             .padding(.horizontal)
                         FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, updater: self.viewUpdater)
+                            .padding(.trailing, 3.5)
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)
@@ -164,7 +165,9 @@ struct ServerListView: View {
                 .frame(width: 80)
                 .padding(.top, 5)
                 Divider()
+
                 // MARK: - Loading UI
+
                 if selectedServer == 201 {
                     List {
                         Text("Messages")
@@ -236,7 +239,7 @@ struct ServerListView: View {
             self.selectedServer = 201
             self.selection = number
         })
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Updater")), perform: { pub in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Updater")), perform: { _ in
             viewUpdater.updateView()
         })
         .onAppear {
@@ -249,7 +252,7 @@ struct ServerListView: View {
                 }
                 Request.fetch([Channel].self, url: URL(string: "\(rootURL)/users/@me/channels"), headers: standardHeaders) { completion in
                     switch completion {
-                    case .success(let channels):
+                    case let .success(channels):
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
                             Self.privateChannels = channels
@@ -259,7 +262,7 @@ struct ServerListView: View {
                             }
                         }
                         Notifications.privateChannels = Self.privateChannels.map(\.id)
-                    case .failure(let error):
+                    case let .failure(error):
                         print(error)
                     }
                 }

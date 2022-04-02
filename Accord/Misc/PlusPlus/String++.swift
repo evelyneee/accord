@@ -9,8 +9,7 @@ import Foundation
 
 extension String {
     var hasEmojisOnly: Bool {
-        var mut = self
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        var mut = trimmingCharacters(in: .whitespacesAndNewlines)
         let discordEmojis = mut
             .matchRange(precomputed: Regex.fullEmojiRegex)
         discordEmojis

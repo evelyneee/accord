@@ -24,7 +24,7 @@ public final class IgnoreFailure<Value: Decodable>: Decodable {
             do {
                 let decoded = try container.decode(Value.self)
                 wrappedValue.append(decoded)
-            } catch let error {
+            } catch {
                 print("failed to decode", error)
                 _ = try container.decode(_None.self)
             }
@@ -96,7 +96,7 @@ struct Folder<Content: View>: View {
     var color: Color
     @Binding var read: Bool
     var content: () -> Content
-    
+
     @State private var collapsed: Bool = true
 
     let gridLayout: [GridItem] = GridItem.multiple(count: 2, spacing: 0)
@@ -228,8 +228,8 @@ func pfpURL(_ uid: String?, _ hash: String?, discriminator: String = "0005", _ s
     if let avatar = hash {
         return cdnURL + "/avatars/\(uid)/\(avatar).png?size=\(size)"
     } else {
-        print("/embed/avatars/\(String(((Int(discriminator) ?? 0) % 5))).png")
-        return cdnURL + ("/embed/avatars/\(String(((Int(discriminator) ?? 0) % 5))).png")
+        print("/embed/avatars/\(String((Int(discriminator) ?? 0) % 5)).png")
+        return cdnURL + "/embed/avatars/\(String((Int(discriminator) ?? 0) % 5)).png"
     }
 }
 
@@ -258,14 +258,13 @@ extension NSTextField {
         get { .none }
         set {}
     }
-    
+
     override open func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.type == NSEvent.EventType.keyDown {
             if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == NSEvent.ModifierFlags.command.rawValue {
                 switch event.charactersIgnoringModifiers! {
                 case "v":
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "red.evelyn.accord.PasteEvent"), object: nil, userInfo: [:])
-                    break
                 default:
                     break
                 }
@@ -306,17 +305,20 @@ extension Data {
 extension NSBitmapImageRep {
     var png: Data? { representation(using: .png, properties: [:]) }
 }
+
 extension Data {
     var bitmap: NSBitmapImageRep? { NSBitmapImageRep(data: self) }
 }
+
 extension NSImage {
     var png: Data? { tiffRepresentation?.bitmap?.png }
 }
 
 extension Date {
     func makeProperDate() -> String {
-        return DateFormatter.localizedString(from: self, dateStyle: .medium, timeStyle: .short)
+        DateFormatter.localizedString(from: self, dateStyle: .medium, timeStyle: .short)
     }
+
     func makeProperHour() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "hh:mm"

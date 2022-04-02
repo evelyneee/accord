@@ -63,12 +63,12 @@ final class Gateway {
         case eventCorrupted
         case unknownEvent(String)
         case heartbeatMissed
-        
+
         var localizedDescription: String {
             switch self {
-            case .essentialEventFailed(let event):
+            case let .essentialEventFailed(event):
                 return "Essential Gateway Event failed: \(event)"
-            case .noStringData(let string):
+            case let .noStringData(string):
                 return "Invalid data \(string)"
             case .maxRequestReached:
                 return "Internal rate limit hit, you're going too fast!"
@@ -76,7 +76,7 @@ final class Gateway {
                 return "Session missing?"
             case .eventCorrupted:
                 return "Bad event sent"
-            case .unknownEvent(let event):
+            case let .unknownEvent(event):
                 return "Unknown event: \(event)"
             case .heartbeatMissed:
                 return "Heartbeat ACK missed"
@@ -95,7 +95,7 @@ final class Gateway {
 
     static var gatewayURL: URL = .init(string: "wss://gateway.discord.gg?v=9&encoding=json")!
 
-    public init (
+    public init(
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
         seq: Int? = nil
@@ -282,7 +282,7 @@ final class Gateway {
                 case .cont: break
                 case .binary: break
                 case .ping: print("ping")
-                case .pong:  print("pong")
+                case .pong: print("pong")
                 @unknown default:
                     break
                 }
@@ -376,16 +376,16 @@ final class Gateway {
                 "applications": true,
                 "command_ids": commandIDs,
                 "guild_id": guildID,
-                "limit":limit,
-                "locale":NSNull(),
-                "nonce":generateFakeNonce(),
-                "offset":0,
-                "type":1
+                "limit": limit,
+                "locale": NSNull(),
+                "nonce": generateFakeNonce(),
+                "offset": 0,
+                "type": 1,
             ],
         ]
         try send(json: packet)
     }
-    
+
     public func getCommands(guildID: String, query: String, limit: Int = 10) throws {
         let packet: [String: Any] = [
             "op": 24,
@@ -393,14 +393,14 @@ final class Gateway {
                 "locale": NSNull(),
                 "query": query,
                 "guild_id": guildID,
-                "limit":limit,
-                "nonce":generateFakeNonce(),
-                "type":1
+                "limit": limit,
+                "nonce": generateFakeNonce(),
+                "type": 1,
             ],
         ]
         try send(json: packet)
     }
-    
+
     // cleanup
     deinit {
         self.heartbeatTimer = nil

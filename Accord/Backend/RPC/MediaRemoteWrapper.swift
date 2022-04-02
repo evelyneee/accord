@@ -54,10 +54,10 @@ final class MediaRemoteWrapper {
                     print("Song has iTunes Store ID")
                     Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { completion in
                         switch completion {
-                        case .success(let data):
+                        case let .success(data):
                             print("Success fetching iTunes Store ID")
-                            if let dict = try? JSONSerialization.jsonObject(with: data) as? [String:Any] ?? [:] {
-                                let artworkURL = (dict["results"] as? [[String:Any]])?.first?["artworkUrl100"] as? String
+                            if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:] {
+                                let artworkURL = (dict["results"] as? [[String: Any]])?.first?["artworkUrl100"] as? String
                                 let song = Song(
                                     name: name,
                                     artist: information["kMRMediaRemoteNowPlayingInfoArtist"] as? String,
@@ -69,7 +69,7 @@ final class MediaRemoteWrapper {
                                 )
                                 promise(.success(song))
                             }
-                        case .failure(let error):
+                        case let .failure(error):
                             print(error)
                         }
                     })
@@ -118,8 +118,8 @@ final class MediaRemoteWrapper {
                                     state: song.albumName ?? song.name + " (Single)",
                                     details: song.name,
                                     assets: [
-                                        "large_image":"mp:\(url)",
-                                        "large_text":"By " + (song.artist ?? "Unnamed Artist")
+                                        "large_image": "mp:\(url)",
+                                        "large_text": "By " + (song.artist ?? "Unnamed Artist"),
                                     ]
                                 )
                             }
@@ -146,4 +146,3 @@ final class MediaRemoteWrapper {
             .store(in: &Self.bag)
     }
 }
-

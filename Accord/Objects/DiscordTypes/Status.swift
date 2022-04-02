@@ -15,7 +15,7 @@ final class Status: Codable {
 }
 
 final class Activity {
-    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, timestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String:String] = [:]) {
+    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, timestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:]) {
         self.applicationID = applicationID
         self.flags = flags
         self.emoji = emoji
@@ -37,7 +37,7 @@ final class Activity {
     var applicationID: String?
     var flags: Int?
     var details: String?
-    var assets: [String:String]
+    var assets: [String: String]
     var dictValue: [String: Any] {
         var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
@@ -47,7 +47,7 @@ final class Activity {
             dict["state"] = state
         }
         if type != 4 {
-            dict["assets"] = self.assets
+            dict["assets"] = assets
             dict["party"] = [:]
             dict["secrets"] = [:]
         }

@@ -55,10 +55,10 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     }
 
     func edit(now: String) {
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(self.channel_id)/messages/\(self.id)"), headers: Headers(
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["content":now],
+            bodyObject: ["content": now],
             type: .PATCH,
             discordHeaders: true,
             json: true
@@ -95,15 +95,15 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
 }
 
 enum MessageType: Int, Codable {
-    case `default`, recipientAdd, recipientRemove, `call`,
-    channelNameChange, channelIconChange, channelMessagePin,
-    guildMemberJoin, userBoostedServer, guildReachedLevelOne,
-    guildReachedLevelTwo, guildReachedLevelThree, unused,
-    channelFollowAdd, guildDiscoveryDisqualified,
-    guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
-    guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,
-    chatInputCommand, threadStarterMessage, guildInviteReminder,
-    contextMenuCommand, likelyScammer
+    case `default`, recipientAdd, recipientRemove, call,
+         channelNameChange, channelIconChange, channelMessagePin,
+         guildMemberJoin, userBoostedServer, guildReachedLevelOne,
+         guildReachedLevelTwo, guildReachedLevelThree, unused,
+         channelFollowAdd, guildDiscoveryDisqualified,
+         guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
+         guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,
+         chatInputCommand, threadStarterMessage, guildInviteReminder,
+         contextMenuCommand, likelyScammer
 }
 
 // TODO: Component object

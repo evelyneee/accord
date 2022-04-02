@@ -47,7 +47,7 @@ struct LoadingView: View {
         Text("uwu owo"),
         Text("Accord for iOS, releasing alongside GTA VI"),
         Text("What's a X-Super-Properties?"),
-        Text("😼")
+        Text("😼"),
     ]
 
     var body: some View {

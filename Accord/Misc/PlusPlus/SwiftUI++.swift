@@ -5,18 +5,18 @@
 //  Created by evelyn on 2022-01-03.
 //
 
+import AVKit
 import Combine
 import Foundation
 import SwiftUI
 import WebKit
-import AVKit
 
 extension Button {
     init(action: @escaping () throws -> Void, catch: @escaping (_ error: Error?) -> Void, label: @escaping () -> Label) {
         self.init(action: {
             do {
                 try action()
-            } catch let error {
+            } catch {
                 `catch`(error)
             }
         }, label: label)
@@ -144,31 +144,29 @@ extension GridItem {
 }
 
 struct SafeVideoPlayer: View {
-    
     @StateObject var model: VideoPlayerModel
-    
+
     final class VideoPlayerModel: ObservableObject {
-        
         init(url: URL) {
             self.url = url
         }
-        
+
         func loadVideo() {
-            if self.player == nil {
+            if player == nil {
                 let playerItem = AVPlayerItem(url: url)
-                self.player = AVPlayer(playerItem: playerItem)
+                player = AVPlayer(playerItem: playerItem)
             }
         }
-        
-        private (set) var url: URL
+
+        private(set) var url: URL
         @Published var player: AVPlayer?
     }
-    
+
     init?(url: String) {
-        guard let url = URL.init(string: url) else { return nil }
-        self._model = StateObject.init(wrappedValue: VideoPlayerModel.init(url: url))
+        guard let url = URL(string: url) else { return nil }
+        _model = StateObject(wrappedValue: VideoPlayerModel(url: url))
     }
-    
+
     var body: some View {
         VideoPlayer(player: model.player)
             .onAppear {

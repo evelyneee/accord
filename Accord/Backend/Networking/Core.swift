@@ -9,8 +9,8 @@ import Foundation
 
 final class NetworkCore {
     static var shared = NetworkCore()
-    private (set) var connected = true
-    init () {
+    private(set) var connected = true
+    init() {
         let url = URL(string: "\(rootURL)/gateway")!
         let data = try? Data(contentsOf: url)
         if data == nil {
@@ -21,36 +21,3 @@ final class NetworkCore {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

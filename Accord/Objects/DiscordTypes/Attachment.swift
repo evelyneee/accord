@@ -22,19 +22,19 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
     var proxy_url: String
     var height: Int?
     var width: Int?
-    
+
     var isVideo: Bool {
-        self.content_type?.prefix(6) == "video/"
+        content_type?.prefix(6) == "video/"
     }
-    
+
     var isImage: Bool {
-        self.content_type?.prefix(6) == "image/"
+        content_type?.prefix(6) == "image/"
     }
-    
+
     var isFile: Bool {
-        !(self.isImage || self.isVideo)
+        !(isImage || isVideo)
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

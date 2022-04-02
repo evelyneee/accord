@@ -9,15 +9,14 @@ import Foundation
 import SwiftUI
 
 struct ChatControls: View {
-    
     @available(macOS 12.0, *)
     enum FocusedElements: Hashable {
-      case mainTextField
+        case mainTextField
     }
-    
+
     @available(macOS 12.0, *)
     @FocusState private var focusedField: FocusedElements?
-    
+
     @State var chatTextFieldContents: String = ""
     @State var pfps: [String: NSImage] = [:]
     @Binding var guildID: String
@@ -63,7 +62,7 @@ struct ChatControls: View {
             }
         }
     }
-    
+
     var matchedUsersView: some View {
         ForEach(viewModel.matchedUsers.sorted(by: >).prefix(10), id: \.key) { id, username in
             Button(action: { [weak viewModel] in
@@ -81,10 +80,10 @@ struct ChatControls: View {
             .padding(3)
         }
     }
-    
+
     var matchedCommandsView: some View {
         ForEach(viewModel.matchedCommands.prefix(10), id: \.id) { command in
-            Button.init(action: { [weak command, weak viewModel] in
+            Button(action: { [weak command, weak viewModel] in
                 guard let command = command else { return }
                 var contents = "/\(command.name)"
                 command.options?.forEach { arg in
@@ -115,7 +114,7 @@ struct ChatControls: View {
             .padding(3)
         }
     }
-    
+
     var matchedEmojiView: some View {
         ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
             HStack {
@@ -148,7 +147,7 @@ struct ChatControls: View {
             }
         }
     }
-    
+
     var matchedChannelsView: some View {
         ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
             Button(action: { [weak viewModel] in
@@ -166,7 +165,7 @@ struct ChatControls: View {
             .padding(3)
         }
     }
-    
+
     @available(macOS 12.0, *)
     var montereyTextField: some View {
         TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
@@ -182,16 +181,17 @@ struct ChatControls: View {
                 if self.focusedField == .mainTextField {
                     let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                     if let rawData = data,
-                        let string = String(data: rawData, encoding: .utf8),
-                        let url = URL(string: string),
-                        let data = try? Data(contentsOf: url) {
-                            self.fileUpload = data
-                            self.fileUploadURL = url
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
-                                    viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                                }
-                            })
+                       let string = String(data: rawData, encoding: .utf8),
+                       let url = URL(string: string),
+                       let data = try? Data(contentsOf: url)
+                    {
+                        self.fileUpload = data
+                        self.fileUploadURL = url
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
+                                viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                            }
+                        }
                     } else if let image = NSImage(pasteboard: NSPasteboard.general) {
                         self.fileUpload = image.png
                         self.fileUploadURL = URL(string: "file:///image0.png")!
@@ -202,7 +202,7 @@ struct ChatControls: View {
                 self.focusedField = .mainTextField
             }
     }
-    
+
     var bigSurTextField: some View {
         TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
             typing = false
@@ -214,21 +214,22 @@ struct ChatControls: View {
             if String(describing: pub.userInfo).contains("Command-V") {
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                 if let rawData = data,
-                    let string = String(data: rawData, encoding: .utf8),
-                    let url = URL(string: string),
-                    let data = try? Data(contentsOf: url) {
-                        self.fileUpload = data
-                        self.fileUploadURL = url
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                            if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
-                                viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                            }
-                        })
+                   let string = String(data: rawData, encoding: .utf8),
+                   let url = URL(string: string),
+                   let data = try? Data(contentsOf: url)
+                {
+                    self.fileUpload = data
+                    self.fileUploadURL = url
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
+                            viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                        }
+                    }
                 }
             }
         }
     }
-    
+
     var fileImportButton: some View {
         Button(action: {
             fileImport.toggle()
@@ -237,7 +238,7 @@ struct ChatControls: View {
         }
         .buttonStyle(BorderlessButtonStyle())
     }
-    
+
     var nitrolessButton: some View {
         Button(action: {
             nitroless.toggle()
@@ -250,7 +251,7 @@ struct ChatControls: View {
                 .frame(width: 300, height: 400)
         })
     }
-    
+
     var emotesButton: some View {
         Button(action: {
             emotes.toggle()
@@ -264,7 +265,7 @@ struct ChatControls: View {
                 .frame(width: 300, height: 400)
         })
     }
-    
+
     var body: some View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {

@@ -7,13 +7,12 @@
 
 import AppKit
 import AVKit
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct ChannelView: View, Equatable {
-    
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
-        return lhs.viewModel == rhs.viewModel
+        lhs.viewModel == rhs.viewModel
     }
 
     @StateObject var viewModel: ChannelViewViewModel
@@ -43,13 +42,14 @@ struct ChannelView: View, Equatable {
     @State var memberList: [OPSItems] = .init()
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
-        
+
     @AppStorage("MetalRenderer")
     var metalRenderer: Bool = false
 
     @State private var cancellable = Set<AnyCancellable>()
-    
+
     // MARK: - init
+
     init(_ channel: Channel, _ guildName: String? = nil) {
         guildID = channel.guild_id ?? "@me"
         channelID = channel.id
@@ -64,7 +64,7 @@ struct ChannelView: View, Equatable {
     var messagesView: some View {
         ForEach(viewModel.messages, id: \.identifier) { message in
             if let author = message.author {
-                MessageCellView (
+                MessageCellView(
                     message: message,
                     nick: viewModel.nicks[author.id],
                     replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
@@ -78,10 +78,10 @@ struct ChannelView: View, Equatable {
                 .equatable()
                 .id(message.identifier)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: (message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 10, trailing: 0))
-                .if(message.mentions.compactMap({ $0?.id }).contains(user_id), transform: {
+                .if(message.mentions.compactMap { $0?.id }.contains(user_id), transform: {
                     $0
                         .padding(5)
-                        .frame (
+                        .frame(
                             maxWidth: .infinity,
                             maxHeight: .infinity
                         )
@@ -89,8 +89,9 @@ struct ChannelView: View, Equatable {
                         .cornerRadius(7)
                 })
                 .onAppear {
-                    if viewModel.messages.count >= 50 &&
-                        message == viewModel.messages[viewModel.messages.count - 2] {
+                    if viewModel.messages.count >= 50,
+                       message == viewModel.messages[viewModel.messages.count - 2]
+                    {
                         messageFetchQueue.async {
                             viewModel.loadMoreMessages()
                         }
@@ -101,7 +102,7 @@ struct ChannelView: View, Equatable {
         .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
     }
-    
+
     var body: some View {
         HStack {
             ZStack(alignment: .bottom) {

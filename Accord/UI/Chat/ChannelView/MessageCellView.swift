@@ -12,11 +12,10 @@ import Foundation
 import SwiftUI
 
 struct MessageCellView: View, Equatable {
-    
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
         lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
-    
+
     var message: Message
     var nick: String?
     var replyNick: String?
@@ -31,10 +30,10 @@ struct MessageCellView: View, Equatable {
     @State var textElement: Text?
     @State var bag = Set<AnyCancellable>()
     @State var editedText: String = ""
-    
+
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
-    
+
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
             message.edit(now: self.editedText)
@@ -131,19 +130,19 @@ struct MessageCellView: View, Equatable {
                                 }())
                                 .font(.chatTextFont)
                                 .fontWeight(.semibold)
-                            +
-                            Text("  \(message.timestamp.makeProperDate())")
+                                +
+                                Text("  \(message.timestamp.makeProperDate())")
                                 .foregroundColor(Color.secondary)
                                 .font(.subheadline)
-                            +
-                            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                                +
+                                Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                                 .foregroundColor(Color.secondary)
                                 .font(.subheadline)
-                            +
-                            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                                +
+                                Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                                 .foregroundColor(Color.secondary)
                                 .font(.subheadline)
-                            if (message.author?.bot ?? false) {
+                            if message.author?.bot ?? false {
                                 Text("Bot")
                                     .padding(.horizontal, 4)
                                     .foregroundColor(Color.white)
@@ -244,7 +243,7 @@ struct MessageCellView: View, Equatable {
                             Button("Open in window") {
                                 guard let attachment = attachment else { return }
                                 if attachment.isVideo, let url = URL(string: attachment.url) {
-                                    attachmentWindows (
+                                    attachmentWindows(
                                         player: AVPlayer(url: url),
                                         url: nil,
                                         name: attachment.filename,
@@ -252,7 +251,7 @@ struct MessageCellView: View, Equatable {
                                         height: attachment.height ?? 500
                                     )
                                 } else if attachment.isImage {
-                                    attachmentWindows (
+                                    attachmentWindows(
                                         player: nil,
                                         url: attachment.url,
                                         name: attachment.filename,
@@ -273,7 +272,6 @@ struct MessageCellView: View, Equatable {
                         }
                     }
                 }
-
             }
         }
         .id(message.id)

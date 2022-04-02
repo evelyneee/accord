@@ -75,7 +75,7 @@ struct GatewayEvent {
 
         case applicationCommandUpdate = "APPLICATION_COMMAND_UPDATE"
         case applicationCommandPermissionsUpdate = "APPLICATION_COMMAND_PERMISSIONS_UPDATE"
-        
+
         case guildApplicationCommandsUpdate = "GUILD_APPLICATION_COMMANDS_UPDATE"
     }
 

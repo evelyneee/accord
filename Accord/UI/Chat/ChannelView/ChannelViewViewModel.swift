@@ -11,9 +11,8 @@ import Foundation
 import SwiftUI
 
 final class ChannelViewViewModel: ObservableObject, Equatable {
-    
     static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
-        return lhs.messages == rhs.messages && lhs.nicks == rhs.nicks && lhs.roles == rhs.roles && lhs.avatars == rhs.avatars && lhs.pronouns == rhs.pronouns
+        lhs.messages == rhs.messages && lhs.nicks == rhs.nicks && lhs.roles == rhs.roles && lhs.avatars == rhs.avatars && lhs.pronouns == rhs.pronouns
     }
 
     @Published var messages: [Message] = .init()
@@ -22,7 +21,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @Published var avatars: [String: String] = .init()
     @Published var pronouns: [String: String] = .init()
     var cancellable: Set<AnyCancellable> = .init()
-    
+
     var guildID: String
     var channelID: String
 
@@ -38,8 +37,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
             MentionSender.shared.removeMentions(server: guildID)
         }
-        self.getMessages(channelID: channelID, guildID: guildID)
-        self.connect()
+        getMessages(channelID: channelID, guildID: guildID)
+        connect()
     }
 
     func connect() {
@@ -47,7 +46,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in
                 guard channelID == self?.channelID else { return }
-                let decoder = JSONDecoder.init()
+                let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                 guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
@@ -117,7 +116,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .sink { [weak self] msg, channelID in
                 // Received a message from backend
                 guard channelID == self?.channelID else { return }
-                let decoder = JSONDecoder.init()
+                let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                 guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 let messageMap = self?.messages.generateKeyMap()

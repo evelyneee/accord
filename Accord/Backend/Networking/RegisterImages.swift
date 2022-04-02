@@ -5,18 +5,17 @@
 //  Created by evelyn on 2022-01-31.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class ExternalImages {
-    
     class RPCResponse: Decodable {
         var url: String
         var external_asset_path: String
     }
-    
+
     class func proxiedURL(appID: String, url: String) -> AnyPublisher<[RPCResponse], Error> {
-        return RequestPublisher.fetch([RPCResponse].self, url: URL(string: "\(rootURL)/applications/\(appID)/external-assets"), headers: Headers(
+        RequestPublisher.fetch([RPCResponse].self, url: URL(string: "\(rootURL)/applications/\(appID)/external-assets"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
             bodyObject: ["urls": [url]],

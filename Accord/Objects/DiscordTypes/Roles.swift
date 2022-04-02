@@ -14,7 +14,7 @@ final class RoleManager {
             .compactMap(\.roles)
             .joined()
             .sorted(by: { $0.position > $1.position })
-            .compactMap { (role) -> [String:(Int, Int)]? in
+            .compactMap { role -> [String: (Int, Int)]? in
                 guard let color = role.color, color != 0 else { return nil }
                 return [role.id: (color, role.position)]
             }

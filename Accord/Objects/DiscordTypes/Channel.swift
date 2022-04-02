@@ -21,6 +21,7 @@ struct Channel: Decodable, Identifiable {
         var id: String?
         var type: Int?
     }
+
     var name: String?
     var topic: String?
     var nsfw: Bool?

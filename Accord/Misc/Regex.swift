@@ -8,7 +8,6 @@
 import Foundation
 
 enum Regex {
-    
     static func precompute() {
         _ = (
             fullEmojiRegex,
@@ -26,7 +25,7 @@ enum Regex {
             chatTextEmojiRegex
         )
     }
-    
+
     static var fullEmojiRegex = try? NSRegularExpression(pattern: #"<:\w+:[0-9]+>"#)
     static var lineSplitRegex = try? NSRegularExpression(pattern: #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#)
     static var emojiIDRegex = try? NSRegularExpression(pattern: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
