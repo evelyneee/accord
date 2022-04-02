@@ -13,7 +13,6 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
-		49F29FAD26A0A47300C1205A /* control in Resources */ = {isa = PBXBuildFile; fileRef = 49F29FAC26A0A47300C1205A /* control */; };
 		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
 		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
 		9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */; };
@@ -81,8 +80,6 @@
 		A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085C269DDCE400F13CAD /* PopoverProfileView.swift */; };
 		A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A869085E269F2A0A00F13CAD /* SettingsView.swift */; };
 		A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88A3D14265B22C4003AE08F /* LoginView.swift */; };
-		A88CD70C26E05900007D979B /* prerm in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70A26E05900007D979B /* prerm */; };
-		A88CD70D26E05900007D979B /* postinst in Resources */ = {isa = PBXBuildFile; fileRef = A88CD70B26E05900007D979B /* postinst */; };
 		A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88CD70E26E065F3007D979B /* MentionProtocol.swift */; };
 		A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */; };
 		A8922501266ED88B00FEA21C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8922500266ED88B00FEA21C /* Extensions.swift */; };
@@ -137,7 +134,6 @@
 		490B2AB6278D21FD00EA4F31 /* Accord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Accord.app; path = ../Release/Accord.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AB7278D21FD00EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; name = Accord_1.0.0_Universal.zip; path = ../Release/Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AB8278D220E00EA4F31 /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = ../Release/Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
-		49F29FAC26A0A47300C1205A /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
@@ -207,8 +203,6 @@
 		A869085C269DDCE400F13CAD /* PopoverProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PopoverProfileView.swift; path = Accord/UI/Profile/PopoverProfileView.swift; sourceTree = SOURCE_ROOT; };
 		A869085E269F2A0A00F13CAD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A88A3D14265B22C4003AE08F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		A88CD70A26E05900007D979B /* prerm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prerm; sourceTree = "<group>"; };
-		A88CD70B26E05900007D979B /* postinst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = postinst; sourceTree = "<group>"; };
 		A88CD70E26E065F3007D979B /* MentionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MentionProtocol.swift; path = Accord/Backend/Networking/MentionProtocol.swift; sourceTree = SOURCE_ROOT; };
 		A88CD71026E066A0007D979B /* ServerListView+Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerListView+Mentions.swift"; sourceTree = "<group>"; };
 		A8922500266ED88B00FEA21C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Extensions.swift; path = Accord/Misc/PlusPlus/Extensions.swift; sourceTree = SOURCE_ROOT; };
@@ -300,7 +294,6 @@
 				32F4C95E256D7D3500343BB3 /* Assets.xcassets */,
 				32F4C963256D7D3500343BB3 /* Info.plist */,
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
-				9ED6F671273702040009C78C /* dpkg */,
 			);
 			path = Accord;
 			sourceTree = "<group>";
@@ -482,16 +475,6 @@
 				9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */,
 			);
 			path = TextField;
-			sourceTree = "<group>";
-		};
-		9ED6F671273702040009C78C /* dpkg */ = {
-			isa = PBXGroup;
-			children = (
-				A88CD70A26E05900007D979B /* prerm */,
-				A88CD70B26E05900007D979B /* postinst */,
-				49F29FAC26A0A47300C1205A /* control */,
-			);
-			name = dpkg;
 			sourceTree = "<group>";
 		};
 		9ED818B1277BF125004D684C /* RPC */ = {
@@ -686,9 +669,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A88CD70D26E05900007D979B /* postinst in Resources */,
-				A88CD70C26E05900007D979B /* prerm in Resources */,
-				49F29FAD26A0A47300C1205A /* control in Resources */,
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -712,7 +692,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/zsh --login";
-			shellScript = "FULL_PRODUCT_NAME_NO_EXTENSION=\"$(basename \"${FULL_PRODUCT_NAME}\" \"${WRAPPER_SUFFIX}\")\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout\"\nmkdir -p \"./layout/DEBIAN\"\nrm -rf \"${FULL_PRODUCT_NAME}/Contents/PkgInfo\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control\" \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/postinst\" \"./layout/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/prerm\" \"./layout/DEBIAN\"\n\nmkdir -p \"./layout/opt/procursus/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout/opt/procursus/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout\" \"me.evelyn.accord_1.0.0_darwin-amd64.deb\"\nrm -rf \"./layout\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nmkdir -p \"./layout-arm64\"\nmkdir -p \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/control-arm64\" \"./layout-arm64/DEBIAN/control\"\n\ncp -a \"${SRCROOT}/${TARGET_NAME}/postinst\" \"./layout-arm64/DEBIAN\"\ncp -a \"${SRCROOT}/${TARGET_NAME}/prerm\" \"./layout-arm64/DEBIAN\"\n\nmkdir -p \"./layout-arm64/opt/procursus/${INSTALL_PATH}\"\ncp -a \"${FULL_PRODUCT_NAME}\" \"./layout-arm64/opt/procursus/${INSTALL_PATH}\"\ndpkg-deb --build \"./layout-arm64\" \"me.evelyn.accord_1.0.0_darwin-arm64.deb\"\nrm -rf \"./layout-arm64\"\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
+			shellScript = "cd $BUILT_PRODUCTS_DIR\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -958,7 +938,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
@@ -996,7 +976,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
