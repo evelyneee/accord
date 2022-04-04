@@ -16,8 +16,8 @@ struct Channel: Decodable, Identifiable {
     // TODO: Overwrite objects
     var permission_overwrites: [PermissionOverwrites]?
     struct PermissionOverwrites: Decodable {
-        var allow: String?
-        var deny: String?
+        var allow: Permissions?
+        var deny: Permissions?
         var id: String?
         var type: Int?
     }

@@ -76,25 +76,21 @@ extension GatewayD {
                 var channel = channel
                 var allowed = true
                 for overwrite in channel.permission_overwrites ?? [] {
-                    if let allowString = overwrite.allow,
-                       let allow = Int(allowString),
+                    if let allow = overwrite.allow,
                        (overwrite.id == user_id) ||
                        (guild.mergedMember?.roles.contains(overwrite.id ?? .init()) ?? false)
                     {
-                        let perms = Permissions.getValues(for: allow)
-                        if perms.contains(.readMessages) {
+                        if allow.contains(.readMessages) {
                             channel.shown = true
                             return channel
                         }
                     }
-                    if let denyString = overwrite.deny,
-                       let deny = Int(denyString),
+                    if let deny = overwrite.deny,
                        (overwrite.id == user_id) ||
                        (guild.mergedMember?.roles.contains(overwrite.id ?? .init()) ?? false) ||
                        overwrite.id == guild.id
                     {
-                        let perms = Permissions.getValues(for: deny)
-                        if perms.contains(.readMessages) {
+                        if deny.contains(.readMessages) {
                             allowed = false
                         }
                     }
