@@ -322,6 +322,7 @@ struct ChatControls: View {
                     fileUpload = try! Data(contentsOf: try! result.get())
                     fileUploadURL = try! result.get()
                 }
+                .onExitCommand { self.replyingTo = nil }
             }
         }
     }

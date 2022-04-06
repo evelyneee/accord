@@ -87,6 +87,7 @@ final class ChatControlsViewModel: ObservableObject {
         textField?.allowsEditingTextAttributes = true
         let font: NSFont? = self.textField?.font
         textQueue.async {
+            let ogContents = self.textFieldContents
             let attributed = NSAttributedMarkdown.markdown(self.textFieldContents, font: font)
             DispatchQueue.main.async {
                 self.textField?.attributedStringValue = attributed
@@ -96,6 +97,7 @@ final class ChatControlsViewModel: ObservableObject {
                 let emote = emoji.dropLast().dropFirst().stringLiteral
                 guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
                 DispatchQueue.main.async {
+                    if self.textFieldContents != ogContents { return }
                     self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
                 }
             }
