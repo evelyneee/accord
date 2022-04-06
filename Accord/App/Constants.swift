@@ -29,8 +29,8 @@ public var darkMode: Bool = UserDefaults.standard.bool(forKey: "darkMode")
 public var sortByMostRecent: Bool = UserDefaults.standard.bool(forKey: "sortByMostRecent")
 public var pfpShown: Bool = UserDefaults.standard.bool(forKey: "pfpShown")
 public var musicPlatform: Platforms? = Platforms(rawValue: UserDefaults.standard.string(forKey: "musicPlatform") ?? "")
-public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.265 Chrome/91.0.4472.164 Electron/13.4.0 Safari/537.36"
-public var dscVersion = 117_300
+public let discordUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) discord/0.0.266 Chrome/91.0.4472.164 Electron/13.6.6 Safari/537.36"
+public var dscVersion = 122_739
 
 public let xcodeRPCAppID = "926282502937641001"
 public let musicRPCAppID = "925514277987704842"

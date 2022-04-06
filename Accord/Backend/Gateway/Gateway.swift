@@ -210,7 +210,7 @@ final class Gateway {
                     "browser": "Discord Client",
                     "release_channel": "stable",
                     "client_build_number": dscVersion,
-                    "client_version": "0.0.265",
+                    "client_version": "0.0.266",
                     "os_version": NSWorkspace.shared.kernelVersion,
                     "os_arch": "x64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
