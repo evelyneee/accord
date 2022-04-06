@@ -31,6 +31,17 @@ extension ServerListView {
                 }
                 return guild
             }
+        
+        Self.mergedMembers = readyPacket.merged_members
+            .compactMap { $0.first }
+            .enumerated()
+            .map { [readyPacket.guilds[$0].id:$1]}
+            .flatMap { $0 }
+            .reduce([String: Guild.MergedMember]()) { dict, tuple in
+                var nextDict = dict
+                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                return nextDict
+            }
 
         // Set presence
         MediaRemoteWrapper.status = readyPacket.user_settings?.status

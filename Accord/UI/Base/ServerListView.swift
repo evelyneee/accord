@@ -57,6 +57,7 @@ struct ServerListView: View {
     @State var selectedServer: Int? = 0
     public static var folders: [GuildFolder] = .init()
     public static var privateChannels: [Channel] = .init()
+    public static var mergedMembers: [String:Guild.MergedMember] = .init()
     internal static var readStates: [ReadStateEntry] = .init()
     @State var status: String?
     @State var timedOut: Bool = false

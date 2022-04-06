@@ -183,3 +183,38 @@ struct SafeVideoPlayer: View {
 extension Font {
     static var chatTextFont = Font.system(size: 14)
 }
+
+extension View {
+    
+    func imageRepresentation(_ completion: @escaping (NSImage?) -> Void) {
+        let view = NoInsetHostingView(rootView: self)
+        view.setFrameSize(view.fittingSize)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            return completion(view.bitmapImage())
+        })
+    }
+
+}
+
+class NoInsetHostingView<V>: NSHostingView<V> where V: View {
+    
+    override var safeAreaInsets: NSEdgeInsets {
+        return .init()
+    }
+    
+}
+
+public extension NSView {
+    
+    func bitmapImage() -> NSImage? {
+        guard let rep = bitmapImageRepForCachingDisplay(in: bounds) else {
+            return nil
+        }
+        cacheDisplay(in: bounds, to: rep)
+        guard let cgImage = rep.cgImage else {
+            return nil
+        }
+        return NSImage(cgImage: cgImage, size: bounds.size)
+    }
+    
+}

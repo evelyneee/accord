@@ -224,17 +224,16 @@ func pronounDBFormed(pronoun: String?) -> String {
 }
 
 func pfpURL(_ uid: String?, _ hash: String?, discriminator: String = "0005", _ size: String = "64") -> String {
-    guard let uid = uid else { return "" }
+    guard let uid = uid else { return cdnURL + "/embed/avatars/0.png" }
     if let avatar = hash {
         return cdnURL + "/avatars/\(uid)/\(avatar).png?size=\(size)"
     } else {
-        print("/embed/avatars/\(String((Int(discriminator) ?? 0) % 5)).png")
         return cdnURL + "/embed/avatars/\(String((Int(discriminator) ?? 0) % 5)).png"
     }
 }
 
 func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
-    guard let id = id, let icon = icon else { return "" }
+    guard let id = id, let icon = icon else { return cdnURL + "/embed/avatars/1.png" }
     return cdnURL + "/icons/\(id)/\(icon).png?size=\(size)"
 }
 

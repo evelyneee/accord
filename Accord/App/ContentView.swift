@@ -17,6 +17,7 @@ struct ContentView: View {
     enum LoadErrors: Error {
         case alreadyLoaded
         case offline
+        case timedOut
     }
 
     @ViewBuilder
@@ -39,14 +40,16 @@ struct ContentView: View {
                             guard NetworkCore.shared.connected else {
                                 throw LoadErrors.offline
                             }
+                            print("hiiiii")
                             let new = try Gateway(url: Gateway.gatewayURL)
                             new.ready()
                                 .sink(receiveCompletion: { completion in
                                     switch completion {
                                     case .finished:
+                                        print("byeeee")
                                         break
                                     case let .failure(error):
-                                        print(error)
+                                        failedToConnect(error)
                                     }
                                 }) { d in
                                     AccordCoreVars.user = d.user
@@ -75,22 +78,7 @@ struct ContentView: View {
                                 .store(in: &wsCancellable)
                             wss = new
                         } catch {
-                            print(error)
-                            let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
-                            do {
-                                let data = try Data(contentsOf: path)
-                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
-                                DispatchQueue.main.async {
-                                    self.serverListView = ServerListView(structure.d)
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    withAnimation {
-                                        loaded = true
-                                    }
-                                }
-                            } catch {
-                                print(error)
-                            }
+                            failedToConnect(error)
                         }
                     }
                 }
@@ -99,6 +87,25 @@ struct ContentView: View {
                 }
         } else {
             serverListView
+        }
+    }
+    
+    func failedToConnect(_ error: Error) {
+        print(error)
+        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")
+        do {
+            let data = try Data(contentsOf: path)
+            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+            DispatchQueue.main.async {
+                self.serverListView = ServerListView(structure.d)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation {
+                    loaded = true
+                }
+            }
+        } catch {
+            print(error)
         }
     }
 }

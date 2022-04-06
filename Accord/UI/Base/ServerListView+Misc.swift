@@ -74,28 +74,8 @@ extension GatewayD {
             guard var channels = guild.channels else { return }
             channels = channels.map { channel -> Channel in
                 var channel = channel
-                var allowed = true
-                for overwrite in channel.permission_overwrites ?? [] {
-                    if let allow = overwrite.allow,
-                       (overwrite.id == user_id) ||
-                       (guild.mergedMember?.roles.contains(overwrite.id ?? .init()) ?? false)
-                    {
-                        if allow.contains(.readMessages) {
-                            channel.shown = true
-                            return channel
-                        }
-                    }
-                    if let deny = overwrite.deny,
-                       (overwrite.id == user_id) ||
-                       (guild.mergedMember?.roles.contains(overwrite.id ?? .init()) ?? false) ||
-                       overwrite.id == guild.id
-                    {
-                        if deny.contains(.readMessages) {
-                            allowed = false
-                        }
-                    }
-                }
-                channel.shown = allowed
+                channel.guild_id = guild.id
+                channel.shown = channel.hasPermission(.readMessages)
                 return channel
             }
             for (index, channel) in channels.enumerated() {

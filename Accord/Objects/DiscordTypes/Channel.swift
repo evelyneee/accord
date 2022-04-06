@@ -15,11 +15,32 @@ struct Channel: Decodable, Identifiable {
     let position: Int?
     // TODO: Overwrite objects
     var permission_overwrites: [PermissionOverwrites]?
+    
     struct PermissionOverwrites: Decodable {
-        var allow: Permissions?
-        var deny: Permissions?
-        var id: String?
-        var type: Int?
+        var allow: Permissions
+        var deny: Permissions
+        var id: String
+        var type: Int
+    }
+    
+    func hasPermission(_ perms: Permissions) -> Bool {
+        var allowed = true
+        for overwrite in self.permission_overwrites ?? [] {
+            if (overwrite.id == user_id ||
+                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false) &&
+                overwrite.allow.contains(.readMessages) {
+                    return true
+            }
+            if (overwrite.id == user_id ||
+                // for the role permissions
+               ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
+                // for the everyone permissions
+                overwrite.id == guild_id) &&
+                overwrite.deny.contains(.readMessages) {
+                    allowed = false
+            }
+        }
+        return allowed
     }
 
     var name: String?

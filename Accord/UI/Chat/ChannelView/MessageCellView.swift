@@ -234,6 +234,15 @@ struct MessageCellView: View, Equatable {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString("\(author.username)#\(author.discriminator)", forType: .string)
                 })
+                Button("Copy image of message", action: {
+                    self.imageRepresentation { image in
+                        if let image = image {
+                            let pb = NSPasteboard.general
+                            pb.clearContents()
+                            pb.writeObjects([image])
+                        }
+                    }
+                })
             }
             if !message.attachments.isEmpty {
                 Divider()
