@@ -85,13 +85,20 @@ final class ChatControlsViewModel: ObservableObject {
     func markdown() {
         guard !textFieldContents.isEmpty else { return }
         textField?.allowsEditingTextAttributes = true
-        let attributed = NSAttributedMarkdown.markdown(textFieldContents, font: textField?.font)
-        textField?.attributedStringValue = attributed
-        let emotes = textFieldContents.matches(for: "(?<!<|<a):.+:")
-        emotes.forEach { emoji in
-            let emote = emoji.dropLast().dropFirst().stringLiteral
-            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
-            textFieldContents = textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
+        let font: NSFont? = self.textField?.font
+        textQueue.async {
+            let attributed = NSAttributedMarkdown.markdown(self.textFieldContents, font: font)
+            DispatchQueue.main.async {
+                self.textField?.attributedStringValue = attributed
+            }
+            let emotes = self.textFieldContents.matches(for: "(?<!<|<a):.+:")
+            emotes.forEach { emoji in
+                let emote = emoji.dropLast().dropFirst().stringLiteral
+                guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
+                DispatchQueue.main.async {
+                    self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
+                }
+            }
         }
     }
 

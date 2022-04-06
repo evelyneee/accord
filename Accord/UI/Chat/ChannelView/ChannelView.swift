@@ -97,6 +97,7 @@ struct ChannelView: View, Equatable {
                         }
                     }
                 }
+                .onExitCommand { self.replyingTo = nil }
             }
         }
         .rotationEffect(.degrees(180))

@@ -201,7 +201,9 @@ struct MessageCellView: View, Equatable {
                 self.editing.toggle()
             }.disabled(message.author?.id != AccordCoreVars.user?.id)
             Button("Delete") { [weak message] in
-                message?.delete()
+                DispatchQueue.global().async {
+                    message?.delete()
+                }
             }.disabled(message.author?.id != AccordCoreVars.user?.id)
             Divider()
             Button("Show profile") {
