@@ -22,9 +22,9 @@ extension ServerListView {
                         color: Color(int: folder.color ?? 0),
                         read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true))
                     ) {
-                        ForEach(folder.guilds, id: \.hashValue) { _ in
+                        ForEach(folder.guilds, id: \.id) { guild in
                             ServerIconCell(
-                                folder: folder,
+                                guild: guild,
                                 selectedServer: self.$selectedServer,
                                 selection: self.$selection,
                                 updater: self.updater
@@ -32,9 +32,9 @@ extension ServerListView {
                         }
                     }
                     .padding(.bottom, 1)
-                } else {
+                } else if let guild = folder.guilds.first {
                     ServerIconCell(
-                        folder: folder,
+                        guild: guild,
                         selectedServer: self.$selectedServer,
                         selection: self.$selection,
                         updater: self.updater
@@ -47,7 +47,7 @@ extension ServerListView {
 }
 
 struct ServerIconCell: View {
-    var folder: GuildFolder
+    var guild: Guild
     @Binding var selectedServer: Int?
     @Binding var selection: Int?
     @StateObject var updater: ServerListView.UpdateView
@@ -70,35 +70,33 @@ struct ServerIconCell: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            ForEach(folder.guilds, id: \.hashValue) { guild in
-                Button(action: { [weak wss] in
-                    wss?.cachedMemberRequest.removeAll()
-                    self.updateSelection(old: selectedServer, new: guild.index)
-                    selectedServer = guild.index
-                }) {
-                    HStack {
-                        Circle()
-                            .fill()
-                            .foregroundColor(Color.primary)
-                            .frame(width: 5, height: 5)
-                            .opacity(unreadMessages(guild: guild) ? 1 : 0)
-                        GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
-                    }
+            Button(action: { [weak wss] in
+                wss?.cachedMemberRequest.removeAll()
+                self.updateSelection(old: selectedServer, new: guild.index)
+                selectedServer = guild.index
+            }) {
+                HStack {
+                    Circle()
+                        .fill()
+                        .foregroundColor(Color.primary)
+                        .frame(width: 5, height: 5)
+                        .opacity(unreadMessages(guild: guild) ? 1 : 0)
+                    GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                 }
-                .accessibility(
-                    label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
-                )
-                .buttonStyle(BorderlessButtonStyle())
-                if pingCount(guild: guild) != 0 {
-                    ZStack {
-                        Circle()
-                            .foregroundColor(.red)
-                            .frame(width: 15, height: 15)
-                        Text(String(pingCount(guild: guild)))
-                            .foregroundColor(.white)
-                            .fontWeight(.semibold)
-                            .font(.caption)
-                    }
+            }
+            .accessibility(
+                label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
+            )
+            .buttonStyle(BorderlessButtonStyle())
+            if pingCount(guild: guild) != 0 {
+                ZStack {
+                    Circle()
+                        .foregroundColor(.red)
+                        .frame(width: 15, height: 15)
+                    Text(String(pingCount(guild: guild)))
+                        .foregroundColor(.white)
+                        .fontWeight(.semibold)
+                        .font(.caption)
                 }
             }
         }

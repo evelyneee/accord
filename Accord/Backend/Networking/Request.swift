@@ -45,7 +45,7 @@ func logOut() {
 }
 
 final class Headers {
-    init(
+    init (
         userAgent: String = discordUserAgent,
         contentType: String? = nil,
         token: String? = nil,
@@ -84,7 +84,7 @@ final class Headers {
             "os": "Mac OS X",
             "browser": "Discord Client",
             "release_channel": "stable",
-            "client_version": "0.0.265",
+            "client_version": "0.0.266",
             "os_version": NSWorkspace.shared.kernelVersion,
             "os_arch": "x64",
             "system_locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",

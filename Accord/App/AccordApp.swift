@@ -32,8 +32,6 @@ struct AccordApp: App {
                     ContentView(loaded: $loaded)
                         .onDisappear {
                             loaded = false
-                            UserDefaults.standard.set(Int(reader.size.width), forKey: "windowWidth")
-                            UserDefaults.standard.set(Int(reader.size.height + 50), forKey: "windowHeight")
                         }
                         .preferredColorScheme(darkMode ? .dark : nil)
                         .sheet(isPresented: $popup, onDismiss: {}) {
@@ -73,18 +71,12 @@ struct AccordApp: App {
                             print(error)
                         }
                     }
-                    self.windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
-                    self.windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
-                    if self.windowWidth == 0 {
-                        self.windowWidth = 1000
-                        UserDefaults.standard.set(1000, forKey: "windowWidth")
-                    }
-                    if self.windowHeight == 0 {
-                        self.windowHeight = 800
-                        UserDefaults.standard.set(Int(800 + 50), forKey: "windowHeight")
-                    }
+                    let windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
+                    let windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
                     appDelegate.fileNotifications()
-                    NSApplication.shared.keyWindow?.contentView?.window?.setFrame(NSRect(x: NSApplication.shared.keyWindow?.contentView?.window?.frame.minX ?? 1000, y: NSApplication.shared.keyWindow?.contentView?.window?.frame.minY ?? 1000, width: CGFloat(windowWidth), height: CGFloat(windowHeight)), display: true)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                        NSApp.keyWindow?.setContentSize(NSSize.init(width: windowWidth, height: windowHeight))
+                    })
                 }
             }
         }
@@ -138,6 +130,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self, selector: #selector(onSleepNote(_:)),
             name: NSWorkspace.willSleepNotification, object: nil
         )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(windowClosed(_:)),
+            name: NSWindow.willCloseNotification, object: nil
+        )
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
             print("Song Changed")
             DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
@@ -186,5 +182,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             showPopover(sender)
         }
+    }
+    
+    @objc func windowClosed(_ sender: AnyObject?) {
+        print(NSApplication.shared.keyWindow?.contentView?.bounds)
+        UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.width ?? 1000), forKey: "windowWidth")
+        UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.height ?? 800), forKey: "windowHeight")
     }
 }
