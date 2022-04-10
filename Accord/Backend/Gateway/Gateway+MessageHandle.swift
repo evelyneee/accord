@@ -43,7 +43,7 @@ extension Gateway {
             memberChunkSubject.send(event.data)
         case .guildMemberListUpdate:
             do {
-                let list = try JSONDecoder().decode(MemberListUpdate.self, from: event.data)
+                let list = try JSONDecoder().decode(MemberListUpdate.self, from: JSONSerialization.data(withJSONObject: ["d": event.d]))
                 memberListSubject.send(list)
             } catch {
                 print(error)

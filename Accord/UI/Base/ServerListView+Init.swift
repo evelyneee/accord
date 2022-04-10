@@ -117,6 +117,7 @@ extension ServerListView {
         selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(readyPacket.guilds.first?.id ?? "")")
         concurrentQueue.async {
             roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
+            roleNames = RoleManager.arrangeRoleNames(guilds: readyPacket.guilds)
         }
 
         // Remote control now switched on
