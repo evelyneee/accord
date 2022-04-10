@@ -29,8 +29,8 @@ final class OPSItems: Decodable {
     var group: OPSGroup?
     
     public var id: String {
-        if member != nil {
-            return member!.user.id
+        if let member = member {
+            return member.user.id
         } else {
             return group!.id ?? ""
         }
