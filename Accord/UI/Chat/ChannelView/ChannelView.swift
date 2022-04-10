@@ -230,7 +230,9 @@ struct MemberListView: View {
     var body: some View {
         List(list, id: \.id) { ops in
             if let group = ops.group {
-                Text(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "")
+                Text(
+                  "\(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "") - \(group.count ?? 0)"
+                )
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
                     .padding([.top])
