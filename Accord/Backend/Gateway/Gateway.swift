@@ -52,6 +52,7 @@ final class Gateway {
     }
 
     private let socketEndpoint: NWEndpoint
+    internal let compress: Bool
 
     public var cachedMemberRequest: [String: GuildMember] = [:]
 
@@ -94,13 +95,21 @@ final class Gateway {
     ]
 
     static var gatewayURL: URL = .init(string: "wss://gateway.discord.gg?v=9&encoding=json")!
-
+    
+    internal var decompressor = ZStream()
+    
     public init(
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
-        seq: Int? = nil
+        seq: Int? = nil,
+        compress: Bool = true
     ) throws {
-        socketEndpoint = NWEndpoint.url(url)
+        if compress {
+            socketEndpoint = NWEndpoint.url(URL(string: "wss://gateway.discord.gg?v=9&encoding=json&compress=zlib-stream")!)
+            print(socketEndpoint)
+        } else {
+            socketEndpoint = NWEndpoint.url(url)
+        }
         let parameters: NWParameters = .tls
         let wsOptions = NWProtocolWebSocket.Options()
         wsOptions.autoReplyPing = true
@@ -109,6 +118,7 @@ final class Gateway {
         parameters.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
         connection = NWConnection(to: socketEndpoint, using: parameters)
         connection?.stateUpdateHandler = stateUpdateHandler
+        self.compress = compress
         try connect(session_id, seq)
     }
 
@@ -123,11 +133,12 @@ final class Gateway {
             if let error = error {
                 return print(error)
             }
+            
             guard let data = data,
-                  let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                  let decompressedData = try? self?.decompressor.decompress(data: data),
+                  let hello = try? JSONSerialization.jsonObject(with: decompressedData, options: []) as? [String: Any],
                   let helloD = hello["d"] as? [String: Any],
-                  let interval = helloD["heartbeat_interval"] as? Int
-            else {
+                  let interval = helloD["heartbeat_interval"] as? Int else {
                 print("Failed to get a heartbeat interval")
                 return wss.hardReset()
             }
@@ -176,8 +187,14 @@ final class Gateway {
             }
             wssThread.async {
                 do {
-                    let event = try GatewayEvent(data: data)
-                    self.handleMessage(event: event)
+                    if self.compress {
+                        let data = try self.decompressor.decompress(data: data)
+                        let event = try GatewayEvent(data: data)
+                        try self.handleMessage(event: event)
+                    } else {
+                        let event = try GatewayEvent(data: data)
+                        try self.handleMessage(event: event)
+                    }
                 } catch {
                     print(error)
                 }
@@ -280,7 +297,31 @@ final class Gateway {
                         print("Closed with unknown close code")
                     }
                 case .cont: break
-                case .binary: break
+                case .binary:
+                    print("binary packet")
+                    wssThread.async {
+                        do {
+                            guard let data = try self?.decompressor.decompress(data: data) else { return }
+                            try wss.updateVoiceState(guildID: nil, channelID: nil)
+                            let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                in: .userDomainMask)[0]
+                                .appendingPathComponent("socketOut.json")
+                            try data.write(to: path)
+                            let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                            wssThread.async {
+                                self?.listen()
+                            }
+                            print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
+                            self?.sessionID = structure.d.session_id
+                            print("Connected with session ID", structure.d.session_id)
+                            promise(.success(structure.d))
+                            return
+                        } catch {
+                            promise(.failure(error))
+                            AccordApp.error(error)
+                            return
+                        }
+                    }
                 case .ping: print("ping")
                 case .pong: print("pong")
                 @unknown default:

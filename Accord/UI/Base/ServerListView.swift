@@ -54,6 +54,7 @@ struct ServerListView: View {
     }
 
     @State var selection: Int?
+    @State var selectedGuild: Guild?
     @State var selectedServer: Int? = 0
     public static var folders: [GuildFolder] = .init()
     public static var privateChannels: [Channel] = .init()
@@ -152,7 +153,7 @@ struct ServerListView: View {
                             .frame(height: 1)
                             .opacity(0.75)
                             .padding(.horizontal)
-                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, updater: self.viewUpdater)
+                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, selectedGuild: self.$selectedGuild, updater: self.viewUpdater)
                             .padding(.trailing, 3.5)
                         Color.gray
                             .frame(height: 1)
@@ -220,8 +221,8 @@ struct ServerListView: View {
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)
-                } else if let selected = selectedServer {
-                    GuildView(guild: Array(Self.folders.compactMap { $0.guilds }.joined())[selected], selection: self.$selection, updater: self.viewUpdater)
+                } else if let selectedGuild = selectedGuild {
+                    GuildView(guild: selectedGuild, selection: self.$selection, updater: self.viewUpdater)
                         .animation(nil, value: UUID())
                 }
             }
@@ -244,6 +245,7 @@ struct ServerListView: View {
             viewUpdater.updateView()
         })
         .onAppear {
+            self.selectedGuild = Array(ServerListView.folders.map(\.guilds).joined()).first
             concurrentQueue.async {
                 if !Self.folders.isEmpty {
                     let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[0].id)")

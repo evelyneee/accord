@@ -87,7 +87,7 @@ extension ServerListView {
 
         // format folders
         let guildDict = guildTemp.generateKeyMap()
-        Self.folders = folderTemp
+        let folders = folderTemp
             .map { folder -> GuildFolder in
                 let folder = folder
                 folder.guilds = folder.guild_ids
@@ -110,16 +110,16 @@ extension ServerListView {
             }
             .filter { !$0.guilds.isEmpty }
 
+        Self.folders = folders
         // Put the read states for access for the private channels
         Self.readStates = readyPacket.read_state?.entries ?? []
-
-        // Guild selection
-        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(readyPacket.guilds.first?.id ?? "")")
+        
         concurrentQueue.async {
             roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
         }
 
         // Remote control now switched on
         MentionSender.shared.delegate = self
+        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(readyPacket.guilds.first?.id ?? "")")
     }
 }

@@ -12,6 +12,7 @@ extension ServerListView {
     struct FolderListView: View {
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
+        @Binding var selectedGuild: Guild?
         @StateObject var updater: ServerListView.UpdateView
 
         var body: some View {
@@ -27,6 +28,7 @@ extension ServerListView {
                                 guild: guild,
                                 selectedServer: self.$selectedServer,
                                 selection: self.$selection,
+                                selectedGuild: self.$selectedGuild,
                                 updater: self.updater
                             )
                         }
@@ -37,6 +39,7 @@ extension ServerListView {
                         guild: guild,
                         selectedServer: self.$selectedServer,
                         selection: self.$selection,
+                        selectedGuild: self.$selectedGuild,
                         updater: self.updater
                     )
                 }
@@ -50,6 +53,7 @@ struct ServerIconCell: View {
     var guild: Guild
     @Binding var selectedServer: Int?
     @Binding var selection: Int?
+    @Binding var selectedGuild: Guild?
     @StateObject var updater: ServerListView.UpdateView
 
     func updateSelection(old: Int?, new: Int?) {
@@ -74,6 +78,7 @@ struct ServerIconCell: View {
                 wss?.cachedMemberRequest.removeAll()
                 self.updateSelection(old: selectedServer, new: guild.index)
                 selectedServer = guild.index
+                self.selectedGuild = guild
             }) {
                 HStack {
                     Circle()

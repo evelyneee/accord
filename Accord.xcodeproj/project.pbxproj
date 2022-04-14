@@ -16,6 +16,7 @@
 		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
 		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
 		9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */; };
+		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
@@ -138,6 +139,7 @@
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
 		9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGKeyCode++.swift"; sourceTree = "<group>"; };
+		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
@@ -415,6 +417,7 @@
 				9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */,
 				A89BE785266BDFB3007B0CBF /* Socket.swift */,
 				9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */,
+				9E13BEE328078F5D001DF4F2 /* ZStream.swift */,
 			);
 			path = Gateway;
 			sourceTree = "<group>";
@@ -775,6 +778,7 @@
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
 				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
+				9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */,
 				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
