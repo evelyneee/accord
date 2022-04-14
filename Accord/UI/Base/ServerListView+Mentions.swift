@@ -10,7 +10,7 @@ import Foundation
 extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
         if guild == "@me" {
-            guard channel != ServerListView.privateChannels[safe: self.selection ?? 0]?.id else { print("currently reading already"); return }
+            guard channel != String(self.selection ?? 0) else { print("currently reading already"); return }
             guard let index = Self.privateChannels.generateKeyMap()[channel] else { return }
             Self.privateChannels[index].read_state?.mention_count += 1
         }

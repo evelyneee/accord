@@ -185,18 +185,24 @@ final class Gateway {
             guard let data = data else {
                 return print(context as Any, data as Any)
             }
-            wssThread.async {
-                do {
-                    if self.compress {
-                        let data = try self.decompressor.decompress(data: data)
-                        let event = try GatewayEvent(data: data)
-                        try self.handleMessage(event: event)
-                    } else {
-                        let event = try GatewayEvent(data: data)
-                        try self.handleMessage(event: event)
+            if self.compress {
+                self.decompressor.decompressionQueue.async {
+                    guard let data = try? self.decompressor.decompress(data: data) else { return }
+                    wssThread.async {
+                        do {
+                            let event = try GatewayEvent(data: data)
+                            try self.handleMessage(event: event)
+                        } catch { print(error) }
                     }
-                } catch {
-                    print(error)
+                }
+            } else {
+                wssThread.async {
+                    do {
+                        let event = try GatewayEvent(data: data)
+                        try self.handleMessage(event: event)
+                    } catch {
+                        print(error)
+                    }
                 }
             }
         }
@@ -301,7 +307,7 @@ final class Gateway {
                     print("binary packet")
                     wssThread.async {
                         do {
-                            guard let data = try self?.decompressor.decompress(data: data) else { return }
+                            guard let data = try self?.decompressor.decompress(data: data, large: true) else { return }
                             try wss.updateVoiceState(guildID: nil, channelID: nil)
                             let path = FileManager.default.urls(for: .cachesDirectory,
                                                                 in: .userDomainMask)[0]

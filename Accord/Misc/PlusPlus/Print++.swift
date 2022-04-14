@@ -7,8 +7,8 @@
 
 import Foundation
 
-public let ENABLE_LINE_LOGGING: Bool = true
-public let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
+private let ENABLE_LINE_LOGGING: Bool = true
+private let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
 
 public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, separator: String = " ") {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?

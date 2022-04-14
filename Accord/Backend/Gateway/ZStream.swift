@@ -13,15 +13,17 @@ final class ZStream {
     let streamPtr = UnsafeMutablePointer<compression_stream>.allocate(capacity: 1)
     var stream: compression_stream
     var status: compression_status
-
+    let decompressionQueue = DispatchQueue(label: "red.evelyn.accord.DecompressionQueue")
+    
     init() {
         self.stream = streamPtr.pointee
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
     }
     
-    func decompress(data: Data) throws -> Data {
+    func decompress(data: Data, large: Bool = false) throws -> Data {
         // header check
-        let data = Data([data[0], data[1]]) == Data([120, 156]) ? data.dropFirst(2) : data
+        let hasHeader = Data([data[0], data[1]]) == Data([120, 156])
+        let data = hasHeader ? data.dropFirst(2) : data
         let outputData = data.withUnsafeBytes { buf -> Data? in
             let bytes = buf.bindMemory(to: UInt8.self).baseAddress!
             // setup the stream's source
@@ -30,15 +32,15 @@ final class ZStream {
             
             // setup the stream's output buffer
             // we use a temporary buffer to store the data as it's compressed
-            let dstBufferSize : size_t = 4096
+            let dstBufferSize : size_t = large ? 32768 : 4096
             let dstBufferPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: dstBufferSize)
             stream.dst_ptr = dstBufferPtr
             stream.dst_size = dstBufferSize
             // and we store the output in a mutable data object
             var outputData = Data()
             
-            
-            repeat {
+            // loop labels :D
+            mainLoop: repeat {
                 status = compression_stream_process(&stream, 0)
 
                 switch status {
@@ -59,6 +61,7 @@ final class ZStream {
                             outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
                             // terminate process
                             status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+                            break mainLoop
                         }
                     }
                     
@@ -68,7 +71,6 @@ final class ZStream {
                     if stream.dst_ptr > dstBufferPtr {
                         outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
                     }
-            
                 case COMPRESSION_STATUS_ERROR:
                     return nil
                     
