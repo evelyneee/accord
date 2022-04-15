@@ -233,8 +233,10 @@ struct ServerListView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             guard let uInfo = pub.userInfo as? [Int: Int],
                   let firstKey = uInfo.first else { return }
+            print(firstKey)
             self.selectedServer = firstKey.key
             self.selection = firstKey.value
+            self.selectedGuild = Array(Self.folders.map(\.guilds).joined())[firstKey.key]
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: String],
