@@ -14,6 +14,7 @@ final class ZStream {
     var stream: compression_stream
     var status: compression_status
     let decompressionQueue = DispatchQueue(label: "red.evelyn.accord.DecompressionQueue")
+    private var lock: Bool = false
     
     init() {
         self.stream = streamPtr.pointee
@@ -21,8 +22,20 @@ final class ZStream {
     }
     
     func decompress(data: Data, large: Bool = false) throws -> Data {
+        guard lock == false else {
+            self.decompressionQueue.async {
+                _ = try? self.decompress(data: data)
+            }
+            throw ZlibErrors.threadError
+        }
+        lock = true
         // header check
-        let hasHeader = Data([data[0], data[1]]) == Data([120, 156])
+        let hasHeader = data.prefix(2).withUnsafeBytes { buf -> Bool in
+            let bytes = buf.bindMemory(to: UInt8.self)
+            let headered = Data(buffer: bytes).prefix(2) == Data([0x78, 0x9C])
+            if headered { print("RFC1951 header detected") }
+            return headered
+        }
         let data = hasHeader ? data.dropFirst(2) : data
         let outputData = data.withUnsafeBytes { buf -> Data? in
             let bytes = buf.bindMemory(to: UInt8.self).baseAddress!
@@ -59,7 +72,6 @@ final class ZStream {
                         if stream.dst_ptr > dstBufferPtr {
                             outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
                             // terminate process
-                            status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
                             break mainLoop
                         }
                     }
@@ -71,6 +83,7 @@ final class ZStream {
                         outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
                     }
                 case COMPRESSION_STATUS_ERROR:
+                    print(errno)
                     return nil
                     
                 default:
@@ -81,6 +94,7 @@ final class ZStream {
             return outputData
         }
         guard let outputData = outputData else { throw ZlibErrors.noData }
+        lock = false
         return outputData
     }
     
@@ -88,6 +102,7 @@ final class ZStream {
         case badString
         case noUTF8Data
         case noData
+        case threadError
     }
     
     deinit {

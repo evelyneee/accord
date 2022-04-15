@@ -192,7 +192,9 @@ final class Gateway {
                         do {
                             let event = try GatewayEvent(data: data)
                             try self.handleMessage(event: event)
-                        } catch { print(error) }
+                        } catch {
+                            print(error)
+                        }
                     }
                 }
             } else {
