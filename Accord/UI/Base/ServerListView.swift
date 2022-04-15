@@ -68,6 +68,7 @@ struct ServerListView: View {
 
     var dmButton: some View {
         Button(action: {
+            ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
             selectedServer = 201
             selection = nil
             wss?.cachedMemberRequest.removeAll()

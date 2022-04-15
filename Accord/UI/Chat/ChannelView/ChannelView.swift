@@ -34,6 +34,7 @@ struct ChannelView: View, Equatable {
     // Mention users in replies
     @State var mention: Bool = true
     @State var replyingTo: Message?
+    @State var mentionUser: Bool = true
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
@@ -45,7 +46,7 @@ struct ChannelView: View, Equatable {
 
     @AppStorage("MetalRenderer")
     var metalRenderer: Bool = false
-
+    
     @State private var cancellable = Set<AnyCancellable>()
 
     // MARK: - init

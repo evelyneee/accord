@@ -23,6 +23,7 @@ struct ChatControls: View {
     @Binding var channelID: String
     @Binding var chatText: String
     @Binding var replyingTo: Message?
+    @Binding var mentionUser: Bool
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
@@ -49,7 +50,8 @@ struct ChatControls: View {
                 }
             } else if let replyingTo = replyingTo {
                 self.replyingTo = nil
-                viewModel?.send(text: contents, replyingTo: replyingTo, mention: true, guildID: guildID)
+                viewModel?.send(text: contents, replyingTo: replyingTo, mention: self.mentionUser, guildID: guildID)
+                self.mentionUser = true
             } else if viewModel?.textFieldContents.prefix(1) == "/" {
                 try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
             } else {

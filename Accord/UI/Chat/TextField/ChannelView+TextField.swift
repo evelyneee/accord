@@ -18,6 +18,15 @@ extension ChannelView {
                             Text("replying to \(replied.author?.username ?? "")")
                                 .lineLimit(0)
                                 .font(.subheadline)
+                            Spacer()
+                            Button(action: {
+                                mentionUser.toggle()
+                            }, label: {
+                                Image(systemName: mentionUser ? "bell.fill" : "bell")
+                                    .foregroundColor(mentionUser ? .accentColor : .secondary)
+                                    .accessibility(label: Text(mentionUser ? "Mention users" : "Don't mention users"))
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
                             Button(action: {
                                 replyingTo = nil
                             }, label: {
@@ -41,6 +50,7 @@ extension ChannelView {
                 channelID: Binding.constant(channelID),
                 chatText: Binding.constant("Message #\(channelName)"),
                 replyingTo: $replyingTo,
+                mentionUser: $mentionUser,
                 fileUpload: $fileUpload,
                 fileUploadURL: $fileUploadURL
             )

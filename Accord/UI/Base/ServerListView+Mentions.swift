@@ -50,7 +50,6 @@ extension ServerListView: MentionSenderDelegate {
         if guildID == "@me" {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "DMSelect"), object: nil, userInfo: ["index": channel.id])
         }
-        print("selecting")
         let index = Self.folders.map { ServerListView.fastIndexGuild(guildID, array: $0.guilds) }
         print(index)
         for (i, v) in index.enumerated() {
@@ -64,9 +63,7 @@ extension ServerListView: MentionSenderDelegate {
             if isDM {
                 guard let index = ServerListView.privateChannels.generateKeyMap()[channelID] else { return }
                 ServerListView.privateChannels[index].last_message_id = messageID
-                ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
             } else {
-                print(self.selection)
                 guard channelID != String(self.selection ?? 0) else { print("currently reading already"); return }
                 ServerListView.folders.enumerated().forEach { index1, folder in
                     folder.guilds.enumerated().forEach { index2, guild in

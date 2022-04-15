@@ -45,9 +45,7 @@ struct ContentView: View {
                             new.ready()
                                 .sink(receiveCompletion: { completion in
                                     switch completion {
-                                    case .finished:
-                                        print("byeeee")
-                                        break
+                                    case .finished: break
                                     case let .failure(error):
                                         failedToConnect(error)
                                     }

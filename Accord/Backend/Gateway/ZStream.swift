@@ -47,7 +47,6 @@ final class ZStream {
                 case COMPRESSION_STATUS_OK:
                     // Going to call _process at least once more, so prepare for that
                     if stream.dst_size == 0 {
-                        print("out")
                         // Output buffer full...
                         
                         // Write out to outputData
