@@ -70,6 +70,7 @@ extension Gateway {
                 joined.append(contentsOf: ServerListView.privateChannels.filter { $0.id == channelID })
                 let joinedGuilds: Guild? = Array(guildArray.joined()).first
                 showNotification(title: message.author?.username ?? "Unknown User", subtitle: joinedGuilds == nil ? joined.first?.name ?? "Direct Messages" : "#\(joined.first?.computedName ?? "") • \(joinedGuilds?.name ?? "")", description: message.content)
+                
                 MentionSender.shared.addMention(guild: guildID, channel: channelID)
             }
         case .messageUpdate:

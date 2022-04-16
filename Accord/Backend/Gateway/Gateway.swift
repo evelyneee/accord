@@ -98,7 +98,7 @@ final class Gateway {
     
     internal var decompressor = ZStream()
     
-    public init(
+    public init (
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
         seq: Int? = nil,
@@ -184,6 +184,16 @@ final class Gateway {
             }
             guard let data = data else {
                 return print(context as Any, data as Any)
+            }
+            if let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata {
+                if info.opcode == .close {
+                    if let closeMessage = String(data: data, encoding: .utf8) {
+                        print("Closed with \(closeMessage)")
+                    } else {
+                        print("Closed with unknown close code")
+                    }
+                    wss.reset()
+                }
             }
             if self.compress {
                 self.decompressor.decompressionQueue.async {

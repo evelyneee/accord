@@ -161,22 +161,27 @@ struct MessageCellView: View, Equatable {
                 }
                 Spacer()
             }
-
-            HStack {
-                ForEach(message.reactions ?? [], id: \.emoji.id) { reaction in
+            LazyVGrid.init(columns: Array.init(repeating: GridItem(.flexible(minimum: 45, maximum: 55), spacing: 4), count: 4), alignment: .leading, spacing: 4, content: {
+                ForEach(message.reactions ?? [], id: \.identifier) { reaction in
                     HStack(spacing: 4) {
-                        Attachment(cdnURL + "/emojis/\(reaction.emoji.id ?? "").png?size=16")
-                            .equatable()
-                            .frame(width: 16, height: 16)
+                        if let id = reaction.emoji.id {
+                            Attachment(cdnURL + "/emojis/\(id).png?size=16")
+                                .equatable()
+                                .frame(width: 16, height: 16)
+                        } else if let name = reaction.emoji.name {
+                            Text(name)
+                                .frame(width: 16, height: 16)
+                        }
                         Text(String(reaction.count))
                             .fontWeight(Font.Weight.medium)
                     }
                     .padding(4)
+                    .frame(minWidth: 45, maxWidth: 55)
                     .background(Color(NSColor.windowBackgroundColor))
                     .cornerRadius(4)
-                    .padding(.leading, 41)
                 }
-            }
+            })
+            .padding(.leading, 41)
             ForEach(message.embeds ?? [], id: \.id) { embed in
                 EmbedView(embed: embed)
                     .equatable()

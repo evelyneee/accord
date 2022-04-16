@@ -14,31 +14,31 @@ extension ChannelView {
             if replyingTo != nil || !typing.isEmpty {
                 HStack {
                     if let replied = replyingTo {
-                        HStack {
-                            Text("replying to \(replied.author?.username ?? "")")
-                                .lineLimit(0)
-                                .font(.subheadline)
-                            Spacer()
-                            Button(action: {
-                                mentionUser.toggle()
-                            }, label: {
-                                Image(systemName: mentionUser ? "bell.fill" : "bell")
-                                    .foregroundColor(mentionUser ? .accentColor : .secondary)
-                                    .accessibility(label: Text(mentionUser ? "Mention users" : "Don't mention users"))
-                            })
-                            .buttonStyle(BorderlessButtonStyle())
-                            Button(action: {
-                                replyingTo = nil
-                            }, label: {
-                                Image(systemName: "xmark.circle.fill")
-                            })
-                            .buttonStyle(BorderlessButtonStyle())
-                        }
+                        Text("replying to \(replied.author?.username ?? "")")
+                            .lineLimit(0)
+                            .font(.subheadline)
                     }
                     if !(typing.isEmpty) {
                         Text("\(typing.joined(separator: ", ")) \(typing.count == 1 ? "is" : "are") typing")
                             .lineLimit(0)
                             .font(.subheadline)
+                    }
+                    if replyingTo != nil {
+                        Spacer()
+                        Button(action: {
+                            mentionUser.toggle()
+                        }, label: {
+                            Image(systemName: mentionUser ? "bell.fill" : "bell")
+                                .foregroundColor(mentionUser ? .accentColor : .secondary)
+                                .accessibility(label: Text(mentionUser ? "Mention users" : "Don't mention users"))
+                        })
+                        .buttonStyle(BorderlessButtonStyle())
+                        Button(action: {
+                            replyingTo = nil
+                        }, label: {
+                            Image(systemName: "xmark.circle.fill")
+                        })
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
                 .padding(.vertical, 4)
