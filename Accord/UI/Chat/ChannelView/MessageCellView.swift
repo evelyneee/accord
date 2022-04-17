@@ -150,6 +150,14 @@ struct MessageCellView: View, Equatable {
                                     .background(Capsule().fill().foregroundColor(Color.red))
                                     .padding(.horizontal, 4)
                             }
+                            if message.author?.system ?? false {
+                                Text("System")
+                                    .padding(.horizontal, 4)
+                                    .foregroundColor(Color.white)
+                                    .font(.subheadline)
+                                    .background(Capsule().fill().foregroundColor(Color.purple))
+                                    .padding(.horizontal, 4)
+                            }
                         }
                         if self.editing {
                             editingTextField
