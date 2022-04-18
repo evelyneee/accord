@@ -65,5 +65,6 @@ struct Permissions: Decodable, OptionSet {
     static var createPrivateThreads = Permissions(rawValue: 1 << 36)
     static var externalStickers = Permissions(rawValue: 1 << 37)
     static var sendMessagesInThreads = Permissions(rawValue: 1 << 38)
-    
+    static var useEmbeddedActivities = Permissions(rawValue: 1 << 39)
+    static var moderateMembers = Permissions(rawValue: 1 << 40)
 }

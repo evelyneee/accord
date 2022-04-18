@@ -48,6 +48,8 @@ struct ChannelView: View, Equatable {
     var metalRenderer: Bool = false
     
     @State private var cancellable = Set<AnyCancellable>()
+    
+    private var permissions: Permissions
 
     // MARK: - init
 
@@ -57,6 +59,8 @@ struct ChannelView: View, Equatable {
         channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
         _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
+        self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
+        print(self.permissions.contains(.manageMessages))
         if DiscordDesktopRPCEnabled {
             DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
@@ -72,6 +76,7 @@ struct ChannelView: View, Equatable {
                     pronouns: viewModel.pronouns[author.id],
                     avatar: viewModel.avatars[author.id],
                     guildID: guildID,
+                    permissions: permissions,
                     role: $viewModel.roles[author.id],
                     replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                     replyingTo: $replyingTo
