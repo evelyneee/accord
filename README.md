@@ -18,9 +18,6 @@ If you want to help and have a macOS Big Sur device, PRs are welcomed
 
 ### Installing
 
-#### TestFlight [Recommended]
-[Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to recieve automatic updates, contribute feedback to the project, and stay informed with up-to-date changelogs.
-
 #### Homebrew [Recommended]
 [If you have Homebrew installed on your Mac](https://brew.sh), you can get the latest Accord release by installing the `accord` package:
 ```
@@ -31,8 +28,11 @@ To upgrade Accord using Homebrew, run the following:
 brew upgrade --cask accord
 ```
 
-#### GitHub Releases
+#### GitHub Releases [Recommended]
 Alternatively, you can [download the latest version of Accord via GitHub releases](https://github.com/evelyneee/accord/releases/latest). These builds will not recieve automatic updates, so you will manually need to check for updates to benefit from the latest features and bug fixes.
+
+#### TestFlight
+[Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to recieve automatic updates, contribute feedback to the project, and stay informed with up-to-date changelogs. However, the TestFlight might be less updated.
 
 ### Building
 Xcode is required.
