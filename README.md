@@ -29,10 +29,10 @@ brew upgrade --cask accord
 ```
 
 #### GitHub Releases [Recommended]
-Alternatively, you can [download the latest version of Accord via GitHub releases](https://github.com/evelyneee/accord/releases/latest). These builds will not recieve automatic updates, so you will manually need to check for updates to benefit from the latest features and bug fixes.
+Alternatively, you can [download the latest version of Accord via GitHub releases](https://github.com/evelyneee/accord/releases/latest). These builds will not receive automatic updates, so you will have to manually check for updates to benefit from the latest features and bug fixes.
 
 #### TestFlight
-[Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to recieve automatic updates, contribute feedback to the project, and stay informed with up-to-date changelogs. However, the TestFlight might be less updated.
+[Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to receive automatic updates, give feedback to the project, and stay up-to-date with changelogs. However, the TestFlight might be less updated.
 
 ### Building
 Xcode is required.
