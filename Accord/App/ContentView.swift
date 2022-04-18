@@ -28,6 +28,7 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
+                        print(Permissions((0...40).compactMap { Permissions.init(rawValue: 1 << $0) }).rawValue)
                         guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {

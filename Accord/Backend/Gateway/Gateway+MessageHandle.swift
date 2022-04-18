@@ -54,7 +54,7 @@ extension Gateway {
         case .messageCreate:
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-            guard let message = try? decoder.decode(GatewayEventContent<Message>.self, from: event.data).d else { print("uhhhhh"); return }
+            let message = try decoder.decode(GatewayEventContent<Message>.self, from: event.data).d
             if let channelID = event.channelID, let author = message.author {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
@@ -85,7 +85,9 @@ extension Gateway {
         case .messageReactionRemove: break
         case .messageReactionRemoveAll: break
         case .messageReactionRemoveEmoji: break
-        case .presenceUpdate: break
+        case .presenceUpdate:
+            let event = try JSONDecoder().decode(GatewayEventContent<PresenceUpdate>.self, from: event.data)
+            self.presencePipeline[event.d.user.id]?.send(event.d)
         case .typingStart:
             if let channelID = event.channelID {
                 typingSubject.send((event.data, channelID))
@@ -99,26 +101,22 @@ extension Gateway {
         case .guildApplicationCommandsUpdate:
             print("uwu")
             if let guildID = event.guildID {
-                do {
-                    let commands = try JSONDecoder().decode(
-                        SlashCommandStorage.GuildApplicationCommandsUpdateEvent.self,
-                        from: event.data
-                    )
-                    let userKeyMap = commands.d.applications.generateKeyMap()
-                    SlashCommandStorage.commands[guildID] = commands.d.application_commands
-                        .map { command -> SlashCommandStorage.Command in
-                            print(command)
-                            if let index = userKeyMap[command.application_id],
-                               let avatar = commands.d.applications[index].icon
-                            {
-                                command.avatar = avatar
-                                return command
-                            }
+                let commands = try JSONDecoder().decode(
+                    SlashCommandStorage.GuildApplicationCommandsUpdateEvent.self,
+                    from: event.data
+                )
+                let userKeyMap = commands.d.applications.generateKeyMap()
+                SlashCommandStorage.commands[guildID] = commands.d.application_commands
+                    .map { command -> SlashCommandStorage.Command in
+                        print(command)
+                        if let index = userKeyMap[command.application_id],
+                           let avatar = commands.d.applications[index].icon
+                        {
+                            command.avatar = avatar
                             return command
                         }
-                } catch {
-                    print(error)
-                }
+                        return command
+                    }
             }
         default: break
         }

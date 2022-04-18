@@ -27,6 +27,23 @@ final class Presence: Decodable {
     //    client_status
 }
 
+final class PresenceUpdate: Decodable {
+    var user: PresenceUpdate.User
+    var guildID: String?
+    var status: String
+    @IgnoreFailure
+    var activities: [ActivityCodable]
+    
+    enum CodingKeys: String, CodingKey {
+        case user, status, activities
+        case guildID = "guild_id"
+    }
+    
+    final class User: Decodable {
+        var id: String
+    }
+}
+
 enum UserStatus: String, Codable {
     case online
     case dnd

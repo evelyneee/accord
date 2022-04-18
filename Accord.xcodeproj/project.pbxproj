@@ -21,6 +21,7 @@
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
 		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
+		9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
@@ -144,6 +145,7 @@
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
 		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
+		9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewCell.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
@@ -521,6 +523,7 @@
 				9E6470662741B9960026686C /* GuildView.swift */,
 				9E82874C27BB515F00953A7B /* FolderListView.swift */,
 				9E82874E27BB522600953A7B /* ServerListView+Init.swift */,
+				9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -786,6 +789,7 @@
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
 				9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
+				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
@@ -925,7 +929,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

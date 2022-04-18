@@ -24,12 +24,14 @@ final class Gateway {
     internal var bag = Set<AnyCancellable>()
 
     // To communicate with the view
-    private(set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
-    private(set) var editSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var typingSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var memberChunkSubject = PassthroughSubject<Data, Never>()
-    private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+    private (set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
+    private (set) var editSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var typingSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var memberChunkSubject = PassthroughSubject<Data, Never>()
+    private (set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+    
+    public var presencePipeline = [String:PassthroughSubject<PresenceUpdate, Never>]()
 
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
@@ -462,6 +464,15 @@ final class Gateway {
         try send(json: packet)
     }
 
+    public func listenForPresence(userID: String, action: @escaping ((PresenceUpdate) -> Void)) {
+        self.presencePipeline[userID] = .init()
+        self.presencePipeline[userID]?.sink(receiveValue: action).store(in: &self.bag)
+    }
+    
+    public func unregisterPresence(userID: String) {
+        self.presencePipeline.removeValue(forKey: userID)
+    }
+    
     // cleanup
     deinit {
         self.heartbeatTimer = nil
