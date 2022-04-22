@@ -187,24 +187,6 @@ final class NSAttributedMarkdown {
     }
 }
 
-private extension NSFont {
-    var bold: NSFont {
-        let font = NSFont.boldSystemFont(ofSize: 12)
-        return font
-    }
-
-    var italic: NSFont {
-        let font = NSFont.systemFont(ofSize: 12)
-        let descriptor = font.fontDescriptor.withSymbolicTraits([.italic])
-        return NSFont(descriptor: descriptor, size: NSFont.systemFontSize)!
-    }
-
-    var boldItalic: NSFont {
-        let font = NSFont.boldSystemFont(ofSize: 12)
-        return font
-    }
-}
-
 extension Array where Element == String {
     func replaceAllOccurences(of original: String, with string: String) -> [String] {
         map { $0.replacingOccurrences(of: original, with: string) }

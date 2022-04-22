@@ -49,6 +49,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                 guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
+                message.processedTimestamp = message.timestamp.makeProperDate()
                 if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                     self?.loadUser(for: message.author?.id)
                 }
@@ -154,6 +155,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         .map { output -> [Message] in
             output.enumerated().compactMap { index, element -> Message in
                 guard element != output.last else { return element }
+                element.processedTimestamp = element.timestamp.makeProperDate()
                 element.sameAuthor = output[index + 1].author?.id == element.author?.id
                 return element
             }

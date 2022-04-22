@@ -41,7 +41,10 @@ struct ContentView: View {
                                 throw LoadErrors.offline
                             }
                             print("hiiiii")
-                            let new = try Gateway(url: Gateway.gatewayURL)
+                            let new = try Gateway(
+                                url: Gateway.gatewayURL,
+                                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                            )
                             new.ready()
                                 .sink(receiveCompletion: { completion in
                                     switch completion {

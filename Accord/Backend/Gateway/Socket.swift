@@ -87,8 +87,4 @@ extension Gateway {
             wss = new
         }
     }
-
-    func decodePayload(payload: Data) -> [String: Any]? {
-        try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
-    }
 }

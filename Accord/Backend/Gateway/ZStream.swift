@@ -99,8 +99,6 @@ final class ZStream {
     }
     
     enum ZlibErrors: Error {
-        case badString
-        case noUTF8Data
         case noData
         case threadError
     }

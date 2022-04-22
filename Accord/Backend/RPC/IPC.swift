@@ -8,6 +8,7 @@
 import Darwin
 import Foundation
 
+/// Removed from target, unused
 class IPC {
     let servicePort = "6463"
 
