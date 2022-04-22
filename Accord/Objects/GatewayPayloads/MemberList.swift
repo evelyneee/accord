@@ -19,12 +19,12 @@ final class ListOPS: Decodable {
     var items: [OPSItems]?
 }
 
-final class OPSGroup: Decodable {
+final class OPSGroup: Codable {
     var count: Int?
     var id: String?
 }
 
-final class OPSItems: Decodable {
+final class OPSItems: Codable {
     var member: GuildMember?
     var group: OPSGroup?
     

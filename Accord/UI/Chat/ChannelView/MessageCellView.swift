@@ -203,7 +203,7 @@ struct MessageCellView: View, Equatable {
                         bodyObject: ["delete_message_days":1],
                         type: .PUT,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/\(guildID!)/\(self.message.channel_id)"
                     ))
                 }
             }
@@ -220,7 +220,7 @@ struct MessageCellView: View, Equatable {
                         token: AccordCoreVars.token,
                         type: .DELETE,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/\(guildID!)/\(self.message.channel_id)"
                     ))
                 }
             }

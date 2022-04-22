@@ -18,11 +18,10 @@ final class GuildMemberChunk: Decodable {
     var presences: [Presence]?
 }
 
-final class Presence: Decodable {
-    var user: User?
+final class Presence: Codable {
+    var user: PresenceUpdate.User?
     // var guild_id: String
     var status: UserStatus?
-    @IgnoreFailure
     var activities: [ActivityCodable]
     //    client_status
 }
@@ -39,7 +38,7 @@ final class PresenceUpdate: Decodable {
         case guildID = "guild_id"
     }
     
-    final class User: Decodable {
+    final class User: Codable {
         var id: String
     }
 }
@@ -61,7 +60,7 @@ final class TypingEvent: Decodable {
     }
 }
 
-final class GuildMember: Decodable {
+final class GuildMember: Codable {
     var avatar: String?
     var user: User
     var nick: String?

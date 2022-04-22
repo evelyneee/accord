@@ -60,7 +60,6 @@ struct ChannelView: View, Equatable {
         self.guildName = guildName ?? "Direct Messages"
         _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
         self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
-        print(self.permissions.contains(.manageMessages))
         if DiscordDesktopRPCEnabled {
             DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
@@ -167,6 +166,13 @@ struct ChannelView: View, Equatable {
                 .sink { list in
                     if self.memberListShown, memberList.isEmpty {
                         self.memberList = Array(list.d.ops.compactMap(\.items).joined())
+                            .map { item -> OPSItems in
+                                let new = item
+                                new.member?.roles = new.member?.roles?
+                                    .filter { roleColors[$0] != nil }
+                                    .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
+                                return new
+                            }
                     }
                 }
                 .store(in: &cancellable)
@@ -259,6 +265,12 @@ struct MemberListView: View {
                     VStack(alignment: .leading) {
                         Text(ops.member?.nick ?? ops.member?.user.username ?? "")
                             .fontWeight(.medium)
+                            .foregroundColor({ () -> Color in
+                                if let role = ops.member?.roles?.first, let color = roleColors[role]?.0 {
+                                    return Color(int: color)
+                                }
+                                return Color.primary
+                            }())
                             .lineLimit(0)
                         if let presence = ops.member?.presence?.activities.first?.state {
                             Text(presence).foregroundColor(.secondary)

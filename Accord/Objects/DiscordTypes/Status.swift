@@ -75,10 +75,10 @@ final class StatusEmoji: Codable {
         self.animated = animated
     }
 
-    var name: String
-    var id: String
-    var animated: Bool
-    var dictValue: [String: Any] {
+    var name: String?
+    var id: String?
+    var animated: Bool?
+    var dictValue: [String: Any?] {
         ["name": name, "id": id, "animated": animated]
     }
 }
