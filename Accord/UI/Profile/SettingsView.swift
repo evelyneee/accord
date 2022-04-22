@@ -60,9 +60,9 @@ struct SettingsViewRedesign: View {
     @State var loading: Bool = false
     @State var bioText: String = " "
     @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
-    @State var enableGenericRPC: Bool = false
     @State var selectedApp: NSRunningApplication = .current
     @State var genericRPCDetails: String = ""
+    @State var rpcIconURL: String = ""
     var availableApps: [NSRunningApplication] {
         // we need to filer out by normal apps, otherwise this would be bloated with several background processes
         NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }
@@ -254,13 +254,12 @@ struct SettingsViewRedesign: View {
                             }
                     }
                     .disabled(!useGenericRPC)
-                    TextField("Custom RPC details..", text: $genericRPCDetails)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                        .disabled(!useGenericRPC)
-                    SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence", detail: "This will display the current channel you're talking in")
+
+                    RPCInfoTextFields
+                    
+                    SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence", detail: "Will display the current file being edited")
                     SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence", detail: "This will display the current Song you're listening to")
-                    SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
+                    SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence", detail: "This will display the current channel you're talking in")
                     SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                 }
                 .padding(5)
@@ -310,9 +309,27 @@ struct SettingsViewRedesign: View {
         }
     }
     
+    
+    @ViewBuilder var RPCInfoTextFields: some View {
+        HStack(alignment: .top) {
+            Text("Custom RPC Details")
+            TextField("", text: $genericRPCDetails)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+        }
+        .disabled(!useGenericRPC)
+        
+        HStack(alignment: .top) {
+            Text("RPC Icon URL")
+            TextField("Icon URL", text: $rpcIconURL)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+        }
+        .disabled(!useGenericRPC)
+    }
+    
     func callAppRPC() {
         if useGenericRPC {
-            GenericAppRPC(withApp: selectedApp, details: genericRPCDetails.isEmpty ? nil : genericRPCDetails).updatePresence()
+            let instance = GenericAppRPC(withApp: selectedApp, details: genericRPCDetails.isEmpty ? nil : genericRPCDetails, iconURL: rpcIconURL.isEmpty ? nil : rpcIconURL)
+            instance.updatePresence()
         }
     }
 }

@@ -11,11 +11,13 @@ import AppKit
 class GenericAppRPC {
     private let app: NSRunningApplication
     private let details: String?
+    private let iconURL: String?
     private let startDate = Int(Date().timeIntervalSince1970) * 1000
     
-    init(withApp app: NSRunningApplication, details: String? = nil) {
+    init(withApp app: NSRunningApplication, details: String? = nil, iconURL: String? = nil) {
         self.app = app
         self.details = details
+        self.iconURL = iconURL
     }
     
     
@@ -24,6 +26,10 @@ class GenericAppRPC {
             print("Couldn't get app name. we out.")
             return
         }
+        var assets: [String: String] = [:]
+        if let iconURL = iconURL {
+            assets["large_image"] = "mp:\(iconURL)"
+        }
         
         do {
             try wss.updatePresence(status: status ?? MediaRemoteWrapper.status ?? "dnd", since: startDate) {
@@ -31,7 +37,8 @@ class GenericAppRPC {
                     name: appName,
                     type: 0,
                     timestamp: startDate,
-                    details: details
+                    details: details,
+                    assets: assets
                 )
             }
              print("clled wss.updatePresence for app \(appName). We out here")
