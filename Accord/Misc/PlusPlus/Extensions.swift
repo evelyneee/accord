@@ -228,7 +228,8 @@ func pfpURL(_ uid: String?, _ hash: String?, discriminator: String = "0005", _ s
     if let avatar = hash {
         return cdnURL + "/avatars/\(uid)/\(avatar).png?size=\(size)"
     } else {
-        return cdnURL + "/embed/avatars/\(String((Int(discriminator) ?? 0) % 5)).png"
+        let index = String((Int(discriminator) ?? 0) % 5)
+        return cdnURL + "/embed/avatars/\(index).png"
     }
 }
 

@@ -83,5 +83,6 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
         var hoisted_role: String?
         var nick: String?
         var roles: [String]
+        var cachedPermissions: Permissions?
     }
 }

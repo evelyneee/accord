@@ -7,47 +7,6 @@
 
 import Foundation
 
-func testXP() {
-    /*
-     {
-        "type":2,
-        "application_id":"785982039798186014",
-        "guild_id":"349243932447604736",
-        "channel_id":"688121419980341282",
-        "session_id":"d0d59397c3c82237c7c426696574aba0",
-        "data":{
-            "version":"910922653005676659",
-            "id":"910922647485972535",
-            "guild_id":"349243932447604736",
-            "name":"xp","type":1,
-            "options":[],
-            "attachments":[],
-            "application_command":{
-                "id":"910922647485972535",
-                "name":"xp",
-                "application_id":"785982039798186014",
-                "guild_id":"349243932447604736",
-                "type":1,
-                "description":"Show your or another user's XP",
-                "default_permission":true,
-                "listed":true,
-                "name_localized":"xp",
-                "version":"910922653005676659",
-                "permissions":[],
-                "options":[
-                    {
-                        "description":"Member to show xp of",
-                        "name":"user",
-                        "type":6
-                    }
-                ]
-            }
-        },
-        "nonce":"934248465829986304"
-     }
-     */
-}
-
 final class SlashCommands {
     // {"version":"847239978559078431","id":"847239978559078430","name":"minesweeper","type":1,"options":[],"application_command":{"application_id":"836759847357251604","default_member_permissions":null,"default_permission":true,"description":"play minesweeper on a 5-5-5 board","dm_permission":null,"id":"847239978559078430","name":"minesweeper","permissions":[],"type":1,"version":"847239978559078431"},"attachments":[]}
     public class func interact(
@@ -68,11 +27,14 @@ final class SlashCommands {
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let optionValues = options.prefix(optionValues.count).enumerated().map { index, option -> [String: Any] in
-            var value = optionValues[index]
-            value["type"] = option.type
-            return value
-        }
+        let optionValues = options
+            .prefix(optionValues.count)
+            .enumerated()
+            .map { index, option -> [String: Any] in
+                var value = optionValues[index]
+                value["type"] = option.type
+                return value
+            }
         let params: [String: Any] = [
             "type": type,
             "application_id": applicationID,
@@ -113,7 +75,6 @@ final class SlashCommands {
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
         guard let params = try params.jsonString() else { return }
         request.httpBody = try Request.createMultipartBody(with: params, boundary: boundary)
-        print(String(data: request.httpBody!, encoding: .utf8))
         let task = URLSession.shared.dataTask(with: request)
         task.resume()
     }

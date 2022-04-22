@@ -13,9 +13,6 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
-		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
-		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
-		9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */; };
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
@@ -139,7 +136,6 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
-		9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGKeyCode++.swift"; sourceTree = "<group>"; };
 		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
@@ -405,7 +401,6 @@
 				9E6BCC63277E8E850085F279 /* Print++.swift */,
 				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
 				9ED3011027A6C76300D6235D /* Keypath++.swift */,
-				9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */,
 				9EB3582327BFFD3E0046A136 /* Collection++.swift */,
 				9EDD136527D5A55A000685E6 /* String++.swift */,
 			);
@@ -624,7 +619,6 @@
 				32F4C954256D7D3300343BB3 /* Frameworks */,
 				32F4C955256D7D3300343BB3 /* Resources */,
 				32ADD59925839980008D1715 /* Embed App Extensions */,
-				49F29FAB26A0A44900C1205A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -681,28 +675,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		49F29FAB26A0A44900C1205A /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FULL_PRODUCT_NAME)",
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/zsh --login";
-			shellScript = "cd $BUILT_PRODUCTS_DIR\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		32F4C953256D7D3300343BB3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -731,7 +703,6 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
-				9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */,
 				9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
@@ -745,7 +716,6 @@
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
-				9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */,
 				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
 				9E82875127BD6C5400953A7B /* Permissions.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
@@ -796,7 +766,6 @@
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */,
-				9E0088D027937F5300F36D6B /* IPC.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 				9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */,
 				9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */,
