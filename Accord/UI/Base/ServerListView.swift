@@ -9,6 +9,7 @@ import Combine
 import SwiftUI
 
 public var roleColors: [String: (Int, Int)] = [:]
+public var roleNames: [String: String] = [:]
 
 struct NavigationLazyView<Content: View>: View {
     let build: () -> Content

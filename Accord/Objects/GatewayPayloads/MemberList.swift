@@ -19,6 +19,20 @@ final class ListOPS: Decodable {
     var items: [OPSItems]?
 }
 
+final class OPSGroup: Decodable {
+    var count: Int?
+    var id: String?
+}
+
 final class OPSItems: Decodable {
     var member: GuildMember?
+    var group: OPSGroup?
+    
+    public var id: String {
+        if let member = member {
+            return member.user.id
+        } else {
+            return group!.id ?? ""
+        }
+    }
 }
