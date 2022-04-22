@@ -128,7 +128,7 @@ struct MessageCellView: View, Equatable {
                 Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
-            if message.author?.bot ?? false {
+            if message.author?.bot == true {
                 Text("Bot")
                     .padding(.horizontal, 4)
                     .foregroundColor(Color.white)
@@ -136,6 +136,14 @@ struct MessageCellView: View, Equatable {
                     .background(Capsule().fill().foregroundColor(Color.red))
                     .padding(.horizontal, 4)
             }
+            if message.author?.system == true {
+                Text("System")
+                    .padding(.horizontal, 4)
+                    .foregroundColor(Color.white)
+                    .font(.subheadline)
+                    .background(Capsule().fill().foregroundColor(Color.purple))
+                    .padding(.horizontal, 4)
+           }
         }
 
     }
