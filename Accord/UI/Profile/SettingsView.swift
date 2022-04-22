@@ -54,13 +54,22 @@ struct SettingsViewRedesign: View {
     var selectedPlatform: Platforms = .appleMusic
     @AppStorage("CompressGateway")
     var compress: Bool = false
-
+    @State var useGenericRPC: Bool = false
+    
     @State var user: User? = AccordCoreVars.user
     @State var loading: Bool = false
     @State var bioText: String = " "
     @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
+    @State var enableGenericRPC: Bool = false
+    @State var selectedApp: NSRunningApplication = .current
+    @State var genericRPCDetails: String = ""
+    var availableApps: [NSRunningApplication] {
+        // we need to filer out by normal apps, otherwise this would be bloated with several background processes
+        NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }
+    }
+    
     @Environment(\.colorScheme) var colorScheme
-
+    
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
@@ -148,7 +157,7 @@ struct SettingsViewRedesign: View {
                         SettingsToggleView(toggled: $showHiddenChannels, title: "Show hidden channels", detail: "Please don't use this")
                         SettingsToggleView(toggled: $compress, title: "Enable Gateway Stream Compression", detail: "Recommended")
                     }
-
+                    
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -170,14 +179,7 @@ struct SettingsViewRedesign: View {
                             .padding()
                     }
                     .disabled(true)
-                    Group {
-                        SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
-                        SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
-                        SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
-                        SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
-                    }
                 }
-                .toggleStyle(SwitchToggleStyle())
                 .pickerStyle(MenuPickerStyle())
                 .padding(5)
                 .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
@@ -219,51 +221,98 @@ struct SettingsViewRedesign: View {
                         .buttonStyle(BorderedButtonStyle())
                         .padding()
                     }
-                    .fileImporter(isPresented: $loading, allowedContentTypes: [.data], onCompletion: { result in
-                        do {
-                            let url = try result.get()
-                            let path = FileManager.default.urls(for: .documentDirectory,
-                                                                in: .userDomainMask)[0].appendingPathComponent(UUID().uuidString)
-                            if FileManager.default.secureCopyItem(at: url, to: path) {
-                                print("Plugin successfully copied")
-                            }
-                        } catch {}
-                    })
                 }
                 .padding(5)
                 .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
                 .cornerRadius(15)
                 .padding()
                 .disabled(true)
-                Text("Accord (red.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
+                Text("Rich Presence Settings")
+                    .font(.title)
+                    .fontWeight(.bold)
                     .padding(.leading, 20)
-                    .foregroundColor(.secondary)
-                Text("OS: macOS \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))")
-                    .padding(.leading, 20)
-                    .foregroundColor(.secondary)
-                HStack(alignment: .center) {
-                    Text("Open source at")
-                        .padding(.leading, 20)
-                        .foregroundColor(.secondary)
-                    GithubIcon()
-                        .foregroundColor(Color.accentColor)
-                        .frame(width: 13, height: 13)
-                        .onTapGesture {
-                            NSWorkspace.shared.open(URL(string: "https://github.com/evelyneee/Accord")!)
+                VSplitView {
+                    SettingsToggleView(toggled: $useGenericRPC, title: "Enable Rich Presence", detail: "Enables rich presence and allows you to choose what app to display")
+                        .onChange(of: useGenericRPC) { _ in
+                            callAppRPC()
                         }
+                    HStack(alignment: .top) {
+                        Text("Enable Rich Presence for..")
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .padding()
+                        Picker(selection: $selectedApp, content: {
+                            ForEach(availableApps, id: \.self) { app in
+                                if let name = app.localizedName {
+                                    Text(name)
+                                }
+                            }
+                        }, label: {})
+                            .padding()
+                            .onChange(of: selectedApp) { _ in
+                                callAppRPC()
+                            }
+                    }
+                    .disabled(!useGenericRPC)
+                    TextField("Custom RPC details..", text: $genericRPCDetails)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .disabled(!useGenericRPC)
+                    SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence", detail: "This will display the current channel you're talking in")
+                    SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence", detail: "This will display the current Song you're listening to")
+                    SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
+                    SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                 }
-                .frame(height: 5)
-                Text("Made with 🤍 by Evelyn")
+                .padding(5)
+                .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
+                .cornerRadius(15)
+                .padding()
+                
+                .fileImporter(isPresented: $loading, allowedContentTypes: [.data], onCompletion: { result in
+                    do {
+                        let url = try result.get()
+                        let path = FileManager.default.urls(for: .documentDirectory,
+                                                               in: .userDomainMask)[0].appendingPathComponent(UUID().uuidString)
+                        if FileManager.default.secureCopyItem(at: url, to: path) {
+                            print("Plugin successfully copied")
+                        }
+                    } catch {}
+                })
+            }
+            Text("Accord (red.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
+                .padding(.leading, 20)
+                .foregroundColor(.secondary)
+            Text("OS: macOS \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))")
+                .padding(.leading, 20)
+                .foregroundColor(.secondary)
+            HStack(alignment: .center) {
+                Text("Open source at")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
+                GithubIcon()
+                    .foregroundColor(Color.accentColor)
+                    .frame(width: 13, height: 13)
+                    .onTapGesture {
+                        NSWorkspace.shared.open(URL(string: "https://github.com/evelyneee/Accord")!)
+                    }
             }
-            .onDisappear {
-                darkMode = dark
-                sortByMostRecent = recent
-                pfpShown = profilePictures
-                pastelColors = pastel
-                // discordStockSettings = discordSettings
-            }
+            .frame(height: 5)
+            Text("Made with 🤍 by Evelyn")
+                .padding(.leading, 20)
+                .foregroundColor(.secondary)
+        }
+        .onDisappear {
+            darkMode = dark
+            sortByMostRecent = recent
+            pfpShown = profilePictures
+            pastelColors = pastel
+            // discordStockSettings = discordSettings
+        }
+    }
+    
+    func callAppRPC() {
+        if useGenericRPC {
+            GenericAppRPC(withApp: selectedApp, details: genericRPCDetails.isEmpty ? nil : genericRPCDetails).updatePresence()
         }
     }
 }
@@ -301,7 +350,8 @@ struct SettingsToggleView: View {
             .padding()
             Spacer()
             Toggle(isOn: $toggled) {}
-                .padding()
+            .padding()
+            .toggleStyle(SwitchToggleStyle())
         }
     }
 }
