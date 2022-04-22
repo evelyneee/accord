@@ -173,7 +173,7 @@ struct MessageCellView: View, Equatable {
                                     .background(Capsule().fill().foregroundColor(Color.red))
                                     .padding(.horizontal, 4)
                             }
-                            if message.author?.system ?? false {
+                            if message.author?.system == true {
                                 Text("System")
                                     .padding(.horizontal, 4)
                                     .foregroundColor(Color.white)
