@@ -10,7 +10,7 @@ import Foundation
 import Network
 
 final class Notifications {
-    public static var privateChannels: [String] = []
+    static var privateChannels: [String] = []
 }
 
 extension Gateway {

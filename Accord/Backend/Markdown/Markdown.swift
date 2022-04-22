@@ -74,7 +74,7 @@ public final class Markdown {
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
                 .eraseToAny()
         }
-        return Future { promise in
+        return Future { promise -> Void in
             let mentions = word.matches(precomputed: Regex.mentionsRegex)
             let channels = word.matches(precomputed: Regex.channelsRegex)
             let songIDs = word.matches(precomputed: Regex.songIDsRegex)

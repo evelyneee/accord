@@ -27,7 +27,7 @@ final class Embed: Codable, Hashable, Identifiable {
     var id: Int? { hashValue }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine((timestamp ?? .init()) + (url ?? .init()) + (title ?? .init()))
+        hasher.combine((timestamp ?? "") + (url ?? "") + (title ?? ""))
     }
 
     final class Field: Codable {

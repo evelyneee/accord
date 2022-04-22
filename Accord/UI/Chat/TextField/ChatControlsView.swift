@@ -190,8 +190,11 @@ struct ChatControls: View {
                         self.fileUpload = data
                         self.fileUploadURL = url
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
-                                viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                            if let textCount = viewModel?.textFieldContents.count,
+                                let pathComponentsCount = url.pathComponents.last?.count {
+                                if textCount >= pathComponentsCount {
+                                    viewModel?.textFieldContents.removeLast(pathComponentsCount)
+                                }
                             }
                         }
                     } else if let image = NSImage(pasteboard: NSPasteboard.general) {

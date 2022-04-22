@@ -17,7 +17,6 @@ struct ContentView: View {
     enum LoadErrors: Error {
         case alreadyLoaded
         case offline
-        case timedOut
     }
 
     @ViewBuilder
@@ -63,8 +62,6 @@ struct ContentView: View {
                                             }
                                         }
                                     }
-                                    username = d.user.username
-                                    discriminator = d.user.discriminator
                                     DispatchQueue.main.async {
                                         self.serverListView = ServerListView(d)
                                     }

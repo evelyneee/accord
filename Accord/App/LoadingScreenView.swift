@@ -10,12 +10,11 @@ import SwiftUI
 
 struct TiltAnimation: ViewModifier {
     @State var rotated: Bool = false
-    @State var timer: Timer?
     func body(content: Content) -> some View {
         content
             .rotationEffect(.degrees(rotated ? 10 : -10))
             .onAppear {
-                timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+                Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
                     withAnimation(Animation.spring()) {
                         rotated.toggle()
                     }

@@ -68,11 +68,14 @@ final class SlashCommands {
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let optionValues = options.prefix(optionValues.count).enumerated().map { index, option -> [String: Any] in
-            var value = optionValues[index]
-            value["type"] = option.type
-            return value
-        }
+        let optionValues = options
+            .prefix(optionValues.count)
+            .enumerated()
+            .map { index, option -> [String: Any] in
+                var value = optionValues[index]
+                value["type"] = option.type
+                return value
+            }
         let params: [String: Any] = [
             "type": type,
             "application_id": applicationID,
