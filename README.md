@@ -16,6 +16,24 @@ Minimum requirement: macOS Big Sur
 If you want to help and have a macOS Big Sur device, PRs are welcomed
 </sup>
 
+### Installing
+
+#### Homebrew [Recommended]
+[If you have Homebrew installed on your Mac](https://brew.sh), you can get the latest Accord release by installing the `accord` package:
+```
+brew install --cask accord
+```
+To upgrade Accord using Homebrew, run the following:
+```
+brew upgrade --cask accord
+```
+
+#### GitHub Releases [Recommended]
+Alternatively, you can [download the latest version of Accord via GitHub releases](https://github.com/evelyneee/accord/releases/latest). These builds will not receive automatic updates, so you will have to manually check for updates to benefit from the latest features and bug fixes.
+
+#### TestFlight
+[Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to receive automatic updates, give feedback to the project, and stay up-to-date with changelogs. However, the TestFlight might be less updated.
+
 ### Building
 Xcode is required.
 1. Download the project and open it in Xcode 
@@ -28,18 +46,6 @@ The built product will be in the `build/Release` directory
 ### Licensing
 This project is licensed under the BSD 3 clause license.
 
-### TestFlight
-
-[Join the Accord TestFlight](https://testflight.apple.com/join/YmTwJT8u)
-
 ### Support
-
-[Discord Server](https://discord.gg/nUGnmA9yFH)
-
-### Latest testflight description
-
-Welcome to the first Accord beta. 
-
-This beta has a few known issues: 
-- Many features are disabled due to them being unfinished
-- Login will not work in a new location. To log in, you must open a private browser tab, log in to the account and try again
+* If you have questions, feel free to [ask them in our Discord server](https://discord.gg/nUGnmA9yFH)!
+* If you'd like to report an issue, [please do so here](https://github.com/evelyneee/accord/issues/new).

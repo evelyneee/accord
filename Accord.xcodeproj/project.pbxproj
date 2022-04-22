@@ -13,13 +13,12 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
-		9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CD279366FD00F36D6B /* NativeRPC.swift */; };
-		9E0088D027937F5300F36D6B /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0088CF27937F5300F36D6B /* IPC.swift */; };
-		9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */; };
+		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
 		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
 		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
+		9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
@@ -137,11 +136,12 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
-		9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGKeyCode++.swift"; sourceTree = "<group>"; };
+		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
 		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
+		9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewCell.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
@@ -401,7 +401,6 @@
 				9E6BCC63277E8E850085F279 /* Print++.swift */,
 				9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */,
 				9ED3011027A6C76300D6235D /* Keypath++.swift */,
-				9E10EB3927B1E5720076B462 /* CGKeyCode++.swift */,
 				9EB3582327BFFD3E0046A136 /* Collection++.swift */,
 				9EDD136527D5A55A000685E6 /* String++.swift */,
 			);
@@ -415,6 +414,7 @@
 				9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */,
 				A89BE785266BDFB3007B0CBF /* Socket.swift */,
 				9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */,
+				9E13BEE328078F5D001DF4F2 /* ZStream.swift */,
 			);
 			path = Gateway;
 			sourceTree = "<group>";
@@ -518,6 +518,7 @@
 				9E6470662741B9960026686C /* GuildView.swift */,
 				9E82874C27BB515F00953A7B /* FolderListView.swift */,
 				9E82874E27BB522600953A7B /* ServerListView+Init.swift */,
+				9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -618,7 +619,6 @@
 				32F4C954256D7D3300343BB3 /* Frameworks */,
 				32F4C955256D7D3300343BB3 /* Resources */,
 				32ADD59925839980008D1715 /* Embed App Extensions */,
-				49F29FAB26A0A44900C1205A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -675,28 +675,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		49F29FAB26A0A44900C1205A /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FULL_PRODUCT_NAME)",
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/zsh --login";
-			shellScript = "cd $BUILT_PRODUCTS_DIR\n\nzip -vr Accord_1.0.0_Universal.zip Accord.app/ -x \"*.DS_Store\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		32F4C953256D7D3300343BB3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -725,7 +703,6 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
-				9E0088CE279366FD00F36D6B /* NativeRPC.swift in Sources */,
 				9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
@@ -739,7 +716,6 @@
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
-				9E10EB3A27B1E5720076B462 /* CGKeyCode++.swift in Sources */,
 				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
 				9E82875127BD6C5400953A7B /* Permissions.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
@@ -775,6 +751,7 @@
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
 				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
+				9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */,
 				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
@@ -782,13 +759,13 @@
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
 				9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
+				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
 				A80FEC2E2724FD35005F9950 /* NSColor++.swift in Sources */,
-				9E0088D027937F5300F36D6B /* IPC.swift in Sources */,
 				A8CD4CA5267D27F300E2C4F1 /* ServerListView.swift in Sources */,
 				9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */,
 				9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */,
@@ -938,7 +915,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
@@ -976,7 +953,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;

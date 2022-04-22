@@ -13,6 +13,10 @@ struct Permissions: Decodable, OptionSet {
         self.rawValue = rawValue
     }
     
+    init(_ rawValue: Int64) {
+        self.init(rawValue: rawValue)
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let stringValue = try container.decode(String.self)
@@ -65,5 +69,6 @@ struct Permissions: Decodable, OptionSet {
     static var createPrivateThreads = Permissions(rawValue: 1 << 36)
     static var externalStickers = Permissions(rawValue: 1 << 37)
     static var sendMessagesInThreads = Permissions(rawValue: 1 << 38)
-    
+    static var useEmbeddedActivities = Permissions(rawValue: 1 << 39)
+    static var moderateMembers = Permissions(rawValue: 1 << 40)
 }

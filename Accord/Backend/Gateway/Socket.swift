@@ -10,7 +10,7 @@ import Foundation
 import Network
 
 final class Notifications {
-    public static var privateChannels: [String] = []
+    static var privateChannels: [String] = []
 }
 
 extension Gateway {
@@ -86,9 +86,5 @@ extension Gateway {
             new.ready().sink(receiveCompletion: doNothing, receiveValue: doNothing).store(in: &new.bag)
             wss = new
         }
-    }
-
-    func decodePayload(payload: Data) -> [String: Any]? {
-        try? JSONSerialization.jsonObject(with: payload, options: []) as? [String: Any]
     }
 }

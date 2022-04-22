@@ -14,8 +14,6 @@ import UserNotifications
 struct AccordApp: App {
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State var windowWidth: Int = .init(NSApplication.shared.keyWindow?.frame.width ?? 1000)
-    @State var windowHeight: Int = .init(NSApplication.shared.keyWindow?.frame.height ?? 800)
     @State var popup: Bool = false
     @State var token = AccordCoreVars.token
     var body: some Scene {
@@ -184,7 +182,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    @objc func windowClosed(_ sender: AnyObject?) {
+    @objc func windowClosed(_: AnyObject?) {
         print(NSApplication.shared.keyWindow?.contentView?.bounds)
         UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.width ?? 1000), forKey: "windowWidth")
         UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.height ?? 800), forKey: "windowHeight")

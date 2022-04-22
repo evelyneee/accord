@@ -74,7 +74,7 @@ public final class Markdown {
                 .map { Text("\(Image(nsImage: $0))") + Text(" ") }
                 .eraseToAny()
         }
-        return Future { promise in
+        return Future { promise -> Void in
             let mentions = word.matches(precomputed: Regex.mentionsRegex)
             let channels = word.matches(precomputed: Regex.channelsRegex)
             let songIDs = word.matches(precomputed: Regex.songIDsRegex)
@@ -184,24 +184,6 @@ final class NSAttributedMarkdown {
             mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular), range: NSRange(match, in: mut.string))
         }
         return mut
-    }
-}
-
-private extension NSFont {
-    var bold: NSFont {
-        let font = NSFont.boldSystemFont(ofSize: 12)
-        return font
-    }
-
-    var italic: NSFont {
-        let font = NSFont.systemFont(ofSize: 12)
-        let descriptor = font.fontDescriptor.withSymbolicTraits([.italic])
-        return NSFont(descriptor: descriptor, size: NSFont.systemFontSize)!
-    }
-
-    var boldItalic: NSFont {
-        let font = NSFont.boldSystemFont(ofSize: 12)
-        return font
     }
 }
 

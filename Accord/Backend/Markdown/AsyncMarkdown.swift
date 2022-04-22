@@ -16,7 +16,8 @@ final class AsyncMarkdownModel: ObservableObject {
     }
 
     @Published var markdown: Text
-
+    var loaded = false
+    
     private func make(text: String, font: Bool) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
@@ -46,5 +47,6 @@ struct AsyncMarkdown: View, Equatable {
             .font(self.font ? .system(size: 48) : .chatTextFont)
             .animation(nil)
             .fixedSize(horizontal: false, vertical: true)
+            .if(model.loaded && self.font, transform: { $0.hidden() })
     }
 }

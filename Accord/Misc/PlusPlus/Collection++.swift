@@ -10,7 +10,7 @@ import Foundation
 
 extension Collection where Element: Identifiable {
     func generateKeyMap() -> [Element.ID: Int] {
-        enumerated()
+        enumerated().lazy
             .compactMap { [$1.id: $0] }
             .reduce(into: [:]) { result, next in
                 result.merge(next) { _, rhs in rhs }

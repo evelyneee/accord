@@ -98,7 +98,7 @@ final class ChatControlsViewModel: ObservableObject {
                 guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
                 DispatchQueue.main.async {
                     if self.textFieldContents != ogContents { return }
-                    self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)>")
+                    self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)> ")
                 }
             }
         }

@@ -404,15 +404,12 @@ public final class RequestPublisher {
 
     class func fetch<T: Decodable>(
         _: T.Type,
-        request: URLRequest? = nil,
         url: URL? = nil,
         headers: Headers? = nil,
         retry: Int = 2
     ) -> AnyPublisher<T, Error> {
         let request: URLRequest? = {
-            if let request = request {
-                return request
-            } else if let url = url {
+            if let url = url {
                 return URLRequest(url: url)
             } else {
                 print("You need to provide a request method")

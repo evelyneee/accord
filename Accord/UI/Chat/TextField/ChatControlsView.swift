@@ -23,6 +23,7 @@ struct ChatControls: View {
     @Binding var channelID: String
     @Binding var chatText: String
     @Binding var replyingTo: Message?
+    @Binding var mentionUser: Bool
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
@@ -49,7 +50,8 @@ struct ChatControls: View {
                 }
             } else if let replyingTo = replyingTo {
                 self.replyingTo = nil
-                viewModel?.send(text: contents, replyingTo: replyingTo, mention: true, guildID: guildID)
+                viewModel?.send(text: contents, replyingTo: replyingTo, mention: self.mentionUser, guildID: guildID)
+                self.mentionUser = true
             } else if viewModel?.textFieldContents.prefix(1) == "/" {
                 try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
             } else {
@@ -69,7 +71,7 @@ struct ChatControls: View {
                 if let range = viewModel?.textFieldContents.range(of: "@") {
                     viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                 }
-                viewModel?.textFieldContents.append("<@!\(id)>")
+                viewModel?.textFieldContents.append("<@!\(id)> ")
             }, label: {
                 HStack {
                     Text(username)
@@ -122,7 +124,7 @@ struct ChatControls: View {
                     if let range = viewModel?.textFieldContents.range(of: ":") {
                         viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                     }
-                    viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)>")
+                    viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)> ")
                     viewModel?.matchedEmoji.removeAll()
                 }, label: {
                     HStack {
@@ -154,7 +156,7 @@ struct ChatControls: View {
                 if let range = viewModel?.textFieldContents.range(of: "#") {
                     viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                 }
-                viewModel?.textFieldContents.append("<#\(channel.id)>")
+                viewModel?.textFieldContents.append("<#\(channel.id)> ")
             }) {
                 HStack {
                     Text(channel.name ?? "Unknown Channel")
@@ -188,8 +190,11 @@ struct ChatControls: View {
                         self.fileUpload = data
                         self.fileUploadURL = url
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
-                                viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
+                            if let textCount = viewModel?.textFieldContents.count,
+                                let pathComponentsCount = url.pathComponents.last?.count {
+                                if textCount >= pathComponentsCount {
+                                    viewModel?.textFieldContents.removeLast(pathComponentsCount)
+                                }
                             }
                         }
                     } else if let image = NSImage(pasteboard: NSPasteboard.general) {

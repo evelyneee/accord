@@ -17,7 +17,6 @@ struct ContentView: View {
     enum LoadErrors: Error {
         case alreadyLoaded
         case offline
-        case timedOut
     }
 
     @ViewBuilder
@@ -28,6 +27,7 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
+                        print(Permissions((0...40).compactMap { Permissions.init(rawValue: 1 << $0) }).rawValue)
                         guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
@@ -41,13 +41,14 @@ struct ContentView: View {
                                 throw LoadErrors.offline
                             }
                             print("hiiiii")
-                            let new = try Gateway(url: Gateway.gatewayURL)
+                            let new = try Gateway(
+                                url: Gateway.gatewayURL,
+                                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                            )
                             new.ready()
                                 .sink(receiveCompletion: { completion in
                                     switch completion {
-                                    case .finished:
-                                        print("byeeee")
-                                        break
+                                    case .finished: break
                                     case let .failure(error):
                                         failedToConnect(error)
                                     }
@@ -64,8 +65,6 @@ struct ContentView: View {
                                             }
                                         }
                                     }
-                                    username = d.user.username
-                                    discriminator = d.user.discriminator
                                     DispatchQueue.main.async {
                                         self.serverListView = ServerListView(d)
                                     }

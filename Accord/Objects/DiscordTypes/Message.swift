@@ -25,6 +25,7 @@ final class Message: Decodable, Equatable, Identifiable, Hashable {
     var mentions: [User?]
     var pinned: Bool?
     var timestamp: Date
+    var processedTimestamp: String?
     var type: MessageType
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
@@ -105,74 +106,3 @@ enum MessageType: Int, Codable {
          chatInputCommand, threadStarterMessage, guildInviteReminder,
          contextMenuCommand, likelyScammer
 }
-
-// TODO: Component object
-
-/*
- [
-   {
-     "type": 1,
-     "components": [
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "apple_music",
-           "id": "847868738870968380"
-         },
-         "url": "https://geo.music.apple.com/us/album/_/1489214567?i=1489214627&mt=1&app=music&ls=1&at=1000lHKX"
-       },
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "soundcloud",
-           "id": "847868739257106453"
-         },
-         "url": "https://soundcloud.com/voltra/iso-beam"
-       },
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "spotify",
-           "id": "847868739298131998"
-         },
-         "url": "https://open.spotify.com/track/1KcSxfoaa2zrxMUIez9QiI"
-       }
-     ]
-   },
-   {
-     "type": 1,
-     "components": [
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "tidal",
-           "id": "847868738254012467"
-         },
-         "url": "https://listen.tidal.com/track/123567071"
-       },
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "youtube",
-           "id": "847883855344042044"
-         },
-         "url": "https://www.youtube.com/watch?v=-kKeL2vMcUY"
-       },
-       {
-         "type": 2,
-         "style": 5,
-         "emoji": {
-           "name": "youtube_music",
-           "id": "847868739172827156"
-         },
-         "url": "https://music.youtube.com/watch?v=-kKeL2vMcUY"
-       }
-     ]
-   }
- ]
- */

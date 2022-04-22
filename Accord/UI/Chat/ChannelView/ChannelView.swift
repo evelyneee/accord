@@ -34,6 +34,7 @@ struct ChannelView: View, Equatable {
     // Mention users in replies
     @State var mention: Bool = true
     @State var replyingTo: Message?
+    @State var mentionUser: Bool = true
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
@@ -45,8 +46,10 @@ struct ChannelView: View, Equatable {
 
     @AppStorage("MetalRenderer")
     var metalRenderer: Bool = false
-
+    
     @State private var cancellable = Set<AnyCancellable>()
+    
+    private var permissions: Permissions
 
     // MARK: - init
 
@@ -56,6 +59,8 @@ struct ChannelView: View, Equatable {
         channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
         _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
+        self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
+        print(self.permissions.contains(.manageMessages))
         if DiscordDesktopRPCEnabled {
             DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
@@ -71,6 +76,7 @@ struct ChannelView: View, Equatable {
                     pronouns: viewModel.pronouns[author.id],
                     avatar: viewModel.avatars[author.id],
                     guildID: guildID,
+                    permissions: permissions,
                     role: $viewModel.roles[author.id],
                     replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                     replyingTo: $replyingTo
@@ -78,8 +84,8 @@ struct ChannelView: View, Equatable {
                 .equatable()
                 .id(message.identifier)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: (message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 10, trailing: 0))
-                .if(message.mentions.compactMap { $0?.id }.contains(user_id), transform: {
-                    $0
+                .if(message.mentions.compactMap { $0?.id }.contains(user_id), transform: { view in
+                    view
                         .padding(5)
                         .frame(
                             maxWidth: .infinity,
@@ -136,15 +142,23 @@ struct ChannelView: View, Equatable {
             wss.typingSubject
                 .receive(on: webSocketQueue)
                 .sink { [weak viewModel] msg, channelID in
-                    guard channelID == self.channelID else { return }
-                    guard let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
+                    
+                    guard channelID == self.channelID,
+                          let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
                           memberDecodable.user_id != AccordCoreVars.user?.id else { return }
-                    let isKnownAs = viewModel?.nicks[memberDecodable.user_id] ?? memberDecodable.member?.nick ?? memberDecodable.member?.user.username ?? "Unknown User"
-                    if !(typing.contains(isKnownAs)) {
+                    
+                    let isKnownAs =
+                    viewModel?.nicks[memberDecodable.user_id] ??
+                    memberDecodable.member?.nick ??
+                    memberDecodable.member?.user.username ??
+                    "Unknown User"
+                    
+                    if !typing.contains(isKnownAs) {
                         typing.append(isKnownAs)
                     }
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        guard !(typing.isEmpty) else { return }
+                        guard !typing.isEmpty else { return }
                         typing.removeLast()
                     }
                 }

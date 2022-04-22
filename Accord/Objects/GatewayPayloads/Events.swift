@@ -19,12 +19,29 @@ final class GuildMemberChunk: Decodable {
 }
 
 final class Presence: Decodable {
-    // var user: User?
+    var user: User?
     // var guild_id: String
     var status: UserStatus?
     @IgnoreFailure
     var activities: [ActivityCodable]
     //    client_status
+}
+
+final class PresenceUpdate: Decodable {
+    var user: PresenceUpdate.User
+    var guildID: String?
+    var status: String
+    @IgnoreFailure
+    var activities: [ActivityCodable]
+    
+    enum CodingKeys: String, CodingKey {
+        case user, status, activities
+        case guildID = "guild_id"
+    }
+    
+    final class User: Decodable {
+        var id: String
+    }
 }
 
 enum UserStatus: String, Codable {
@@ -62,4 +79,8 @@ final class GatewayDeletedMessage: Decodable {
 
 final class DeletedMessage: Decodable {
     var id: String
+}
+
+final class GatewayEventContent<T: Decodable>: Decodable {
+    var d: T
 }

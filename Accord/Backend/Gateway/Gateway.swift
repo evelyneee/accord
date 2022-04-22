@@ -15,21 +15,20 @@ import Network
 final class Gateway {
     private(set) var connection: NWConnection?
     private(set) var sessionID: String?
-    private(set) var interval: Int = 40000
 
     internal var pendingHeartbeat: Bool = false
-    internal var heartbeatTimer: Cancellable?
-
     internal var seq: Int = 0
     internal var bag = Set<AnyCancellable>()
 
     // To communicate with the view
-    private(set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
-    private(set) var editSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var typingSubject = PassthroughSubject<(Data, String), Never>()
-    private(set) var memberChunkSubject = PassthroughSubject<Data, Never>()
-    private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+    private (set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
+    private (set) var editSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var typingSubject = PassthroughSubject<(Data, String), Never>()
+    private (set) var memberChunkSubject = PassthroughSubject<Data, Never>()
+    private (set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+    
+    var presencePipeline = [String:PassthroughSubject<PresenceUpdate, Never>]()
 
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
@@ -52,14 +51,13 @@ final class Gateway {
     }
 
     private let socketEndpoint: NWEndpoint
+    internal let compress: Bool
 
-    public var cachedMemberRequest: [String: GuildMember] = [:]
+    var cachedMemberRequest: [String: GuildMember] = [:]
 
     enum GatewayErrors: Error {
         case noStringData(String)
-        case maxRequestReached
         case essentialEventFailed(String)
-        case noSession
         case eventCorrupted
         case unknownEvent(String)
         case heartbeatMissed
@@ -70,10 +68,6 @@ final class Gateway {
                 return "Essential Gateway Event failed: \(event)"
             case let .noStringData(string):
                 return "Invalid data \(string)"
-            case .maxRequestReached:
-                return "Internal rate limit hit, you're going too fast!"
-            case .noSession:
-                return "Session missing?"
             case .eventCorrupted:
                 return "Bad event sent"
             case let .unknownEvent(event):
@@ -94,13 +88,21 @@ final class Gateway {
     ]
 
     static var gatewayURL: URL = .init(string: "wss://gateway.discord.gg?v=9&encoding=json")!
-
-    public init(
+    
+    internal var decompressor = ZStream()
+    
+    init (
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
-        seq: Int? = nil
+        seq: Int? = nil,
+        compress: Bool = true
     ) throws {
-        socketEndpoint = NWEndpoint.url(url)
+        if compress {
+            socketEndpoint = NWEndpoint.url(URL(string: "wss://gateway.discord.gg?v=9&encoding=json&compress=zlib-stream")!)
+            print(socketEndpoint)
+        } else {
+            socketEndpoint = NWEndpoint.url(url)
+        }
         let parameters: NWParameters = .tls
         let wsOptions = NWProtocolWebSocket.Options()
         wsOptions.autoReplyPing = true
@@ -109,6 +111,7 @@ final class Gateway {
         parameters.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
         connection = NWConnection(to: socketEndpoint, using: parameters)
         connection?.stateUpdateHandler = stateUpdateHandler
+        self.compress = compress
         try connect(session_id, seq)
     }
 
@@ -123,17 +126,17 @@ final class Gateway {
             if let error = error {
                 return print(error)
             }
+            
             guard let data = data,
-                  let hello = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                  let decompressedData = self?.compress == true ? try? self?.decompressor.decompress(data: data) : data,
+                  let hello = try? JSONSerialization.jsonObject(with: decompressedData, options: []) as? [String: Any],
                   let helloD = hello["d"] as? [String: Any],
-                  let interval = helloD["heartbeat_interval"] as? Int
-            else {
+                  let interval = helloD["heartbeat_interval"] as? Int else {
                 print("Failed to get a heartbeat interval")
                 return wss.hardReset()
             }
-            self?.interval = interval
             DispatchQueue.main.async {
-                self?.heartbeatTimer = Timer.publish(
+                Timer.publish(
                     every: Double(interval / 1000),
                     tolerance: nil,
                     on: .main,
@@ -150,6 +153,7 @@ final class Gateway {
                         }
                     }
                 }
+                .store(in: &self!.bag)
             }
             do {
                 if let session_id = session_id, let seq = seq {
@@ -163,7 +167,7 @@ final class Gateway {
         }
     }
 
-    private func listen(repeat _: Bool = true) {
+    private func listen() {
         guard connection?.state != .cancelled else { return }
         connection?.receiveMessage { data, context, _, error in
             if let error = error {
@@ -174,12 +178,36 @@ final class Gateway {
             guard let data = data else {
                 return print(context as Any, data as Any)
             }
-            wssThread.async {
-                do {
-                    let event = try GatewayEvent(data: data)
-                    self.handleMessage(event: event)
-                } catch {
-                    print(error)
+            if let info = context?.protocolMetadata.first as? NWProtocolWebSocket.Metadata {
+                if info.opcode == .close {
+                    if let closeMessage = String(data: data, encoding: .utf8) {
+                        print("Closed with \(closeMessage)")
+                    } else {
+                        print("Closed with unknown close code")
+                    }
+                    wss.reset()
+                }
+            }
+            if self.compress {
+                self.decompressor.decompressionQueue.async {
+                    guard let data = try? self.decompressor.decompress(data: data) else { return }
+                    wssThread.async {
+                        do {
+                            let event = try GatewayEvent(data: data)
+                            try self.handleMessage(event: event)
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }
+            } else {
+                wssThread.async {
+                    do {
+                        let event = try GatewayEvent(data: data)
+                        try self.handleMessage(event: event)
+                    } catch {
+                        print(error)
+                    }
                 }
             }
         }
@@ -232,7 +260,7 @@ final class Gateway {
         pendingHeartbeat = true
     }
 
-    public func ready() -> Future<GatewayD, Error> {
+    func ready() -> Future<GatewayD, Error> {
         Future { [weak self] promise in
             self?.connection?.receiveMessage { data, context, _, error in
                 if let error = error {
@@ -280,7 +308,33 @@ final class Gateway {
                         print("Closed with unknown close code")
                     }
                 case .cont: break
-                case .binary: break
+                case .binary:
+                    print("binary packet")
+                    self?.decompressor.decompressionQueue.async {
+                        guard let data = try? self?.decompressor.decompress(data: data, large: true) else { return }
+                        wssThread.async {
+                            do {
+                                try wss.updateVoiceState(guildID: nil, channelID: nil)
+                                let path = FileManager.default.urls(for: .cachesDirectory,
+                                                                    in: .userDomainMask)[0]
+                                    .appendingPathComponent("socketOut.json")
+                                try data.write(to: path)
+                                let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
+                                wssThread.async {
+                                    self?.listen()
+                                }
+                                print("Hello, \(structure.d.user.username)#\(structure.d.user.discriminator) !!")
+                                self?.sessionID = structure.d.session_id
+                                print("Connected with session ID", structure.d.session_id)
+                                promise(.success(structure.d))
+                                return
+                            } catch {
+                                promise(.failure(error))
+                                AccordApp.error(error)
+                                return
+                            }
+                        }
+                    }
                 case .ping: print("ping")
                 case .pong: print("pong")
                 @unknown default:
@@ -290,7 +344,7 @@ final class Gateway {
         }
     }
 
-    public func updatePresence(status: String, since: Int, @ActivityBuilder _ activities: () -> [Activity]) throws {
+    func updatePresence(status: String, since: Int, @ActivityBuilder _ activities: () -> [Activity]) throws {
         let packet: [String: Any] = [
             "op": 3,
             "d": [
@@ -303,7 +357,7 @@ final class Gateway {
         try send(json: packet)
     }
 
-    public func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
+    func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
         let packet: [String: Any] = [
             "op": 6,
             "d": [
@@ -318,7 +372,7 @@ final class Gateway {
         }
     }
 
-    public func subscribe(to guild: String) throws {
+    func subscribe(to guild: String) throws {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -331,7 +385,7 @@ final class Gateway {
         try send(json: packet)
     }
 
-    public func memberList(for guild: String, in channel: String) throws {
+    func memberList(for guild: String, in channel: String) throws {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -346,7 +400,7 @@ final class Gateway {
         try send(json: packet)
     }
 
-    public func subscribeToDM(_ channel: String) throws {
+    func subscribeToDM(_ channel: String) throws {
         let packet: [String: Any] = [
             "op": 13,
             "d": [
@@ -357,7 +411,7 @@ final class Gateway {
         print("sent packet")
     }
 
-    public func getMembers(ids: [String], guild: String) throws {
+    func getMembers(ids: [String], guild: String) throws {
         let packet: [String: Any] = [
             "op": 8,
             "d": [
@@ -369,7 +423,7 @@ final class Gateway {
         try send(json: packet)
     }
 
-    public func getCommands(guildID: String, commandIDs: [String] = [], limit: Int = 10) throws {
+    func getCommands(guildID: String, commandIDs: [String] = [], limit: Int = 10) throws {
         let packet: [String: Any] = [
             "op": 24,
             "d": [
@@ -386,7 +440,7 @@ final class Gateway {
         try send(json: packet)
     }
 
-    public func getCommands(guildID: String, query: String, limit: Int = 10) throws {
+    func getCommands(guildID: String, query: String, limit: Int = 10) throws {
         let packet: [String: Any] = [
             "op": 24,
             "d": [
@@ -401,9 +455,17 @@ final class Gateway {
         try send(json: packet)
     }
 
+    func listenForPresence(userID: String, action: @escaping ((PresenceUpdate) -> Void)) {
+        self.presencePipeline[userID] = .init()
+        self.presencePipeline[userID]?.sink(receiveValue: action).store(in: &self.bag)
+    }
+    
+    func unregisterPresence(userID: String) {
+        self.presencePipeline.removeValue(forKey: userID)
+    }
+    
     // cleanup
     deinit {
-        self.heartbeatTimer = nil
         self.bag.invalidateAll()
     }
 }
