@@ -193,7 +193,7 @@ struct ServerListView: View {
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString(channel.id, forType: .string)
                                 }
-                                Button(action: {
+                                Button("Close DM") {
                                     let headers = Headers(
                                         userAgent: discordUserAgent,
                                         contentType: nil,
@@ -204,19 +204,15 @@ struct ServerListView: View {
                                         empty: true
                                     )
                                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channel.id)"), headers: headers)
-                                }) {
-                                    Text("Close DM")
+                                    guard let index = ServerListView.privateChannels.generateKeyMap()[channel.id] else { return }
+                                    ServerListView.privateChannels.remove(at: index)
                                 }
-                                Button(action: {
+                                Button("Mark as read") {
                                     channel.read_state?.mention_count = 0
                                     channel.read_state?.last_message_id = channel.last_message_id
-                                }) {
-                                    Text("Mark as read")
                                 }
-                                Button(action: {
+                                Button("Open in new window") {
                                     showWindow(channel)
-                                }) {
-                                    Text("Open in new window")
                                 }
                             }
                         }

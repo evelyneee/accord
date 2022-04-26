@@ -79,10 +79,11 @@ final class XcodeRPC {
 
 extension NSAppleEventDescriptor {
     var literalArray: [String] {
-        var arr: [String?] = []
-        for i in 1 ... numberOfItems {
-            arr.append(atIndex(i)?.stringValue)
+        guard let listDescriptor = self.coerce(toDescriptorType: typeAEList) else {
+            return []
         }
-        return arr.compactMap(\.self)
+
+        return (0..<listDescriptor.numberOfItems)
+            .compactMap { listDescriptor.atIndex($0 + 1)?.stringValue }
     }
 }
