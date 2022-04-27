@@ -277,12 +277,12 @@ struct ServerListView: View {
                     Activity.current!
                 }
                 if UserDefaults.standard.bool(forKey: "XcodeRPC") {
-                    guard let workspace = XcodeRPC.getActiveWorkspace() else { return }
-                    XcodeRPC.updatePresence(workspace: workspace, filename: XcodeRPC.getActiveFilename())
+                    guard let workspace = XcodePresence.getActiveWorkspace() else { return }
+                    XcodePresence.updatePresence(workspace: workspace, filename: XcodePresence.getActiveFilename())
                 } else if UserDefaults.standard.bool(forKey: "AppleMusicRPC") {
                     MediaRemoteWrapper.updatePresence()
                 } else if UserDefaults.standard.bool(forKey: "VSCodeRPCEnabled") {
-                    VisualStudioCodeRPC.updatePresence()
+                    VisualStudioCodePresence.updatePresence()
                 }
             }
         }

@@ -62,7 +62,7 @@ struct ChannelView: View, Equatable {
         self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
         print(self.permissions.contains(.manageMessages))
         if DiscordDesktopRPCEnabled {
-            DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
+            DiscordDesktopPresence.update(guildName: channel.guild_name, channelName: channel.computedName)
         }
     }
 

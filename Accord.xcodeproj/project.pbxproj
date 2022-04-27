@@ -13,11 +13,12 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
+		37CDDFF2281902A900EF359E /* GenericAppPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CDDFF1281902A900EF359E /* GenericAppPresence.swift */; };
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
-		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
-		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
+		9E39B2682787B93600069424 /* DiscordDesktopPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopPresence.swift */; };
+		9E39B26A2787C30900069424 /* VisualStudioCodePresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodePresence.swift */; };
 		9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
@@ -29,7 +30,7 @@
 		9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */; };
 		9E6BCC62277E8E570085F279 /* LoadingScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC61277E8E570085F279 /* LoadingScreenView.swift */; };
 		9E6BCC64277E8E850085F279 /* Print++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC63277E8E850085F279 /* Print++.swift */; };
-		9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodeRPC.swift */; };
+		9E6BCC66277E908B0085F279 /* XcodePresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodePresence.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7834D12781F2D500ABB9F8 /* Combine++.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
@@ -125,6 +126,7 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
+		37CDDFF1281902A900EF359E /* GenericAppPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericAppPresence.swift; sourceTree = "<group>"; };
 		490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -139,8 +141,8 @@
 		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
-		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
-		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
+		9E39B2672787B93600069424 /* DiscordDesktopPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopPresence.swift; sourceTree = "<group>"; };
+		9E39B2692787C30900069424 /* VisualStudioCodePresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodePresence.swift; sourceTree = "<group>"; };
 		9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewCell.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
@@ -153,7 +155,7 @@
 		9E6BCC5E277E8D990085F279 /* Gateway+MessageHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Gateway+MessageHandle.swift"; sourceTree = "<group>"; };
 		9E6BCC61277E8E570085F279 /* LoadingScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingScreenView.swift; sourceTree = "<group>"; };
 		9E6BCC63277E8E850085F279 /* Print++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Print++.swift"; sourceTree = "<group>"; };
-		9E6BCC65277E908B0085F279 /* XcodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeRPC.swift; sourceTree = "<group>"; };
+		9E6BCC65277E908B0085F279 /* XcodePresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodePresence.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7834D12781F2D500ABB9F8 /* Combine++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine++.swift"; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
@@ -481,9 +483,10 @@
 			isa = PBXGroup;
 			children = (
 				9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */,
-				9E6BCC65277E908B0085F279 /* XcodeRPC.swift */,
-				9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */,
-				9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */,
+				9E6BCC65277E908B0085F279 /* XcodePresence.swift */,
+				9E39B2672787B93600069424 /* DiscordDesktopPresence.swift */,
+				9E39B2692787C30900069424 /* VisualStudioCodePresence.swift */,
+				37CDDFF1281902A900EF359E /* GenericAppPresence.swift */,
 				9E0088CD279366FD00F36D6B /* NativeRPC.swift */,
 				9E0088CF27937F5300F36D6B /* IPC.swift */,
 			);
@@ -715,7 +718,7 @@
 				9EDD136827D6F951000685E6 /* Regex.swift in Sources */,
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
-				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
+				9E6BCC66277E908B0085F279 /* XcodePresence.swift in Sources */,
 				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
 				9E82875127BD6C5400953A7B /* Permissions.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
@@ -734,7 +737,7 @@
 				9E7E4D2C279B6508008FAF15 /* Views.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
-				9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */,
+				9E39B26A2787C30900069424 /* VisualStudioCodePresence.swift in Sources */,
 				9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
@@ -757,11 +760,12 @@
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
-				9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */,
+				9E39B2682787B93600069424 /* DiscordDesktopPresence.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
+				37CDDFF2281902A900EF359E /* GenericAppPresence.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
 				32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */,
@@ -904,7 +908,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = VF46MYDSGH;
+				DEVELOPMENT_TEAM = "";
 				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -942,7 +946,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = VF46MYDSGH;
+				DEVELOPMENT_TEAM = L9735M962H;
 				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;

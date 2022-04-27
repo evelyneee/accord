@@ -328,7 +328,7 @@ struct SettingsViewRedesign: View {
     
     func callAppRPC() {
         if useGenericRPC {
-            let instance = GenericAppRPC(withApp: selectedApp, details: genericRPCDetails.isEmpty ? nil : genericRPCDetails, iconURL: rpcIconURL.isEmpty ? nil : rpcIconURL)
+            let instance = GenericAppPresence(withApp: selectedApp, details: genericRPCDetails.isEmpty ? nil : genericRPCDetails, iconURL: rpcIconURL.isEmpty ? nil : rpcIconURL)
             instance.updatePresence()
         }
     }

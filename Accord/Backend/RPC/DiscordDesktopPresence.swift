@@ -1,5 +1,5 @@
 //
-//  DiscordDesktopRPC.swift
+//  DiscordDesktopPresence.swift
 //  Accord
 //
 //  Created by evelyn on 2022-01-06.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class DiscordDesktopRPC {
+final class DiscordDesktopPresence {
     class func update(guildName: String? = nil, channelName: String) {
         guard DiscordDesktopRPCEnabled else { return }
         try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "dnd", since: Int(Date().timeIntervalSince1970) * 1000) {

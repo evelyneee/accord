@@ -1,5 +1,5 @@
 //
-//  XcodeRPC.swift
+//  XcodePresence.swift
 //  Accord
 //
 //  Created by evelyn on 2021-12-30.
@@ -10,7 +10,7 @@ import Combine
 import Foundation
 import OSAKit
 
-final class XcodeRPC {
+final class XcodePresence {
     static var started = Int(Date().timeIntervalSince1970) * 1000
 
     class func runXcodeScript(_ script: String) -> [String] {

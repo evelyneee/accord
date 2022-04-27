@@ -1,5 +1,5 @@
 //
-//  VisualStudioCodeRPC.swift
+//  VisualStudioCodePresence.swift
 //  Accord
 //
 //  Created by evelyn on 2022-01-06.
@@ -8,7 +8,7 @@
 import Cocoa
 import Foundation
 
-final class VisualStudioCodeRPC {
+final class VisualStudioCodePresence {
     static var started = Int(Date().timeIntervalSince1970) * 1000
 
     class func getVSCodeWindowName() -> [String] {
