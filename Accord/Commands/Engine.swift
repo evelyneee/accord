@@ -66,7 +66,7 @@ final class SlashCommands {
             ],
             "nonce":generateFakeNonce()
         ]
-        Request.fetch(
+        Request.fetch (
             url: URL(string: "\(rootURL)/interactions"),
             with: params,
             fileURL: nil,
@@ -82,7 +82,7 @@ final class SlashCommands {
             switch $0 {
             case .success((_, let response)):
                 if let response = response,
-                   (0..<300).contains(response.statusCode) {
+                   (200..<300).contains(response.statusCode) {
                     print("Interaction worked!")
                 } else {
                     AccordApp.error(

@@ -429,7 +429,7 @@ public final class RequestPublisher {
             .retry(retry)
             .tryMap { data, response throws -> T in
                 guard let httpResponse = response as? HTTPURLResponse else { throw Request.FetchErrors.badResponse(response) }
-                if httpResponse.statusCode == 200 {
+                if (200..<300).contains(httpResponse.statusCode) {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                     return try decoder.decode(T.self, from: data)
