@@ -382,13 +382,6 @@ public final class Request {
         print(String(data: body, encoding: .utf8))
         return body
     }
-    /*
-     ------WebKitFormBoundaryeDoDxVailL1LpUnN
-     Content-Disposition: form-data; name="payload_json"
-
-     {"type":2,"application_id":"836759847357251604","guild_id":"815369174096412692","channel_id":"839005662931189801","session_id":"0f77b7545645d1991d11e54cccfa8425","data":{"version":"847239978559078431","id":"847239978559078430","name":"minesweeper","type":1,"options":[],"application_command":{"application_id":"836759847357251604","default_member_permissions":null,"default_permission":true,"description":"play minesweeper on a 5-5-5 board","dm_permission":null,"id":"847239978559078430","name":"minesweeper","permissions":[],"type":1,"version":"847239978559078431"},"attachments":[]},"nonce":"946208314188890112"}
-     ------WebKitFormBoundaryeDoDxVailL1LpUnN--
-     */
 }
 
 public final class RequestPublisher {

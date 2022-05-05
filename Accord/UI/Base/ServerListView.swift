@@ -61,11 +61,13 @@ struct ServerListView: View {
     public static var privateChannels: [Channel] = .init()
     public static var mergedMembers: [String:Guild.MergedMember] = .init()
     internal static var readStates: [ReadStateEntry] = .init()
+    var statusText: String?
     @State var status: String?
     @State var timedOut: Bool = false
     @State var mentions: Bool = false
     @State var bag = Set<AnyCancellable>()
     @StateObject var viewUpdater = UpdateView()
+    @State var iconHovered: Bool = false
 
     var dmButton: some View {
         Button(action: {
@@ -74,10 +76,13 @@ struct ServerListView: View {
             selection = nil
             wss?.cachedMemberRequest.removeAll()
         }) {
-            Image(systemName: "bubble.left.fill")
+            Image(systemName: "bubble.right.fill")
+                .imageScale(.medium)
                 .frame(width: 45, height: 45)
-                .background(VisualEffectView(material: .fullScreenUI, blendingMode: .withinWindow))
-                .cornerRadius(selectedServer == 201 ? 15.0 : 23.5)
+                .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
+                .cornerRadius(iconHovered || selectedServer == 201 ? 15.0 : 23.5)
+                .if(selectedServer == 201, transform: { $0.foregroundColor(Color.white) })
+                .onHover(perform: { self.iconHovered = $0 })
         }
     }
 
@@ -89,42 +94,48 @@ struct ServerListView: View {
 
     @ViewBuilder
     var statusIndicator: some View {
-        switch self.status {
-        case "online":
-            Circle()
-                .foregroundColor(Color.green)
-                .frame(width: 12, height: 12)
-        case "invisible":
-            Image("invisible")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 14, height: 14)
-        case "dnd":
-            Image("dnd")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 14, height: 14)
-        case "idle":
-            Circle()
-                .foregroundColor(Color(NSColor.systemOrange))
-                .frame(width: 12, height: 12)
-        default:
-            Circle()
-                .foregroundColor(Color.clear)
-                .frame(width: 12, height: 12)
-        }
+        Circle()
+            .foregroundColor({ () -> Color in
+                switch self.status {
+                case "online":
+                    return Color.green
+                case "idle":
+                    return Color.orange
+                case "dnd":
+                    return Color.red
+                case "offline":
+                    return Color.gray
+                default:
+                    return Color.clear
+                }
+            }())
+            .frame(width: 7, height: 7)
     }
 
     var settingsLink: some View {
-        NavigationLink(destination: NavigationLazyView(SettingsViewRedesign()), tag: 0, selection: self.$selection) {
-            ZStack(alignment: .bottomTrailing) {
-                Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
-                    .scaledToFit()
-                    .frame(width: 45, height: 45)
-                    .cornerRadius((self.selection == 0) ? 15.0 : 23.5)
-                statusIndicator
+        NavigationLink(destination: NavigationLazyView(SettingsView()), tag: 0, selection: self.$selection) {
+            HStack {
+                ZStack(alignment: .bottomTrailing) {
+                    Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .cornerRadius((self.selection == 0) ? 15.0 : 23.5)
+                    statusIndicator
+                }
+                VStack(alignment: .leading) {
+                    if let user = AccordCoreVars.user {
+                        Text(user.username) + Text("#" + user.discriminator).foregroundColor(.secondary)
+                        if let statusText = statusText {
+                            Text(statusText)
+                                .foregroundColor(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                }
             }
+
         }
+        .buttonStyle(BorderlessButtonStyle())
     }
 
     var body: some View {
@@ -136,21 +147,23 @@ struct ServerListView: View {
                     LazyVStack {
                         if !NetworkCore.shared.connected {
                             onlineButton
+                                .buttonStyle(BorderlessButtonStyle())
                         }
                         ZStack(alignment: .bottomTrailing) {
                             dmButton
-                            if Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +) != 0 {
+                            if let count = Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +), count != 0 {
                                 ZStack {
                                     Circle()
                                         .foregroundColor(Color.red)
                                         .frame(width: 15, height: 15)
-                                    Text(String(Self.privateChannels.compactMap { $0.read_state?.mention_count }.reduce(0, +)))
+                                    Text(String(count))
                                         .foregroundColor(Color.white)
                                         .fontWeight(.semibold)
                                         .font(.caption)
                                 }
                             }
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)
@@ -161,11 +174,9 @@ struct ServerListView: View {
                             .frame(height: 1)
                             .opacity(0.75)
                             .padding(.horizontal)
-                        settingsLink
                     }
                     .padding(.vertical)
                 }
-                .buttonStyle(BorderlessButtonStyle())
                 .frame(width: 80)
                 .padding(.top, 5)
                 Divider()
@@ -174,9 +185,7 @@ struct ServerListView: View {
 
                 if selectedServer == 201 {
                     List {
-                        Text("Messages")
-                            .fontWeight(.bold)
-                            .font(.title2)
+                        settingsLink
                         Divider()
                         ForEach(Self.privateChannels, id: \.id) { channel in
                             NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {

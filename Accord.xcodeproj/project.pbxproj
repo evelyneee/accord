@@ -218,7 +218,7 @@
 		A8BC5253268DF5AD00B7823E /* AttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentView.swift; sourceTree = "<group>"; };
 		A8C73D1126F5812D00CF0350 /* Songlink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Songlink.swift; path = Accord/UI/Chat/ChannelView/Songlink.swift; sourceTree = SOURCE_ROOT; };
 		A8C73D1326F583A000CF0350 /* SongLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongLink.swift; sourceTree = "<group>"; };
-		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Backend/Utils/Keychain.swift; sourceTree = SOURCE_ROOT; };
+		A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Keychain.swift; path = Accord/Misc/Keychain.swift; sourceTree = SOURCE_ROOT; };
 		A8CD4CA4267D27F300E2C4F1 /* ServerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerListView.swift; path = Accord/UI/Base/ServerListView.swift; sourceTree = SOURCE_ROOT; };
 		A8F84D6226DF19E5007A8625 /* Sticker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -239,13 +239,13 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9E5145A42823513D0070828B /* Media */,
 				9E96EB7827DEC32B00BB3C8A /* Voice */,
 				9E6B71082784EBC400A26CB6 /* Gateway */,
 				9ED818B1277BF125004D684C /* RPC */,
 				A80FEC34272779D9005F9950 /* PluginManager */,
 				9E7BC56B27472308008E3FAB /* Markdown */,
 				A82521382687ABC50073F640 /* Networking */,
-				A825213A2687ABE40073F640 /* Utils */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -378,6 +378,16 @@
 				9E4F3FC427764E200003E383 /* GifView.swift */,
 			);
 			path = Gifs;
+			sourceTree = "<group>";
+		};
+		9E5145A42823513D0070828B /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				A89845402698C3FD00B1C9DB /* GifManager.swift */,
+				A85D3FDD2677A681002327AD /* Images.swift */,
+				9ED3011227A8C40600D6235D /* RegisterImages.swift */,
+			);
+			path = Media;
 			sourceTree = "<group>";
 		};
 		9E6B71012783A6F200A26CB6 /* Shapes */ = {
@@ -534,10 +544,8 @@
 			children = (
 				9E7E4D31279BA105008FAF15 /* Core.swift */,
 				A88CD70E26E065F3007D979B /* MentionProtocol.swift */,
-				A85D3FDD2677A681002327AD /* Images.swift */,
 				32AA719025EAEEDA00550BA5 /* Request.swift */,
 				A8C73D1126F5812D00CF0350 /* Songlink.swift */,
-				9ED3011227A8C40600D6235D /* RegisterImages.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -550,16 +558,6 @@
 				9E39B26D2789166000069424 /* GatewayPayloads */,
 			);
 			path = Objects;
-			sourceTree = "<group>";
-		};
-		A825213A2687ABE40073F640 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				A89845402698C3FD00B1C9DB /* GifManager.swift */,
-				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
-				9ED4A5AE276E334600BD485C /* AppKitLink.swift */,
-			);
-			path = Utils;
 			sourceTree = "<group>";
 		};
 		A82A05FB26D3F3AC007B9B27 /* ChannelView */ = {
@@ -585,7 +583,9 @@
 			children = (
 				9E6B71062783A73400A26CB6 /* PlusPlus */,
 				9E6B71012783A6F200A26CB6 /* Shapes */,
+				9ED4A5AE276E334600BD485C /* AppKitLink.swift */,
 				A80FEC262724FD35005F9950 /* ImageProcessing.swift */,
+				A8CD4C9E267CF9EB00E2C4F1 /* Keychain.swift */,
 				9EDD136727D6F951000685E6 /* Regex.swift */,
 				A80FEC2A2724FD35005F9950 /* UserNotifications.swift */,
 				9E8F8CA52773FC9C00A77600 /* Queues.swift */,

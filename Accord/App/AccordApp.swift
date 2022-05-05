@@ -65,9 +65,6 @@ struct AccordApp: App {
                     }
                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
                         granted, error in
-                        if !granted {
-                            print(error)
-                        }
                     }
                     let windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
                     let windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
@@ -86,14 +83,17 @@ struct AccordApp: App {
                 Button("Show quick jump") {
                     popup.toggle()
                 }.keyboardShortcut("k")
+                #if DEBUG
                 Button("Error", action: {
                     Self.error(Request.FetchErrors.invalidRequest, additionalDescription: "uwu")
                 })
+                #endif
             }
             CommandMenu("Account") {
                 Button("Log out") {
                     logOut()
                 }
+                #if DEBUG
                 Menu("Debug") {
                     Button("Reconnect") {
                         wss.reset()
@@ -102,6 +102,7 @@ struct AccordApp: App {
                         wss.hardReset()
                     }
                 }
+                #endif
             }
         }
     }

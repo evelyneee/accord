@@ -65,8 +65,9 @@ struct ContentView: View {
                                             }
                                         }
                                     }
+                                    let view = ServerListView(d)
                                     DispatchQueue.main.async {
-                                        self.serverListView = ServerListView(d)
+                                        self.serverListView = view
                                     }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                         withAnimation {

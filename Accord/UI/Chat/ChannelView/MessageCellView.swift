@@ -329,8 +329,10 @@ struct MessageCellView: View, Equatable {
                     discordHeaders: true,
                     referer: "https://discord.com/channels/\(guildID ?? "@me")/\(self.message.channel_id)"
                 ))
+                DispatchQueue.main.async {
+                    message.pinned?.toggle()
+                }
             }
-            message.pinned?.toggle()
         }
         .if(!(self.permissions.contains(.manageMessages) || guildID == "@me" || guildID == nil), transform: { $0.hidden() })
         Divider()
@@ -424,7 +426,7 @@ struct MessageCellView: View, Equatable {
                             editingTextField
                                 .padding(.leading, 41)
                         } else {
-                            AsyncMarkdown(message.content, font: message.content.hasEmojisOnly)
+                            AsyncMarkdown(message.content)
                                 .equatable()
                                 .padding(.leading, 41)
                         }
@@ -433,7 +435,7 @@ struct MessageCellView: View, Equatable {
                         if self.editing {
                             editingTextField
                         } else {
-                            AsyncMarkdown(message.content, font: message.content.hasEmojisOnly)
+                            AsyncMarkdown(message.content)
                                 .equatable()
                         }
                     }

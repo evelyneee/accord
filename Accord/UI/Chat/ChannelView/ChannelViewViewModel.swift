@@ -45,6 +45,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.messageSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in
+                assert(!Thread.isMainThread)
                 guard channelID == self?.channelID else { return }
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
@@ -71,6 +72,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.memberChunkSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg in
+                assert(!Thread.isMainThread)
                 guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
                 let allUsers: [GuildMember] = users.compactMap { $0 }
                 for person in allUsers {
@@ -99,6 +101,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.deleteSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
+                assert(!Thread.isMainThread)
                 guard channelID == self?.channelID else { return }
                 let messageMap = self?.messages.generateKeyMap()
                 guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
@@ -115,6 +118,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.editSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
+                assert(!Thread.isMainThread)
                 // Received a message from backend
                 guard channelID == self?.channelID else { return }
                 let decoder = JSONDecoder()

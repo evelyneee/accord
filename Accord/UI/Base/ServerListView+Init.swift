@@ -54,6 +54,7 @@ extension ServerListView {
             name: "Custom Status",
             type: 4
         )
+        self.statusText = readyPacket.user_settings?.custom_status?.text 
 
         // Save the emotes for easy access
         Emotes.emotes = readyPacket.guilds

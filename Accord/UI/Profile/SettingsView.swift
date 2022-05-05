@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 @available(macOS 11.0, *)
-struct SettingsViewRedesign: View {
+struct SettingsView: View {
     @AppStorage("pfpShown")
     var profilePictures: Bool = pfpShown
     @AppStorage("sortByMostRecent")
@@ -51,7 +51,7 @@ struct SettingsViewRedesign: View {
     @AppStorage("ShowHiddenChannels")
     var showHiddenChannels: Bool = false
     @AppStorage("MusicPlatform")
-    var selectedPlatform: Platforms = .appleMusic
+    var selectedPlatform: String = "appleMusic"
     @AppStorage("CompressGateway")
     var compress: Bool = false
 
@@ -64,10 +64,11 @@ struct SettingsViewRedesign: View {
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
-                Text("Accord Settings")
+                Text("Settings")
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.leading, 20)
+                #if false
                 HStack(alignment: .top) {
                     VStack(alignment: .leading) {
                         VStack(alignment: .leading) {
@@ -78,10 +79,10 @@ struct SettingsViewRedesign: View {
                         }
                         .padding(.bottom, 10)
                         VStack(alignment: .leading) {
-                            Text("Phone number")
+                            Text("MFA enabled")
                                 .font(.title3)
                                 .fontWeight(.bold)
-                            Text("not done yet, placeholder")
+                            Text(user?.mfa_enabled ?? false ? "Yes" : "No")
                         }
                         .padding(.bottom, 10)
                         Spacer()
@@ -129,6 +130,7 @@ struct SettingsViewRedesign: View {
                 .cornerRadius(15)
                 .padding()
                 .disabled(true)
+                #endif
                 VSplitView {
                     Group {
                         SettingsToggleView(toggled: $profilePictures, title: "Show profile pictures")
@@ -155,21 +157,20 @@ struct SettingsViewRedesign: View {
                             .fontWeight(.medium)
                             .padding()
                         Spacer()
-                        Picker(selection: $selectedPlatform, content: {
-                            Text("Amazon Music").tag(Platforms.amazonMusic)
-                            Text("Apple Music").tag(Platforms.appleMusic)
-                            Text("Deezer").tag(Platforms.deezer)
-                            Text("iTunes").tag(Platforms.itunes)
-                            Text("Napster").tag(Platforms.napster)
-                            Text("Pandora").tag(Platforms.pandora)
-                            Text("Soundcloud").tag(Platforms.soundcloud)
-                            Text("Spotify").tag(Platforms.spotify)
-                            Text("Tidal").tag(Platforms.tidal)
-                            Text("Youtube Music").tag(Platforms.youtubeMusic)
-                        }, label: {})
-                            .padding()
+                        Menu("Select your platform") {
+                            Button("Amazon Music", action: { self.selectedPlatform = Platforms.amazonMusic.rawValue })
+                            Button("Apple Music", action: { self.selectedPlatform = Platforms.appleMusic.rawValue })
+                            Button("Deezer", action: { self.selectedPlatform = Platforms.deezer.rawValue })
+                            Button("iTunes", action: { self.selectedPlatform = Platforms.itunes.rawValue })
+                            Button("Napster", action: { self.selectedPlatform = Platforms.napster.rawValue })
+                            Button("Pandora", action: { self.selectedPlatform = Platforms.pandora.rawValue })
+                            Button("Soundcloud", action: { self.selectedPlatform = Platforms.soundcloud.rawValue })
+                            Button("Spotify", action: { self.selectedPlatform = Platforms.spotify.rawValue })
+                            Button("Tidal", action: { self.selectedPlatform = Platforms.tidal.rawValue })
+                            Button("Youtube Music", action: { self.selectedPlatform = Platforms.youtubeMusic.rawValue })
+                        }
+                        .padding()
                     }
-                    .disabled(true)
                     Group {
                         SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
                         SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
@@ -183,6 +184,7 @@ struct SettingsViewRedesign: View {
                 .background(Color.black.opacity(colorScheme == .dark ? 0.25 : 0.10))
                 .cornerRadius(15)
                 .padding()
+                #if false
                 Text("Proxy Settings")
                     .font(.title)
                     .fontWeight(.bold)
@@ -235,6 +237,7 @@ struct SettingsViewRedesign: View {
                 .cornerRadius(15)
                 .padding()
                 .disabled(true)
+                #endif
                 Text("Accord (red.evelyn.accord) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
                     .padding(.leading, 20)
                     .foregroundColor(.secondary)
@@ -263,6 +266,14 @@ struct SettingsViewRedesign: View {
                 pfpShown = profilePictures
                 pastelColors = pastel
                 // discordStockSettings = discordSettings
+            }
+            .toolbar {
+                ToolbarItemGroup {
+                    Toggle(isOn: Binding.constant(false)) {
+                        Image(systemName: "bell.badge.fill")
+                    }
+                    .hidden()
+                }
             }
         }
     }

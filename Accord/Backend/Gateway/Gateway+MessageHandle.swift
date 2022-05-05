@@ -58,6 +58,7 @@ extension Gateway {
             if let channelID = event.channelID, let author = message.author {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
+            guard message.author?.id != user_id else { return }
             let ids = message.mentions.compactMap { $0?.id }
             let guildID = message.guild_id ?? "@me"
             guard let channelID = event.channelID else { print("wat"); break }

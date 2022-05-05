@@ -16,12 +16,13 @@ final class ZStream {
     let decompressionQueue = DispatchQueue(label: "red.evelyn.accord.DecompressionQueue")
     private var lock: Bool = false
     
-    init() {
+    init () {
         self.stream = streamPtr.pointee
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
     }
     
     func decompress(data: Data, large: Bool = false) throws -> Data {
+        
         guard lock == false else {
             self.decompressionQueue.async {
                 _ = try? self.decompress(data: data)

@@ -87,15 +87,17 @@ public final class Markdown {
                     guard let song = song else { return }
                     switch musicPlatform {
                     case .appleMusic:
+                        print(song.linksByPlatform.appleMusic.url)
                         return promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
                     case .spotify:
-                        return promise(.success(Text(song.linksByPlatform.spotify?.url ?? word).foregroundColor(Color.blue).underline() + Text(" ")))
+                        return promise(.success(Text(song.linksByPlatform.spotify.url).foregroundColor(Color.blue).underline() + Text(" ")))
                     case .none:
                         return promise(.success(Text(word) + Text(" ")))
                     default: break
                     }
                 }
             }
+            guard dict.isEmpty else { return }
             for id in mentions {
                 return promise(.success(
                     Text("@\(members[id] ?? "Unknown User")")
