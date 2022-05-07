@@ -8,6 +8,17 @@
 import Combine
 import SwiftUI
 
+extension EnvironmentValues {
+    var user: User {
+        get { self[UserKey.self] }
+        set { self[UserKey.self] = newValue }
+    }
+}
+
+private struct UserKey: EnvironmentKey {
+    static let defaultValue = AccordCoreVars.user!
+}
+
 struct ContentView: View {
     @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()

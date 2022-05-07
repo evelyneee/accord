@@ -71,10 +71,12 @@ struct ServerListView: View {
 
     var dmButton: some View {
         Button(action: {
-            ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
-            selectedServer = 201
             selection = nil
-            wss?.cachedMemberRequest.removeAll()
+            DispatchQueue.global().async {
+                wss?.cachedMemberRequest.removeAll()
+                ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
+            }
+            selectedServer = 201
         }) {
             Image(systemName: "bubble.right.fill")
                 .imageScale(.medium)
@@ -113,7 +115,7 @@ struct ServerListView: View {
     }
 
     var settingsLink: some View {
-        NavigationLink(destination: NavigationLazyView(SettingsView()), tag: 0, selection: self.$selection) {
+        NavigationLink(destination: SettingsView(), tag: 0, selection: self.$selection) {
             HStack {
                 ZStack(alignment: .bottomTrailing) {
                     Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
@@ -254,8 +256,8 @@ struct ServerListView: View {
             viewUpdater.updateView()
         })
         .onAppear {
-            self.selectedGuild = Array(ServerListView.folders.map(\.guilds).joined()).first
-            concurrentQueue.async {
+            self.selectedGuild = ServerListView.folders.first?.guilds.first
+            DispatchQueue.global().async {
                 if !Self.folders.isEmpty {
                     let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[0].id)")
                     DispatchQueue.main.async {
@@ -268,7 +270,7 @@ struct ServerListView: View {
                         let channels = channels.sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
                         DispatchQueue.main.async {
                             Self.privateChannels = channels
-                            concurrentQueue.async {
+                            DispatchQueue.global().async {
                                 assignPrivateReadStates()
                                 self.viewUpdater.updateView()
                             }

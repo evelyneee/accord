@@ -57,7 +57,7 @@ struct AccordApp: App {
                     // DispatchQueue(label: "socket").async {
                     //     let rpc = IPC().start()
                     // }
-                    concurrentQueue.async {
+                    DispatchQueue.global().async {
                         NetworkCore.shared = NetworkCore()
                     }
                     DispatchQueue.global(qos: .background).async {

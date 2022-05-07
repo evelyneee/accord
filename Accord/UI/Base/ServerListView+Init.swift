@@ -116,7 +116,7 @@ extension ServerListView {
         // Put the read states for access for the private channels
         Self.readStates = readyPacket.read_state?.entries ?? []
         
-        concurrentQueue.async {
+        DispatchQueue.global().async {
             roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
             roleNames = RoleManager.arrangeRoleNames(guilds: readyPacket.guilds)
         }

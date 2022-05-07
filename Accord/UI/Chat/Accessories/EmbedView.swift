@@ -20,7 +20,10 @@ struct EmbedView: View, Equatable {
     var body: some View {
         HStack(spacing: 0) {
             if let color = embed?.color {
-                Color(int: color).frame(width: 3).padding(.trailing, 5)
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color(int: color))
+                    .frame(width: 3)
+                    .padding(.trailing, 5)
             }
             VStack(alignment: .leading) {
                 if let author = embed?.author {
@@ -28,34 +31,31 @@ struct EmbedView: View, Equatable {
                         if let iconURL = author.proxy_icon_url {
                             Attachment(iconURL, size: CGSize(width: 24, height: 24))
                                 .equatable()
-                                .frame(width: 24, height: 24)
+                                .frame(width: 20, height: 20)
                                 .clipShape(Circle())
                         } else if let iconURL = author.icon_url {
                             Attachment(iconURL, size: CGSize(width: 24, height: 24))
                                 .equatable()
-                                .frame(width: 24, height: 24)
+                                .frame(width: 20, height: 20)
                                 .clipShape(Circle())
                         }
                         if let urlString = author.url, let url = URL(string: urlString) {
                             Link(author.name, destination: url)
                         } else {
                             Text(author.name)
+                                .fontWeight(.semibold)
+                                .font(.title3)
                         }
                     }
                 }
                 if let title = embed?.title {
                     Text(title)
-                        .fontWeight(.bold)
+                        .fontWeight(.semibold)
                         .font(.title3)
                 }
                 if let description = embed?.description {
-                    if #available(macOS 12.0, *) {
-                        Text((try? AttributedString(markdown: description)) ?? AttributedString(description))
-                            .lineLimit(2)
-                    } else {
-                        Text(description)
-                            .lineLimit(2)
-                    }
+                    AsyncMarkdown(description)
+                        .lineLimit(2)
                 }
                 if let image = embed?.image {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))

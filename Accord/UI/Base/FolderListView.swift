@@ -57,7 +57,7 @@ struct ServerIconCell: View {
     @StateObject var updater: ServerListView.UpdateView
 
     func updateSelection(old: Int?, new: Int?) {
-        concurrentQueue.async {
+        DispatchQueue.global().async {
             let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
             guard let selectedServer = old,
                   let new = new,

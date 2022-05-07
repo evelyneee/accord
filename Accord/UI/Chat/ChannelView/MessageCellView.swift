@@ -357,7 +357,13 @@ struct MessageCellView: View, Equatable {
     }
     
     private var replyView: some View {
-        HStack(alignment: .bottom) {
+        HStack {
+            RoundedRectangle(cornerRadius: 5)
+                .trim(from: 0.5, to: 0.75)
+                .stroke(.gray.opacity(0.4), lineWidth: 2)
+                .frame(width: 53, height: 20)
+                .padding(.bottom, -15)
+                .padding(.trailing, -30)
             Attachment(pfpURL(message.referenced_message?.author?.id, message.referenced_message?.author?.avatar, discriminator: message.referenced_message?.author?.discriminator ?? "0005", "16"))
                 .equatable()
                 .frame(width: 15, height: 15)
@@ -376,7 +382,8 @@ struct MessageCellView: View, Equatable {
                 .lineLimit(0)
                 .foregroundColor(.secondary)
         }
-        .padding(.leading, 47)
+        .padding(.bottom, -3)
+        .padding(.leading, 15)
     }
     
     private var interactionView: some View {
@@ -422,21 +429,27 @@ struct MessageCellView: View, Equatable {
                 }
                 VStack(alignment: .leading) {
                     if message.isSameAuthor, message.referenced_message == nil {
-                        if self.editing {
-                            editingTextField
-                                .padding(.leading, 41)
+                        if !message.content.isEmpty {
+                            if self.editing {
+                                editingTextField
+                                    .padding(.leading, 41)
+                            } else {
+                                AsyncMarkdown(message.content)
+                                    .equatable()
+                                    .padding(.leading, 41)
+                            }
                         } else {
-                            AsyncMarkdown(message.content)
-                                .equatable()
-                                .padding(.leading, 41)
+                            Spacer().frame(height: 2)
                         }
                     } else {
                         authorText
-                        if self.editing {
-                            editingTextField
-                        } else {
-                            AsyncMarkdown(message.content)
-                                .equatable()
+                        if !message.content.isEmpty {
+                            if self.editing {
+                                editingTextField
+                            } else {
+                                AsyncMarkdown(message.content)
+                                    .equatable()
+                            }
                         }
                     }
                 }

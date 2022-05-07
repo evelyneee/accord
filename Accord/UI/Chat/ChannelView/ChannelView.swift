@@ -51,6 +51,9 @@ struct ChannelView: View, Equatable {
     
     private var permissions: Permissions
 
+    @Environment(\.user)
+    var user: User
+    
     // MARK: - init
 
     init(_ channel: Channel, _ guildName: String? = nil) {
@@ -93,6 +96,9 @@ struct ChannelView: View, Equatable {
                         .background(Color.yellow.opacity(0.05))
                         .cornerRadius(7)
                 })
+                .onHover(perform: { _ in
+                        print(message.content)
+                })
                 .onAppear {
                     if viewModel.messages.count >= 50,
                        message == viewModel.messages[viewModel.messages.count - 2]
@@ -104,7 +110,7 @@ struct ChannelView: View, Equatable {
                 }
             }
         }
-        .rotationEffect(.degrees(180))
+        .rotationEffect(.radians(.pi))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
     }
 
@@ -144,7 +150,7 @@ struct ChannelView: View, Equatable {
                     
                     guard channelID == self.channelID,
                           let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                          memberDecodable.user_id != AccordCoreVars.user?.id else { return }
+                          memberDecodable.user_id != self.user.id else { return }
                     
                     let isKnownAs =
                     viewModel?.nicks[memberDecodable.user_id] ??
