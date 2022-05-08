@@ -26,6 +26,10 @@ struct GatewayD: Decodable {
     var country_code: String
     @IgnoreFailure
     var merged_members: [[Guild.MergedMember]]
+    @IgnoreFailure
+    var private_channels: [Channel]
+    @IgnoreFailure
+    var users: [User]
 }
 
 final class Relationship: Codable {

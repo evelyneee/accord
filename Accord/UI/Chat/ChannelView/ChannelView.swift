@@ -40,7 +40,7 @@ struct ChannelView: View, Equatable {
     @State var mentions: Bool = false
 
     @State var memberListShown: Bool = false
-    @State var memberList: [OPSItems] = .init()
+    @State var memberList: [OPSItems]
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
 
@@ -63,9 +63,7 @@ struct ChannelView: View, Equatable {
         self.guildName = guildName ?? "Direct Messages"
         _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
         self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
-        if DiscordDesktopRPCEnabled {
-            DiscordDesktopRPC.update(guildName: channel.guild_name, channelName: channel.computedName)
-        }
+        _memberList = State(initialValue: channel.recipients?.map(OPSItems.init) ?? [])
     }
 
     var messagesView: some View {
@@ -95,9 +93,6 @@ struct ChannelView: View, Equatable {
                         )
                         .background(Color.yellow.opacity(0.05))
                         .cornerRadius(7)
-                })
-                .onHover(perform: { _ in
-                        print(message.content)
                 })
                 .onAppear {
                     if viewModel.messages.count >= 50,
@@ -133,7 +128,7 @@ struct ChannelView: View, Equatable {
                 MemberListView(list: $memberList)
                     .frame(width: 250)
                     .onAppear {
-                        if memberList.isEmpty {
+                        if memberList.isEmpty && guildID != "@me" {
                             try? wss.memberList(for: guildID, in: channelID)
                         }
                     }
@@ -209,10 +204,8 @@ struct ChannelView: View, Equatable {
                     MentionsView(replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
                 }
-                if guildID != "@me" {
-                    Toggle(isOn: $memberListShown.animation()) {
-                        Image(systemName: "person.2.fill")
-                    }
+                Toggle(isOn: $memberListShown.animation()) {
+                    Image(systemName: "person.2.fill")
                 }
             }
         }

@@ -61,6 +61,14 @@ final class TypingEvent: Decodable {
 }
 
 final class GuildMember: Codable {
+    internal init(avatar: String? = nil, user: User, nick: String? = nil, roles: [String]? = nil, presence: Presence? = nil) {
+        self.avatar = avatar
+        self.user = user
+        self.nick = nick
+        self.roles = roles
+        self.presence = presence
+    }
+    
     var avatar: String?
     var user: User
     var nick: String?

@@ -23,11 +23,11 @@ extension ServerListView {
         return messageDict[entry]
     }
 
-    func assignPrivateReadStates() {
-        let privateReadStateDict = Self.readStates.generateKeyMap()
+    func assignPrivateReadStates(_ entries: [ReadStateEntry]) {
+        let privateReadStateDict = entries.generateKeyMap()
         for (i, channel) in Self.privateChannels.enumerated() {
             if let index = privateReadStateDict[channel.id] {
-                Self.privateChannels[i].read_state = Self.readStates[index]
+                Self.privateChannels[i].read_state = entries[index]
             }
         }
         print("Binded to private channels")

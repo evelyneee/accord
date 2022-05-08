@@ -417,44 +417,84 @@ struct MessageCellView: View, Equatable {
             if message.interaction != nil {
                 interactionView
             }
-            HStack(alignment: .top) { [unowned message] in
-                if !(message.isSameAuthor && message.referenced_message == nil) {
-                    Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
-                        .equatable()
-                        .frame(width: 33, height: 33)
-                        .clipShape(Circle())
-                        .popover(isPresented: $popup, content: {
-                            PopoverProfileView(user: message.author)
-                        })
-                }
-                VStack(alignment: .leading) {
-                    if message.isSameAuthor, message.referenced_message == nil {
-                        if !message.content.isEmpty {
-                            if self.editing {
-                                editingTextField
-                                    .padding(.leading, 41)
+            switch message.type {
+            case .recipientAdd:
+                Label(title: {
+                    Text(message.author?.username ?? "Unknown User").fontWeight(.semibold)
+                    + Text(" added ")
+                    + Text(message.mentions.first??.username ?? "Unknown User").fontWeight(.semibold)
+                    + Text(" to the group")
+                }, icon: {
+                    Image(systemName: "arrow.forward").foregroundColor(.green)
+                })
+                .padding(.leading, 41)
+            case .recipientRemove:
+                Label(title: {
+                    Text(message.author?.username ?? "Unknown User").fontWeight(.semibold)
+                    + Text(" left the group")
+                }, icon: {
+                    Image(systemName: "arrow.backward").foregroundColor(.red)
+                })
+                .padding(.leading, 41)
+            case .channelNameChange:
+                Label(title: {
+                    Text(message.author?.username ?? "Unknown User").fontWeight(.semibold)
+                    + Text(" changed the channel name")
+                }, icon: {
+                    Image(systemName: "pencil")
+                })
+                .padding(.leading, 41)
+            case .guildMemberJoin:
+                Label(title: {
+                    (Text("Welcome, ")
+                     + Text(message.author?.username ?? "Unknown User").fontWeight(.semibold)
+                    + Text("!"))
+                }, icon: {
+                    Image(systemName: "arrow.forward").foregroundColor(.green)
+                })
+                .padding(.leading, 41)
+            default:
+                HStack(alignment: .top) { [unowned message] in
+                    if !(message.isSameAuthor && message.referenced_message == nil) {
+                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
+                            .equatable()
+                            .frame(width: 33, height: 33)
+                            .clipShape(Circle())
+                            .popover(isPresented: $popup, content: {
+                                PopoverProfileView(user: message.author)
+                            })
+                    }
+                    VStack(alignment: .leading) {
+                        if message.isSameAuthor, message.referenced_message == nil {
+                            if !message.content.isEmpty {
+                                if self.editing {
+                                    editingTextField
+                                        .padding(.leading, 41)
+                                } else {
+                                    AsyncMarkdown(message.content)
+                                        .equatable()
+                                        .padding(.leading, 41)
+                                }
                             } else {
-                                AsyncMarkdown(message.content)
-                                    .equatable()
-                                    .padding(.leading, 41)
+                                Spacer().frame(height: 2)
                             }
                         } else {
-                            Spacer().frame(height: 2)
-                        }
-                    } else {
-                        authorText
-                        if !message.content.isEmpty {
-                            if self.editing {
-                                editingTextField
-                            } else {
-                                AsyncMarkdown(message.content)
-                                    .equatable()
+                            authorText
+                            if !message.content.isEmpty {
+                                if self.editing {
+                                    editingTextField
+                                } else {
+                                    AsyncMarkdown(message.content)
+                                        .equatable()
+                                }
                             }
                         }
                     }
+                    Spacer()
                 }
-                Spacer()
+
             }
+            
             if message.reactions?.isEmpty == false {
                 reactionsGrid
             }

@@ -25,6 +25,16 @@ final class OPSGroup: Codable {
 }
 
 final class OPSItems: Codable {
+    init(member: GuildMember? = nil, group: OPSGroup? = nil) {
+        self.member = member
+        self.group = group
+    }
+    
+    init(_ user: User) {
+        self.member = GuildMember(user: user)
+        print(self.member)
+    }
+    
     var member: GuildMember?
     var group: OPSGroup?
     

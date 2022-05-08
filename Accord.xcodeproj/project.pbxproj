@@ -16,7 +16,6 @@
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
-		9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */; };
 		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
 		9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
@@ -138,7 +137,6 @@
 		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
-		9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscordDesktopRPC.swift; sourceTree = "<group>"; };
 		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
 		9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewCell.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
@@ -489,7 +487,6 @@
 			children = (
 				9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */,
 				9E6BCC65277E908B0085F279 /* XcodeRPC.swift */,
-				9E39B2672787B93600069424 /* DiscordDesktopRPC.swift */,
 				9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */,
 				9E0088CD279366FD00F36D6B /* NativeRPC.swift */,
 				9E0088CF27937F5300F36D6B /* IPC.swift */,
@@ -753,7 +750,6 @@
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
-				9E39B2682787B93600069424 /* DiscordDesktopRPC.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,

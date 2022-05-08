@@ -96,7 +96,7 @@ final class Reply: Codable, Equatable, Identifiable, Hashable {
 }
 
 enum MessageType: Int, Codable {
-    case `default`, recipientAdd, recipientRemove, call,
+    case `default` = 0, recipientAdd, recipientRemove, call,
          channelNameChange, channelIconChange, channelMessagePin,
          guildMemberJoin, userBoostedServer, guildReachedLevelOne,
          guildReachedLevelTwo, guildReachedLevelThree, unused,

@@ -18,13 +18,27 @@ extension ServerListView {
         guard Self.folders.isEmpty else {
             return
         }
-
+        
+        let keys = readyPacket.users.generateKeyMap()
+        Self.privateChannels = readyPacket.private_channels.map { c -> Channel in
+            var c = c
+            if c.recipients?.isEmpty != false {
+                c.recipients = c.recipient_ids?
+                    .compactMap { keys[$0] }
+                    .map { readyPacket.users[$0] }
+            }
+            return c
+        }
+        .sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
+        
+        assignPrivateReadStates(readyPacket.read_state?.entries ?? [])
+        Notifications.privateChannels = Self.privateChannels.map(\.id)
+        
         // Bind the merged member objects to the guilds
         readyPacket.guilds = readyPacket.guilds.enumerated()
             .map { index, guild -> Guild in
                 var guild = guild
-
-                guild.mergedMember = readyPacket.merged_members[safe: index]?.first
+                guild.mergedMember = readyPacket.merged_members[index].first
 
                 if let role = guild.roles?.filter({ $0.id == guild.mergedMember?.hoisted_role }).first {
                     guild.guildPermissions = role.permissions
@@ -113,8 +127,6 @@ extension ServerListView {
             .filter { !$0.guilds.isEmpty }
 
         Self.folders = folders
-        // Put the read states for access for the private channels
-        Self.readStates = readyPacket.read_state?.entries ?? []
         
         DispatchQueue.global().async {
             roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
