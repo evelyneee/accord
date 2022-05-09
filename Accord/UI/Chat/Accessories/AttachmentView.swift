@@ -33,7 +33,7 @@ struct AttachmentView: View {
     var media: [AttachedFiles]
     var body: some View {
         ForEach(media, id: \.url) { obj in
-            if obj.content_type?.contains("image/jpeg") == true && obj.content_type?.contains("gif") == false {
+            if obj.content_type?.contains("image/") == true && obj.content_type?.contains("gif") == false {
                 Attachment(obj.url, size: CGSize(width: 500, height: 500)).equatable()
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)

@@ -57,14 +57,19 @@ struct ServerIconCell: View {
     @StateObject var updater: ServerListView.UpdateView
 
     func updateSelection(old: Int?, new: Int?) {
-        self.selection = nil
         DispatchQueue.global().async {
             let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
             guard let selectedServer = old,
                   let new = new,
                   let id = map[safe: selectedServer]?.id,
                   let newID = map[safe: new]?.id else { return }
-            UserDefaults.standard.set(self.selection, forKey: "AccordChannelIn\(id)")
+            if let selection = selection {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
+                DispatchQueue.main.async {
+                    print("deselecting")
+                    self.selection = nil
+                }
+            }
             DispatchQueue.main.async {
                 if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(newID)") as? Int {
                     self.selection = value
@@ -87,7 +92,7 @@ struct ServerIconCell: View {
                         .foregroundColor(Color.primary)
                         .frame(width: 5, height: selectedServer == guild.index ? 30 : 5)
                         .animation(Animation.linear(duration: 0.1))
-                        .opacity(unreadMessages(guild: guild) ? 1 : 0)
+                        .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
                     GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                 }
             }

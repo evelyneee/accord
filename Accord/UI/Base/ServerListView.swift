@@ -34,13 +34,14 @@ struct GuildHoverAnimation: ViewModifier {
     var color: Color = Color.accentColor.opacity(0.5)
     var hasIcon: Bool
     var frame: CGFloat = 45
+    var selected: Bool
     @State var hovered: Bool = false
     func body(content: Content) -> some View {
         content
             .onHover(perform: { res in withAnimation(Animation.linear(duration: 0.1)) { hovered = res } })
             .frame(width: frame, height: frame)
             .background(!hasIcon && hovered ? self.color : Color.clear)
-            .cornerRadius(hovered ? 12.0 : 23.5)
+            .cornerRadius(hovered || selected ? 13.5 : 23.5)
     }
 }
 
@@ -96,7 +97,7 @@ struct ServerListView: View {
                 .imageScale(.medium)
                 .frame(width: 45, height: 45)
                 .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
-                .cornerRadius(iconHovered || selectedServer == 201 ? 12.0 : 23.5)
+                .cornerRadius(iconHovered || selectedServer == 201 ? 13.5 : 23.5)
                 .if(selectedServer == 201, transform: { $0.foregroundColor(Color.white) })
                 .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) { self.iconHovered = h } })
         }
@@ -135,7 +136,6 @@ struct ServerListView: View {
                     Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .cornerRadius((self.selection == 0) ? 15.0 : 23.5)
                     statusIndicator
                 }
                 VStack(alignment: .leading) {

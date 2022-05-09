@@ -101,16 +101,16 @@ struct GuildListPreview: View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))
                 .equatable()
-                .modifier(GuildHoverAnimation(hasIcon: true))
+                .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.index))
         } else {
             if let name = guild.name {
                 Text(name.components(separatedBy: " ").compactMap({ $0.first }).map(String.init).joined())
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
             } else {
                 Image(systemName: "questionmark")
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
             }
         }
     }
