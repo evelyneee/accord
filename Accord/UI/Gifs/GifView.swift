@@ -28,7 +28,7 @@ struct GifView: View {
                     .scaledToFit()
             }
         }
-        .onAppear { print("hi"); prep() }
+        .onAppear { prep() }
         .onDisappear { timer?.cancel(); timer = nil }
     }
 
@@ -78,12 +78,11 @@ struct HoverGifView: View {
                     .resizable()
                     .scaledToFit()
                     .onHover { _ in animated.toggle() }
-                    .onDisappear { print(url, "baibai"); timer?.cancel(); timer = nil; animatedImages.removeAll() }
+                    .onDisappear { timer?.cancel(); timer = nil; animatedImages.removeAll() }
             } else {
                 Text("...")
                     .onAppear {
-                        guard animatedImages.isEmpty else { print("uh fuk"); return }
-                        print("instance created", url)
+                        guard animatedImages.isEmpty else { return }
                         prep()
                     }
             }
