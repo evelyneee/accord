@@ -291,7 +291,7 @@ struct MessageCellView: View, Equatable {
                         NSWorkspace.shared.open(url)
                     }
                 }
-                Button("Copy image URL") {
+                Button("Copy media URL") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(attachment?.url ?? "", forType: .string)
                 }
@@ -409,6 +409,33 @@ struct MessageCellView: View, Equatable {
         .padding(.leading, 47)
     }
     
+    @ViewBuilder
+    private var avatarView: some View {
+        if let author = message.author {
+            if (self.avatar?.prefix(2) ?? author.avatar?.prefix(2)) == "a_" {
+                GifView(url: { () -> String in
+                    if let avatar = self.avatar, let guildID = guildID {
+                        return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).gif?size=48"
+                    } else {
+                        return cdnURL + "/avatars/\(author.id)/\(author.avatar!).gif?size=48"
+                    }
+                }())
+            } else {
+                Attachment ({ () -> String in
+                    if let avatar = self.avatar, let guildID = guildID {
+                        return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).png?size=48"
+                    } else if let avatar = author.avatar {
+                        return cdnURL + "/avatars/\(author.id)/\(avatar).png?size=48"
+                    } else {
+                        let index = String((Int(author.discriminator) ?? 0) % 5)
+                        return cdnURL + "/embed/avatars/\(index).png"
+                    }
+                }())
+                .equatable()
+            }
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             if message.referenced_message != nil {
@@ -456,8 +483,7 @@ struct MessageCellView: View, Equatable {
             default:
                 HStack(alignment: .top) { [unowned message] in
                     if !(message.isSameAuthor && message.referenced_message == nil) {
-                        Attachment(avatar != nil ? cdnURL + "/guilds/\(guildID ?? "")/users/\(message.author?.id ?? "")/avatars/\(avatar!).png?size=48" : pfpURL(message.author?.id, message.author?.avatar, discriminator: message.author?.discriminator ?? "0005"))
-                            .equatable()
+                        avatarView
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
@@ -494,19 +520,18 @@ struct MessageCellView: View, Equatable {
                 }
 
             }
-            
-            if message.reactions?.isEmpty == false {
-                reactionsGrid
-            }
+            stickerView
             ForEach(message.embeds ?? [], id: \.id) { embed in
                 EmbedView(embed: embed)
                     .equatable()
                     .padding(.leading, 41)
             }
-            stickerView
             AttachmentView(media: message.attachments)
                 .padding(.leading, 41)
                 .padding(.top, 5)
+            if message.reactions?.isEmpty == false {
+                reactionsGrid
+            }
         }
         .contextMenu { contextMenuContent }
         .id(message.id)

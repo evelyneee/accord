@@ -57,6 +57,7 @@ struct ServerIconCell: View {
     @StateObject var updater: ServerListView.UpdateView
 
     func updateSelection(old: Int?, new: Int?) {
+        self.selection = nil
         DispatchQueue.global().async {
             let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
             guard let selectedServer = old,
@@ -81,10 +82,11 @@ struct ServerIconCell: View {
                 self.selectedGuild = guild
             }) {
                 HStack {
-                    Circle()
+                    RoundedRectangle(cornerRadius: 5)
                         .fill()
                         .foregroundColor(Color.primary)
-                        .frame(width: 5, height: 5)
+                        .frame(width: 5, height: selectedServer == guild.index ? 30 : 5)
+                        .animation(Animation.linear(duration: 0.1))
                         .opacity(unreadMessages(guild: guild) ? 1 : 0)
                     GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
                 }

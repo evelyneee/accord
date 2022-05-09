@@ -24,8 +24,8 @@ func frameSize(width: CGFloat, height: CGFloat, originalWidth: Int?, originalHei
 
 public extension View {
     func maxFrame(width: CGFloat, height: CGFloat, originalWidth: Int?, originalHeight: Int?) -> some View {
-        let size = frameSize(width: width, height: height, originalWidth: originalWidth, originalHeight: originalHeight)
-        return frame(width: size.0, height: size.1)
+        let (width, height) = frameSize(width: width, height: height, originalWidth: originalWidth, originalHeight: originalHeight)
+        return frame(width: width, height: height)
     }
 }
 
@@ -33,15 +33,20 @@ struct AttachmentView: View {
     var media: [AttachedFiles]
     var body: some View {
         ForEach(media, id: \.url) { obj in
-            if obj.content_type?.prefix(6).stringLiteral == "image/" {
+            if obj.content_type?.contains("image/jpeg") == true && obj.content_type?.contains("gif") == false {
                 Attachment(obj.url, size: CGSize(width: 500, height: 500)).equatable()
+                    .cornerRadius(5)
+                    .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
+                    .accessibility(label: Text(obj.description ?? "Image"))
+            } else if obj.content_type?.contains("gif") == true {
+                GifView(url: obj.url)
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))
             } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxy_url) {
                 VideoPlayer(player: AVPlayer(url: url))
                     .cornerRadius(5)
-                    .frame(minWidth: 200, maxWidth: 350, minHeight: 200, maxHeight: 350)
+                    .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
             }
         }
     }

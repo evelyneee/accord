@@ -67,7 +67,7 @@ struct EmbedView: View, Equatable {
                 {
                     VideoPlayer(player: AVPlayer(url: url))
                         .cornerRadius(5)
-                        .frame(maxWidth: 250)
+                        .maxFrame(width: 380, height: 300, originalWidth: video.width ?? 0, originalHeight: video.height ?? 0)
                 }
                 if let fields = embed?.fields {
                     LazyVGrid(columns: columns, alignment: .leading) {

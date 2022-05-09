@@ -30,6 +30,20 @@ enum Emotes {
     }
 }
 
+struct GuildHoverAnimation: ViewModifier {
+    var color: Color = Color.accentColor.opacity(0.5)
+    var hasIcon: Bool
+    var frame: CGFloat = 45
+    @State var hovered: Bool = false
+    func body(content: Content) -> some View {
+        content
+            .onHover(perform: { res in withAnimation(Animation.linear(duration: 0.1)) { hovered = res } })
+            .frame(width: frame, height: frame)
+            .background(!hasIcon && hovered ? self.color : Color.clear)
+            .cornerRadius(hovered ? 12.0 : 23.5)
+    }
+}
+
 func pingCount(guild: Guild) -> Int {
     let intArray = guild.channels!.compactMap { $0.read_state?.mention_count }
     return intArray.reduce(0, +)
@@ -82,9 +96,9 @@ struct ServerListView: View {
                 .imageScale(.medium)
                 .frame(width: 45, height: 45)
                 .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
-                .cornerRadius(iconHovered || selectedServer == 201 ? 15.0 : 23.5)
+                .cornerRadius(iconHovered || selectedServer == 201 ? 12.0 : 23.5)
                 .if(selectedServer == 201, transform: { $0.foregroundColor(Color.white) })
-                .onHover(perform: { self.iconHovered = $0 })
+                .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) { self.iconHovered = h } })
         }
     }
 

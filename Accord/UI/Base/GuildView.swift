@@ -101,21 +101,16 @@ struct GuildListPreview: View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))
                 .equatable()
-                .frame(width: 45, height: 45)
-                .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+                .modifier(GuildHoverAnimation(hasIcon: true))
         } else {
             if let name = guild.name {
-                Text(name)
+                Text(name.components(separatedBy: " ").compactMap({ $0.first }).map(String.init).joined())
                     .equatable()
-                    .frame(width: 45, height: 45)
-                    .background(Color.secondary)
-                    .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+                    .modifier(GuildHoverAnimation(hasIcon: false))
             } else {
                 Image(systemName: "questionmark")
                     .equatable()
-                    .frame(width: 45, height: 45)
-                    .background(Color.secondary)
-                    .cornerRadius(selectedServer == guild.index ? 15.0 : 23.5)
+                    .modifier(GuildHoverAnimation(hasIcon: false))
             }
         }
     }
