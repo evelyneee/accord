@@ -520,15 +520,19 @@ struct MessageCellView: View, Equatable {
                 }
 
             }
-            stickerView
+            if message.sticker_items?.isEmpty == false {
+                stickerView
+            }
             ForEach(message.embeds ?? [], id: \.id) { embed in
                 EmbedView(embed: embed)
                     .equatable()
                     .padding(.leading, 41)
             }
-            AttachmentView(media: message.attachments)
-                .padding(.leading, 41)
-                .padding(.top, 5)
+            if !message.attachments.isEmpty {
+                AttachmentView(media: message.attachments)
+                    .padding(.leading, 41)
+                    .padding(.top, 5)
+            }
             if message.reactions?.isEmpty == false {
                 reactionsGrid
             }

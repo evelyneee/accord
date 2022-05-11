@@ -44,3 +44,23 @@ extension Slice where Base: Sequence {
         base
     }
 }
+
+extension Array where Element: Identifiable {
+    subscript(id: Self.Element.ID, keyMap: [Self.Element.ID:Int]? = nil) -> Self.Element? {
+        get {
+            let keys = keyMap ?? self.generateKeyMap()
+            guard let element = keys[id] else { return nil }
+            return self[element]
+        }
+        set {
+            let keys = keyMap ?? self.generateKeyMap()
+            guard let element = keys[id], let newValue = newValue else { return }
+            self[element] = newValue
+        }
+    }
+    
+    subscript(indexOf id: Self.Element.ID, keyMap: [Self.Element.ID:Int]? = nil) -> Int? {
+        let keys = keyMap ?? self.generateKeyMap()
+        return keys[id]
+    }
+}

@@ -83,17 +83,10 @@ struct ChannelView: View, Equatable {
                 )
                 .equatable()
                 .id(message.identifier)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: (message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 10, trailing: 0))
-                .if(message.mentions.compactMap { $0?.id }.contains(user_id), transform: { view in
-                    view
-                        .padding(5)
-                        .frame(
-                            maxWidth: .infinity,
-                            maxHeight: .infinity
-                        )
-                        .background(Color.yellow.opacity(0.05))
-                        .cornerRadius(7)
-                })
+                .listRowInsets(.init(top: 0, leading: 0, bottom: ((message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 15) - (message.user_mentioned == true ? 3 : 0), trailing: 0))
+                .padding(.horizontal, 5)
+                .padding(.vertical, message.user_mentioned == true ? 3 : 0)
+                .background(message.user_mentioned == true ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
                 .onAppear {
                     if viewModel.messages.count >= 50,
                        message == viewModel.messages[viewModel.messages.count - 2]
@@ -113,13 +106,14 @@ struct ChannelView: View, Equatable {
         HStack {
             ZStack(alignment: .bottom) {
                 List {
-                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 65 : 75)
+                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 75 : 90)
                     if metalRenderer {
                         messagesView.drawingGroup()
                     } else {
                         messagesView
                     }
                 }
+                .listStyle(PlainListStyle())
                 .rotationEffect(.init(degrees: 180))
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 blurredTextField
