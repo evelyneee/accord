@@ -15,16 +15,19 @@ final class Status: Codable {
 }
 
 final class Activity {
-    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, timestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:]) {
+    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, metadata: [String:Any]? = nil, timestamp: Int? = nil, endTimestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:], syncID: String? = nil) {
         self.applicationID = applicationID
         self.flags = flags
         self.emoji = emoji
         self.name = name
         self.type = type
+        self.metadata = metadata
         self.timestamp = timestamp
+        self.endTimestamp = endTimestamp
         self.state = state
         self.details = details
         self.assets = assets
+        self.syncID = syncID
     }
 
     static var current: Activity?
@@ -34,10 +37,13 @@ final class Activity {
     var state: String?
     var type: Int
     var timestamp: Int?
+    var endTimestamp: Int?
     var applicationID: String?
     var flags: Int?
     var details: String?
+    var syncID: String?
     var assets: [String: String]
+    var metadata: [String:Any]?
     var dictValue: [String: Any] {
         var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
@@ -51,10 +57,21 @@ final class Activity {
             dict["party"] = [:]
             dict["secrets"] = [:]
         }
+        if name == "Spotify" {
+            dict["party"] = ["id":"spotify:"+user_id]
+        }
+        if let metadata = metadata {
+            dict["metadata"] = metadata
+        }
+        if let syncID = syncID {
+            dict["sync_id"] = syncID
+        }
         if name != "Custom Status" {
             dict["application_id"] = applicationID ?? NSNull()
         }
-        if let timestamp = timestamp {
+        if let timestamp = timestamp, let endTimestamp = endTimestamp {
+            dict["timestamps"] = ["start": timestamp, "end": endTimestamp]
+        } else if let timestamp = timestamp {
             dict["timestamps"] = ["start": timestamp]
         }
         if let flags = flags {

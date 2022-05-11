@@ -101,7 +101,7 @@ public final class Markdown {
             for id in mentions {
                 return promise(.success(
                     Text("@\(members[id] ?? "Unknown User")")
-                        .foregroundColor(id == user_id ? Color(Color.RGBColorSpace.sRGB, red: 1, green: 0.843, blue: 0, opacity: 1) : Color(NSColor.controlAccentColor))
+                        .foregroundColor(Color.accentColor)
                         .underline()
                         +
                         Text(" ")

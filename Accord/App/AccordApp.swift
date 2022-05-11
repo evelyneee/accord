@@ -57,6 +57,24 @@ struct AccordApp: App {
                     // DispatchQueue(label: "socket").async {
                     //     let rpc = IPC().start()
                     // }
+                    Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
+                        contentType: "application/x-www-form-urlencoded",
+                        token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
+                        bodyObject: ["grant_type":"client_credentials"],
+                        type: .POST
+                    )) {
+                        switch $0 {
+                        case .success(let data):
+                            print(data)
+                            let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any]
+                            print(packet)
+                            if let token = packet?["access_token"] as? String {
+                                spotifyToken = token
+                            }
+                        case .failure(let error):
+                            print(error)
+                        }
+                    }
                     DispatchQueue.global().async {
                         NetworkCore.shared = NetworkCore()
                     }

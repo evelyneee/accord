@@ -32,6 +32,8 @@ struct SettingsView: View {
     var pronounDB: Bool = false
     @AppStorage("AppleMusicRPC")
     var appleMusicRPC: Bool = false
+    @AppStorage("SpotifyRPC")
+    var spotifyRPC: Bool = true
     @AppStorage("XcodeRPC")
     var xcodeRPC: Bool = false
     @AppStorage("DiscordDesktopRPCEnabled")
@@ -174,6 +176,7 @@ struct SettingsView: View {
                     Group {
                         SettingsToggleView(toggled: $xcodeRPC, title: "Enable Xcode Rich Presence")
                         SettingsToggleView(toggled: $appleMusicRPC, title: "Enable Apple Music Rich Presence")
+                        SettingsToggleView(toggled: $spotifyRPC, title: "Enable Spotify Rich Presence in Apple Music", detail: "This will show your currently playing Apple Music song in Spotify Presence")
                         SettingsToggleView(toggled: $ddRPC, title: "Enable Discord Client Rich Presence")
                         SettingsToggleView(toggled: $vsRPC, title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                     }
