@@ -24,7 +24,9 @@ struct GifView: View {
             if animatedImages.isEmpty {
                 Image(nsImage: NSImage())
             } else {
-                Image(nsImage: animatedImages[value]).resizable()
+                Image(nsImage: animatedImages[value])
+                    .resizable()
+                    .frame(width: 160, height: 160)
                     .scaledToFit()
             }
         }
@@ -33,31 +35,77 @@ struct GifView: View {
     }
 
     func prep() {
-        gifQueue.async {
-            can = URLSession.shared.dataTaskPublisher(for: URL(string: url)!)
-                .map(\.data)
-                .replaceError(with: Data())
-                .sink { data in
-                    let gif = Gif(data: data)
-                    animatedImages = gif?.animatedImages ?? []
-                    duration = Double(CFTimeInterval(gif?.calculatedDuration ?? 0))
-                    DispatchQueue.main.async {
-                        self.timer = Timer.publish(
-                            every: Double(duration / Double(animatedImages.count)),
-                            tolerance: nil,
-                            on: .main,
-                            in: .default
-                        )
-                        .autoconnect()
-                        .sink { _ in
-                            if value + 1 == animatedImages.count {
-                                self.value = 0
-                                return
+        if url.suffix(4) == "json" {
+            gifQueue.async {
+                print(self.url)
+                Request.fetch(url: URL(string: self.url)) {
+                    switch $0 {
+                    case .success(let data):
+                        var req = URLRequest.init(url: URL(string: "https://api.evelyn.red/v1/lottie")!)
+                        req.addValue("discord_sticker" + UUID().uuidString.toBase64(), forHTTPHeaderField: "filename")
+                        req.httpBody = data
+                        Request.fetch(request: req, headers: Headers(
+                            contentType: "application/json",
+                            type: .POST
+                        )) {
+                            switch $0 {
+                            case .success(let data):
+                                let gif = Gif(data: data)
+                                guard let animatedImages = gif?.animatedImages, let calculatedDuration = gif?.calculatedDuration else { return }
+                                self.animatedImages = animatedImages
+                                self.duration = Double(CFTimeInterval(calculatedDuration))
+                                DispatchQueue.main.async {
+                                    self.timer = Timer.publish(
+                                        every: Double(duration / Double(animatedImages.count)),
+                                        tolerance: nil,
+                                        on: .main,
+                                        in: .default
+                                    )
+                                    .autoconnect()
+                                    .sink { _ in
+                                        if value + 1 == animatedImages.count {
+                                            self.value = 0
+                                            return
+                                        }
+                                        (self.value) += 1 % (animatedImages.count)
+                                    }
+                                }
+                            case .failure(let error): print(error)
                             }
-                            (self.value) += 1 % (animatedImages.count)
                         }
+                    case .failure(let error):
+                        print(error)
                     }
                 }
+            }
+        } else {
+            gifQueue.async {
+                can = URLSession.shared.dataTaskPublisher(for: URL(string: url)!)
+                    .map(\.data)
+                    .replaceError(with: Data())
+                    .sink { data in
+                        let gif = Gif(data: data)
+                        animatedImages = gif?.animatedImages ?? []
+                        duration = Double(CFTimeInterval(gif?.calculatedDuration ?? 0))
+                        DispatchQueue.main.async {
+                            self.timer = Timer.publish(
+                                every: Double(duration / Double(animatedImages.count)),
+                                tolerance: nil,
+                                on: .main,
+                                in: .default
+                            )
+                            .autoconnect()
+                            .sink { _ in
+                                if value + 1 == animatedImages.count {
+                                    self.value = 0
+                                    return
+                                }
+                                (self.value) += 1 % (animatedImages.count)
+                            }
+                        }
+                    }
+            }
+
         }
     }
 }

@@ -83,7 +83,7 @@ struct ChannelView: View, Equatable {
                 )
                 .equatable()
                 .id(message.identifier)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: ((message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 15) - (message.user_mentioned == true ? 3 : 0), trailing: 0))
+                .listRowInsets(.init(top: 3.5, leading: 0, bottom: ((message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 13) - (message.user_mentioned == true ? 3 : 0), trailing: 0))
                 .padding(.horizontal, 5)
                 .padding(.vertical, message.user_mentioned == true ? 3 : 0)
                 .background(message.user_mentioned == true ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)

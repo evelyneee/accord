@@ -133,12 +133,14 @@ final class Gateway {
     private func hello(_ session_id: String? = nil, _ seq: Int? = nil) {
         guard connection?.state != .cancelled else { return } // Don't listen for hello if there is no connection
         connection?.receiveMessage { [weak self] data, _, _, error in
+            guard let self = self else { return }
+
             if let error = error {
                 return print(error)
             }
             
             guard let data = data,
-                  let decompressedData = self?.compress == true ? try? self?.decompressor.decompress(data: data) : data,
+                  let decompressedData = self.compress ? try? self.decompressor.decompress(data: data) : data,
                   let hello = try? JSONSerialization.jsonObject(with: decompressedData, options: []) as? [String: Any],
                   let helloD = hello["d"] as? [String: Any],
                   let interval = helloD["heartbeat_interval"] as? Int else {
@@ -163,13 +165,13 @@ final class Gateway {
                         }
                     }
                 }
-                .store(in: &self!.bag)
+                .store(in: &self.bag)
             }
             do {
                 if let session_id = session_id, let seq = seq {
-                    try self?.reconnect(session_id: session_id, seq: seq)
+                    try self.reconnect(session_id: session_id, seq: seq)
                 } else {
-                    try self?.identify()
+                    try self.identify()
                 }
             } catch {
                 print(error)

@@ -35,4 +35,5 @@ enum StickerFormat: Int, Codable {
 final class StickerItem: Codable {
     var id: String
     var name: String
+    var format_type: StickerFormat
 }

@@ -204,7 +204,6 @@ public final class Request {
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
             if let data = data {
-                print(data)
                 guard error == nil else {
                     print(error?.localizedDescription ?? "Unknown Error")
                     return completion(.failure(FetchErrors.badResponse(response)))

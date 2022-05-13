@@ -143,28 +143,6 @@ final class MediaRemoteWrapper {
         case errorGettingNowInfoPtr
         case noName
     }
-
-    /*
-     1:
-     assets:
-        large_image: "spotify:ab67616d0000b27326f7f19c7f0381e56156c94a"
-        large_text: "Graduation"
-     details: "I Wonder"
-     flags: 48
-     metadata:
-        album_id: "4SZko61aMnmgvNhfhgTuD3"
-        artist_ids:["5K4W6rqBFWDnAN6FQUkS6x"]
-     name: "Spotify"
-     party: {
-        id: "spotify:645775800897110047"
-     }
-     state: "Kanye West"
-     sync_id: "7rbECVPkY5UODxoOUVKZnA"
-     timestamps:
-        end: 1652278715825
-        start: 1652278472385
-     type: 2
-     */
     
     class func getCurrentlyPlayingSong() -> Future<Song, Error> {
         Future { promise in
@@ -172,7 +150,9 @@ final class MediaRemoteWrapper {
             MRMediaRemoteGetNowPlayingInfo(DispatchQueue.main) { information in
                 guard let name = information["kMRMediaRemoteNowPlayingInfoTitle"] as? String else { return promise(.failure(NowPlayingErrors.noName)) }
                 let isMusic = information["kMRMediaRemoteNowPlayingInfoIsMusicApp"] as? Bool ?? false
-                let progress = information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double
+                let timestamp = information["kMRMediaRemoteNowPlayingInfoTimestamp"] as? String
+                let formatted = Date().timeIntervalSince1970 - (ISO8601DateFormatter().date(from: timestamp ?? "")?.timeIntervalSince1970 ?? 0)
+                let progress = (information["kMRMediaRemoteNowPlayingInfoElapsedTime"] as? Double) ?? formatted
                 if let id = (information["kMRMediaRemoteNowPlayingInfoAlbumiTunesStoreAdamIdentifier"] as? Int) ?? (information["kMRMediaRemoteNowPlayingInfoiTunesStoreIdentifier"] as? Int) {
                     print("Song has iTunes Store ID")
                     Request.fetch(url: URL(string: "https://itunes.apple.com/lookup?id=\(String(id))"), completion: { completion in
@@ -218,6 +198,46 @@ final class MediaRemoteWrapper {
     static var rateLimit: Bool = false
     static var status: String?
 
+    class private func updateWithSong(_ song: Song) {
+        try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
+            Activity.current!
+            Activity(
+                applicationID: musicRPCAppID,
+                flags: 1,
+                name: "Apple Music",
+                type: 2,
+                timestamp: Int(Date().timeIntervalSince1970) * 1000,
+                state: "In \(song.albumName ?? song.name) by \(song.artist ?? "someone")",
+                details: song.name
+            )
+        }
+    }
+    
+    class private func updateWithArtworkURL(_ song: Song, artworkURL: String) {
+        ExternalImages.proxiedURL(appID: musicRPCAppID, url: artworkURL)
+            .replaceError(with: [])
+            .sink { out in
+                guard let url = out.first?.external_asset_path else { return }
+                try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
+                    Activity.current!
+                    Activity(
+                        flags: 1,
+                        name: "Apple Music",
+                        type: 2,
+                        timestamp: Int(Date().timeIntervalSince1970) * 1000,
+                        endTimestamp: song.duration != nil ? Int(Date().timeIntervalSince1970 + (song.duration!)) * 1000 : nil,
+                        state: song.albumName ?? song.name + " (Single)",
+                        details: song.name,
+                        assets: [
+                            "large_image": "mp:\(url)",
+                            "large_text": song.albumName ?? "Unknown album",
+                        ]
+                    )
+                }
+            }
+            .store(in: &bag)
+    }
+    
     class func updatePresence(status: String? = nil) {
         guard !Self.rateLimit else { return }
         rateLimit = true
@@ -237,64 +257,38 @@ final class MediaRemoteWrapper {
                     )) {
                         switch $0 {
                         case .success(let packet):
-                            try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
-                                Activity.current!
-                                Activity(
-                                    flags: 48,
-                                    name: "Spotify",
-                                    type: 2,
-                                    metadata: ["album_id":packet.tracks.items.first?.album.id ?? "", "artist_ids":packet.tracks.items.first?.artists.map(\.id) ?? []],
-                                    timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                                    endTimestamp: song.duration != nil ? Int(Date().timeIntervalSince1970 + (song.duration!)) * 1000 : nil,
-                                    state: song.artist ?? "Unknown artist",
-                                    details: song.name,
-                                    assets: [
-                                        "large_image": "spotify:\(packet.tracks.items.first?.album.images.first?.url.components(separatedBy: "/").last ?? "")",
-                                        "large_text": song.albumName ?? "Unknown album",
-                                    ]
-                                )
+                            if let track = packet.tracks.items.first, let imageURL = track.album.images.first?.url.components(separatedBy: "/").last {
+                                print(song.elapsed)
+                                try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
+                                    Activity.current!
+                                    Activity(
+                                        flags: 48,
+                                        name: "Spotify",
+                                        type: 2,
+                                        metadata: ["album_id":track.album.id, "artist_ids":track.artists.map(\.id)],
+                                        timestamp: Int(Date().timeIntervalSince1970 - (song.elapsed ?? 0)) * 1000,
+                                        endTimestamp: Int(Date().timeIntervalSince1970 + (song.duration ?? Double(track.durationMS / 1000))) * 1000,
+                                        state: song.artist ?? "Unknown artist",
+                                        details: track.name,
+                                        assets: [
+                                            "large_image": "spotify:"+imageURL,
+                                            "large_text": track.album.name,
+                                        ]
+                                    )
+                                }
+                            } else if let url = song.artworkURL {
+                                Self.updateWithArtworkURL(song, artworkURL: url)
+                            } else {
+                                Self.updateWithSong(song)
                             }
                         case .failure(let error):
                             print(error)
                         }
                     }
                 } else if let url = song.artworkURL {
-                    ExternalImages.proxiedURL(appID: musicRPCAppID, url: url)
-                        .replaceError(with: [])
-                        .sink { out in
-                            print(song.duration)
-                            guard let url = out.first?.external_asset_path else { return }
-                            try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
-                                Activity.current!
-                                Activity(
-                                    flags: 48,
-                                    name: "Apple Music",
-                                    type: 2,
-                                    timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                                    endTimestamp: song.duration != nil ? Int(Date().timeIntervalSince1970 + (song.duration!)) * 1000 : nil,
-                                    state: song.albumName ?? song.name + " (Single)",
-                                    details: song.name,
-                                    assets: [
-                                        "large_image": "mp:\(url)",
-                                        "large_text": song.albumName ?? "Unknown album",
-                                    ]
-                                )
-                            }
-                        }
-                        .store(in: &bag)
+                    Self.updateWithArtworkURL(song, artworkURL: url)
                 } else {
-                    try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
-                        Activity.current!
-                        Activity(
-                            applicationID: musicRPCAppID,
-                            flags: 1,
-                            name: "Apple Music",
-                            type: 2,
-                            timestamp: Int(Date().timeIntervalSince1970) * 1000,
-                            state: "In \(song.albumName ?? song.name) by \(song.artist ?? "someone")",
-                            details: song.name
-                        )
-                    }
+                    Self.updateWithSong(song)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     rateLimit = false
