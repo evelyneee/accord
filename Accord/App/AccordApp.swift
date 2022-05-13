@@ -23,7 +23,6 @@ struct AccordApp: App {
                     .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
                         self.token = AccordCoreVars.token
-                        print("posted", self.token)
                     }
             } else {
                 GeometryReader { reader in

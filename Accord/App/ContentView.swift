@@ -96,8 +96,11 @@ struct ContentView: View {
                 .onDisappear {
                     print("uh bye")
                 }
-        } else {
+        } else if let serverListView = serverListView {
             serverListView
+        } else {
+            Text("Why are we here??")
+                .padding(200)
         }
     }
     
