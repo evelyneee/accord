@@ -258,7 +258,6 @@ final class MediaRemoteWrapper {
                         switch $0 {
                         case .success(let packet):
                             if let track = packet.tracks.items.first, let imageURL = track.album.images.first?.url.components(separatedBy: "/").last {
-                                print(song.elapsed)
                                 try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
                                     Activity.current!
                                     Activity(

@@ -65,13 +65,15 @@ extension Gateway {
             MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
             if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
                 print("Sending notification")
-                let guildArray = ServerListView.folders.map { $0.guilds.filter { $0.id == message.guild_id } }
-                let channelArray = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.id == channelID } } }
-                var joined: [Channel] = Array(Array(Array(channelArray).joined()).joined())
-                joined.append(contentsOf: ServerListView.privateChannels.filter { $0.id == channelID })
-                let joinedGuilds: Guild? = Array(guildArray.joined()).first
-                showNotification(title: message.author?.username ?? "Unknown User", subtitle: joinedGuilds == nil ? joined.first?.name ?? "Direct Messages" : "#\(joined.first?.computedName ?? "") • \(joinedGuilds?.name ?? "")", description: message.content)
-                
+                let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[message.guild_id ?? ""]
+                let matchingChannel = matchingGuild?.channels?[message.channel_id] ?? ServerListView.privateChannels[message.channel_id]
+                showNotification(
+                    title: message.author?.username ?? "Unknown User",
+                    subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
+                    description: message.content,
+                    pfpURL: pfpURL(message.author?.id, message.author?.avatar, "128"),
+                    id: message.channel_id
+                )
                 MentionSender.shared.addMention(guild: guildID, channel: channelID)
             }
         case .messageUpdate:
@@ -114,6 +116,7 @@ extension Gateway {
                             command.avatar = avatar
                             return command
                         }
+                        print(event.data)
                         return command
                     }
             }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Settings: Decodable {
+class DiscordSettings: Decodable {
     var theme: SyncedTheme
     var status: String
     var render_reactions: Bool?

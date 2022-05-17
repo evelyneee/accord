@@ -10,12 +10,20 @@ import Foundation
 import SwiftUI
 import UserNotifications
 
+var reachability: Reachability?
+
 @main
 struct AccordApp: App {
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var popup: Bool = false
     @State var token = AccordCoreVars.token
+    
+    private enum Tabs: Hashable {
+        case general, rpc
+    }
+    
+    @SceneBuilder
     var body: some Scene {
         WindowGroup {
             if self.token == "" {
@@ -25,32 +33,30 @@ struct AccordApp: App {
                         self.token = AccordCoreVars.token
                     }
             } else {
-                GeometryReader { reader in
-                    ContentView(loaded: $loaded)
-                        .onDisappear {
-                            loaded = false
-                        }
-                        .preferredColorScheme(darkMode ? .dark : nil)
-                        .sheet(isPresented: $popup, onDismiss: {}) {
-                            SearchView()
-                                .focusable()
-                                .touchBar {
-                                    Button(action: {
-                                        popup.toggle()
-                                    }) {
-                                        Image(systemName: "magnifyingglass")
-                                    }
+                ContentView(loaded: $loaded)
+                    .onDisappear {
+                        loaded = false
+                    }
+                    .preferredColorScheme(darkMode ? .dark : nil)
+                    .sheet(isPresented: $popup, onDismiss: {}) {
+                        SearchView()
+                            .focusable()
+                            .touchBar {
+                                Button(action: {
+                                    popup.toggle()
+                                }) {
+                                    Image(systemName: "magnifyingglass")
                                 }
-                        }
-                        .focusable()
-                        .touchBar {
-                            Button(action: {
-                                popup.toggle()
-                            }) {
-                                Image(systemName: "magnifyingglass")
                             }
+                    }
+                    .focusable()
+                    .touchBar {
+                        Button(action: {
+                            popup.toggle()
+                        }) {
+                            Image(systemName: "magnifyingglass")
                         }
-                }
+                    }
                 .onAppear {
                     // AccordCoreVars.loadVersion()
                     // DispatchQueue(label: "socket").async {
@@ -64,9 +70,7 @@ struct AccordApp: App {
                     )) {
                         switch $0 {
                         case .success(let data):
-                            print(data)
                             let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any]
-                            print(packet)
                             if let token = packet?["access_token"] as? String {
                                 spotifyToken = token
                             }
@@ -83,12 +87,7 @@ struct AccordApp: App {
                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
                         granted, error in
                     }
-                    let windowWidth = UserDefaults.standard.integer(forKey: "windowWidth")
-                    let windowHeight = UserDefaults.standard.integer(forKey: "windowHeight")
                     appDelegate.fileNotifications()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                        NSApp.keyWindow?.setContentSize(NSSize.init(width: windowWidth, height: windowHeight))
-                    })
                 }
             }
         }
@@ -122,26 +121,33 @@ struct AccordApp: App {
                 #endif
             }
         }
+        Settings {
+            TabView {
+                SettingsView()
+                    .tabItem {
+                        Label("General", systemImage: "gear")
+                    }
+                    .tag(Tabs.general)
+                ProfileEditingView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person")
+                    }
+                    .tag(Tabs.rpc)
+            }
+            .frame(minHeight: 500)
+        }
     }
+    
+
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    @objc func onWakeNote(_: NSNotification) {
-        print("hi")
-        concurrentQueue.async {
-            wss?.reset()
-        }
-    }
-
+    
     @objc func onSleepNote(_: NSNotification) {
         wss?.close(.protocolCode(.protocolError))
     }
 
     func fileNotifications() {
-        NSWorkspace.shared.notificationCenter.addObserver(
-            self, selector: #selector(onWakeNote(_:)),
-            name: NSWorkspace.didWakeNotification, object: nil
-        )
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(onSleepNote(_:)),
             name: NSWorkspace.willSleepNotification, object: nil
@@ -149,6 +155,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(
             self, selector: #selector(windowClosed(_:)),
             name: NSWindow.willCloseNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(loadWindowRect(_:)),
+            name: NSWindow.didBecomeKeyNotification, object: nil
         )
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
             print("Song Changed")
@@ -166,6 +176,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_: Notification) {
+        
+        reachability = try? Reachability()
+        reachability?.whenReachable = { status in
+            print("reconnecting reachable")
+            concurrentQueue.async {
+                wss?.reset()
+            }
+        }
+        reachability?.whenUnreachable = {
+            print($0, "unreachable")
+        }
+        try? reachability?.startNotifier()
+        
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
 
         let contentView = MentionsView(replyingTo: Binding.constant(nil))
@@ -191,6 +214,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func closePopover(_ sender: AnyObject?) {
         popover.performClose(sender)
     }
+    
+    @objc func loadWindowRect(_:AnyObject?) {
+        guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
+        NSApp.keyWindow?.setFrame(from: desc)
+    }
 
     @objc func togglePopover(_ sender: AnyObject?) {
         if popover.isShown {
@@ -201,8 +229,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func windowClosed(_: AnyObject?) {
-        print(NSApplication.shared.keyWindow?.contentView?.bounds)
-        UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.width ?? 1000), forKey: "windowWidth")
-        UserDefaults.standard.set(Int(NSApplication.shared.keyWindow?.contentView?.bounds.height ?? 800), forKey: "windowHeight")
+        UserDefaults.standard.set(NSApp.keyWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
     }
 }

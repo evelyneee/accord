@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DiscordEmote: Codable {
+struct DiscordEmote: Codable, Identifiable {
     var id: String
     var name: String
     var animated: Bool?

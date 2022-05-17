@@ -7,8 +7,83 @@
 
 import SwiftUI
 
+// thanks to https://stackoverflow.com/questions/62102647/swiftui-hstack-with-wrap-and-dynamic-height/62103264#62103264
+struct RolesView: View {
+    var tags: [String]
+
+    @State private var totalHeight = CGFloat.infinity
+
+    var body: some View {
+        self.generateContent().frame(maxHeight: totalHeight)
+    }
+
+    private func generateContent() -> some View {
+        var width = CGFloat.zero
+        var height = CGFloat.zero
+
+        return ZStack(alignment: .topLeading) {
+            ForEach(self.tags, id: \.self) { tag in
+                self.item(for: tag)
+                    .alignmentGuide(.leading, computeValue: { d in
+                        if (abs(width - d.width) > 286)
+                        {
+                            width = 0
+                            height -= d.height
+                        }
+                        let result = width
+                        if tag == self.tags.last {
+                            width = 0
+                        } else {
+                            width -= d.width
+                        }
+                        return result
+                    })
+                    .alignmentGuide(.top, computeValue: {d in
+                        let result = height
+                        if tag == self.tags.last {
+                            height = 0
+                        }
+                        return result
+                    })
+            }
+        }.background(viewHeightReader($totalHeight))
+    }
+    
+    @ViewBuilder
+    private func item(for role: String) -> some View {
+        if let roleName = roleNames[role], let roleColor = roleColors[role]?.0 {
+            HStack(spacing: 4) {
+                Circle()
+                    .fill()
+                    .foregroundColor(Color(int: roleColor))
+                    .frame(width: 10, height: 10)
+                Text(roleName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .padding(4)
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(4)
+            .padding(4)
+        }
+    }
+
+    private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
+        return GeometryReader { geometry -> Color in
+            let rect = geometry.frame(in: .local)
+            DispatchQueue.main.async {
+                binding.wrappedValue = rect.size.height
+            }
+            return .clear
+        }
+    }
+}
+
 struct PopoverProfileView: View {
-    var user: User?
+    @State var user: User?
+    var guildID: String
+    @State var guildMember: GuildMember? = nil
+    @State var fullUser: User? = nil
     @State var hovered: Int?
     
     struct PopoverProfileViewButton: View {
@@ -46,13 +121,43 @@ struct PopoverProfileView: View {
         }
     }
     
+    var userObject: User?
+    
+    final class UserRequest: Decodable {
+        var user: User
+        var guild_member: GuildMember?
+    }
+    
+    func loadUser() {
+        let url = URL.init(string: rootURL)?
+            .appendingPathComponent("users")
+            .appendingPathComponent(self.user?.id ?? "")
+            .appendingPathComponent("profile")
+            .appendingQueryParameters(
+                self.guildID == "@me" ?
+                ["with_mutual_guilds":"false"] :
+                ["with_mutual_guilds":"false", "guild_id":guildID]
+            )
+        Request.fetch(UserRequest.self, url: url, headers: standardHeaders) {
+            switch $0 {
+            case .success(let user):
+                DispatchQueue.main.async {
+                    self.fullUser = user.user
+                    self.guildMember = user.guild_member
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
     var body: some View {
         ZStack(alignment: .top) {
             VStack {
-                if let banner = user?.banner, let id = user?.id {
-                    Attachment(cdnURL + "/banners/\(id)/\(banner).png")
+                if let banner = fullUser?.banner, let id = user?.id {
+                    Attachment(cdnURL + "/banners/\(id)/\(banner).png?size=320")
                         .equatable()
-                        .frame(height: 100)
+                        .frame(width: 290)
                 } else {
                     Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
                 }
@@ -65,20 +170,35 @@ struct PopoverProfileView: View {
                         GifView(url: cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
-                            .shadow(radius: 5)
                     } else {
                         Attachment(pfpURL(user?.id, user?.avatar, discriminator: user?.discriminator ?? "0005"))
                             .equatable()
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
-                            .shadow(radius: 5)
                     }
-                    Text(user?.username ?? "")
+                    Text(self.guildMember?.nick ?? user?.username ?? "")
                         .font(.title2)
                         .fontWeight(.bold)
                     Text("\(user?.username ?? "")#\(user?.discriminator ?? "")")
                         .font(.subheadline)
                         .foregroundColor(Color.secondary)
+                    
+                    if let bio = self.fullUser?.bio {
+                        Divider()
+                        Text("About me")
+                            .fontWeight(.semibold)
+                            .padding(.bottom, 1)
+                        AsyncMarkdown(bio)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Divider()
+                    }
+                    if let roles = self.guildMember?.roles?.sorted(by: { lhs, rhs in
+                        if let lhs = roleColors[lhs]?.1, let rhs = roleColors[rhs]?.1 {
+                            return lhs > rhs
+                        } else { return true }
+                    }) {
+                        RolesView(tags: roles)
+                    }
                     HStack(alignment: .bottom) {
                         PopoverProfileViewButton(
                             label: "Message",
@@ -129,6 +249,11 @@ struct PopoverProfileView: View {
                 .background(Color(NSColor.windowBackgroundColor))
             }
         }
-        .frame(width: 290, height: 250)
+        .frame(width: 290)
+        .onAppear {
+            DispatchQueue.global().async {
+                self.loadUser()
+            }
+        }
     }
 }

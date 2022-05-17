@@ -18,18 +18,31 @@ final class AsyncMarkdownModel: ObservableObject {
     @Published var markdown: Text
     @Published var hasEmojiOnly: Bool = false
     @Published var loaded: Bool = false
-    
-    private func make(text: String) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+
+    func make(text: String) {
+        DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            self.hasEmojiOnly = text.hasEmojisOnly
-            Markdown.markAll(text: text, Storage.usernames, font: self.hasEmojiOnly)
+            let emojis = text.hasEmojisOnly
+            Markdown.markAll(text: text, Storage.usernames, font: emojis)
                 .replaceError(with: Text(text))
                 .receive(on: RunLoop.main)
                 .assign(to: &self.$markdown)
             DispatchQueue.main.async {
                 self.loaded = true
+                self.hasEmojiOnly = text.hasEmojisOnly
             }
+        }
+    }
+}
+
+@available(macOS 12.0, *)
+extension View {
+    @ViewBuilder
+    func textSelectionBool(_ selected: Bool) -> some View {
+        if selected {
+            self.textSelection(.enabled)
+        } else {
+            self.textSelection(.disabled)
         }
     }
 }
@@ -40,16 +53,33 @@ struct AsyncMarkdown: View, Equatable {
     }
 
     @StateObject var model: AsyncMarkdownModel
+    @Binding var text: String
 
-    init(_ text: String) {
+    init(_ text: String, binded: Binding<String> = Binding.constant("")) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
+        self._text = binded
     }
-
+    
     var body: some View {
-        model.markdown
-            .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
-            .animation(nil)
-            .fixedSize(horizontal: false, vertical: true)
-            .if(!model.loaded && model.hasEmojiOnly, transform: { $0.hidden() })
+        if #available(macOS 12.0, *) {
+            model.markdown
+                .textSelectionBool(!model.hasEmojiOnly)
+                .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                .animation(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: self.text, perform: { text in
+                    self.model.make(text: text)
+                })
+                .if(!model.loaded && model.hasEmojiOnly, transform: { $0.hidden() })
+        } else {
+            model.markdown
+                .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                .animation(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: self.text, perform: { text in
+                    self.model.make(text: text)
+                })
+                .if(!model.loaded && model.hasEmojiOnly, transform: { $0.hidden() })
+        }
     }
 }

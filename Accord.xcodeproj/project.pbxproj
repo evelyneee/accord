@@ -19,6 +19,7 @@
 		9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */; };
 		9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */; };
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
+		9E5145A8282FC8FD0070828B /* ProfileEditingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
 		9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71022783A6FD00A26CB6 /* Github.swift */; };
@@ -54,6 +55,7 @@
 		9ED818B3277BF133004D684C /* MediaRemoteWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */; };
 		9EDD136627D5A55A000685E6 /* String++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136527D5A55A000685E6 /* String++.swift */; };
 		9EDD136827D6F951000685E6 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136727D6F951000685E6 /* Regex.swift */; };
+		9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDDB1B22831E4FC00510036 /* Reachability.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
 		A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC262724FD35005F9950 /* ImageProcessing.swift */; };
 		A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC272724FD35005F9950 /* Operators++.swift */; };
@@ -140,6 +142,7 @@
 		9E39B2692787C30900069424 /* VisualStudioCodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualStudioCodeRPC.swift; sourceTree = "<group>"; };
 		9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewCell.swift; sourceTree = "<group>"; };
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
+		9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditingView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
 		9E6B71022783A6FD00A26CB6 /* Github.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Github.swift; sourceTree = "<group>"; };
@@ -176,6 +179,7 @@
 		9ED818B2277BF133004D684C /* MediaRemoteWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRemoteWrapper.swift; sourceTree = "<group>"; };
 		9EDD136527D5A55A000685E6 /* String++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String++.swift"; sourceTree = "<group>"; };
 		9EDD136727D6F951000685E6 /* Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
+		9EDDB1B22831E4FC00510036 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
 		A80FEC262724FD35005F9950 /* ImageProcessing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		A80FEC272724FD35005F9950 /* Operators++.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Operators++.swift"; sourceTree = "<group>"; };
@@ -237,6 +241,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9EDDB1B42831E50500510036 /* Reachability */,
 				9E5145A42823513D0070828B /* Media */,
 				9E96EB7827DEC32B00BB3C8A /* Voice */,
 				9E6B71082784EBC400A26CB6 /* Gateway */,
@@ -494,6 +499,14 @@
 			path = RPC;
 			sourceTree = "<group>";
 		};
+		9EDDB1B42831E50500510036 /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				9EDDB1B22831E4FC00510036 /* Reachability.swift */,
+			);
+			path = Reachability;
+			sourceTree = "<group>";
+		};
 		A80FEC34272779D9005F9950 /* PluginManager */ = {
 			isa = PBXGroup;
 			children = (
@@ -532,6 +545,7 @@
 			children = (
 				A869085E269F2A0A00F13CAD /* SettingsView.swift */,
 				A869085C269DDCE400F13CAD /* PopoverProfileView.swift */,
+				9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -688,6 +702,7 @@
 				9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */,
 				9E2C98792780F573008C6AFD /* Gateway.swift in Sources */,
 				A80FEC2D2724FD35005F9950 /* Networking++.swift in Sources */,
+				9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* Request.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
@@ -701,6 +716,7 @@
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ChannelView.swift in Sources */,
+				9E5145A8282FC8FD0070828B /* ProfileEditingView.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
 				9E6BCC56277E23E80085F279 /* Reaction.swift in Sources */,
 				A869085D269DDCE500F13CAD /* PopoverProfileView.swift in Sources */,

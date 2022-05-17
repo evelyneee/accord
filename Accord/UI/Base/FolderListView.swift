@@ -59,6 +59,11 @@ struct ServerIconCell: View {
 
     func updateSelection(old: Int?, new: Int?) {
         DispatchQueue.global().async {
+            if old == 201 {
+                if let selection = selection {
+                    UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
+                }
+            }
             let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
             guard let selectedServer = old,
                   let new = new,
@@ -73,7 +78,6 @@ struct ServerIconCell: View {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             DispatchQueue.main.async {
-                print("deselecting")
                 self.selection = nil
                 withAnimation(old == 201 ? nil : Animation.linear(duration: 0.1)) {
                     if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(newID)") as? Int {

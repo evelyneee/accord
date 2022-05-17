@@ -14,7 +14,7 @@ final class Status: Codable {
     var emoji_id: String?
 }
 
-final class Activity {
+final class Activity: Identifiable {
     internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, metadata: [String:Any]? = nil, timestamp: Int? = nil, endTimestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:], syncID: String? = nil) {
         self.applicationID = applicationID
         self.flags = flags
@@ -32,6 +32,7 @@ final class Activity {
 
     static var current: Activity?
 
+    var id: String { self.name + (state ?? "") }
     var emoji: StatusEmoji?
     var name: String
     var state: String?
@@ -86,7 +87,7 @@ final class Activity {
 }
 
 final class StatusEmoji: Codable {
-    internal init(name: String, id: String, animated: Bool) {
+    internal init(name: String?, id: String?, animated: Bool?) {
         self.name = name
         self.id = id
         self.animated = animated
@@ -96,7 +97,7 @@ final class StatusEmoji: Codable {
     var id: String?
     var animated: Bool?
     var dictValue: [String: Any?] {
-        ["name": name, "id": id, "animated": animated]
+        ["name": name as Optional<Any>, "id": id, "animated": animated].compactMapValues { $0 }
     }
 }
 
@@ -110,7 +111,7 @@ final class ActivityCodable: Codable {
     var flags: Int?
     var details: String?
     var dictValue: [String: Any] {
-        var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
+        var dict: [String: Any?] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
             dict["emoji"] = emoji.dictValue
         }
@@ -134,6 +135,6 @@ final class ActivityCodable: Codable {
         if let details = details {
             dict["details"] = details
         }
-        return dict
+        return dict.compactMapValues { $0 }
     }
 }

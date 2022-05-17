@@ -124,7 +124,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard channelID == self?.channelID else { return }
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-                guard var message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
+                guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 message.processedTimestamp = message.timestamp.makeProperDate()
                 message.user_mentioned = message.mentions.compactMap { $0?.id }.contains(user_id)
                 let messageMap = self?.messages.generateKeyMap()

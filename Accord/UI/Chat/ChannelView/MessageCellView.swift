@@ -98,7 +98,7 @@ struct MessageCellView: View, Equatable {
     }
     
     private var stickerView: some View {
-        ForEach(message.sticker_items!, id: \.id) { sticker in
+        ForEach(message.sticker_items ?? [], id: \.id) { sticker in
             if sticker.format_type == .lottie {
                 GifView.init(url: "https://cdn.discordapp.com/stickers/\(sticker.id).json")
                     .frame(width: 160, height: 160)
@@ -496,7 +496,7 @@ struct MessageCellView: View, Equatable {
                             .frame(width: 33, height: 33)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
-                                PopoverProfileView(user: message.author)
+                                PopoverProfileView(user: message.author, guildID: self.guildID ?? "@me")
                             })
                             .padding(.trailing, 1.5)
                     }

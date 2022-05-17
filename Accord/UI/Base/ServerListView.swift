@@ -7,6 +7,7 @@
 
 import Combine
 import SwiftUI
+import UserNotifications
 
 public var roleColors: [String: (Int, Int)] = [:]
 public var roleNames: [String: String] = [:]
@@ -92,6 +93,13 @@ struct ServerListView: View {
                 ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
             }
             selectedServer = 201
+            let prevSelection = selection
+            if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? Int {
+                self.selection = selectionPrevious
+            }
+            if let selection = prevSelection {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
+            }
         }) {
             Image(systemName: "bubble.right.fill")
                 .imageScale(.medium)
@@ -203,8 +211,13 @@ struct ServerListView: View {
                         ForEach(Self.privateChannels, id: \.id) { channel in
                             NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                                 ServerListViewCell(channel: channel, updater: self.viewUpdater)
-                                    .onChange(of: self.selection, perform: { _ in
-                                        if self.selection == Int(channel.id) {
+                                    .onChange(of: self.selection, perform: { [selection] new in
+                                        if new == Int(channel.id) {
+                                            channel.read_state?.mention_count = 0
+                                            channel.read_state?.last_message_id = channel.last_message_id
+                                            viewUpdater.updateView()
+                                        } else if selection == Int(channel.id) {
+                                            print("wow")
                                             channel.read_state?.mention_count = 0
                                             channel.read_state?.last_message_id = channel.last_message_id
                                         }
@@ -241,6 +254,7 @@ struct ServerListView: View {
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)
+                    .animation(nil, value: UUID())
                 } else if let selectedGuild = selectedGuild {
                     GuildView(guild: selectedGuild, selection: self.$selection, updater: self.viewUpdater)
                         .animation(nil, value: UUID())

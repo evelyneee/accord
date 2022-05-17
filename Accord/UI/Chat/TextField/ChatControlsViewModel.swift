@@ -26,12 +26,26 @@ final class ChatControlsViewModel: ObservableObject {
 
     @AppStorage("SilentTyping")
     var silentTyping: Bool = false
+    
+    var locked: Bool = false
+    var runOnUnlock: (() -> Void)?
 
-    func checkText(guildID: String) {
+    func checkText(guildID: String, channelID: String) {
         let mentions = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
         let channels = textFieldContents.matches(precomputed: Regex.chatTextChannelsRegex)
         let slashes = textFieldContents.matches(precomputed: Regex.chatTextSlashCommandRegex)
         let emoji = textFieldContents.matches(precomputed: Regex.chatTextEmojiRegex)
+        
+        guard !self.textFieldContents.isEmpty else {
+            DispatchQueue.main.async {
+                self.matchedEmoji.removeAll()
+                self.matchedCommands.removeAll()
+                self.matchedUsers.removeAll()
+                self.matchedChannels.removeAll()
+            }
+            return
+        }
+        
         if let search = mentions.last?.lowercased() {
             let matched: [String: String] = Storage.usernames
                 .mapValues { $0.lowercased() }
@@ -53,17 +67,43 @@ final class ChatControlsViewModel: ObservableObject {
         } else if let command = slashes.last?.trimmingCharacters(in: .letters.inverted),
                   textFieldContents.prefix(1) == "/", guildID != "@me"
         {
+            guard !locked else {
+                self.runOnUnlock = { [weak self] in
+                    self?.checkText(guildID: guildID, channelID: channelID)
+                }
+                return
+            }
+            locked = true
             print("querying", command)
-            try? wss.getCommands(guildID: guildID, query: command)
-            let commands = SlashCommandStorage.commands[guildID]?
-                .filter { $0.name.lowercased().contains(command) }
-                .prefix(10)
-                .literal()
-            DispatchQueue.main.async {
-                if self.command == nil, let commands = commands {
-                    self.matchedCommands = commands
+            let url = URL(string: rootURL)?
+                .appendingPathComponent("channels")
+                .appendingPathComponent(channelID)
+                .appendingPathComponent("application-commands")
+                .appendingPathComponent("search")
+                .appendingQueryParameters([
+                    "type":"1",
+                    "query":command,
+                    "limit":"7",
+                    "include_applications":"true"
+                ])
+            Request.fetch(
+                SlashCommandStorage.GuildApplicationCommandsUpdateEvent.D.self,
+                url: url,
+                headers: standardHeaders
+            ) {
+                switch $0 {
+                case .success(let commands):
+                    DispatchQueue.main.async {
+                        self.matchedCommands = commands.application_commands
+                    }
+                case .failure(let error):
+                    print(error)
                 }
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
+                self.locked = false
+                self.runOnUnlock?()
+            })
         } else if let key = emoji.last {
             let matched = Array(Emotes.emotes.values.joined())
                 .filter { $0.name.lowercased().contains(key) }
@@ -76,6 +116,7 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func findView() {
+        print("looking up")
         AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
             textField.allowsEditingTextAttributes = true
             self?.textField = textField

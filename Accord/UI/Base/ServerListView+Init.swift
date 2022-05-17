@@ -60,13 +60,15 @@ extension ServerListView {
         MediaRemoteWrapper.status = readyPacket.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
-                name: readyPacket.user_settings?.custom_status?.emoji_name ?? "",
-                id: readyPacket.user_settings?.custom_status?.emoji_id ?? "",
+                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Emotes.emotes.values.joined())[readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
+                id: readyPacket.user_settings?.custom_status?.emoji_id,
                 animated: false
             ),
             name: "Custom Status",
-            type: 4
+            type: 4,
+            state: readyPacket.user_settings?.custom_status?.text
         )
+        wss?.presences.append(Activity.current!)
         self.statusText = readyPacket.user_settings?.custom_status?.text 
 
         // Save the emotes for easy access
@@ -96,7 +98,6 @@ extension ServerListView {
         // Form the folders and fix the guild objects
         let guildKeyMap = readyPacket.guilds.generateKeyMap()
         let guildTemp = guildOrder
-            .lazy
             .compactMap { readyPacket.guilds[$0, guildKeyMap] }
 
         // format folders

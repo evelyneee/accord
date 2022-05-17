@@ -173,8 +173,21 @@ struct ChatControls: View {
         TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
             .focused($focusedField, equals: .mainTextField)
             .onSubmit {
-                typing = false
-                send()
+                if CGEventSource.keyState(.combinedSessionState, key: CGKeyCode(0x38)) {
+                    self.viewModel.textFieldContents.append("\n")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                        self.viewModel.textField?.currentEditor()?.moveDown(nil)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                            self.focusedField = .mainTextField
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                                self.viewModel.textField?.currentEditor()?.moveDown(nil)
+                            })
+                        })
+                    })
+                } else {
+                    typing = false
+                    send()
+                }
             }
             .layoutPriority(1)
             .animation(nil)
@@ -275,7 +288,11 @@ struct ChatControls: View {
         HStack { [unowned viewModel] in
             ZStack(alignment: .trailing) {
                 VStack {
-                    if !(viewModel.matchedUsers.isEmpty) || !(viewModel.matchedEmoji.isEmpty) || !(viewModel.matchedChannels.isEmpty) || !(viewModel.matchedCommands.isEmpty) {
+                    if !(viewModel.matchedUsers.isEmpty) ||
+                        !(viewModel.matchedEmoji.isEmpty) ||
+                        !(viewModel.matchedChannels.isEmpty) ||
+                        !(viewModel.matchedCommands.isEmpty) &&
+                        !viewModel.textFieldContents.isEmpty {
                         VStack {
                             matchedUsersView
                             matchedCommandsView
@@ -315,7 +332,7 @@ struct ChatControls: View {
                         }
                         viewModel?.markdown()
                         textQueue.async {
-                            viewModel?.checkText(guildID: guildID)
+                            viewModel?.checkText(guildID: guildID, channelID: channelID)
                         }
                     }
                 }

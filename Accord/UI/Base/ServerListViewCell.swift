@@ -28,7 +28,6 @@ struct ServerListViewCell: View {
                 statusDot
                     .onAppear {
                         if let user = channel.recipients?.first {
-                            print("registering", user.username)
                             wss.listenForPresence(userID: user.id) { presence in
                                 self.status = presence.status
                             }
@@ -36,7 +35,6 @@ struct ServerListViewCell: View {
                     }
                     .onDisappear {
                         if let user = channel.recipients?.first, channel.type == .dm {
-                            print("deregistering", user.username)
                             wss.unregisterPresence(userID: user.id)
                         }
                     }

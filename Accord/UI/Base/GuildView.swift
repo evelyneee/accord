@@ -62,10 +62,15 @@ struct GuildView: View {
                     .foregroundColor(channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
                     .opacity(channel.read_state?.last_message_id != channel.last_message_id ? 1 : 0.5)
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
-                    .onChange(of: self.selection, perform: { _ in
-                        if self.selection == Int(channel.id) {
+                    .onChange(of: self.selection, perform: { [selection] new in
+                        if new == Int(channel.id) {
                             channel.read_state?.mention_count = 0
                             channel.read_state?.last_message_id = channel.last_message_id
+                        } else if selection == Int(channel.id) {
+                            let prevCount = channel.read_state?.mention_count
+                            channel.read_state?.mention_count = 0
+                            channel.read_state?.last_message_id = channel.last_message_id
+                            if prevCount != 0 { self.updater.updateView() }
                         }
                     })
                     .contextMenu {

@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import UserNotifications
 
 extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
         if guild == "@me" {
             guard channel != String(self.selection ?? 0) else { print("currently reading already"); return }
-            Self.privateChannels[channel]?.read_state?.mention_count += 1
+            guard let index = Self.privateChannels.generateKeyMap()[channel] else { return }
+            Self.privateChannels[index].read_state?.mention_count += 1
         }
         guard channel != String(self.selection ?? 0) else { print("currently reading already"); return }
         let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }

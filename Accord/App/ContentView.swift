@@ -38,7 +38,6 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
-                        print(Permissions((0...40).compactMap { Permissions.init(rawValue: 1 << $0) }).rawValue)
                         guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
@@ -112,6 +111,7 @@ struct ContentView: View {
             let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
             DispatchQueue.main.async {
                 self.serverListView = ServerListView(structure.d)
+                AccordCoreVars.user = structure.d.user
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation {

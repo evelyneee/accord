@@ -14,9 +14,15 @@ struct EmotesView: View, Equatable {
         true
     }
 
+    init(chatText: Binding<String>? = nil, onSelect: @escaping ((DiscordEmote) -> Void) = { _ in }) {
+        self._chatText = chatText ?? Binding.constant("")
+        self.onSelect = onSelect
+    }
+    
     @State var searchenabled = true
     var columns: [GridItem] = GridItem.multiple(count: 10, spacing: 0)
     @Binding var chatText: String
+    var onSelect: ((DiscordEmote) -> Void)
     @State var SearchText: String = ""
     @State var minimumWidth = 275
     @State var recentMax = 8
@@ -34,7 +40,8 @@ struct EmotesView: View, Equatable {
                                     LazyVGrid(columns: columns) {
                                         ForEach(Emotes.emotes[key] ?? [], id: \.id) { emote in
                                             Button(action: {
-                                                chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
+                                                chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
+                                                onSelect(emote)
                                                 print(cdnURL + "/emojis/\(emote.id).png?size=24")
                                             }) {
                                                 VStack {

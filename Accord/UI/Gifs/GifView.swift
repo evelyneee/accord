@@ -26,8 +26,8 @@ struct GifView: View {
             } else {
                 Image(nsImage: animatedImages[value])
                     .resizable()
-                    .frame(width: 160, height: 160)
                     .scaledToFit()
+                    .frame(width: 160, height: 160)
             }
         }
         .onAppear { prep() }
