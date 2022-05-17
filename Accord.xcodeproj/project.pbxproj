@@ -13,6 +13,7 @@
 		32F4C95B256D7D3300343BB3 /* AccordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95A256D7D3300343BB3 /* AccordApp.swift */; };
 		32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F4C95C256D7D3300343BB3 /* ContentView.swift */; };
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
+		370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370AF4112834504C0055AA1D /* JoinServerSheetView.swift */; };
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
@@ -125,6 +126,7 @@
 		32F4C95E256D7D3500343BB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		32F4C963256D7D3500343BB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
+		370AF4112834504C0055AA1D /* JoinServerSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinServerSheetView.swift; sourceTree = "<group>"; };
 		490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -534,6 +536,7 @@
 				A832557726EEEC1D00F18A55 /* ServerListView+Misc.swift */,
 				9E6470662741B9960026686C /* GuildView.swift */,
 				9E82874C27BB515F00953A7B /* FolderListView.swift */,
+				370AF4112834504C0055AA1D /* JoinServerSheetView.swift */,
 				9E82874E27BB522600953A7B /* ServerListView+Init.swift */,
 				9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */,
 			);
@@ -757,6 +760,7 @@
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
 				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
+				370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
 				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
