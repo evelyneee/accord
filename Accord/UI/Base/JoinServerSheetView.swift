@@ -25,7 +25,7 @@ struct JoinServerSheetView: View {
                 .onExitCommand {
                     isPresented.toggle()
                 }
-            Text("ie: `zun3eCEr6k`")
+            Text("example: `zun3eCEr6k`")
                 .font(.subheadline)
         }
         
