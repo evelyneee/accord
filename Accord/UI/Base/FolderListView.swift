@@ -47,17 +47,7 @@ extension ServerListView {
                 }
             }
             .padding(.trailing, 6)
-            Button(action: {
-                isShowingJoinServerSheet.toggle()
-            }, label: {
-                Image(systemName: "plus.circle")
-                    .padding()
-                    .frame(width: 5, height: 30)
-            })
-                .sheet(isPresented: $isShowingJoinServerSheet, onDismiss: nil) {
-                    JoinServerSheetView(isPresented: $isShowingJoinServerSheet, updater: updater)
-                        .padding()
-                }
+            
         }
     }
 }
