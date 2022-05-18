@@ -34,8 +34,6 @@ struct MessageCellView: View, Equatable {
     @Binding var replyingTo: Message?
     @State var editing: Bool = false
     @State var popup: Bool = false
-    @State var textElement: Text?
-    @State var bag = Set<AnyCancellable>()
     @State var editedText: String = ""
 
     @AppStorage("GifProfilePictures")
@@ -126,15 +124,15 @@ struct MessageCellView: View, Equatable {
                 .font(.chatTextFont)
                 .fontWeight(.semibold)
                 +
-                Text("  \(message.processedTimestamp ?? "")")
+            Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
             if message.author?.bot == true {

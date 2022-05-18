@@ -10,7 +10,22 @@ import Foundation
 import SwiftUI
 import UserNotifications
 
-var reachability: Reachability?
+var reachability: Reachability? = {
+    var reachability = try? Reachability()
+    reachability?.whenReachable = { status in
+        print("reconnecting reachable")
+        concurrentQueue.async {
+            if wss?.connection?.state != .preparing {
+                wss?.reset()
+            }
+        }
+    }
+    reachability?.whenUnreachable = {
+        print($0, "unreachable")
+    }
+    try? reachability?.startNotifier()
+    return reachability
+}()
 
 @main
 struct AccordApp: App {
@@ -21,6 +36,10 @@ struct AccordApp: App {
     
     private enum Tabs: Hashable {
         case general, rpc
+    }
+    
+    init() {
+        _ = reachability
     }
     
     @SceneBuilder
@@ -62,23 +81,24 @@ struct AccordApp: App {
                     // DispatchQueue(label: "socket").async {
                     //     let rpc = IPC().start()
                     // }
-                    Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
-                        contentType: "application/x-www-form-urlencoded",
-                        token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
-                        bodyObject: ["grant_type":"client_credentials"],
-                        type: .POST
-                    )) {
-                        switch $0 {
-                        case .success(let data):
-                            let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any]
-                            if let token = packet?["access_token"] as? String {
-                                spotifyToken = token
-                            }
-                        case .failure(let error):
-                            print(error)
-                        }
-                    }
+
                     DispatchQueue.global().async {
+                        Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
+                            contentType: "application/x-www-form-urlencoded",
+                            token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
+                            bodyObject: ["grant_type":"client_credentials"],
+                            type: .POST
+                        )) {
+                            switch $0 {
+                            case .success(let data):
+                                let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any]
+                                if let token = packet?["access_token"] as? String {
+                                    spotifyToken = token
+                                }
+                            case .failure(let error):
+                                print(error)
+                            }
+                        }
                         NetworkCore.shared = NetworkCore()
                     }
                     DispatchQueue.global(qos: .background).async {
@@ -176,18 +196,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_: Notification) {
-        
-        reachability = try? Reachability()
-        reachability?.whenReachable = { status in
-            print("reconnecting reachable")
-            concurrentQueue.async {
-                wss?.reset()
-            }
-        }
-        reachability?.whenUnreachable = {
-            print($0, "unreachable")
-        }
-        try? reachability?.startNotifier()
+        NSApp.dockTile.badgeLabel = nil
+        NSApp.dockTile.showsApplicationBadge = false
         
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
 

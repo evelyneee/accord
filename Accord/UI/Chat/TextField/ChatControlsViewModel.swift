@@ -30,6 +30,12 @@ final class ChatControlsViewModel: ObservableObject {
     var locked: Bool = false
     var runOnUnlock: (() -> Void)?
 
+    init() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            self.findView()
+        })
+    }
+    
     func checkText(guildID: String, channelID: String) {
         let mentions = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
         let channels = textFieldContents.matches(precomputed: Regex.chatTextChannelsRegex)

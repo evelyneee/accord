@@ -49,7 +49,7 @@ extension View {
 
 struct AsyncMarkdown: View, Equatable {
     static func == (_ lhs: AsyncMarkdown, _ rhs: AsyncMarkdown) -> Bool {
-        lhs.model.markdown == rhs.model.markdown
+        lhs.text == rhs.text
     }
 
     @StateObject var model: AsyncMarkdownModel

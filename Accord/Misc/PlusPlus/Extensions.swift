@@ -10,6 +10,11 @@ import Combine
 import Foundation
 import SwiftUI
 
+// thanks osy
+extension String: Error {
+    var localizedString: String { self }
+}
+
 public var doNothing: (Any) -> Void = { _ in }
 
 @propertyWrapper

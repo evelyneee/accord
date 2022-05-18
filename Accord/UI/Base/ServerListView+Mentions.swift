@@ -13,7 +13,7 @@ extension ServerListView: MentionSenderDelegate {
         if guild == "@me" {
             guard channel != String(self.selection ?? 0) else { print("currently reading already"); return }
             guard let index = Self.privateChannels.generateKeyMap()[channel] else { return }
-            Self.privateChannels[index].read_state?.mention_count += 1
+            Self.privateChannels[index].read_state?.mention_count? += 1
         }
         guard channel != String(self.selection ?? 0) else { print("currently reading already"); return }
         let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
@@ -21,7 +21,7 @@ extension ServerListView: MentionSenderDelegate {
             guard let v = v, var folderList = Self.folders[i].guilds[v].channels else { continue }
             folderList.append(contentsOf: Self.privateChannels)
             if let index = fastIndexChannels(channel, array: folderList) {
-                Self.folders[i].guilds[v].channels?[index].read_state?.mention_count += 1
+                Self.folders[i].guilds[v].channels?[index].read_state?.mention_count? += 1
             }
         }
         DispatchQueue.main.async {

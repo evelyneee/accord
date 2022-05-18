@@ -336,9 +336,6 @@ struct ChatControls: View {
                         }
                     }
                 }
-                .onAppear {
-                    viewModel.findView()
-                }
                 .textFieldStyle(PlainTextFieldStyle())
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
                     fileUpload = try! Data(contentsOf: try! result.get())

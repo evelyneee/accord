@@ -186,21 +186,11 @@ struct ServerListView: View {
                             onlineButton
                                 .buttonStyle(BorderlessButtonStyle())
                         }
-                        ZStack(alignment: .bottomTrailing) {
-                            dmButton
-                            if let count = Self.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +), count != 0 {
-                                ZStack {
-                                    Circle()
-                                        .foregroundColor(Color.red)
-                                        .frame(width: 15, height: 15)
-                                    Text(String(count))
-                                        .foregroundColor(Color.white)
-                                        .fontWeight(.semibold)
-                                        .font(.caption)
-                                }
-                            }
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
+                        DMButton(
+                            selection: self.$selection,
+                            selectedServer: self.$selectedServer,
+                            updater: self.viewUpdater
+                        )
                         Color.gray
                             .frame(height: 1)
                             .opacity(0.75)
@@ -227,49 +217,11 @@ struct ServerListView: View {
                     List {
                         settingsLink
                         Divider()
-                        ForEach(Self.privateChannels, id: \.id) { channel in
-                            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
-                                ServerListViewCell(channel: channel, updater: self.viewUpdater)
-                                    .onChange(of: self.selection, perform: { [selection] new in
-                                        if new == Int(channel.id) {
-                                            channel.read_state?.mention_count = 0
-                                            channel.read_state?.last_message_id = channel.last_message_id
-                                            viewUpdater.updateView()
-                                        } else if selection == Int(channel.id) {
-                                            print("wow")
-                                            channel.read_state?.mention_count = 0
-                                            channel.read_state?.last_message_id = channel.last_message_id
-                                        }
-                                    })
-                            }
-                            .contextMenu {
-                                Button("Copy Channel ID") {
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(channel.id, forType: .string)
-                                }
-                                Button("Close DM") {
-                                    let headers = Headers(
-                                        userAgent: discordUserAgent,
-                                        contentType: nil,
-                                        token: AccordCoreVars.token,
-                                        type: .DELETE,
-                                        discordHeaders: true,
-                                        referer: "https://discord.com/channels/@me",
-                                        empty: true
-                                    )
-                                    Request.ping(url: URL(string: "\(rootURL)/channels/\(channel.id)"), headers: headers)
-                                    guard let index = ServerListView.privateChannels[indexOf: channel.id] else { return }
-                                    ServerListView.privateChannels.remove(at: index)
-                                }
-                                Button("Mark as read") {
-                                    channel.read_state?.mention_count = 0
-                                    channel.read_state?.last_message_id = channel.last_message_id
-                                }
-                                Button("Open in new window") {
-                                    showWindow(channel)
-                                }
-                            }
-                        }
+                        PrivateChannelsView(
+                            privateChannels: Self.privateChannels,
+                            selection: self.$selection,
+                            viewUpdater: self.viewUpdater
+                        )
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)

@@ -147,7 +147,7 @@ final class MediaRemoteWrapper {
     class func getCurrentlyPlayingSong() -> Future<Song, Error> {
         Future { promise in
             // Get song info
-            MRMediaRemoteGetNowPlayingInfo(DispatchQueue.main) { information in
+            MRMediaRemoteGetNowPlayingInfo(DispatchQueue.global()) { information in
                 guard let name = information["kMRMediaRemoteNowPlayingInfoTitle"] as? String else { return promise(.failure(NowPlayingErrors.noName)) }
                 let isMusic = information["kMRMediaRemoteNowPlayingInfoIsMusicApp"] as? Bool ?? false
                 let timestamp = information["kMRMediaRemoteNowPlayingInfoTimestamp"] as? String

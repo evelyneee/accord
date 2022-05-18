@@ -62,28 +62,22 @@ struct ServerIconCell: View {
 
     func updateSelection(old: Int?, new: Int?) {
         DispatchQueue.global().async {
-            if old == 201 {
-                if let selection = selection {
-                    UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
-                }
+            if let selection = selection, old == 201 {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
             }
-            let map = Array(ServerListView.folders.compactMap { $0.guilds }.joined())
-            guard let selectedServer = old,
-                  let new = new,
-                  let newID = map[safe: new]?.id else {
-                DispatchQueue.main.async {
+            guard let new = new else {
+                return DispatchQueue.main.async {
                     self.selectedServer = new
                     self.selectedGuild = guild
                 }
-                return
             }
-            if let selection = selection, let id = map[safe: selectedServer]?.id {
+            if let selection = selection, let id = selectedGuild?.id {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             DispatchQueue.main.async {
                 self.selection = nil
                 withAnimation(old == 201 ? nil : Animation.linear(duration: 0.1)) {
-                    if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(newID)") as? Int {
+                    if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
                         self.selection = value
                         self.selectedGuild = guild
                         self.selectedServer = new
