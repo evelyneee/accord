@@ -111,7 +111,7 @@ final class Gateway {
     ) throws {
         if compress {
             socketEndpoint = NWEndpoint.url(URL(string: "wss://gateway.discord.gg?v=9&encoding=json&compress=zlib-stream")!)
-            print(socketEndpoint)
+            print("Connecting with stream compression enabled")
         } else {
             socketEndpoint = NWEndpoint.url(url)
         }
@@ -320,7 +320,6 @@ final class Gateway {
                     }
                 case .cont: break
                 case .binary:
-                    print("binary packet")
                     self?.decompressor.decompressionQueue.async {
                         guard let data = try? self?.decompressor.decompress(data: data, large: true) else { return }
                         wssThread.async {
@@ -361,7 +360,6 @@ final class Gateway {
     
     func updatePresence(status: String, since: Int, activities: [Activity]) throws {
         self.presences = activities
-        print(activities.map(\.dictValue))
         let packet: [String: Any] = [
             "op": 3,
             "d": [

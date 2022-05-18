@@ -24,11 +24,7 @@ struct NavigationLazyView<Content: View>: View {
 }
 
 enum Emotes {
-    public static var emotes: [String: [DiscordEmote]] = [:] {
-        didSet {
-            print(#function)
-        }
-    }
+    public static var emotes: [String: [DiscordEmote]] = [:]
 }
 
 struct GuildHoverAnimation: ViewModifier {
@@ -227,6 +223,7 @@ struct ServerListView: View {
                             selection: self.$selection,
                             viewUpdater: self.viewUpdater
                         )
+                        .animation(nil, value: UUID())
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)
@@ -284,7 +281,6 @@ struct ServerListView: View {
                     Toggle(isOn: Binding.constant(false)) {
                         Image(systemName: "bell.badge.fill")
                     }
-                    .hidden()
                 }
             }
         }

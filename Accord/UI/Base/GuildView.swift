@@ -50,6 +50,11 @@ struct GuildView: View {
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
                         .font(.system(size: 10))
+                        .onChange(of: self.selection, perform: { [selection] new in
+                            if let selection = selection, new == Int(channel.id) {
+                                self.selection = selection
+                            }
+                        })
                 } else {
                     NavigationLink(
                         destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()),

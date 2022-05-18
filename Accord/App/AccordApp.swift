@@ -13,7 +13,6 @@ import UserNotifications
 var reachability: Reachability? = {
     var reachability = try? Reachability()
     reachability?.whenReachable = { status in
-        print("reconnecting reachable")
         concurrentQueue.async {
             if wss?.connection?.state != .preparing {
                 wss?.reset()

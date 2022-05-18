@@ -66,23 +66,31 @@ extension Gateway {
         })
     }
 
-    func reset(function: String = #function) {
-        print("resetting from function", function, wss.connection?.state as Any)
+    func reset() {
+        print("resetting from function")
 
         if let state = wss.connection?.state, case NWConnection.State.failed = state {
             close(.protocolCode(.protocolError))
         }
         concurrentQueue.async {
-            guard let new = try? Gateway(url: Gateway.gatewayURL, session_id: wss.sessionID, seq: wss.seq) else { return }
+            guard let new = try? Gateway(
+                url: Gateway.gatewayURL,
+                session_id: wss.sessionID,
+                seq: wss.seq,
+                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+            ) else { return }
             wss = new
         }
     }
 
-    func hardReset(function: String = #function) {
-        print("hard resetting from function", function)
+    func hardReset() {
+        print("hard resetting from function")
         close(.protocolCode(.normalClosure))
         concurrentQueue.async {
-            guard let new = try? Gateway(url: Gateway.gatewayURL) else { return }
+            guard let new = try? Gateway(
+                url: Gateway.gatewayURL,
+                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+            ) else { return }
             new.ready().sink(receiveCompletion: doNothing, receiveValue: doNothing).store(in: &new.bag)
             wss = new
         }

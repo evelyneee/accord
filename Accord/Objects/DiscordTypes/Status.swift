@@ -81,7 +81,6 @@ final class Activity: Identifiable {
         if let details = details {
             dict["details"] = details
         }
-        print(dict)
         return dict
     }
 }

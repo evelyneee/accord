@@ -15,6 +15,7 @@ struct PrivateChannelsView: View {
         ForEach(privateChannels, id: \.id) { channel in
             NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
                 ServerListViewCell(channel: channel, updater: self.viewUpdater)
+                    .animation(nil, value: UUID())
                     .onChange(of: self.selection, perform: { [selection] new in
                         if new == Int(channel.id) {
                             channel.read_state?.mention_count = 0

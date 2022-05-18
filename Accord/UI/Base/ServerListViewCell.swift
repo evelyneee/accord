@@ -40,6 +40,7 @@ struct ServerListViewCell: View {
                     }
             }
             Text(channel.computedName)
+                .animation(nil, value: UUID())
         }
     }
     

@@ -92,9 +92,6 @@ struct ContentView: View {
                         }
                     }
                 }
-                .onDisappear {
-                    print("uh bye")
-                }
         } else if let serverListView = serverListView {
             serverListView
         } else {
