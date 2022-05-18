@@ -80,16 +80,14 @@ final class ZStream {
                         break mainLoop
                     }
                 default:
-                    print(status)
                     break mainLoop
                 }
                 
             } while status == COMPRESSION_STATUS_OK
             return outputData
         }
-        guard let outputData = outputData else { throw ZlibErrors.noData }
+        guard let outputData = outputData else { throw "No data returned" }
         lock = false
-        print(try? String(outputData))
         return outputData
     }
     
