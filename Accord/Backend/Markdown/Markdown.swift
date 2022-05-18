@@ -22,6 +22,17 @@ public final class Markdown {
     public static var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     fileprivate static let blankCharacter = "‎" // Not an empty string
 
+    class func appleMarkdown(_ text: String) -> Text {
+        do {
+            if #available(macOS 12, *) {
+                let markdown = try AttributedString(markdown: text)
+                return Text(markdown) + Text(" ")
+            } else { throw MarkdownErrors.unsupported }
+        } catch {
+            return Text(word) + Text(" ")
+        }
+    }
+    
     /***
 
      Overengineered processing for Markdown using Combine
@@ -87,12 +98,11 @@ public final class Markdown {
                     guard let song = song else { return }
                     switch musicPlatform {
                     case .appleMusic:
-                        print(song.linksByPlatform.appleMusic.url)
-                        return promise(.success(Text(song.linksByPlatform.appleMusic.url).foregroundColor(Color.blue).underline() + Text(" ")))
+                        return promise(.success(appleMarkdown(song.linksByPlatform.appleMusic.url)))
                     case .spotify:
-                        return promise(.success(Text(song.linksByPlatform.spotify.url).foregroundColor(Color.blue).underline() + Text(" ")))
+                        return promise(.success(appleMarkdown(song.linksByPlatform.spotify.url)))
                     case .none:
-                        return promise(.success(Text(word) + Text(" ")))
+                        return promise(.success(appleMarkdown(word)))
                     default: break
                     }
                 }
@@ -115,14 +125,7 @@ public final class Markdown {
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
-            do {
-                if #available(macOS 12, *) {
-                    let markdown = try AttributedString(markdown: word)
-                    return promise(.success(Text(markdown) + Text(" ")))
-                } else { throw MarkdownErrors.unsupported }
-            } catch {
-                return promise(.success(Text(word) + Text(" ")))
-            }
+            return promise(.success(appleMarkdown(word)))
         }
         .debugWarnNoMainThread()
         .eraseToAnyPublisher()
