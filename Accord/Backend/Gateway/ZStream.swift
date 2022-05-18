@@ -22,21 +22,16 @@ final class ZStream {
     }
     
     func decompress(data: Data, large: Bool = false) throws -> Data {
-        
         guard lock == false else {
             self.decompressionQueue.async {
                 _ = try? self.decompress(data: data)
             }
-            throw ZlibErrors.threadError
+            throw "Already decompressing"
         }
         lock = true
+        defer { lock = false }
         // header check
-        let hasHeader = data.prefix(2).withUnsafeBytes { buf -> Bool in
-            let bytes = buf.bindMemory(to: UInt8.self)
-            let headered = Data(buffer: bytes).prefix(2) == Data([0x78, 0x9C])
-            if headered { print("RFC1951 header detected") }
-            return headered
-        }
+        let hasHeader = data.prefix(2) == Data([0x78, 0x9C])
         let data = hasHeader ? data.dropFirst(2) : data
         let outputData = data.withUnsafeBytes { buf -> Data? in
             let bytes = buf.bindMemory(to: UInt8.self).baseAddress!
@@ -82,13 +77,10 @@ final class ZStream {
                     print("doneeeee")
                     if stream.dst_ptr > dstBufferPtr {
                         outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
+                        break mainLoop
                     }
-                case COMPRESSION_STATUS_ERROR:
-                    print(errno)
-                    return nil
-                    
                 default:
-                    break
+                    break mainLoop
                 }
                 
             } while status == COMPRESSION_STATUS_OK

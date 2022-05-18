@@ -29,7 +29,7 @@ public final class Markdown {
                 return Text(markdown) + Text(" ")
             } else { throw MarkdownErrors.unsupported }
         } catch {
-            return Text(word) + Text(" ")
+            return Text(text) + Text(" ")
         }
     }
     
