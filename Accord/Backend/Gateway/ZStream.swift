@@ -80,6 +80,7 @@ final class ZStream {
                         break mainLoop
                     }
                 default:
+                    print(status)
                     break mainLoop
                 }
                 
@@ -88,6 +89,7 @@ final class ZStream {
         }
         guard let outputData = outputData else { throw ZlibErrors.noData }
         lock = false
+        print(try? String(outputData))
         return outputData
     }
     

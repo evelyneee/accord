@@ -14,7 +14,9 @@ func showNotification(title: String, subtitle: String, description: String? = ni
     DispatchQueue.global().async {
         let content = UNMutableNotificationContent()
         content.title = title
-        content.subtitle = subtitle
+        if subtitle != title {
+            content.subtitle = subtitle
+        }
         if let description = description {
             content.body = description
         }

@@ -122,7 +122,6 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func findView() {
-        print("looking up")
         AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
             textField.allowsEditingTextAttributes = true
             self?.textField = textField

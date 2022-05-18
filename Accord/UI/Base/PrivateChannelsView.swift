@@ -21,7 +21,6 @@ struct PrivateChannelsView: View {
                             channel.read_state?.last_message_id = channel.last_message_id
                             viewUpdater.updateView()
                         } else if selection == Int(channel.id) {
-                            print("wow")
                             channel.read_state?.mention_count = 0
                             channel.read_state?.last_message_id = channel.last_message_id
                         }

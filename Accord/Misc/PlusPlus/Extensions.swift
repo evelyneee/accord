@@ -264,19 +264,8 @@ extension NSTextField {
         set {}
     }
     
-    override open func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
-        print("newline 2")
-        super.insertNewlineIgnoringFieldEditor(sender)
-    }
-    
-    override open func insertNewline(_ sender: Any?) {
-        print("newline")
-        super.insertNewline(sender)
-    }
-    
     override open func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.type == NSEvent.EventType.keyDown {
-            print(event)
             if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == NSEvent.ModifierFlags.command.rawValue {
                 switch event.charactersIgnoringModifiers! {
                 case "v":
@@ -284,8 +273,6 @@ extension NSTextField {
                 default:
                     break
                 }
-            } else if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == NSEvent.ModifierFlags.shift.rawValue {
-                print(event.characters)
             }
         }
         return super.performKeyEquivalent(with: event)

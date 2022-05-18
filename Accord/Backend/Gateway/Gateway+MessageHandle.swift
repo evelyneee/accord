@@ -64,7 +64,6 @@ extension Gateway {
             guard let channelID = event.channelID else { print("wat"); break }
             MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
             if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                print("Sending notification")
                 let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[message.guild_id ?? ""]
                 let matchingChannel = matchingGuild?.channels?[message.channel_id] ?? ServerListView.privateChannels[message.channel_id]
                 showNotification(
