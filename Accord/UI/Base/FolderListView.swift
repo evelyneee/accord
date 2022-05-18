@@ -13,6 +13,8 @@ extension ServerListView {
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
         @Binding var selectedGuild: Guild?
+        
+        @State var isShowingJoinServerSheet: Bool = false
         @StateObject var updater: ServerListView.UpdateView
 
         var body: some View {
@@ -45,6 +47,7 @@ extension ServerListView {
                 }
             }
             .padding(.trailing, 6)
+            
         }
     }
 }
