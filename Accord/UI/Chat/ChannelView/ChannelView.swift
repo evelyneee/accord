@@ -48,9 +48,7 @@ struct ChannelView: View, Equatable {
     var metalRenderer: Bool = false
     
     @State private var cancellable = Set<AnyCancellable>()
-    
-    private var permissions: Permissions
-    
+        
     @Environment(\.user)
     var user: User
     
@@ -61,8 +59,7 @@ struct ChannelView: View, Equatable {
         channelID = channel.id
         channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
-        _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channelID: channel.id, guildID: channel.guild_id ?? "@me"))
-        self.permissions = channel.permission_overwrites?.allAllowed(guildID: guildID) ?? .init()
+        _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
         _memberList = State(initialValue: channel.recipients?.map(OPSItems.init) ?? [])
     }
 
@@ -76,7 +73,7 @@ struct ChannelView: View, Equatable {
                     pronouns: viewModel.pronouns[author.id],
                     avatar: viewModel.avatars[author.id],
                     guildID: guildID,
-                    permissions: permissions,
+                    permissions: viewModel.permissions,
                     role: $viewModel.roles[author.id],
                     replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
                     replyingTo: $replyingTo
@@ -120,7 +117,7 @@ struct ChannelView: View, Equatable {
                 blurredTextField
             }
             if memberListShown {
-                MemberListView(list: $memberList)
+                MemberListView(guildID: self.guildID, list: $memberList)
                     .frame(width: 250)
                     .onAppear {
                         if memberList.isEmpty && guildID != "@me" {
@@ -240,9 +237,10 @@ public struct VisualEffectView: NSViewRepresentable {
 }
 
 struct MemberListView: View {
+    var guildID: String
     @Binding var list: [OPSItems]
     var body: some View {
-        List(list, id: \.id) { ops in
+        List(self.$list, id: \.id) { $ops in
             if let group = ops.group {
                 Text(
                   "\(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "") - \(group.count ?? 0)"
@@ -251,28 +249,45 @@ struct MemberListView: View {
                     .foregroundColor(.secondary)
                     .padding([.top])
             } else {
-                HStack {
-                    Attachment(pfpURL(ops.member?.user.id ?? "", ops.member?.user.avatar ?? "", discriminator: ops.member?.user.discriminator ?? "", "24"))
-                        .equatable()
-                        .frame(width: 33, height: 33)
-                        .clipShape(Circle())
-                    VStack(alignment: .leading) {
-                        Text(ops.member?.nick ?? ops.member?.user.username ?? "")
-                            .fontWeight(.medium)
-                            .foregroundColor({ () -> Color in
-                                if let role = ops.member?.roles?.first, let color = roleColors[role]?.0 {
-                                    return Color(int: color)
-                                }
-                                return Color.primary
-                            }())
+                MemberListViewCell(guildID: self.guildID, ops: $ops)
+            }
+        }
+    }
+}
+
+struct MemberListViewCell: View {
+    var guildID: String
+    @Binding var ops: OPSItems
+    @State var popup: Bool = false
+    var body: some View {
+        Button(action: {
+            self.popup.toggle()
+        }) { [unowned ops] in
+            HStack {
+                Attachment(pfpURL(ops.member?.user.id ?? "", ops.member?.user.avatar ?? "", discriminator: ops.member?.user.discriminator ?? "", "24"))
+                    .equatable()
+                    .frame(width: 33, height: 33)
+                    .clipShape(Circle())
+                VStack(alignment: .leading) {
+                    Text(ops.member?.nick ?? ops.member?.user.username ?? "")
+                        .fontWeight(.medium)
+                        .foregroundColor({ () -> Color in
+                            if let role = ops.member?.roles?.first, let color = roleColors[role]?.0 {
+                                return Color(int: color)
+                            }
+                            return Color.primary
+                        }())
+                        .lineLimit(0)
+                    if let presence = ops.member?.presence?.activities.first?.state {
+                        Text(presence).foregroundColor(.secondary)
                             .lineLimit(0)
-                        if let presence = ops.member?.presence?.activities.first?.state {
-                            Text(presence).foregroundColor(.secondary)
-                                .lineLimit(0)
-                        }
                     }
                 }
             }
         }
+        .buttonStyle(.borderless)
+        .popover(isPresented: self.$popup, content: {
+            PopoverProfileView(user: ops.member?.user, guildID: guildID)
+        })
     }
 }

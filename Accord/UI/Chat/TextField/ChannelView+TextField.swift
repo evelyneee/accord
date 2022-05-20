@@ -51,6 +51,7 @@ extension ChannelView {
                 chatText: Binding.constant("Message #\(channelName)"),
                 replyingTo: $replyingTo,
                 mentionUser: $mentionUser,
+                permissions: $viewModel.permissions,
                 fileUpload: $fileUpload,
                 fileUploadURL: $fileUploadURL
             )

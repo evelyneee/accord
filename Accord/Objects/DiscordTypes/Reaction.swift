@@ -7,10 +7,11 @@
 
 import Foundation
 
-final class Reaction: Codable {
+final class Reaction: Identifiable, Codable {
     var count: Int
     var me: Bool
     var emoji: ReactionEmote
+    var id: String { identifier }
     var identifier: String { self.emoji.id ?? emoji.name ?? "some emoji" }
 }
 

@@ -21,22 +21,33 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @Published var avatars: [String: String] = .init()
     @Published var pronouns: [String: String] = .init()
     var cancellable: Set<AnyCancellable> = .init()
-
+    var permissions: Permissions = .init()
+    
     var guildID: String
     var channelID: String
 
-    init(channelID: String, guildID: String) {
-        self.channelID = channelID
-        self.guildID = guildID
+    init(channel: Channel) {
+        self.channelID = channel.id
+        self.guildID = channel.guild_id ?? "@me"
         guard wss != nil else { return }
         messageFetchQueue.async {
-            if guildID == "@me" {
-                try? wss.subscribeToDM(channelID)
+            if self.guildID == "@me" {
+                try? wss.subscribeToDM(self.channelID)
             } else {
-                try? wss.subscribe(to: guildID)
+                try? wss.subscribe(to: self.guildID)
             }
-            self.getMessages(channelID: channelID, guildID: guildID)
-            MentionSender.shared.removeMentions(server: guildID)
+            self.getMessages(channelID: self.channelID, guildID: self.guildID)
+            MentionSender.shared.removeMentions(server: self.guildID)
+            if self.guildID == "@me" {
+                self.permissions = .init([
+                    .sendMessages, .readMessages
+                ])
+                if channel.owner_id == user_id {
+                    self.permissions.insert(.kickMembers)
+                }
+            } else {
+                self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+            }
         }
         connect()
     }

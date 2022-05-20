@@ -24,7 +24,7 @@ struct MentionsView: View {
                 replyNick: nil,
                 pronouns: nil,
                 avatar: nil,
-                guildID: nil,
+                guildID: "",
                 permissions: .init(),
                 role: Binding.constant(nil),
                 replyRole: Binding.constant(nil),

@@ -107,8 +107,12 @@ final class Gateway {
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
         seq: Int? = nil,
-        compress: Bool = true
+        compress: Bool = true,
+        decompressor: ZStream? = nil
     ) throws {
+        if let decompressor = decompressor {
+            self.decompressor = decompressor
+        }
         if compress {
             socketEndpoint = NWEndpoint.url(URL(string: "wss://gateway.discord.gg?v=9&encoding=json&compress=zlib-stream")!)
             print("Connecting with stream compression enabled")

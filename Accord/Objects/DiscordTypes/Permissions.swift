@@ -30,6 +30,10 @@ struct Permissions: Decodable, OptionSet {
     
     public let rawValue: Int64
     
+    var moderator: Bool {
+        self.contains(.moderateMembers) || self.contains(.kickMembers) || self.contains(.banMembers)
+    }
+    
     static var createInstantInvite = Permissions(rawValue: 1 << 0)
     static var kickMembers = Permissions(rawValue: 1 << 1)
     static var banMembers = Permissions(rawValue: 1 << 2)

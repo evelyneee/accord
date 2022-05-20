@@ -24,6 +24,7 @@ struct ChatControls: View {
     @Binding var chatText: String
     @Binding var replyingTo: Message?
     @Binding var mentionUser: Bool
+    @Binding var permissions: Permissions
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
@@ -36,6 +37,12 @@ struct ChatControls: View {
     weak var textField: NSTextField?
     @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
 
+    var textFieldText: String {
+        self.permissions.contains(.sendMessages) ?
+        viewModel.percent ?? chatText :
+        "You do not have permission to speak in this channel"
+    }
+    
     private func send() {
         messageSendQueue.async { [weak viewModel] in
             guard viewModel?.textFieldContents != "", let contents = viewModel?.textFieldContents else { return }
@@ -170,7 +177,7 @@ struct ChatControls: View {
 
     @available(macOS 12.0, *)
     var montereyTextField: some View {
-        TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents)
+        TextField(textFieldText, text: $viewModel.textFieldContents)
             .focused($focusedField, equals: .mainTextField)
             .onSubmit {
                 if CGEventSource.keyState(.combinedSessionState, key: CGKeyCode(0x38)) {
@@ -222,7 +229,7 @@ struct ChatControls: View {
     }
 
     var bigSurTextField: some View {
-        TextField(viewModel.percent ?? chatText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
+        TextField(textFieldText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
             typing = false
             send()
         }
@@ -320,6 +327,7 @@ struct ChatControls: View {
                             }
                         }
                     }
+                    .disabled(!self.permissions.contains(.sendMessages))
                     .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
                         if !typing, viewModel?.textFieldContents != "" {
                             messageSendQueue.async {

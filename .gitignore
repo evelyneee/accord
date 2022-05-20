@@ -1,5 +1,6 @@
 .DS_Store
 
+Accord/Backend/Highlighting/*
 **/*.xcworkspace/**/xcuserdata/
 **/*.xcodeproj/**/xcuserdata/
 

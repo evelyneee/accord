@@ -125,9 +125,9 @@ public final class Markdown {
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
+            
             return promise(.success(appleMarkdown(word)))
         }
-        .debugWarnNoMainThread()
         .eraseToAnyPublisher()
     }
 
@@ -162,7 +162,6 @@ public final class Markdown {
             .collect()
             .map { $0.reduce(Text(""), +) }
             .eraseToAnyPublisher()
-            .debugWarnNoMainThread()
     }
 }
 

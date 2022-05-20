@@ -48,6 +48,8 @@
 		9EA295212753D1490014927D /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA295202753D1480014927D /* MemberList.swift */; };
 		9EB3303828344929007D38EF /* PrivateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303728344929007D38EF /* PrivateChannelsView.swift */; };
 		9EB3303A28344A10007D38EF /* DMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303928344A10007D38EF /* DMButton.swift */; };
+		9EB3303C2835B295007D38EF /* PermissionOverwrites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */; };
+		9EB3303F2837181E007D38EF /* Highlighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303E2837181E007D38EF /* Highlighting.swift */; };
 		9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3582327BFFD3E0046A136 /* Collection++.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
@@ -175,6 +177,8 @@
 		9EA295202753D1480014927D /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
 		9EB3303728344929007D38EF /* PrivateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateChannelsView.swift; sourceTree = "<group>"; };
 		9EB3303928344A10007D38EF /* DMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMButton.swift; sourceTree = "<group>"; };
+		9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionOverwrites.swift; sourceTree = "<group>"; };
+		9EB3303E2837181E007D38EF /* Highlighting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlighting.swift; sourceTree = "<group>"; };
 		9EB3582327BFFD3E0046A136 /* Collection++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection++.swift"; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
@@ -247,6 +251,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				9EB3303D2837180C007D38EF /* Highlighting */,
 				9EDDB1B42831E50500510036 /* Reachability */,
 				9E5145A42823513D0070828B /* Media */,
 				9E96EB7827DEC32B00BB3C8A /* Voice */,
@@ -377,6 +382,7 @@
 				A8B1F29526CB163B00E8FDC5 /* User.swift */,
 				9E6BCC55277E23E80085F279 /* Reaction.swift */,
 				9E82875027BD6C5400953A7B /* Permissions.swift */,
+				9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */,
 			);
 			path = DiscordTypes;
 			sourceTree = "<group>";
@@ -481,6 +487,14 @@
 				9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */,
 			);
 			path = Voice;
+			sourceTree = "<group>";
+		};
+		9EB3303D2837180C007D38EF /* Highlighting */ = {
+			isa = PBXGroup;
+			children = (
+				9EB3303E2837181E007D38EF /* Highlighting.swift */,
+			);
+			path = Highlighting;
 			sourceTree = "<group>";
 		};
 		9ECE42B9279E131B00883D0A /* TextField */ = {
@@ -706,6 +720,7 @@
 				9E82874D27BB515F00953A7B /* FolderListView.swift in Sources */,
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
 				9E82874F27BB522600953A7B /* ServerListView+Init.swift in Sources */,
+				9EB3303F2837181E007D38EF /* Highlighting.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
 				9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */,
 				9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */,
@@ -717,6 +732,7 @@
 				A8BC5254268DF5AD00B7823E /* AttachmentView.swift in Sources */,
 				9ED3011127A6C76300D6235D /* Keypath++.swift in Sources */,
 				9E7E4D28279B63E8008FAF15 /* Models.swift in Sources */,
+				9EB3303C2835B295007D38EF /* PermissionOverwrites.swift in Sources */,
 				9ED3011327A8C40600D6235D /* RegisterImages.swift in Sources */,
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,

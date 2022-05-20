@@ -19,14 +19,19 @@ final class AsyncMarkdownModel: ObservableObject {
     @Published var hasEmojiOnly: Bool = false
     @Published var loaded: Bool = false
 
+    private var cancellable: AnyCancellable?
+    
     func make(text: String) {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
             let emojis = text.hasEmojisOnly
-            Markdown.markAll(text: text, Storage.usernames, font: emojis)
+            self.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
                 .replaceError(with: Text(text))
-                .receive(on: RunLoop.main)
-                .assign(to: &self.$markdown)
+                .sink { text in
+                    DispatchQueue.main.async {
+                        self.markdown = text
+                    }
+                }
             DispatchQueue.main.async {
                 self.loaded = true
                 self.hasEmojiOnly = text.hasEmojisOnly

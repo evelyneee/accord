@@ -10,7 +10,7 @@ import Foundation
 
 final class Message: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id && lhs.content == rhs.content
+        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds
     }
 
     var author: User?

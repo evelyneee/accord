@@ -10,11 +10,12 @@ import Foundation
 import SwiftUI
 import UserNotifications
 
+var allowReconnection: Bool = false
 var reachability: Reachability? = {
     var reachability = try? Reachability()
     reachability?.whenReachable = { status in
         concurrentQueue.async {
-            if wss?.connection?.state != .preparing {
+            if wss?.connection?.state != .preparing && allowReconnection {
                 wss?.reset()
             }
         }
@@ -23,6 +24,9 @@ var reachability: Reachability? = {
         print($0, "unreachable")
     }
     try? reachability?.startNotifier()
+    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+        allowReconnection = true
+    }
     return reachability
 }()
 
@@ -179,6 +183,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self, selector: #selector(loadWindowRect(_:)),
             name: NSWindow.didBecomeKeyNotification, object: nil
         )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(onWake(_:)),
+            name: NSWorkspace.didWakeNotification, object: nil
+        )
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
             print("Song Changed")
             DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
@@ -217,6 +225,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showPopover(_: AnyObject?) {
         if let button = statusBarItem?.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+        }
+    }
+    
+    @objc func onWake(_:AnyObject?) {
+        concurrentQueue.async {
+            wss?.reset()
         }
     }
 
