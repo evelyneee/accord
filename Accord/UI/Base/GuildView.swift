@@ -12,31 +12,66 @@ struct GuildView: View {
     var guild: Guild
     @Binding var selection: Int?
     @StateObject var updater: ServerListView.UpdateView
+    @State var invitePopup: Bool = false
     var body: some View {
         List {
-            HStack {
-                if let level = guild.premium_tier, level != 0 {
-                    switch level {
-                    case 1:
-                        Image(systemName: "star").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                    case 2:
-                        Image(systemName: "star.leadinghalf.filled").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                    case 3:
-                        Image(systemName: "star.fill").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                    default:
-                        EmptyView()
+            Menu(content: {
+                Button("Generate new invite") {
+                    self.invitePopup.toggle()
+                }
+                Button("Copy ID") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(guild.id, forType: .string)
+                }
+                Divider()
+                if guild.owner_id != user_id {
+                    Button("Leave Server") {
+                        DispatchQueue.global().async {
+                            let url = URL(string: rootURL)?
+                                .appendingPathComponent("users")
+                                .appendingPathComponent("@me")
+                                .appendingPathComponent("guilds")
+                                .appendingPathComponent(guild.id)
+                            Request.ping(url: url, headers: Headers.init(
+                                userAgent: discordUserAgent,
+                                token: AccordCoreVars.token,
+                                bodyObject: ["lurking":false],
+                                type: .DELETE,
+                                discordHeaders: true
+                            ))
+                        }
                     }
                 }
-                Text(guild.name ?? "Unknown Guild")
-                    .fontWeight(.semibold)
-                    .font(.system(size: 13))
-            }
+            }, label: {
+                HStack {
+                    if let level = guild.premium_tier, level != 0 {
+                        switch level {
+                        case 1:
+                            Image(systemName: "star").resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                        case 2:
+                            Image(systemName: "star.leadinghalf.filled").resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                        case 3:
+                            Image(systemName: "star.fill").resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                        default:
+                            EmptyView()
+                        }
+                    }
+                    Text(guild.name ?? "Unknown Guild")
+                        .fontWeight(.semibold)
+                        .font(.system(size: 13))
+                }
+            })
+            .menuStyle(BorderlessButtonMenuStyle())
+            .sheet(isPresented: self.$invitePopup, content: {
+                NewInviteSheet(selection: self.$selection, isPresented: self.$invitePopup)
+                    .frame(width: 350, height: 250)
+            })
             if let banner = guild.banner {
                 Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png", size: nil)
                     .equatable()

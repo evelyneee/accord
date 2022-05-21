@@ -7,6 +7,7 @@
 
 import Combine
 import SwiftUI
+import AppKit
 
 extension EnvironmentValues {
     var user: User {
@@ -50,6 +51,9 @@ struct ContentView: View {
                             guard NetworkCore.shared.connected else {
                                 throw LoadErrors.offline
                             }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
+                                NSApp.keyWindow?.identifier = NSUserInterfaceItemIdentifier("AccordMainWindow")
+                            })
                             print("hiiiii")
                             let new = try Gateway(
                                 url: Gateway.gatewayURL,

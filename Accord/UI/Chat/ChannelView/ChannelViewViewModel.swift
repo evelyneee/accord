@@ -25,6 +25,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     
     var guildID: String
     var channelID: String
+    
+    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
 
     init(channel: Channel) {
         self.channelID = channel.id
@@ -46,7 +48,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     self.permissions.insert(.kickMembers)
                 }
             } else {
-                self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+                Self.permissionQueue.async {
+                    self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+                }
             }
         }
         connect()

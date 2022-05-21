@@ -73,6 +73,12 @@ struct Channel: Decodable, Identifiable {
     }
 }
 
+final class PartialChannel: Codable {
+    var id: String
+    var name: String
+    var type: ChannelType
+}
+
 enum ChannelType: Int, Codable {
     case normal = 0
     case dm = 1

@@ -51,7 +51,7 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
         
         let everyonePerms = self.filter { $0.id == guildID }
         permsArray.insert(.init([
-            .sendMessages, .readMessages
+            .sendMessages, .readMessages, .changeNickname
         ]))
         permsArray.remove(Permissions(everyonePerms.map(\.deny)))
         permsArray.insert(Permissions(everyonePerms.map(\.allow)))

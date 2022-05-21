@@ -50,6 +50,8 @@
 		9EB3303A28344A10007D38EF /* DMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303928344A10007D38EF /* DMButton.swift */; };
 		9EB3303C2835B295007D38EF /* PermissionOverwrites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */; };
 		9EB3303F2837181E007D38EF /* Highlighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303E2837181E007D38EF /* Highlighting.swift */; };
+		9EB3304128372079007D38EF /* NewInviteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3304028372079007D38EF /* NewInviteSheet.swift */; };
+		9EB330432837236F007D38EF /* InviteUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB330422837236F007D38EF /* InviteUpdate.swift */; };
 		9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3582327BFFD3E0046A136 /* Collection++.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
@@ -179,6 +181,8 @@
 		9EB3303928344A10007D38EF /* DMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMButton.swift; sourceTree = "<group>"; };
 		9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionOverwrites.swift; sourceTree = "<group>"; };
 		9EB3303E2837181E007D38EF /* Highlighting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlighting.swift; sourceTree = "<group>"; };
+		9EB3304028372079007D38EF /* NewInviteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewInviteSheet.swift; sourceTree = "<group>"; };
+		9EB330422837236F007D38EF /* InviteUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteUpdate.swift; sourceTree = "<group>"; };
 		9EB3582327BFFD3E0046A136 /* Collection++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection++.swift"; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
@@ -383,6 +387,7 @@
 				9E6BCC55277E23E80085F279 /* Reaction.swift */,
 				9E82875027BD6C5400953A7B /* Permissions.swift */,
 				9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */,
+				9EB330422837236F007D38EF /* InviteUpdate.swift */,
 			);
 			path = DiscordTypes;
 			sourceTree = "<group>";
@@ -559,6 +564,7 @@
 				9E3B48DA280C348E00B131B7 /* ServerListViewCell.swift */,
 				9EB3303728344929007D38EF /* PrivateChannelsView.swift */,
 				9EB3303928344A10007D38EF /* DMButton.swift */,
+				9EB3304028372079007D38EF /* NewInviteSheet.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -774,6 +780,7 @@
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
 				A8B1F29E26CB16DE00E8FDC5 /* Emote.swift in Sources */,
+				9EB3304128372079007D38EF /* NewInviteSheet.swift in Sources */,
 				9E6B710A2784EBEC00A26CB6 /* GatewayEvent.swift in Sources */,
 				3207A24425867586006C2665 /* Constants.swift in Sources */,
 				A88CD71126E066A0007D979B /* ServerListView+Mentions.swift in Sources */,
@@ -805,6 +812,7 @@
 				9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */,
 				9E7E4D30279B69D7008FAF15 /* Storage.swift in Sources */,
 				9EB3303A28344A10007D38EF /* DMButton.swift in Sources */,
+				9EB330432837236F007D38EF /* InviteUpdate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
