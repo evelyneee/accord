@@ -66,7 +66,7 @@ final class SlashCommands {
             ],
             "nonce":generateFakeNonce()
         ]
-        Request.fetch (
+        Request.multipartData (
             url: URL(string: "\(rootURL)/interactions"),
             with: params,
             fileURL: nil,

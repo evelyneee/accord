@@ -22,6 +22,7 @@
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E5145A8282FC8FD0070828B /* ProfileEditingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
+		9E6878ED283BB9EB001DD5AB /* FileAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
 		9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71022783A6FD00A26CB6 /* Github.swift */; };
 		9E6B710A2784EBEC00A26CB6 /* GatewayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71092784EBEC00A26CB6 /* GatewayEvent.swift */; };
@@ -152,6 +153,7 @@
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditingView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
+		9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAttachmentView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
 		9E6B71022783A6FD00A26CB6 /* Github.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Github.swift; sourceTree = "<group>"; };
 		9E6B71072783ABD500A26CB6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -346,6 +348,7 @@
 				A898453D26978EBA00B1C9DB /* EmotesView.swift */,
 				9E8F8CA72774037F00A77600 /* MentionsView.swift */,
 				9ECE08F4277286E3001BA0F7 /* PinsView.swift */,
+				9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */,
 			);
 			path = Accessories;
 			sourceTree = "<group>";
@@ -789,6 +792,7 @@
 				9E6BCC64277E8E850085F279 /* Print++.swift in Sources */,
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
 				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,
+				9E6878ED283BB9EB001DD5AB /* FileAttachmentView.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,

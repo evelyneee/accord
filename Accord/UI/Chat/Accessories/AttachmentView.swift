@@ -47,6 +47,8 @@ struct AttachmentView: View {
                 VideoPlayer(player: AVPlayer(url: url))
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
+            } else {
+                FileAttachmentView(file: obj)
             }
         }
     }

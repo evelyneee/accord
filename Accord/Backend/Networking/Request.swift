@@ -306,7 +306,7 @@ public final class Request {
         }).resume()
     }
 
-    class func fetch(
+    class func multipartData(
         url: URL?,
         with payloadJson: [String: Any]? = nil,
         fileURL: String? = nil,
@@ -458,6 +458,87 @@ public final class RequestPublisher {
             }
             .debugWarnNoMainThread()
             .eraseToAny()
+    }
+}
+
+@available(macOS, obsoleted: 12.0)
+extension URLSession {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        try await withCheckedThrowingContinuation { continuation in
+            self.dataTask(with: request) { data, response, error in
+                if let data = data, let response = response {
+                    continuation.resume(with: .success((data, response)))
+                } else if let response = response {
+                    continuation.resume(with: .success((Data(), response)))
+                } else if let error = error {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+}
+
+enum AsyncRequest {
+    static func fetch<T: Decodable>(
+        _: T.Type,
+        url: URL? = nil,
+        headers: Headers? = nil,
+        retry: Int = 2
+    ) async throws -> T {
+        let request: URLRequest? = {
+            if let url = url {
+                return URLRequest(url: url)
+            } else {
+                print("You need to provide a request method")
+                return nil
+            }
+        }()
+        guard var request = request else { throw "Bad request" }
+        var config = URLSessionConfiguration.default
+        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
+            print("No active websocket connection")
+            throw "No active websocket connection"
+        }
+        // Set headers
+        do { try headers?.set(request: &request, config: &config) } catch { throw "Could not set headers" }
+
+        let (data, response) = try await URLSession(configuration: config).data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            if !(200..<300).contains(httpResponse.statusCode) {
+                let error = try JSONDecoder().decode(DiscordError.self, from: data)
+                throw Request.FetchErrors.discordError(code: error.code, message: error.message)
+            }
+        }
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+        return try decoder.decode(T.self, from: data)
+    }
+    
+    static func image(
+        url: URL?,
+        to size: CGSize? = nil
+    ) async throws -> NSImage {
+        guard let url = url else { throw "Bad url" }
+        let request = URLRequest(url: url)
+        if let cachedImage = cache.cachedResponse(for: request), let img = NSImage(data: cachedImage.data) {
+            return img
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let size = size, let downsampled = data.downsample(to: size), let image = NSImage(data: downsampled) {
+            cache.storeCachedResponse(CachedURLResponse(response: response, data: downsampled), for: request)
+            return image
+        } else if let image = NSImage(data: data) {
+            cache.storeCachedResponse(CachedURLResponse(response: response, data: data), for: request)
+            return image
+        } else if let httpResponse = response as? HTTPURLResponse {
+            throw "Got bad response with HTTP code " + String(httpResponse.statusCode)
+        } else {
+            throw "No response and/or data received."
+        }
     }
 }
 
