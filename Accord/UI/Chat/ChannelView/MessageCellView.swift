@@ -89,7 +89,7 @@ struct MessageCellView: View, Equatable {
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
     
-    private let leftPadding: CGFloat = 42.5
+    private let leftPadding: CGFloat = 45
 
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
@@ -148,7 +148,7 @@ struct MessageCellView: View, Equatable {
     private var stickerView: some View {
         ForEach(message.sticker_items ?? [], id: \.id) { sticker in
             if sticker.format_type == .lottie {
-                GifView.init(url: "https://cdn.discordapp.com/stickers/\(sticker.id).json")
+                GifView("https://cdn.discordapp.com/stickers/\(sticker.id).json")
                     .frame(width: 160, height: 160)
                     .cornerRadius(3)
                     .padding(.leading, leftPadding)
@@ -364,17 +364,18 @@ struct MessageCellView: View, Equatable {
         Button("Reply") { [weak message] in
             replyingTo = message
         }
-        Button("Edit") {
-            self.editing.toggle()
-        }
-        .if(message.author?.id != AccordCoreVars.user?.id, transform: { $0.hidden() })
-        Button("Delete") { [weak message] in
-            DispatchQueue.global().async {
-                message?.delete()
+        if message.author?.id == AccordCoreVars.user?.id {
+            Button("Edit") {
+                self.editing.toggle()
             }
         }
-        .if(message.author?.id != AccordCoreVars.user?.id && !self.permissions.contains(.manageMessages),
-            transform: { $0.hidden() })
+        if message.author?.id == AccordCoreVars.user?.id || self.permissions.contains(.manageMessages) {
+            Button("Delete") { [weak message] in
+                DispatchQueue.global().async {
+                    message?.delete()
+                }
+            }
+        }
         Divider()
         Button("Show profile") {
             popup.toggle()
@@ -495,7 +496,7 @@ struct MessageCellView: View, Equatable {
     private var avatarView: some View {
         if let author = message.author {
             if (self.avatar?.prefix(2) ?? author.avatar?.prefix(2)) == "a_" {
-                GifView(url: { () -> String in
+                GifView({ () -> String in
                     if let avatar = self.avatar {
                         return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).gif?size=48"
                     } else {
@@ -566,7 +567,7 @@ struct MessageCellView: View, Equatable {
                 HStack(alignment: .top) { [unowned message] in
                     if !(message.isSameAuthor && message.referenced_message == nil) {
                         avatarView
-                            .frame(width: 33, height: 33)
+                            .frame(width: 35, height: 35)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
                                 PopoverProfileView(user: message.author, guildID: self.guildID)

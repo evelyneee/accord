@@ -214,7 +214,7 @@ struct ProfileEditingView: View {
                                 self.imageData = nil
                             }
                         } else if self.user?.avatar?.prefix(2) == "a_" {
-                            GifView(url: cdnURL + "/avatars/\(self.user?.id ?? "")/\(self.user?.avatar ?? "").gif?size=64")
+                            GifView(cdnURL + "/avatars/\(self.user?.id ?? "")/\(self.user?.avatar ?? "").gif?size=64")
                                 .clipShape(Circle())
                                 .frame(width: 45, height: 45)
                         } else if let userID = self.user?.id, let avatar = self.user?.avatar {

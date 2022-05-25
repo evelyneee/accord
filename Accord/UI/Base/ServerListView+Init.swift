@@ -24,7 +24,7 @@ extension ServerListView {
             var c = c
             if c.recipients?.isEmpty != false {
                 c.recipients = c.recipient_ids?
-                    .compactMap { readyPacket.users[$0, keys] }
+                    .compactMap { readyPacket.users[keyed: $0, keys] }
             }
             return c
         }
@@ -60,7 +60,7 @@ extension ServerListView {
         MediaRemoteWrapper.status = readyPacket.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
-                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Emotes.emotes.values.joined())[readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
+                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Emotes.emotes.values.joined())[keyed: readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
                 id: readyPacket.user_settings?.custom_status?.emoji_id,
                 animated: false
             ),
@@ -98,7 +98,7 @@ extension ServerListView {
         // Form the folders and fix the guild objects
         let guildKeyMap = readyPacket.guilds.generateKeyMap()
         let guildTemp = guildOrder
-            .compactMap { readyPacket.guilds[$0, guildKeyMap] }
+            .compactMap { readyPacket.guilds[keyed: $0, guildKeyMap] }
 
         // format folders
         let guildDict = guildTemp.generateKeyMap()

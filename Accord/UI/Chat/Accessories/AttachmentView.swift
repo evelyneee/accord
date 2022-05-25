@@ -39,7 +39,7 @@ struct AttachmentView: View {
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))
             } else if obj.content_type?.contains("gif") == true {
-                GifView(url: obj.url)
+                GifView(obj.url)
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))

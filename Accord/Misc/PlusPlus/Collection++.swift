@@ -30,6 +30,10 @@ extension Collection {
         let jsonString = String(data: data, encoding: .utf8)
         return jsonString
     }
+    
+    var arrayLiteral: Array<Self.Element> {
+        Array(self)
+    }
 }
 
 extension ArraySlice {
@@ -46,7 +50,7 @@ extension Slice where Base: Sequence {
 }
 
 extension Array where Element: Identifiable {
-    subscript(id: Self.Element.ID, keyMap: [Self.Element.ID:Int]? = nil) -> Self.Element? {
+    subscript(keyed id: Self.Element.ID, keyMap: [Self.Element.ID:Int]? = nil) -> Self.Element? {
         get {
             let keys = keyMap ?? self.generateKeyMap()
             guard let element = keys[id] else { return nil }

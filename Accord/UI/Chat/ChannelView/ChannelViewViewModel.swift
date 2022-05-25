@@ -144,7 +144,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 message.user_mentioned = message.mentions.compactMap { $0?.id }.contains(user_id)
                 let messageMap = self?.messages.generateKeyMap()
                 DispatchQueue.main.async {
-                    self?.messages[message.id, messageMap] = message
+                    self?.messages[keyed: message.id, messageMap] = message
                 }
             }
             .store(in: &cancellable)
@@ -294,7 +294,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     func performSecondStageLoad() {
         var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
         // getCachedMemberChunk()
-        for (index, item) in allUserIDs.enumerated {
+        for (index, item) in allUserIDs.enumerated() {
             if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)"), [Int](allUserIDs.indices).contains(index) {
                 allUserIDs.remove(at: index)
             }
@@ -331,11 +331,5 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 extension Array where Array.Element: Hashable {
     func unique() -> some Collection {
         Array(Set(self))
-    }
-}
-
-extension Array {
-    var enumerated: EnumeratedSequence<[Element]> {
-        self.enumerated()
     }
 }
