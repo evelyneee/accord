@@ -15,6 +15,7 @@
 		32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 32F4C95E256D7D3500343BB3 /* Assets.xcassets */; };
 		370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370AF4112834504C0055AA1D /* JoinServerSheetView.swift */; };
 		373EE5BA2838FF410077B7A4 /* SetNicknameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373EE5B92838FF410077B7A4 /* SetNicknameView.swift */; };
+		37B9DE0B2840EA44003C15DA /* Highlighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B9DE0A2840EA44003C15DA /* Highlighting.swift */; };
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
@@ -51,12 +52,8 @@
 		9EB3303828344929007D38EF /* PrivateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303728344929007D38EF /* PrivateChannelsView.swift */; };
 		9EB3303A28344A10007D38EF /* DMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303928344A10007D38EF /* DMButton.swift */; };
 		9EB3303C2835B295007D38EF /* PermissionOverwrites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */; };
-<<<<<<< HEAD
-=======
-		9EB3303F2837181E007D38EF /* Highlighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303E2837181E007D38EF /* Highlighting.swift */; };
 		9EB3304128372079007D38EF /* NewInviteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3304028372079007D38EF /* NewInviteSheet.swift */; };
 		9EB330432837236F007D38EF /* InviteUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB330422837236F007D38EF /* InviteUpdate.swift */; };
->>>>>>> 2611ca53a3abf7abb1d89be982a605b90995cb9b
 		9EB3582427BFFD3E0046A136 /* Collection++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3582327BFFD3E0046A136 /* Collection++.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
@@ -139,6 +136,7 @@
 		32F4C964256D7D3500343BB3 /* Accord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Accord.entitlements; sourceTree = "<group>"; };
 		370AF4112834504C0055AA1D /* JoinServerSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinServerSheetView.swift; sourceTree = "<group>"; };
 		373EE5B92838FF410077B7A4 /* SetNicknameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNicknameView.swift; sourceTree = "<group>"; };
+		37B9DE0A2840EA44003C15DA /* Highlighting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Highlighting.swift; sourceTree = "<group>"; };
 		490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -187,12 +185,8 @@
 		9EB3303728344929007D38EF /* PrivateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateChannelsView.swift; sourceTree = "<group>"; };
 		9EB3303928344A10007D38EF /* DMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMButton.swift; sourceTree = "<group>"; };
 		9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionOverwrites.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
-=======
-		9EB3303E2837181E007D38EF /* Highlighting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlighting.swift; sourceTree = "<group>"; };
 		9EB3304028372079007D38EF /* NewInviteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewInviteSheet.swift; sourceTree = "<group>"; };
 		9EB330422837236F007D38EF /* InviteUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteUpdate.swift; sourceTree = "<group>"; };
->>>>>>> 2611ca53a3abf7abb1d89be982a605b90995cb9b
 		9EB3582327BFFD3E0046A136 /* Collection++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection++.swift"; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
@@ -265,6 +259,7 @@
 		32AA719225EAEEF700550BA5 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
+				37B9DE092840EA44003C15DA /* Highlighting */,
 				9EDDB1B42831E50500510036 /* Reachability */,
 				9E5145A42823513D0070828B /* Media */,
 				9E96EB7827DEC32B00BB3C8A /* Voice */,
@@ -321,6 +316,14 @@
 				32F4C964256D7D3500343BB3 /* Accord.entitlements */,
 			);
 			path = Accord;
+			sourceTree = "<group>";
+		};
+		37B9DE092840EA44003C15DA /* Highlighting */ = {
+			isa = PBXGroup;
+			children = (
+				37B9DE0A2840EA44003C15DA /* Highlighting.swift */,
+			);
+			path = Highlighting;
 			sourceTree = "<group>";
 		};
 		490B2AAD278D20AA00EA4F31 /* Release */ = {
@@ -745,6 +748,7 @@
 				A82A062426D98259007B9B27 /* ReadState.swift in Sources */,
 				A8B1F29826CB166C00E8FDC5 /* Events.swift in Sources */,
 				A89BE786266BDFB3007B0CBF /* Socket.swift in Sources */,
+				37B9DE0B2840EA44003C15DA /* Highlighting.swift in Sources */,
 				9EB3303828344929007D38EF /* PrivateChannelsView.swift in Sources */,
 				9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */,
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,

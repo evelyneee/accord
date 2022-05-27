@@ -54,9 +54,9 @@ struct SetNicknameView: View {
         // we must append @me instead
         // otherwise, you'll encounter an error
         if self.user == AccordCoreVars.user {
-            url = url.appendingPathComponent("@me")
+            url.appendPathComponent("@me")
         } else {
-            url = url.appendingPathComponent(userID)
+            url.appendPathComponent(userID)
         }
         
         let body = ["nick": newNicknameText]
