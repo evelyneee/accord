@@ -11,27 +11,31 @@ import Foundation
 import SwiftUI
 
 struct GifView: View {
+    
+    init(_ url: String) {
+        self.url = url
+        prep()
+    }
+    
     var url: String
     @State var currentImage: NSImage = .init()
     @State var animatedImages: [NSImage] = []
     @State var counterValue: Int = 0
     @State var duration: Double = 0
     @State var value: Int = 0
-    @State var timer: Cancellable?
-    @State private var can: AnyCancellable?
+    @State var timer: Cancellable? = nil
+    @State private var can: AnyCancellable? = nil
+    
+    @ViewBuilder
     var body: some View {
-        ZStack {
-            if animatedImages.isEmpty {
-                Image(nsImage: NSImage())
-            } else {
+        HStack {
+            if !animatedImages.isEmpty {
                 Image(nsImage: animatedImages[value])
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 160, height: 160)
             }
         }
-        .onAppear { prep() }
-        .onDisappear { timer?.cancel(); timer = nil }
+        .onAppear(perform: self.prep)
     }
 
     func prep() {
@@ -121,8 +125,8 @@ struct HoverGifView: View {
     @State var animated: Bool = false
     var body: some View {
         HStack {
-            if !animatedImages.isEmpty {
-                Image(nsImage: animated ? animatedImages[value] : animatedImages[0])
+            if let first = animatedImages.first {
+                Image(nsImage: animated ? animatedImages[value] : first)
                     .resizable()
                     .scaledToFit()
                     .onHover { _ in animated.toggle() }

@@ -10,8 +10,7 @@ Recommended: macOS Monterey
 
 Minimum requirement: macOS Big Sur
 * Untested
-* Many features are missing
-* Performance issues 
+* Some features are missing
 <sup>
 If you want to help and have a macOS Big Sur device, PRs are welcomed
 </sup>
@@ -44,7 +43,7 @@ Xcode is required.
 The built product will be in the `build/Release` directory
 
 ### Licensing
-This project is licensed under the BSD 3 clause license.
+This project is licensed under the BSD 4 clause license.
 
 ### Support
 * If you have questions, feel free to [ask them in our Discord server](https://discord.gg/nUGnmA9yFH)!

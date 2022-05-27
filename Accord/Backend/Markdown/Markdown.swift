@@ -11,6 +11,9 @@ import Foundation
 import SwiftUI
 
 public final class Markdown {
+    
+    static var highlighting: Bool = UserDefaults.standard.value(forKey: "Highlighting") as? Bool ?? false
+    
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
@@ -64,25 +67,47 @@ public final class Markdown {
 
      ***/
 
+    @available(macOS 12.0, *)
+    class func bionicMarkdown(_ word: String) -> AttributedString {
+        var markdown = try? AttributedString(markdown: word)
+        markdown = markdown?.transformingAttributes(\.presentationIntent, { transformer in
+            transformer.value = nil
+        })
+        let highlighted = Highlighting.parse(word)
+        if let markdown = markdown, markdown != AttributedString(word) {
+            return markdown
+        } else {
+            return highlighted
+        }
+    }
+    
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool) -> TextPublisher {
+    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextPublisher {
         let emoteIDs = word.matches(precomputed: Regex.emojiIDRegex)
-        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "48" : "16")") {
+        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=48") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-                .map { Text("\(Image(nsImage: $0))") + Text(" ") }
+                .map { image -> NSImage in
+                    guard !font else { return image }
+                    image.size = NSSize(width: 18, height: 18)
+                    print("resizing hehe")
+                    return image
+                }
+                .map {
+                    Text(Image(nsImage: $0)).font(.system(size: 14)) + Text(" ")
+                }
                 .eraseToAny()
         }
         let inlineImages = word.matches(precomputed: Regex.inlineImageRegex).filter { $0.contains("nitroless") || $0.contains("emote") || $0.contains("emoji") } // nitroless emoji
         if let url = inlineImages.first, let emoteURL = URL(string: url) {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-                .map { Text("\(Image(nsImage: $0))") + Text(" ") }
+                .map { Text(Image(nsImage: $0)) + Text(" ") }
                 .eraseToAny()
         }
         return Future { promise -> Void in
@@ -125,8 +150,12 @@ public final class Markdown {
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
-            
-            return promise(.success(appleMarkdown(word)))
+                        
+            if #available(macOS 12.0, *), highlight {
+                return promise(.success(Text(bionicMarkdown(word)) + Text(" ")))
+            } else {
+                return promise(.success(appleMarkdown(word)))
+            }
         }
         .eraseToAnyPublisher()
     }
@@ -137,10 +166,10 @@ public final class Markdown {
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
-    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool) -> TextArrayPublisher {
+    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         let words = line.matchRange(precomputed: Regex.lineRegex).map { line[$0].trimmingCharacters(in: .whitespaces) }
-        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font) }
+        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight) }
         return Publishers.MergeMany(pubs)
             .collect()
             .eraseToAnyPublisher()
@@ -154,9 +183,48 @@ public final class Markdown {
      **/
     public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
-        let pubs = newlines.map { markLine(String($0), members, font: font) }
-        let withNewlines: [TextArrayPublisher] = Array(pubs.map { [$0] }.joined(separator: [newLinePublisher]))
-        return Publishers.MergeMany(withNewlines)
+        
+        let codeBlockMarkerRawOffsets = newlines
+            .lazy
+            .enumerated()
+            .filter { $0.element.prefix(3) == "```" }
+            .map(\.offset)
+        
+        let indexes = codeBlockMarkerRawOffsets
+            .lazy
+            .indices
+            .filter { $0 % 2 == 0 }
+            .map { number -> (Int, Int)? in
+                if !codeBlockMarkerRawOffsets.indices.contains(number + 1) { return nil }
+                return (codeBlockMarkerRawOffsets[number], codeBlockMarkerRawOffsets[number + 1])
+            }
+            .compactMap(\.self)
+                
+        let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting) }
+        var strippedPublishers = pubs
+            .map { [$0] }
+            .joined()
+            .arrayLiteral
+        
+        indexes.forEach { lowerBound, upperBound in
+            (lowerBound...upperBound).forEach { line in
+                let textObject: Text = Text(newlines[line]).font(Font.system(size: 14, design: .monospaced))
+                strippedPublishers[line] = Just([textObject]).eraseToAny()
+            }
+        }
+        let deleteIndexes = indexes
+            .map { [$0, $1] }
+            .joined()
+        
+        strippedPublishers.remove(atOffsets: IndexSet(deleteIndexes))
+        
+        let arrayWithNewlines = strippedPublishers
+            .map { Array([$0]) }
+            .joined(separator: [
+                newLinePublisher
+            ])
+        
+        return Publishers.MergeMany(Array(arrayWithNewlines))
             .map { $0.reduce(Text(""), +) }
             .mapError { $0 as Error }
             .collect()

@@ -39,7 +39,7 @@ struct ChannelView: View, Equatable {
     @State var pins: Bool = false
     @State var mentions: Bool = false
 
-    @State var memberListShown: Bool = false
+    @AppStorage("memberListShown") var memberListShown: Bool = UserDefaults.standard.bool(forKey: "memberListShown")
     @State var memberList: [OPSItems]
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?

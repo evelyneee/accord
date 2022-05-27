@@ -75,7 +75,7 @@ struct ChatControls: View {
     var matchedUsersView: some View {
         ForEach(viewModel.matchedUsers.sorted(by: >).prefix(10), id: \.key) { id, username in
             Button(action: { [weak viewModel] in
-                if let range = viewModel?.textFieldContents.range(of: "@") {
+                if let range = viewModel?.textFieldContents.ranges(of: "@").last {
                     viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                 }
                 viewModel?.textFieldContents.append("<@!\(id)> ")
@@ -128,7 +128,7 @@ struct ChatControls: View {
         ForEach(viewModel.matchedEmoji.prefix(10), id: \.id) { emoji in
             HStack {
                 Button(action: { [weak viewModel] in
-                    if let range = viewModel?.textFieldContents.range(of: ":") {
+                    if let range = viewModel?.textFieldContents.ranges(of: ":").last {
                         viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                     }
                     viewModel?.textFieldContents.append("<\((emoji.animated ?? false) ? "a" : ""):\(emoji.name):\(emoji.id)> ")
@@ -145,7 +145,7 @@ struct ChatControls: View {
                 .buttonStyle(.borderless)
                 .padding(3)
                 Button("Send link") { [weak viewModel] in
-                    if let range = viewModel?.textFieldContents.range(of: ":") {
+                    if let range = viewModel?.textFieldContents.ranges(of: ":").last {
                         viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                     }
                     viewModel?.textFieldContents.append(cdnURL + "/emojis/\(emoji.id).png?size=48")
@@ -160,7 +160,7 @@ struct ChatControls: View {
     var matchedChannelsView: some View {
         ForEach(viewModel.matchedChannels.prefix(10), id: \.id) { channel in
             Button(action: { [weak viewModel] in
-                if let range = viewModel?.textFieldContents.range(of: "#") {
+                if let range = viewModel?.textFieldContents.ranges(of: "#").last {
                     viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                 }
                 viewModel?.textFieldContents.append("<#\(channel.id)> ")

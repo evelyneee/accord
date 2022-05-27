@@ -167,7 +167,7 @@ struct PopoverProfileView: View {
                 Spacer().frame(height: 100)
                 VStack(alignment: .leading) {
                     if user?.avatar?.prefix(2) == "a_" {
-                        GifView(url: cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
+                        GifView(cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
                             .clipShape(Circle())
                             .frame(width: 45, height: 45)
                     } else {

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
+    
     static func == (lhs: AttachedFiles, rhs: AttachedFiles) -> Bool {
         lhs.id == rhs.id
     }

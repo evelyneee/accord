@@ -25,6 +25,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     
     var guildID: String
     var channelID: String
+    
+    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
 
     init(channel: Channel) {
         self.channelID = channel.id
@@ -46,7 +48,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     self.permissions.insert(.kickMembers)
                 }
             } else {
-                self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+                Self.permissionQueue.async {
+                    self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+                }
             }
         }
         connect()
@@ -140,7 +144,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 message.user_mentioned = message.mentions.compactMap { $0?.id }.contains(user_id)
                 let messageMap = self?.messages.generateKeyMap()
                 DispatchQueue.main.async {
-                    self?.messages[message.id, messageMap] = message
+                    self?.messages[keyed: message.id, messageMap] = message
                 }
             }
             .store(in: &cancellable)
@@ -290,7 +294,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     func performSecondStageLoad() {
         var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
         // getCachedMemberChunk()
-        for (index, item) in allUserIDs.enumerated {
+        for (index, item) in allUserIDs.enumerated() {
             if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)"), [Int](allUserIDs.indices).contains(index) {
                 allUserIDs.remove(at: index)
             }
@@ -327,11 +331,5 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 extension Array where Array.Element: Hashable {
     func unique() -> some Collection {
         Array(Set(self))
-    }
-}
-
-extension Array {
-    var enumerated: EnumeratedSequence<[Element]> {
-        self.enumerated()
     }
 }

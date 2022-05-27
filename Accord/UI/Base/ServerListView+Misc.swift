@@ -23,7 +23,7 @@ extension ServerListView {
     func assignPrivateReadStates(_ entries: [ReadStateEntry]) {
         let privateReadStateDict = entries.generateKeyMap()
         Self.privateChannels.enumerated().forEach {
-            Self.privateChannels[$0].read_state = entries[$1.id, privateReadStateDict]
+            Self.privateChannels[$0].read_state = entries[keyed: $1.id, privateReadStateDict]
         }
         print("Binded to private channels")
         Self.readStates.removeAll()
@@ -83,7 +83,7 @@ extension GatewayD {
                 else {
                     continue
                 }
-                channels[index].read_state = readState.entries[channel.id, stateDict]
+                channels[index].read_state = readState.entries[keyed: channel.id, stateDict]
             }
             guild.channels = channels
             self.guilds[index] = guild
