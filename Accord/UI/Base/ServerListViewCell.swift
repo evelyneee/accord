@@ -23,7 +23,7 @@ struct ServerListViewCell: View {
                     discriminator: channel.recipients?.first?.discriminator ?? "0005"
                 ))
                     .equatable()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 35, height: 35)
                     .clipShape(Circle())
                 statusDot
                     .onAppear {
@@ -39,8 +39,16 @@ struct ServerListViewCell: View {
                         }
                     }
             }
-            Text(channel.computedName)
-                .animation(nil, value: UUID())
+            VStack(alignment: .leading) {
+                Text(channel.computedName)
+                    .animation(nil, value: UUID())
+                if let messageID = channel.last_message_id {
+                    if messageID != channel.read_state?.last_message_id {
+                        Text("New messages at " + Date(timeIntervalSince1970: Double(parseSnowflake(messageID) / 1000)).makeProperHour())
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
         }
     }
     
@@ -71,10 +79,20 @@ struct ServerListViewCell: View {
             dmLabelView
         case .group_dm:
             HStack {
-                Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channel.icon ?? "").png?size=24").equatable()
-                    .frame(width: 24, height: 24)
-                    .clipShape(Circle())
-                Text(channel.computedName)
+                if let channelIcon = channel.icon {
+                    Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channel.icon ?? "").png?size=48").equatable()
+                        .frame(width: 35, height: 35)
+                        .clipShape(Circle())
+                } else {
+                    Attachment(pfpURL(nil, nil, discriminator: channel.id.suffix(4).stringLiteral))
+                        .frame(width: 35, height: 35)
+                        .clipShape(Circle())
+                }
+                VStack(alignment: .leading) {
+                    Text(channel.computedName)
+                    Text(String((channel.recipients?.count ?? 0) + 1) + " members")
+                        .foregroundColor(.secondary)
+                }
             }
         case .guild_public_thread:
             HStack {
@@ -110,19 +128,22 @@ struct ServerListViewCell: View {
                     return Color.clear
                 }
             }())
-            .frame(width: 7, height: 7)
+            .frame(width: 8, height: 8)
+            .opacity(0.8)
+            .shadow(radius: 0.25)
     }
     
     private var readStateDot: some View {
         ZStack {
             Circle()
-                .foregroundColor(Color.red)
-                .frame(width: 15, height: 15)
+                .foregroundColor(.red)
+                .opacity(0.8)
+                .shadow(radius: 0.2)
             Text(String(channel.read_state?.mention_count ?? 0))
-                .foregroundColor(Color.white)
-                .fontWeight(.semibold)
+                .foregroundColor(.white)
                 .font(.caption)
         }
+        .frame(width: 15, height: 15)
     }
     
     var body: some View {

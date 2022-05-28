@@ -89,7 +89,7 @@ struct MessageCellView: View, Equatable {
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
     
-    private let leftPadding: CGFloat = 45
+    private let leftPadding: CGFloat = 44.5
 
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
@@ -444,7 +444,7 @@ struct MessageCellView: View, Equatable {
             RoundedRectangle(cornerRadius: 5)
                 .trim(from: 0.5, to: 0.75)
                 .stroke(.gray.opacity(0.4), lineWidth: 2)
-                .frame(width: 53, height: 20)
+                .frame(width: 53, height: 17)
                 .padding(.bottom, -15)
                 .padding(.trailing, -30)
             Attachment(pfpURL(message.referenced_message?.author?.id, message.referenced_message?.author?.avatar, discriminator: message.referenced_message?.author?.discriminator ?? "0005", "16"))
@@ -459,7 +459,7 @@ struct MessageCellView: View, Equatable {
                     }
                     return Color.primary
                 }())
-                .fontWeight(.semibold)
+                .fontWeight(.medium)
             Text(message.referenced_message?.content ?? "Error")
                 .font(.subheadline)
                 .lineLimit(0)

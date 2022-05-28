@@ -100,6 +100,7 @@ struct Folder<Content: View>: View {
     var icon: [Guild]
     var color: Color
     @Binding var read: Bool
+    var mentionCount: Int?
     var content: () -> Content
 
     @State private var collapsed: Bool = true
@@ -117,48 +118,51 @@ struct Folder<Content: View>: View {
                             .foregroundColor(Color.primary)
                             .frame(width: 5, height: 5)
                             .opacity(read ? 1 : 0)
-                        VStack(spacing: 3) {
-                            HStack(spacing: 3) {
-                                if let guild = icon.first, let icon = guild.icon {
-                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                        .equatable()
-                                        .clipShape(Circle())
-                                        .frame(width: 16, height: 16)
-                                } else {
-                                    Spacer().frame(width: 16, height: 16)
+                        ZStack(alignment: .bottomTrailing) {
+                            VStack(spacing: 3) {
+                                HStack(spacing: 3) {
+                                    if let guild = icon.first, let icon = guild.icon {
+                                        Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
+                                            .equatable()
+                                            .clipShape(Circle())
+                                            .frame(width: 16, height: 16)
+                                    } else {
+                                        Spacer().frame(width: 16, height: 16)
+                                    }
+                                    if let guild = icon[safe: 1], let icon = guild.icon {
+                                        Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
+                                            .equatable()
+                                            .clipShape(Circle())
+                                            .frame(width: 16, height: 16)
+                                    } else {
+                                        Spacer().frame(width: 16, height: 16)
+                                    }
                                 }
-                                if let guild = icon[safe: 1], let icon = guild.icon {
-                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                        .equatable()
-                                        .clipShape(Circle())
-                                        .frame(width: 16, height: 16)
-                                } else {
-                                    Spacer().frame(width: 16, height: 16)
+                                HStack(spacing: 3) {
+                                    if let guild = icon[safe: 2], let icon = guild.icon {
+                                        Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
+                                            .equatable()
+                                            .clipShape(Circle())
+                                            .frame(width: 16, height: 16)
+                                    } else {
+                                        Spacer().frame(width: 16, height: 16)
+                                    }
+                                    if let guild = icon[safe: 3], let icon = guild.icon {
+                                        Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
+                                            .equatable()
+                                            .clipShape(Circle())
+                                            .frame(width: 16, height: 16)
+                                    } else {
+                                        Spacer().frame(width: 16, height: 16)
+                                    }
                                 }
                             }
-                            HStack(spacing: 3) {
-                                if let guild = icon[safe: 2], let icon = guild.icon {
-                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                        .equatable()
-                                        .clipShape(Circle())
-                                        .frame(width: 16, height: 16)
-                                } else {
-                                    Spacer().frame(width: 16, height: 16)
-                                }
-                                if let guild = icon[safe: 3], let icon = guild.icon {
-                                    Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                        .equatable()
-                                        .clipShape(Circle())
-                                        .frame(width: 16, height: 16)
-                                } else {
-                                    Spacer().frame(width: 16, height: 16)
-                                }
-                            }
+                            .frame(width: 45, height: 45)
+                            .background(color.opacity(0.75))
+                            .cornerRadius(15)
+                            .frame(width: 45, height: 45)
+                            .redBadge(collapsed ? mentionCount : nil)
                         }
-                        .frame(width: 45, height: 45)
-                        .background(color.opacity(0.75))
-                        .cornerRadius(15)
-                        .frame(width: 45, height: 45)
                     }
                 }
             )
@@ -229,8 +233,7 @@ func pronounDBFormed(pronoun: String?) -> String {
 }
 
 func pfpURL(_ uid: String?, _ hash: String?, discriminator: String = "0005", _ size: String = "64") -> String {
-    guard let uid = uid else { return cdnURL + "/embed/avatars/0.png" }
-    if let avatar = hash {
+    if let uid = uid, let avatar = hash {
         return cdnURL + "/avatars/\(uid)/\(avatar).png?size=\(size)"
     } else {
         let index = String((Int(discriminator) ?? 0) % 5)
@@ -329,4 +332,8 @@ extension Date {
         dateFormatter.dateFormat = "hh:mm"
         return dateFormatter.string(from: self)
     }
+}
+
+func parseSnowflake(_ snowflake: String) -> Int64 {
+    return ((Int64(snowflake) ?? 0) >> 22) + 1420070400000
 }

@@ -33,12 +33,20 @@ struct GuildHoverAnimation: ViewModifier {
     var frame: CGFloat = 45
     var selected: Bool
     @State var hovered: Bool = false
+    
     func body(content: Content) -> some View {
         content
-            .onHover(perform: { res in withAnimation(Animation.linear(duration: 0.1)) { hovered = res } })
+            .onHover(perform: { res in
+                if hovered != res {
+                    print("changing", res)
+                    withAnimation(Animation.linear(duration: 0.1)) {
+                        hovered = res
+                    }
+                }
+            })
             .frame(width: frame, height: frame)
             .background(!hasIcon && hovered ? self.color : Color.clear)
-            .cornerRadius(hovered || selected ? 13.5 : 23.5)
+            .cornerRadius(hovered || selected ? 15 : frame / 2)
     }
 }
 

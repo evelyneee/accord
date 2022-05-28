@@ -260,6 +260,7 @@ struct ChatControls: View {
             fileImport.toggle()
         }) {
             Image(systemName: "plus.circle.fill")
+                .imageScale(.medium)
         }
         .buttonStyle(BorderlessButtonStyle())
     }
@@ -269,6 +270,7 @@ struct ChatControls: View {
             nitroless.toggle()
         }) {
             Image(systemName: "rectangle.grid.3x2.fill")
+                .imageScale(.medium)
         }
         .buttonStyle(BorderlessButtonStyle())
         .popover(isPresented: $nitroless, content: {
@@ -282,6 +284,7 @@ struct ChatControls: View {
             emotes.toggle()
         }) {
             Image(systemName: "face.smiling.fill")
+                .imageScale(.medium) 
         }
         .buttonStyle(BorderlessButtonStyle())
         .keyboardShortcut("e", modifiers: [.command])

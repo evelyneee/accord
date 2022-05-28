@@ -73,11 +73,21 @@ struct GuildView: View {
                     .frame(width: 350, height: 250)
             })
             if let banner = guild.banner {
-                Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png", size: nil)
-                    .equatable()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .cornerRadius(10)
-                    .animation(nil, value: UUID())
+                if banner.prefix(2) == "a_" {
+                    GifView(cdnURL + "/banners/\(guild.id)/\(banner).gif?size=1024")
+                        .drawingGroup()
+                        .cornerRadius(3)
+                        .animation(nil, value: UUID())
+                        .edgesIgnoringSafeArea(.all)
+                        .padding(.vertical, 5)
+                } else {
+                    Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=1024", size: nil)
+                        .equatable()
+                        .cornerRadius(3)
+                        .animation(nil, value: UUID())
+                        .edgesIgnoringSafeArea(.all)
+                        .padding(.vertical, 5)
+                }
             }
             ForEach(guild.channels ?? .init(), id: \.id) { channel in
                 if channel.type == .section {

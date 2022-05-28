@@ -16,7 +16,7 @@ final class AsyncMarkdownModel: ObservableObject {
     }
 
     @Published var markdown: Text
-    @Published var hasEmojiOnly: Bool = false
+    var hasEmojiOnly: Bool = false
     @Published var loaded: Bool = false
 
     private var cancellable: AnyCancellable?
@@ -27,27 +27,14 @@ final class AsyncMarkdownModel: ObservableObject {
             let emojis = text.hasEmojisOnly
             self.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
                 .replaceError(with: Text(text))
+                .receive(on: RunLoop.main)
                 .sink { text in
-                    DispatchQueue.main.async {
-                        self.markdown = text
-                    }
+                    self.loaded = true
+                    self.markdown = text
                 }
             DispatchQueue.main.async {
-                self.loaded = true
-                self.hasEmojiOnly = text.hasEmojisOnly
+                self.hasEmojiOnly = emojis
             }
-        }
-    }
-}
-
-@available(macOS 12.0, *)
-extension View {
-    @ViewBuilder
-    func textSelectionBool(_ selected: Bool) -> some View {
-        if selected {
-            self.textSelection(.enabled)
-        } else {
-            self.textSelection(.disabled)
         }
     }
 }
@@ -60,9 +47,9 @@ struct AsyncMarkdown: View, Equatable {
     @StateObject var model: AsyncMarkdownModel
     @Binding var text: String
 
-    init(_ text: String, binded: Binding<String> = Binding.constant("")) {
+    init(_ text: String, binded: Binding<String>? = nil) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
-        self._text = binded
+        self._text = binded ?? Binding.constant(text)
     }
     
     @ViewBuilder
@@ -70,7 +57,7 @@ struct AsyncMarkdown: View, Equatable {
         if !model.hasEmojiOnly || model.loaded {
             if #available(macOS 12.0, *) {
                 model.markdown
-                    .textSelectionBool(!model.hasEmojiOnly)
+                    .textSelection(.enabled)
                     .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
                     .animation(nil)
                     .fixedSize(horizontal: false, vertical: true)

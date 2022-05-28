@@ -411,9 +411,9 @@ public final class RequestPublisher {
         }()
         guard var request = request else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
         var config = URLSessionConfiguration.default
-        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
+        if (wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) {
             print("No active websocket connection")
-            return Empty(completeImmediately: true).eraseToAnyPublisher()
+            wss.reset()
         }
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }

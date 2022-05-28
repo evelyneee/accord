@@ -110,7 +110,6 @@ struct ChannelView: View, Equatable {
                         messagesView
                     }
                 }
-                .offset(x: 0, y: -1)
                 .listStyle(PlainListStyle())
                 .rotationEffect(.init(degrees: 180))
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)

@@ -23,7 +23,8 @@ extension ServerListView {
                     Folder(
                         icon: Array(folder.guilds.prefix(4)),
                         color: Color(int: folder.color ?? 0),
-                        read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true))
+                        read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true)),
+                        mentionCount: folder.guilds.map({ pingCount(guild: $0) }).reduce(0, +)
                     ) {
                         ForEach(folder.guilds, id: \.id) { guild in
                             ServerIconCell(
@@ -91,37 +92,25 @@ struct ServerIconCell: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Button(action: { [weak wss] in
-                wss?.cachedMemberRequest.removeAll()
-                self.updateSelection(old: selectedServer, new: guild.index)
-            }) {
-                HStack {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill()
-                        .foregroundColor(Color.primary)
-                        .frame(width: 5, height: selectedServer == guild.index || hovering ? 30 : 5)
-                        .animation(Animation.linear(duration: 0.1))
-                        .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
-                    GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
-                }
-            }
-            .accessibility(
-                label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
-            )
-            .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) {self.hovering = h} })
-            .buttonStyle(BorderlessButtonStyle())
-            if pingCount(guild: guild) != 0 {
-                ZStack {
-                    Circle()
-                        .foregroundColor(.red)
-                        .frame(width: 15, height: 15)
-                    Text(String(pingCount(guild: guild)))
-                        .foregroundColor(.white)
-                        .fontWeight(.semibold)
-                        .font(.caption)
-                }
+        Button(action: { [weak wss] in
+            wss?.cachedMemberRequest.removeAll()
+            self.updateSelection(old: selectedServer, new: guild.index)
+        }) {
+            HStack {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill()
+                    .foregroundColor(Color.primary)
+                    .frame(width: 5, height: selectedServer == guild.index || hovering ? 30 : 5)
+                    .animation(Animation.linear(duration: 0.1))
+                    .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
+                GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
             }
         }
+        .accessibility(
+            label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
+        )
+        .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) {self.hovering = h} })
+        .buttonStyle(BorderlessButtonStyle())
+        .redBadge(pingCount(guild: guild))
     }
 }

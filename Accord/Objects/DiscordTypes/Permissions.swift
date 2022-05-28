@@ -75,4 +75,48 @@ struct Permissions: Decodable, OptionSet {
     static var sendMessagesInThreads = Permissions(rawValue: 1 << 38)
     static var useEmbeddedActivities = Permissions(rawValue: 1 << 39)
     static var moderateMembers = Permissions(rawValue: 1 << 40)
+    
+    static var all = Permissions([
+        .createInstantInvite,
+        .kickMembers,
+        .banMembers,
+        .administrator,
+        .manageChannels,
+        .manageGuild,
+        .addReactions,
+        .viewAuditLog,
+        .prioritySpeaker,
+        .stream,
+        .readMessages,
+        .sendMessages,
+        .sendTTSMessages,
+        .manageMessages,
+        .embedLinks,
+        .attachFiles,
+        .readMessageHistory,
+        .mentionEveryone,
+        .externalEmoji,
+        .viewGuildInsights,
+        .connectToVoice,
+        .speakInVoice,
+        .muteMembers,
+        .deafenMembers,
+        .moveMembers,
+        .useVoiceActivation,
+        .changeNickname,
+        .manageNicknames,
+        .manageRoles,
+        .manageWebhooks,
+        .manageEmoji,
+        .useSlashCommands,
+        .requestToSpeak,
+        .manageEvents,
+        .manageThreads,
+        .createPublicThreads,
+        .createPrivateThreads,
+        .externalStickers,
+        .sendMessagesInThreads,
+        .useEmbeddedActivities,
+        .moderateMembers
+    ])
 }

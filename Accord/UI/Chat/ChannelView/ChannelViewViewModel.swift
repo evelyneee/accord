@@ -50,6 +50,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             } else {
                 Self.permissionQueue.async {
                     self.permissions = channel.permission_overwrites?.allAllowed(guildID: self.guildID) ?? .init()
+                    print(self.permissions.contains(.sendMessages))
                 }
             }
         }

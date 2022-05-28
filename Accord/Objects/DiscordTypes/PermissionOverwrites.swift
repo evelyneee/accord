@@ -45,7 +45,8 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
         ServerListView.mergedMembers[guildID]?.cachedPermissions = permsArray
         
         if permsArray.contains(.administrator) {
-            permsArray = Permissions(rawValue: 2199023255551)
+            permsArray = Permissions.all
+            ServerListView.mergedMembers[guildID]?.cachedPermissions = permsArray
             return permsArray
         }
         

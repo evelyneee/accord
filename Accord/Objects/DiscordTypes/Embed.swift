@@ -30,7 +30,8 @@ final class Embed: Codable, Hashable, Identifiable {
         hasher.combine((timestamp ?? "") + (url ?? "") + (title ?? ""))
     }
 
-    final class Field: Codable {
+    final class Field: Codable, Identifiable {
+        var id: String { name }
         var name: String
         var inline: Bool?
         var value: String

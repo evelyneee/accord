@@ -77,8 +77,7 @@ extension Gateway {
                 url: Gateway.gatewayURL,
                 session_id: wss.sessionID,
                 seq: wss.seq,
-                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true,
-                decompressor: wss.decompressor
+                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
             ) else { return }
             wss = new
         }
