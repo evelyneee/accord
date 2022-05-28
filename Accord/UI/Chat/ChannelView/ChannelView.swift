@@ -101,9 +101,9 @@ struct ChannelView: View, Equatable {
 
     var body: some View {
         HStack {
-            ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
                 List {
-                    Spacer().frame(height: typing.isEmpty && replyingTo == nil ? 75 : 90)
+                    Spacer().frame(height: 20)
                     if metalRenderer {
                         messagesView.drawingGroup()
                     } else {

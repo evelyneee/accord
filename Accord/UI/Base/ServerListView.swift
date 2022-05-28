@@ -37,11 +37,8 @@ struct GuildHoverAnimation: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onHover(perform: { res in
-                if hovered != res {
-                    print("changing", res)
-                    withAnimation(Animation.linear(duration: 0.1)) {
-                        hovered = res
-                    }
+                withAnimation(Animation.linear(duration: 0.1)) {
+                    hovered = res
                 }
             })
             .frame(width: frame, height: frame)
@@ -76,7 +73,10 @@ struct ServerListView: View {
 
     @State var selection: Int?
     @State var selectedGuild: Guild?
-    @State var selectedServer: Int? = 0
+    var upcomingGuild: Guild?
+    var upcomingSelection: Int?
+    @AppStorage("SelectedServer")
+    var selectedServer: Int?
     public static var folders: [GuildFolder] = .init()
     public static var privateChannels: [Channel] = .init()
     public static var mergedMembers: [String:Guild.MergedMember] = .init()
@@ -262,14 +262,12 @@ struct ServerListView: View {
             viewUpdater.updateView()
         })
         .onAppear {
-            self.selectedGuild = ServerListView.folders.first?.guilds.first
+            if let upcomingGuild = upcomingGuild {
+                self.selectedGuild = upcomingGuild
+                self.selection = self.upcomingSelection
+            }
+            print(self.selectedGuild)
             DispatchQueue.global().async {
-                if !Self.folders.isEmpty {
-                    let val = UserDefaults.standard.integer(forKey: "AccordChannelIn\(Array(Self.folders.compactMap { $0.guilds }.joined())[0].id)")
-                    DispatchQueue.main.async {
-                        self.selection = (val != 0 ? val : nil)
-                    }
-                }
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
                     Activity.current!
                 }

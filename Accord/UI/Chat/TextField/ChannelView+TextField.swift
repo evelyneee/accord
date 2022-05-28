@@ -57,9 +57,9 @@ extension ChannelView {
             )
             .padding(13)
         }
-        .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
-        .clipShape(RoundedCorners(tl: replyingTo != nil || !typing.isEmpty ? 7 : 12, tr: replyingTo != nil || !typing.isEmpty ? 7 : 12, bl: 12, br: 12))
-        .padding(12)
+        .background(Color(NSColor.alternatingContentBackgroundColors[1])) // blurred background
+        .clipShape(RoundedCorners(tl: replyingTo != nil || !typing.isEmpty ? 4 : 9, tr: replyingTo != nil || !typing.isEmpty ? 4 : 9, bl: 9, br: 9))
+        .padding([.horizontal, .bottom], 12)
         .padding(.bottom, 2)
     }
 }

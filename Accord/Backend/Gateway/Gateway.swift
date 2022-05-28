@@ -209,7 +209,7 @@ final class Gateway {
                 }
             }
             if self.compress {
-                self.decompressor.decompressionQueue.async {
+                self.decompressor.decompressionQueue.sync {
                     guard let data = try? self.decompressor.decompress(data: data) else { return }
                     wssThread.async {
                         do {

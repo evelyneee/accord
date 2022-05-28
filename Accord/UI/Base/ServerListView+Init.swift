@@ -11,6 +11,9 @@ import SwiftUI
 extension ServerListView {
     // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
     init(_ readyPacket: GatewayD) {
+        
+        let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? Int
+        
         // Set status for the indicator
         status = readyPacket.user_settings?.status
 
@@ -134,6 +137,14 @@ extension ServerListView {
 
         // Remote control now switched on
         MentionSender.shared.delegate = self
-        selection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(readyPacket.guilds.first?.id ?? "")")
+        if let previousServer = previousServer, previousServer != 201 {
+            print("setting")
+            self.upcomingGuild = guildTemp[previousServer]
+            self.selectedServer = previousServer
+        } else {
+            self.upcomingGuild = nil
+            self.selectedServer = 201
+        }
+        self.upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(self.upcomingGuild?.id ?? readyPacket.guilds.first?.id ?? "")")
     }
 }
