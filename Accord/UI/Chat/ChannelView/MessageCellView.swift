@@ -5,11 +5,8 @@
 //  Created by evelyn on 2021-12-12.
 //
 
-import AppKit
-import AVKit
-import Combine
-import Foundation
 import SwiftUI
+import AVKit
 
 struct GridStack<T: Identifiable, Content: View>: View {
     let rows: Int?
@@ -85,7 +82,8 @@ struct MessageCellView: View, Equatable {
     @State var editing: Bool = false
     @State var popup: Bool = false
     @State var editedText: String = ""
-
+    @State var showEditNicknamePopover: Bool = false
+    
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
     
@@ -380,6 +378,13 @@ struct MessageCellView: View, Equatable {
         Button("Show profile") {
             popup.toggle()
         }
+        
+        if (message.author == AccordCoreVars.user) || self.permissions.contains(.manageNicknames) {
+            Button("Set nickname") {
+                showEditNicknamePopover.toggle()
+            }
+        }
+        
         Divider()
         copyMenu
         if !message.attachments.isEmpty {
@@ -624,5 +629,9 @@ struct MessageCellView: View, Equatable {
         }
         .contextMenu { contextMenuContent }
         .id(message.id)
+        .popover(isPresented: $showEditNicknamePopover) {
+            SetNicknameView(user: message.author, guildID: self.guildID, isPresented: $showEditNicknamePopover)
+                .padding()
+        }
     }
 }
