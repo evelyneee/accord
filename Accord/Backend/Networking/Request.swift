@@ -332,7 +332,7 @@ public final class Request {
 
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return }
-        request.httpBody = try? Request.createMultipartBody(with: try payloadJson?.jsonString(), fileURL: fileURL, boundary: boundary)
+        request.httpBody = try? Request.createMultipartBody(with: try payloadJson?.jsonString(), fileURLs: [fileURL].compactMap(\.self), boundary: boundary)
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
@@ -347,9 +347,9 @@ public final class Request {
 
     class func createMultipartBody(
         with payloadJson: String?,
-        fileURL: String? = nil,
+        fileURLs: [String] = [],
         boundary: String = "Boundary-\(UUID().uuidString)",
-        fileData: Data? = nil
+        fileData: [Data] = []
     ) throws -> Data {
         var body = Data()
 
@@ -361,22 +361,22 @@ public final class Request {
             )
             body.append("\(payloadJson)\r\n")
         }
+        try fileURLs
+            .compactMap { URL.init(string: $0) }
+            .enumerated()
+            .forEach { idx, url in
+                let filename = url.lastPathComponent
+                let data = try fileData[safe: idx] ?? Data(contentsOf: url)
+                let mimetype = url.mimeType()
 
-        if let fileURL = fileURL,
-           let url = URL(string: fileURL)
-        {
-            let filename = url.lastPathComponent
-            let data = try fileData ?? Data(contentsOf: url)
-            let mimetype = url.mimeType()
-
-            body.append("--\(boundary)\r\n")
-            body.append(
-                "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n"
-            )
-            body.append("Content-Type: \(mimetype)\r\n\r\n")
-            body.append(data)
-            body.append("\r\n")
-        }
+                body.append("--\(boundary)\r\n")
+                body.append(
+                    "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n"
+                )
+                body.append("Content-Type: \(mimetype)\r\n\r\n")
+                body.append(data)
+                body.append("\r\n")
+            }
 
         body.append("--\(boundary)--\r\n")
         print(String(data: body, encoding: .utf8))

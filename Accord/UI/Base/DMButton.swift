@@ -10,27 +10,31 @@ import SwiftUI
 struct DMButton: View {
     @Binding var selection: Int?
     @Binding var selectedServer: Int?
+    @Binding var selectedGuild: Guild?
     @StateObject var updater: ServerListView.UpdateView
     @State var mentionCount: Int?
     @State var iconHovered: Bool = false
     var body: some View {
         Button(action: {
-            selection = nil
             DispatchQueue.global().async {
                 wss?.cachedMemberRequest.removeAll()
                 ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
             }
+            if let selection = selection, let id = self.selectedGuild?.id {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
+            }
+            selection = nil
+            self.selectedGuild = nil
             selectedServer = 201
-            let prevSelection = selection
             if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? Int {
                 self.selection = selectionPrevious
             }
-            if let selection = prevSelection {
-                UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
-            }
         }) {
             Image(systemName: "bubble.right.fill")
-                .imageScale(.medium)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 17, height: 17)
+                .padding()
                 .frame(width: 45, height: 45)
                 .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
                 .cornerRadius(iconHovered || selectedServer == 201 ? 13.5 : 23.5)

@@ -50,7 +50,7 @@ struct ChatControls: View {
                 viewModel?.emptyTextField()
             }
             if let fileUpload = fileUpload, let fileUploadURL = fileUploadURL {
-                viewModel?.send(text: contents, file: fileUploadURL, data: fileUpload, channelID: self.channelID)
+                viewModel?.send(text: contents, file: [fileUploadURL], data: [fileUpload], channelID: self.channelID)
                 DispatchQueue.main.async {
                     self.fileUpload = nil
                     self.fileUploadURL = nil

@@ -251,14 +251,14 @@ final class ChatControlsViewModel: ObservableObject {
         ))
     }
 
-    func send(text: String, file: URL, data: Data, channelID: String) {
+    func send(text: String, file: [URL], data: [Data], channelID: String) {
         var request = URLRequest(url: URL(string: "\(rootURL)/channels/\(channelID)/messages")!)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
         guard let string = try? ["content": text].jsonString() else { return }
-        request.httpBody = try? Request.createMultipartBody(with: string, fileURL: file.absoluteString, boundary: boundary, fileData: data)
+        request.httpBody = try? Request.createMultipartBody(with: string, fileURLs: file.map(\.absoluteString), boundary: boundary, fileData: data)
         let task = URLSession.shared.dataTask(with: request) { [weak self] _, res, _ in
             if let response = res as? HTTPURLResponse, response.statusCode == 200 {
                 DispatchQueue.main.async {
