@@ -80,7 +80,7 @@ struct ServerListViewCell: View {
         case .group_dm:
             HStack {
                 if let channelIcon = channel.icon {
-                    Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channel.icon ?? "").png?size=48").equatable()
+                    Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channelIcon).png?size=48").equatable()
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
                 } else {

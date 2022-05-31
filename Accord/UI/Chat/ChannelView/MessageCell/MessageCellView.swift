@@ -8,56 +8,6 @@
 import SwiftUI
 import AVKit
 
-struct GridStack<T: Identifiable, Content: View>: View {
-    let rows: Int?
-    let columns: Int?
-    let verticalAlignment: SwiftUI.HorizontalAlignment
-    let horizontalAlignment: SwiftUI.VerticalAlignment
-    let array: [T]
-    let content: (T) -> Content
-
-    @ViewBuilder
-    var body: some View {
-        if let rows = rows {
-            VStack(alignment: self.verticalAlignment) {
-                ForEach(0 ..< rows, id: \.self) { row in
-                    HStack(alignment: self.horizontalAlignment) {
-                        ForEach(0 ..< Int(round(Double(array.count / rows))), id: \.self) { column in
-                            content(self.array[row*column])
-                                .id(self.array[row*column].id)
-                                .onAppear { print(self.array[row*column].id) }
-                        }
-                    }
-                    .id(UUID())
-                }
-            }
-        } else if let columns = columns {
-            VStack(alignment: self.verticalAlignment) {
-                ForEach(0 ..< Int(round(Double(array.count / columns))), id: \.self) { row in
-                    HStack(alignment: self.horizontalAlignment) {
-                        ForEach(0 ..< columns, id: \.self) { column in
-                            content(self.array[row*column])
-                                .id(self.array[row*column].id)
-                                .onAppear { print(self.array[row*column].id) }
-                        }
-                        .id(UUID())
-                    }
-                }
-                .id(UUID())
-            }
-        }
-    }
-
-    init(_ array: [T], rowAlignment: SwiftUI.HorizontalAlignment = .center, columnAlignment: SwiftUI.VerticalAlignment = .center, rows: Int? = nil, columns: Int? = nil, @ViewBuilder content: @escaping (T) -> Content) {
-        self.array = array
-        self.verticalAlignment = rowAlignment
-        self.horizontalAlignment = columnAlignment
-        self.rows = rows
-        self.columns = columns
-        self.content = content
-    }
-}
-
 fileprivate var encoder: ISO8601DateFormatter = {
     let encoder = ISO8601DateFormatter()
     encoder.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -158,49 +108,6 @@ struct MessageCellView: View, Equatable {
                     .padding(.leading, leftPadding)
             }
         }
-    }
-    
-    private var authorText: some View {
-        HStack(spacing: 1) {
-            Text(nick ?? message.author?.username ?? "Unknown User")
-                .foregroundColor({ () -> Color in
-                    if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
-                        return Color(int: color)
-                    }
-                    return Color.primary
-                }())
-                .font(.chatTextFont)
-                .fontWeight(.semibold)
-                +
-            Text("  \(message.processedTimestamp ?? "")")
-                .foregroundColor(Color.secondary)
-                .font(.subheadline)
-                +
-            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
-                .foregroundColor(Color.secondary)
-                .font(.subheadline)
-                +
-            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
-                .foregroundColor(Color.secondary)
-                .font(.subheadline)
-            if message.author?.bot == true {
-                Text("Bot")
-                    .padding(.horizontal, 4)
-                    .foregroundColor(Color.white)
-                    .font(.subheadline)
-                    .background(Capsule().fill().foregroundColor(Color.red))
-                    .padding(.horizontal, 4)
-            }
-            if message.author?.system == true {
-                Text("System")
-                    .padding(.horizontal, 4)
-                    .foregroundColor(Color.white)
-                    .font(.subheadline)
-                    .background(Capsule().fill().foregroundColor(Color.purple))
-                    .padding(.horizontal, 4)
-           }
-        }
-
     }
     
     private var copyMenu: some View {
@@ -444,93 +351,38 @@ struct MessageCellView: View, Equatable {
         }
     }
     
-    private var replyView: some View {
-        HStack {
-            RoundedRectangle(cornerRadius: 5)
-                .trim(from: 0.5, to: 0.75)
-                .stroke(.gray.opacity(0.4), lineWidth: 2)
-                .frame(width: 53, height: 17)
-                .padding(.bottom, -15)
-                .padding(.trailing, -30)
-            Attachment(pfpURL(message.referenced_message?.author?.id, message.referenced_message?.author?.avatar, discriminator: message.referenced_message?.author?.discriminator ?? "0005", "16"))
-                .equatable()
-                .frame(width: 15, height: 15)
-                .clipShape(Circle())
-            Text(replyNick ?? message.referenced_message?.author?.username ?? "")
-                .font(.subheadline)
-                .foregroundColor({ () -> Color in
-                    if let replyRole = replyRole, let color = roleColors[replyRole]?.0, !message.isSameAuthor {
-                        return Color(int: color)
-                    }
-                    return Color.primary
-                }())
-                .fontWeight(.medium)
-            Text(message.referenced_message?.content ?? "Error")
-                .font(.subheadline)
-                .lineLimit(0)
-                .foregroundColor(.secondary)
-        }
-        .padding(.bottom, -3)
-        .padding(.leading, 15)
-    }
-    
-    private var interactionView: some View {
-        HStack {
-            Attachment(pfpURL(message.interaction?.user?.id, message.interaction?.user?.avatar, "16"))
-                .equatable()
-                .frame(width: 15, height: 15)
-                .clipShape(Circle())
-            Text(message.interaction?.user?.username ?? "")
-                .font(.subheadline)
-                .foregroundColor({ () -> Color in
-                    if let replyRole = replyRole, let color = roleColors[replyRole]?.0, !message.isSameAuthor {
-                        return Color(int: color)
-                    }
-                    return Color.primary
-                }())
-                .fontWeight(.semibold)
-            Text("/" + (message.interaction?.name ?? ""))
-                .font(.subheadline)
-                .lineLimit(0)
-                .foregroundColor(.secondary)
-        }
-        .padding(.leading, 47)
-    }
-    
     @ViewBuilder
     private var avatarView: some View {
         if let author = message.author {
-            if (self.avatar?.prefix(2) ?? author.avatar?.prefix(2)) == "a_" {
-                GifView({ () -> String in
-                    if let avatar = self.avatar {
-                        return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).gif?size=48"
-                    } else {
-                        return cdnURL + "/avatars/\(author.id)/\(author.avatar!).gif?size=48"
-                    }
-                }())
-            } else {
-                Attachment ({ () -> String in
-                    if let avatar = self.avatar {
-                        return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).png?size=48"
-                    } else if let avatar = author.avatar {
-                        return cdnURL + "/avatars/\(author.id)/\(avatar).png?size=48"
-                    } else {
-                        let index = String((Int(author.discriminator) ?? 0) % 5)
-                        return cdnURL + "/embed/avatars/\(index).png"
-                    }
-                }())
-                .equatable()
+            Button(action: {
+                self.popup.toggle()
+            }) {
+                AvatarView (
+                    author: author,
+                    guildID: self.guildID,
+                    avatar: self.avatar
+                )
             }
+            .buttonStyle(.borderless)
         }
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            if message.referenced_message != nil {
-                replyView
+            if let reply = message.referenced_message {
+                ReplyView (
+                    reply: reply,
+                    replyNick: replyNick,
+                    replyRole: $replyRole
+                )
             }
-            if message.interaction != nil {
-                interactionView
+            if let interaction = message.interaction {
+                InteractionView (
+                    interaction: interaction,
+                    isSameAuthor: message.isSameAuthor,
+                    replyRole: self.$replyRole
+                )
+                .padding(.leading, 47)
             }
             switch message.type {
             case .recipientAdd:
@@ -589,12 +441,20 @@ struct MessageCellView: View, Equatable {
                                     AsyncMarkdown(message.content)
                                         .equatable()
                                         .padding(.leading, leftPadding)
+                                        .popover(isPresented: $popup, content: {
+                                            PopoverProfileView(user: message.author, guildID: self.guildID)
+                                        })
                                 }
                             } else {
                                 Spacer().frame(height: 2)
                             }
                         } else {
-                            authorText
+                            AuthorTextView (
+                                message: self.message,
+                                pronouns: self.pronouns,
+                                nick: self.nick,
+                                role: self.$role
+                            )
                             Spacer().frame(height: 1.3)
                             if !message.content.isEmpty {
                                 if self.editing {

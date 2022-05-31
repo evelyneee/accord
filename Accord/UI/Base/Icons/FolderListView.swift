@@ -20,7 +20,7 @@ extension ServerListView {
         var body: some View {
             ForEach(ServerListView.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
-                    Folder(
+                    Folder (
                         icon: Array(folder.guilds.prefix(4)),
                         color: Color(int: folder.color ?? 0),
                         read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true)),
@@ -78,7 +78,7 @@ struct ServerIconCell: View {
             DispatchQueue.main.async {
                 print("loading", self.selection, self.guild.id)
                 self.selection = nil
-                withAnimation(old == 201 ? nil : Animation.linear(duration: 0.1)) {
+                withAnimation(old == 201 ? nil : Animation.easeInOut(duration: 0.1)) {
                     if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
                         self.selectedGuild = guild
                         self.selectedServer = new
@@ -102,7 +102,7 @@ struct ServerIconCell: View {
                     .fill()
                     .foregroundColor(Color.primary)
                     .frame(width: 5, height: selectedServer == guild.index || hovering ? 30 : 5)
-                    .animation(Animation.linear(duration: 0.1))
+                    .animation(Animation.easeInOut(duration: 0.1))
                     .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
                 GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
             }
@@ -110,7 +110,7 @@ struct ServerIconCell: View {
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
         )
-        .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) {self.hovering = h} })
+        .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) {self.hovering = h} })
         .buttonStyle(BorderlessButtonStyle())
         .redBadge(pingCount(guild: guild))
     }

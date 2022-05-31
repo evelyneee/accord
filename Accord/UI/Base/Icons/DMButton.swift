@@ -23,9 +23,9 @@ struct DMButton: View {
             if let selection = selection, let id = self.selectedGuild?.id {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
+            selectedServer = 201
             selection = nil
             self.selectedGuild = nil
-            selectedServer = 201
             if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? Int {
                 self.selection = selectionPrevious
             }
@@ -39,7 +39,7 @@ struct DMButton: View {
                 .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
                 .cornerRadius(iconHovered || selectedServer == 201 ? 13.5 : 23.5)
                 .if(selectedServer == 201, transform: { $0.foregroundColor(Color.white) })
-                .onHover(perform: { h in withAnimation(Animation.linear(duration: 0.1)) { self.iconHovered = h } })
+                .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) { self.iconHovered = h } })
         }
         .redBadge(mentionCount)
         .buttonStyle(BorderlessButtonStyle())

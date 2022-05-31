@@ -46,9 +46,9 @@ extension ChannelView {
                 Divider()
             }
             ChatControls(
-                guildID: Binding.constant(guildID),
-                channelID: Binding.constant(channelID),
-                chatText: Binding.constant("Message #\(channelName)"),
+                guildID: guildID,
+                channelID: channelID,
+                chatText: "Message #\(channelName)",
                 replyingTo: $replyingTo,
                 mentionUser: $mentionUser,
                 permissions: $viewModel.permissions,
@@ -57,10 +57,10 @@ extension ChannelView {
             )
             .padding(13)
         }
-        .background(Color(NSColor.alternatingContentBackgroundColors[1])) // blurred background
+        .background(Color(NSColor.alternatingContentBackgroundColors[1]))
         .clipShape(RoundedCorners(tl: replyingTo != nil || !typing.isEmpty ? 6 : 9, tr: replyingTo != nil || !typing.isEmpty ? 6 : 9, bl: 9, br: 9))
         .padding([.horizontal, .bottom], 12)
         .padding(.bottom, 2)
-        .background(Color.primary.colorInvert())
+        .background(colorScheme == .dark ? nil : Color(NSColor.controlBackgroundColor))
     }
 }
