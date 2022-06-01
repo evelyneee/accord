@@ -95,34 +95,32 @@ struct GuildView: View {
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
                         .font(.system(size: 10))
-                        .onChange(of: self.selection, perform: { [selection] new in
-                            if let selection = selection, new == Int(channel.id) {
-                                self.selection = selection
-                            }
-                        })
                 } else {
                     NavigationLink(
-                        destination: NavigationLazyView(ChannelView(channel, guild.name).equatable()),
                         tag: Int(channel.id) ?? 0,
-                        selection: self.$selection
-                    ) {
-                        ServerListViewCell(channel: channel, updater: self.updater)
-                    }
+                        selection: self.$selection,
+                        destination: {
+                            NavigationLazyView (
+                                ChannelView(channel, guild.name)
+                                    .equatable()
+                                    .onAppear {
+                                        let prevCount = channel.read_state?.mention_count
+                                        channel.read_state?.mention_count = 0
+                                        channel.read_state?.last_message_id = channel.last_message_id
+                                        if prevCount != 0 { self.updater.updateView() }
+                                    }
+                            )
+                        }, label: {
+                            ServerListViewCell(
+                                channel: channel,
+                                updater: self.updater
+                            )
+                        }
+                    )
                     .buttonStyle(BorderlessButtonStyle())
                     .foregroundColor(channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
                     .opacity(channel.read_state?.last_message_id != channel.last_message_id ? 1 : 0.5)
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
-                    .onChange(of: self.selection, perform: { [selection] new in
-                        if new == Int(channel.id) {
-                            channel.read_state?.mention_count = 0
-                            channel.read_state?.last_message_id = channel.last_message_id
-                        } else if selection == Int(channel.id) {
-                            let prevCount = channel.read_state?.mention_count
-                            channel.read_state?.mention_count = 0
-                            channel.read_state?.last_message_id = channel.last_message_id
-                            if prevCount != 0 { self.updater.updateView() }
-                        }
-                    })
                     .contextMenu {
                         Button("Copy Channel ID") {
                             NSPasteboard.general.clearContents()

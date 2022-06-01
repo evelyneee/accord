@@ -36,12 +36,12 @@ struct DMButton: View {
                 .frame(width: 17, height: 17)
                 .padding()
                 .frame(width: 45, height: 45)
-                .background(selectedServer == 201 ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
+                .background(selectedServer == 201 || iconHovered ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
                 .cornerRadius(iconHovered || selectedServer == 201 ? 13.5 : 23.5)
-                .if(selectedServer == 201, transform: { $0.foregroundColor(Color.white) })
-                .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) { self.iconHovered = h } })
+                .foregroundColor(selectedServer == 201 || iconHovered ? Color.white : nil)
+                .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.2)) { self.iconHovered = h } })
         }
-        .redBadge(mentionCount)
+        .redBadge($mentionCount)
         .buttonStyle(BorderlessButtonStyle())
         .onReceive(self.updater.$updater, perform: { _ in
             DispatchQueue.global().async {
