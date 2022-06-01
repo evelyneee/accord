@@ -32,7 +32,7 @@ extension ServerListView {
                                 selectedServer: self.$selectedServer,
                                 selection: self.$selection,
                                 selectedGuild: self.$selectedGuild,
-                                updater: self.updater
+                                updater: self.$updater.updater
                             )
                         }
                     }
@@ -43,7 +43,7 @@ extension ServerListView {
                         selectedServer: self.$selectedServer,
                         selection: self.$selection,
                         selectedGuild: self.$selectedGuild,
-                        updater: self.updater
+                        updater: self.$updater.updater
                     )
                 }
             }
@@ -59,7 +59,7 @@ struct ServerIconCell: View {
     @Binding var selection: Int?
     @Binding var selectedGuild: Guild?
     @State var hovering: Bool = false
-    @StateObject var updater: ServerListView.UpdateView
+    @Binding var updater: Bool
 
     @State var mentionCount: Int?
     
@@ -103,14 +103,14 @@ struct ServerIconCell: View {
                     .frame(width: 5, height: selectedServer == guild.index || hovering ? 30 : 5)
                     .animation(Animation.easeInOut(duration: 0.1))
                     .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
-                GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: updater)
+                GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: self.$updater)
             }
         }
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
         )
         .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) { self.hovering = h } })
-        .onReceive(self.updater.$updater, perform: { _ in
+        .onChange(of: self.updater, perform: { _ in
             self.mentionCount = pingCount(guild: guild)
         })
         .buttonStyle(BorderlessButtonStyle())

@@ -109,6 +109,12 @@ struct GuildView: View {
                                         channel.read_state?.last_message_id = channel.last_message_id
                                         if prevCount != 0 { self.updater.updateView() }
                                     }
+                                    .onDisappear {
+                                        let prevCount = channel.read_state?.mention_count
+                                        channel.read_state?.mention_count = 0
+                                        channel.read_state?.last_message_id = channel.last_message_id
+                                        if prevCount != 0 { self.updater.updateView() }
+                                    }
                             )
                         }, label: {
                             ServerListViewCell(
@@ -149,7 +155,7 @@ struct GuildView: View {
 struct GuildListPreview: View {
     @State var guild: Guild
     @Binding var selectedServer: Int?
-    @StateObject var updater: ServerListView.UpdateView
+    @Binding var updater: Bool
     var body: some View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))
