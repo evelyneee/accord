@@ -16,6 +16,7 @@ extension String {
             .reversed()
             .forEach { mut.removeSubrange($0) }
         return mut
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .filter { !$0.isEmoji }
             .count == 0
     }

@@ -13,20 +13,26 @@ struct PrivateChannelsView: View {
     @StateObject var viewUpdater: ServerListView.UpdateView
     var body: some View {
         ForEach(privateChannels, id: \.id) { channel in
-            NavigationLink(destination: NavigationLazyView(ChannelView(channel).equatable()), tag: Int(channel.id) ?? 0, selection: self.$selection) {
-                ServerListViewCell(channel: channel, updater: self.viewUpdater)
-                    .animation(nil, value: UUID())
-                    .onChange(of: self.selection, perform: { [selection] new in
-                        if new == Int(channel.id) {
-                            channel.read_state?.mention_count = 0
-                            channel.read_state?.last_message_id = channel.last_message_id
-                            viewUpdater.updateView()
-                        } else if selection == Int(channel.id) {
-                            channel.read_state?.mention_count = 0
-                            channel.read_state?.last_message_id = channel.last_message_id
-                        }
-                    })
-            }
+            NavigationLink (
+                tag: Int(channel.id) ?? 0,
+                selection: self.$selection,
+                destination: {
+                    NavigationLazyView(
+                        ChannelView(channel)
+                            .equatable()
+                            .onAppear {
+                                let prevCount = channel.read_state?.mention_count
+                                channel.read_state?.mention_count = 0
+                                channel.read_state?.last_message_id = channel.last_message_id
+                                if prevCount != 0 { self.viewUpdater.updateView() }
+                            }
+                    )
+                },
+                label: {
+                    ServerListViewCell(channel: channel, updater: self.viewUpdater)
+                        .animation(nil, value: UUID())
+                }
+            )
             .contextMenu {
                 Button("Copy Channel ID") {
                     NSPasteboard.general.clearContents()

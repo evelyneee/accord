@@ -66,7 +66,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                 guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 message.processedTimestamp = message.timestamp.makeProperDate()
-                message.user_mentioned = message.mentions.compactMap { $0?.id }.contains(user_id)
+                message.user_mentioned = message.mentions.compactMap { $0.id }.contains(user_id)
                 if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                     self?.loadUser(for: message.author?.id)
                 }
@@ -79,7 +79,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     }
                     guard let author = message.author else { return }
                     Storage.usernames[author.id] = author.username
-                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                    withAnimation(Animation.easeInOut(duration: 0.05)) {
                         self?.messages.insert(message, at: 0)
                     }
                 }
@@ -124,7 +124,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard let message = gatewayMessage.d else { return }
                 guard let index = messageMap?[message.id] else { return }
                 DispatchQueue.main.async {
-                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                    withAnimation(Animation.easeInOut(duration: 0.05)) {
                         let i: Int = index
                         self?.messages.remove(at: i)
                     }
@@ -141,7 +141,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
                 guard let message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 message.processedTimestamp = message.timestamp.makeProperDate()
-                message.user_mentioned = message.mentions.compactMap { $0?.id }.contains(user_id)
+                message.user_mentioned = message.mentions.compactMap { $0.id }.contains(user_id)
                 let messageMap = self?.messages.generateKeyMap()
                 DispatchQueue.main.async {
                     self?.messages[keyed: message.id, messageMap] = message
@@ -178,7 +178,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard element != output.last else { return element }
                 element.processedTimestamp = element.timestamp.makeProperDate()
                 element.sameAuthor = output[index + 1].author?.id == element.author?.id
-                element.user_mentioned = element.mentions.compactMap { $0?.id }.contains(user_id)
+                element.user_mentioned = element.mentions.compactMap { $0.id }.contains(user_id)
                 return element
             }
         }
@@ -319,7 +319,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard element != msg.last else { return element }
                 element.processedTimestamp = element.timestamp.makeProperDate()
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
-                element.user_mentioned = element.mentions.compactMap { $0?.id }.contains(user_id)
+                element.user_mentioned = element.mentions.compactMap { $0.id }.contains(user_id)
                 return element
             }
             self?.messages.append(contentsOf: messages)

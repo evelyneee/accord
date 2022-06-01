@@ -61,6 +61,8 @@ struct ServerIconCell: View {
     @State var hovering: Bool = false
     @StateObject var updater: ServerListView.UpdateView
 
+    @State var mentionCount: Int?
+    
     func updateSelection(old: Int?, new: Int?) {
         DispatchQueue.global().async {
             if let selection = selection, old == 201 {
@@ -76,17 +78,14 @@ struct ServerIconCell: View {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             DispatchQueue.main.async {
-                print("loading", self.selection, self.guild.id)
                 self.selection = nil
-                withAnimation(old == 201 ? nil : Animation.easeInOut(duration: 0.1)) {
-                    if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
-                        self.selectedGuild = guild
-                        self.selectedServer = new
-                        self.selection = value
-                    } else {
-                        self.selectedGuild = guild
-                        self.selectedServer = new
-                    }
+                if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
+                    self.selectedGuild = guild
+                    self.selectedServer = new
+                    self.selection = value
+                } else {
+                    self.selectedGuild = guild
+                    self.selectedServer = new
                 }
             }
         }
@@ -110,8 +109,11 @@ struct ServerIconCell: View {
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
         )
-        .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) {self.hovering = h} })
+        .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) { self.hovering = h } })
+        .onReceive(self.updater.$updater, perform: { _ in
+            self.mentionCount = pingCount(guild: guild)
+        })
         .buttonStyle(BorderlessButtonStyle())
-        .redBadge(pingCount(guild: guild))
+        .redBadge($mentionCount)
     }
 }

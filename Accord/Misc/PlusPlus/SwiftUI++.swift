@@ -220,7 +220,7 @@ public extension NSView {
 }
 
 struct NotificationBadge: ViewModifier {
-    var count: Int?
+    @Binding var count: Int?
     func body(content: Content) -> some View {
         ZStack(alignment: .bottomTrailing) {
             content
@@ -242,7 +242,7 @@ struct NotificationBadge: ViewModifier {
 }
 
 extension View {
-    func redBadge(_ count: Int?) -> some View {
+    func redBadge(_ count: Binding<Int?>) -> some View {
         self.modifier(NotificationBadge(count: count))
     }
     

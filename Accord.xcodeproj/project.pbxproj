@@ -61,6 +61,14 @@
 		9EC5FA1F2845BBCA00C2A416 /* GridStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */; };
 		9EC5FA212845BC0600C2A416 /* AuthorText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA202845BC0600C2A416 /* AuthorText.swift */; };
 		9EC5FA232846346E00C2A416 /* ReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA222846346D00C2A416 /* ReplyView.swift */; };
+		9EC5FA252846B7ED00C2A416 /* MessageCellMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA242846B7ED00C2A416 /* MessageCellMenu.swift */; };
+		9EC5FA272846B9D700C2A416 /* ReactionsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA262846B9D700C2A416 /* ReactionsGrid.swift */; };
+		9EC5FA292846BC4D00C2A416 /* RecipientAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA282846BC4D00C2A416 /* RecipientAddView.swift */; };
+		9EC5FA2B2846BD7800C2A416 /* RecipientRemoveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA2A2846BD7800C2A416 /* RecipientRemoveView.swift */; };
+		9EC5FA2D2846BDD200C2A416 /* ChannelNameChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA2C2846BDD200C2A416 /* ChannelNameChangeView.swift */; };
+		9EC5FA2F2846BE2000C2A416 /* WelcomeMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA2E2846BE2000C2A416 /* WelcomeMessageView.swift */; };
+		9EC5FA312846BE8300C2A416 /* StickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA302846BE8300C2A416 /* StickerView.swift */; };
+		9EC5FA352846C1B400C2A416 /* MatchesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA342846C1B400C2A416 /* MatchesView.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
 		9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */; };
@@ -200,6 +208,14 @@
 		9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridStack.swift; sourceTree = "<group>"; };
 		9EC5FA202845BC0600C2A416 /* AuthorText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorText.swift; sourceTree = "<group>"; };
 		9EC5FA222846346D00C2A416 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
+		9EC5FA242846B7ED00C2A416 /* MessageCellMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellMenu.swift; sourceTree = "<group>"; };
+		9EC5FA262846B9D700C2A416 /* ReactionsGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsGrid.swift; sourceTree = "<group>"; };
+		9EC5FA282846BC4D00C2A416 /* RecipientAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipientAddView.swift; sourceTree = "<group>"; };
+		9EC5FA2A2846BD7800C2A416 /* RecipientRemoveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipientRemoveView.swift; sourceTree = "<group>"; };
+		9EC5FA2C2846BDD200C2A416 /* ChannelNameChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelNameChangeView.swift; sourceTree = "<group>"; };
+		9EC5FA2E2846BE2000C2A416 /* WelcomeMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeMessageView.swift; sourceTree = "<group>"; };
+		9EC5FA302846BE8300C2A416 /* StickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerView.swift; sourceTree = "<group>"; };
+		9EC5FA342846C1B400C2A416 /* MatchesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesView.swift; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
 		9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsViewModel.swift; sourceTree = "<group>"; };
@@ -581,13 +597,36 @@
 		9EC5FA1D2845BBA000C2A416 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				9EC5FA182845B9E900C2A416 /* InteractionView.swift */,
 				9EC5FA1A2845BACC00C2A416 /* AvatarView.swift */,
 				9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */,
 				9EC5FA202845BC0600C2A416 /* AuthorText.swift */,
-				9EC5FA222846346D00C2A416 /* ReplyView.swift */,
+				9EC5FA242846B7ED00C2A416 /* MessageCellMenu.swift */,
+				9EC5FA262846B9D700C2A416 /* ReactionsGrid.swift */,
+				9EC5FA302846BE8300C2A416 /* StickerView.swift */,
+				9EC5FA322846C09C00C2A416 /* MessageTypes */,
+				9EC5FA332846C0C200C2A416 /* Reference */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		9EC5FA322846C09C00C2A416 /* MessageTypes */ = {
+			isa = PBXGroup;
+			children = (
+				9EC5FA282846BC4D00C2A416 /* RecipientAddView.swift */,
+				9EC5FA2A2846BD7800C2A416 /* RecipientRemoveView.swift */,
+				9EC5FA2C2846BDD200C2A416 /* ChannelNameChangeView.swift */,
+				9EC5FA2E2846BE2000C2A416 /* WelcomeMessageView.swift */,
+			);
+			path = MessageTypes;
+			sourceTree = "<group>";
+		};
+		9EC5FA332846C0C200C2A416 /* Reference */ = {
+			isa = PBXGroup;
+			children = (
+				9EC5FA182845B9E900C2A416 /* InteractionView.swift */,
+				9EC5FA222846346D00C2A416 /* ReplyView.swift */,
+			);
+			path = Reference;
 			sourceTree = "<group>";
 		};
 		9ECE42B9279E131B00883D0A /* TextField */ = {
@@ -596,6 +635,7 @@
 				A82A05FE26D3F4D2007B9B27 /* ChannelView+TextField.swift */,
 				A82A060026D3F5A4007B9B27 /* ChatControlsView.swift */,
 				9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */,
+				9EC5FA342846C1B400C2A416 /* MatchesView.swift */,
 			);
 			path = TextField;
 			sourceTree = "<group>";
@@ -807,6 +847,7 @@
 				A8B1F2A426CB176900E8FDC5 /* Channel.swift in Sources */,
 				9E82874F27BB522600953A7B /* ServerListView+Init.swift in Sources */,
 				A85D3FDE2677A681002327AD /* Images.swift in Sources */,
+				9EC5FA2D2846BDD200C2A416 /* ChannelNameChangeView.swift in Sources */,
 				9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */,
 				9E6BCC5D277E43E10085F279 /* SearchView.swift in Sources */,
 				9E2C98792780F573008C6AFD /* Gateway.swift in Sources */,
@@ -830,6 +871,7 @@
 				A8C73D1226F5812D00CF0350 /* Songlink.swift in Sources */,
 				9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */,
 				32F3742F25733D8100ADB7E6 /* ChannelView.swift in Sources */,
+				9EC5FA292846BC4D00C2A416 /* RecipientAddView.swift in Sources */,
 				9E5145A8282FC8FD0070828B /* ProfileEditingView.swift in Sources */,
 				A8C73D1426F583A000CF0350 /* SongLink.swift in Sources */,
 				9E6BCC56277E23E80085F279 /* Reaction.swift in Sources */,
@@ -857,9 +899,11 @@
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
 				9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */,
+				9EC5FA312846BE8300C2A416 /* StickerView.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
 				A88A3D15265B22C4003AE08F /* LoginView.swift in Sources */,
 				9E39B26A2787C30900069424 /* VisualStudioCodeRPC.swift in Sources */,
+				9EC5FA2B2846BD7800C2A416 /* RecipientRemoveView.swift in Sources */,
 				9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */,
 				A8922501266ED88B00FEA21C /* Extensions.swift in Sources */,
 				A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */,
@@ -876,6 +920,7 @@
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
 				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,
 				9E6878ED283BB9EB001DD5AB /* FileAttachmentView.swift in Sources */,
+				9EC5FA352846C1B400C2A416 /* MatchesView.swift in Sources */,
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
@@ -885,7 +930,10 @@
 				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A88CD70F26E065F3007D979B /* MentionProtocol.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
+				9EC5FA252846B7ED00C2A416 /* MessageCellMenu.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
+				9EC5FA2F2846BE2000C2A416 /* WelcomeMessageView.swift in Sources */,
+				9EC5FA272846B9D700C2A416 /* ReactionsGrid.swift in Sources */,
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,

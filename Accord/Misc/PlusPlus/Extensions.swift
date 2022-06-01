@@ -161,7 +161,7 @@ struct Folder<Content: View>: View {
                             .background(color.opacity(0.75))
                             .cornerRadius(15)
                             .frame(width: 45, height: 45)
-                            .redBadge(collapsed ? mentionCount : nil)
+                            .redBadge(collapsed ? .constant(mentionCount) : .constant(nil))
                         }
                     }
                 }
