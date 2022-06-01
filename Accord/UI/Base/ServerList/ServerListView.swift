@@ -219,7 +219,6 @@ struct ServerListView: View {
                 self.selectedGuild = upcomingGuild
                 self.selection = self.upcomingSelection
             }
-            print(self.selectedGuild)
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
                     Activity.current!

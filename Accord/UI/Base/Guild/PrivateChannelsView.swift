@@ -26,6 +26,12 @@ struct PrivateChannelsView: View {
                                 channel.read_state?.last_message_id = channel.last_message_id
                                 if prevCount != 0 { self.viewUpdater.updateView() }
                             }
+                            .onDisappear {
+                                let prevCount = channel.read_state?.mention_count
+                                channel.read_state?.mention_count = 0
+                                channel.read_state?.last_message_id = channel.last_message_id
+                                if prevCount != 0 { self.viewUpdater.updateView() }
+                            }
                     )
                 },
                 label: {
