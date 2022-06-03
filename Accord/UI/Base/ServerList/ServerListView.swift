@@ -48,12 +48,12 @@ struct GuildHoverAnimation: ViewModifier {
 }
 
 func pingCount(guild: Guild) -> Int {
-    let intArray = guild.channels!.compactMap { $0.read_state?.mention_count }
+    let intArray = guild.channels.compactMap { $0.read_state?.mention_count }
     return intArray.reduce(0, +)
 }
 
 func unreadMessages(guild: Guild) -> Bool {
-    let array = guild.channels?
+    let array = guild.channels
         .compactMap { $0.last_message_id == $0.read_state?.last_message_id }
         .contains(false)
     return array ?? false
@@ -94,7 +94,6 @@ struct ServerListView: View {
         }
     }
 
-    @ViewBuilder
     var statusIndicator: some View {
         Circle()
             .foregroundColor({ () -> Color in

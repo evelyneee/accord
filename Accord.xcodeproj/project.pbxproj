@@ -216,6 +216,8 @@
 		9EC5FA2E2846BE2000C2A416 /* WelcomeMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeMessageView.swift; sourceTree = "<group>"; };
 		9EC5FA302846BE8300C2A416 /* StickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerView.swift; sourceTree = "<group>"; };
 		9EC5FA342846C1B400C2A416 /* MatchesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesView.swift; sourceTree = "<group>"; };
+		9EC5FA362849196A00C2A416 /* RTCSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCSocket.swift; sourceTree = "<group>"; };
+		9EC5FA3828491D3500C2A416 /* Opcodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Opcodes.swift; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
 		9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsViewModel.swift; sourceTree = "<group>"; };
@@ -531,6 +533,8 @@
 			isa = PBXGroup;
 			children = (
 				9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */,
+				9EC5FA362849196A00C2A416 /* RTCSocket.swift */,
+				9EC5FA3828491D3500C2A416 /* Opcodes.swift */,
 			);
 			path = Voice;
 			sourceTree = "<group>";
@@ -924,6 +928,7 @@
 				A869085F269F2A0A00F13CAD /* SettingsView.swift in Sources */,
 				370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */,
 				A898453E26978EBA00B1C9DB /* EmotesView.swift in Sources */,
+				9EC5FA3928491D3500C2A416 /* Opcodes.swift in Sources */,
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
 				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
 				9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */,
@@ -938,6 +943,7 @@
 				32F4C95D256D7D3300343BB3 /* ContentView.swift in Sources */,
 				9E3B48DB280C348E00B131B7 /* ServerListViewCell.swift in Sources */,
 				A80FEC2C2724FD35005F9950 /* Operators++.swift in Sources */,
+				9EC5FA372849196A00C2A416 /* RTCSocket.swift in Sources */,
 				A82A05FF26D3F4D2007B9B27 /* ChannelView+TextField.swift in Sources */,
 				A8B1F2A026CB16F500E8FDC5 /* Guild.swift in Sources */,
 				9E6BCC5F277E8D990085F279 /* Gateway+MessageHandle.swift in Sources */,
@@ -1078,7 +1084,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = Accord/Accord.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

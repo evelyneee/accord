@@ -92,14 +92,3 @@ final class AccordCoreVars {
 //        var newest_build: Build
 //    }
 //}
-
-#if DEBUG
-    let rw = (
-        dso: { () -> UnsafeMutableRawPointer in
-            var info = Dl_info()
-            dladdr(dlsym(dlopen(nil, RTLD_LAZY), "LocalizedString"), &info)
-            return info.dli_fbase
-        }(),
-        log: OSLog(subsystem: "com.apple.runtime-issues", category: "Accord")
-    )
-#endif

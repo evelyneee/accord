@@ -16,7 +16,7 @@ fileprivate var encoder: ISO8601DateFormatter = {
 
 struct MessageCellMenu: View {
     
-    var message: Message
+    @State var message: Message
     var guildID: String
     var permissions: Permissions
     @Binding var replyingTo: Message?
@@ -94,28 +94,25 @@ struct MessageCellMenu: View {
     
     private var copyMenu: some View {
         Menu("Copy") {
-            Button("Copy message text") { [weak message] in
-                guard let content = message?.content else { return }
+            Button("Copy message text") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(content, forType: .string)
+                NSPasteboard.general.setString(message.content, forType: .string)
             }
-            Button("Copy message link") { [weak message] in
-                guard let channelID = message?.channel_id, let id = message?.id else { return }
+            Button("Copy message link") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("https://discord.com/channels/\(message?.guild_id ?? guildID)/\(channelID)/\(id)", forType: .string)
+                NSPasteboard.general.setString("https://discord.com/channels/\(message.guild_id ?? guildID)/\(message.channel_id)/\(message.id)", forType: .string)
             }
-            Button("Copy user ID") { [weak message] in
-                guard let id = message?.author?.id else { return }
+            Button("Copy user ID") {
+                guard let id = message.author?.id else { return }
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(id, forType: .string)
             }
-            Button("Copy message ID") { [weak message] in
-                guard let id = message?.id else { return }
+            Button("Copy message ID") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(id, forType: .string)
+                NSPasteboard.general.setString(message.id, forType: .string)
             }
-            Button("Copy username and tag", action: { [weak message] in
-                guard let author = message?.author else { return }
+            Button("Copy username and tag", action: {
+                guard let author = message.author else { return }
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString("\(author.username)#\(author.discriminator)", forType: .string)
             })
@@ -247,7 +244,7 @@ struct MessageCellMenu: View {
     }
     
     var body: some View {
-        Button("Reply") { [weak message] in
+        Button("Reply") {
             replyingTo = message
         }
         if message.author?.id == AccordCoreVars.user?.id {
@@ -256,9 +253,9 @@ struct MessageCellMenu: View {
             }
         }
         if message.author?.id == AccordCoreVars.user?.id || self.permissions.contains(.manageMessages) {
-            Button("Delete") { [weak message] in
+            Button("Delete") {
                 DispatchQueue.global().async {
-                    message?.delete()
+                    message.delete()
                 }
             }
         }

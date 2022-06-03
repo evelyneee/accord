@@ -239,7 +239,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func loadWindowRect(_:AnyObject?) {
-        guard NSApp.keyWindow?.identifier == NSUserInterfaceItemIdentifier.init("AccordMainWindow") else { return }
         guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
         NSApp.keyWindow?.setFrame(from: desc)
     }

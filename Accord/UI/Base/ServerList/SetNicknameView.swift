@@ -9,10 +9,10 @@
 import SwiftUI
 
 struct SetNicknameView: View {
-    /// The user object to set the nickname for
+    /// The user to set the nickname for
     var user: User?
     
-    /// The GuildID to set the nickname in
+    /// The guild ID to set the nickname in
     let guildID: String
     
     @Binding var isPresented: Bool
@@ -61,11 +61,14 @@ struct SetNicknameView: View {
         
         let body = ["nick": newNicknameText]
         
-        Request.fetch(
-            request: nil,
-            url: url,
-            headers: Headers(userAgent: discordUserAgent, contentType: nil, token: AccordCoreVars.token, bodyObject: body, type: .PATCH, discordHeaders: true, referer: nil, empty: false, json: true, cached: false)
-        ) { result in
+        Request.fetch(url: url, headers: Headers (
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            bodyObject: body,
+            type: .PATCH,
+            discordHeaders: true,
+            json: true
+        )) { result in
             switch result {
             case .success(let data):
                 // make sure it is not a DiscordError

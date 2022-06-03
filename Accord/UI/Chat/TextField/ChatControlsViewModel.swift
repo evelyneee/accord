@@ -62,7 +62,7 @@ final class ChatControlsViewModel: ObservableObject {
                 self.matchedUsers = matched
             }
         } else if let search = channels.last {
-            let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels?.filter { $0.name?.contains(search) ?? false } } }
+            let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
             let joined: [Channel] = Array(Array(Array(matches).joined()).joined())
                 .filter { $0.guild_id == guildID }
                 .prefix(10)
@@ -124,7 +124,7 @@ final class ChatControlsViewModel: ObservableObject {
     func findView() {
         AppKitLink<NSTextField>.introspect { [weak self] textField, _ in
             textField.allowsEditingTextAttributes = true
-            self?.textField = textField
+            //self?.textField = textField
         }
     }
 

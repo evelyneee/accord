@@ -46,7 +46,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // TODO: Voice state object
     // var voice_states: [VoiceState]
     // var members: [GuildMember]?
-    var channels: [Channel]?
+    var channels: [Channel]
     // TODO: Thread object
     var threads: [Channel]?
     // TODO: PresenceUpdate object

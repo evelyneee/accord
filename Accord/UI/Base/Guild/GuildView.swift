@@ -74,14 +74,14 @@ struct GuildView: View {
             })
             if let banner = guild.banner {
                 if banner.prefix(2) == "a_" {
-                    GifView(cdnURL + "/banners/\(guild.id)/\(banner).gif?size=1024")
-                        .drawingGroup()
-                        .cornerRadius(3)
-                        .animation(nil, value: UUID())
-                        .edgesIgnoringSafeArea(.all)
-                        .padding(.vertical, 5)
+//                    GifView(cdnURL + "/banners/\(guild.id)/\(banner).gif?size=512")
+//                        .drawingGroup()
+//                        .cornerRadius(3)
+//                        .animation(nil, value: UUID())
+//                        .edgesIgnoringSafeArea(.all)
+//                        .padding(.vertical, 5)
                 } else {
-                    Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=1024", size: nil)
+                    Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=512", size: nil)
                         .equatable()
                         .cornerRadius(3)
                         .animation(nil, value: UUID())

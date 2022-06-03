@@ -35,17 +35,16 @@ extension GatewayD {
         let showHiddenChannels = UserDefaults.standard.bool(forKey: "ShowHiddenChannels")
         guilds.enumerated().forEach { index, _guild in
             var guild = _guild
-            guild.channels = guild.channels?.sorted { ($0.type.rawValue, $0.position ?? 0, $0.id) < ($1.type.rawValue, $1.position ?? 0, $1.id) }
-            guard let rejects = guild.channels?
-                .filter({ $0.parent_id == nil && $0.type != .section }),
-                let parents: [Channel] = guild.channels?.filter({ $0.type == .section }),
-                let sections = Array(NSOrderedSet(array: parents)) as? [Channel] else { return }
+            guild.channels = guild.channels.sorted { ($0.type.rawValue, $0.position ?? 0, $0.id) < ($1.type.rawValue, $1.position ?? 0, $1.id) }
+            guard let sections = Array(NSOrderedSet(array: guild.channels.filter({ $0.type == .section }))) as? [Channel] else { return }
+            let rejects = guild.channels
+                .filter({ $0.parent_id == nil && $0.type != .section })
             var sectionFormatted: [Channel] = .init()
             sections.forEach { channel in
-                guard let matching = guild.channels?
+                let matching = guild.channels
                     .filter({ $0.parent_id == channel.id })
-                    .filter({ showHiddenChannels ? true : ($0.shown ?? true) }),
-                    !matching.isEmpty else { return }
+                    .filter({ showHiddenChannels ? true : ($0.shown ?? true) })
+                guard !matching.isEmpty else { return }
                 sectionFormatted.append(channel)
                 sectionFormatted.append(contentsOf: matching)
             }
@@ -66,7 +65,7 @@ extension GatewayD {
         let stateDict = readState.entries.generateKeyMap()
         guilds.enumerated().forEach { (index, guild) -> Void in
             var guild = guild
-            guard var channels = guild.channels else { return }
+            var channels = guild.channels
             channels = channels.map { channel -> Channel in
                 var channel = channel
                 channel.guild_id = guild.id

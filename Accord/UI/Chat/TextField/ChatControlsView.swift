@@ -56,9 +56,11 @@ struct ChatControls: View {
                     self.fileUploadURL = nil
                 }
             } else if let replyingTo = replyingTo {
-                self.replyingTo = nil
                 viewModel?.send(text: contents, replyingTo: replyingTo, mention: self.mentionUser, guildID: guildID)
-                self.mentionUser = true
+                DispatchQueue.main.async {
+                    self.replyingTo = nil
+                    self.mentionUser = true
+                }
             } else if viewModel?.textFieldContents.prefix(1) == "/" {
                 try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
             } else {

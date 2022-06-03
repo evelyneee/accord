@@ -72,6 +72,7 @@ struct GatewayEvent {
         case userUpdate = "USER_UPDATE"
 
         case voiceStateUpdate = "VOICE_STATE_UPDATE"
+        case voiceServerUpdate = "VOICE_SERVER_UPDATE"
 
         case applicationCommandUpdate = "APPLICATION_COMMAND_UPDATE"
         case applicationCommandPermissionsUpdate = "APPLICATION_COMMAND_PERMISSIONS_UPDATE"

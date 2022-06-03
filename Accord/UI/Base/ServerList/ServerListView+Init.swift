@@ -114,7 +114,7 @@ extension ServerListView {
                         var guild = guildTemp[id]
                         guild.emojis.removeAll()
                         guild.index = id
-                        guild.channels = guild.channels?
+                        guild.channels = guild.channels
                             .compactMap { channel -> Channel in
                                 var channel = channel
                                 channel.guild_id = guild.id

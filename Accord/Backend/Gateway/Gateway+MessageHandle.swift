@@ -65,7 +65,7 @@ extension Gateway {
             MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
             if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
                 let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[keyed: message.guild_id ?? ""]
-                let matchingChannel = matchingGuild?.channels?[keyed: message.channel_id] ?? ServerListView.privateChannels[keyed: message.channel_id]
+                let matchingChannel = matchingGuild?.channels[keyed: message.channel_id] ?? ServerListView.privateChannels[keyed: message.channel_id]
                 showNotification(
                     title: message.author?.username ?? "Unknown User",
                     subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
@@ -100,6 +100,17 @@ extension Gateway {
         case .messageDeleteBulk: break
         case .applicationCommandUpdate: break
         case .applicationCommandPermissionsUpdate: break
+        case .voiceServerUpdate: break
+//            print(event.d)
+//            let token = event.d?["token"] as? String ?? ""
+//            guard let endpoint = event.d?["endpoint"] as? String else { return }
+//
+//            let vcSocket = try? RTCSocket(
+//                url: URL(string: "wss://" + endpoint.dropLast(4)),
+//                token: token,
+//                guildID: "825437365027864578",
+//                channelID: ""
+//            )
         case .guildApplicationCommandsUpdate:
             print("uwu")
             if let guildID = event.guildID {

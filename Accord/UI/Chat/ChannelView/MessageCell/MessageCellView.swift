@@ -19,7 +19,7 @@ struct MessageCellView: View, Equatable {
     var pronouns: String?
     var avatar: String?
     var guildID: String
-    var permissions: Permissions
+    @Binding var permissions: Permissions
     @Binding var role: String?
     @Binding var replyRole: String?
     @Binding var replyingTo: Message?
@@ -63,6 +63,7 @@ struct MessageCellView: View, Equatable {
     
     var body: some View {
         VStack(alignment: .leading) {
+            
             if let reply = message.referenced_message {
                 ReplyView (
                     reply: reply,

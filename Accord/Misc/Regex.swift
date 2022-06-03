@@ -15,7 +15,6 @@ enum Regex {
             emojiIDRegex,
             songIDsRegex,
             mentionsRegex,
-            inlineImageRegex,
             platformsRegex,
             channelsRegex,
             lineRegex,
@@ -32,7 +31,6 @@ enum Regex {
     static var emojiIDRegex = try? NSRegularExpression(pattern: #"(?<=\:)(\d+)(.*?)(?=\>)"#)
     static var songIDsRegex = try? NSRegularExpression(pattern: #"(?<=https:\/\/open\.spotify\.com\/track\/|https:\/\/music\.apple\.com\/[a-z][a-z]\/album\/[a-zA-Z\d%\(\)-]{1,100}\/|https://tidal\.com/browse/track/)(?:(?!\?).)*"#)
     static var mentionsRegex = try? NSRegularExpression(pattern: #"(?<=\@|@!)(\d+)(.*?)(?=\>)"#)
-    static var inlineImageRegex = try? NSRegularExpression(pattern: #"(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpg|gif|png))(?:\?([^#]*))?(?:#(.*))?"#)
     static var platformsRegex = try? NSRegularExpression(pattern: #"(spotify|music\.apple|tidal)"#)
     static var channelsRegex = try? NSRegularExpression(pattern: ##"(?<=\#)(\d+)(.+?)(?=\>)"##)
     static var lineRegex = try? NSRegularExpression(pattern: #"\*.+\*|~~.+~~|`{1,3}.+`{1,3}|([^*~\s]+)+"#)

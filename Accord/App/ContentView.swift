@@ -91,6 +91,16 @@ struct ContentView: View {
                                 }
                                 .store(in: &wsCancellable)
                             wss = new
+                            
+//                            concurrentQueue.asyncAfter(deadline: .now() + 5, execute: {
+//                                try? wss.updateVoiceState(
+//                                    guildID: "825437365027864578",
+//                                    channelID: "971218660146425876",
+//                                    deafened: true,
+//                                    muted: true,
+//                                    streaming: false
+//                                )
+//                            })
                         } catch {
                             failedToConnect(error)
                         }

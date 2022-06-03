@@ -13,7 +13,7 @@ struct SearchView: View {
     @State var results: [Channel] = .init()
     @Environment(\.presentationMode) var presentationMode
     var matches: [Channel] {
-        var matches: [Channel] = Array(Array(Array(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels?.filter { $0.name?.lowercased().contains(text.lowercased()) ?? true } } }).joined()).joined())
+        var matches: [Channel] = Array(Array(Array(ServerListView.folders.compactMap { $0.guilds.compactMap { $0.channels.filter { $0.name?.lowercased().contains(text.lowercased()) ?? true } } }).joined()).joined())
         let dmMatches: [Channel] = ServerListView.privateChannels.filter { $0.computedName.lowercased().contains(text.lowercased()) }
         matches.append(contentsOf: dmMatches)
         return matches
