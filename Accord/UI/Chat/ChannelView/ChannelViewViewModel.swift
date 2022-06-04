@@ -33,7 +33,13 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     var guildID: String
     var channelID: String
     
-    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
+    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue", attributes: .concurrent)
+    
+    static fileprivate let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+        return decoder
+    }()
 
     init(channel: Channel) {
         self.channelID = channel.id
@@ -68,17 +74,51 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         connect()
     }
 
+    private static var cachingQueue = DispatchQueue(label: "red.evelyn.accord.CachingQueue", attributes: .concurrent)
+    private func cacheUsers(_ members: [GuildMember]) {
+        Self.cachingQueue.async { [weak self] in
+            guard let guildID = self?.guildID else { return }
+            members.forEach { user in
+                do {
+                    let saving = GuildMember.GuildMemberSaved(member: user)
+                    let data = try JSONEncoder().encode(saving)
+                    guard let url = URL(string: rootURL)?
+                        .appendingPathComponent("guilds")
+                        .appendingPathComponent(guildID)
+                        .appendingPathComponent("members")
+                        .appendingPathComponent(user.user.id) else { return }
+                    let request = URLRequest(url: url)
+                    let response = URLResponse(url: url, mimeType: "application/discord-guild-member", expectedContentLength: data.count, textEncodingName: "utf8")
+                    let fakeURLResponse = CachedURLResponse(response: response, data: data)
+                    cache.storeCachedResponse(fakeURLResponse, for: request)
+                } catch { print(error) }
+            }
+        }
+    }
+    
+    func loadCachedUser(_ id: String) throws -> GuildMember {
+        assert(!Thread.isMainThread)
+        guard let url = URL(string: rootURL)?
+            .appendingPathComponent("guilds")
+            .appendingPathComponent(self.guildID)
+            .appendingPathComponent("members")
+            .appendingPathComponent(id) else { throw "Bad url" }
+        let request = URLRequest(url: url)
+        guard let user = cache.cachedResponse(for: request) else { throw "No user data" }
+        let cachedObject = try JSONDecoder().decode(GuildMember.GuildMemberSaved.self, from: user.data)
+        guard !cachedObject.isOutdated else { throw "Outdated object" }
+        return cachedObject.member
+    }
+    
     func connect() {
         wss.messageSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in
                 guard channelID == self?.channelID else { return }
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-                guard var message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
+                guard var message = try? Self.decoder.decode(GatewayMessage.self, from: msg).d else { return }
                 message.processedTimestamp = message.timestamp.makeProperDate()
                 message.user_mentioned = message.mentions.compactMap { $0.id }.contains(user_id)
-                if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
+                if self?.guildID != "@me" && !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
                     self?.loadUser(for: message.author?.id)
                 }
                 if let firstMessage = self?.messages.first {
@@ -96,42 +136,29 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             }
             .store(in: &cancellable)
+        
         wss.memberChunkSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg in
-                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg), let users = chunk.d?.members else { return }
+                guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg),
+                        let users = chunk.d?.members,
+                        chunk.d?.guild_id == self?.guildID else { return }
                 let allUsers: [GuildMember] = users.compactMap { $0 }
+                self?.cacheUsers(allUsers)
                 for person in allUsers {
-                    DispatchQueue.main.async {
-                        wss.cachedMemberRequest["\(self?.guildID ?? "")$\(person.user.id)"] = person
-                        if let nickname = person.nick {
-                            self?.nicks[person.user.id] = nickname
-                        }
-                        if let avatar = person.avatar {
-                            self?.avatars[person.user.id] = avatar
-                        }
-                    }
-                    if let roles = person.roles {
-                        let temp = roles
-                            .filter { roleColors[$0] != nil }
-                            .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
-                        if let foregroundRoleColor = temp.first {
-                            DispatchQueue.main.async {
-                                self?.roles[person.user.id] = foregroundRoleColor
-                            }
-                        }
-                    }
+                    self?.memberLoad(person)
                 }
             }
             .store(in: &cancellable)
+        
         wss.deleteSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
                 guard channelID == self?.channelID else { return }
                 let messageMap = self?.messages.generateKeyMap()
-                guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg) else { return }
-                guard let message = gatewayMessage.d else { return }
-                guard let index = messageMap?[message.id] else { return }
+                guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg),
+                      let message = gatewayMessage.d,
+                      let index = messageMap?[message.id] else { return }
                 DispatchQueue.main.async {
                     withAnimation(Animation.easeInOut(duration: 0.05)) {
                         let i: Int = index
@@ -140,6 +167,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             }
             .store(in: &cancellable)
+        
         wss.editSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
@@ -156,6 +184,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             }
             .store(in: &cancellable)
+        
         wss.typingSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
@@ -191,13 +220,46 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         .map { item -> OPSItems in
                             let new = item
                             new.member?.roles = new.member?.roles?
-                                .filter { roleColors[$0] != nil }
-                                .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
+                                .compactMap { (id) -> (String, (Int, Int))? in
+                                    if let color = roleColors[id] {
+                                        return (id, color)
+                                    }
+                                    return nil
+                                }
+                                .sorted(by: { $0.1.1 > $1.1.1 })
+                                .map(\.0)
                             return new
                         }
                 }
             }
             .store(in: &cancellable)
+    }
+    
+    private func memberLoad(_ person: GuildMember) {
+        DispatchQueue.main.async {
+            if let nickname = person.nick {
+                self.nicks[person.user.id] = nickname
+            }
+            if let avatar = person.avatar {
+                self.avatars[person.user.id] = avatar
+            }
+        }
+        if let roles = person.roles {
+            let foregroundRoleColor = roles
+                .compactMap { (id) -> (String, (Int, Int))? in
+                    if let color = roleColors[id] {
+                        return (id, color)
+                    }
+                    return nil
+                }
+                .sorted(by: { $0.1.1 > $1.1.1 })
+                .map(\.0).first
+            if let foregroundRoleColor = foregroundRoleColor {
+                DispatchQueue.main.async {
+                    self.roles[person.user.id] = foregroundRoleColor
+                }
+            }
+        }
     }
 
     func ack(channelID: String, guildID: String) {
@@ -221,8 +283,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-        .subscribe(on: DispatchQueue.global(qos: .userInitiated))
-        .receive(on: DispatchQueue.global(qos: .userInitiated))
+        .subscribe(on: messageFetchQueue)
+        .receive(on: messageFetchQueue)
         .map { output -> [Message] in
             output.enumerated().compactMap { index, element -> Message in
                 guard element != output.last else { return element }
@@ -233,7 +295,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 return element
             }
         }
-        .receive(on: DispatchQueue.main)
+        .receive(on: RunLoop.main)
         .sink(receiveCompletion: { completion in
             switch completion {
             case .finished: break
@@ -243,7 +305,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
         }) { [weak self] messages in
             self?.messages = messages
-            DispatchQueue.global(qos: .userInitiated).async {
+            messageFetchQueue.async {
                 guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
                 self?.loadPronouns()
                 self?.ack(channelID: channelID, guildID: guildID)
@@ -262,27 +324,11 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 
     func loadUser(for id: String?) {
         guard let id = id else { return }
-        guard let person = wss.cachedMemberRequest["\(guildID)$\(id)"] else {
+        guard let person = try? self.loadCachedUser(id) else {
             try? wss.getMembers(ids: [id], guild: guildID)
             return
         }
-        let nickname = person.nick ?? person.user.username
-        DispatchQueue.main.async {
-            self.nicks[person.user.id] = nickname
-        }
-        if let avatar = person.avatar {
-            avatars[person.user.id] = avatar
-        }
-        if let roles = person.roles {
-            let temp = roles
-                .filter { roleColors[$0] != nil }
-                .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
-            if let foregroundRoleColor = temp.first {
-                DispatchQueue.main.async {
-                    self.roles[person.user.id] = foregroundRoleColor
-                }
-            }
-        }
+        memberLoad(person)
     }
 
     func fakeNicksObject() {
@@ -318,39 +364,21 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         .store(in: &cancellable)
     }
 
-    func getCachedMemberChunk() {
-        let allUserIDs = messages.compactMap { $0.author?.id }
-            .removingDuplicates()
-        for person in allUserIDs.compactMap({ wss.cachedMemberRequest["\(guildID)$\($0)"] }) {
-            let nickname = person.nick ?? person.user.username
-            DispatchQueue.main.async {
-                self.nicks[person.user.id] = nickname
-            }
-            if let avatar = person.avatar {
-                avatars[person.user.id] = avatar
-            }
-            if let roles = person.roles {
-                let temp = roles
-                    .filter { roleColors[$0] != nil }
-                    .sorted(by: { roleColors[$0]!.1 > roleColors[$1]!.1 })
-                if let foregroundRoleColor = temp.first {
-                    DispatchQueue.main.async {
-                        self.roles[person.user.id] = foregroundRoleColor
-                    }
-                }
-            }
-        }
-    }
-
     func performSecondStageLoad() {
-        var allUserIDs: [String] = Array(NSOrderedSet(array: messages.compactMap { $0.author?.id })) as! [String]
-        // getCachedMemberChunk()
-        for (index, item) in allUserIDs.enumerated() {
-            if Array(wss.cachedMemberRequest.keys).contains("\(guildID)$\(item)"), [Int](allUserIDs.indices).contains(index) {
-                allUserIDs.remove(at: index)
-            }
+        var allUserIDs: [String] = messages
+            .compactMap { $0.author?.id }
+            .removingDuplicates()
+        var toRemove: [String] = .init()
+        allUserIDs.forEach { id in
+            do {
+                let member = try self.loadCachedUser(id)
+                toRemove.append(id)
+                memberLoad(member)
+            } catch { print(error) }
         }
+        allUserIDs = allUserIDs.filter { !toRemove.contains($0) }
         if !(allUserIDs.isEmpty) {
+            print(allUserIDs, "websocket request")
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
         }
     }
@@ -363,10 +391,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(channelID)"
         ))
-        .sink(receiveCompletion: { _ in
-
-        }) { [weak self] msg in
-            let messages: [Message] = msg.enumerated().compactMap { index, element -> Message in
+        .map { msg in
+            msg.enumerated().compactMap { index, element -> Message in
                 guard element != msg.last else { return element }
                 var element = element
                 element.processedTimestamp = element.timestamp.makeProperDate()
@@ -374,6 +400,11 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 element.user_mentioned = element.mentions.compactMap { $0.id }.contains(user_id)
                 return element
             }
+        }
+        .receive(on: RunLoop.main)
+        .sink(receiveCompletion: { _ in
+
+        }) { [weak self] messages in
             self?.messages.append(contentsOf: messages)
         }
         .store(in: &cancellable)

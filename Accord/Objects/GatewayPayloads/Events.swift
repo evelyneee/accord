@@ -74,6 +74,18 @@ final class GuildMember: Codable {
     var nick: String?
     var roles: [String]?
     var presence: Presence?
+    
+    struct GuildMemberSaved: Codable {
+        internal init(member: GuildMember, date: Date = Date()) {
+            self.member = member
+            self.date = date
+        }
+        
+        var member: GuildMember
+        var date: Date
+        
+        var isOutdated: Bool { !Calendar.current.isDateInToday(self.date) }
+    }
 }
 
 final class GatewayMessage: Decodable {
@@ -89,5 +101,17 @@ final class DeletedMessage: Decodable {
 }
 
 final class GatewayEventContent<T: Decodable>: Decodable {
+    internal init(d: T) {
+        self.d = d
+    }
+    
+    var d: T
+}
+
+final class GatewayEventCodable<T: Codable>: Codable {
+    internal init(d: T) {
+        self.d = d
+    }
+    
     var d: T
 }

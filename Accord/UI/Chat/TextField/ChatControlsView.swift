@@ -343,7 +343,7 @@ struct ChatControls: View {
                                 typing = false
                             }
                         }
-                        viewModel?.markdown()
+                        //viewModel?.markdown()
                         textQueue.async {
                             viewModel?.checkText(guildID: guildID, channelID: channelID)
                         }

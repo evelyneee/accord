@@ -30,4 +30,4 @@ let messageFetchQueue = DispatchQueue(label: "AccordMessageFetchQueue", attribut
 let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue", attributes: .concurrent)
 
 // Gif loading queue
-let gifQueue = DispatchQueue(label: "AccordGifQueue")
+let gifQueue = DispatchQueue(label: "AccordGifQueue", attributes: .concurrent)

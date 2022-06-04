@@ -56,7 +56,7 @@ func unreadMessages(guild: Guild) -> Bool {
     let array = guild.channels
         .compactMap { $0.last_message_id == $0.read_state?.last_message_id }
         .contains(false)
-    return array ?? false
+    return array
 }
 
 struct ServerListView: View {

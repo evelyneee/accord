@@ -89,7 +89,7 @@ struct GuildView: View {
                         .padding(.vertical, 5)
                 }
             }
-            ForEach(guild.channels ?? .init(), id: \.id) { channel in
+            ForEach(guild.channels, id: \.id) { channel in
                 if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
