@@ -39,7 +39,7 @@ struct ChatControls: View {
     var textFieldText: String {
         self.permissions.contains(.sendMessages) ?
         viewModel.percent ?? chatText :
-        "You do not have permission to speak in this channel"
+        "You do not have permission to speak in this channel."
     }
     
     private func send() {
