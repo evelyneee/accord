@@ -9,12 +9,11 @@ import Foundation
 import SwiftUI
 
 struct ChatControls: View {
-    @available(macOS 12.0, *)
+
     enum FocusedElements: Hashable {
         case mainTextField
     }
 
-    @available(macOS 12.0, *)
     @FocusState private var focusedField: FocusedElements?
 
     @State var chatTextFieldContents: String = ""
@@ -24,7 +23,7 @@ struct ChatControls: View {
     var chatText: String
     @Binding var replyingTo: Message?
     @Binding var mentionUser: Bool
-    @Binding var permissions: Permissions
+    var permissions: Permissions
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
@@ -66,10 +65,15 @@ struct ChatControls: View {
             } else {
                 viewModel?.send(text: contents, guildID: guildID, channelID: channelID)
             }
-            if #available(macOS 12.0, *) {
-                DispatchQueue.main.async {
-                    self.focusedField = .mainTextField
-                }
+            self.focusIfUnfocused()
+        }
+    }
+    
+    func focusIfUnfocused() {
+        DispatchQueue.main.async {
+            print(self.focusedField)
+            if self.focusedField != .mainTextField {
+                self.focusedField = .mainTextField
             }
         }
     }
@@ -167,29 +171,15 @@ struct ChatControls: View {
         )
     }
 
-    @available(macOS 12.0, *)
-    var montereyTextField: some View {
+    var mainTextField: some View {
         TextField(textFieldText, text: $viewModel.textFieldContents)
             .focused($focusedField, equals: .mainTextField)
             .onSubmit {
-                if CGEventSource.keyState(.combinedSessionState, key: CGKeyCode(0x38)) {
-                    self.viewModel.textFieldContents.append("\n")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                        self.viewModel.textField?.currentEditor()?.moveDown(nil)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                            self.focusedField = .mainTextField
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                self.viewModel.textField?.currentEditor()?.moveDown(nil)
-                            })
-                        })
-                    })
-                } else {
-                    typing = false
-                    send()
-                }
+                typing = false
+                send()
             }
             .layoutPriority(1)
-            .animation(nil)
+            .animation(nil, value: UUID())
             .fixedSize(horizontal: false, vertical: true)
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
                 if self.focusedField == .mainTextField {
@@ -216,35 +206,10 @@ struct ChatControls: View {
                 }
             }
             .onAppear {
-                self.focusedField = .mainTextField
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                    self.focusIfUnfocused()
+                })
             }
-    }
-
-    var bigSurTextField: some View {
-        TextField(textFieldText, text: $viewModel.textFieldContents, onEditingChanged: { _ in }) {
-            typing = false
-            send()
-        }
-        .animation(nil)
-        .fixedSize(horizontal: false, vertical: true)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSMenuWillSendActionNotification"))) { [weak viewModel] pub in
-            if String(describing: pub.userInfo).contains("Command-V") {
-                let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
-                if let rawData = data,
-                   let string = String(data: rawData, encoding: .utf8),
-                   let url = URL(string: string),
-                   let data = try? Data(contentsOf: url)
-                {
-                    self.fileUpload = data
-                    self.fileUploadURL = url
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        if (viewModel?.textFieldContents.count ?? -1) >= (url.pathComponents.last?.count ?? 0) {
-                            viewModel?.textFieldContents.removeLast(url.pathComponents.last?.count ?? 0)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     var fileImportButton: some View {
@@ -270,7 +235,7 @@ struct ChatControls: View {
         .buttonStyle(BorderlessButtonStyle())
         .frame(width: 17.5, height: 17.5)
         .popover(isPresented: $nitroless, content: {
-            NavigationLazyView(NitrolessView(chatText: $viewModel.textFieldContents).equatable())
+            NitrolessView(chatText: $viewModel.textFieldContents).equatable()
                 .frame(width: 300, height: 400)
         })
     }
@@ -313,11 +278,7 @@ struct ChatControls: View {
                     HStack {
                         fileImportButton
                         Divider().frame(height: 20)
-                        if #available(macOS 12.0, *) {
-                            montereyTextField
-                        } else {
-                            bigSurTextField
-                        }
+                        mainTextField
                         if nitrolessEnabled {
                             nitrolessButton
                         }

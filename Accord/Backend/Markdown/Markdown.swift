@@ -12,6 +12,8 @@ import SwiftUI
 
 public final class Markdown {
     
+    private init () {}
+    
     static var highlighting: Bool = UserDefaults.standard.value(forKey: "Highlighting") as? Bool ?? false
     
     enum MarkdownErrors: Error {
@@ -67,7 +69,6 @@ public final class Markdown {
 
      ***/
 
-    @available(macOS 12.0, *)
     class func bionicMarkdown(_ word: String) -> AttributedString {
         var markdown = try? AttributedString(markdown: word)
         markdown = markdown?.transformingAttributes(\.presentationIntent, { transformer in
@@ -88,7 +89,7 @@ public final class Markdown {
      - Returns AnyPublisher with SwiftUI Text view
      **/
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextPublisher {
-        let emoteIDs = word.matches(precomputed: Regex.emojiIDRegex)
+        let emoteIDs = word.matches(precomputed: RegexExpressions.emojiIDRegex)
         if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=48") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
@@ -103,10 +104,10 @@ public final class Markdown {
                 .eraseToAny()
         }
         return Future { promise -> Void in
-            let mentions = word.matches(precomputed: Regex.mentionsRegex)
-            let channels = word.matches(precomputed: Regex.channelsRegex)
-            let songIDs = word.matches(precomputed: Regex.songIDsRegex)
-            let platforms = word.matches(precomputed: Regex.platformsRegex)
+            let mentions = word.matches(precomputed: RegexExpressions.mentionsRegex)
+            let channels = word.matches(precomputed: RegexExpressions.channelsRegex)
+            let songIDs = word.matches(precomputed: RegexExpressions.songIDsRegex)
+            let platforms = word.matches(precomputed: RegexExpressions.platformsRegex)
                 .replaceAllOccurences(of: "music.apple", with: "applemusic")
             let dict = Array(arrayLiteral: zip(songIDs, platforms))
                 .reduce([], +)
@@ -142,7 +143,7 @@ public final class Markdown {
                 return promise(.success(Text(word) + Text(" ")))
             }
                         
-            if #available(macOS 12.0, *), highlight {
+            if highlight {
                 return promise(.success(Text(bionicMarkdown(word)) + Text(" ")))
             } else {
                 return promise(.success(appleMarkdown(word)))
@@ -159,7 +160,7 @@ public final class Markdown {
      **/
     public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
-        let words = line.matchRange(precomputed: Regex.lineRegex).map { line[$0].trimmingCharacters(in: .whitespaces) }
+        let words = line.matchRange(precomputed: RegexExpressions.lineRegex).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight) }
         return Publishers.MergeMany(pubs)
             .collect()

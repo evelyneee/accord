@@ -7,6 +7,7 @@
 
 import AppKit
 import Foundation
+import SwiftUI
 
 final class AppKitLink<V: NSView> {
     class func introspectView(_ root: NSView, _ completion: @escaping ((_ nsView: V, _ subviewCount: Int) -> Void)) {
@@ -29,4 +30,37 @@ final class AppKitLink<V: NSView> {
             }
         }
     }
+}
+
+struct FetchScrollView: NSViewRepresentable {
+    
+    let view = NSTextField(string: "")
+    @State var tableView: NSTableView? = nil
+    
+    func makeNSView(context: Context) -> NSView {
+        return view
+    }
+    
+    func getTableView() -> NSTableView? {
+        guard let cell = view.superview?.superview?.superview else { return nil }
+        let tableView = Mirror(reflecting: cell)
+            .children
+            .filter { $0.label == "enclosingTableView"}
+            .first?.value as? NSTableView
+        print(tableView)
+        return tableView
+    }
+    
+    func setTableView() {
+        self.tableView = self.getTableView()
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {
+    }
+}
+
+class ListTableCellView: NSView {
+    //(label: Optional("host"), value: Optional(<_TtGC7SwiftUI15CellHostingViewGVS_15ModifiedContentVS_14_ViewList_ViewVS_19CellContentModifier__: 0x7f8f049a5800>)),
+    //var enclosingTableView: Any?
+    // (label: Optional("delegate"), value: Optional(<_TtGC7SwiftUI26NSTableViewListCoordinatorGVS_19ListStyleDataSourceOs5Never_GOS_19SelectionManagerBoxS2___: 0x7f8f05192940>))
 }

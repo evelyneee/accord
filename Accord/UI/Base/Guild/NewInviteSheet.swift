@@ -53,14 +53,9 @@ struct NewInviteSheet: View {
                     HStack(spacing: 0) {
                         Text("Invite Code: ")
                             .fontWeight(.medium)
-                        if #available(macOS 12.0, *) {
-                            Text("https://discord.gg/" + code)
-                                .fontWeight(.medium)
-                                .textSelection(.enabled)
-                        } else {
-                            Text("https://discord.gg/" + code)
-                                .fontWeight(.medium)
-                        }
+                        Text("https://discord.gg/" + code)
+                            .fontWeight(.medium)
+                            .textSelection(.enabled)
                     }
                     .padding(5)
                     Button("Copy") {

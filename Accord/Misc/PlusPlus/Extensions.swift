@@ -246,14 +246,14 @@ func iconURL(_ id: String?, _ icon: String?, _ size: String = "96") -> String {
     return cdnURL + "/icons/\(id)/\(icon).png?size=\(size)"
 }
 
-public extension Collection where Indices.Iterator.Element == Index {
+public extension Collection {
     subscript(exist index: Index) -> Iterator.Element? {
         indices.contains(index) ? self[index] : nil
     }
 }
 
 // prevent index out of range
-public extension Collection where Indices.Iterator.Element == Index, Index: BinaryInteger {
+public extension Collection where Index: BinaryInteger {
     subscript(safe index: Index) -> Iterator.Element? {
         indices.count > index ? self[index] : nil
     }

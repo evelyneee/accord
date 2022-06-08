@@ -112,7 +112,7 @@ struct SettingsView: View {
 }
 
 extension FileManager {
-    open func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
+    public func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
         do {
             if FileManager.default.fileExists(atPath: dstURL.path) {
                 try FileManager.default.removeItem(at: dstURL)

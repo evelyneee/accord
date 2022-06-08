@@ -7,7 +7,11 @@
 
 import Foundation
 
-struct Channel: Decodable, Identifiable {
+struct Channel: Decodable, Equatable, Identifiable, Hashable {
+    static func == (lhs: Channel, rhs: Channel) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     let id: String
     let type: ChannelType
     var guild_id: String?
@@ -70,6 +74,10 @@ struct Channel: Decodable, Identifiable {
 
     var computedName: String {
         name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

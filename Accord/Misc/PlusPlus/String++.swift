@@ -11,7 +11,7 @@ extension String {
     var hasEmojisOnly: Bool {
         var mut = trimmingCharacters(in: .whitespacesAndNewlines)
         let discordEmojis = mut
-            .matchRange(precomputed: Regex.fullEmojiRegex)
+            .matchRange(precomputed: RegexExpressions.fullEmojiRegex)
         discordEmojis
             .reversed()
             .forEach { mut.removeSubrange($0) }

@@ -1,5 +1,5 @@
 //
-//  Regex.swift
+//  RegexExpressions.swift
 //  Accord
 //
 //  Created by evelyn on 2022-03-07.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Regex {
+enum RegexExpressions {
     static func precompute() {
         _ = (
             fullEmojiRegex,

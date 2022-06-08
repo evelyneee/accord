@@ -17,7 +17,6 @@ struct DMButton: View {
     var body: some View {
         Button(action: {
             DispatchQueue.global().async {
-                wss?.cachedMemberRequest.removeAll()
                 ServerListView.privateChannels = ServerListView.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
             }
             if let selection = selection, let id = self.selectedGuild?.id {

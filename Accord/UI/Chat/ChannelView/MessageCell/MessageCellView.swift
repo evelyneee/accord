@@ -45,22 +45,6 @@ struct MessageCellView: View, Equatable {
         }
     }
     
-    @ViewBuilder
-    private var avatarView: some View {
-        if let author = message.author {
-            Button(action: {
-                self.popup.toggle()
-            }) {
-                AvatarView (
-                    author: author,
-                    guildID: self.guildID,
-                    avatar: self.avatar
-                )
-            }
-            .buttonStyle(.borderless)
-        }
-    }
-    
     var body: some View {
         VStack(alignment: .leading) {
             
@@ -108,8 +92,12 @@ struct MessageCellView: View, Equatable {
                 }
             default:
                 HStack(alignment: .top) {
-                    if !(message.isSameAuthor && message.referenced_message == nil) {
-                        avatarView
+                    if let author = message.author, !(message.isSameAuthor && message.referenced_message == nil) {
+                        AvatarView (
+                            author: author,
+                            guildID: self.guildID,
+                            avatar: self.avatar
+                        )
                             .frame(width: 35, height: 35)
                             .clipShape(Circle())
                             .popover(isPresented: $popup, content: {
@@ -118,7 +106,7 @@ struct MessageCellView: View, Equatable {
                             .padding(.trailing, 1.5)
                     }
                     VStack(alignment: .leading) {
-                        if message.isSameAuthor, message.referenced_message == nil {
+                        if message.isSameAuthor && message.referenced_message == nil {
                             if !message.content.isEmpty {
                                 if self.editing {
                                     editingTextField
@@ -190,7 +178,6 @@ struct MessageCellView: View, Equatable {
                 showEditNicknamePopover: self.$showEditNicknamePopover
             )
         }
-        .id(message.id)
         .popover(isPresented: $showEditNicknamePopover) {
             SetNicknameView(user: message.author, guildID: self.guildID, isPresented: $showEditNicknamePopover)
                 .padding()

@@ -43,7 +43,7 @@ extension ArraySlice {
     }
 }
 
-extension Slice where Base: Sequence {
+extension Slice {
     func literal() -> Base {
         base
     }

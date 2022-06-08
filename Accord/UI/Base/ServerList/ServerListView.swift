@@ -195,6 +195,7 @@ struct ServerListView: View {
             }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
+        .navigationViewStyle(DoubleColumnNavigationViewStyle())
         //.navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             guard let uInfo = pub.userInfo as? [Int: Int],

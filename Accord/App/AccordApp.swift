@@ -105,7 +105,7 @@ struct AccordApp: App {
                         NetworkCore.shared = NetworkCore()
                     }
                     DispatchQueue.global(qos: .background).async {
-                        Regex.precompute()
+                        RegexExpressions.precompute()
                     }
                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
                         granted, error in

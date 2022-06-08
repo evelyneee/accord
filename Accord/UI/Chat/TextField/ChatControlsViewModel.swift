@@ -20,7 +20,6 @@ final class ChatControlsViewModel: ObservableObject {
     var observation: NSKeyValueObservation?
     var command: SlashCommandStorage.Command?
 
-    weak var textField: NSTextField?
     var currentValue: String?
     var currentRange: Int?
 
@@ -38,11 +37,11 @@ final class ChatControlsViewModel: ObservableObject {
     
     func checkText(guildID: String, channelID: String) {
         let ogContents = self.textFieldContents
-        let mentions = textFieldContents.matches(precomputed: Regex.chatTextMentionsRegex)
-        let channels = textFieldContents.matches(precomputed: Regex.chatTextChannelsRegex)
-        let slashes = textFieldContents.matches(precomputed: Regex.chatTextSlashCommandRegex)
-        let emoji = textFieldContents.matches(precomputed: Regex.chatTextEmojiRegex)
-        let emotes = self.textFieldContents.matches(precomputed: Regex.completedEmoteRegex)
+        let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentionsRegex)
+        let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannelsRegex)
+        let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommandRegex)
+        let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmojiRegex)
+        let emotes = self.textFieldContents.matches(precomputed: RegexExpressions.completedEmoteRegex)
         
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
@@ -134,7 +133,9 @@ final class ChatControlsViewModel: ObservableObject {
 
     func findView() {
         AppKitLink<NSTextField>.introspect { textField, _ in
-            textField.allowsEditingTextAttributes = true
+            DispatchQueue.main.async {
+                textField.allowsEditingTextAttributes = true
+            }
         }
     }
 
@@ -160,14 +161,8 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func emptyTextField() {
-        if #available(macOS 12.0, *) {
-            DispatchQueue.main.async {
-                self.textFieldContents = ""
-            }
-        } else {
-            DispatchQueue.main.sync {
-                self.textFieldContents = ""
-            }
+        DispatchQueue.main.async {
+            self.textFieldContents = ""
         }
     }
 

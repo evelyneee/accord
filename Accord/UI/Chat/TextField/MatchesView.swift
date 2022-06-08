@@ -14,13 +14,18 @@ struct MatchesView<Data: RangeReplaceableCollection & RandomAccessCollection & M
     var label: ((Data.Element) -> Content)
     var body: some View {
         ForEach(elements, id: id) { element in
-            Button(action: {
-                action(element)
-            }, label: {
-                label(element)
-            })
-            .buttonStyle(.borderless)
-            .padding(3)
+            if let element = element as AnyObject {
+                Button(action: { [weak element] in
+                    guard let element = element as? Data.Element else { return }
+                    action(element)
+                }, label: { [weak element] in
+                    if let element = element as? Data.Element {
+                        label(element)
+                    }
+                })
+                .buttonStyle(.borderless)
+                .padding(3)
+            }
         }
     }
 }

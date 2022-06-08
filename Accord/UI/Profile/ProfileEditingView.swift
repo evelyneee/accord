@@ -82,7 +82,7 @@ struct ProfileEditingView: View {
                     Button.init(action: {
                         self.emotePopup.toggle()
                     }, label: {
-                        let parsedEmote = self.emoteText.matches(precomputed: Regex.emojiIDRegex).first
+                        let parsedEmote = self.emoteText.matches(precomputed: RegexExpressions.emojiIDRegex).first
                         if let parsedEmote = parsedEmote {
                             Attachment(cdnURL + "/emojis/\(parsedEmote).png?size=48")
                                 .frame(width: 16, height: 16)

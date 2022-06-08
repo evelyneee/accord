@@ -10,6 +10,18 @@ import AVKit
 import Combine
 import SwiftUI
 
+extension NSScrollView {
+    open override func viewDidMoveToWindow() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "red.evelyn.accord.ScrollToBottom"), object: nil, queue: nil) { _ in
+            if self.documentView?.className.contains("ListCoreTableView") == true {
+                let heightOffset = self.contentSize.height - self.bounds.height + self.contentInsets.bottom
+                let bottomOffset = NSPoint(x: 0, y: heightOffset)
+                self.contentView.scroll(to: bottomOffset) 
+            }
+        }
+    }
+}
+
 struct ChannelView: View, Equatable {
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         lhs.viewModel == rhs.viewModel
@@ -76,7 +88,7 @@ struct ChannelView: View, Equatable {
                     replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
                     pronouns: viewModel.pronouns[author.id],
                     avatar: viewModel.avatars[author.id],
-                    guildID: guildID,
+                    guildID: viewModel.guildID,
                     permissions: $viewModel.permissions,
                     role: $viewModel.roles[author.id],
                     replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
@@ -84,11 +96,17 @@ struct ChannelView: View, Equatable {
                 )
                 .equatable()
                 .id(message.id)
-                .listRowInsets(.init(top: 3.5, leading: 0, bottom: ((message.isSameAuthor && message.referenced_message == nil) ? 0.5 : 13) - (message.user_mentioned == true ? 3 : 0), trailing: 0))
-                .padding(.horizontal, 5)
-                .padding(.vertical, message.user_mentioned == true ? 3 : 0)
-                .background(message.user_mentioned == true ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
+                .listRowInsets(EdgeInsets(
+                    top: 3.5,
+                    leading: 0,
+                    bottom: message.bottomInset,
+                    trailing: 0
+                ))
+                .padding(.horizontal, 5.0)
+                .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
+                .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
                 .onAppear { [unowned viewModel] in
+
                     if viewModel.messages.count >= 50,
                        message == viewModel.messages[viewModel.messages.count - 2]
                     {
@@ -99,12 +117,13 @@ struct ChannelView: View, Equatable {
                 }
             }
         }
-        .rotationEffect(.radians(.pi))
+        .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+        .listRowBackground(Color.clear)
     }
-
+    
     var body: some View {
-        HStack {
+        HStack(content: {
             VStack(spacing: 0) {
                 List {
                     Spacer().frame(height: 15)
@@ -112,7 +131,12 @@ struct ChannelView: View, Equatable {
                         messagesView.drawingGroup()
                     } else {
                         messagesView
+//                            .onAppear {
+//                                viewModel.tableView = self.tableViewGetter.getTableView()
+//                                viewModel.tableView?.scrollToEndOfDocument(nil)
+//                            }
                     }
+                    //self.tableViewGetter
                 }
                 .listStyle(.plain)
                 .rotationEffect(.radians(.pi))
@@ -120,16 +144,16 @@ struct ChannelView: View, Equatable {
                 blurredTextField
             }
             if memberListShown {
-                MemberListView(guildID: self.guildID, list: $viewModel.memberList)
+                MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
                     .frame(width: 250)
-                    .onAppear {
-                        if viewModel.memberList.isEmpty && guildID != "@me" {
-                            try? wss.memberList(for: guildID, in: channelID)
+                    .onAppear { [unowned viewModel] in
+                        if viewModel.memberList.isEmpty && viewModel.guildID != "@me" {
+                            try? wss.memberList(for: viewModel.guildID, in: viewModel.channelID)
                         }
                     }
             }
-        }
-        .navigationTitle(Text("\(guildID == "@me" ? "" : "#")\(channelName)"))
+        })
+        .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)"))
         .navigationSubtitle(Text(guildName))
         .presentedWindowToolbarStyle(.unifiedCompact)
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
@@ -147,8 +171,8 @@ struct ChannelView: View, Equatable {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))
                 }
-                .popover(isPresented: $pins) {
-                    PinsView(guildID: guildID, channelID: channelID, replyingTo: Binding.constant(nil))
+                .popover(isPresented: $pins) { [unowned viewModel] in
+                    PinsView(guildID: viewModel.guildID, channelID: viewModel.channelID, replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
                 }
                 Toggle(isOn: $mentions) {

@@ -253,7 +253,7 @@ struct MessageCellMenu: View {
             }
         }
         if message.author?.id == AccordCoreVars.user?.id || self.permissions.contains(.manageMessages) {
-            Button("Delete") {
+            Button("Delete") { 
                 DispatchQueue.global().async {
                     message.delete()
                 }

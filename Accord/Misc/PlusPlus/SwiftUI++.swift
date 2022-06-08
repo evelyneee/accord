@@ -23,49 +23,6 @@ extension Button {
     }
 }
 
-struct AsyncView<Content: View, D: Decodable>: View {
-    @State var cancellable: AnyCancellable? = nil
-    @State var d: D? = nil
-    @State var error: Error? = nil
-
-    private var completion: (D?, Error?) -> Content
-    private var headers: Headers?
-    private var url: URL?
-    private var queue: DispatchQueue
-
-    init(_: D.Type, _ url: URL?, headers: Headers? = nil, on queue: DispatchQueue, content: @escaping (D?, Error?) -> Content) {
-        self.url = url
-        self.headers = headers
-        completion = content
-        self.queue = queue
-    }
-
-    func load() {
-        queue.async {
-            self.cancellable = RequestPublisher.fetch(D.self, url: url, headers: headers)
-                .sink(receiveCompletion: { completion in
-                    dump(completion)
-                    switch completion {
-                    case .finished: break
-                    case let .failure(error):
-                        self.error = error
-                    }
-                }, receiveValue: { d in
-                    self.d = d
-                })
-        }
-    }
-
-    var body: some View {
-        HStack {
-            completion(d, error)
-        }
-        .onAppear(perform: {
-            self.load()
-        })
-    }
-}
-
 struct RoundedCorners: Shape {
     var tl: CGFloat = 0.0
     var tr: CGFloat = 0.0

@@ -459,23 +459,7 @@ public final class RequestPublisher {
     }
 }
 
-@available(macOS, obsoleted: 12.0)
-extension URLSession {
-    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
-        try await withCheckedThrowingContinuation { continuation in
-            self.dataTask(with: request) { data, response, error in
-                if let data = data, let response = response {
-                    continuation.resume(with: .success((data, response)))
-                } else if let response = response {
-                    continuation.resume(with: .success((Data(), response)))
-                } else if let error = error {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-}
-
+#if false
 enum AsyncRequest {
     static func fetch<T: Decodable>(
         _: T.Type,
@@ -539,6 +523,7 @@ enum AsyncRequest {
         }
     }
 }
+#endif
 
 enum DateDecodingErrors: Error {
     case badDate(String)

@@ -40,7 +40,6 @@ func showNotification(title: String, subtitle: String, description: String? = ni
 }
 
 #if false
-@available(macOS 12.0, *)
 func newNotification(_ message: Message) {
     let content = UNMutableNotificationContent()
 

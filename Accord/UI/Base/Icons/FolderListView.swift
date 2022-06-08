@@ -92,8 +92,7 @@ struct ServerIconCell: View {
     }
 
     var body: some View {
-        Button(action: { [weak wss] in
-            wss?.cachedMemberRequest.removeAll()
+        Button(action: {
             self.updateSelection(old: selectedServer, new: guild.index)
         }) {
             HStack {
@@ -101,7 +100,7 @@ struct ServerIconCell: View {
                     .fill()
                     .foregroundColor(Color.primary)
                     .frame(width: 5, height: selectedServer == guild.index || hovering ? 30 : 5)
-                    .animation(Animation.easeInOut(duration: 0.1))
+                    .animation(Animation.easeInOut(duration: 0.1), value: UUID())
                     .opacity(unreadMessages(guild: guild) || selectedServer == guild.index ? 1 : 0)
                 GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: self.$updater)
             }

@@ -63,8 +63,6 @@ final class Gateway {
     private let socketEndpoint: NWEndpoint
     internal let compress: Bool
 
-    var cachedMemberRequest: [String: GuildMember] = [:]
-
     enum GatewayErrors: Error {
         case noStringData(String)
         case essentialEventFailed(String)

@@ -51,11 +51,11 @@ struct RolesView: View {
     
     @ViewBuilder
     private func item(for role: String) -> some View {
-        if let roleName = roleNames[role], let roleColor = roleColors[role]?.0 {
+        if let roleName = roleNames[role] {
             HStack(spacing: 4) {
                 Circle()
                     .fill()
-                    .foregroundColor(Color(int: roleColor))
+                    .foregroundColor(color(for: role))
                     .frame(width: 10, height: 10)
                 Text(roleName)
                     .font(.subheadline)
@@ -66,6 +66,13 @@ struct RolesView: View {
             .cornerRadius(4)
             .padding(4)
         }
+    }
+    
+    func color(for role: String) -> Color {
+        if let roleColor = roleColors[role]?.0 {
+            return Color(int: roleColor)
+        }
+        return Color.secondary
     }
 
     private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
@@ -183,7 +190,7 @@ struct PopoverProfileView: View {
                         .font(.subheadline)
                         .foregroundColor(Color.secondary)
                     
-                    if let bio = self.fullUser?.bio {
+                    if let bio = self.fullUser?.bio, !bio.isEmpty {
                         Divider()
                         Text("About me")
                             .fontWeight(.semibold)

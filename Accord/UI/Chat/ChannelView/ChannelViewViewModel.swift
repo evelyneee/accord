@@ -14,7 +14,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
         lhs.messages == rhs.messages && lhs.nicks == rhs.nicks && lhs.roles == rhs.roles && lhs.avatars == rhs.avatars && lhs.pronouns == rhs.pronouns
     }
-
+    
     @Published var messages: [Message] = .init()
     @Published var nicks: [String: String] = .init()
     @Published var roles: [String: String] = .init()
@@ -30,48 +30,59 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @Environment(\.user)
     var user: User
     
+    weak var tableView: NSTableView?
+    
     var guildID: String
     var channelID: String
     
-    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue", attributes: .concurrent)
+    static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
     
     static fileprivate let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         return decoder
     }()
-
+    
     init(channel: Channel) {
         self.channelID = channel.id
         self.guildID = channel.guild_id ?? "@me"
         guard wss != nil else { return }
-        messageFetchQueue.async {
+        connect()
+        loadChannel(channel)
+    }
+    
+    func loadChannel(_ channel: Channel) {
+        messageFetchQueue.async { [weak self] in
+            guard let self = self else { return }
             if self.guildID == "@me" {
                 try? wss.subscribeToDM(self.channelID)
             } else {
                 try? wss.subscribe(to: self.guildID)
             }
+            self.loadPermissions(channel)
             self.getMessages(channelID: self.channelID, guildID: self.guildID)
             MentionSender.shared.removeMentions(server: self.guildID)
-            if self.guildID == "@me" {
-                DispatchQueue.main.async {
-                    self.permissions = .init([
-                        .sendMessages, .readMessages
-                    ])
-                    if channel.owner_id == user_id {
-                        self.permissions.insert(.kickMembers)
-                    }
+        }
+    }
+    
+    func loadPermissions(_ channel: Channel) {
+        if self.guildID == "@me" {
+            DispatchQueue.main.async {
+                self.permissions = .init([
+                    .sendMessages, .readMessages
+                ])
+                if channel.owner_id == user_id {
+                    self.permissions.insert(.kickMembers)
                 }
-            } else {
-                Self.permissionQueue.async { [weak self] in
-                    let perms = channel.permission_overwrites?.allAllowed(guildID: self?.guildID ?? "") ?? .init()
-                    DispatchQueue.main.async {
-                        self?.permissions = perms
-                    }
+            }
+        } else {
+            Self.permissionQueue.async { [weak self] in
+                let perms = channel.permission_overwrites?.allAllowed(guildID: self?.guildID ?? "") ?? .init()
+                DispatchQueue.main.async {
+                    self?.permissions = perms
                 }
             }
         }
-        connect()
     }
 
     private static var cachingQueue = DispatchQueue(label: "red.evelyn.accord.CachingQueue", attributes: .concurrent)
@@ -188,22 +199,20 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.typingSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
-                
-                guard let self = self else { return }
-                
-                guard channelID == self.channelID,
+                                
+                guard channelID == self?.channelID,
                       let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                      memberDecodable.user_id != self.user.id else { return }
+                      memberDecodable.user_id != self?.user.id else { return }
                 
                 let isKnownAs =
-                self.nicks[memberDecodable.user_id] ??
+                self?.nicks[memberDecodable.user_id] ??
                 memberDecodable.member?.nick ??
                 memberDecodable.member?.user.username ??
                 "Unknown User"
                 
                 DispatchQueue.main.async {
-                    if !self.typing.contains(isKnownAs) {
-                        self.typing.append(isKnownAs)
+                    if self?.typing.contains(isKnownAs) == false {
+                        self?.typing.append(isKnownAs)
                     }
                 }
                 
@@ -318,7 +327,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     func cacheUsernames() {
         messages.forEach { message in
             guard let author = message.author else { return }
-            Storage.usernames[author.id] = author.username
+            DispatchQueue.main.async {
+                Storage.usernames[author.id] = author.username
+            }
         }
     }
 
@@ -406,6 +417,36 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 
         }) { [weak self] messages in
             self?.messages.append(contentsOf: messages)
+        }
+        .store(in: &cancellable)
+    }
+    
+    func loadAroundMessage(id: String) {
+        RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?around=\(id)&limit=50"), headers: Headers(
+            userAgent: discordUserAgent,
+            token: AccordCoreVars.token,
+            type: .GET,
+            discordHeaders: true,
+            referer: "https://discord.com/channels/\(guildID)/\(channelID)"
+        ))
+        .map { msg in
+            msg.enumerated().compactMap { index, element -> Message in
+                guard element != msg.last else { return element }
+                var element = element
+                element.processedTimestamp = element.timestamp.makeProperDate()
+                element.sameAuthor = msg[index + 1].author?.id == element.author?.id
+                element.user_mentioned = element.mentions.compactMap { $0.id }.contains(user_id)
+                return element
+            }
+        }
+        .receive(on: RunLoop.main)
+        .sink(receiveCompletion: { _ in
+
+        }) { [weak self] messages in
+            self?.messages = messages
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                //ChannelView.scrollViewSubject.send(id)
+            }
         }
         .store(in: &cancellable)
     }

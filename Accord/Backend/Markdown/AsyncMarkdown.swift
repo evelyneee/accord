@@ -12,7 +12,6 @@ import SwiftUI
 final class AsyncMarkdownModel: ObservableObject {
     init(text: String) {
         markdown = Text(text)
-        make(text: text)
     }
 
     @Published var markdown: Text
@@ -23,16 +22,16 @@ final class AsyncMarkdownModel: ObservableObject {
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
     
-    
     func make(text: String) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
             self?.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
                 .replaceError(with: Text(text))
-                .receive(on: RunLoop.main)
                 .sink { [weak self] text in
-                    self?.loaded = true
-                    self?.markdown = text
+                    DispatchQueue.main.async {
+                        self?.loaded = true
+                        self?.markdown = text
+                    }
                 }
             DispatchQueue.main.async {
                 self?.hasEmojiOnly = emojis
@@ -57,24 +56,17 @@ struct AsyncMarkdown: View, Equatable {
     @ViewBuilder
     var body: some View {
         if !model.hasEmojiOnly || model.loaded {
-            if #available(macOS 12.0, *) {
-                model.markdown
-                    .textSelection(.enabled)
-                    .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
-                    .animation(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .onChange(of: self.text, perform: { text in
-                        self.model.make(text: text)
-                    })
-            } else {
-                model.markdown
-                    .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
-                    .animation(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .onChange(of: self.text, perform: { text in
-                        self.model.make(text: text)
-                    })
-            }
+            model.markdown
+                .textSelection(.enabled)
+                .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                .animation(nil, value: UUID())
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: self.text, perform: { [weak model] text in
+                    model?.make(text: text)
+                })
+                .onAppear {
+                    model.make(text: text)
+                }
         }
     }
 }

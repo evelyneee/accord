@@ -30,7 +30,7 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
     }
     
     func allAllowed(guildID: String) -> Permissions {
-        var permsArray = ServerListView.mergedMembers[guildID]?.cachedPermissions ?? Permissions (
+        var permsArray = Permissions (
             ServerListView.folders.lazy
                 .map { $0.guilds }
                 .joined()
@@ -41,12 +41,9 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
                 .compactMap { Int64($0) }
                 .map { Permissions($0) } ?? [Permissions]()
             )
-        
-        ServerListView.mergedMembers[guildID]?.cachedPermissions = permsArray
-        
+                
         if permsArray.contains(.administrator) {
             permsArray = Permissions.all
-            ServerListView.mergedMembers[guildID]?.cachedPermissions = permsArray
             return permsArray
         }
         
