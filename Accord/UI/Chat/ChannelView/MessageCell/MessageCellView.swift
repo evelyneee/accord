@@ -5,8 +5,8 @@
 //  Created by evelyn on 2021-12-12.
 //
 
-import SwiftUI
 import AVKit
+import SwiftUI
 
 struct MessageCellView: View, Equatable {
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
@@ -27,10 +27,10 @@ struct MessageCellView: View, Equatable {
     @State var popup: Bool = false
     @State var editedText: String = ""
     @State var showEditNicknamePopover: Bool = false
-    
+
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
-    
+
     private let leftPadding: CGFloat = 44.5
 
     var editingTextField: some View {
@@ -44,19 +44,18 @@ struct MessageCellView: View, Equatable {
             self.editedText = message.content
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
-            
             if let reply = message.referenced_message {
-                ReplyView (
+                ReplyView(
                     reply: reply,
                     replyNick: replyNick,
                     replyRole: $replyRole
                 )
             }
             if let interaction = message.interaction {
-                InteractionView (
+                InteractionView(
                     interaction: interaction,
                     isSameAuthor: message.isSameAuthor,
                     replyRole: self.$replyRole
@@ -65,27 +64,27 @@ struct MessageCellView: View, Equatable {
             }
             switch message.type {
             case .recipientAdd:
-                RecipientAddView (
+                RecipientAddView(
                     message: self.message
                 )
                 .padding(.leading, leftPadding)
             case .recipientRemove:
                 if let user = message.author {
-                    RecipientRemoveView (
+                    RecipientRemoveView(
                         user: user
                     )
                     .padding(.leading, leftPadding)
                 }
             case .channelNameChange:
                 if let user = message.author {
-                    ChannelNameChangeView (
+                    ChannelNameChangeView(
                         user: user
                     )
                     .padding(.leading, leftPadding)
                 }
             case .guildMemberJoin:
                 if let user = message.author {
-                    WelcomeMessageView (
+                    WelcomeMessageView(
                         user: user
                     )
                     .padding(.leading, leftPadding)
@@ -93,20 +92,21 @@ struct MessageCellView: View, Equatable {
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referenced_message == nil) {
-                        AvatarView (
+                        AvatarView(
                             author: author,
                             guildID: self.guildID,
                             avatar: self.avatar
                         )
-                            .frame(width: 35, height: 35)
-                            .clipShape(Circle())
-                            .popover(isPresented: $popup, content: {
-                                PopoverProfileView(user: message.author, guildID: self.guildID)
-                            })
-                            .padding(.trailing, 1.5)
+                        .frame(width: 35, height: 35)
+                        .clipShape(Circle())
+                        .popover(isPresented: $popup, content: {
+                            PopoverProfileView(user: message.author, guildID: self.guildID)
+                        })
+                        .padding(.trailing, 1.5)
+                        .fixedSize()
                     }
                     VStack(alignment: .leading) {
-                        if message.isSameAuthor && message.referenced_message == nil {
+                        if message.isSameAuthor, message.referenced_message == nil {
                             if !message.content.isEmpty {
                                 if self.editing {
                                     editingTextField
@@ -123,12 +123,13 @@ struct MessageCellView: View, Equatable {
                                 Spacer().frame(height: 2)
                             }
                         } else {
-                            AuthorTextView (
+                            AuthorTextView(
                                 message: self.message,
                                 pronouns: self.pronouns,
                                 nick: self.nick,
                                 role: self.$role
                             )
+                            .fixedSize()
                             Spacer().frame(height: 1.3)
                             if !message.content.isEmpty {
                                 if self.editing {
@@ -142,11 +143,11 @@ struct MessageCellView: View, Equatable {
                     }
                     Spacer()
                 }
-
             }
             if let stickerItems = message.sticker_items,
-                stickerItems.isEmpty == false {
-                StickerView (
+               stickerItems.isEmpty == false
+            {
+                StickerView(
                     stickerItems: stickerItems
                 )
             }
@@ -159,16 +160,17 @@ struct MessageCellView: View, Equatable {
                 AttachmentView(media: message.attachments)
                     .padding(.leading, leftPadding)
                     .padding(.top, 5)
+                    .fixedSize()
             }
             if let reactions = message.reactions, !reactions.isEmpty {
-                ReactionsGridView (
+                ReactionsGridView(
                     reactions: reactions
                 )
                 .padding(.leading, leftPadding)
             }
         }
         .contextMenu {
-            MessageCellMenu (
+            MessageCellMenu(
                 message: self.message,
                 guildID: self.guildID,
                 permissions: self.permissions,

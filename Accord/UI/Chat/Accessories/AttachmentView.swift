@@ -34,30 +34,33 @@ struct AttachmentView: View {
     @State var quickLookURL: URL?
     var body: some View {
         ForEach(media, id: \.url) { obj in
-            if obj.content_type?.contains("image/") == true && obj.content_type?.contains("gif") == false {
-                Button(action: {
+            if obj.content_type?.contains("image/") == true, obj.content_type?.contains("gif") == false {
+                Button(action: { [weak obj] in
+                    guard let obj = obj else { return }
                     if let quickLookURL = quickLookURL {
                         try? FileManager.default.removeItem(at: quickLookURL)
                         self.quickLookURL = nil
                     } else {
                         Request.fetch(url: URL(string: obj.url), headers: .init(type: .GET)) {
                             switch $0 {
-                            case .success(let data):
+                            case let .success(data):
                                 print(data)
                                 let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
                                     .appendingPathComponent(obj.filename)
                                 try? data.write(to: path)
                                 self.quickLookURL = path
-                            case .failure(let error):
+                            case let .failure(error):
                                 print(error)
                             }
                         }
                     }
-                }) {
-                    Attachment(obj.url, size: CGSize(width: 500, height: 500)).equatable()
-                        .cornerRadius(5)
-                        .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
-                        .accessibility(label: Text(obj.description ?? "Image"))
+                }) { [weak obj] in
+                    if let obj {
+                        Attachment(obj.url, size: CGSize(width: 500, height: 500)).equatable()
+                            .cornerRadius(5)
+                            .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
+                            .accessibility(label: Text(obj.description ?? "Image"))
+                    }
                 }
                 .buttonStyle(.borderless)
                 .quickLookPreview(self.$quickLookURL)

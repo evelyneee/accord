@@ -32,12 +32,12 @@ final class PresenceUpdate: Decodable {
     var status: String
     @IgnoreFailure
     var activities: [ActivityCodable]
-    
+
     enum CodingKeys: String, CodingKey {
         case user, status, activities
         case guildID = "guild_id"
     }
-    
+
     final class User: Codable {
         var id: String
     }
@@ -68,23 +68,23 @@ final class GuildMember: Codable {
         self.roles = roles
         self.presence = presence
     }
-    
+
     var avatar: String?
     var user: User
     var nick: String?
     var roles: [String]?
     var presence: Presence?
-    
+
     struct GuildMemberSaved: Codable {
         internal init(member: GuildMember, date: Date = Date()) {
             self.member = member
             self.date = date
         }
-        
+
         var member: GuildMember
         var date: Date
-        
-        var isOutdated: Bool { !Calendar.current.isDateInToday(self.date) }
+
+        var isOutdated: Bool { !Calendar.current.isDateInToday(date) }
     }
 }
 
@@ -104,7 +104,7 @@ final class GatewayEventContent<T: Decodable>: Decodable {
     internal init(d: T) {
         self.d = d
     }
-    
+
     var d: T
 }
 
@@ -112,6 +112,6 @@ final class GatewayEventCodable<T: Codable>: Codable {
     internal init(d: T) {
         self.d = d
     }
-    
+
     var d: T
 }

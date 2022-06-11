@@ -5,18 +5,17 @@
 //  Created by Serena on 21/05/2022
 //
 
-
 import SwiftUI
 
 struct SetNicknameView: View {
     /// The user to set the nickname for
     var user: User?
-    
+
     /// The guild ID to set the nickname in
     let guildID: String
-    
+
     @Binding var isPresented: Bool
-    
+
     @State var newNicknameText: String = ""
     @State var errorText: String? = nil
     var body: some View {
@@ -28,40 +27,40 @@ struct SetNicknameView: View {
                 .foregroundColor(.red)
                 .fixedSize(horizontal: true, vertical: false)
         }
-        
+
         Button("Set") {
             setNickname()
         }
         .disabled(newNicknameText.isEmpty)
         .keyboardShortcut(.defaultAction)
     }
-    
+
     func setNickname() {
         errorText = nil // reset error, if one was encountered
-        
-        guard let userID = self.user?.id else {
+
+        guard let userID = user?.id else {
             errorText = "Unable to get user ID"
             return
         }
-        
+
         // The API URL to contact
-        var url: URL = URL(string: rootURL)!
+        var url = URL(string: rootURL)!
             .appendingPathComponent("guilds")
             .appendingPathComponent(guildID)
             .appendingPathComponent("members")
-        
+
         // if we're changing the nickname of the current user,
         // we must append @me instead
         // otherwise, you'll encounter an error
-        if self.user == AccordCoreVars.user {
+        if user == AccordCoreVars.user {
             url.appendPathComponent("@me")
         } else {
             url.appendPathComponent(userID)
         }
-        
+
         let body = ["nick": newNicknameText]
-        
-        Request.fetch(url: url, headers: Headers (
+
+        Request.fetch(url: url, headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
             bodyObject: body,
@@ -70,15 +69,15 @@ struct SetNicknameView: View {
             json: true
         )) { result in
             switch result {
-            case .success(let data):
+            case let .success(data):
                 // make sure it is not a DiscordError
                 if let discordErr = try? JSONDecoder().decode(DiscordError.self, from: data) {
                     errorText = "Discord Error: \(discordErr.message ?? "Unknown Error")"
                     return
                 }
-                
+
                 isPresented.toggle() // dismiss the view once we're done
-            case .failure(let err):
+            case let .failure(err):
                 errorText = "Failed to set nickname with error \(err)"
             }
         }

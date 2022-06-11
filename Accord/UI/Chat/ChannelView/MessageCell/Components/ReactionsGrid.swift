@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct ReactionsGridView: View {
-    
     var reactions: [Reaction]
-        
+
     var body: some View {
         GridStack(reactions, rowAlignment: .leading, columns: 6, content: { reaction in
             HStack(spacing: 4) {
@@ -29,5 +28,6 @@ struct ReactionsGridView: View {
             .background(Color(NSColor.windowBackgroundColor))
             .cornerRadius(4)
         })
+        .fixedSize()
     }
 }

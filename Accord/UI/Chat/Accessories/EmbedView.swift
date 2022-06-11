@@ -90,7 +90,6 @@ struct EmbedView: View, Equatable {
                         }
                     }
                     .padding(.vertical, 2)
-                    
                 }
             }
             .padding(.leading, 2)

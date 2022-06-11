@@ -15,14 +15,14 @@ struct EmotesView: View, Equatable {
     }
 
     init(chatText: Binding<String>? = nil, onSelect: @escaping ((DiscordEmote) -> Void) = { _ in }) {
-        self._chatText = chatText ?? Binding.constant("")
+        _chatText = chatText ?? Binding.constant("")
         self.onSelect = onSelect
     }
-    
+
     @State var searchenabled = true
     var columns: [GridItem] = GridItem.multiple(count: 10, spacing: 0)
     @Binding var chatText: String
-    var onSelect: ((DiscordEmote) -> Void)
+    var onSelect: (DiscordEmote) -> Void
     @State var SearchText: String = ""
     @State var minimumWidth = 275
     @State var recentMax = 8
@@ -75,7 +75,7 @@ struct EmotesView: View, Equatable {
                 TextField("Search emotes", text: $search)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-                    .background(VisualEffectView(material: NSVisualEffectView.Material.sidebar, blendingMode: NSVisualEffectView.BlendingMode.withinWindow)) // blurred background
+                    .background(Material.thick) // blurred background
             }
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)

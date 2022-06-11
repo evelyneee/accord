@@ -32,10 +32,10 @@ struct GuildView: View {
                                 .appendingPathComponent("@me")
                                 .appendingPathComponent("guilds")
                                 .appendingPathComponent(guild.id)
-                            Request.ping(url: url, headers: Headers.init(
+                            Request.ping(url: url, headers: Headers(
                                 userAgent: discordUserAgent,
                                 token: AccordCoreVars.token,
-                                bodyObject: ["lurking":false],
+                                bodyObject: ["lurking": false],
                                 type: .DELETE,
                                 discordHeaders: true
                             ))
@@ -100,7 +100,7 @@ struct GuildView: View {
                         tag: Int(channel.id) ?? 0,
                         selection: self.$selection,
                         destination: {
-                            NavigationLazyView (
+                            NavigationLazyView(
                                 ChannelView(channel, guild.name)
                                     .equatable()
                                     .onAppear {
@@ -163,7 +163,7 @@ struct GuildListPreview: View {
                 .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.index))
         } else {
             if let name = guild.name {
-                Text(name.components(separatedBy: " ").compactMap({ $0.first }).map(String.init).joined())
+                Text(name.components(separatedBy: " ").compactMap(\.first).map(String.init).joined())
                     .equatable()
                     .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
             } else {

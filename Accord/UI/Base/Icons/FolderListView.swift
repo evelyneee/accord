@@ -13,18 +13,18 @@ extension ServerListView {
         @Binding var selectedServer: Int?
         @Binding var selection: Int?
         @Binding var selectedGuild: Guild?
-        
+
         @State var isShowingJoinServerSheet: Bool = false
         @StateObject var updater: ServerListView.UpdateView
 
         var body: some View {
             ForEach(ServerListView.folders, id: \.hashValue) { folder in
                 if folder.guilds.count != 1 {
-                    Folder (
+                    Folder(
                         icon: Array(folder.guilds.prefix(4)),
                         color: Color(int: folder.color ?? 0),
                         read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true)),
-                        mentionCount: folder.guilds.map({ pingCount(guild: $0) }).reduce(0, +)
+                        mentionCount: folder.guilds.map { pingCount(guild: $0) }.reduce(0, +)
                     ) {
                         ForEach(folder.guilds, id: \.id) { guild in
                             ServerIconCell(
@@ -34,6 +34,7 @@ extension ServerListView {
                                 selectedGuild: self.$selectedGuild,
                                 updater: self.$updater.updater
                             )
+                            .fixedSize()
                         }
                     }
                     .padding(.bottom, 1)
@@ -45,10 +46,10 @@ extension ServerListView {
                         selectedGuild: self.$selectedGuild,
                         updater: self.$updater.updater
                     )
+                    .fixedSize()
                 }
             }
             .padding(.trailing, 6)
-            
         }
     }
 }
@@ -62,7 +63,7 @@ struct ServerIconCell: View {
     @Binding var updater: Bool
 
     @State var mentionCount: Int?
-    
+
     func updateSelection(old: Int?, new: Int?) {
         DispatchQueue.global().async {
             if let selection = selection, old == 201 {

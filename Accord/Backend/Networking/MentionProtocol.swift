@@ -33,7 +33,7 @@ class MentionSender {
     func select(channel: Channel) {
         delegate?.select(channel: channel)
     }
-    
+
     func newMessage(in channel: String, with messageID: String, isDM: Bool) {
         delegate?.newMessage(in: channel, with: messageID, isDM: isDM)
     }

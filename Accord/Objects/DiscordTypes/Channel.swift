@@ -9,9 +9,9 @@ import Foundation
 
 struct Channel: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
-    
+
     let id: String
     let type: ChannelType
     var guild_id: String?
@@ -19,29 +19,31 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     let position: Int?
     // TODO: Overwrite objects
     var permission_overwrites: [PermissionOverwrites]?
-    
+
     struct PermissionOverwrites: Decodable {
         var allow: Permissions
         var deny: Permissions
         var id: String
         var type: Int
     }
-    
+
     func hasPermission(_ perms: Permissions) -> Bool {
         var allowed = true
-        for overwrite in self.permission_overwrites ?? [] {
-            if (overwrite.id == user_id ||
-                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false) &&
-                overwrite.allow.contains(perms) {
-                    return true
+        for overwrite in permission_overwrites ?? [] {
+            if overwrite.id == user_id ||
+                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false,
+                overwrite.allow.contains(perms)
+            {
+                return true
             }
-            if (overwrite.id == user_id ||
+            if overwrite.id == user_id ||
                 // for the role permissions
-               ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
+                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
                 // for the everyone permissions
-                overwrite.id == guild_id) &&
-                overwrite.deny.contains(perms) {
-                    allowed = false
+                overwrite.id == guild_id,
+                overwrite.deny.contains(perms)
+            {
+                allowed = false
             }
         }
         return allowed
@@ -75,7 +77,7 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var computedName: String {
         name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

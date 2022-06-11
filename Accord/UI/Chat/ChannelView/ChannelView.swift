@@ -10,18 +10,6 @@ import AVKit
 import Combine
 import SwiftUI
 
-extension NSScrollView {
-    open override func viewDidMoveToWindow() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "red.evelyn.accord.ScrollToBottom"), object: nil, queue: nil) { _ in
-            if self.documentView?.className.contains("ListCoreTableView") == true {
-                let heightOffset = self.contentSize.height - self.bounds.height + self.contentInsets.bottom
-                let bottomOffset = NSPoint(x: 0, y: heightOffset)
-                self.contentView.scroll(to: bottomOffset) 
-            }
-        }
-    }
-}
-
 struct ChannelView: View, Equatable {
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         lhs.viewModel == rhs.viewModel
@@ -48,21 +36,25 @@ struct ChannelView: View, Equatable {
     @State var pins: Bool = false
     @State var mentions: Bool = false
 
-    @AppStorage("memberListShown") var memberListShown: Bool = UserDefaults.standard.bool(forKey: "memberListShown")
+    @AppStorage("memberListShown")
+    var memberListShown: Bool = false
+
     @State var fileUpload: Data?
     @State var fileUploadURL: URL?
 
     @AppStorage("MetalRenderer")
     var metalRenderer: Bool = false
-    
+
     @State private var cancellable = Set<AnyCancellable>()
-        
+
     @Environment(\.user)
     var user: User
-    
+
     @Environment(\.colorScheme)
     var colorScheme: ColorScheme
-    
+
+    static var scrollTo = PassthroughSubject<String, Never>()
+
     // MARK: - init
 
     init(_ channel: Channel, _ guildName: String? = nil) {
@@ -81,64 +73,57 @@ struct ChannelView: View, Equatable {
 
     var messagesView: some View {
         ForEach(viewModel.messages, id: \.identifier) { message in
-            if let author = message.author {
-                MessageCellView (
-                    message: message,
-                    nick: viewModel.nicks[author.id],
-                    replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
-                    pronouns: viewModel.pronouns[author.id],
-                    avatar: viewModel.avatars[author.id],
-                    guildID: viewModel.guildID,
-                    permissions: $viewModel.permissions,
-                    role: $viewModel.roles[author.id],
-                    replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                    replyingTo: $replyingTo
-                )
-                .equatable()
-                .id(message.id)
-                .listRowInsets(EdgeInsets(
-                    top: 3.5,
-                    leading: 0,
-                    bottom: message.bottomInset,
-                    trailing: 0
-                ))
-                .padding(.horizontal, 5.0)
-                .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
-                .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
-                .onAppear { [unowned viewModel] in
-
-                    if viewModel.messages.count >= 50,
-                       message == viewModel.messages[viewModel.messages.count - 2]
-                    {
-                        messageFetchQueue.async {
-                            viewModel.loadMoreMessages()
-                        }
+            MessageCellView(
+                message: message,
+                nick: viewModel.nicks[message.author?.id ?? ""],
+                replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
+                pronouns: viewModel.pronouns[message.author?.id ?? ""],
+                avatar: viewModel.avatars[message.author?.id ?? ""],
+                guildID: viewModel.guildID,
+                permissions: $viewModel.permissions,
+                role: $viewModel.roles[message.author?.id ?? ""],
+                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+                replyingTo: $replyingTo
+            )
+            .equatable()
+            .id(message.id)
+            .listRowInsets(EdgeInsets(
+                top: 3.5,
+                leading: 0,
+                bottom: message.bottomInset,
+                trailing: 0
+            ))
+            .padding(.horizontal, 5.0)
+            .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
+            .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
+            .onAppear { [unowned viewModel] in
+                if viewModel.messages.count >= 50,
+                   message == viewModel.messages[viewModel.messages.count - 2]
+                {
+                    messageFetchQueue.async {
+                        viewModel.loadMoreMessages()
                     }
                 }
             }
         }
         .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-        .listRowBackground(Color.clear)
+        .fixedSize(horizontal: false, vertical: true)
     }
-    
+
     var body: some View {
         HStack(content: {
             VStack(spacing: 0) {
                 List {
                     Spacer().frame(height: 15)
                     if metalRenderer {
-                        messagesView.drawingGroup()
+                        messagesView
+                            .drawingGroup()
                     } else {
                         messagesView
-//                            .onAppear {
-//                                viewModel.tableView = self.tableViewGetter.getTableView()
-//                                viewModel.tableView?.scrollToEndOfDocument(nil)
-//                            }
                     }
-                    //self.tableViewGetter
                 }
-                .listStyle(.plain)
+                .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
                 .rotationEffect(.radians(.pi))
                 .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 blurredTextField
@@ -147,7 +132,7 @@ struct ChannelView: View, Equatable {
                 MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
                     .frame(width: 250)
                     .onAppear { [unowned viewModel] in
-                        if viewModel.memberList.isEmpty && viewModel.guildID != "@me" {
+                        if viewModel.memberList.isEmpty, viewModel.guildID != "@me" {
                             try? wss.memberList(for: viewModel.guildID, in: viewModel.channelID)
                         }
                     }
@@ -190,34 +175,6 @@ struct ChannelView: View, Equatable {
     }
 }
 
-// MARK: - macOS Big Sur blur view
-
-public struct VisualEffectView: NSViewRepresentable {
-    let material: NSVisualEffectView.Material
-    let blendingMode: NSVisualEffectView.BlendingMode
-
-    public init(
-        material: NSVisualEffectView.Material = .contentBackground,
-        blendingMode: NSVisualEffectView.BlendingMode = .withinWindow
-    ) {
-        self.material = material
-        self.blendingMode = blendingMode
-    }
-
-    public func makeNSView(context _: Context) -> NSVisualEffectView {
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-        visualEffectView.state = NSVisualEffectView.State.active
-        return visualEffectView
-    }
-
-    public func updateNSView(_ visualEffectView: NSVisualEffectView, context _: Context) {
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-    }
-}
-
 struct MemberListView: View {
     var guildID: String
     @Binding var list: [OPSItems]
@@ -225,11 +182,11 @@ struct MemberListView: View {
         List(self.$list, id: \.id) { $ops in
             if let group = ops.group {
                 Text(
-                  "\(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "") - \(group.count ?? 0)"
+                    "\(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "") - \(group.count ?? 0)"
                 )
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                    .padding([.top])
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .padding([.top])
             } else {
                 MemberListViewCell(guildID: self.guildID, ops: $ops)
             }

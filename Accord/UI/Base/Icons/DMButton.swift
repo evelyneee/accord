@@ -44,7 +44,7 @@ struct DMButton: View {
         .buttonStyle(BorderlessButtonStyle())
         .onReceive(self.updater.$updater, perform: { _ in
             DispatchQueue.global().async {
-                self.mentionCount = ServerListView.privateChannels.compactMap({ $0.read_state?.mention_count }).reduce(0, +)
+                self.mentionCount = ServerListView.privateChannels.compactMap { $0.read_state?.mention_count }.reduce(0, +)
             }
         })
     }

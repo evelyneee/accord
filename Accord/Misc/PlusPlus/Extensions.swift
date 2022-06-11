@@ -266,7 +266,7 @@ extension NSTextField {
         get { .none }
         set {}
     }
-    
+
     override open func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.type == NSEvent.EventType.keyDown {
             if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == NSEvent.ModifierFlags.command.rawValue {
@@ -335,5 +335,5 @@ extension Date {
 }
 
 func parseSnowflake(_ snowflake: String) -> Int64 {
-    return ((Int64(snowflake) ?? 0) >> 22) + 1420070400000
+    ((Int64(snowflake) ?? 0) >> 22) + 1_420_070_400_000
 }

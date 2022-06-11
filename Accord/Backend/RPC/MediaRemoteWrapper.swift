@@ -9,11 +9,13 @@ import Combine
 import Foundation
 
 // MARK: - SpotifyResponse
+
 struct SpotifyResponse: Codable {
     let tracks: Tracks
 }
 
 // MARK: - Tracks
+
 struct Tracks: Codable {
     let href: String
     let items: [SpotifyItem]
@@ -23,6 +25,7 @@ struct Tracks: Codable {
 }
 
 // MARK: - Item
+
 struct SpotifyItem: Codable {
     let album: Album
     let artists: [Artist]
@@ -54,6 +57,7 @@ struct SpotifyItem: Codable {
 }
 
 // MARK: - Album
+
 struct Album: Codable {
     let albumType: String
     let artists: [Artist]
@@ -80,6 +84,7 @@ struct Album: Codable {
 }
 
 // MARK: - Artist
+
 struct Artist: Codable {
     let externalUrls: ExternalUrls
     let href: String
@@ -92,11 +97,13 @@ struct Artist: Codable {
 }
 
 // MARK: - ExternalUrls
+
 struct ExternalUrls: Codable {
     let spotify: String
 }
 
 // MARK: - Image
+
 struct SpotifyImage: Codable {
     let height: Int
     let url: String
@@ -104,9 +111,8 @@ struct SpotifyImage: Codable {
 }
 
 final class MediaRemoteWrapper {
-    
     typealias MRMediaRemoteGetNowPlayingInfoFunction = @convention(c) (DispatchQueue, @escaping ([String: Any]) -> Void) -> Void
-    
+
     static var MRMediaRemoteGetNowPlayingInfo: MRMediaRemoteGetNowPlayingInfoFunction = {
         // Load framework
         let bundle = CFBundleCreate(kCFAllocatorDefault, NSURL(fileURLWithPath: "/System/Library/PrivateFrameworks/MediaRemote.framework"))
@@ -116,9 +122,9 @@ final class MediaRemoteWrapper {
         typealias MRMediaRemoteGetNowPlayingInfoFunction = @convention(c) (DispatchQueue, @escaping ([String: Any]) -> Void) -> Void
         return unsafeBitCast(MRMediaRemoteGetNowPlayingInfoPointer, to: MRMediaRemoteGetNowPlayingInfoFunction.self)
     }()
-    
+
     static var useSpotifyRPC: Bool = UserDefaults.standard.value(forKey: "SpotifyRPC") as? Bool ?? true
-    
+
     final class Song {
         internal init(name: String, artist: String? = nil, duration: Double? = nil, albumName: String? = nil, elapsed: Double? = nil, isMusic: Bool, artworkURL: String?) {
             self.name = name
@@ -143,7 +149,7 @@ final class MediaRemoteWrapper {
         case errorGettingNowInfoPtr
         case noName
     }
-    
+
     class func getCurrentlyPlayingSong() -> Future<Song, Error> {
         Future { promise in
             // Get song info
@@ -160,7 +166,8 @@ final class MediaRemoteWrapper {
                         case let .success(data):
                             print("Success fetching iTunes Store ID")
                             if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                let results = dict["results"] as? [[String: Any]] {
+                               let results = dict["results"] as? [[String: Any]]
+                            {
                                 let artworkURL = results.first?["artworkUrl100"] as? String
                                 let song = Song(
                                     name: name,
@@ -198,7 +205,7 @@ final class MediaRemoteWrapper {
     static var rateLimit: Bool = false
     static var status: String?
 
-    class private func updateWithSong(_ song: Song) {
+    private class func updateWithSong(_ song: Song) {
         try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
             Activity.current!
             Activity(
@@ -212,8 +219,8 @@ final class MediaRemoteWrapper {
             )
         }
     }
-    
-    class private func updateWithArtworkURL(_ song: Song, artworkURL: String) {
+
+    private class func updateWithArtworkURL(_ song: Song, artworkURL: String) {
         ExternalImages.proxiedURL(appID: musicRPCAppID, url: artworkURL)
             .replaceError(with: [])
             .sink { out in
@@ -237,7 +244,7 @@ final class MediaRemoteWrapper {
             }
             .store(in: &bag)
     }
-    
+
     class func updatePresence(status: String? = nil) {
         guard !Self.rateLimit else { return }
         rateLimit = true
@@ -245,18 +252,18 @@ final class MediaRemoteWrapper {
             .sink(receiveCompletion: {
                 switch $0 {
                 case .finished: break
-                case .failure(let error): print(error)
+                case let .failure(error): print(error)
                 }
             }, receiveValue: { song in
                 guard song.isMusic else { return }
                 if let spotifyToken = spotifyToken, Self.useSpotifyRPC {
-                    Request.fetch(SpotifyResponse.self, url: URL.init(string: "https://api.spotify.com/v1/search?type=track&q=" + ((song.artist ?? "") + "+" + song.name).replacingOccurrences(of: " ", with: "+")), headers: Headers.init(
+                    Request.fetch(SpotifyResponse.self, url: URL(string: "https://api.spotify.com/v1/search?type=track&q=" + ((song.artist ?? "") + "+" + song.name).replacingOccurrences(of: " ", with: "+")), headers: Headers(
                         contentType: "application/json",
                         token: "Bearer " + spotifyToken,
                         type: .GET
                     )) {
                         switch $0 {
-                        case .success(let packet):
+                        case let .success(packet):
                             if let track = packet.tracks.items.first, let imageURL = track.album.images.first?.url.components(separatedBy: "/").last {
                                 try? wss.updatePresence(status: status ?? Self.status ?? "dnd", since: 0) {
                                     Activity.current!
@@ -264,13 +271,13 @@ final class MediaRemoteWrapper {
                                         flags: 48,
                                         name: "Spotify",
                                         type: 2,
-                                        metadata: ["album_id":track.album.id, "artist_ids":track.artists.map(\.id)],
+                                        metadata: ["album_id": track.album.id, "artist_ids": track.artists.map(\.id)],
                                         timestamp: Int(Date().timeIntervalSince1970 - (song.elapsed ?? 0)) * 1000,
                                         endTimestamp: Int(Date().timeIntervalSince1970 + (song.duration ?? Double(track.durationMS / 1000))) * 1000,
                                         state: song.artist ?? "Unknown artist",
                                         details: track.name,
                                         assets: [
-                                            "large_image": "spotify:"+imageURL,
+                                            "large_image": "spotify:" + imageURL,
                                             "large_text": track.album.name,
                                         ]
                                     )
@@ -280,7 +287,7 @@ final class MediaRemoteWrapper {
                             } else {
                                 Self.updateWithSong(song)
                             }
-                        case .failure(let error):
+                        case let .failure(error):
                             print(error)
                         }
                     }

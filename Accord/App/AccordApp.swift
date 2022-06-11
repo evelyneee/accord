@@ -13,9 +13,9 @@ import UserNotifications
 var allowReconnection: Bool = false
 var reachability: Reachability? = {
     var reachability = try? Reachability()
-    reachability?.whenReachable = { status in
+    reachability?.whenReachable = { _ in
         concurrentQueue.async {
-            if wss?.connection?.state != .preparing && allowReconnection {
+            if wss?.connection?.state != .preparing, allowReconnection {
                 wss?.reset()
             }
         }
@@ -36,15 +36,15 @@ struct AccordApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var popup: Bool = false
     @State var token = AccordCoreVars.token
-    
+
     private enum Tabs: Hashable {
         case general, rpc
     }
-    
+
     init() {
         _ = reachability
     }
-    
+
     @SceneBuilder
     var body: some Scene {
         WindowGroup {
@@ -79,39 +79,39 @@ struct AccordApp: App {
                             Image(systemName: "magnifyingglass")
                         }
                     }
-                .onAppear {
-                    // AccordCoreVars.loadVersion()
-                    // DispatchQueue(label: "socket").async {
-                    //     let rpc = IPC().start()
-                    // }
+                    .onAppear {
+                        // AccordCoreVars.loadVersion()
+                        // DispatchQueue(label: "socket").async {
+                        //     let rpc = IPC().start()
+                        // }
 
-                    DispatchQueue.global().async {
-                        Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
-                            contentType: "application/x-www-form-urlencoded",
-                            token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
-                            bodyObject: ["grant_type":"client_credentials"],
-                            type: .POST
-                        )) {
-                            switch $0 {
-                            case .success(let data):
-                                let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any]
-                                if let token = packet?["access_token"] as? String {
-                                    spotifyToken = token
+                        DispatchQueue.global().async {
+                            Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
+                                contentType: "application/x-www-form-urlencoded",
+                                token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
+                                bodyObject: ["grant_type": "client_credentials"],
+                                type: .POST
+                            )) {
+                                switch $0 {
+                                case let .success(data):
+                                    let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                                    if let token = packet?["access_token"] as? String {
+                                        spotifyToken = token
+                                    }
+                                case let .failure(error):
+                                    print(error)
                                 }
-                            case .failure(let error):
-                                print(error)
                             }
+                            NetworkCore.shared = NetworkCore()
                         }
-                        NetworkCore.shared = NetworkCore()
+                        DispatchQueue.global(qos: .background).async {
+                            RegexExpressions.precompute()
+                        }
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
+                            _, _ in
+                        }
+                        appDelegate.fileNotifications()
                     }
-                    DispatchQueue.global(qos: .background).async {
-                        RegexExpressions.precompute()
-                    }
-                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
-                        granted, error in
-                    }
-                    appDelegate.fileNotifications()
-                }
             }
         }
         .windowStyle(.automatic)
@@ -123,9 +123,9 @@ struct AccordApp: App {
                     popup.toggle()
                 }.keyboardShortcut("k")
                 #if DEBUG
-                Button("Error", action: {
-                    Self.error(Request.FetchErrors.invalidRequest, additionalDescription: "uwu")
-                })
+                    Button("Error", action: {
+                        Self.error(Request.FetchErrors.invalidRequest, additionalDescription: "uwu")
+                    })
                 #endif
             }
             CommandMenu("Account") {
@@ -133,14 +133,14 @@ struct AccordApp: App {
                     logOut()
                 }
                 #if DEBUG
-                Menu("Debug") {
-                    Button("Reconnect") {
-                        wss.reset()
+                    Menu("Debug") {
+                        Button("Reconnect") {
+                            wss.reset()
+                        }
+                        Button("Force reconnect") {
+                            wss.hardReset()
+                        }
                     }
-                    Button("Force reconnect") {
-                        wss.hardReset()
-                    }
-                }
                 #endif
             }
         }
@@ -160,12 +160,9 @@ struct AccordApp: App {
             .frame(minHeight: 500)
         }
     }
-    
-
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    
     @objc func onSleepNote(_: NSNotification) {
         wss?.close(.protocolCode(.protocolError))
     }
@@ -205,7 +202,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         NSApp.dockTile.badgeLabel = nil
         NSApp.dockTile.showsApplicationBadge = false
-        
+
         guard UserDefaults.standard.bool(forKey: "MentionsMenuBarItemEnabled") else { return }
 
         let contentView = MentionsView(replyingTo: Binding.constant(nil))
@@ -227,8 +224,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
         }
     }
-    
-    @objc func onWake(_:AnyObject?) {
+
+    @objc func onWake(_: AnyObject?) {
         concurrentQueue.async {
             wss?.reset()
         }
@@ -237,8 +234,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func closePopover(_ sender: AnyObject?) {
         popover.performClose(sender)
     }
-    
-    @objc func loadWindowRect(_:AnyObject?) {
+
+    @objc func loadWindowRect(_: AnyObject?) {
         guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
         NSApp.keyWindow?.setFrame(from: desc)
     }
@@ -250,9 +247,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             showPopover(sender)
         }
     }
-    
+
     @objc func windowClosed(_: AnyObject?) {
-        guard NSApp.keyWindow?.identifier == NSUserInterfaceItemIdentifier.init("AccordMainWindow") else { return }
+        guard NSApp.keyWindow?.identifier == NSUserInterfaceItemIdentifier("AccordMainWindow") else { return }
         UserDefaults.standard.set(NSApp.keyWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
     }
 }

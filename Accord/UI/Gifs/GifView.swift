@@ -11,12 +11,11 @@ import Foundation
 import SwiftUI
 
 struct GifView: View {
-    
     init(_ url: String) {
         self.url = url
         prep()
     }
-    
+
     var url: String
     @State var currentImage: NSImage = .init()
     @State var animatedImages: [NSImage] = []
@@ -25,7 +24,7 @@ struct GifView: View {
     @State var value: Int = 0
     @State var timer: Cancellable? = nil
     @State private var can: AnyCancellable? = nil
-    
+
     @ViewBuilder
     var body: some View {
         HStack {
@@ -43,8 +42,8 @@ struct GifView: View {
             gifQueue.async {
                 Request.fetch(url: URL(string: self.url)) {
                     switch $0 {
-                    case .success(let data):
-                        var req = URLRequest.init(url: URL(string: "https://api.evelyn.red/v1/lottie")!)
+                    case let .success(data):
+                        var req = URLRequest(url: URL(string: "https://api.evelyn.red/v1/lottie")!)
                         req.addValue("discord_sticker" + UUID().uuidString.toBase64(), forHTTPHeaderField: "filename")
                         req.httpBody = data
                         Request.fetch(request: req, headers: Headers(
@@ -52,7 +51,7 @@ struct GifView: View {
                             type: .POST
                         )) {
                             switch $0 {
-                            case .success(let data):
+                            case let .success(data):
                                 let gif = Gif(data: data)
                                 guard let animatedImages = gif?.animatedImages, let calculatedDuration = gif?.calculatedDuration else { return }
                                 self.animatedImages = animatedImages
@@ -73,10 +72,10 @@ struct GifView: View {
                                         (self.value) += 1 % (animatedImages.count)
                                     }
                                 }
-                            case .failure(let error): print(error)
+                            case let .failure(error): print(error)
                             }
                         }
-                    case .failure(let error):
+                    case let .failure(error):
                         print(error)
                     }
                 }
@@ -108,7 +107,6 @@ struct GifView: View {
                         }
                     }
             }
-
         }
     }
 }

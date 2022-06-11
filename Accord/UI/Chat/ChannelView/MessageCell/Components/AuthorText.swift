@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct AuthorTextView: View {
-    
     var message: Message
     var pronouns: String?
     var nick: String?
@@ -25,15 +24,15 @@ struct AuthorTextView: View {
                 .font(.chatTextFont)
                 .fontWeight(.semibold)
                 +
-            Text("  \(message.processedTimestamp ?? "")")
+                Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-            Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+                Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
             if message.author?.bot == true {
@@ -51,8 +50,7 @@ struct AuthorTextView: View {
                     .font(.subheadline)
                     .background(Capsule().fill().foregroundColor(Color.purple))
                     .padding(.horizontal, 4)
-           }
+            }
         }
-
     }
 }

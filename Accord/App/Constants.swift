@@ -33,8 +33,7 @@ let xcodeRPCAppID = "926282502937641001"
 let musicRPCAppID = "925514277987704842"
 let discordDesktopRPCAppID = "928798784174051399"
 let vsCodeRPCAppID = "928861386140971078"
-var spotifyToken: String? = nil
-
+var spotifyToken: String?
 
 #if DEBUG
     let keychainItemName = "red.evelyn.accord.token.debug"
@@ -46,7 +45,7 @@ enum Storage {
     static var usernames: [String: String] = [:]
 }
 
-final class AccordCoreVars {
+enum AccordCoreVars {
     // static var cancellable: Cancellable?
 
     // static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
@@ -81,7 +80,7 @@ final class AccordCoreVars {
 //    }
 }
 
-//class Res: Decodable {
+// class Res: Decodable {
 //    var statistics: Response
 //    class Response: Decodable {
 //        class Build: Decodable {
@@ -90,4 +89,4 @@ final class AccordCoreVars {
 //
 //        var newest_build: Build
 //    }
-//}
+// }

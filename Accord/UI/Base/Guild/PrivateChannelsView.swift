@@ -13,7 +13,7 @@ struct PrivateChannelsView: View {
     @StateObject var viewUpdater: ServerListView.UpdateView
     var body: some View {
         ForEach(privateChannels, id: \.id) { channel in
-            NavigationLink (
+            NavigationLink(
                 tag: Int(channel.id) ?? 0,
                 selection: self.$selection,
                 destination: {

@@ -5,17 +5,16 @@
 //  Created by evelyn on 2022-05-31.
 //
 
-import SwiftUI
 import AVKit
+import SwiftUI
 
-fileprivate var encoder: ISO8601DateFormatter = {
+private var encoder: ISO8601DateFormatter = {
     let encoder = ISO8601DateFormatter()
     encoder.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     return encoder
 }()
 
 struct MessageCellMenu: View {
-    
     @State var message: Message
     var guildID: String
     var permissions: Permissions
@@ -23,7 +22,7 @@ struct MessageCellMenu: View {
     @Binding var editing: Bool
     @Binding var popup: Bool
     @Binding var showEditNicknamePopover: Bool
-    
+
     @ViewBuilder
     private var moderationSection: some View {
         if self.guildID == "@me" || (self.guildID != "@me" && permissions.moderator) {
@@ -50,11 +49,12 @@ struct MessageCellMenu: View {
                 }
             }
         }
-        if message.author != nil &&
-            guildID != "@me" &&
-            permissions.moderator {
-                moderationMenu
-        } else if self.guildID == "@me" && permissions.contains(.kickMembers) {
+        if message.author != nil,
+           guildID != "@me",
+           permissions.moderator
+        {
+            moderationMenu
+        } else if self.guildID == "@me", permissions.contains(.kickMembers) {
             Button("Remove member") {
                 let url = URL(string: rootURL)?
                     .appendingPathComponent("channels")
@@ -73,7 +73,7 @@ struct MessageCellMenu: View {
             }
         }
     }
-    
+
     func timeout(time: String) {
         let url = URL(string: "https://discord.com/api/v9/guilds/")?
             .appendingPathComponent(guildID)
@@ -83,7 +83,7 @@ struct MessageCellMenu: View {
             Request.ping(url: url, headers: Headers(
                 userAgent: discordUserAgent,
                 token: AccordCoreVars.token,
-                bodyObject: ["communication_disabled_until":time],
+                bodyObject: ["communication_disabled_until": time],
                 type: .PATCH,
                 discordHeaders: true,
                 referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)",
@@ -91,7 +91,7 @@ struct MessageCellMenu: View {
             ))
         }
     }
-    
+
     private var copyMenu: some View {
         Menu("Copy") {
             Button("Copy message text") {
@@ -126,9 +126,8 @@ struct MessageCellMenu: View {
                 }
             })
         }
-
     }
-    
+
     private var moderationMenu: some View {
         Menu("Moderation") {
             if permissions.contains(.banMembers) {
@@ -142,7 +141,7 @@ struct MessageCellMenu: View {
                         Request.ping(url: url, headers: Headers(
                             userAgent: discordUserAgent,
                             token: AccordCoreVars.token,
-                            bodyObject: ["delete_message_days":1],
+                            bodyObject: ["delete_message_days": 1],
                             type: .PUT,
                             discordHeaders: true,
                             referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
@@ -204,7 +203,7 @@ struct MessageCellMenu: View {
             }
         }
     }
-    
+
     private var attachmentMenu: some View {
         ForEach(message.attachments, id: \.url) { attachment in
             Menu(attachment.filename) { [weak attachment] in
@@ -242,7 +241,7 @@ struct MessageCellMenu: View {
             }
         }
     }
-    
+
     var body: some View {
         Button("Reply") {
             replyingTo = message
@@ -253,7 +252,7 @@ struct MessageCellMenu: View {
             }
         }
         if message.author?.id == AccordCoreVars.user?.id || self.permissions.contains(.manageMessages) {
-            Button("Delete") { 
+            Button("Delete") {
                 DispatchQueue.global().async {
                     message.delete()
                 }
@@ -263,13 +262,13 @@ struct MessageCellMenu: View {
         Button("Show profile") {
             popup.toggle()
         }
-        
-        if ((message.author == AccordCoreVars.user) || self.permissions.contains(.manageNicknames)) && guildID != "@me" {
+
+        if (message.author == AccordCoreVars.user) || self.permissions.contains(.manageNicknames), guildID != "@me" {
             Button("Set nickname") {
                 showEditNicknamePopover.toggle()
             }
         }
-        
+
         Divider()
         copyMenu
         if !message.attachments.isEmpty {

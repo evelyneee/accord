@@ -8,32 +8,31 @@
 import Foundation
 
 struct Permissions: Decodable, OptionSet {
-    
     public init(rawValue: Int64) {
         self.rawValue = rawValue
     }
-    
+
     init(_ rawValue: Int64) {
         self.init(rawValue: rawValue)
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let stringValue = try container.decode(String.self)
         guard let integer = Int64(stringValue) else { throw Self.PermissionsDecodingErrors.notANumber }
-        self.rawValue = integer
+        rawValue = integer
     }
-    
+
     enum PermissionsDecodingErrors: Error {
         case notANumber
     }
-    
+
     public let rawValue: Int64
-    
+
     var moderator: Bool {
-        self.contains(.moderateMembers) || self.contains(.kickMembers) || self.contains(.banMembers)
+        contains(.moderateMembers) || contains(.kickMembers) || contains(.banMembers)
     }
-    
+
     static var createInstantInvite = Permissions(rawValue: 1 << 0)
     static var kickMembers = Permissions(rawValue: 1 << 1)
     static var banMembers = Permissions(rawValue: 1 << 2)
@@ -75,7 +74,7 @@ struct Permissions: Decodable, OptionSet {
     static var sendMessagesInThreads = Permissions(rawValue: 1 << 38)
     static var useEmbeddedActivities = Permissions(rawValue: 1 << 39)
     static var moderateMembers = Permissions(rawValue: 1 << 40)
-    
+
     static var all = Permissions([
         .createInstantInvite,
         .kickMembers,
@@ -117,6 +116,6 @@ struct Permissions: Decodable, OptionSet {
         .externalStickers,
         .sendMessagesInThreads,
         .useEmbeddedActivities,
-        .moderateMembers
+        .moderateMembers,
     ])
 }

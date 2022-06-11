@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct RecipientRemoveView: View {
-    
     var user: User
-    
+
     var body: some View {
         Label(title: {
             Text(user.username).fontWeight(.semibold)
-            + Text(" left the group")
+                + Text(" left the group")
         }, icon: {
             Image(systemName: "arrow.backward").foregroundColor(.red)
         })

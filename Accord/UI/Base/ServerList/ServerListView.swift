@@ -33,7 +33,7 @@ struct GuildHoverAnimation: ViewModifier {
     var frame: CGFloat = 45
     var selected: Bool
     @State var hovered: Bool = false
-    
+
     func body(content: Content) -> some View {
         content
             .onHover(perform: { res in
@@ -42,7 +42,7 @@ struct GuildHoverAnimation: ViewModifier {
                 }
             })
             .frame(width: frame, height: frame)
-            .background(!hasIcon && hovered ? self.color : Color.clear)
+            .background(!hasIcon && hovered ? color : Color.clear)
             .cornerRadius(hovered || selected ? 15 : frame / 2)
     }
 }
@@ -79,7 +79,7 @@ struct ServerListView: View {
     var selectedServer: Int?
     public static var folders: [GuildFolder] = .init()
     public static var privateChannels: [Channel] = .init()
-    public static var mergedMembers: [String:Guild.MergedMember] = .init()
+    public static var mergedMembers: [String: Guild.MergedMember] = .init()
     internal static var readStates: [ReadStateEntry] = .init()
     var statusText: String?
     @State var status: String?
@@ -87,7 +87,7 @@ struct ServerListView: View {
     @StateObject var viewUpdater = UpdateView()
     @State var iconHovered: Bool = false
     @State var isShowingJoinServerSheet: Bool = false
-    
+
     var onlineButton: some View {
         Button("Offline") {
             AccordApp.error(text: "Offline", additionalDescription: "Check your network connection")
@@ -134,7 +134,6 @@ struct ServerListView: View {
                     }
                 }
             }
-
         }
         .buttonStyle(BorderlessButtonStyle())
     }
@@ -143,8 +142,8 @@ struct ServerListView: View {
         NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
-                    
                     // MARK: - Messages button
+
                     LazyVStack {
                         if !NetworkCore.shared.connected {
                             onlineButton
@@ -156,6 +155,7 @@ struct ServerListView: View {
                             selectedGuild: self.$selectedGuild,
                             updater: self.viewUpdater
                         )
+                        .fixedSize()
                         Color.gray
                             .frame(width: 30, height: 1)
                             .opacity(0.75)
@@ -178,7 +178,7 @@ struct ServerListView: View {
                     List {
                         settingsLink
                         Divider()
-                        PrivateChannelsView (
+                        PrivateChannelsView(
                             privateChannels: Self.privateChannels,
                             selection: self.$selection,
                             viewUpdater: self.viewUpdater
@@ -196,7 +196,7 @@ struct ServerListView: View {
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
-        //.navigationViewStyle(DoubleColumnNavigationViewStyle())
+        // .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             guard let uInfo = pub.userInfo as? [Int: Int],
                   let firstKey = uInfo.first else { return }

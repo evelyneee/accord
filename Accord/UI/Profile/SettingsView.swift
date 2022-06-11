@@ -10,10 +10,9 @@ import SwiftUI
 
 @available(macOS 11.0, *)
 struct SettingsView: View {
-
     @AppStorage("MusicPlatform")
     var selectedPlatform: String = "appleMusic"
-    
+
     @State var user: User? = AccordCoreVars.user
     @State var loading: Bool = false
     @State var bioText: String = " "
@@ -111,8 +110,8 @@ struct SettingsView: View {
     }
 }
 
-extension FileManager {
-    public func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
+public extension FileManager {
+    func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
         do {
             if FileManager.default.fileExists(atPath: dstURL.path) {
                 try FileManager.default.removeItem(at: dstURL)

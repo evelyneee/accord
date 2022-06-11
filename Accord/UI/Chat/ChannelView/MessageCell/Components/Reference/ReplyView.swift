@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct ReplyView: View {
-    
     let reply: Reply
     var replyNick: String?
     @Binding var replyRole: String?
-    
+
     var body: some View {
         HStack {
             RoundedRectangle(cornerRadius: 5)
@@ -21,10 +20,12 @@ struct ReplyView: View {
                 .frame(width: 53, height: 17)
                 .padding(.bottom, -15)
                 .padding(.trailing, -30)
+                .fixedSize()
             Attachment(pfpURL(reply.author?.id, reply.author?.avatar, discriminator: reply.author?.discriminator ?? "0005", "16"))
                 .equatable()
                 .frame(width: 15, height: 15)
                 .clipShape(Circle())
+                .fixedSize()
             Text(replyNick ?? reply.author?.username ?? "")
                 .font(.subheadline)
                 .foregroundColor({ () -> Color in
@@ -34,10 +35,15 @@ struct ReplyView: View {
                     return Color.primary
                 }())
                 .fontWeight(.medium)
-            Text(reply.content)
-                .font(.subheadline)
-                .lineLimit(0)
-                .foregroundColor(.secondary)
+            Button(action: {
+                ChannelView.scrollTo.send(reply.id)
+            }, label: {
+                Text(reply.content)
+                    .font(.subheadline)
+                    .lineLimit(0)
+                    .foregroundColor(.secondary)
+            })
+            .buttonStyle(.borderless)
         }
         .padding(.bottom, -3)
         .padding(.leading, 15)

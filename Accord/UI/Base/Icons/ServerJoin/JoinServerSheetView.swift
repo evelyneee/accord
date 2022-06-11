@@ -4,14 +4,13 @@
 //
 //  Created by Serena on 18/05/2022
 //
-	
 
 import SwiftUI
 
 struct JoinServerSheetView: View {
     @State var inviteCode: String = ""
     @State var errorText: String? = nil
-        
+
     @Binding var isPresented: Bool
     @StateObject var updater: ServerListView.UpdateView
     var body: some View {
@@ -19,7 +18,7 @@ struct JoinServerSheetView: View {
             Text("Join a server")
                 .font(.title3)
                 .fontWeight(.bold)
-            
+
             TextField("Invite Code", text: $inviteCode)
                 .textFieldStyle(.roundedBorder)
                 .onExitCommand {
@@ -28,18 +27,18 @@ struct JoinServerSheetView: View {
             Text("example: `zun3eCEr6k`")
                 .font(.subheadline)
         }
-        
+
         if let errorText = errorText {
             Text(errorText)
                 .foregroundColor(.red)
         }
-        
+
         HStack {
             Button("Dismiss") {
                 isPresented.toggle()
             }
             .controlSize(.large)
-            
+
             Button("Join") {
                 inviteCode = inviteCode.replacingOccurrences(of: "discord.gg/", with: "")
                 inviteCode = inviteCode.replacingOccurrences(of: "https://discord.gg/", with: "")
@@ -49,7 +48,7 @@ struct JoinServerSheetView: View {
             .controlSize(.large)
         }
     }
-    
+
     func joinServer() {
         guard !inviteCode.isEmpty else {
             errorText = "Invite Code must not be empty"
@@ -61,16 +60,16 @@ struct JoinServerSheetView: View {
             .appendingPathComponent(inviteCode)
         Request.fetch(request: nil, url: joinURL, headers: .init(userAgent: discordUserAgent, token: AccordCoreVars.token, bodyObject: nil, type: .POST, discordHeaders: true, cached: false)) { result in
             switch result {
-            case .success(let data):
+            case let .success(data):
                 let decoder = JSONDecoder()
                 if let discordError = try? decoder.decode(DiscordError.self, from: data) {
                     errorText = "Error: \(discordError.message ?? "Unknown Error")"
                     return
                 }
-                
+
                 isPresented.toggle()
                 updater.updateView()
-            case .failure(let err):
+            case let .failure(err):
                 errorText = "Error: \(err.localizedDescription)"
                 print("error: \(err)")
             }

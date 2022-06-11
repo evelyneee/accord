@@ -25,24 +25,24 @@ final class ChatControlsViewModel: ObservableObject {
 
     @AppStorage("SilentTyping")
     var silentTyping: Bool = false
-    
+
     var locked: Bool = false
     var runOnUnlock: (() -> Void)?
 
     init() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            self.findView()
-        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.findView()
+        }
     }
-    
+
     func checkText(guildID: String, channelID: String) {
-        let ogContents = self.textFieldContents
+        let ogContents = textFieldContents
         let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentionsRegex)
         let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannelsRegex)
         let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommandRegex)
         let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmojiRegex)
-        let emotes = self.textFieldContents.matches(precomputed: RegexExpressions.completedEmoteRegex)
-        
+        let emotes = textFieldContents.matches(precomputed: RegexExpressions.completedEmoteRegex)
+
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
             guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
@@ -51,8 +51,8 @@ final class ChatControlsViewModel: ObservableObject {
                 self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)> ")
             }
         }
-        
-        guard !self.textFieldContents.isEmpty else {
+
+        guard !textFieldContents.isEmpty else {
             DispatchQueue.main.async {
                 self.matchedEmoji.removeAll()
                 self.matchedCommands.removeAll()
@@ -61,7 +61,7 @@ final class ChatControlsViewModel: ObservableObject {
             }
             return
         }
-        
+
         if let search = mentions.last?.lowercased() {
             let matched: [String: String] = Storage.usernames
                 .mapValues { $0.lowercased() }
@@ -84,7 +84,7 @@ final class ChatControlsViewModel: ObservableObject {
                   textFieldContents.prefix(1) == "/", guildID != "@me"
         {
             guard !locked else {
-                self.runOnUnlock = { [weak self] in
+                runOnUnlock = { [weak self] in
                     self?.checkText(guildID: guildID, channelID: channelID)
                 }
                 return
@@ -97,10 +97,10 @@ final class ChatControlsViewModel: ObservableObject {
                 .appendingPathComponent("application-commands")
                 .appendingPathComponent("search")
                 .appendingQueryParameters([
-                    "type":"1",
-                    "query":command,
-                    "limit":"7",
-                    "include_applications":"true"
+                    "type": "1",
+                    "query": command,
+                    "limit": "7",
+                    "include_applications": "true",
                 ])
             Request.fetch(
                 SlashCommandStorage.GuildApplicationCommandsUpdateEvent.D.self,
@@ -108,18 +108,18 @@ final class ChatControlsViewModel: ObservableObject {
                 headers: standardHeaders
             ) {
                 switch $0 {
-                case .success(let commands):
+                case let .success(commands):
                     DispatchQueue.main.async {
                         self.matchedCommands = commands.application_commands
                     }
-                case .failure(let error):
+                case let .failure(error):
                     print(error)
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 self.locked = false
                 self.runOnUnlock?()
-            })
+            }
         } else if let key = emoji.last {
             let matched = Array(Emotes.emotes.values.joined())
                 .filter { $0.name.lowercased().contains(key) }
@@ -133,9 +133,8 @@ final class ChatControlsViewModel: ObservableObject {
 
     func findView() {
         AppKitLink<NSTextField>.introspect { textField, _ in
-            DispatchQueue.main.async {
-                textField.allowsEditingTextAttributes = true
-            }
+            textField.lineBreakMode = .byWordWrapping
+            textField.usesSingleLineMode = false
         }
     }
 
@@ -181,16 +180,16 @@ final class ChatControlsViewModel: ObservableObject {
                 emptyTextField()
             } else if textFieldContents.prefix(6) == "/shrug" {
                 send(text: #"¯\_(ツ)_/¯"#, guildID: guildID, channelID: channelID)
-                self.emptyTextField()
+                emptyTextField()
             } else if textFieldContents.prefix(6) == "/debug" {
                 sendDebugLog(guildID: guildID, channelID: channelID)
-                self.emptyTextField()
+                emptyTextField()
             } else if textFieldContents.prefix(6) == "/reset" {
                 wss.reset()
-                self.emptyTextField()
+                emptyTextField()
             } else if textFieldContents.prefix(12) == "/reset force" {
                 wss.hardReset()
-                self.emptyTextField()
+                emptyTextField()
             } else if textFieldContents.prefix(5) == "/help" {
                 let help = """
                 **Slash commands**
@@ -204,7 +203,7 @@ final class ChatControlsViewModel: ObservableObject {
                 system?.username = "Accord"
                 system?.discriminator = "0000"
                 system?.avatar = nil
-                let message = Message (
+                let message = Message(
                     author: system,
                     channel_id: channelID,
                     guild_id: guildID,
@@ -272,11 +271,11 @@ final class ChatControlsViewModel: ObservableObject {
         Connection State: \(reachability?.connection as Any)
         """
     }
-    
+
     func sendDebugLog(guildID: String, channelID: String) {
-        self.send(text: debugLog, guildID: guildID, channelID: channelID)
+        send(text: debugLog, guildID: guildID, channelID: channelID)
     }
-    
+
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
             userAgent: discordUserAgent,

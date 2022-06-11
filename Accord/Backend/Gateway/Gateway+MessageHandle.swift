@@ -31,7 +31,7 @@ extension Gateway {
         case .messageACK: break
         case .sessionsReplace: break
         case .channelCreate: break
-            // let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+        // let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
         case .channelUpdate: break
         case .channelDelete: break
         case .guildCreate:
@@ -59,7 +59,7 @@ extension Gateway {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
             guard message.author?.id != user_id else { return }
-            let ids = message.mentions.compactMap { $0.id }
+            let ids = message.mentions.map(\.id)
             let guildID = message.guild_id ?? "@me"
             guard let channelID = event.channelID else { print("wat"); break }
             MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
@@ -89,7 +89,7 @@ extension Gateway {
         case .messageReactionRemoveEmoji: break
         case .presenceUpdate:
             let event = try JSONDecoder().decode(GatewayEventContent<PresenceUpdate>.self, from: event.data)
-            self.presencePipeline[event.d.user.id]?.send(event.d)
+            presencePipeline[event.d.user.id]?.send(event.d)
         case .typingStart:
             if let channelID = event.channelID {
                 typingSubject.send((event.data, channelID))

@@ -17,13 +17,13 @@ struct GridStack<T: Identifiable, Content: View>: View {
 
     init(_ array: [T], rowAlignment: SwiftUI.HorizontalAlignment = .center, columnAlignment: SwiftUI.VerticalAlignment = .center, rows: Int? = nil, columns: Int? = nil, @ViewBuilder content: @escaping (T) -> Content) {
         self.array = array
-        self.verticalAlignment = rowAlignment
-        self.horizontalAlignment = columnAlignment
+        verticalAlignment = rowAlignment
+        horizontalAlignment = columnAlignment
         self.rows = rows
         self.columns = columns
         self.content = content
     }
-    
+
     @ViewBuilder
     var body: some View {
         if let rows = rows {
@@ -31,9 +31,9 @@ struct GridStack<T: Identifiable, Content: View>: View {
                 ForEach(0 ..< rows, id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
                         ForEach(0 ..< Int(round(Double(array.count / rows))), id: \.self) { column in
-                            content(self.array[row*column])
-                                .id(self.array[row*column].id)
-                                .onAppear { print(self.array[row*column].id) }
+                            content(self.array[row * column])
+                                .id(self.array[row * column].id)
+                                .onAppear { print(self.array[row * column].id) }
                         }
                     }
                     .id(UUID())
@@ -44,9 +44,9 @@ struct GridStack<T: Identifiable, Content: View>: View {
                 ForEach(0 ..< Int(round(Double(array.count / columns))), id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
                         ForEach(0 ..< columns, id: \.self) { column in
-                            content(self.array[row*column])
-                                .id(self.array[row*column].id)
-                                .onAppear { print(self.array[row*column].id) }
+                            content(self.array[row * column])
+                                .id(self.array[row * column].id)
+                                .onAppear { print(self.array[row * column].id) }
                         }
                         .id(UUID())
                     }

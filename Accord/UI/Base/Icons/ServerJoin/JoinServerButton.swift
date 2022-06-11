@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct JoinServerButton: View {
-    
     @State var isShowingJoinServerSheet: Bool = false
     @State var iconHovered: Bool = false
     @StateObject var viewUpdater: ServerListView.UpdateView
-    
+
     private var iconView: some View {
         Image(systemName: "plus")
             .imageScale(.large)
@@ -20,7 +19,7 @@ struct JoinServerButton: View {
             .background(self.isShowingJoinServerSheet ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
             .cornerRadius(iconHovered || self.isShowingJoinServerSheet ? 13.5 : 23.5)
     }
-    
+
     var body: some View {
         Button(action: {
             isShowingJoinServerSheet.toggle()

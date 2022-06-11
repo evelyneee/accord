@@ -5,24 +5,23 @@
 //  Created by evelyn on 2022-05-23.
 //
 
+import QuickLook
 import SwiftUI
 import UniformTypeIdentifiers
-import QuickLook
 
 struct FileAttachmentView: View {
-    
     var file: AttachedFiles
     @State var quickLookURL: URL?
-    
+
     var formattedSize: String {
-        let megabytes = self.file.size >= 1048576
+        let megabytes = file.size >= 1_048_576
         if megabytes {
-            return String(Double(self.file.size / 1048576)) + " mb"
+            return String(Double(file.size / 1_048_576)) + " mb"
         } else {
-            return String(Double(self.file.size / 1024)) + " kb"
+            return String(Double(file.size / 1024)) + " kb"
         }
     }
-    
+
     var body: some View {
         HStack {
             Image(nsImage: NSWorkspace.shared.icon(for: UTType(mimeType: file.content_type ?? "application/text") ?? .text))
@@ -44,13 +43,13 @@ struct FileAttachmentView: View {
                 } else {
                     Request.fetch(url: URL(string: file.url), headers: .init(type: .GET)) {
                         switch $0 {
-                        case .success(let data):
+                        case let .success(data):
                             print(data)
                             let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
                                 .appendingPathComponent(file.filename)
                             try? data.write(to: path)
                             self.quickLookURL = path
-                        case .failure(let error):
+                        case let .failure(error):
                             print(error)
                         }
                     }
@@ -64,7 +63,7 @@ struct FileAttachmentView: View {
             }
             .buttonStyle(.borderless)
             .padding(.trailing, 5)
-            
+
             Button(action: {
                 guard let url = URL(string: self.file.url) else { return }
                 NSWorkspace.shared.open(url)

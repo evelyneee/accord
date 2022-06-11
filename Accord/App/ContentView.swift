@@ -5,9 +5,9 @@
 //  Created by evelyn on 2020-11-24.
 //
 
+import AppKit
 import Combine
 import SwiftUI
-import AppKit
 
 extension EnvironmentValues {
     var user: User {
@@ -51,9 +51,9 @@ struct ContentView: View {
                             guard NetworkCore.shared.connected else {
                                 throw LoadErrors.offline
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                 NSApp.keyWindow?.identifier = NSUserInterfaceItemIdentifier("AccordMainWindow")
-                            })
+                            }
                             print("hiiiii")
                             let new = try Gateway(
                                 url: Gateway.gatewayURL,
@@ -91,7 +91,7 @@ struct ContentView: View {
                                 }
                                 .store(in: &wsCancellable)
                             wss = new
-                            
+
 //                            concurrentQueue.asyncAfter(deadline: .now() + 5, execute: {
 //                                try? wss.updateVoiceState(
 //                                    guildID: "825437365027864578",
@@ -113,7 +113,7 @@ struct ContentView: View {
                 .padding(200)
         }
     }
-    
+
     func failedToConnect(_ error: Error) {
         print(error)
         let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("socketOut.json")

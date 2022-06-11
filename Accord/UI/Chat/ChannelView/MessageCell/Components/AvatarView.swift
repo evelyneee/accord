@@ -8,19 +8,21 @@
 import SwiftUI
 
 struct AvatarView: View {
-    
     var author: User
     var guildID: String
     var avatar: String?
-    
+
     var animated: Bool {
-        (self.avatar ?? author.avatar)?.prefix(2) == "a_"
+        (avatar ?? author.avatar)?.prefix(2) == "a_"
     }
-    
+
     var imageExtension: String {
         animated ? "gif" : "png"
     }
-    
+
+    @AppStorage("GifProfilePictures")
+    var gifPfp: Bool = false
+
     var imageURL: String {
         if let avatar = avatar {
             return cdnURL + "/guilds/\(guildID)/users/\(author.id)/avatars/\(avatar).\(imageExtension)?size=64"
@@ -32,11 +34,11 @@ struct AvatarView: View {
         }
         return cdnURL + "/embed/avatars/0.png?size=48"
     }
-    
+
     @ViewBuilder
     var body: some View {
-        if animated {
-            GifView(imageURL)
+        if animated, gifPfp {
+            GifView(imageURL).drawingGroup()
         } else {
             Attachment(imageURL).equatable()
         }

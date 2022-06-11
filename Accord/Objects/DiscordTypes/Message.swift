@@ -24,12 +24,12 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var mention_everyone: Bool?
     var mentions: [User]
     var user_mentioned: Bool?
-    
+
     var userMentioned: Bool { user_mentioned ?? false }
     var bottomInset: CGFloat {
-        (self.isSameAuthor && self.referenced_message == nil ? 0.5 : 13.0) - (self.userMentioned ? 3.0 : 0.0)
+        (isSameAuthor && referenced_message == nil ? 0.5 : 13.0) - (userMentioned ? 3.0 : 0.0)
     }
-    
+
     var pinned: Bool?
     var timestamp: Date
     var processedTimestamp: String?

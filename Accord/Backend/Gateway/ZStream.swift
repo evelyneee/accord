@@ -5,25 +5,24 @@
 //  Created by evelyn on 2022-04-13.
 //
 
-import Foundation
 import Compression
+import Foundation
 
 final class ZStream {
-    
     let streamPtr = UnsafeMutablePointer<compression_stream>.allocate(capacity: 1)
     var stream: compression_stream
     var status: compression_status
     let decompressionQueue = DispatchQueue(label: "red.evelyn.accord.DecompressionQueue")
     private var lock: Bool = false
-    
-    init () {
-        self.stream = streamPtr.pointee
+
+    init() {
+        stream = streamPtr.pointee
         status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
     }
-    
+
     func decompress(data: Data, large: Bool = false) throws -> Data {
         guard lock == false else {
-            self.decompressionQueue.async {
+            decompressionQueue.async {
                 _ = try? self.decompress(data: data)
             }
             throw "Already decompressing"
@@ -38,16 +37,20 @@ final class ZStream {
             // setup the stream's source
             stream.src_ptr = bytes
             stream.src_size = data.count
-            
+
             // setup the stream's output buffer
             // we use a temporary buffer to store the data as it's compressed
-            let dstBufferSize : size_t = large ? 32768 : 4096
+            let dstBufferSize: size_t = large ? 32768 : 4096
             let dstBufferPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: dstBufferSize)
             stream.dst_ptr = dstBufferPtr
             stream.dst_size = dstBufferSize
             // and we store the output in a mutable data object
             var outputData = Data()
-            
+
+            defer {
+                free(dstBufferPtr)
+            }
+
             // loop labels :D
             mainLoop: repeat {
                 status = compression_stream_process(&stream, 0)
@@ -57,10 +60,10 @@ final class ZStream {
                     // Going to call _process at least once more, so prepare for that
                     if stream.dst_size == 0 {
                         // Output buffer full...
-                        
+
                         // Write out to outputData
                         outputData.append(dstBufferPtr, count: dstBufferSize)
-                        
+
                         // Re-use dstBuffer
                         stream.dst_ptr = dstBufferPtr
                         stream.dst_size = dstBufferSize
@@ -71,7 +74,7 @@ final class ZStream {
                             break mainLoop
                         }
                     }
-                    
+
                 case COMPRESSION_STATUS_END:
                     // We are done, just write out the output buffer if there's anything in it
                     print("doneeeee")
@@ -82,7 +85,7 @@ final class ZStream {
                 default:
                     break mainLoop
                 }
-                
+
             } while status == COMPRESSION_STATUS_OK
             return outputData
         }
@@ -90,13 +93,14 @@ final class ZStream {
         lock = false
         return outputData
     }
-    
+
     enum ZlibErrors: Error {
         case noData
         case threadError
     }
-    
+
     deinit {
+        free(self.streamPtr)
         compression_stream_destroy(&stream)
     }
 }

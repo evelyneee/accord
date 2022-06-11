@@ -5,9 +5,9 @@
 //  Created by evelyn on 2022-05-19.
 //
 
+import AppKit
 import Foundation
 import SwiftUI
-import AppKit
 
 struct NewInviteSheet: View {
     @State var code: String?
@@ -29,9 +29,9 @@ struct NewInviteSheet: View {
             return String(maxAge / 60 / 60 / 24) + " days"
         }
     }
-    
+
     var maxUsesString: String {
-        switch self.maxUses {
+        switch maxUses {
         case 0: return "No limit"
         case 1: return "1 use"
         case 5: return "5 uses"
@@ -39,10 +39,10 @@ struct NewInviteSheet: View {
         case 25: return "25 uses"
         case 50: return "50 uses"
         case 100: return "100 uses"
-        default: self.maxUses = 0; return "No limit"
+        default: maxUses = 0; return "No limit"
         }
     }
-    
+
     var body: some View {
         VStack {
             Text("Create a new invite")
@@ -65,7 +65,7 @@ struct NewInviteSheet: View {
                 }
             }
         }
-        
+
         Menu("Expires in " + self.ageString) {
             Button("30 minutes") {
                 self.maxAge = 30 * 60
@@ -122,7 +122,7 @@ struct NewInviteSheet: View {
             Text(errorText)
                 .foregroundColor(.red)
         }
-        
+
         HStack {
             Button("Dismiss") {
                 isPresented.toggle()
@@ -131,7 +131,7 @@ struct NewInviteSheet: View {
             .onExitCommand {
                 isPresented.toggle()
             }
-            
+
             Button("Generate new invite") {
                 self.generateCode()
             }
@@ -139,7 +139,7 @@ struct NewInviteSheet: View {
             .controlSize(.large)
         }
     }
-    
+
     func generateCode() {
         guard let selection = selection else {
             return
@@ -151,26 +151,24 @@ struct NewInviteSheet: View {
         Request.fetch(InviteUpdate.self, url: url, headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
-            bodyObject: ["max_age" : self.maxAge,
-                         "max_uses" : self.maxUses,
-                         "target_type" : NSNull(),
-                         "validate" : NSNull(),
-                         "temporary" : self.maxAge == 0
-                        ],
+            bodyObject: ["max_age": maxAge,
+                         "max_uses": maxUses,
+                         "target_type": NSNull(),
+                         "validate": NSNull(),
+                         "temporary": maxAge == 0],
             type: .POST,
             discordHeaders: true,
             json: true
         )) {
             switch $0 {
-            case .success(let update):
-                print(update, ["max_age" : self.maxAge,
-                               "max_uses" : self.maxUses,
-                               "target_type" : NSNull(),
-                               "validate" : NSNull(),
-                               "temporary" : self.maxAge == 0
-                              ])
+            case let .success(update):
+                print(update, ["max_age": self.maxAge,
+                               "max_uses": self.maxUses,
+                               "target_type": NSNull(),
+                               "validate": NSNull(),
+                               "temporary": self.maxAge == 0])
                 self.code = update.code
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
             }
         }

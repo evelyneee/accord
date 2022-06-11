@@ -12,7 +12,7 @@ final class Reaction: Identifiable, Codable {
     var me: Bool
     var emoji: ReactionEmote
     var id: String { identifier }
-    var identifier: String { self.emoji.id ?? emoji.name ?? "some emoji" }
+    var identifier: String { emoji.id ?? emoji.name ?? "some emoji" }
 }
 
 final class ReactionEmote: Codable {

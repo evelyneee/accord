@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct ChatControls: View {
-
-    enum FocusedElements: Hashable {
-        case mainTextField
-    }
-
-    @FocusState private var focusedField: FocusedElements?
+//    enum FocusedElements: Hashable {
+//        case mainTextField
+//        case none
+//    }
+//
+//    @FocusState private var focusedField: FocusedElements?
 
     @State var chatTextFieldContents: String = ""
     @State var pfps: [String: NSImage] = [:]
@@ -37,11 +37,11 @@ struct ChatControls: View {
     @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
 
     var textFieldText: String {
-        self.permissions.contains(.sendMessages) ?
-        viewModel.percent ?? chatText :
-        "You do not have permission to speak in this channel."
+        permissions.contains(.sendMessages) ?
+            viewModel.percent ?? chatText :
+            "You do not have permission to speak in this channel."
     }
-    
+
     private func send() {
         messageSendQueue.async { [weak viewModel] in
             guard viewModel?.textFieldContents != "", let contents = viewModel?.textFieldContents else { return }
@@ -65,30 +65,30 @@ struct ChatControls: View {
             } else {
                 viewModel?.send(text: contents, guildID: guildID, channelID: channelID)
             }
-            self.focusIfUnfocused()
-        }
-    }
-    
-    func focusIfUnfocused() {
-        DispatchQueue.main.async {
-            print(self.focusedField)
-            if self.focusedField != .mainTextField {
-                self.focusedField = .mainTextField
-            }
+            // self.focusIfUnfocused()
         }
     }
 
+//    func focusIfUnfocused() {
+//        DispatchQueue.main.async {
+//            print(self.focusedField)
+//            if self.focusedField != .mainTextField {
+//                self.focusedField = .mainTextField
+//            }
+//        }
+//    }
+
     var matchedUsersView: some View {
-        MatchesView (
+        MatchesView(
             elements: viewModel.matchedUsers.sorted(by: >).prefix(10),
             id: \.key,
-            action: { [weak viewModel] key, username in
+            action: { [weak viewModel] key, _ in
                 if let range = viewModel?.textFieldContents.ranges(of: "@").last {
                     viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                 }
                 viewModel?.textFieldContents.append("<@!\(key)> ")
             },
-            label: { key, username in
+            label: { _, username in
                 HStack {
                     Text(username)
                     Spacer()
@@ -98,7 +98,7 @@ struct ChatControls: View {
     }
 
     var matchedCommandsView: some View {
-        MatchesView (
+        MatchesView(
             elements: viewModel.matchedCommands.prefix(10),
             id: \.id,
             action: { [weak viewModel] command in
@@ -130,7 +130,7 @@ struct ChatControls: View {
     }
 
     var matchedEmojiView: some View {
-        MatchesView (
+        MatchesView(
             elements: viewModel.matchedEmoji.prefix(10),
             id: \.id,
             action: { [weak viewModel] emoji in
@@ -153,7 +153,7 @@ struct ChatControls: View {
     }
 
     var matchedChannelsView: some View {
-        MatchesView (
+        MatchesView(
             elements: viewModel.matchedChannels.prefix(10),
             id: \.id,
             action: { [weak viewModel] channel in
@@ -173,7 +173,7 @@ struct ChatControls: View {
 
     var mainTextField: some View {
         TextField(textFieldText, text: $viewModel.textFieldContents)
-            .focused($focusedField, equals: .mainTextField)
+            // .focused($focusedField, equals: .mainTextField)
             .onSubmit {
                 typing = false
                 send()
@@ -182,7 +182,7 @@ struct ChatControls: View {
             .animation(nil, value: UUID())
             .fixedSize(horizontal: false, vertical: true)
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
-                if self.focusedField == .mainTextField {
+                if true {
                     let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                     if let rawData = data,
                        let string = String(data: rawData, encoding: .utf8),
@@ -193,7 +193,8 @@ struct ChatControls: View {
                         self.fileUploadURL = url
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             if let textCount = viewModel?.textFieldContents.count,
-                                let pathComponentsCount = url.pathComponents.last?.count {
+                               let pathComponentsCount = url.pathComponents.last?.count
+                            {
                                 if textCount >= pathComponentsCount {
                                     viewModel?.textFieldContents.removeLast(pathComponentsCount)
                                 }
@@ -205,11 +206,11 @@ struct ChatControls: View {
                     }
                 }
             }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                    self.focusIfUnfocused()
-                })
-            }
+//            .onAppear {
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+//                    self.focusIfUnfocused()
+//                })
+//            }
     }
 
     var fileImportButton: some View {
@@ -265,7 +266,8 @@ struct ChatControls: View {
                         !(viewModel.matchedEmoji.isEmpty) ||
                         !(viewModel.matchedChannels.isEmpty) ||
                         !(viewModel.matchedCommands.isEmpty) &&
-                        !viewModel.textFieldContents.isEmpty {
+                        !viewModel.textFieldContents.isEmpty
+                    {
                         VStack {
                             matchedUsersView
                             matchedCommandsView
@@ -304,7 +306,7 @@ struct ChatControls: View {
                                 typing = false
                             }
                         }
-                        //viewModel?.markdown()
+                        // viewModel?.markdown()
                         textQueue.async {
                             viewModel?.checkText(guildID: guildID, channelID: channelID)
                         }

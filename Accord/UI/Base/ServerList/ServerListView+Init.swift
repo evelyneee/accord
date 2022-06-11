@@ -11,9 +11,8 @@ import SwiftUI
 extension ServerListView {
     // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
     init(_ readyPacket: GatewayD) {
-        
         let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? Int
-        
+
         // Set status for the indicator
         status = readyPacket.user_settings?.status
 
@@ -21,7 +20,7 @@ extension ServerListView {
         guard Self.folders.isEmpty else {
             return
         }
-        
+
         let keys = readyPacket.users.generateKeyMap()
         Self.privateChannels = readyPacket.private_channels.map { c -> Channel in
             var c = c
@@ -32,10 +31,10 @@ extension ServerListView {
             return c
         }
         .sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
-        
+
         assignPrivateReadStates(readyPacket.read_state?.entries ?? [])
         Notifications.privateChannels = Self.privateChannels.map(\.id)
-        
+
         // Bind the merged member objects to the guilds
         readyPacket.guilds = readyPacket.guilds.enumerated()
             .map { index, guild -> Guild in
@@ -47,11 +46,11 @@ extension ServerListView {
                 }
                 return guild
             }
-        
+
         Self.mergedMembers = readyPacket.merged_members
-            .compactMap { $0.first }
+            .compactMap(\.first)
             .enumerated()
-            .map { [readyPacket.guilds[$0].id:$1]}
+            .map { [readyPacket.guilds[$0].id: $1] }
             .flatMap { $0 }
             .reduce([String: Guild.MergedMember]()) { dict, tuple in
                 var nextDict = dict
@@ -72,7 +71,7 @@ extension ServerListView {
             state: readyPacket.user_settings?.custom_status?.text
         )
         wss?.presences.append(Activity.current!)
-        self.statusText = readyPacket.user_settings?.custom_status?.text 
+        statusText = readyPacket.user_settings?.custom_status?.text
 
         // Save the emotes for easy access
         Emotes.emotes = readyPacket.guilds
@@ -129,7 +128,7 @@ extension ServerListView {
             .filter { !$0.guilds.isEmpty }
 
         Self.folders = folders
-        
+
         DispatchQueue.global().async {
             roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
             roleNames = RoleManager.arrangeRoleNames(guilds: readyPacket.guilds)
@@ -139,12 +138,12 @@ extension ServerListView {
         MentionSender.shared.delegate = self
         if let previousServer = previousServer, previousServer != 201 {
             print("setting")
-            self.upcomingGuild = guildTemp[previousServer]
-            self.selectedServer = previousServer
+            upcomingGuild = guildTemp[previousServer]
+            selectedServer = previousServer
         } else {
-            self.upcomingGuild = nil
-            self.selectedServer = 201
+            upcomingGuild = nil
+            selectedServer = 201
         }
-        self.upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(self.upcomingGuild?.id ?? readyPacket.guilds.first?.id ?? "")")
+        upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(upcomingGuild?.id ?? readyPacket.guilds.first?.id ?? "")")
     }
 }

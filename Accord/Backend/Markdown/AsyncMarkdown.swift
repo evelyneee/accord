@@ -16,12 +16,12 @@ final class AsyncMarkdownModel: ObservableObject {
 
     @Published var markdown: Text
     @Published var loaded: Bool = false
-    
+
     var hasEmojiOnly: Bool = false
 
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
-    
+
     func make(text: String) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
@@ -50,9 +50,9 @@ struct AsyncMarkdown: View, Equatable {
 
     init(_ text: String, binded: Binding<String>? = nil) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
-        self._text = binded ?? Binding.constant(text)
+        _text = binded ?? Binding.constant(text)
     }
-    
+
     @ViewBuilder
     var body: some View {
         if !model.hasEmojiOnly || model.loaded {
@@ -64,8 +64,8 @@ struct AsyncMarkdown: View, Equatable {
                 .onChange(of: self.text, perform: { [weak model] text in
                     model?.make(text: text)
                 })
-                .onAppear {
-                    model.make(text: text)
+                .onAppear { [weak model] in
+                    model?.make(text: text)
                 }
         }
     }

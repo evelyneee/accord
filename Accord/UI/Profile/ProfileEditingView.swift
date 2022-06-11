@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension NSTextView {
-    open override var frame: CGRect {
+    override open var frame: CGRect {
         didSet {
             backgroundColor = .clear
             drawsBackground = true
@@ -30,10 +30,10 @@ struct ProfileEditingView: View {
     @State var emoteID: String? = nil
     @State var emoteName: String? = nil
     @State var emoteAnimated: Bool? = nil
-    
+
     @Environment(\.colorScheme) var colorScheme
 
-    func updateProfile(settings: Bool = false, _ dict: [String:Any]) {
+    func updateProfile(settings: Bool = false, _ dict: [String: Any]) {
         DispatchQueue.global().async {
             var url = URL(string: rootURL)?
                 .appendingPathComponent("users")
@@ -51,7 +51,7 @@ struct ProfileEditingView: View {
                 json: true
             )) {
                 switch $0 {
-                case .success(let user):
+                case let .success(user):
                     AccordCoreVars.user = user
                     DispatchQueue.main.async {
                         self.user = user
@@ -59,13 +59,13 @@ struct ProfileEditingView: View {
                             self.bioText = bio
                         }
                     }
-                case .failure(let error):
+                case let .failure(error):
                     print(error)
                 }
             }
         }
     }
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -79,7 +79,7 @@ struct ProfileEditingView: View {
                     .fontWeight(.semibold)
                     .padding(.top, 5)
                 HStack {
-                    Button.init(action: {
+                    Button(action: {
                         self.emotePopup.toggle()
                     }, label: {
                         let parsedEmote = self.emoteText.matches(precomputed: RegexExpressions.emojiIDRegex).first
@@ -111,33 +111,33 @@ struct ProfileEditingView: View {
                         Button("Save") {
                             Activity.current?.state = self.status
                             if let emoteID = emoteID, let emoteName = emoteName, let emoteAnimated = emoteAnimated {
-                                Activity.current?.emoji = StatusEmoji.init(name: emoteName, id: emoteID, animated: emoteAnimated)
+                                Activity.current?.emoji = StatusEmoji(name: emoteName, id: emoteID, animated: emoteAnimated)
                                 wss.presences[0] = Activity.current!
                                 try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "online", since: 0, activities: wss.presences)
                                 if self.status.isEmpty {
-                                    updateProfile(settings: true, ["custom_status":[
-                                        "emoji_id":self.emoteID,
-                                        "emote_name":self.emoteName
+                                    updateProfile(settings: true, ["custom_status": [
+                                        "emoji_id": self.emoteID,
+                                        "emote_name": self.emoteName,
                                     ]])
                                 } else {
-                                    updateProfile(settings: true, ["custom_status":[
-                                        "text":self.status,
-                                        "emoji_id":self.emoteID,
-                                        "emote_name":self.emoteName
+                                    updateProfile(settings: true, ["custom_status": [
+                                        "text": self.status,
+                                        "emoji_id": self.emoteID,
+                                        "emote_name": self.emoteName,
                                     ]])
                                 }
                             } else if !self.status.isEmpty {
                                 Activity.current?.state = self.status
                                 wss.presences[0] = Activity.current!
                                 try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "online", since: 0, activities: wss.presences)
-                                updateProfile(settings: true, ["custom_status":[
-                                    "text":self.status
+                                updateProfile(settings: true, ["custom_status": [
+                                    "text": self.status,
                                 ]])
                             } else {
                                 Activity.current?.state = nil
                                 wss.presences[0] = Activity.current!
                                 try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "online", since: 0, activities: wss.presences)
-                                updateProfile(settings: true, ["custom_status":[]])
+                                updateProfile(settings: true, ["custom_status": []])
                             }
                         }
                     }
@@ -158,7 +158,7 @@ struct ProfileEditingView: View {
                         )
                     if self.user?.bio != self.bioText {
                         Button("Save") {
-                            updateProfile(["bio":self.bioText])
+                            updateProfile(["bio": self.bioText])
                         }
                         .padding(5)
                     }
@@ -171,7 +171,8 @@ struct ProfileEditingView: View {
                         self.bannerPicker.toggle()
                     }, label: {
                         if let bannerData = bannerData,
-                            let image = NSImage(data: bannerData) {
+                           let image = NSImage(data: bannerData)
+                        {
                             Image(nsImage: image)
                                 .resizable()
                                 .scaledToFit()
@@ -192,25 +193,26 @@ struct ProfileEditingView: View {
                     }
                     if let bannerData = bannerData {
                         Button("Save") {
-                            updateProfile(["banner":"data:image/png;base64,"+bannerData.base64EncodedString()])
+                            updateProfile(["banner": "data:image/png;base64," + bannerData.base64EncodedString()])
                             self.bannerData = nil
                         }
                         .padding(3)
                     }
                 }
                 VStack(alignment: .leading) {
-                    Button.init(action: {
+                    Button(action: {
                         self.filePicker.toggle()
                     }, label: {
                         if let imageData = imageData,
-                           let image = NSImage(data: imageData) {
+                           let image = NSImage(data: imageData)
+                        {
                             Image(nsImage: image)
                                 .resizable()
                                 .scaledToFill()
                                 .clipShape(Circle())
                                 .frame(width: 45, height: 45)
                             Button("Save") {
-                                updateProfile(["avatar":"data:image/png;base64,"+imageData.base64EncodedString()])
+                                updateProfile(["avatar": "data:image/png;base64," + imageData.base64EncodedString()])
                                 self.imageData = nil
                             }
                         } else if self.user?.avatar?.prefix(2) == "a_" {
@@ -261,24 +263,24 @@ struct ProfileEditingView: View {
             }
         }
     }
-    
+
     func loadUser() {
-        let url = URL.init(string: rootURL)?
+        let url = URL(string: rootURL)?
             .appendingPathComponent("users")
             .appendingPathComponent("@me")
             .appendingPathComponent("profile")
             .appendingQueryParameters(
-                ["with_mutual_guilds":"false"]
+                ["with_mutual_guilds": "false"]
             )
         Request.fetch(PopoverProfileView.UserRequest.self, url: url, headers: standardHeaders) {
             switch $0 {
-            case .success(let user):
+            case let .success(user):
                 print(user)
                 DispatchQueue.main.async {
                     AccordCoreVars.user = user.user
                     self.user = user.user
                 }
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
             }
         }

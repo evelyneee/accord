@@ -11,11 +11,10 @@ import Foundation
 import SwiftUI
 
 public final class Markdown {
-    
-    private init () {}
-    
+    private init() {}
+
     static var highlighting: Bool = UserDefaults.standard.value(forKey: "Highlighting") as? Bool ?? false
-    
+
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
@@ -37,7 +36,7 @@ public final class Markdown {
             return Text(text) + Text(" ")
         }
     }
-    
+
     /***
 
      Overengineered processing for Markdown using Combine
@@ -71,9 +70,9 @@ public final class Markdown {
 
     class func bionicMarkdown(_ word: String) -> AttributedString {
         var markdown = try? AttributedString(markdown: word)
-        markdown = markdown?.transformingAttributes(\.presentationIntent, { transformer in
+        markdown = markdown?.transformingAttributes(\.presentationIntent) { transformer in
             transformer.value = nil
-        })
+        }
         let highlighted = Highlighting.parse(word)
         if let markdown = markdown, markdown != AttributedString(word) {
             return markdown
@@ -81,7 +80,7 @@ public final class Markdown {
             return highlighted
         }
     }
-    
+
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
@@ -103,7 +102,7 @@ public final class Markdown {
                 }
                 .eraseToAny()
         }
-        return Future { promise -> Void in
+        return Future { promise in
             let mentions = word.matches(precomputed: RegexExpressions.mentionsRegex)
             let channels = word.matches(precomputed: RegexExpressions.channelsRegex)
             let songIDs = word.matches(precomputed: RegexExpressions.songIDsRegex)
@@ -136,13 +135,13 @@ public final class Markdown {
                 ))
             }
             for id in channels {
-                let channel = Array(ServerListView.folders.map({ $0.guilds }).joined().map(\.channels).joined())[keyed: id]
+                let channel = Array(ServerListView.folders.map(\.guilds).joined().map(\.channels).joined())[keyed: id]
                 return promise(.success(Text("#\(channel?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
-                        
+
             if highlight {
                 return promise(.success(Text(bionicMarkdown(word)) + Text(" ")))
             } else {
@@ -175,13 +174,13 @@ public final class Markdown {
      **/
     public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
-        
+
         let codeBlockMarkerRawOffsets = newlines
             .lazy
             .enumerated()
             .filter { $0.element.prefix(3) == "```" }
             .map(\.offset)
-        
+
         let indexes = codeBlockMarkerRawOffsets
             .lazy
             .indices
@@ -191,31 +190,31 @@ public final class Markdown {
                 return (codeBlockMarkerRawOffsets[number], codeBlockMarkerRawOffsets[number + 1])
             }
             .compactMap(\.self)
-                
+
         let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting) }
         var strippedPublishers = pubs
             .map { [$0] }
             .joined()
             .arrayLiteral
-        
+
         indexes.forEach { lowerBound, upperBound in
-            (lowerBound...upperBound).forEach { line in
-                let textObject: Text = Text(newlines[line]).font(Font.system(size: 14, design: .monospaced))
+            (lowerBound ... upperBound).forEach { line in
+                let textObject: Text = .init(newlines[line]).font(Font.system(size: 14, design: .monospaced))
                 strippedPublishers[line] = Just([textObject]).eraseToAny()
             }
         }
         let deleteIndexes = indexes
             .map { [$0, $1] }
             .joined()
-        
+
         strippedPublishers.remove(atOffsets: IndexSet(deleteIndexes))
-        
+
         let arrayWithNewlines = strippedPublishers
             .map { Array([$0]) }
             .joined(separator: [
-                newLinePublisher
+                newLinePublisher,
             ])
-        
+
         return Publishers.MergeMany(Array(arrayWithNewlines))
             .map { $0.reduce(Text(""), +) }
             .mapError { $0 as Error }
@@ -248,6 +247,43 @@ final class NSAttributedMarkdown {
             mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular), range: NSRange(match, in: mut.string))
         }
         return mut
+    }
+
+    public class func markdownStripped(_ text: String, font: NSFont?) -> NSMutableAttributedString {
+        let mut = NSMutableAttributedString(string: text)
+        let italic = text.matchRange(precomputed: Regexes.italic)
+        let bold = text.matchRange(precomputed: Regexes.bold)
+        let strikeThrough = text.matchRange(precomputed: Regexes.strikeThrough)
+        let monospace = text.matchRange(precomputed: Regexes.mono)
+        if let font = font {
+            mut.setAttributes([.font: font, .foregroundColor: NSColor.textColor], range: NSRange(mut.string.startIndex..., in: mut.string))
+        }
+        italic.forEach { match in
+            mut.applyFontTraits(NSFontTraitMask.italicFontMask, range: NSRange(match, in: mut.string))
+        }
+        bold.forEach { match in
+            mut.applyFontTraits(NSFontTraitMask.boldFontMask, range: NSRange(match, in: mut.string))
+        }
+        strikeThrough.forEach { match in
+            mut.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSRange(match, in: mut.string))
+        }
+        monospace.forEach { match in
+            mut.addAttribute(NSAttributedString.Key.font, value: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular), range: NSRange(match, in: mut.string))
+        }
+        return mut
+    }
+
+    enum Regexes {
+        static func precompute() {
+            _ = (
+                italic, bold, strikeThrough, mono
+            )
+        }
+
+        static var italic = try? NSRegularExpression(pattern: #"(\*|_)(.*?)\1"#)
+        static var bold = try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
+        static var strikeThrough = try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
+        static var mono = try? NSRegularExpression(pattern: #"(`(\w+(\s\w+)*)`)"#)
     }
 }
 

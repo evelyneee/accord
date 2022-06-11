@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct StickerView: View {
-    
     var stickerItems: [StickerItem]
     private let leftPadding: CGFloat = 44.5
-    
+
     var body: some View {
         ForEach(stickerItems, id: \.id) { sticker in
             if sticker.format_type == .lottie {

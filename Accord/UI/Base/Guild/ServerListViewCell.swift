@@ -13,7 +13,7 @@ struct ServerListViewCell: View {
     @StateObject var updater: ServerListView.UpdateView
     var guildID: String { channel.guild_id ?? "@me" }
     @State var status: String? = nil
-    
+
     private var dmLabelView: some View {
         HStack {
             ZStack(alignment: .bottomTrailing) {
@@ -22,9 +22,9 @@ struct ServerListViewCell: View {
                     channel.recipients?.first?.avatar,
                     discriminator: channel.recipients?.first?.discriminator ?? "0005"
                 ))
-                    .equatable()
-                    .frame(width: 35, height: 35)
-                    .clipShape(Circle())
+                .equatable()
+                .frame(width: 35, height: 35)
+                .clipShape(Circle())
                 statusDot
                     .onAppear {
                         if let user = channel.recipients?.first {
@@ -51,7 +51,7 @@ struct ServerListViewCell: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var labelView: some View {
         switch channel.type {
@@ -111,7 +111,7 @@ struct ServerListViewCell: View {
             }
         }
     }
-    
+
     private var statusDot: some View {
         Circle()
             .foregroundColor({ () -> Color in
@@ -132,7 +132,7 @@ struct ServerListViewCell: View {
             .opacity(0.8)
             .shadow(radius: 0.25)
     }
-    
+
     private var readStateDot: some View {
         ZStack {
             Circle()
@@ -145,7 +145,7 @@ struct ServerListViewCell: View {
         }
         .frame(width: 15, height: 15)
     }
-    
+
     var body: some View {
         HStack {
             labelView

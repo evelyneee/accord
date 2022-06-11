@@ -27,10 +27,16 @@ struct SearchView: View {
                 TextField("Jump to channel", text: $text)
                     .font(.title2)
                     .textFieldStyle(PlainTextFieldStyle())
+                    .onSubmit {
+                        if let channel = self.matches.first {
+                            MentionSender.shared.select(channel: channel)
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    }
             }
-            VStack {
+            List {
                 Spacer().frame(height: 25)
-                ForEach(matches.prefix(10), id: \.id) { channel in
+                ForEach(matches, id: \.id) { channel in
                     Button(action: {
                         MentionSender.shared.select(channel: channel)
                         presentationMode.wrappedValue.dismiss()
@@ -40,26 +46,35 @@ struct SearchView: View {
                                 Attachment(iconURL(channel.guild_id, icon))
                                     .equatable()
                                     .clipShape(Circle())
-                                    .frame(width: 19, height: 19)
+                                    .frame(width: 23, height: 23)
                             } else if channel.recipients?.count == 1 {
                                 Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar, discriminator: channel.recipients?[0].discriminator ?? "0005"))
                                     .equatable()
                                     .clipShape(Circle())
-                                    .frame(width: 19, height: 19)
+                                    .frame(width: 23, height: 23)
+                            } else if let icon = channel.icon {
+                                Attachment(cdnURL + "/channel-icons/\(channel.id)/\(icon).png?size=48")
+                                    .equatable()
+                                    .clipShape(Circle())
+                                    .frame(width: 23, height: 23)
                             }
                             Text(channel.computedName)
                                 .foregroundColor(Color(NSColor.textColor))
+                                .font(.system(size: 15))
                             if let guildName = channel.guild_name {
                                 Text(" — \(guildName)")
                                     .foregroundColor(.secondary)
+                                    .font(.system(size: 15))
                             }
                             Spacer()
                         }
                     })
-                    .buttonStyle(BorderlessButtonStyle())
+                    .buttonStyle(.plain)
                 }
                 Spacer()
-            }.frame(height: 300)
+            }
+            .listStyle(.plain)
+            .frame(height: 300)
         }
         .frame(width: 400)
         .padding()

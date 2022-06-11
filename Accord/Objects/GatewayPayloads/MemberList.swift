@@ -29,14 +29,14 @@ final class OPSItems: Codable {
         self.member = member
         self.group = group
     }
-    
+
     init(_ user: User) {
-        self.member = GuildMember(user: user)
+        member = GuildMember(user: user)
     }
-    
+
     var member: GuildMember?
     var group: OPSGroup?
-    
+
     public var id: String {
         if let member = member {
             return member.user.id

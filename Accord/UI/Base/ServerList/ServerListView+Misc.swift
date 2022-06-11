@@ -36,14 +36,14 @@ extension GatewayD {
         guilds.enumerated().forEach { index, _guild in
             var guild = _guild
             guild.channels = guild.channels.sorted { ($0.type.rawValue, $0.position ?? 0, $0.id) < ($1.type.rawValue, $1.position ?? 0, $1.id) }
-            guard let sections = Array(NSOrderedSet(array: guild.channels.filter({ $0.type == .section }))) as? [Channel] else { return }
+            guard let sections = Array(NSOrderedSet(array: guild.channels.filter { $0.type == .section })) as? [Channel] else { return }
             let rejects = guild.channels
-                .filter({ $0.parent_id == nil && $0.type != .section })
+                .filter { $0.parent_id == nil && $0.type != .section }
             var sectionFormatted: [Channel] = .init()
             sections.forEach { channel in
                 let matching = guild.channels
-                    .filter({ $0.parent_id == channel.id })
-                    .filter({ showHiddenChannels ? true : ($0.shown ?? true) })
+                    .filter { $0.parent_id == channel.id }
+                    .filter { showHiddenChannels ? true : ($0.shown ?? true) }
                 guard !matching.isEmpty else { return }
                 sectionFormatted.append(channel)
                 sectionFormatted.append(contentsOf: matching)
@@ -63,7 +63,7 @@ extension GatewayD {
     func assignReadStates() {
         guard let readState = read_state else { return }
         let stateDict = readState.entries.generateKeyMap()
-        guilds.enumerated().forEach { (index, guild) -> Void in
+        guilds.enumerated().forEach { index, guild in
             var guild = guild
             var channels = guild.channels
             channels = channels.map { channel -> Channel in

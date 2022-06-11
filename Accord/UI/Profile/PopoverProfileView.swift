@@ -25,8 +25,7 @@ struct RolesView: View {
             ForEach(self.tags, id: \.self) { tag in
                 self.item(for: tag)
                     .alignmentGuide(.leading, computeValue: { d in
-                        if (abs(width - d.width) > 286)
-                        {
+                        if abs(width - d.width) > 286 {
                             width = 0
                             height -= d.height
                         }
@@ -38,7 +37,7 @@ struct RolesView: View {
                         }
                         return result
                     })
-                    .alignmentGuide(.top, computeValue: {d in
+                    .alignmentGuide(.top, computeValue: { _ in
                         let result = height
                         if tag == self.tags.last {
                             height = 0
@@ -48,7 +47,7 @@ struct RolesView: View {
             }
         }.background(viewHeightReader($totalHeight))
     }
-    
+
     @ViewBuilder
     private func item(for role: String) -> some View {
         if let roleName = roleNames[role] {
@@ -67,7 +66,7 @@ struct RolesView: View {
             .padding(4)
         }
     }
-    
+
     func color(for role: String) -> Color {
         if let roleColor = roleColors[role]?.0 {
             return Color(int: roleColor)
@@ -76,7 +75,7 @@ struct RolesView: View {
     }
 
     private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
-        return GeometryReader { geometry -> Color in
+        GeometryReader { geometry -> Color in
             let rect = geometry.frame(in: .local)
             DispatchQueue.main.async {
                 binding.wrappedValue = rect.size.height
@@ -92,14 +91,13 @@ struct PopoverProfileView: View {
     @State var guildMember: GuildMember? = nil
     @State var fullUser: User? = nil
     @State var hovered: Int?
-    
+
     struct PopoverProfileViewButton: View {
-        
         var label: String
         var symbolName: String
         @State var hovered: Int? = nil
-        var action: (() -> Void)
-        
+        var action: () -> Void
+
         var body: some View {
             Button(action: action, label: {
                 VStack {
@@ -127,37 +125,37 @@ struct PopoverProfileView: View {
             })
         }
     }
-    
+
     var userObject: User?
-    
+
     final class UserRequest: Decodable {
         var user: User
         var guild_member: GuildMember?
     }
-    
+
     func loadUser() {
-        let url = URL.init(string: rootURL)?
+        let url = URL(string: rootURL)?
             .appendingPathComponent("users")
-            .appendingPathComponent(self.user?.id ?? "")
+            .appendingPathComponent(user?.id ?? "")
             .appendingPathComponent("profile")
             .appendingQueryParameters(
-                self.guildID == "@me" ?
-                ["with_mutual_guilds":"false"] :
-                ["with_mutual_guilds":"false", "guild_id":guildID]
+                guildID == "@me" ?
+                    ["with_mutual_guilds": "false"] :
+                    ["with_mutual_guilds": "false", "guild_id": guildID]
             )
         Request.fetch(UserRequest.self, url: url, headers: standardHeaders) {
             switch $0 {
-            case .success(let user):
+            case let .success(user):
                 DispatchQueue.main.async {
                     self.fullUser = user.user
                     self.guildMember = user.guild_member
                 }
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
             }
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .top) {
             VStack {
@@ -189,7 +187,7 @@ struct PopoverProfileView: View {
                     Text("\(user?.username ?? "")#\(user?.discriminator ?? "")")
                         .font(.subheadline)
                         .foregroundColor(Color.secondary)
-                    
+
                     if let bio = self.fullUser?.bio, !bio.isEmpty {
                         Divider()
                         Text("About me")
@@ -215,18 +213,18 @@ struct PopoverProfileView: View {
                             Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
                                 userAgent: discordUserAgent,
                                 token: AccordCoreVars.token,
-                                bodyObject: ["recipients":[user?.id ?? ""]],
+                                bodyObject: ["recipients": [user?.id ?? ""]],
                                 type: .POST,
                                 discordHeaders: true,
                                 referer: "https://discord.com/channels/@me",
                                 json: true
                             )) {
                                 switch $0 {
-                                case .success(let channel):
+                                case let .success(channel):
                                     print(channel)
                                     ServerListView.privateChannels.append(channel)
                                     MentionSender.shared.select(channel: channel)
-                                case .failure(let error):
+                                case let .failure(error):
                                     AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
                                 }
                             }
@@ -235,19 +233,19 @@ struct PopoverProfileView: View {
                             label: "Call",
                             symbolName: "phone.fill"
                         ) {
-                            // todo: voice chat
+                            // TODO: voice chat
                         }
                         PopoverProfileViewButton(
                             label: "Video call",
                             symbolName: "camera.circle.fill"
                         ) {
-                            // todo: video call
+                            // TODO: video call
                         }
                         PopoverProfileViewButton(
                             label: "Add Friend",
                             symbolName: "person.crop.circle.badge.plus"
                         ) {
-                            // todo: check add friend
+                            // TODO: check add friend
                         }
                     }
                     .transition(AnyTransition.opacity)

@@ -64,14 +64,14 @@ final class SlashCommands {
                     },
                 ],
             ],
-            "nonce":generateFakeNonce()
+            "nonce": generateFakeNonce(),
         ]
-        Request.multipartData (
+        Request.multipartData(
             url: URL(string: "\(rootURL)/interactions"),
             with: params,
             fileURL: nil,
             boundary: boundary,
-            headers: Headers (
+            headers: Headers(
                 userAgent: discordUserAgent,
                 token: AccordCoreVars.token,
                 type: .POST,
@@ -80,9 +80,10 @@ final class SlashCommands {
             )
         ) {
             switch $0 {
-            case .success((_, let response)):
+            case let .success((_, response)):
                 if let response = response,
-                   (200..<300).contains(response.statusCode) {
+                   (200 ..< 300).contains(response.statusCode)
+                {
                     print("Interaction worked!")
                 } else {
                     AccordApp.error(
@@ -92,7 +93,7 @@ final class SlashCommands {
                         reconnectOption: false
                     )
                 }
-            case .failure(let error):
+            case let .failure(error):
                 print(error)
             }
         }

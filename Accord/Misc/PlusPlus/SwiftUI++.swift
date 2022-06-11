@@ -142,27 +142,22 @@ extension Font {
 }
 
 extension View {
-    
     func imageRepresentation(_ completion: @escaping (NSImage?) -> Void) {
         let view = NoInsetHostingView(rootView: self)
         view.setFrameSize(view.fittingSize)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-            return completion(view.bitmapImage())
-        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            completion(view.bitmapImage())
+        }
     }
-
 }
 
 class NoInsetHostingView<V>: NSHostingView<V> where V: View {
-    
     override var safeAreaInsets: NSEdgeInsets {
-        return .init()
+        .init()
     }
-    
 }
 
 public extension NSView {
-    
     func bitmapImage() -> NSImage? {
         guard let rep = bitmapImageRepForCachingDisplay(in: bounds) else {
             return nil
@@ -173,7 +168,6 @@ public extension NSView {
         }
         return NSImage(cgImage: cgImage, size: bounds.size)
     }
-    
 }
 
 struct NotificationBadge: ViewModifier {
@@ -200,15 +194,15 @@ struct NotificationBadge: ViewModifier {
 
 extension View {
     func redBadge(_ count: Binding<Int?>) -> some View {
-        self.modifier(NotificationBadge(count: count))
+        modifier(NotificationBadge(count: count))
     }
-    
+
     @ViewBuilder
     func conditionalClipShape<S: Shape, U: Shape>(_ condition: Bool, _ shape1: S, _ shape2: U) -> some View {
         if condition {
-            self.clipShape(shape1)
+            clipShape(shape1)
         } else {
-            self.clipShape(shape2)
+            clipShape(shape2)
         }
     }
 }

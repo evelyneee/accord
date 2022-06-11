@@ -21,14 +21,14 @@ final class Gateway {
     internal var bag = Set<AnyCancellable>()
 
     // To communicate with the view
-    private (set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
-    private (set) var editSubject = PassthroughSubject<(Data, String), Never>()
-    private (set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
-    private (set) var typingSubject = PassthroughSubject<(Data, String), Never>()
-    private (set) var memberChunkSubject = PassthroughSubject<Data, Never>()
-    private (set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
-    
-    var presencePipeline = [String:PassthroughSubject<PresenceUpdate, Never>]()
+    private(set) var messageSubject = PassthroughSubject<(Data, String, Bool), Never>()
+    private(set) var editSubject = PassthroughSubject<(Data, String), Never>()
+    private(set) var deleteSubject = PassthroughSubject<(Data, String), Never>()
+    private(set) var typingSubject = PassthroughSubject<(Data, String), Never>()
+    private(set) var memberChunkSubject = PassthroughSubject<Data, Never>()
+    private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
+
+    var presencePipeline = [String: PassthroughSubject<PresenceUpdate, Never>]()
 
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
@@ -49,12 +49,12 @@ final class Gateway {
             fatalError()
         }
     }
-    
+
     func closeMessageHandler(_ message: String?) {
         guard let message = message?.lowercased() else {
             return
         }
-        
+
         if message.contains("Not authenticated") || message.contains("Authentication failed") {
             logOut()
         }
@@ -96,12 +96,12 @@ final class Gateway {
     ]
 
     static var gatewayURL: URL = .init(string: "wss://gateway.discord.gg?v=9&encoding=json")!
-    
+
     internal var decompressor = ZStream()
-    
+
     public var presences: [Activity] = []
-    
-    init (
+
+    init(
         url: URL = Gateway.gatewayURL,
         session_id: String? = nil,
         seq: Int? = nil,
@@ -142,12 +142,13 @@ final class Gateway {
             if let error = error {
                 return print(error)
             }
-            
+
             guard let data = data,
                   let decompressedData = self.compress ? try? self.decompressor.decompress(data: data) : data,
                   let hello = try? JSONSerialization.jsonObject(with: decompressedData, options: []) as? [String: Any],
                   let helloD = hello["d"] as? [String: Any],
-                  let interval = helloD["heartbeat_interval"] as? Int else {
+                  let interval = helloD["heartbeat_interval"] as? Int
+            else {
                 print("Failed to get a heartbeat interval")
                 return wss.hardReset()
             }
@@ -357,11 +358,11 @@ final class Gateway {
     }
 
     func updatePresence(status: String, since: Int, @ActivityBuilder _ activities: () -> [Activity]) throws {
-        try self.updatePresence(status: status, since: since, activities: activities())
+        try updatePresence(status: status, since: since, activities: activities())
     }
-    
+
     func updatePresence(status: String, since: Int, activities: [Activity]) throws {
-        self.presences = activities
+        presences = activities
         let packet: [String: Any] = [
             "op": 3,
             "d": [
@@ -472,14 +473,14 @@ final class Gateway {
     }
 
     func listenForPresence(userID: String, action: @escaping ((PresenceUpdate) -> Void)) {
-        self.presencePipeline[userID] = .init()
-        self.presencePipeline[userID]?.sink(receiveValue: action).store(in: &self.bag)
+        presencePipeline[userID] = .init()
+        presencePipeline[userID]?.sink(receiveValue: action).store(in: &bag)
     }
-    
+
     func unregisterPresence(userID: String) {
-        self.presencePipeline.removeValue(forKey: userID)
+        presencePipeline.removeValue(forKey: userID)
     }
-    
+
     // cleanup
     deinit {
         self.bag.invalidateAll()

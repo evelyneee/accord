@@ -15,7 +15,7 @@ final class Status: Codable {
 }
 
 final class Activity: Identifiable {
-    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, metadata: [String:Any]? = nil, timestamp: Int? = nil, endTimestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:], syncID: String? = nil) {
+    internal init(applicationID: String? = nil, flags: Int? = nil, emoji: StatusEmoji? = nil, name: String, type: Int, metadata: [String: Any]? = nil, timestamp: Int? = nil, endTimestamp: Int? = nil, state: String? = nil, details: String? = nil, assets: [String: String] = [:], syncID: String? = nil) {
         self.applicationID = applicationID
         self.flags = flags
         self.emoji = emoji
@@ -32,7 +32,7 @@ final class Activity: Identifiable {
 
     static var current: Activity?
 
-    var id: String { self.name + (state ?? "") }
+    var id: String { name + (state ?? "") }
     var emoji: StatusEmoji?
     var name: String
     var state: String?
@@ -44,7 +44,7 @@ final class Activity: Identifiable {
     var details: String?
     var syncID: String?
     var assets: [String: String]
-    var metadata: [String:Any]?
+    var metadata: [String: Any]?
     var dictValue: [String: Any] {
         var dict: [String: Any] = ["name": name, "type": type, "state": NSNull()]
         if let emoji = emoji {
@@ -59,7 +59,7 @@ final class Activity: Identifiable {
             dict["secrets"] = [:]
         }
         if name == "Spotify" {
-            dict["party"] = ["id":"spotify:"+user_id]
+            dict["party"] = ["id": "spotify:" + user_id]
         }
         if let metadata = metadata {
             dict["metadata"] = metadata
@@ -96,7 +96,7 @@ final class StatusEmoji: Codable {
     var id: String?
     var animated: Bool?
     var dictValue: [String: Any?] {
-        ["name": name as Optional<Any>, "id": id, "animated": animated].compactMapValues { $0 }
+        ["name": name as Any?, "id": id, "animated": animated].compactMapValues { $0 }
     }
 }
 
