@@ -157,6 +157,7 @@ struct LoginView: View {
             .padding()
             Form {
                 TextField("Token:", text: $loginViewDataModel.token)
+                    .textFieldStyle(.roundedBorder)
             }.tabItem {
                 Text("Token")
             }
