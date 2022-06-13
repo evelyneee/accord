@@ -237,13 +237,13 @@ struct PopoverProfileView: View {
                         }
                         PopoverProfileViewButton(
                             label: "Video call",
-                            symbolName: "camera.circle.fill"
+                            symbolName: "camera.fill"
                         ) {
                             // TODO: video call
                         }
                         PopoverProfileViewButton(
                             label: "Add Friend",
-                            symbolName: "person.crop.circle.badge.plus"
+                            symbolName: "person.fill.badge.plus"
                         ) {
                             // TODO: check add friend
                         }

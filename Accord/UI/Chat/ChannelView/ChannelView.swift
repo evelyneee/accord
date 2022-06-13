@@ -223,6 +223,7 @@ struct MemberListViewCell: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.borderless)
         .popover(isPresented: self.$popup, content: {
