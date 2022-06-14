@@ -84,7 +84,6 @@ struct AccordApp: App {
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
-
                         DispatchQueue.global().async {
                             Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
                                 contentType: "application/x-www-form-urlencoded",
@@ -226,6 +225,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func onWake(_: AnyObject?) {
+        print("who up")
         concurrentQueue.async {
             wss?.reset()
         }

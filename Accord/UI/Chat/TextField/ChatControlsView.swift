@@ -44,7 +44,7 @@ struct ChatControls: View {
 
     private func send() {
         messageSendQueue.async { [weak viewModel] in
-            guard viewModel?.textFieldContents != "", let contents = viewModel?.textFieldContents else { return }
+            guard (viewModel?.textFieldContents != "" || fileUploadURL != nil), let contents = viewModel?.textFieldContents else { return }
             if contents.prefix(1) != "/" {
                 viewModel?.emptyTextField()
             }
@@ -182,28 +182,26 @@ struct ChatControls: View {
             .animation(nil, value: UUID())
             .fixedSize(horizontal: false, vertical: true)
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
-                if true {
-                    let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
-                    if let rawData = data,
-                       let string = String(data: rawData, encoding: .utf8),
-                       let url = URL(string: string),
-                       let data = try? Data(contentsOf: url)
-                    {
-                        self.fileUpload = data
-                        self.fileUploadURL = url
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            if let textCount = viewModel?.textFieldContents.count,
-                               let pathComponentsCount = url.pathComponents.last?.count
-                            {
-                                if textCount >= pathComponentsCount {
-                                    viewModel?.textFieldContents.removeLast(pathComponentsCount)
-                                }
+                let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
+                if let rawData = data,
+                   let string = String(data: rawData, encoding: .utf8),
+                   let url = URL(string: string),
+                   let data = try? Data(contentsOf: url)
+                {
+                    self.fileUpload = data
+                    self.fileUploadURL = url
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        if let textCount = viewModel?.textFieldContents.count,
+                           let pathComponentsCount = url.pathComponents.last?.count
+                        {
+                            if textCount >= pathComponentsCount {
+                                viewModel?.textFieldContents.removeLast(pathComponentsCount)
                             }
                         }
-                    } else if let image = NSImage(pasteboard: NSPasteboard.general) {
-                        self.fileUpload = image.png
-                        self.fileUploadURL = URL(string: "file:///image0.png")!
                     }
+                } else if let image = NSImage(pasteboard: NSPasteboard.general) {
+                    self.fileUpload = image.png
+                    self.fileUploadURL = URL(string: "file:///image0.png")!
                 }
             }
 //            .onAppear {

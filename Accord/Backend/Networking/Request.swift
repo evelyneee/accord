@@ -479,6 +479,11 @@ public final class RequestPublisher {
             var config = URLSessionConfiguration.default
             guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
                 print("No active websocket connection")
+                concurrentQueue.async {
+                    if wss.connection?.state != .preparing {
+                        wss?.reset()
+                    }
+                }
                 throw "No active websocket connection"
             }
             // Set headers

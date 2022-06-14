@@ -54,6 +54,7 @@ func pingCount(guild: Guild) -> Int {
 
 func unreadMessages(guild: Guild) -> Bool {
     let array = guild.channels
+        .filter { $0.read_state != nil }
         .compactMap { $0.last_message_id == $0.read_state?.last_message_id }
         .contains(false)
     return array

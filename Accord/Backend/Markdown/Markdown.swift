@@ -87,18 +87,25 @@ public final class Markdown {
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
-    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextPublisher {
+    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool) -> TextPublisher {
+        if !(word.contains("*") || word.contains("~") || word.contains("/") || word.contains("_") || word.contains(">")) {
+            if highlight {
+                return Just(Text(bionicMarkdown(word)) + Text(" ")).eraseToAny()
+            } else {
+                return Just(Text(word) + Text(" ")).eraseToAny()
+            }
+        }
         let emoteIDs = word.matches(precomputed: RegexExpressions.emojiIDRegex)
-        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=48") {
+        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "96" : "32")") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { image -> NSImage in
                     guard !font else { return image }
-                    image.size = NSSize(width: 18, height: 18)
+                    image.size = NSSize(width: 16, height: 16)
                     return image
                 }
                 .map {
-                    Text(Image(nsImage: $0)).font(.system(size: 14)) + Text(" ")
+                    Text(Image(nsImage: $0)).font(font ? .system(size: 48) : .system(size: 14)) + Text(" ")
                 }
                 .eraseToAny()
         }
@@ -138,6 +145,11 @@ public final class Markdown {
                 let channel = Array(ServerListView.folders.map(\.guilds).joined().map(\.channels).joined())[keyed: id]
                 return promise(.success(Text("#\(channel?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
+            
+            if word == ">" && quote {
+                return promise(.success(Text("︳").foregroundColor(.secondary)))
+            }
+            
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
@@ -160,7 +172,7 @@ public final class Markdown {
     public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         let words = line.matchRange(precomputed: RegexExpressions.lineRegex).map { line[$0].trimmingCharacters(in: .whitespaces) }
-        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight) }
+        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first) }
         return Publishers.MergeMany(pubs)
             .collect()
             .eraseToAnyPublisher()
@@ -203,6 +215,7 @@ public final class Markdown {
                 strippedPublishers[line] = Just([textObject]).eraseToAny()
             }
         }
+        
         let deleteIndexes = indexes
             .map { [$0, $1] }
             .joined()

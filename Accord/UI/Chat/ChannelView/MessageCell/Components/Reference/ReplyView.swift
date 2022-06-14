@@ -35,10 +35,10 @@ struct ReplyView: View {
                     return Color.primary
                 }())
                 .fontWeight(.medium)
-            Button(action: {
-                ChannelView.scrollTo.send(reply.id)
-            }, label: {
-                Text(reply.content)
+            Button(action: { [unowned reply] in
+                ChannelView.scrollTo.send((reply.channel_id, reply.id))
+            }, label: { [weak reply] in
+                Text(reply?.content ?? "")
                     .font(.subheadline)
                     .lineLimit(0)
                     .foregroundColor(.secondary)

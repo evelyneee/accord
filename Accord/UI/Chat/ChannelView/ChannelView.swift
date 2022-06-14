@@ -53,7 +53,9 @@ struct ChannelView: View, Equatable {
     @Environment(\.colorScheme)
     var colorScheme: ColorScheme
 
-    static var scrollTo = PassthroughSubject<String, Never>()
+    static var scrollTo = PassthroughSubject<(String, String), Never>()
+    
+    @State var scrolledOutOfBounds: Bool = false
 
     // MARK: - init
 
@@ -114,18 +116,62 @@ struct ChannelView: View, Equatable {
     var body: some View {
         HStack(content: {
             VStack(spacing: 0) {
-                List {
-                    Spacer().frame(height: 15)
-                    if metalRenderer {
-                        messagesView
-                            .drawingGroup()
-                    } else {
-                        messagesView
+                ZStack(alignment: .bottomTrailing) {
+                    ScrollViewReader { proxy in
+                        List {
+                            Spacer().frame(height: 15)
+                            if metalRenderer {
+                                messagesView
+                                    .drawingGroup()
+                            } else {
+                                messagesView
+                            }
+                        }
+                        .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+                        .rotationEffect(.radians(.pi))
+                        .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                        .onReceive(NotificationCenter.default.publisher(for: NSWorkspace.didWakeNotification), perform: { [weak viewModel] _ in
+                            viewModel?.cancellable.forEach { $0.cancel() }
+                            viewModel?.cancellable.removeAll()
+                            viewModel?.connect()
+                            if viewModel?.guildID == "@me" {
+                                try? wss.subscribeToDM(self.channelID)
+                            } else {
+                                try? wss.subscribe(to: self.guildID)
+                            }
+                            viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID)
+                        })
+                        .onReceive(Self.scrollTo, perform: { channelID, id in
+                            guard channelID == self.channelID else { return }
+                            if viewModel.messages.map(\.id).contains(id) {
+                                withAnimation(.easeInOut(duration: 0.5), {
+                                    proxy.scrollTo(id, anchor: .center)
+                                })
+                            } else {
+                                self.scrolledOutOfBounds = true
+                                messageFetchQueue.async {
+                                    viewModel.loadAroundMessage(id: id)
+                                }
+                            }
+                        })
+                    }
+                    if self.scrolledOutOfBounds {
+                        Button(action: { [weak viewModel] in
+                            self.scrolledOutOfBounds = false
+                            messageFetchQueue.async {
+                                viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID, scrollAfter: true)
+                            }
+                        }) {
+                            Image(systemName: "arrowtriangle.down.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 33, height: 33)
+                                .opacity(0.9)
+                        }
+                        .buttonStyle(.borderless)
+                        .padding(15)
                     }
                 }
-                .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
-                .rotationEffect(.radians(.pi))
-                .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                 blurredTextField
             }
             if memberListShown {
@@ -151,6 +197,20 @@ struct ChannelView: View, Equatable {
             return true
         }
         .toolbar {
+            ToolbarItem(placement: .navigation) {
+                HStack {
+                    Button(action: {
+                        NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+                    }, label: {
+                        Image(systemName: "sidebar.leading")
+                    })
+                    Image(systemName: "number")
+                        .resizable()
+                        .frame(width: 13, height: 13)
+                        .foregroundColor(.secondary)
+                        .padding(.trailing, -2)
+                }
+            }
             ToolbarItemGroup {
                 Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")

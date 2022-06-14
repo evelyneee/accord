@@ -286,7 +286,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         ))
     }
 
-    func getMessages(channelID: String, guildID: String) {
+    func getMessages(channelID: String, guildID: String, scrollAfter: Bool = false) {
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             userAgent: discordUserAgent,
             token: AccordCoreVars.token,
@@ -316,6 +316,11 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
         }) { [weak self] messages in
             self?.messages = messages
+            if scrollAfter {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                    ChannelView.scrollTo.send((self?.channelID ?? "", messages.first?.id ?? ""))
+                })
+            }
             messageFetchQueue.async {
                 guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
                 self?.loadPronouns()
@@ -448,7 +453,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         }) { [weak self] messages in
             self?.messages = messages
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                ChannelView.scrollTo.send(id)
+                ChannelView.scrollTo.send((self?.channelID ?? "", id))
             }
         }
         .store(in: &cancellable)
