@@ -242,9 +242,10 @@ struct MemberListView: View {
         List(self.$list, id: \.id) { $ops in
             if let group = ops.group {
                 Text(
-                    "\(group.id == "offline" ? "Offline" : group.id == "online" ? "Online" : roleNames[group.id ?? ""] ?? "") - \(group.count ?? 0)"
+                    "\(group.id == "offline" ? "OFFLINE" : group.id == "online" ? "OFFLINE" : roleNames[group.id ?? ""]?.uppercased() ?? "") - \(group.count ?? 0)"
                 )
                 .fontWeight(.semibold)
+                .font(.system(size: 10))
                 .foregroundColor(.secondary)
                 .padding([.top])
             } else {
@@ -263,7 +264,7 @@ struct MemberListViewCell: View {
             self.popup.toggle()
         }) { [unowned ops] in
             HStack {
-                Attachment(pfpURL(ops.member?.user.id ?? "", ops.member?.user.avatar ?? "", discriminator: ops.member?.user.discriminator ?? "", "24"))
+                Attachment(pfpURL(ops.member?.user.id ?? "", ops.member?.user.avatar ?? "", discriminator: ops.member?.user.discriminator ?? "", "64"))
                     .equatable()
                     .frame(width: 33, height: 33)
                     .clipShape(Circle())

@@ -167,7 +167,6 @@ struct ServerListView: View {
                             .opacity(0.75)
                         JoinServerButton(viewUpdater: self.viewUpdater)
                     }
-                    .padding(.vertical)
                 }
                 .frame(width: 80)
                 .padding(.top, 5)
