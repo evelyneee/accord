@@ -28,6 +28,10 @@ struct EmotesView: View, Equatable {
     @State var recentMax = 8
     @State var recentsenabled = true
     @State var search = ""
+    
+    @Environment(\.dismiss)
+    var dismiss
+    
     var body: some View {
         HStack {
             ZStack(alignment: .top) {
@@ -42,6 +46,7 @@ struct EmotesView: View, Equatable {
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                                 onSelect(emote)
+                                                self.dismiss()
                                                 print(cdnURL + "/emojis/\(emote.id).png?size=24")
                                             }) {
                                                 VStack {
@@ -60,7 +65,9 @@ struct EmotesView: View, Equatable {
                             LazyVGrid(columns: columns) {
                                 ForEach(Emotes.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
                                     Button(action: {
-                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)>")
+                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
+                                        onSelect(emote)
+                                        self.dismiss()
                                     }) {
                                         HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=24").equatable()
                                             .frame(width: 30, height: 30)
@@ -76,6 +83,10 @@ struct EmotesView: View, Equatable {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .background(Material.thick) // blurred background
+                    .onSubmit {
+                        self.onSelect(DiscordEmote(id: "stock", name: self.search))
+                        self.dismiss()
+                    }
             }
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)

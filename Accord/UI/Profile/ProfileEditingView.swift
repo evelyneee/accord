@@ -26,7 +26,6 @@ struct ProfileEditingView: View {
     @State var imageData: Data? = nil
     @State var bannerData: Data? = nil
     @State var emotePopup: Bool = false
-    @State var emoteText: String = ""
     @State var emoteID: String? = nil
     @State var emoteName: String? = nil
     @State var emoteAnimated: Bool? = nil
@@ -82,10 +81,11 @@ struct ProfileEditingView: View {
                     Button(action: {
                         self.emotePopup.toggle()
                     }, label: {
-                        let parsedEmote = self.emoteText.matches(precomputed: RegexExpressions.emojiIDRegex).first
-                        if let parsedEmote = parsedEmote {
-                            Attachment(cdnURL + "/emojis/\(parsedEmote).png?size=48")
+                        if let emoteID = emoteID {
+                            Attachment(cdnURL + "/emojis/\(emoteID).png?size=48")
                                 .frame(width: 16, height: 16)
+                        } else if let emoteName = emoteName {
+                            Text(emoteName)
                         } else if let emoji = Activity.current?.emoji {
                             if let id = emoji.id {
                                 Attachment(cdnURL + "/emojis/\(id).png?size=48")
@@ -100,13 +100,47 @@ struct ProfileEditingView: View {
                     .buttonStyle(.borderless)
                     .popover(isPresented: self.$emotePopup, content: {
                         EmotesView(onSelect: { emote in
+                            if emote.id == "stock" {
+                                self.emoteName = emote.name
+                                self.emoteID = nil
+                                return
+                            }
                             self.emoteID = emote.id
-                            self.emoteText = emote.name
+                            self.emoteName = emote.name
                             self.emoteAnimated = emote.animated
+                            self.emotePopup = false
                         })
                     })
                     TextField("Type in your status", text: self.$status)
                         .textFieldStyle(.roundedBorder)
+                    Button("uwu") {
+                        try? wss.send(json: [
+                            "op":3,
+                            "d":[
+                                "afk":false,
+                                "activities":[
+                                    [
+                                        "name":"Custom Status",
+                                        "state":NSNull(),
+                                        "type":4,
+                                        "emoji":[
+                                            "animated":false,
+                                            "id":NSNull(),
+                                            "name":"🏃🏻‍♀️"
+                                        ]
+                                    ]
+                                ],
+                                "since":0,
+                                "status":"online"
+                            ]
+                        ])
+                        updateProfile(settings: true, [
+                            "status":"online"
+                        ])
+                        updateProfile(settings: true, ["custom_status": [
+                            "emoji_name": "🏃🏻‍♀️"
+                        ]])
+                    }
                     if self.status != Activity.current?.state || self.emoteID != Activity.current?.emoji?.id {
                         Button("Save") {
                             Activity.current?.state = self.status
@@ -117,13 +151,27 @@ struct ProfileEditingView: View {
                                 if self.status.isEmpty {
                                     updateProfile(settings: true, ["custom_status": [
                                         "emoji_id": self.emoteID,
-                                        "emote_name": self.emoteName,
+                                        "emoji_name": self.emoteName,
                                     ]])
                                 } else {
                                     updateProfile(settings: true, ["custom_status": [
                                         "text": self.status,
                                         "emoji_id": self.emoteID,
-                                        "emote_name": self.emoteName,
+                                        "emoji_name": self.emoteName,
+                                    ]])
+                                }
+                            } else if let emoteName = emoteName {
+                                Activity.current?.emoji = StatusEmoji(name: emoteName, id: nil, animated: nil)
+                                wss.presences[0] = Activity.current!
+                                try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "online", since: 0, activities: wss.presences)
+                                if self.status.isEmpty {
+                                    updateProfile(settings: true, ["custom_status": [
+                                        "emoji_name": emoteName
+                                    ]])
+                                } else {
+                                    updateProfile(settings: true, ["custom_status": [
+                                        "text": self.status,
+                                        "emoji_name": emoteName
                                     ]])
                                 }
                             } else if !self.status.isEmpty {
