@@ -216,33 +216,33 @@ struct PopoverProfileView: View {
                     }) {
                         RolesView(tags: roles)
                     }
-                    HStack(alignment: .bottom) {
-                        PopoverProfileViewButton(
-                            label: "Message",
-                            symbolName: "bubble.right.fill"
-                        ) {
-                            print("lol creating new channel now")
-                            Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
-                                userAgent: discordUserAgent,
-                                token: AccordCoreVars.token,
-                                bodyObject: ["recipients": [user?.id ?? ""]],
-                                type: .POST,
-                                discordHeaders: true,
-                                referer: "https://discord.com/channels/@me",
-                                json: true
-                            )) {
-                                switch $0 {
-                                case let .success(channel):
-                                    print(channel)
-                                    ServerListView.privateChannels.append(channel)
-                                    MentionSender.shared.select(channel: channel)
-                                case let .failure(error):
-                                    AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
-                                }
+                    Button(action: {
+                        Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
+                            userAgent: discordUserAgent,
+                            token: AccordCoreVars.token,
+                            bodyObject: ["recipients": [user?.id ?? ""]],
+                            type: .POST,
+                            discordHeaders: true,
+                            referer: "https://discord.com/channels/@me",
+                            json: true
+                        )) {
+                            switch $0 {
+                            case let .success(channel):
+                                print(channel)
+                                ServerListView.privateChannels.append(channel)
+                                MentionSender.shared.select(channel: channel)
+                            case let .failure(error):
+                                AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
                             }
                         }
+                    }) {
+                        HStack {
+                            Text("Message")
+                                .frame(maxWidth: .infinity)
+                        }
                     }
-                    .frame(maxWidth: .infinity)
+                    .controlSize(.large)
+                    .buttonStyle(.borderedProminent)
                     .transition(AnyTransition.opacity)
                 }
                 .padding(14)

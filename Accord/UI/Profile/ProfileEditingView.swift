@@ -113,34 +113,6 @@ struct ProfileEditingView: View {
                     })
                     TextField("Type in your status", text: self.$status)
                         .textFieldStyle(.roundedBorder)
-                    Button("uwu") {
-                        try? wss.send(json: [
-                            "op":3,
-                            "d":[
-                                "afk":false,
-                                "activities":[
-                                    [
-                                        "name":"Custom Status",
-                                        "state":NSNull(),
-                                        "type":4,
-                                        "emoji":[
-                                            "animated":false,
-                                            "id":NSNull(),
-                                            "name":"🏃🏻‍♀️"
-                                        ]
-                                    ]
-                                ],
-                                "since":0,
-                                "status":"online"
-                            ]
-                        ])
-                        updateProfile(settings: true, [
-                            "status":"online"
-                        ])
-                        updateProfile(settings: true, ["custom_status": [
-                            "emoji_name": "🏃🏻‍♀️"
-                        ]])
-                    }
                     if self.status != Activity.current?.state || self.emoteID != Activity.current?.emoji?.id {
                         Button("Save") {
                             Activity.current?.state = self.status

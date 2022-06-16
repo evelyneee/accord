@@ -39,14 +39,19 @@ struct LoadingView: View {
     fileprivate static let greetings: [Text] = [
         Text("Made in Canada!"),
         Text("Gaslight. Gatekeep. Girlboss.").italic(),
-        Text("Not a car"),
         Text("Send your best hints to ") + Text("evln#0001").font(Font.system(.title2, design: .monospaced)),
         Text("You can change your nickname with ") + Text("/nick").font(Font.system(.title2, design: .monospaced)),
-        Text(verbatim: #"¯\_(ツ)_/¯"#),
-        Text("uwu owo"),
-        Text("Accord for iOS, releasing alongside GTA VI"),
-        Text("What's a X-Super-Properties?"),
-        Text("😼"),
+        Text("can you find all 12 frogs?"),
+        Text("according to my sources").italic(),
+        Text("swift... you... why!!!"),
+        Text("🤸🏻‍♀️").font(.system(size: 36)),
+        Text("Make sure to join the official server!"),
+        Text("Let's merge without conflicts 😳"),
+        Text("Wumpus is now a feral possum"),
+        Text("Accord is behind you"),
+        Text("Boo 👻"),
+        Text("Click [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for a surprise"),
+        Text("Check out ") + Text("/help").font(Font.system(.title2, design: .monospaced)),
     ]
 
     var body: some View {
@@ -58,8 +63,9 @@ struct LoadingView: View {
                     Image(nsImage: NSApplication.shared.applicationIconImage)
                         .saturation(0.0).modifier(TiltAnimation())
                     LoadingView.greetings.randomElement()!
-                        .font(.title2)
                         .fontWeight(.medium)
+                        .font(.title2)
+                        .textSelection(.enabled)
                         .padding(5)
                     Text("Connecting")
                         .foregroundColor(Color.secondary)

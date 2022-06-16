@@ -370,9 +370,15 @@ public final class Request {
                 let mimetype = url.mimeType()
 
                 body.append("--\(boundary)\r\n")
-                body.append(
-                    "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n"
-                )
+                if fileURLs.count > 1 {
+                    body.append(
+                        "Content-Disposition: form-data; name=\"files[\(String(idx))]\"; filename=\"\(filename)\"\r\n"
+                    )
+                } else {
+                    body.append(
+                        "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n"
+                    )
+                }
                 body.append("Content-Type: \(mimetype)\r\n\r\n")
                 body.append(data)
                 body.append("\r\n")

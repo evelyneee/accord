@@ -295,8 +295,32 @@ final class ChatControlsViewModel: ObservableObject {
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.addValue(AccordCoreVars.token, forHTTPHeaderField: "Authorization")
-        guard let string = try? ["content": text].jsonString() else { return }
+        
+        let packet: [String:Any] = file.count > 1 ? [
+            "content": text,
+            "nonce":generateFakeNonce(),
+            "channel_id":channelID,
+            "type":0,
+            "sticker_ids":[],
+            "attachments":file.enumerated().map { offset, url in
+                [
+                    "filename":url.lastPathComponent,
+                    "id":offset
+                ]
+            }
+        ] :
+        [
+            "content": text,
+            "nonce":generateFakeNonce(),
+            "channel_id":channelID
+        ]
+        
+        guard let string = try? packet.jsonString() else { return }
+        
+        print(string)
+        
         request.httpBody = try? Request.createMultipartBody(with: string, fileURLs: file.map(\.absoluteString), boundary: boundary, fileData: data)
+        print(request.httpBody ?? Data())
         let task = URLSession.shared.dataTask(with: request) { [weak self] _, res, _ in
             if let response = res as? HTTPURLResponse, response.statusCode == 200 {
                 DispatchQueue.main.async {

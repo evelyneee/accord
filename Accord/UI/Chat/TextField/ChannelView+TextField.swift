@@ -52,8 +52,7 @@ extension ChannelView {
                 replyingTo: $replyingTo,
                 mentionUser: $mentionUser,
                 permissions: viewModel.permissions,
-                fileUpload: $fileUpload,
-                fileUploadURL: $fileUploadURL
+                fileUploads: self.$fileUploads
             )
             .padding(13)
         }

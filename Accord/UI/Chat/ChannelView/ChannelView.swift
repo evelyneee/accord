@@ -39,8 +39,7 @@ struct ChannelView: View, Equatable {
     @AppStorage("memberListShown")
     var memberListShown: Bool = false
 
-    @State var fileUpload: Data?
-    @State var fileUploadURL: URL?
+    @State var fileUploads: [(Data?, URL?)] = .init()
 
     @AppStorage("MetalRenderer")
     var metalRenderer: Bool = false
@@ -190,8 +189,7 @@ struct ChannelView: View, Equatable {
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { data, _ in
                 if let data = data, let path = NSString(data: data, encoding: 4), let url = URL(string: path as String) {
-                    fileUpload = try! Data(contentsOf: url)
-                    fileUploadURL = url
+                    self.fileUploads.append((try? Data(contentsOf: url), url))
                 }
             })
             return true

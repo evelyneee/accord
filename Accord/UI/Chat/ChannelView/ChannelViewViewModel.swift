@@ -227,7 +227,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.memberListSubject
             .sink { [unowned self] list in
                 if self.memberList.isEmpty {
-                    self.memberList = Array(list.d.ops.compactMap(\.items).joined())
+                    let list = Array(list.d.ops.compactMap(\.items).joined())
                         .map { item -> OPSItems in
                             let new = item
                             new.member?.roles = new.member?.roles?
@@ -241,6 +241,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                                 .map(\.0)
                             return new
                         }
+                    DispatchQueue.main.async {
+                        self.memberList = list
+                    }
                 }
             }
             .store(in: &cancellable)

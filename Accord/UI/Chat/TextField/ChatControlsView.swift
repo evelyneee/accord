@@ -27,8 +27,7 @@ struct ChatControls: View {
     @State var nitroless = false
     @State var emotes = false
     @State var fileImport: Bool = false
-    @Binding var fileUpload: Data?
-    @Binding var fileUploadURL: URL?
+    @Binding var fileUploads: [(Data?, URL?)]
     @State var dragOver: Bool = false
     @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: AccordCoreVars.plugins.count)
     @StateObject var viewModel = ChatControlsViewModel()
@@ -44,15 +43,14 @@ struct ChatControls: View {
 
     private func send() {
         messageSendQueue.async { [weak viewModel] in
-            guard (viewModel?.textFieldContents != "" || fileUploadURL != nil), let contents = viewModel?.textFieldContents else { return }
+            guard (viewModel?.textFieldContents != "" || !fileUploads.isEmpty), let contents = viewModel?.textFieldContents else { return }
             if contents.prefix(1) != "/" {
                 viewModel?.emptyTextField()
             }
-            if let fileUpload = fileUpload, let fileUploadURL = fileUploadURL {
-                viewModel?.send(text: contents, file: [fileUploadURL], data: [fileUpload], channelID: self.channelID)
+            if !fileUploads.isEmpty {
+                viewModel?.send(text: contents, file: self.fileUploads.compactMap(\.1), data: self.fileUploads.compactMap(\.0), channelID: self.channelID)
                 DispatchQueue.main.async {
-                    self.fileUpload = nil
-                    self.fileUploadURL = nil
+                    self.fileUploads.removeAll()
                 }
             } else if let replyingTo = replyingTo {
                 viewModel?.send(text: contents, replyingTo: replyingTo, mention: self.mentionUser, guildID: guildID)
@@ -79,37 +77,47 @@ struct ChatControls: View {
 //    }
     
     var mediaView: some View {
-        ZStack(alignment: .topTrailing) {
-            if let fileUpload = fileUpload, let nsImage = NSImage(data: fileUpload) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(5)
-                    .frame(height: 180)
-                
-            } else {
-                ZStack(alignment: .center) {
-                    Image(systemName: "doc")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(Color.white.opacity(0.4))
-                        .frame(width: 48, height: 48)
-                }
-                .frame(width: 180, height: 180)
-                .background(Color.black.opacity(0.2))
-                .cornerRadius(5)
+        HStack {
+            ForEach(Array(zip(self.fileUploads.indices, self.fileUploads)), id: \.1.1) { offset, item in
+                let data = item.0
+                let url = item.1
+                VStack(alignment: .leading, content: {
+                    ZStack(alignment: .topTrailing) {
+                        if let data = data, let nsImage = NSImage(data: data) {
+                            Image(nsImage: nsImage)
+                                .resizable()
+                                .scaledToFit()
+                                .cornerRadius(5)
+                                .frame(height: 130)
+                            
+                        } else {
+                            ZStack(alignment: .center) {
+                                Image(systemName: "doc")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .foregroundColor(Color.primary.opacity(0.4))
+                                    .frame(width: 48, height: 48)
+                            }
+                            .frame(width: 130, height: 130)
+                            .background(Color.black.opacity(0.2))
+                            .cornerRadius(5)
+                        }
+                        
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.black, Color.white.opacity(0.5))
+                            .frame(width: 22, height: 22)
+                            .onTapGesture {
+                                self.fileUploads.remove(at: offset)
+                            }
+                            .padding(4)
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(url?.lastPathComponent ?? "")
+                })
             }
-            
-            Image(systemName: "xmark.circle.fill")
-                .resizable()
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(.black, Color.white.opacity(0.5))
-                .frame(width: 22, height: 22)
-                .onTapGesture {
-                    self.fileUpload = nil
-                }
-                .padding(4)
-        }.frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     var matchedUsersView: some View {
@@ -222,8 +230,7 @@ struct ChatControls: View {
                    let url = URL(string: string),
                    let data = try? Data(contentsOf: url)
                 {
-                    self.fileUpload = data
-                    self.fileUploadURL = url
+                    self.fileUploads.append((data, url))
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         if let textCount = viewModel?.textFieldContents.count,
                            let pathComponentsCount = url.pathComponents.last?.count
@@ -234,8 +241,7 @@ struct ChatControls: View {
                         }
                     }
                 } else if let image = NSImage(pasteboard: NSPasteboard.general) {
-                    self.fileUpload = image.png
-                    self.fileUploadURL = URL(string: "file:///image0.png")!
+                    self.fileUploads.append((image.png, URL(string: "file:///image0.png")!))
                 }
             }
 //            .onAppear {
@@ -309,8 +315,10 @@ struct ChatControls: View {
                         }
                         .padding(.bottom, 7)
                     }
-                    if fileUpload != nil {
-                        mediaView
+                    if !fileUploads.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: true) {
+                            mediaView
+                        }
                         Divider().padding(.bottom, 7)
                     }
                     HStack {
@@ -341,8 +349,7 @@ struct ChatControls: View {
                 }
                 .textFieldStyle(PlainTextFieldStyle())
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
-                    fileUpload = try! Data(contentsOf: try! result.get())
-                    fileUploadURL = try! result.get()
+                    self.fileUploads.append((try? Data(contentsOf: try! result.get()), try? result.get()))
                 }
                 .onExitCommand { self.replyingTo = nil }
             }
