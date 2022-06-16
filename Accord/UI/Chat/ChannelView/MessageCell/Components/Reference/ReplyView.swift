@@ -38,7 +38,9 @@ struct ReplyView: View {
             Button(action: { [unowned reply] in
                 ChannelView.scrollTo.send((reply.channel_id, reply.id))
             }, label: { [weak reply] in
-                Text(reply?.content ?? "")
+                let content = reply?.content ?? ""
+                let hasAttachment = !(reply?.attachments ?? []).isEmpty
+                Text(content != "" ? content : hasAttachment ? "Click to see attachment" : "       ")
                     .font(.subheadline)
                     .lineLimit(0)
                     .foregroundColor(.secondary)
