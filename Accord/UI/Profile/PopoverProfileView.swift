@@ -25,7 +25,7 @@ struct RolesView: View {
             ForEach(self.tags, id: \.self) { tag in
                 self.item(for: tag)
                     .alignmentGuide(.leading, computeValue: { d in
-                        if abs(width - d.width) > 276 {
+                        if abs(width - d.width) > 262 {
                             width = 0
                             height -= d.height
                         }
@@ -241,28 +241,11 @@ struct PopoverProfileView: View {
                                 }
                             }
                         }
-                        PopoverProfileViewButton(
-                            label: "Call",
-                            symbolName: "phone.fill"
-                        ) {
-                            // TODO: voice chat
-                        }
-                        PopoverProfileViewButton(
-                            label: "Video call",
-                            symbolName: "camera.fill"
-                        ) {
-                            // TODO: video call
-                        }
-                        PopoverProfileViewButton(
-                            label: "Add Friend",
-                            symbolName: "person.fill.badge.plus"
-                        ) {
-                            // TODO: check add friend
-                        }
                     }
+                    .frame(maxWidth: .infinity)
                     .transition(AnyTransition.opacity)
                 }
-                .padding()
+                .padding(14)
                 .background(Color(NSColor.windowBackgroundColor))
             }
         }

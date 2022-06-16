@@ -77,6 +77,40 @@ struct ChatControls: View {
 //            }
 //        }
 //    }
+    
+    var mediaView: some View {
+        ZStack(alignment: .topTrailing) {
+            if let fileUpload = fileUpload, let nsImage = NSImage(data: fileUpload) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(5)
+                    .frame(height: 180)
+                
+            } else {
+                ZStack(alignment: .center) {
+                    Image(systemName: "doc")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(Color.white.opacity(0.4))
+                        .frame(width: 48, height: 48)
+                }
+                .frame(width: 180, height: 180)
+                .background(Color.black.opacity(0.2))
+                .cornerRadius(5)
+            }
+            
+            Image(systemName: "xmark.circle.fill")
+                .resizable()
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.black, Color.white.opacity(0.5))
+                .frame(width: 22, height: 22)
+                .onTapGesture {
+                    self.fileUpload = nil
+                }
+                .padding(4)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
 
     var matchedUsersView: some View {
         MatchesView(
@@ -275,6 +309,10 @@ struct ChatControls: View {
                         }
                         .padding(.bottom, 7)
                     }
+                    if fileUpload != nil {
+                        mediaView
+                        Divider().padding(.bottom, 7)
+                    }
                     HStack {
                         fileImportButton
                         Divider().frame(height: 20)
@@ -283,15 +321,6 @@ struct ChatControls: View {
                             nitrolessButton
                         }
                         emotesButton
-                        HStack {
-                            if fileUpload != nil {
-                                Image(systemName: "doc.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 17.5, height: 17.5)
-                                    .foregroundColor(Color.secondary)
-                            }
-                        }
                     }
                     .disabled(!self.permissions.contains(.sendMessages))
                     .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
