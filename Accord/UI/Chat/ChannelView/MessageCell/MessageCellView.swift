@@ -158,8 +158,15 @@ struct MessageCellView: View, Equatable {
             }
             if !message.attachments.isEmpty {
                 AttachmentView(media: message.attachments)
+                    .background {
+                        Rectangle()
+                            .foregroundColor(Color(NSColor.windowBackgroundColor))
+                            .cornerRadius(5)
+                        ProgressView()
+                    }
                     .padding(.leading, leftPadding)
                     .padding(.top, 5)
+                    .cornerRadius(5)
                     .fixedSize()
             }
             if let reactions = message.reactions, !reactions.isEmpty {

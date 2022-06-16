@@ -25,7 +25,7 @@ struct RolesView: View {
             ForEach(self.tags, id: \.self) { tag in
                 self.item(for: tag)
                     .alignmentGuide(.leading, computeValue: { d in
-                        if abs(width - d.width) > 286 {
+                        if abs(width - d.width) > 262 {
                             width = 0
                             height -= d.height
                         }
@@ -172,14 +172,26 @@ struct PopoverProfileView: View {
                 Spacer().frame(height: 100)
                 VStack(alignment: .leading) {
                     if user?.avatar?.prefix(2) == "a_" {
-                        GifView(cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
-                            .clipShape(Circle())
-                            .frame(width: 45, height: 45)
+                        ZStack(alignment: .center) {
+                            Circle().frame(width: 64, height: 64)
+                                .foregroundColor(Color(NSColor.windowBackgroundColor))
+                            GifView(cdnURL + "/avatars/\(user?.id ?? "")/\(user?.avatar ?? "").gif?size=64")
+                                .clipShape(Circle())
+                                .frame(width: 60, height: 60)
+                        }
+                        .offset(y: -48)
+                        .padding(.bottom, -48)
                     } else {
-                        Attachment(pfpURL(user?.id, user?.avatar, discriminator: user?.discriminator ?? "0005"))
-                            .equatable()
-                            .clipShape(Circle())
-                            .frame(width: 45, height: 45)
+                        ZStack(alignment: .center) {
+                            Circle().frame(width: 64, height: 64)
+                                .foregroundColor(Color(NSColor.windowBackgroundColor))
+                            Attachment(pfpURL(user?.id, user?.avatar, discriminator: user?.discriminator ?? "0005"))
+                                .equatable()
+                                .clipShape(Circle())
+                                .frame(width: 60, height: 60)
+                        }
+                        .offset(y: -48)
+                        .padding(.bottom, -48)
                     }
                     Text(self.guildMember?.nick ?? user?.username ?? "")
                         .font(.title2)
@@ -229,28 +241,11 @@ struct PopoverProfileView: View {
                                 }
                             }
                         }
-                        PopoverProfileViewButton(
-                            label: "Call",
-                            symbolName: "phone.fill"
-                        ) {
-                            // TODO: voice chat
-                        }
-                        PopoverProfileViewButton(
-                            label: "Video call",
-                            symbolName: "camera.fill"
-                        ) {
-                            // TODO: video call
-                        }
-                        PopoverProfileViewButton(
-                            label: "Add Friend",
-                            symbolName: "person.fill.badge.plus"
-                        ) {
-                            // TODO: check add friend
-                        }
                     }
+                    .frame(maxWidth: .infinity)
                     .transition(AnyTransition.opacity)
                 }
-                .padding()
+                .padding(14)
                 .background(Color(NSColor.windowBackgroundColor))
             }
         }
