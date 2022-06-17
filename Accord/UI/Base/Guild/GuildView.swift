@@ -34,7 +34,7 @@ struct GuildView: View {
                                 .appendingPathComponent(guild.id)
                             Request.ping(url: url, headers: Headers(
                                 userAgent: discordUserAgent,
-                                token: AccordCoreVars.token,
+                                token: Globals.token,
                                 bodyObject: ["lurking": false],
                                 type: .DELETE,
                                 discordHeaders: true
@@ -100,22 +100,26 @@ struct GuildView: View {
                         tag: Int(channel.id) ?? 0,
                         selection: self.$selection,
                         destination: {
-                            NavigationLazyView(
-                                ChannelView(channel, guild.name)
-                                    .equatable()
-                                    .onAppear {
-                                        let prevCount = channel.read_state?.mention_count
-                                        channel.read_state?.mention_count = 0
-                                        channel.read_state?.last_message_id = channel.last_message_id
-                                        if prevCount != 0 { self.updater.updateView() }
-                                    }
-                                    .onDisappear {
-                                        let prevCount = channel.read_state?.mention_count
-                                        channel.read_state?.mention_count = 0
-                                        channel.read_state?.last_message_id = channel.last_message_id
-                                        if prevCount != 0 { self.updater.updateView() }
-                                    }
-                            )
+                            if channel.type == .forum {
+                                NavigationLazyView(ForumChannelList(forumChannel: channel))
+                            } else {
+                                NavigationLazyView(
+                                    ChannelView(channel, guild.name)
+                                        .equatable()
+                                        .onAppear {
+                                            let prevCount = channel.read_state?.mention_count
+                                            channel.read_state?.mention_count = 0
+                                            channel.read_state?.last_message_id = channel.last_message_id
+                                            if prevCount != 0 { self.updater.updateView() }
+                                        }
+                                        .onDisappear {
+                                            let prevCount = channel.read_state?.mention_count
+                                            channel.read_state?.mention_count = 0
+                                            channel.read_state?.last_message_id = channel.last_message_id
+                                            if prevCount != 0 { self.updater.updateView() }
+                                        }
+                                )
+                            }
                         }, label: {
                             ServerListViewCell(
                                 channel: channel,

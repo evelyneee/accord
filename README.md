@@ -3,17 +3,7 @@ A faster discord client for your Mac.
 
 ### OS Requirement
 
-Recommended: macOS Monterey
-* Has Markdown support for messages
-* Much more stable
-* Fully tested
-
-Minimum requirement: macOS Big Sur
-* Untested
-* Some features are missing
-<sup>
-If you want to help and have a macOS Big Sur device, PRs are welcomed
-</sup>
+Accord requires macOS Monterey (12.0) or higher
 
 ### Installing
 
@@ -41,6 +31,11 @@ Xcode is required.
 4. Run `xcodebuild` 
 
 The built product will be in the `build/Release` directory
+
+### macOS Big Sur
+macOS 11 is currently unsupported, the last supported but broken code for it is in the `big-sur` branch. 
+Some features are missing, but it could definitely be ported back to the main codebase
+If you want to help and have a macOS Big Sur device and a lot of dedication, PRs are welcomed, however I cannot maintain such OS support myself.
 
 ### Licensing
 This project is licensed under the BSD 4 clause license.

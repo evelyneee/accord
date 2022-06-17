@@ -53,7 +53,7 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
         let headers = Headers(
             userAgent: discordUserAgent,
             contentType: nil,
-            token: AccordCoreVars.token,
+            token: Globals.token,
             type: .DELETE,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
@@ -65,7 +65,7 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     func edit(now: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: Headers(
             userAgent: discordUserAgent,
-            token: AccordCoreVars.token,
+            token: Globals.token,
             bodyObject: ["content": now],
             type: .PATCH,
             discordHeaders: true,

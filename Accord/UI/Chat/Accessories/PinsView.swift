@@ -38,7 +38,7 @@ struct PinsView: View {
                 // https://discord.com/api/v9/channels/831692717397770272/pins
                 RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/pins"), headers: Headers(
                     userAgent: discordUserAgent,
-                    token: AccordCoreVars.token,
+                    token: Globals.token,
                     type: .GET,
                     discordHeaders: true,
                     referer: "https://discord.com/channels/\(guildID)/\(channelID)"

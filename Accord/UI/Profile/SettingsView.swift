@@ -13,10 +13,10 @@ struct SettingsView: View {
     @AppStorage("MusicPlatform")
     var selectedPlatform: String = "appleMusic"
 
-    @State var user: User? = AccordCoreVars.user
+    @State var user: User? = Globals.user
     @State var loading: Bool = false
     @State var bioText: String = " "
-    @State var username: String = AccordCoreVars.user?.username ?? "Unknown User"
+    @State var username: String = Globals.user?.username ?? "Unknown User"
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {

@@ -38,7 +38,7 @@ struct MessageCellMenu: View {
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
                         userAgent: discordUserAgent,
-                        token: AccordCoreVars.token,
+                        token: Globals.token,
                         type: message.pinned == false ? .PUT : .DELETE,
                         discordHeaders: true,
                         referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
@@ -64,7 +64,7 @@ struct MessageCellMenu: View {
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
                         userAgent: discordUserAgent,
-                        token: AccordCoreVars.token,
+                        token: Globals.token,
                         type: .DELETE,
                         discordHeaders: true,
                         referer: "https://discord.com/channels/@me/\(self.message.channel_id)"
@@ -82,7 +82,7 @@ struct MessageCellMenu: View {
         DispatchQueue.global().async {
             Request.ping(url: url, headers: Headers(
                 userAgent: discordUserAgent,
-                token: AccordCoreVars.token,
+                token: Globals.token,
                 bodyObject: ["communication_disabled_until": time],
                 type: .PATCH,
                 discordHeaders: true,
@@ -140,7 +140,7 @@ struct MessageCellMenu: View {
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
                             userAgent: discordUserAgent,
-                            token: AccordCoreVars.token,
+                            token: Globals.token,
                             bodyObject: ["delete_message_days": 1],
                             type: .PUT,
                             discordHeaders: true,
@@ -159,7 +159,7 @@ struct MessageCellMenu: View {
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
                             userAgent: discordUserAgent,
-                            token: AccordCoreVars.token,
+                            token: Globals.token,
                             type: .DELETE,
                             discordHeaders: true,
                             referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
@@ -246,12 +246,12 @@ struct MessageCellMenu: View {
         Button("Reply") {
             replyingTo = message
         }
-        if message.author?.id == AccordCoreVars.user?.id {
+        if message.author?.id == Globals.user?.id {
             Button("Edit") {
                 self.editing.toggle()
             }
         }
-        if message.author?.id == AccordCoreVars.user?.id || self.permissions.contains(.manageMessages) {
+        if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
             Button("Delete") {
                 DispatchQueue.global().async {
                     message.delete()
@@ -263,7 +263,7 @@ struct MessageCellMenu: View {
             popup.toggle()
         }
 
-        if (message.author == AccordCoreVars.user) || self.permissions.contains(.manageNicknames), guildID != "@me" {
+        if (message.author == Globals.user) || self.permissions.contains(.manageNicknames), guildID != "@me" {
             Button("Set nickname") {
                 showEditNicknamePopover.toggle()
             }

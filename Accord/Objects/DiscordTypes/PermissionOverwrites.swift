@@ -58,7 +58,7 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
         let rolePerms = filter { ServerListView.mergedMembers[guildID]?.roles.contains($0.id) ?? false }
         permsArray.remove(Permissions(rolePerms.map(\.deny)))
         permsArray.insert(Permissions(rolePerms.map(\.allow)))
-        let memberPerms = filter { $0.id == AccordCoreVars.user?.id }
+        let memberPerms = filter { $0.id == Globals.user?.id }
         permsArray.remove(Permissions(memberPerms.map(\.deny)))
         permsArray.insert(Permissions(memberPerms.map(\.allow)))
         return permsArray

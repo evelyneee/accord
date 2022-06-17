@@ -125,7 +125,7 @@ struct ServerListView: View {
                     statusIndicator
                 }
                 VStack(alignment: .leading) {
-                    if let user = AccordCoreVars.user {
+                    if let user = Globals.user {
                         Text(user.username) + Text("#" + user.discriminator).foregroundColor(.secondary)
                         if let statusText = statusText {
                             Text(statusText)

@@ -85,7 +85,7 @@ func showNotification(title: String, subtitle: String, description: String? = ni
                 let mePerson = INPerson(
                     personHandle: INPersonHandle(value: user_id, type: .unknown),
                     nameComponents: nil,
-                    displayName: AccordCoreVars.user?.username ?? "",
+                    displayName: Globals.user?.username ?? "",
                     image: avatar,
                     contactIdentifier: nil,
                     customIdentifier: nil,

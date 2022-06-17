@@ -73,7 +73,7 @@ final class SlashCommands {
             boundary: boundary,
             headers: Headers(
                 userAgent: discordUserAgent,
-                token: AccordCoreVars.token,
+                token: Globals.token,
                 type: .POST,
                 discordHeaders: true,
                 referer: "https://discord.com/channels/\(guildID)/\(channelID)"

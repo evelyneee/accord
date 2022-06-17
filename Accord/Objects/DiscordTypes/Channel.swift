@@ -69,10 +69,12 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     // TODO: Thread member object
     // var member: User?
     var permissions: Int64?
+    var overridePermissions: Bool?
     var read_state: ReadStateEntry?
     var guild_name: String?
     var threads: [Channel]?
     var shown: Bool?
+    var message_count: Int?
 
     var computedName: String {
         name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
@@ -104,6 +106,6 @@ enum ChannelType: Int, Codable {
     case guild_public_thread = 11
     case guild_private_thread = 12
     case stage = 13
-    case unknown4 = 14
-    case unknown5 = 15
+    case directory = 14
+    case forum = 15
 }

@@ -13,6 +13,7 @@ import SwiftUI
 var wss: Gateway!
 
 let rootURL: String = "https://discord.com/api/v9"
+let root = URL(string: "https://discord.com/api/v9")!
 let cdnURL: String = "https://cdn.discordapp.com"
 var user_id: String = .init()
 var avatar: Data = .init()
@@ -45,7 +46,7 @@ enum Storage {
     static var usernames: [String: String] = [:]
 }
 
-enum AccordCoreVars {
+enum Globals {
     // static var cancellable: Cancellable?
 
     // static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")

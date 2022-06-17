@@ -58,12 +58,16 @@ struct ChannelView: View, Equatable {
 
     // MARK: - init
 
-    init(_ channel: Channel, _ guildName: String? = nil) {
+    init(_ channel: Channel, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
         guildID = channel.guild_id ?? "@me"
         channelID = channel.id
         channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
         self.guildName = guildName ?? "Direct Messages"
-        _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
+        if let model {
+            self._viewModel = model
+        } else {
+            _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
+        }
         viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
         if wss.connection?.state == .cancelled {
             concurrentQueue.async {

@@ -48,7 +48,7 @@ struct PrivateChannelsView: View {
                     let headers = Headers(
                         userAgent: discordUserAgent,
                         contentType: nil,
-                        token: AccordCoreVars.token,
+                        token: Globals.token,
                         type: .DELETE,
                         discordHeaders: true,
                         referer: "https://discord.com/channels/@me",

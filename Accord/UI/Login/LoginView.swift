@@ -120,7 +120,7 @@ struct LoginView: View {
                 UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
                 if !loginViewDataModel.token.isEmpty {
                     KeychainManager.save(key: keychainItemName, data: loginViewDataModel.token.data(using: String.Encoding.utf8) ?? Data())
-                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                     NSApplication.shared.restart()
                 } else {
                     try? viewModel?.login(loginViewDataModel.email, loginViewDataModel.password, loginViewDataModel.twoFactor)
@@ -213,7 +213,7 @@ struct LoginView: View {
                     if let ticket = viewModel.ticket {
                         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
                             userAgent: discordUserAgent,
-                            token: AccordCoreVars.token,
+                            token: Globals.token,
                             bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
                             type: .POST,
                             discordHeaders: true,
@@ -223,7 +223,7 @@ struct LoginView: View {
                             case let .success(value):
                                 if let token = value.token {
                                     KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
-                                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                     self.loginViewDataModel.captcha = false
                                     NSApplication.shared.restart()
                                 }
@@ -249,7 +249,7 @@ struct LoginView: View {
                         case let .success(response):
                             if let token = response.token {
                                 KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
-                                AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                 self.loginViewDataModel.captcha = false
                                 NSApplication.shared.restart()
                             }
@@ -257,7 +257,7 @@ struct LoginView: View {
                                 Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
                                     userAgent: discordUserAgent,
                                     contentType: "application/json",
-                                    token: AccordCoreVars.token,
+                                    token: Globals.token,
                                     bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
                                     type: .POST,
                                     discordHeaders: true,
@@ -267,7 +267,7 @@ struct LoginView: View {
                                     case let .success(response):
                                         if let token = response.token {
                                             KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
-                                            AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                            Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                             self.loginViewDataModel.captcha = false
                                             NSApplication.shared.restart()
                                         }
@@ -317,7 +317,7 @@ final class LoginViewViewModel: ObservableObject {
             case let .success(response):
                 if let checktoken = response.token {
                     KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                    AccordCoreVars.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                     let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
                     let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
                     let task = Process()

@@ -39,7 +39,7 @@ final class User: Codable, Equatable, Identifiable, Hashable {
     func addFriend(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
-//            token: AccordCoreVars.token,
+//            token: Globals.token,
 //            type: .PUT,
 //            discordHeaders: true,
 //            referer: "https://discord.com/channels/\(guild)/\(channel)"
@@ -50,7 +50,7 @@ final class User: Codable, Equatable, Identifiable, Hashable {
     func removeFriend(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
-//            token: AccordCoreVars.token,
+//            token: Globals.token,
 //            type: .DELETE,
 //            discordHeaders: true,
 //            referer: "https://discord.com/channels/\(guild)/\(channel)"
@@ -61,7 +61,7 @@ final class User: Codable, Equatable, Identifiable, Hashable {
     func block(_: String, _: String) {
 //        let headers = Headers(
 //            userAgent: discordUserAgent,
-//            token: AccordCoreVars.token,
+//            token: Globals.token,
 //            bodyObject: ["type":2],
 //            type: .PUT,
 //            discordHeaders: true,

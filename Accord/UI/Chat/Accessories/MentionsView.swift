@@ -35,7 +35,7 @@ struct MentionsView: View {
             messageFetchQueue.async {
                 RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/users/@me/mentions?limit=50&roles=true&everyone=true"), headers: Headers(
                     userAgent: discordUserAgent,
-                    token: AccordCoreVars.token,
+                    token: Globals.token,
                     type: .GET,
                     discordHeaders: true,
                     referer: "https://discord.com/channels/@me"

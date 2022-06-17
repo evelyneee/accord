@@ -35,7 +35,7 @@ struct AccordApp: App {
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var popup: Bool = false
-    @State var token = AccordCoreVars.token
+    @State var token = Globals.token
 
     private enum Tabs: Hashable {
         case general, rpc
@@ -52,7 +52,7 @@ struct AccordApp: App {
                 LoginView()
                     .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
-                        self.token = AccordCoreVars.token
+                        self.token = Globals.token
                     }
             } else {
                 ContentView(loaded: $loaded)
@@ -80,7 +80,7 @@ struct AccordApp: App {
                         }
                     }
                     .onAppear {
-                        // AccordCoreVars.loadVersion()
+                        // Globals.loadVersion()
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }

@@ -236,7 +236,7 @@ final class Gateway {
         let packet: [String: Any] = [
             "op": 2,
             "d": [
-                "token": AccordCoreVars.token,
+                "token": Globals.token,
                 "capabilities": 253,
                 "compress": false,
                 "client_state": [
@@ -381,7 +381,7 @@ final class Gateway {
             "d": [
                 "seq": seq ?? self.seq,
                 "session_id": session_id ?? sessionID ?? "",
-                "token": AccordCoreVars.token,
+                "token": Globals.token,
             ],
         ]
         try send(json: packet)

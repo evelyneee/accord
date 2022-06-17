@@ -29,7 +29,7 @@ struct ChatControls: View {
     @State var fileImport: Bool = false
     @Binding var fileUploads: [(Data?, URL?)]
     @State var dragOver: Bool = false
-    @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: AccordCoreVars.plugins.count)
+    @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: Globals.plugins.count)
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
     weak var textField: NSTextField?
@@ -380,8 +380,8 @@ extension Array where Element: Hashable {
 }
 
 /*
- if AccordCoreVars.plugins != [] {
-     ForEach(AccordCoreVars.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
+ if Globals.plugins != [] {
+     ForEach(Globals.plugins.enumerated().reversed().reversed(), id: \.offset) { offset, plugin in
          if pluginPoppedUp.indices.contains(offset) {
              Button(action: {
                  pluginPoppedUp[offset].toggle()

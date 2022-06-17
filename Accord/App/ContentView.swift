@@ -17,7 +17,7 @@ extension EnvironmentValues {
 }
 
 private struct UserKey: EnvironmentKey {
-    static let defaultValue = AccordCoreVars.user!
+    static let defaultValue = Globals.user!
 }
 
 struct ContentView: View {
@@ -39,7 +39,7 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
-                        guard AccordCoreVars.token != "" else { modalIsPresented = true; return }
+                        guard Globals.token != "" else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
                                 loaded = true
@@ -67,7 +67,7 @@ struct ContentView: View {
                                         failedToConnect(error)
                                     }
                                 }) { d in
-                                    AccordCoreVars.user = d.user
+                                    Globals.user = d.user
                                     user_id = d.user.id
                                     if let pfp = d.user.avatar {
                                         Request.fetch(url: URL(string: cdnURL + "/avatars/\(d.user.id)/\(pfp).png?size=80")) { completion in
@@ -122,7 +122,7 @@ struct ContentView: View {
             let structure = try JSONDecoder().decode(GatewayStructure.self, from: data)
             DispatchQueue.main.async {
                 self.serverListView = ServerListView(structure.d)
-                AccordCoreVars.user = structure.d.user
+                Globals.user = structure.d.user
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation {

@@ -219,7 +219,7 @@ struct PopoverProfileView: View {
                     Button(action: {
                         Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
                             userAgent: discordUserAgent,
-                            token: AccordCoreVars.token,
+                            token: Globals.token,
                             bodyObject: ["recipients": [user?.id ?? ""]],
                             type: .POST,
                             discordHeaders: true,
