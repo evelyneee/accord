@@ -30,6 +30,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 
     var cancellable: Set<AnyCancellable> = .init()
     @Published var permissions: Permissions = .init()
+    
+    @Published var noMoreMessages = false
 
     @Environment(\.user)
     var user: User
@@ -225,6 +227,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
             .store(in: &cancellable)
         wss.memberListSubject
+            .receive(on: RunLoop.main)
             .sink { [unowned self] list in
                 if self.memberList.isEmpty {
                     let list = Array(list.d.ops.compactMap(\.items).joined())
@@ -319,6 +322,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
         }) { [weak self] messages in
             self?.messages = messages
+            if messages.count < 50 {
+                self?.noMoreMessages = true
+            }
             if scrollAfter {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                     ChannelView.scrollTo.send((self?.channelID ?? "", messages.first?.id ?? ""))
@@ -427,6 +433,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         .sink(receiveCompletion: { _ in
 
         }) { [weak self] messages in
+            if messages.isEmpty {
+                self?.noMoreMessages = true
+            }
             self?.messages.append(contentsOf: messages)
         }
         .store(in: &cancellable)
