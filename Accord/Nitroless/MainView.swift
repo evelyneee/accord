@@ -50,7 +50,7 @@ struct NitrolessView: View, Equatable {
                         }) {
                             VStack {
                                 HoveredAttachment("\(Self.nitrolessRoot)emotes/\(key)\(allEmotes[key] ?? "")").equatable()
-                                    .frame(width: 20, height: 20)
+                                    .frame(width: 29, height: 29)
                             }
                             .frame(width: 30, height: 30)
                         }

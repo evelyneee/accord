@@ -13,65 +13,11 @@ struct GuildView: View {
     @Binding var selection: Int?
     @StateObject var updater: ServerListView.UpdateView
     @State var invitePopup: Bool = false
+    
+    @State var width: CGFloat?
+    
     var body: some View {
         List {
-            Menu(content: {
-                Button("Generate new invite") {
-                    self.invitePopup.toggle()
-                }
-                Button("Copy ID") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(guild.id, forType: .string)
-                }
-                Divider()
-                if guild.owner_id != user_id {
-                    Button("Leave Server") {
-                        DispatchQueue.global().async {
-                            let url = URL(string: rootURL)?
-                                .appendingPathComponent("users")
-                                .appendingPathComponent("@me")
-                                .appendingPathComponent("guilds")
-                                .appendingPathComponent(guild.id)
-                            Request.ping(url: url, headers: Headers(
-                                userAgent: discordUserAgent,
-                                token: AccordCoreVars.token,
-                                bodyObject: ["lurking": false],
-                                type: .DELETE,
-                                discordHeaders: true
-                            ))
-                        }
-                    }
-                }
-            }, label: {
-                HStack {
-                    if let level = guild.premium_tier, level != 0 {
-                        switch level {
-                        case 1:
-                            Image(systemName: "star").resizable()
-                                .scaledToFit()
-                                .frame(width: 15, height: 15)
-                        case 2:
-                            Image(systemName: "star.leadinghalf.filled").resizable()
-                                .scaledToFit()
-                                .frame(width: 15, height: 15)
-                        case 3:
-                            Image(systemName: "star.fill").resizable()
-                                .scaledToFit()
-                                .frame(width: 15, height: 15)
-                        default:
-                            EmptyView()
-                        }
-                    }
-                    Text(guild.name ?? "Unknown Guild")
-                        .fontWeight(.semibold)
-                        .font(.system(size: 13))
-                }
-            })
-            .menuStyle(BorderlessButtonMenuStyle())
-            .sheet(isPresented: self.$invitePopup, content: {
-                NewInviteSheet(selection: self.$selection, isPresented: self.$invitePopup)
-                    .frame(width: 350, height: 250)
-            })
             if let banner = guild.banner {
                 if banner.prefix(2) == "a_" {
 //                    GifView(cdnURL + "/banners/\(guild.id)/\(banner).gif?size=512")
@@ -149,6 +95,75 @@ struct GuildView: View {
             }
         }
         .listStyle(.sidebar)
+        .readSize {
+            self.width = $0.width
+        }
+        .toolbar {
+            Menu(content: {
+                Button("Generate new invite") {
+                    self.invitePopup.toggle()
+                }
+                Button("Copy ID") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(guild.id, forType: .string)
+                }
+                Divider()
+                if guild.owner_id != user_id {
+                    Button("Leave Server") {
+                        DispatchQueue.global().async {
+                            let url = URL(string: rootURL)?
+                                .appendingPathComponent("users")
+                                .appendingPathComponent("@me")
+                                .appendingPathComponent("guilds")
+                                .appendingPathComponent(guild.id)
+                            Request.ping(url: url, headers: Headers(
+                                userAgent: discordUserAgent,
+                                token: AccordCoreVars.token,
+                                bodyObject: ["lurking": false],
+                                type: .DELETE,
+                                discordHeaders: true
+                            ))
+                        }
+                    }
+                }
+            }, label: {
+                HStack {
+                    switch guild.premium_tier {
+                    case 1:
+                        Image(systemName: "star").resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                    case 2:
+                        Image(systemName: "star.leadinghalf.filled").resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                    case 3:
+                        Image(systemName: "star.fill").resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                    default:
+                        EmptyView()
+                    }
+                    
+                    Text(guild.name ?? "Unknown Guild")
+                        .fontWeight(.semibold)
+                        .font(.system(size: 13))
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Spacer()
+                
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            })
+            .frame(width: (self.width ?? 190) - 32, alignment: .trailing)
+            .padding(.leading, 16)
+            .menuStyle(BorderlessButtonMenuStyle())
+            .sheet(isPresented: self.$invitePopup, content: {
+                NewInviteSheet(selection: self.$selection, isPresented: self.$invitePopup)
+                    .frame(width: 350, height: 250)
+            })
+        }
     }
 }
 
@@ -173,4 +188,22 @@ struct GuildListPreview: View {
             }
         }
     }
+}
+
+
+extension View {
+    func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+        background(
+            GeometryReader { geometryProxy in
+                Color.clear
+                    .preference(key: SizePreferenceKey.self, value: geometryProxy.size)
+            }
+        )
+        .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
+    }
+}
+
+private struct SizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }

@@ -111,6 +111,33 @@ struct ChannelView: View, Equatable {
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
         .fixedSize(horizontal: false, vertical: true)
     }
+    
+    var messagePlaceholderView : some View {
+        ForEach(1..<20) { _ in
+            VStack {
+                HStack(alignment: .bottom) {
+                    Circle()
+                        .foregroundColor(.gray)
+                        .frame(width: 35, height: 35)
+                        .padding(.trailing, 1.5)
+                        .fixedSize()
+                    
+                    VStack(alignment: .leading) {
+                        Rectangle()
+                            .frame(width: 30 * CGFloat(Int.random(in: 3...20)), height: 13 * CGFloat(Int.random(in: 1...5)))
+                            .cornerRadius(6)
+                        Rectangle()
+                            .frame(width: 20 * CGFloat(Int.random(in: 3...10)), height: 13)
+                            .cornerRadius(6)
+                        Spacer().frame(height: 1.3)
+                    }
+                }
+                .foregroundColor(.gray)
+                .opacity(0.5)
+                Spacer()
+            }
+        }
+    }
 
     var body: some View {
         HStack(content: {
@@ -124,6 +151,20 @@ struct ChannelView: View, Equatable {
                                     .drawingGroup()
                             } else {
                                 messagesView
+                            }
+                            if viewModel.noMoreMessages {
+                                Divider()
+                                Text("This is the start of the channel")
+                                    .rotationEffect(.degrees(180))
+                                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                                Text("Welcome to #\(channelName)!")
+                                    .bold()
+                                    .dynamicTypeSize(.xxxLarge)
+                                    .font(.largeTitle)
+                                    .rotationEffect(.degrees(180))
+                                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                            } else {
+                                messagePlaceholderView
                             }
                         }
                         .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
@@ -183,8 +224,7 @@ struct ChannelView: View, Equatable {
                     }
             }
         })
-        .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)"))
-        .navigationSubtitle(Text(guildName))
+        .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)".replacingOccurrences(of: "#", with: "")))
         .presentedWindowToolbarStyle(.unifiedCompact)
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
             providers.first?.loadDataRepresentation(forTypeIdentifier: "public.file-url", completionHandler: { data, _ in

@@ -223,7 +223,10 @@ struct ChatControls: View {
             .layoutPriority(1)
             .animation(nil, value: UUID())
             .fixedSize(horizontal: false, vertical: true)
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))) { [weak viewModel] _ in
+            .onReceive(
+                NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))
+                    .debounce(for: RunLoop.SchedulerTimeType.Stride(floatLiteral: 0.05), scheduler: RunLoop.current)
+            ) { [weak viewModel] _ in
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                 if let rawData = data,
                    let string = String(data: rawData, encoding: .utf8),
