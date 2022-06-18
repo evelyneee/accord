@@ -264,7 +264,7 @@ struct ChannelView: View, Equatable {
             Toggle("Filter by pinned", isOn: $searchForPinnedMessages)
         }
         .onSubmit(of: .search) {
-            showSearch = !searchText.isEmpty || !self.searchForPinnedMessages
+            showSearch = !searchText.isEmpty || self.searchForPinnedMessages
             if showSearch {
                 search()
             }
