@@ -325,7 +325,6 @@ struct ChannelView: View, Equatable {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         Request.fetch(SearchResult.self, request: nil, url: url, headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .GET
         ), decoder: decoder) { result in
