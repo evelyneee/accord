@@ -35,7 +35,12 @@ struct ChannelView: View, Equatable {
 
     @State var pins: Bool = false
     @State var mentions: Bool = false
-
+    
+    @State var searchText: String = ""
+    @State var showSearch: Bool = false
+    @State var searchMessages: [Message] = []
+    @State var searchForPinnedMessages: Bool = false
+    
     @AppStorage("memberListShown")
     var memberListShown: Bool = false
 
@@ -227,6 +232,23 @@ struct ChannelView: View, Equatable {
                         }
                     }
             }
+            
+            if showSearch {
+                List(searchMessages, id: \.id) { message in
+                    MessageCellView(
+                        message: message,
+                        nick: nil,
+                        replyNick: nil,
+                        pronouns: nil,
+                        avatar: nil,
+                        guildID: self.guildID,
+                        permissions: .constant(.init()),
+                        role: Binding.constant(nil),
+                        replyRole: Binding.constant(nil),
+                        replyingTo: $replyingTo
+                    )
+                }
+            }
         })
         .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)".replacingOccurrences(of: "#", with: "")))
         .presentedWindowToolbarStyle(.unifiedCompact)
@@ -237,6 +259,15 @@ struct ChannelView: View, Equatable {
                 }
             })
             return true
+        }
+        .searchable(text: $searchText) {
+            Toggle("Filter by pinned", isOn: $searchForPinnedMessages)
+        }
+        .onSubmit(of: .search) {
+            showSearch = !searchText.isEmpty || !self.searchForPinnedMessages
+            if showSearch {
+                search()
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigation) {
@@ -272,6 +303,39 @@ struct ChannelView: View, Equatable {
                 Toggle(isOn: $memberListShown.animation()) {
                     Image(systemName: "person.2.fill")
                 }
+            }
+        }
+    }
+    
+    func search() {
+        var queryParams: [String: String] = [:]
+        if !searchText.isEmpty {
+            queryParams["content"] = searchText
+        }
+        
+        queryParams["pinned"] = searchForPinnedMessages.description
+        
+        let url = URL(string: rootURL)!
+            .appendingPathComponent("guilds")
+            .appendingPathComponent(self.guildID)
+            .appendingPathComponent("messages")
+            .appendingPathComponent("search")
+            .appendingQueryParameters(queryParams)
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+        Request.fetch(SearchResult.self, request: nil, url: url, headers: Headers(
+            userAgent: discordUserAgent,
+            token: Globals.token,
+            type: .GET
+        ), decoder: decoder) { result in
+            switch result {
+            case .success(let messages):
+                DispatchQueue.main.async {
+                    self.searchMessages = messages.messages.flatMap { $0 }
+                }
+            case .failure(let error):
+                print("Error: \(error)")
             }
         }
     }
