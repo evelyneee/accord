@@ -76,38 +76,63 @@ struct ChannelView: View, Equatable {
         }
     }
 
+    @inline(__always)
+    func cell(for message: Message) -> some View {
+        MessageCellView(
+            message: message,
+            nick: viewModel.nicks[message.author?.id ?? ""],
+            replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
+            pronouns: viewModel.pronouns[message.author?.id ?? ""],
+            avatar: viewModel.avatars[message.author?.id ?? ""],
+            guildID: viewModel.guildID,
+            permissions: $viewModel.permissions,
+            role: $viewModel.roles[message.author?.id ?? ""],
+            replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+            replyingTo: $replyingTo
+        )
+        .equatable()
+        .id(message.id)
+        .listRowInsets(EdgeInsets(
+            top: 3.5,
+            leading: 0,
+            bottom: message.bottomInset,
+            trailing: 0
+        ))
+        .padding(.horizontal, 5.0)
+        .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
+        .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
+        .onAppear { [unowned viewModel] in
+            if viewModel.messages.count >= 50,
+               message == viewModel.messages[viewModel.messages.count - 2]
+            {
+                messageFetchQueue.async {
+                    viewModel.loadMoreMessages()
+                }
+            }
+        }
+    }
+    
     var messagesView: some View {
         ForEach(viewModel.messages, id: \.identifier) { message in
-            MessageCellView(
-                message: message,
-                nick: viewModel.nicks[message.author?.id ?? ""],
-                replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
-                pronouns: viewModel.pronouns[message.author?.id ?? ""],
-                avatar: viewModel.avatars[message.author?.id ?? ""],
-                guildID: viewModel.guildID,
-                permissions: $viewModel.permissions,
-                role: $viewModel.roles[message.author?.id ?? ""],
-                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                replyingTo: $replyingTo
-            )
-            .equatable()
-            .id(message.id)
-            .listRowInsets(EdgeInsets(
-                top: 3.5,
-                leading: 0,
-                bottom: message.bottomInset,
-                trailing: 0
-            ))
-            .padding(.horizontal, 5.0)
-            .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
-            .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
-            .onAppear { [unowned viewModel] in
-                if viewModel.messages.count >= 50,
-                   message == viewModel.messages[viewModel.messages.count - 2]
-                {
-                    messageFetchQueue.async {
-                        viewModel.loadMoreMessages()
+            if message.inSameDay {
+                cell(for: message)
+            } else {
+                VStack {
+                    HStack {
+                        Color.secondary
+                            .frame(height: 0.75)
+                            .opacity(0.4)
+                        Text(message.processedTimestamp?.components(separatedBy: " at ").first ?? "Today")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                        Color.secondary
+                            .frame(height: 0.75)
+                            .opacity(0.4)
                     }
+                    .padding(.top)
+                    cell(for: message)
                 }
             }
         }
@@ -136,13 +161,26 @@ struct ChannelView: View, Equatable {
                         Spacer().frame(height: 1.3)
                     }
                 }
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary.opacity(0.85))
                 .opacity(0.5)
                 Spacer()
             }
         }
     }
-
+    
+    @ViewBuilder
+    private var channelHeaderView: some View {
+        Divider()
+        Text("This is the start of the channel")
+            .font(.system(size: 15))
+            .fontWeight(.semibold)
+        Text("Welcome to #\(channelName)!")
+            .bold()
+            .dynamicTypeSize(.xxxLarge)
+            .font(.largeTitle)
+    }
+    
+    
     var body: some View {
         HStack(content: {
             VStack(spacing: 0) {
@@ -157,14 +195,7 @@ struct ChannelView: View, Equatable {
                                 messagesView
                             }
                             if viewModel.noMoreMessages {
-                                Divider()
-                                Text("This is the start of the channel")
-                                    .rotationEffect(.degrees(180))
-                                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                                Text("Welcome to #\(channelName)!")
-                                    .bold()
-                                    .dynamicTypeSize(.xxxLarge)
-                                    .font(.largeTitle)
+                                channelHeaderView
                                     .rotationEffect(.degrees(180))
                                     .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                             } else {
@@ -284,7 +315,7 @@ struct MemberListView: View {
         List(self.$list, id: \.id) { $ops in
             if let group = ops.group {
                 Text(
-                    "\(group.id == "offline" ? "OFFLINE" : group.id == "online" ? "OFFLINE" : roleNames[group.id ?? ""]?.uppercased() ?? "") - \(group.count ?? 0)"
+                    "\(group.id == "offline" ? "OFFLINE" : group.id == "online" ? "OFFLINE" : Storage.roleNames[group.id ?? ""]?.uppercased() ?? "") - \(group.count ?? 0)"
                 )
                 .fontWeight(.semibold)
                 .font(.system(size: 10))
@@ -314,7 +345,7 @@ struct MemberListViewCell: View {
                     Text(ops.member?.nick ?? ops.member?.user.username ?? "")
                         .fontWeight(.medium)
                         .foregroundColor({ () -> Color in
-                            if let role = ops.member?.roles?.first, let color = roleColors[role]?.0 {
+                            if let role = ops.member?.roles?.first, let color = Storage.roleColors[role]?.0 {
                                 return Color(int: color)
                             }
                             return Color.primary

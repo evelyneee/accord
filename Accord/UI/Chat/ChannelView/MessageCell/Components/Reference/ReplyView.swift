@@ -29,7 +29,7 @@ struct ReplyView: View {
             Text(replyNick ?? reply.author?.username ?? "")
                 .font(.subheadline)
                 .foregroundColor({ () -> Color in
-                    if let replyRole = replyRole, let color = roleColors[replyRole]?.0 {
+                    if let replyRole = replyRole, let color = Storage.roleColors[replyRole]?.0 {
                         return Color(int: color)
                     }
                     return Color.primary

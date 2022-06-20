@@ -20,10 +20,17 @@ struct EmbedView: View, Equatable {
     var body: some View {
         HStack(spacing: 0) {
             if let color = embed?.color {
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(Color(int: color))
-                    .frame(width: 4)
-                    .padding(.trailing, 5)
+                if #available(macOS 13.0, *) {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Color(int: color).gradient)
+                        .frame(width: 4)
+                        .padding(.trailing, 5)
+                } else {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Color(int: color))
+                        .frame(width: 4)
+                        .padding(.trailing, 5)
+                }
             } else {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(Color.black)

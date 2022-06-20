@@ -29,6 +29,8 @@ final class Gateway {
     private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
 
     var presencePipeline = [String: PassthroughSubject<PresenceUpdate, Never>]()
+    
+    private var subscribed = Set<String>()
 
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
@@ -268,9 +270,6 @@ final class Gateway {
     }
 
     private func heartbeat() throws {
-        guard !pendingHeartbeat else {
-            return AccordApp.error(GatewayErrors.heartbeatMissed, additionalDescription: "Check your network connection")
-        }
         let packet: [String: Any] = [
             "op": 1,
             "d": seq,
@@ -391,6 +390,8 @@ final class Gateway {
     }
 
     func subscribe(to guild: String) throws {
+        guard self.subscribed.contains(guild) else { return }
+        self.subscribed.insert(guild)
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -419,6 +420,8 @@ final class Gateway {
     }
 
     func subscribeToDM(_ channel: String) throws {
+        guard self.subscribed.contains(channel) else { return }
+        self.subscribed.insert(channel)
         let packet: [String: Any] = [
             "op": 13,
             "d": [

@@ -38,7 +38,7 @@ extension Gateway {
             let guild = try JSONDecoder().decode(GatewayEventContent<Guild>.self, from: event.data)
             let folder = GuildFolder(guild_ids: [guild.d.id])
             folder.guilds.append(guild.d)
-            ServerListView.folders.append(folder)
+            Storage.folders.append(folder)
         case .guildDelete:
             print(String(data: event.data, encoding: .utf8))
         case .guildMemberAdd: break
@@ -63,9 +63,9 @@ extension Gateway {
             let guildID = message.guild_id ?? "@me"
             guard let channelID = event.channelID else { print("wat"); break }
             MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
-            if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[keyed: message.guild_id ?? ""]
-                let matchingChannel = matchingGuild?.channels[keyed: message.channel_id] ?? ServerListView.privateChannels[keyed: message.channel_id]
+            if ids.contains(user_id) || (Storage.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
+                let matchingGuild = Array(Storage.folders.map(\.guilds).joined())[keyed: message.guild_id ?? ""]
+                let matchingChannel = matchingGuild?.channels[keyed: message.channel_id] ?? Storage.privateChannels[keyed: message.channel_id]
                 showNotification(
                     title: message.author?.username ?? "Unknown User",
                     subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",

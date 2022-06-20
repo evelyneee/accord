@@ -46,7 +46,6 @@ struct PrivateChannelsView: View {
                 }
                 Button("Close DM") {
                     let headers = Headers(
-                        userAgent: discordUserAgent,
                         contentType: nil,
                         token: Globals.token,
                         type: .DELETE,
@@ -55,8 +54,8 @@ struct PrivateChannelsView: View {
                         empty: true
                     )
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channel.id)"), headers: headers)
-                    guard let index = ServerListView.privateChannels[indexOf: channel.id] else { return }
-                    ServerListView.privateChannels.remove(at: index)
+                    guard let index = Storage.privateChannels[indexOf: channel.id] else { return }
+                    Storage.privateChannels.remove(at: index)
                 }
                 Button("Mark as read") {
                     channel.read_state?.mention_count = 0

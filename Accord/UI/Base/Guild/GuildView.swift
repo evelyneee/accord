@@ -93,6 +93,11 @@ struct GuildView: View {
                         }) {
                             Text("Open in new window")
                         }
+                        Button(action: {
+                            showPanel(channel)
+                        }) {
+                            Text("Open in new panel")
+                        }
                     }
                     .animation(nil, value: UUID())
                 }
@@ -173,22 +178,22 @@ struct GuildView: View {
 
 struct GuildListPreview: View {
     @State var guild: Guild
-    @Binding var selectedServer: Int?
+    @Binding var selectedServer: String?
     @Binding var updater: Bool
     var body: some View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))
                 .equatable()
-                .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.index))
+                .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.id))
         } else {
             if let name = guild.name {
                 Text(name.components(separatedBy: " ").compactMap(\.first).map(String.init).joined())
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.id))
             } else {
                 Image(systemName: "questionmark")
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.id))
             }
         }
     }
@@ -210,4 +215,13 @@ extension View {
 private struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
+}
+
+func showPanel(_ channel: Channel) {
+    let panel2 = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 600), styleMask: [.titled, .nonactivatingPanel, .closable], backing: .buffered, defer: true)
+    panel2.title = channel.computedName
+    panel2.level = .init(Int(CGWindowLevelForKey(CGWindowLevelKey.floatingWindow)))
+    panel2.contentView = NSHostingView(rootView: ChannelView(channel, channel.guild_name))
+    panel2.collectionBehavior = [.fullScreenAuxiliary]
+    panel2.orderFrontRegardless()
 }

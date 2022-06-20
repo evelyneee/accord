@@ -33,6 +33,8 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var pinned: Bool?
     var timestamp: Date
     var processedTimestamp: String?
+    var _inSameDay: Bool?
+    var inSameDay: Bool { self._inSameDay ?? true }
     var type: MessageType
     var attachments: [AttachedFiles]
     var referenced_message: Reply?
@@ -51,7 +53,6 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
 
     func delete() {
         let headers = Headers(
-            userAgent: discordUserAgent,
             contentType: nil,
             token: Globals.token,
             type: .DELETE,
@@ -64,7 +65,6 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
 
     func edit(now: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["content": now],
             type: .PATCH,

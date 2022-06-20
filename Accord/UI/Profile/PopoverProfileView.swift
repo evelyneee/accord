@@ -50,12 +50,17 @@ struct RolesView: View {
 
     @ViewBuilder
     private func item(for role: String) -> some View {
-        if let roleName = roleNames[role] {
+        if let roleName = Storage.roleNames[role] {
             HStack(spacing: 4) {
-                Circle()
-                    .fill()
-                    .foregroundColor(color(for: role))
-                    .frame(width: 10, height: 10)
+                if #available(macOS 13.0, *) {
+                    Circle()
+                        .fill(color(for: role).gradient)
+                        .frame(width: 10, height: 10)
+                } else {
+                    Circle()
+                        .fill(color(for: role))
+                        .frame(width: 10, height: 10)
+                }
                 Text(roleName)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -68,7 +73,7 @@ struct RolesView: View {
     }
 
     func color(for role: String) -> Color {
-        if let roleColor = roleColors[role]?.0 {
+        if let roleColor = Storage.roleColors[role]?.0 {
             return Color(int: roleColor)
         }
         return Color.secondary
@@ -210,7 +215,7 @@ struct PopoverProfileView: View {
                         Divider()
                     }
                     if let roles = self.guildMember?.roles?.sorted(by: { lhs, rhs in
-                        if let lhs = roleColors[lhs]?.1, let rhs = roleColors[rhs]?.1 {
+                        if let lhs = Storage.roleColors[lhs]?.1, let rhs = Storage.roleColors[rhs]?.1 {
                             return lhs > rhs
                         } else { return true }
                     }) {
@@ -218,7 +223,6 @@ struct PopoverProfileView: View {
                     }
                     Button(action: {
                         Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             bodyObject: ["recipients": [user?.id ?? ""]],
                             type: .POST,
@@ -229,7 +233,7 @@ struct PopoverProfileView: View {
                             switch $0 {
                             case let .success(channel):
                                 print(channel)
-                                ServerListView.privateChannels.append(channel)
+                                Storage.privateChannels.append(channel)
                                 MentionSender.shared.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)

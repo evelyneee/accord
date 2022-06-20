@@ -39,7 +39,6 @@ final class ForumChannelListModel: ObservableObject {
                 "offset": "0"
             ])
         RequestPublisher.fetch(ThreadSearchResult.self, url: url, headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .GET,
             discordHeaders: true,
@@ -90,6 +89,7 @@ struct ForumChannelList: View {
                         }
                         .padding(7)
                     }
+                    .frame(maxWidth: .infinity)
                 })
             }
             .onAppear {

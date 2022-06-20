@@ -10,7 +10,18 @@ import Foundation
 private let ENABLE_LINE_LOGGING: Bool = true
 private let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
 
-public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, separator: String = " ") {
+// this is meant to override the print function globally in scope
+// the normal signature of the print function is print(_ items: Any...)
+// if we wanna override it, we can't use a single variadic parameter because
+// there is an error about ambiguous usage
+// tldr: very cursed code, do not touch
+public func print(
+    _ items: Any..., // first variadic parameter
+    file: String = #fileID, // file name which is not meant to be specified
+    _ items2: Any..., // second variadic parameter
+    line: Int = #line, // line number
+    separator: String = " "
+) {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
         file.components(separatedBy: "/").last ?? "Accord" :
         file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
@@ -18,23 +29,15 @@ public func print<T>(_ items: T..., file: String = #fileID, line: Int = #line, s
     log(items: items, file: file, line: line, separator: separator)
 }
 
-public func print<S: StringProtocol>(_ items: S?..., file: String = #fileID, line: Int = #line, separator: String = " ") {
-    let items: [String] = items.map { $0 ?? "nil" }.compactMap { String($0) }
-    let file = ENABLE_FILE_EXTENSION_LOGGING ?
-        file.components(separatedBy: "/").last ?? "Accord" :
-        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
-    let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
-    log(items: items, file: file, line: line, separator: separator)
-}
-
-public func print(_ items: Any..., file: String = #fileID) {
-    let file = ENABLE_FILE_EXTENSION_LOGGING ?
-        file.components(separatedBy: "/").last ?? "Accord" :
-        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
-    log(items: items, file: file)
-}
-
-public func print(_ item: Any, file: String = #fileID, line: Int = #line) {
+// this function exists to override the print function
+// when there is only one item to print
+// since the other function uses two variadic parameters it doesn't work
+// when there is one element
+public func print(
+    _ item: Any,
+    file: String = #fileID,
+    line: Int = #line
+) {
     let file = ENABLE_FILE_EXTENSION_LOGGING ?
         file.components(separatedBy: "/").last ?? "Accord" :
         file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"

@@ -37,7 +37,6 @@ struct MessageCellMenu: View {
                     .appendingPathComponent(message.id)
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
-                        userAgent: discordUserAgent,
                         token: Globals.token,
                         type: message.pinned == false ? .PUT : .DELETE,
                         discordHeaders: true,
@@ -63,7 +62,6 @@ struct MessageCellMenu: View {
                     .appendingPathComponent(message.author!.id)
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
-                        userAgent: discordUserAgent,
                         token: Globals.token,
                         type: .DELETE,
                         discordHeaders: true,
@@ -81,7 +79,6 @@ struct MessageCellMenu: View {
             .appendingPathComponent(message.author!.id)
         DispatchQueue.global().async {
             Request.ping(url: url, headers: Headers(
-                userAgent: discordUserAgent,
                 token: Globals.token,
                 bodyObject: ["communication_disabled_until": time],
                 type: .PATCH,
@@ -139,7 +136,6 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(message.author!.id)
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             bodyObject: ["delete_message_days": 1],
                             type: .PUT,
@@ -158,7 +154,6 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(message.author!.id)
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             type: .DELETE,
                             discordHeaders: true,

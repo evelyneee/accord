@@ -16,7 +16,7 @@ struct AuthorTextView: View {
         HStack(spacing: 1) {
             Text(nick ?? message.author?.username ?? "Unknown User")
                 .foregroundColor({ () -> Color in
-                    if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
+                    if let role = role, let color = Storage.roleColors[role]?.0, !message.isSameAuthor {
                         return Color(int: color)
                     }
                     return Color.primary

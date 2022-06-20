@@ -8,7 +8,6 @@
 import SwiftUI
 
 // actual view
-@available(macOS 11.0, *)
 struct EmotesView: View, Equatable {
     static func == (_: EmotesView, _: EmotesView) -> Bool {
         true
@@ -39,25 +38,27 @@ struct EmotesView: View, Equatable {
                     Spacer().frame(height: 45)
                     LazyVStack(alignment: .leading) {
                         if search == "" {
-                            let keys = Array(Emotes.emotes.keys)
-                            let nonEmptyKeys = keys.filter { !(Emotes.emotes[$0] ?? []).isEmpty }
+                            let keys = Array(Storage.emotes.keys)
+                            let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
                             ForEach(nonEmptyKeys, id: \.self) { key in
                                 Section(header: Text(key.components(separatedBy: "$")[1])) {
                                     LazyVGrid(columns: columns) {
-                                        ForEach(Emotes.emotes[key] ?? [], id: \.id) { emote in
+                                        ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                                 onSelect(emote)
                                                 self.dismiss()
-                                                print(cdnURL + "/emojis/\(emote.id).png?size=48")
                                             }) {
                                                 VStack {
                                                     HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
                                                         .frame(width: 29, height: 29)
+                                                        .fixedSize()
                                                 }
                                                 .frame(width: 30, height: 30)
+                                                .fixedSize()
                                             }
                                             .buttonStyle(EmoteButton())
+                                            .fixedSize()
                                         }
                                     }
                                 }
@@ -65,7 +66,7 @@ struct EmotesView: View, Equatable {
 
                         } else {
                             LazyVGrid(columns: columns) {
-                                ForEach(Emotes.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
+                                ForEach(Storage.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
                                     Button(action: {
                                         chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                         onSelect(emote)
@@ -73,14 +74,18 @@ struct EmotesView: View, Equatable {
                                     }) {
                                         HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
                                             .frame(width: 29, height: 29)
+                                            .fixedSize()
                                     }
+                                    .fixedSize()
                                     .buttonStyle(EmoteButton())
+                                    .fixedSize()
                                 }
                             }
                         }
                     }
                 }
                 .padding()
+                
                 TextField("Search emotes", text: $search)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
