@@ -9,10 +9,6 @@ import Combine
 import Foundation
 import Network
 
-final class Notifications {
-    static var privateChannels: [String] = []
-}
-
 extension Gateway {
     func close(_ closeCode: NWProtocolWebSocket.CloseCode) {
         let metadata = NWProtocolWebSocket.Metadata(opcode: .close)
@@ -47,7 +43,6 @@ extension Gateway {
             metadata: [NWProtocolWebSocket.Metadata(opcode: .text)]
         )
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        print(jsonData)
         connection?.send(content: jsonData, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)

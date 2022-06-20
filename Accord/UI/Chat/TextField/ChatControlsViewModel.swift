@@ -37,15 +37,15 @@ final class ChatControlsViewModel: ObservableObject {
 
     func checkText(guildID: String, channelID: String) {
         let ogContents = textFieldContents
-        let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentionsRegex)
-        let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannelsRegex)
-        let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommandRegex)
-        let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmojiRegex)
-        let emotes = textFieldContents.matches(precomputed: RegexExpressions.completedEmoteRegex)
+        let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentions)
+        let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannels)
+        let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
+        let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmoji)
+        let emotes = textFieldContents.matches(precomputed: RegexExpressions.completedEmote)
 
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
-            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
+            guard let matched: DiscordEmote = Array(Storage.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
             DispatchQueue.main.async {
                 if self.textFieldContents != ogContents { return }
                 self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)> ")
@@ -63,16 +63,18 @@ final class ChatControlsViewModel: ObservableObject {
         }
 
         if let search = mentions.last?.lowercased() {
-            let matched: [String: String] = Storage.usernames
-                .mapValues { $0.lowercased() }
-                .filterValues { $0.contains(search) }
-                .prefix(10)
-                .literal()
+            let matchedUsers: [String: String] = Storage.usernames
+                .filterValues { $0.lowercased().contains(search) }
+                .mapKeys { "!" + $0 }
+            let matchedRoles = Storage.roleNames
+                .filterValues { $0.lowercased().contains(search) }
+                .mapKeys { "&" + $0 }
+            let matched = matchedUsers.merging(matchedRoles, uniquingKeysWith: { (_, last) in last })
             DispatchQueue.main.async {
                 self.matchedUsers = matched
             }
         } else if let search = channels.last {
-            let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
+            let matches = Storage.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
             let joined: [Channel] = Array(Array(Array(matches).joined()).joined())
                 .filter { $0.guild_id == guildID }
                 .prefix(10)
@@ -121,7 +123,7 @@ final class ChatControlsViewModel: ObservableObject {
                 self.runOnUnlock?()
             }
         } else if let key = emoji.last {
-            let matched = Array(Emotes.emotes.values.joined())
+            let matched = Array(Storage.emotes.values.joined())
                 .filter { $0.name.lowercased().contains(key) }
                 .prefix(10)
                 .literal()
@@ -148,7 +150,6 @@ final class ChatControlsViewModel: ObservableObject {
 
     func send(text: String, guildID: String, channelID: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["content": text, "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
@@ -170,7 +171,6 @@ final class ChatControlsViewModel: ObservableObject {
             if textFieldContents.prefix(6) == "/nick " {
                 let nick = textFieldContents.dropFirst(6).stringLiteral
                 Request.ping(url: URL(string: "\(rootURL)/guilds/\(guildID)/members/%40me/nick"), headers: Headers(
-                    userAgent: discordUserAgent,
                     token: Globals.token,
                     bodyObject: ["nick": nick],
                     type: .PATCH,
@@ -278,7 +278,6 @@ final class ChatControlsViewModel: ObservableObject {
 
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
@@ -340,7 +339,6 @@ final class ChatControlsViewModel: ObservableObject {
     func type(channelID: String, guildID: String) {
         guard !silentTyping else { return }
         Request.ping(url: URL(string: rootURL + "/channels/\(channelID)/typing"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .POST,
             discordHeaders: true,

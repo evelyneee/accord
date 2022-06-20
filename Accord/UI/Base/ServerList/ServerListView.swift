@@ -9,9 +9,6 @@ import Combine
 import SwiftUI
 import UserNotifications
 
-public var roleColors: [String: (Int, Int)] = [:]
-public var roleNames: [String: String] = [:]
-
 struct NavigationLazyView<Content: View>: View {
     let build: () -> Content
     init(_ build: @autoclosure @escaping () -> Content) {
@@ -21,10 +18,6 @@ struct NavigationLazyView<Content: View>: View {
     var body: Content {
         build()
     }
-}
-
-enum Emotes {
-    public static var emotes: [String: [DiscordEmote]] = [:]
 }
 
 struct GuildHoverAnimation: ViewModifier {
@@ -76,8 +69,10 @@ struct ServerListView: View {
     @State var selectedGuild: Guild?
     var upcomingGuild: Guild?
     var upcomingSelection: Int?
+    
     @AppStorage("SelectedServer")
-    var selectedServer: Int?
+    var selectedServer: String?
+    
     public static var folders: [GuildFolder] = .init()
     public static var privateChannels: [Channel] = .init()
     public static var mergedMembers: [String: Guild.MergedMember] = .init()
@@ -174,12 +169,12 @@ struct ServerListView: View {
 
                 // MARK: - Loading UI
 
-                if selectedServer == 201 {
+                if selectedServer == "@me" {
                     List {
                         settingsLink
                         Divider()
                         PrivateChannelsView(
-                            privateChannels: Self.privateChannels,
+                            privateChannels: Storage.privateChannels,
                             selection: self.$selection,
                             viewUpdater: self.viewUpdater
                         )
@@ -198,17 +193,17 @@ struct ServerListView: View {
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         // .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
-            guard let uInfo = pub.userInfo as? [Int: Int],
+            guard let uInfo = pub.userInfo as? [String: Int],
                   let firstKey = uInfo.first else { return }
             print(firstKey)
             self.selectedServer = firstKey.key
             self.selection = firstKey.value
-            self.selectedGuild = Array(Self.folders.map(\.guilds).joined())[firstKey.key]
+            self.selectedGuild = Array(Storage.folders.map(\.guilds).joined())[keyed: firstKey.key]
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: String],
                   let index = uInfo["index"], let number = Int(index) else { return }
-            self.selectedServer = 201
+            self.selectedServer = "@me"
             self.selection = number
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Updater")), perform: { _ in

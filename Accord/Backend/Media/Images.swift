@@ -31,8 +31,6 @@ struct Attachment: View, Equatable {
         HStack {
             Image(nsImage: imageLoader.image)
                 .resizable()
-                .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
-                .scaledToFit()
         }
         .onAppear {
             imageLoader.load()

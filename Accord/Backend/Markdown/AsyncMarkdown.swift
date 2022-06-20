@@ -25,6 +25,18 @@ final class AsyncMarkdownModel: ObservableObject {
     func make(text: String) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
+            guard (text.contains("*") ||
+                   text.contains("~") ||
+                   text.contains("/") ||
+                   text.contains("_") ||
+                   text.contains(">")) &&
+                    text.count < 100 else {
+                DispatchQueue.main.async {
+                    self?.hasEmojiOnly = emojis
+                    self?.loaded = true
+                }
+                return
+            }
             self?.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
                 .replaceError(with: Text(text))
                 .sink { [weak self] text in
@@ -59,12 +71,11 @@ struct AsyncMarkdown: View, Equatable {
             model.markdown
                 .textSelection(.enabled)
                 .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
-                .animation(nil, value: UUID())
                 .fixedSize(horizontal: false, vertical: true)
                 .onChange(of: self.text, perform: { [weak model] text in
                     model?.make(text: text)
                 })
-                .onAppear { [weak model] in
+                .task { [weak model] in
                     model?.make(text: text)
                 }
         }

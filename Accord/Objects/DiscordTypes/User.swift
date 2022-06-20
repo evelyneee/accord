@@ -38,7 +38,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func addFriend(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            type: .PUT,
 //            discordHeaders: true,
@@ -49,7 +48,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func removeFriend(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            type: .DELETE,
 //            discordHeaders: true,
@@ -60,7 +58,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func block(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            bodyObject: ["type":2],
 //            type: .PUT,

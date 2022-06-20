@@ -145,7 +145,6 @@ final class Headers {
 }
 
 var standardHeaders = Headers(
-    userAgent: discordUserAgent,
     contentType: nil,
     token: Globals.token,
     type: .GET,

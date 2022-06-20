@@ -30,6 +30,8 @@ struct ContentView: View {
         case alreadyLoaded
         case offline
     }
+    
+    @EnvironmentObject var globals: AppGlobals
 
     @ViewBuilder
     var body: some View {

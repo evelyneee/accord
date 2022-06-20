@@ -20,7 +20,7 @@ struct InteractionView: View {
             Text(interaction.user?.username ?? "")
                 .font(.subheadline)
                 .foregroundColor({ () -> Color in
-                    if let replyRole = replyRole, let color = roleColors[replyRole]?.0, !isSameAuthor {
+                    if let replyRole = replyRole, let color = Storage.roleColors[replyRole]?.0, !isSameAuthor {
                         return Color(int: color)
                     }
                     return Color.primary

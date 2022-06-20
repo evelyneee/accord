@@ -11,18 +11,18 @@ import SwiftUI
 extension ServerListView {
     // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
     init(_ readyPacket: GatewayD) {
-        let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? Int
+        let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? String
 
         // Set status for the indicator
         status = readyPacket.user_settings?.status
 
         // If there are no folders there's nothing to do
-        guard Self.folders.isEmpty else {
+        guard Storage.folders.isEmpty else {
             return
         }
 
         let keys = readyPacket.users.generateKeyMap()
-        Self.privateChannels = readyPacket.private_channels.map { c -> Channel in
+        Storage.privateChannels = readyPacket.private_channels.map { c -> Channel in
             var c = c
             if c.recipients?.isEmpty != false {
                 c.recipients = c.recipient_ids?
@@ -33,7 +33,6 @@ extension ServerListView {
         .sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
 
         assignPrivateReadStates(readyPacket.read_state?.entries ?? [])
-        Notifications.privateChannels = Self.privateChannels.map(\.id)
 
         // Bind the merged member objects to the guilds
         readyPacket.guilds = readyPacket.guilds.enumerated()
@@ -47,7 +46,7 @@ extension ServerListView {
                 return guild
             }
 
-        Self.mergedMembers = readyPacket.merged_members
+        Storage.mergedMembers = readyPacket.merged_members
             .compactMap(\.first)
             .enumerated()
             .map { [readyPacket.guilds[$0].id: $1] }
@@ -62,7 +61,7 @@ extension ServerListView {
         MediaRemoteWrapper.status = readyPacket.user_settings?.status
         Activity.current = Activity(
             emoji: StatusEmoji(
-                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Emotes.emotes.values.joined())[keyed: readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
+                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Storage.emotes.values.joined())[keyed: readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
                 id: readyPacket.user_settings?.custom_status?.emoji_id,
                 animated: false
             ),
@@ -74,7 +73,7 @@ extension ServerListView {
         statusText = readyPacket.user_settings?.custom_status?.text
 
         // Save the emotes for easy access
-        Emotes.emotes = readyPacket.guilds
+        Storage.emotes = readyPacket.guilds
             .map { ["\($0.id)$\($0.name ?? "Unknown Guild")": $0.emojis] }
             .flatMap { $0 }
             .reduce([String: [DiscordEmote]]()) { dict, tuple in
@@ -112,7 +111,6 @@ extension ServerListView {
                     .map { id -> Guild in
                         var guild = guildTemp[id]
                         guild.emojis.removeAll()
-                        guild.index = id
                         guild.channels = guild.channels
                             .compactMap { channel -> Channel in
                                 var channel = channel
@@ -127,22 +125,22 @@ extension ServerListView {
             }
             .filter { !$0.guilds.isEmpty }
 
-        Self.folders = folders
+        Storage.folders = folders
 
         DispatchQueue.global().async {
-            roleColors = RoleManager.arrangeRoleColors(guilds: readyPacket.guilds)
-            roleNames = RoleManager.arrangeRoleNames(guilds: readyPacket.guilds)
+            Storage.roleColors = RoleManager.arrangeroleColors(guilds: readyPacket.guilds)
+            Storage.roleNames = RoleManager.arrangeroleNames(guilds: readyPacket.guilds)
         }
 
         // Remote control now switched on
         MentionSender.shared.delegate = self
-        if let previousServer = previousServer, previousServer != 201 {
+        if let previousServer = previousServer, previousServer != "@me" {
             print("setting")
-            upcomingGuild = guildTemp[previousServer]
+            upcomingGuild = guildTemp[keyed: previousServer]
             selectedServer = previousServer
         } else {
             upcomingGuild = nil
-            selectedServer = 201
+            selectedServer = "@me"
         }
         upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(upcomingGuild?.id ?? readyPacket.guilds.first?.id ?? "")")
     }

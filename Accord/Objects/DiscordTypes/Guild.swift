@@ -70,7 +70,6 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // var stage_instances: [StageInstances]
     // var stickers: [Sticker]?
 
-    var index: Int?
     var mergedMember: MergedMember?
     var guildPermissions: String?
 

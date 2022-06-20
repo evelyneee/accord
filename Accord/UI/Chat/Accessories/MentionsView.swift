@@ -34,7 +34,6 @@ struct MentionsView: View {
         .onAppear(perform: {
             messageFetchQueue.async {
                 RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/users/@me/mentions?limit=50&roles=true&everyone=true"), headers: Headers(
-                    userAgent: discordUserAgent,
                     token: Globals.token,
                     type: .GET,
                     discordHeaders: true,

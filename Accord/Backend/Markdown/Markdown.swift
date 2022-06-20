@@ -95,7 +95,7 @@ public final class Markdown {
                 return Just(Text(word) + Text(" ")).eraseToAny()
             }
         }
-        let emoteIDs = word.matches(precomputed: RegexExpressions.emojiIDRegex)
+        let emoteIDs = word.matches(precomputed: RegexExpressions.emojiID)
         if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "96" : "32")") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
@@ -110,13 +110,14 @@ public final class Markdown {
                 .eraseToAny()
         }
         return Future { promise in
-            let mentions = word.matches(precomputed: RegexExpressions.mentionsRegex)
-            let channels = word.matches(precomputed: RegexExpressions.channelsRegex)
-            let songIDs = word.matches(precomputed: RegexExpressions.songIDsRegex)
-            let platforms = word.matches(precomputed: RegexExpressions.platformsRegex)
+            let mentions = word.matches(precomputed: RegexExpressions.mentions)
+            let roleMentions = word.matches(precomputed: RegexExpressions.roleMentions)
+            let channels = word.matches(precomputed: RegexExpressions.channels)
+            let songIDs = word.matches(precomputed: RegexExpressions.songIDs)
+            let platforms = word.matches(precomputed: RegexExpressions.platforms)
                 .replaceAllOccurences(of: "music.apple", with: "applemusic")
-            let dict = Array(arrayLiteral: zip(songIDs, platforms))
-                .reduce([], +)
+            
+            let dict = Array(arrayLiteral: zip(songIDs, platforms)).reduce([], +)
             for (id, platform) in dict {
                 SongLink.getSong(song: "\(platform):track:\(id)") { song in
                     guard let song = song else { return }
@@ -132,6 +133,7 @@ public final class Markdown {
                 }
             }
             guard dict.isEmpty else { return }
+            
             for id in mentions {
                 return promise(.success(
                     Text("@\(members[id] ?? "Unknown User")")
@@ -141,8 +143,17 @@ public final class Markdown {
                         Text(" ")
                 ))
             }
+            for id in roleMentions {
+                return promise(.success(
+                    Text("@\(Storage.roleNames[id] ?? "Unknown Role")")
+                        .foregroundColor(Color.accentColor)
+                        .underline()
+                        +
+                        Text(" ")
+                ))
+            }
             for id in channels {
-                let channel = Array(ServerListView.folders.map(\.guilds).joined().map(\.channels).joined())[keyed: id]
+                let channel = Array(Storage.folders.map(\.guilds).joined().map(\.channels).joined())[keyed: id]
                 return promise(.success(Text("#\(channel?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
             }
             
@@ -171,7 +182,7 @@ public final class Markdown {
      **/
     public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
-        let words = line.matchRange(precomputed: RegexExpressions.lineRegex).map { line[$0].trimmingCharacters(in: .whitespaces) }
+        let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first) }
         return Publishers.MergeMany(pubs)
             .collect()

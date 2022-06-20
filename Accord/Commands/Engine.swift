@@ -72,7 +72,6 @@ final class SlashCommands {
             fileURL: nil,
             boundary: boundary,
             headers: Headers(
-                userAgent: discordUserAgent,
                 token: Globals.token,
                 type: .POST,
                 discordHeaders: true,

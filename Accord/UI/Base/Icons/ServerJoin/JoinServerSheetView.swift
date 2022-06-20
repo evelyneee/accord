@@ -58,7 +58,7 @@ struct JoinServerSheetView: View {
         let joinURL = URL(string: rootURL)!
             .appendingPathComponent("invites")
             .appendingPathComponent(inviteCode)
-        Request.fetch(request: nil, url: joinURL, headers: .init(userAgent: discordUserAgent, token: Globals.token, bodyObject: nil, type: .POST, discordHeaders: true, cached: false)) { result in
+        Request.fetch(request: nil, url: joinURL, headers: .init(token: Globals.token, type: .POST, discordHeaders: true)) { result in
             switch result {
             case let .success(data):
                 let decoder = JSONDecoder()

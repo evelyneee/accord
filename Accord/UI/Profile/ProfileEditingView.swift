@@ -41,7 +41,6 @@ struct ProfileEditingView: View {
                 url = url?.appendingPathComponent("settings")
             }
             Request.fetch(User.self, url: url, headers: Headers(
-                userAgent: discordUserAgent,
                 token: Globals.token,
                 bodyObject: dict,
                 type: .PATCH,

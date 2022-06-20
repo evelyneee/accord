@@ -22,8 +22,8 @@ extension ServerListView {
 
     func assignPrivateReadStates(_ entries: [ReadStateEntry]) {
         let privateReadStateDict = entries.generateKeyMap()
-        Self.privateChannels.enumerated().forEach {
-            Self.privateChannels[$0].read_state = entries[keyed: $1.id, privateReadStateDict]
+        Storage.privateChannels.enumerated().forEach {
+            Storage.privateChannels[$0].read_state = entries[keyed: $1.id, privateReadStateDict]
         }
         print("Binded to private channels")
         Self.readStates.removeAll()
