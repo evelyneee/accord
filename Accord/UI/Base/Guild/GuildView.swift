@@ -126,6 +126,7 @@ struct GuildView: View {
                                 .appendingPathComponent("guilds")
                                 .appendingPathComponent(guild.id)
                             Request.ping(url: url, headers: Headers(
+                                userAgent: discordUserAgent,
                                 token: Globals.token,
                                 bodyObject: ["lurking": false],
                                 type: .DELETE,
