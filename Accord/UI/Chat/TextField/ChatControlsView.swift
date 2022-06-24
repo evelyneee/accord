@@ -148,7 +148,7 @@ struct ChatControls: View {
                 }
             )
             if viewModel.matchedUsers.count < 5 {
-                if !viewModel.matchesRoles.isEmpty {
+                if !viewModel.matchedRoles.isEmpty {
                     Divider()
                 }
                 MatchesView(
