@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct ReplyView: View {
+    
     let reply: Reply
     var replyNick: String?
     @Binding var replyRole: String?
 
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack {
             RoundedRectangle(cornerRadius: 5)

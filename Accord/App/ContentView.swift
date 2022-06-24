@@ -21,17 +21,21 @@ private struct UserKey: EnvironmentKey {
 }
 
 struct ContentView: View {
+    
     @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
-    @State var serverListView: ServerListView?
+    
+    @MainActor @State
+    var serverListView: ServerListView?
 
     enum LoadErrors: Error {
         case alreadyLoaded
         case offline
     }
     
-    @EnvironmentObject var globals: AppGlobals
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     @ViewBuilder
     var body: some View {

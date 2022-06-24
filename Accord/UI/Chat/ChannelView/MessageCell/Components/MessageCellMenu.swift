@@ -16,7 +16,10 @@ private var encoder: ISO8601DateFormatter = {
 
 struct MessageCellMenu: View {
     @State var message: Message
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     var permissions: Permissions
     @Binding var replyingTo: Message?
     @Binding var editing: Bool

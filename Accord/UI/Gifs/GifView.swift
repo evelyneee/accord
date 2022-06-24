@@ -17,8 +17,13 @@ struct GifView: View {
     }
 
     var url: String
-    @State var currentImage: NSImage = .init()
-    @State var animatedImages: [NSImage] = []
+    
+    @MainActor @State
+    var currentImage: NSImage = .init()
+    
+    @State
+    var animatedImages: [NSImage] = []
+    
     @State var counterValue: Int = 0
     @State var duration: Double = 0
     @State var value: Int = 0
@@ -28,8 +33,8 @@ struct GifView: View {
     @ViewBuilder
     var body: some View {
         HStack {
-            if !animatedImages.isEmpty, animatedImages.indices.contains(value) {
-                Image(nsImage: animatedImages[value])
+            if !animatedImages.isEmpty {
+                Image(nsImage: currentImage)
                     .resizable()
                     .scaledToFit()
             }
@@ -70,6 +75,7 @@ struct GifView: View {
                                             return
                                         }
                                         (self.value) += 1 % (animatedImages.count)
+                                        self.currentImage = animatedImages[self.value]
                                     }
                                 }
                             case let .failure(error): print(error)

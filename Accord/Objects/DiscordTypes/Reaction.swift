@@ -7,12 +7,22 @@
 
 import Foundation
 
-final class Reaction: Identifiable, Codable {
+final class Reaction: Identifiable, Hashable, Codable {
+    static func == (lhs: Reaction, rhs: Reaction) -> Bool {
+        return lhs.id == rhs.id && lhs.me == rhs.me && lhs.count == rhs.count
+    }
+    
     var count: Int
     var me: Bool
     var emoji: ReactionEmote
     var id: String { identifier }
     var identifier: String { emoji.id ?? emoji.name ?? "some emoji" }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(me)
+        hasher.combine(count)
+    }
 }
 
 final class ReactionEmote: Codable {

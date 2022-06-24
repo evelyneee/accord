@@ -22,22 +22,24 @@ final class AsyncMarkdownModel: ObservableObject {
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
 
-    func make(text: String) {
+    func make(text: String, usernames: [String:String]) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
             guard (text.contains("*") ||
                    text.contains("~") ||
                    text.contains("/") ||
                    text.contains("_") ||
-                   text.contains(">")) &&
-                    text.count < 100 else {
+                   text.contains(">") ||
+                   text.contains("<") ||
+                   text.contains("`")) ||
+                    text.count > 100 else {
                 DispatchQueue.main.async {
                     self?.hasEmojiOnly = emojis
                     self?.loaded = true
                 }
                 return
             }
-            self?.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
+            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis)
                 .replaceError(with: Text(text))
                 .sink { [weak self] text in
                     DispatchQueue.main.async {
@@ -59,6 +61,9 @@ struct AsyncMarkdown: View, Equatable {
 
     @StateObject var model: AsyncMarkdownModel
     @Binding var text: String
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     init(_ text: String, binded: Binding<String>? = nil) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
@@ -73,11 +78,13 @@ struct AsyncMarkdown: View, Equatable {
                 .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
                 .fixedSize(horizontal: false, vertical: true)
                 .onChange(of: self.text, perform: { [weak model] text in
-                    model?.make(text: text)
+                    model?.make(text: text, usernames: Storage.usernames)
                 })
-                .task { [weak model] in
-                    model?.make(text: text)
+                .onAppear { [weak model] in
+                    model?.make(text: text, usernames: Storage.usernames)
                 }
+        } else {
+            EmptyView()
         }
     }
 }

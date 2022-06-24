@@ -8,11 +8,15 @@
 import SwiftUI
 
 struct PrivateChannelsView: View {
-    var privateChannels: [Channel]
+    
+    @Binding var privateChannels: [Channel]
     @Binding var selection: Int?
-    @StateObject var viewUpdater: ServerListView.UpdateView
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
-        ForEach(privateChannels, id: \.id) { channel in
+        ForEach($privateChannels, id: \.id) { $channel in
             NavigationLink(
                 tag: Int(channel.id) ?? 0,
                 selection: self.$selection,
@@ -20,22 +24,20 @@ struct PrivateChannelsView: View {
                     NavigationLazyView(
                         ChannelView(channel)
                             .equatable()
+                            .environmentObject(self.appModel)
                             .onAppear {
-                                let prevCount = channel.read_state?.mention_count
                                 channel.read_state?.mention_count = 0
                                 channel.read_state?.last_message_id = channel.last_message_id
-                                if prevCount != 0 { self.viewUpdater.updateView() }
                             }
                             .onDisappear {
-                                let prevCount = channel.read_state?.mention_count
                                 channel.read_state?.mention_count = 0
                                 channel.read_state?.last_message_id = channel.last_message_id
-                                if prevCount != 0 { self.viewUpdater.updateView() }
                             }
                     )
                 },
                 label: {
-                    ServerListViewCell(channel: channel, updater: self.viewUpdater)
+                    ServerListViewCell(channel: $channel)
+                        .environmentObject(self.appModel)
                         .animation(nil, value: UUID())
                 }
             )
@@ -54,8 +56,9 @@ struct PrivateChannelsView: View {
                         empty: true
                     )
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channel.id)"), headers: headers)
-                    guard let index = Storage.privateChannels[indexOf: channel.id] else { return }
-                    Storage.privateChannels.remove(at: index)
+                    self.selection = nil
+                    guard let index = appModel.privateChannels[indexOf: channel.id] else { return }
+                    appModel.privateChannels.remove(at: index)
                 }
                 Button("Mark as read") {
                     channel.read_state?.mention_count = 0

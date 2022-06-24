@@ -54,41 +54,37 @@ func unreadMessages(guild: Guild) -> Bool {
 }
 
 struct ServerListView: View {
-    // i feel bad about this but i need some way to use static vars
-    public class UpdateView: ObservableObject {
-        @Published var updater: Bool = false
-        func updateView() {
-            DispatchQueue.main.async {
-                self.updater.toggle()
-                self.objectWillChange.send()
-            }
-        }
-    }
-
-    @State var selection: Int?
-    @State var selectedGuild: Guild?
-    var upcomingGuild: Guild?
-    var upcomingSelection: Int?
     
-    @AppStorage("SelectedServer")
+    @MainActor @State
+    var selection: Int? = nil
+    @MainActor @State
+    var selectedGuild: Guild? = nil
+    
+    var upcomingGuild: Guild? = nil
+    var upcomingSelection: Int? = nil
+    
+    @MainActor @AppStorage("SelectedServer")
     var selectedServer: String?
     
-    public static var folders: [GuildFolder] = .init()
-    public static var privateChannels: [Channel] = .init()
-    public static var mergedMembers: [String: Guild.MergedMember] = .init()
+    @ObservedObject
+    public var appModel: AppGlobals = .init()
+    
     internal static var readStates: [ReadStateEntry] = .init()
-    var statusText: String?
-    @State var status: String?
+    var statusText: String? = nil
+    @State var status: String? = nil
     @State var bag = Set<AnyCancellable>()
-    @StateObject var viewUpdater = UpdateView()
     @State var iconHovered: Bool = false
     @State var isShowingJoinServerSheet: Bool = false
+    
+    @State var popup: Bool = false
 
     var onlineButton: some View {
         Button("Offline") {
             AccordApp.error(text: "Offline", additionalDescription: "Check your network connection")
         }
     }
+    
+    var performInView = PassthroughSubject<() -> Void, Never>()
 
     var statusIndicator: some View {
         Circle()
@@ -135,48 +131,49 @@ struct ServerListView: View {
     }
 
     var body: some View {
+        let _ = Self._printChanges()
         NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-
+                    
                     LazyVStack {
                         if !NetworkCore.shared.connected {
-                            onlineButton
-                                .buttonStyle(BorderlessButtonStyle())
+                            onlineButton.buttonStyle(BorderlessButtonStyle())
                         }
                         DMButton(
                             selection: self.$selection,
                             selectedServer: self.$selectedServer,
-                            selectedGuild: self.$selectedGuild,
-                            updater: self.viewUpdater
+                            selectedGuild: self.$selectedGuild
                         )
                         .fixedSize()
                         Color.gray
                             .frame(width: 30, height: 1)
                             .opacity(0.75)
-                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, selectedGuild: self.$selectedGuild, updater: self.viewUpdater)
+                        FolderListView(selectedServer: self.$selectedServer, selection: self.$selection, selectedGuild: self.$selectedGuild)
                             .padding(.trailing, 3.5)
                         Color.gray
                             .frame(width: 30, height: 1)
                             .opacity(0.75)
-                        JoinServerButton(viewUpdater: self.viewUpdater)
+                        JoinServerButton()
                     }
                 }
                 .frame(width: 80)
                 .padding(.top, 5)
+                .onReceive(self.performInView, perform: { action in
+                    action()
+                })
                 Divider()
-
+                
                 // MARK: - Loading UI
-
+                
                 if selectedServer == "@me" {
                     List {
                         settingsLink
                         Divider()
                         PrivateChannelsView(
-                            privateChannels: Storage.privateChannels,
-                            selection: self.$selection,
-                            viewUpdater: self.viewUpdater
+                            privateChannels: self.$appModel.privateChannels,
+                            selection: self.$selection
                         )
                         .animation(nil, value: UUID())
                     }
@@ -184,21 +181,34 @@ struct ServerListView: View {
                     .listStyle(.sidebar)
                     .animation(nil, value: UUID())
                 } else if let selectedGuild = selectedGuild {
-                    GuildView(guild: selectedGuild, selection: self.$selection, updater: self.viewUpdater)
+                    GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild), selection: self.$selection)
                         .animation(nil, value: UUID())
                 }
             }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
+        .environmentObject(self.appModel)
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         // .navigationViewStyle(DoubleColumnNavigationViewStyle())
+        .sheet(isPresented: $popup, onDismiss: {}) {
+            SearchView()
+                .focusable()
+                .environmentObject(self.appModel)
+                .touchBar {
+                    Button(action: {
+                        popup.toggle()
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: Int],
                   let firstKey = uInfo.first else { return }
             print(firstKey)
             self.selectedServer = firstKey.key
             self.selection = firstKey.value
-            self.selectedGuild = Array(Storage.folders.map(\.guilds).joined())[keyed: firstKey.key]
+            self.selectedGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: firstKey.key]
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: String],
@@ -206,8 +216,8 @@ struct ServerListView: View {
             self.selectedServer = "@me"
             self.selection = number
         })
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Updater")), perform: { _ in
-            viewUpdater.updateView()
+        .onReceive(NotificationCenter.default.publisher(for: .init("red.evelyn.accord.Search")), perform: { _ in
+            self.popup.toggle()
         })
         .onAppear {
             if let upcomingGuild = upcomingGuild {

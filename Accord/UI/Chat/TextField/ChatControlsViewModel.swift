@@ -11,12 +11,28 @@ import Foundation
 import SwiftUI
 
 final class ChatControlsViewModel: ObservableObject {
-    @Published var matchedUsers: [String: String] = .init()
-    @Published var matchedChannels: [Channel] = .init()
-    @Published var matchedEmoji: [DiscordEmote] = .init()
-    @Published var matchedCommands: [SlashCommandStorage.Command] = .init()
-    @Published var textFieldContents: String = .init()
-    @Published var percent: String? = nil
+    
+    @MainActor @Published
+    var matchedUsers: [User] = .init()
+    
+    @MainActor @Published
+    var matchedRoles: [String:String] = .init()
+    
+    @MainActor @Published
+    var matchedChannels: [Channel] = .init()
+    
+    @MainActor @Published
+    var matchedEmoji: [DiscordEmote] = .init()
+    
+    @MainActor @Published
+    var matchedCommands: [SlashCommandStorage.Command] = .init()
+    
+    @MainActor @Published
+    var textFieldContents: String = .init()
+    
+    @MainActor @Published
+    var percent: String? = nil
+    
     var observation: NSKeyValueObservation?
     var command: SlashCommandStorage.Command?
 
@@ -27,7 +43,7 @@ final class ChatControlsViewModel: ObservableObject {
     var silentTyping: Bool = false
 
     var locked: Bool = false
-    var runOnUnlock: (() -> Void)?
+    var runOnUnlock: (() async -> Void)?
 
     init() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
@@ -35,13 +51,13 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
-    func checkText(guildID: String, channelID: String) {
-        let ogContents = textFieldContents
-        let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentions)
-        let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannels)
-        let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
-        let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmoji)
-        let emotes = textFieldContents.matches(precomputed: RegexExpressions.completedEmote)
+    func checkText(guildID: String, channelID: String) async {
+        let ogContents = await textFieldContents
+        let mentions = await textFieldContents.matches(precomputed: RegexExpressions.chatTextMentions)
+        let channels = await textFieldContents.matches(precomputed: RegexExpressions.chatTextChannels)
+        let slashes = await textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
+        let emoji = await textFieldContents.matches(precomputed: RegexExpressions.chatTextEmoji)
+        let emotes = await textFieldContents.matches(precomputed: RegexExpressions.completedEmote)
 
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
@@ -52,7 +68,7 @@ final class ChatControlsViewModel: ObservableObject {
             }
         }
 
-        guard !textFieldContents.isEmpty else {
+        guard await !textFieldContents.isEmpty else {
             DispatchQueue.main.async {
                 self.matchedEmoji.removeAll()
                 self.matchedCommands.removeAll()
@@ -63,31 +79,33 @@ final class ChatControlsViewModel: ObservableObject {
         }
 
         if let search = mentions.last?.lowercased() {
-            let matchedUsers: [String: String] = Storage.usernames
-                .filterValues { $0.lowercased().contains(search) }
-                .mapKeys { "!" + $0 }
+            let matchedUsers = await Storage.users
+                .filterValues { $0.username.lowercased().contains(search.lowercased()) }
+                .map(\.value)
             let matchedRoles = Storage.roleNames
                 .filterValues { $0.lowercased().contains(search) }
                 .mapKeys { "&" + $0 }
-            let matched = matchedUsers.merging(matchedRoles, uniquingKeysWith: { (_, last) in last })
-            DispatchQueue.main.async {
-                self.matchedUsers = matched
+            await MainActor.run {
+                self.matchedUsers = matchedUsers
+                self.matchedRoles = matchedRoles
             }
         } else if let search = channels.last {
-            let matches = Storage.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
-            let joined: [Channel] = Array(Array(Array(matches).joined()).joined())
-                .filter { $0.guild_id == guildID }
-                .prefix(10)
-                .literal()
-            DispatchQueue.main.async {
-                self.matchedChannels = joined
+            Task.detached {
+                let matches = await Storage.globals?.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
+                let joined: [Channel] = Array(Array(Array(matches ?? []).joined()).joined())
+                    .filter { $0.guild_id == guildID }
+                    .prefix(10)
+                    .literal()
+                DispatchQueue.main.async {
+                    self.matchedChannels = joined
+                }
             }
         } else if let command = slashes.last?.trimmingCharacters(in: .letters.inverted),
-                  textFieldContents.prefix(1) == "/", guildID != "@me"
+                  await textFieldContents.prefix(1) == "/", guildID != "@me"
         {
             guard !locked else {
                 runOnUnlock = { [weak self] in
-                    self?.checkText(guildID: guildID, channelID: channelID)
+                    await self?.checkText(guildID: guildID, channelID: channelID)
                 }
                 return
             }
@@ -120,7 +138,9 @@ final class ChatControlsViewModel: ObservableObject {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 self.locked = false
-                self.runOnUnlock?()
+                Task.detached {
+                    await self.runOnUnlock?()
+                }
             }
         } else if let key = emoji.last {
             let matched = Array(Storage.emotes.values.joined())
@@ -166,10 +186,10 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
-    func executeCommand(guildID: String, channelID: String) throws {
+    func executeCommand(guildID: String, channelID: String) async throws {
         guard let command = command else {
-            if textFieldContents.prefix(6) == "/nick " {
-                let nick = textFieldContents.dropFirst(6).stringLiteral
+            if await textFieldContents.prefix(6) == "/nick " {
+                let nick = await textFieldContents.dropFirst(6).stringLiteral
                 Request.ping(url: URL(string: "\(rootURL)/guilds/\(guildID)/members/%40me/nick"), headers: Headers(
                     token: Globals.token,
                     bodyObject: ["nick": nick],
@@ -178,19 +198,19 @@ final class ChatControlsViewModel: ObservableObject {
                     json: true
                 ))
                 emptyTextField()
-            } else if textFieldContents.prefix(6) == "/shrug" {
+            } else if await textFieldContents.prefix(6) == "/shrug" {
                 send(text: #"¯\_(ツ)_/¯"#, guildID: guildID, channelID: channelID)
                 emptyTextField()
-            } else if textFieldContents.prefix(6) == "/debug" {
+            } else if await textFieldContents.prefix(6) == "/debug" {
                 sendDebugLog(guildID: guildID, channelID: channelID)
                 emptyTextField()
-            } else if textFieldContents.prefix(6) == "/reset" {
+            } else if await textFieldContents.prefix(6) == "/reset" {
                 wss.reset()
                 emptyTextField()
-            } else if textFieldContents.prefix(12) == "/reset force" {
+            } else if await textFieldContents.prefix(12) == "/reset force" {
                 wss.hardReset()
                 emptyTextField()
-            } else if textFieldContents.prefix(5) == "/help" {
+            } else if await textFieldContents.prefix(5) == "/help" {
                 let help = """
                 **Slash commands**
                 `/shrug`: shrug
@@ -225,7 +245,7 @@ final class ChatControlsViewModel: ObservableObject {
         }
         var options: [[String: Any]] = []
         if command.options?.count != 0 {
-            let args: [(key: String, value: Any)] = textFieldContents
+            let args: [(key: String, value: Any)] = await textFieldContents
                 .matches(for: #"(\S+):((?:(?! \S+:).)+)"#)
                 .compactMap { arg -> (key: String, value: Any)? in
                     let components = arg.components(separatedBy: ":")

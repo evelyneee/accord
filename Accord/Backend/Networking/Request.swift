@@ -335,7 +335,6 @@ public final class Request {
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
-            print(response as? HTTPURLResponse)
             if let data = data {
                 return completion(.success((data, response as? HTTPURLResponse)))
             } else if let error = error {
@@ -384,7 +383,6 @@ public final class Request {
             }
 
         body.append("--\(boundary)--\r\n")
-        print(String(data: body, encoding: .utf8))
         return body
     }
 }

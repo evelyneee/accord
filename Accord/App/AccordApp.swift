@@ -33,11 +33,8 @@ var reachability: Reachability? = {
 @main
 struct AccordApp: App {
     
-    @StateObject var globals = AppGlobals()
-    
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State var popup: Bool = false
     @State var token = Globals.token
 
     private enum Tabs: Hashable {
@@ -59,30 +56,11 @@ struct AccordApp: App {
                     }
             } else {
                 ContentView(loaded: $loaded)
-                    .environmentObject(self.globals)
                     .onDisappear {
                         loaded = false
                     }
                     .preferredColorScheme(darkMode ? .dark : nil)
-                    .sheet(isPresented: $popup, onDismiss: {}) {
-                        SearchView()
-                            .focusable()
-                            .touchBar {
-                                Button(action: {
-                                    popup.toggle()
-                                }) {
-                                    Image(systemName: "magnifyingglass")
-                                }
-                            }
-                    }
                     .focusable()
-                    .touchBar {
-                        Button(action: {
-                            popup.toggle()
-                        }) {
-                            Image(systemName: "magnifyingglass")
-                        }
-                    }
                     .onAppear {
                         // Globals.loadVersion()
                         // DispatchQueue(label: "socket").async {
@@ -123,7 +101,7 @@ struct AccordApp: App {
             SidebarCommands() // 1
             CommandMenu("Navigate") {
                 Button("Show quick jump") {
-                    popup.toggle()
+                    NotificationCenter.default.post(name: .init("red.evelyn.accord.Search"), object: nil)
                 }.keyboardShortcut("k")
                 #if DEBUG
                     Button("Error", action: {

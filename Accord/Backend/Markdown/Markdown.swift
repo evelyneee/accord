@@ -88,7 +88,7 @@ public final class Markdown {
      - Returns AnyPublisher with SwiftUI Text view
      **/
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool) -> TextPublisher {
-        if !(word.contains("*") || word.contains("~") || word.contains("/") || word.contains("_") || word.contains(">")) {
+        if !(word.contains("*") || word.contains("~") || word.contains("/") || word.contains("_") || word.contains(">") || word.contains("<") || word.contains("`")) {
             if highlight {
                 return Just(Text(bionicMarkdown(word)) + Text(" ")).eraseToAny()
             } else {
@@ -152,9 +152,16 @@ public final class Markdown {
                         Text(" ")
                 ))
             }
-            for id in channels {
-                let channel = Array(Storage.folders.map(\.guilds).joined().map(\.channels).joined())[keyed: id]
-                return promise(.success(Text("#\(channel?.name ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+            
+            if !channels.isEmpty {
+                Task {
+                    guard let channelNameStorage = await Storage.globals?.folders.map(\.guilds).joined().map(\.channels).joined() else { return }
+                    
+                    for id in channels {
+                        let channel = Array(channelNameStorage)[keyed: id]
+                        return promise(.success(Text("#\(channel?.computedName ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                    }
+                }
             }
             
             if word == ">" && quote {

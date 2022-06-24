@@ -15,7 +15,9 @@ extension ServerListView {
         @Binding var selectedGuild: Guild?
 
         @State var isShowingJoinServerSheet: Bool = false
-        @StateObject var updater: ServerListView.UpdateView
+        
+        @EnvironmentObject
+        var appModel: AppGlobals
 
         func color(_ folder: GuildFolder) -> Color {
             if let color = folder.color {
@@ -26,33 +28,31 @@ extension ServerListView {
         
         
         var body: some View {
-            ForEach(Storage.folders, id: \.hashValue) { folder in
+            ForEach($appModel.folders, id: \.hashValue) { $folder in
                 if folder.guilds.count != 1 {
                     Folder(
                         icon: Array(folder.guilds.prefix(4)),
                         color: self.color(folder),
-                        read: Binding.constant(folder.guilds.map { unreadMessages(guild: $0) }.contains(true)),
-                        mentionCount: folder.guilds.map { pingCount(guild: $0) }.reduce(0, +)
+                        read: folder.guilds.map({ unreadMessages(guild: $0) }).contains(true),
+                        mentionCount: folder.guilds.map({ pingCount(guild: $0) }).reduce(0, +)
                     ) {
-                        ForEach(folder.guilds, id: \.id) { guild in
+                        ForEach($folder.guilds, id: \.id) { $guild in
                             ServerIconCell(
-                                guild: guild,
+                                guild: $guild,
                                 selectedServer: self.$selectedServer,
                                 selection: self.$selection,
-                                selectedGuild: self.$selectedGuild,
-                                updater: self.$updater.updater
+                                selectedGuild: self.$selectedGuild
                             )
                             .fixedSize()
                         }
                     }
                     .padding(.bottom, 1)
-                } else if let guild = folder.guilds.first {
+                } else if let guild = $folder.guilds.first {
                     ServerIconCell(
                         guild: guild,
                         selectedServer: self.$selectedServer,
                         selection: self.$selection,
-                        selectedGuild: self.$selectedGuild,
-                        updater: self.$updater.updater
+                        selectedGuild: self.$selectedGuild
                     )
                     .fixedSize()
                 }
@@ -63,14 +63,16 @@ extension ServerListView {
 }
 
 struct ServerIconCell: View {
-    var guild: Guild
+    @Binding var guild: Guild
     @Binding var selectedServer: String?
     @Binding var selection: Int?
     @Binding var selectedGuild: Guild?
     @State var hovering: Bool = false
-    @Binding var updater: Bool
 
     @State var mentionCount: Int?
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     func updateSelection(old: String?, new: String?) {
         DispatchQueue.global().async {
@@ -111,14 +113,14 @@ struct ServerIconCell: View {
                     .frame(width: 5, height: selectedServer == guild.id || hovering ? 30 : 5)
                     .animation(Animation.easeInOut(duration: 0.1), value: UUID())
                     .opacity(unreadMessages(guild: guild) || selectedServer == guild.id ? 1 : 0)
-                GuildListPreview(guild: guild, selectedServer: $selectedServer.animation(), updater: self.$updater)
+                GuildListPreview(guild: $guild, selectedServer: $selectedServer.animation())
             }
         }
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
         )
         .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.1)) { self.hovering = h } })
-        .onChange(of: self.updater, perform: { _ in
+        .onReceive(self.appModel.objectWillChange, perform: { _ in
             self.mentionCount = pingCount(guild: guild)
         })
         .buttonStyle(BorderlessButtonStyle())

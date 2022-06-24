@@ -18,7 +18,13 @@ struct MessageCellView: View, Equatable {
     var replyNick: String?
     var pronouns: String?
     var avatar: String?
+    
+    @Environment(\.channelID)
+    var channelID: String
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     @Binding var permissions: Permissions
     @Binding var role: String?
     @Binding var replyRole: String?
@@ -33,6 +39,9 @@ struct MessageCellView: View, Equatable {
 
     private let leftPadding: CGFloat = 44.5
 
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
             message.edit(now: self.editedText)
@@ -48,7 +57,7 @@ struct MessageCellView: View, Equatable {
     var body: some View {
         VStack(alignment: .leading) {
             if let reply = message.referenced_message {
-                ReplyView(
+                ReplyView (
                     reply: reply,
                     replyNick: replyNick,
                     replyRole: $replyRole
@@ -64,27 +73,27 @@ struct MessageCellView: View, Equatable {
             }
             switch message.type {
             case .recipientAdd:
-                RecipientAddView(
+                RecipientAddView (
                     message: self.message
                 )
                 .padding(.leading, leftPadding)
             case .recipientRemove:
                 if let user = message.author {
-                    RecipientRemoveView(
+                    RecipientRemoveView (
                         user: user
                     )
                     .padding(.leading, leftPadding)
                 }
             case .channelNameChange:
                 if let user = message.author {
-                    ChannelNameChangeView(
+                    ChannelNameChangeView (
                         user: user
                     )
                     .padding(.leading, leftPadding)
                 }
             case .guildMemberJoin:
                 if let user = message.author {
-                    WelcomeMessageView(
+                    WelcomeMessageView (
                         user: user
                     )
                     .padding(.leading, leftPadding)
@@ -92,15 +101,14 @@ struct MessageCellView: View, Equatable {
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referenced_message == nil && message.inSameDay) {
-                        AvatarView(
+                        AvatarView (
                             author: author,
-                            guildID: self.guildID,
                             avatar: self.avatar
                         )
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
                         .popover(isPresented: $popup, content: {
-                            PopoverProfileView(user: message.author, guildID: self.guildID)
+                            PopoverProfileView(user: message.author)
                         })
                         .padding(.trailing, 1.5)
                         .fixedSize()
@@ -114,13 +122,12 @@ struct MessageCellView: View, Equatable {
                                 } else {
                                     AsyncMarkdown(message.content)
                                         .equatable()
+                                        .lineSpacing(1.15)
                                         .padding(.leading, leftPadding)
                                         .popover(isPresented: $popup, content: {
-                                            PopoverProfileView(user: message.author, guildID: self.guildID)
+                                            PopoverProfileView(user: message.author)
                                         })
                                 }
-                            } else {
-                                Spacer().frame(height: 2)
                             }
                         } else {
                             AuthorTextView(
@@ -137,6 +144,7 @@ struct MessageCellView: View, Equatable {
                                 } else {
                                     AsyncMarkdown(message.content)
                                         .equatable()
+                                        .lineSpacing(10)
                                 }
                             }
                         }
@@ -171,6 +179,7 @@ struct MessageCellView: View, Equatable {
             }
             if let reactions = message.reactions, !reactions.isEmpty {
                 ReactionsGridView (
+                    messageID: self.message.id,
                     reactions: reactions
                 )
                 .padding(.leading, leftPadding)
@@ -179,7 +188,6 @@ struct MessageCellView: View, Equatable {
         .contextMenu {
             MessageCellMenu(
                 message: self.message,
-                guildID: self.guildID,
                 permissions: self.permissions,
                 replyingTo: self.$replyingTo,
                 editing: self.$editing,
@@ -188,7 +196,7 @@ struct MessageCellView: View, Equatable {
             )
         }
         .popover(isPresented: $showEditNicknamePopover) {
-            SetNicknameView(user: message.author, guildID: self.guildID, isPresented: $showEditNicknamePopover)
+            SetNicknameView(user: message.author, isPresented: $showEditNicknamePopover)
                 .padding()
         }
     }

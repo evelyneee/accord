@@ -9,7 +9,10 @@ import SwiftUI
 
 struct AvatarView: View {
     var author: User
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     var avatar: String?
 
     var animated: Bool {

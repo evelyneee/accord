@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+
 struct ChatControls: View {
 //    enum FocusedElements: Hashable {
 //        case mainTextField
@@ -59,7 +60,9 @@ struct ChatControls: View {
                     self.mentionUser = true
                 }
             } else if viewModel?.textFieldContents.prefix(1) == "/" {
-                try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
+                Task.detached {
+                    try await self.viewModel.executeCommand(guildID: guildID, channelID: channelID)
+                }
             } else {
                 viewModel?.send(text: contents, guildID: guildID, channelID: channelID)
             }
@@ -121,23 +124,57 @@ struct ChatControls: View {
     }
 
     var matchedUsersView: some View {
-        MatchesView(
-            elements: viewModel.matchedUsers.sorted(by: >).prefix(10),
-            id: \.key,
-            action: { [weak viewModel] key, _ in
-                if let range = viewModel?.textFieldContents.ranges(of: "@").last {
-                    viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+        VStack {
+            MatchesView(
+                elements: viewModel.matchedUsers.prefix(10),
+                id: \.id,
+                action: { [weak viewModel] user in
+                    if let range = viewModel?.textFieldContents.ranges(of: "@").last {
+                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                    }
+                    viewModel?.textFieldContents.append("<@\(user.id)> ")
+                },
+                label: { user in
+                    HStack {
+                        Attachment(pfpURL(user.id, user.avatar, discriminator: user.discriminator))
+                            .equatable()
+                            .clipShape(Circle())
+                            .frame(width: 23, height: 23)
+                        Text(user.username).foregroundColor(.primary)
+                        +
+                        Text("#" + user.discriminator)
+                        Spacer()
+                    }
                 }
-                viewModel?.textFieldContents.append("<@\(key)> ")
-            },
-            label: { _, username in
-                HStack {
-                    Text(username)
-                        .foregroundColor(.primary)
-                    Spacer()
+            )
+            if viewModel.matchedUsers.count < 5 {
+                if !viewModel.matchesRoles.isEmpty {
+                    Divider()
                 }
+                MatchesView(
+                    elements: viewModel.matchedRoles.sorted(by: >).prefix(4),
+                    id: \.key,
+                    action: { [weak viewModel] key, _ in
+                        if let range = viewModel?.textFieldContents.ranges(of: "@").last {
+                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                        }
+                        viewModel?.textFieldContents.append("<@\(key)> ")
+                    },
+                    label: { id, roleName in
+                        HStack {
+                            Text("@" + roleName)
+                                .foregroundColor({
+                                    if let color = Storage.roleColors[id.dropFirst().stringLiteral]?.0 {
+                                        return Color(int: color)
+                                    }
+                                    return .primary
+                                }())
+                            Spacer()
+                        }
+                    }
+                )
             }
-        )
+        }
     }
 
     var matchedCommandsView: some View {
@@ -308,7 +345,8 @@ struct ChatControls: View {
                     if !(viewModel.matchedUsers.isEmpty) ||
                         !(viewModel.matchedEmoji.isEmpty) ||
                         !(viewModel.matchedChannels.isEmpty) ||
-                        !(viewModel.matchedCommands.isEmpty) &&
+                        !(viewModel.matchedCommands.isEmpty) ||
+                        !(viewModel.matchedRoles.isEmpty) &&
                         !viewModel.textFieldContents.isEmpty
                     {
                         VStack {
@@ -336,10 +374,10 @@ struct ChatControls: View {
                         emotesButton
                     }
                     .disabled(!self.permissions.contains(.sendMessages))
-                    .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
-                        if !typing, viewModel?.textFieldContents != "" {
+                    .onReceive(viewModel.$textFieldContents) { _ in
+                        if !typing, viewModel.textFieldContents != "" {
                             messageSendQueue.async {
-                                viewModel?.type(channelID: self.channelID, guildID: self.guildID)
+                                viewModel.type(channelID: self.channelID, guildID: self.guildID)
                             }
                             typing = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
@@ -347,8 +385,8 @@ struct ChatControls: View {
                             }
                         }
                         // viewModel?.markdown()
-                        textQueue.async {
-                            viewModel?.checkText(guildID: guildID, channelID: channelID)
+                        Task.detached {
+                            await viewModel.checkText(guildID: guildID, channelID: channelID)
                         }
                     }
                 }

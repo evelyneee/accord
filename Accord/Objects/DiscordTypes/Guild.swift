@@ -9,7 +9,7 @@ import Foundation
 
 struct Guild: Decodable, Equatable, Hashable, Identifiable {
     static func == (lhs: Guild, rhs: Guild) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.channels == rhs.channels
     }
 
     let id: String
@@ -75,6 +75,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(self.channels)
     }
 
     struct MergedMember: Decodable {

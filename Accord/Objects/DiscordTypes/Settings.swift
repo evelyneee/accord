@@ -36,7 +36,7 @@ final class GuildFolder: Decodable, Hashable {
     }
 
     static func == (lhs: GuildFolder, rhs: GuildFolder) -> Bool {
-        lhs.guild_ids == rhs.guild_ids
+        lhs.guild_ids == rhs.guild_ids && lhs.guilds == rhs.guilds
     }
 
     var id: String { UUID().uuidString }
@@ -53,7 +53,7 @@ final class GuildFolder: Decodable, Hashable {
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(guild_ids)
+        hasher.combine(guilds)
     }
 }
 

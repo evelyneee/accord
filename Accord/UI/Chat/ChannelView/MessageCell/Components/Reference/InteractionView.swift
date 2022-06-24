@@ -8,9 +8,14 @@
 import SwiftUI
 
 struct InteractionView: View {
+    
     var interaction: Interaction
     var isSameAuthor: Bool
     @Binding var replyRole: String?
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack {
             Attachment(pfpURL(interaction.user?.id, interaction.user?.avatar, "16"))

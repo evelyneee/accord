@@ -9,8 +9,7 @@ import Foundation
 import SwiftUI
 
 struct ServerListViewCell: View {
-    var channel: Channel
-    @StateObject var updater: ServerListView.UpdateView
+    @Binding var channel: Channel
     var guildID: String { channel.guild_id ?? "@me" }
     @State var status: String? = nil
 
@@ -26,18 +25,6 @@ struct ServerListViewCell: View {
                 .frame(width: 35, height: 35)
                 .clipShape(Circle())
                 statusDot
-                    .onAppear {
-                        if let user = channel.recipients?.first {
-                            wss.listenForPresence(userID: user.id) { presence in
-                                self.status = presence.status
-                            }
-                        }
-                    }
-                    .onDisappear {
-                        if let user = channel.recipients?.first, channel.type == .dm {
-                            wss.unregisterPresence(userID: user.id)
-                        }
-                    }
             }
             VStack(alignment: .leading) {
                 Text(channel.computedName)

@@ -43,8 +43,8 @@ func showNotification(title: String, subtitle: String, description: String? = ni
     func newNotification(_ message: Message) {
         let content = UNMutableNotificationContent()
 
-        let matchingGuild = Array(Storage.folders.map(\.guilds).joined())[message.guild_id ?? ""]
-        let matchingChannel = matchingGuild?.channels?[message.channel_id] ?? Storage.privateChannels[message.channel_id]
+        let matchingGuild = Array(appModel.folders.map(\.guilds).joined())[message.guild_id ?? ""]
+        let matchingChannel = matchingGuild?.channels?[message.channel_id] ?? appModel.privateChannels[message.channel_id]
 
         print(matchingChannel)
 

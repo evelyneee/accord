@@ -30,37 +30,4 @@ extension Array where Self.Element == Channel.PermissionOverwrites {
         }
         return allowed
     }
-
-    func allAllowed(guildID: String) -> Permissions {
-        var permsArray = Permissions(
-            Storage.folders.lazy
-                .map(\.guilds)
-                .joined()
-                .filter { $0.id == guildID }
-                .first?.roles?.lazy
-                .filter { Storage.mergedMembers[guildID]?.roles.contains($0.id) == true }
-                .compactMap(\.permissions)
-                .compactMap { Int64($0) }
-                .map { Permissions($0) } ?? [Permissions]()
-        )
-
-        if permsArray.contains(.administrator) {
-            permsArray = Permissions.all
-            return permsArray
-        }
-
-        let everyonePerms = filter { $0.id == guildID }
-        permsArray.insert(.init([
-            .sendMessages, .readMessages, .changeNickname,
-        ]))
-        permsArray.remove(Permissions(everyonePerms.map(\.deny)))
-        permsArray.insert(Permissions(everyonePerms.map(\.allow)))
-        let rolePerms = filter { Storage.mergedMembers[guildID]?.roles.contains($0.id) ?? false }
-        permsArray.remove(Permissions(rolePerms.map(\.deny)))
-        permsArray.insert(Permissions(rolePerms.map(\.allow)))
-        let memberPerms = filter { $0.id == Globals.user?.id }
-        permsArray.remove(Permissions(memberPerms.map(\.deny)))
-        permsArray.insert(Permissions(memberPerms.map(\.allow)))
-        return permsArray
-    }
 }

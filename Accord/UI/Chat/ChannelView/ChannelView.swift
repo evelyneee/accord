@@ -10,6 +10,33 @@ import AVKit
 import Combine
 import SwiftUI
 
+private struct ChannelIDKey: EnvironmentKey {
+    static let defaultValue = ""
+}
+
+private struct GuildIDKey: EnvironmentKey {
+    static let defaultValue = ""
+}
+
+extension EnvironmentValues {
+    var channelID: String {
+        get { self[ChannelIDKey.self] }
+        set { self[ChannelIDKey.self] = newValue }
+    }
+    var guildID: String {
+        get { self[GuildIDKey.self] }
+        set { self[GuildIDKey.self] = newValue }
+    }
+}
+
+extension View {
+    func channelProperties(channelID: String, guildID: String) -> some View {
+        self
+            .environment(\.channelID, channelID)
+            .environment(\.guildID, guildID)
+    }
+}
+
 struct ChannelView: View, Equatable {
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         lhs.viewModel == rhs.viewModel
@@ -55,6 +82,9 @@ struct ChannelView: View, Equatable {
     static var scrollTo = PassthroughSubject<(String, String), Never>()
     
     @State var scrolledOutOfBounds: Bool = false
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     // MARK: - init
 
@@ -84,7 +114,6 @@ struct ChannelView: View, Equatable {
             replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
             pronouns: viewModel.pronouns[message.author?.id ?? ""],
             avatar: viewModel.avatars[message.author?.id ?? ""],
-            guildID: viewModel.guildID,
             permissions: $viewModel.permissions,
             role: $viewModel.roles[message.author?.id ?? ""],
             replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
@@ -105,8 +134,8 @@ struct ChannelView: View, Equatable {
             if viewModel.messages.count >= 50,
                message == viewModel.messages[viewModel.messages.count - 2]
             {
-                messageFetchQueue.async {
-                    viewModel.loadMoreMessages()
+                Task.detached {
+                    await viewModel.loadMoreMessages()
                 }
             }
         }
@@ -146,25 +175,22 @@ struct ChannelView: View, Equatable {
             VStack {
                 HStack(alignment: .bottom) {
                     Circle()
-                        .foregroundColor(.gray)
                         .frame(width: 35, height: 35)
                         .padding(.trailing, 1.5)
                         .fixedSize()
                     
                     VStack(alignment: .leading) {
-                        Rectangle()
-                            .frame(width: 30 * CGFloat(Int.random(in: 3...20)), height: 13 * CGFloat(Int.random(in: 1...5)))
-                            .cornerRadius(6)
-                        Rectangle()
-                            .frame(width: 20 * CGFloat(Int.random(in: 3...10)), height: 13)
-                            .cornerRadius(6)
+                        Text(UUID().uuidString.prefix(Int.random(in: 5...20)).stringLiteral)
+                            .font(.chatTextFont)
+                        Text((0..<Int.random(in: 1...6)).map { _ in UUID().uuidString }.joined(separator: " "))
+                            .font(.chatTextFont)
                         Spacer().frame(height: 1.3)
                     }
                 }
-                .foregroundColor(.secondary.opacity(0.85))
-                .opacity(0.5)
+                .foregroundColor(.secondary.opacity(0.4))
                 Spacer()
             }
+            .redacted(reason: .placeholder)
         }
     }
     
@@ -259,6 +285,12 @@ struct ChannelView: View, Equatable {
                     }
             }
         })
+        .onAppear {
+            Task.detached {
+                await self.viewModel.setPermissions(self.appModel)
+            }
+        }
+        .channelProperties(channelID: self.channelID, guildID: self.guildID)
         .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)".replacingOccurrences(of: "#", with: "")))
         .presentedWindowToolbarStyle(.unifiedCompact)
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
@@ -361,7 +393,7 @@ struct MemberListViewCell: View {
         }
         .buttonStyle(.borderless)
         .popover(isPresented: self.$popup, content: {
-            PopoverProfileView(user: ops.member?.user, guildID: guildID)
+            PopoverProfileView(user: ops.member?.user)
         })
     }
 }

@@ -31,6 +31,9 @@ struct EmotesView: View, Equatable {
     @Environment(\.dismiss)
     var dismiss
     
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack {
             ZStack(alignment: .top) {

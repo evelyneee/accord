@@ -11,18 +11,30 @@ import SwiftUI
 extension ServerListView {
     // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
     init(_ readyPacket: GatewayD) {
+        
+        let appModel = AppGlobals()
+        
         let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? String
 
         // Set status for the indicator
         status = readyPacket.user_settings?.status
 
         // If there are no folders there's nothing to do
-        guard Storage.folders.isEmpty else {
+        guard appModel.folders.isEmpty else {
             return
         }
-
+        
+        Storage.users = readyPacket.users
+            .map { [$0.id: $0] }
+            .flatMap { $0 }
+            .reduce([String: User]()) { dict, tuple in
+                var nextDict = dict
+                nextDict.updateValue(tuple.1, forKey: tuple.0)
+                return nextDict
+            }
+        
         let keys = readyPacket.users.generateKeyMap()
-        Storage.privateChannels = readyPacket.private_channels.map { c -> Channel in
+        appModel.privateChannels = readyPacket.private_channels.map { c -> Channel in
             var c = c
             if c.recipients?.isEmpty != false {
                 c.recipients = c.recipient_ids?
@@ -32,8 +44,13 @@ extension ServerListView {
         }
         .sorted { $0.last_message_id ?? "" > $1.last_message_id ?? "" }
 
-        assignPrivateReadStates(readyPacket.read_state?.entries ?? [])
-
+        let privateReadStateDict = readyPacket.read_state?.entries.generateKeyMap()
+        appModel.privateChannels.enumerated().forEach {
+            appModel.privateChannels[$0].read_state = readyPacket.read_state?.entries[keyed: $1.id, privateReadStateDict]
+        }
+        
+        print("Binded to private channels")
+        
         // Bind the merged member objects to the guilds
         readyPacket.guilds = readyPacket.guilds.enumerated()
             .map { index, guild -> Guild in
@@ -83,7 +100,7 @@ extension ServerListView {
             }
 
         // Order the channels
-        readyPacket.assignReadStates()
+        readyPacket.assignReadStates(self.appModel)
         readyPacket.order()
         var guildOrder = readyPacket.user_settings?.guild_positions ?? []
         var folderTemp = readyPacket.user_settings?.guild_folders ?? []
@@ -125,13 +142,17 @@ extension ServerListView {
             }
             .filter { !$0.guilds.isEmpty }
 
-        Storage.folders = folders
+        appModel.folders = folders
 
+        
         DispatchQueue.global().async {
             Storage.roleColors = RoleManager.arrangeroleColors(guilds: readyPacket.guilds)
             Storage.roleNames = RoleManager.arrangeroleNames(guilds: readyPacket.guilds)
         }
 
+        self.appModel = appModel
+        Storage.globals = appModel
+        
         // Remote control now switched on
         MentionSender.shared.delegate = self
         if let previousServer = previousServer, previousServer != "@me" {
@@ -142,6 +163,8 @@ extension ServerListView {
             upcomingGuild = nil
             selectedServer = "@me"
         }
+        
         upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(upcomingGuild?.id ?? readyPacket.guilds.first?.id ?? "")")
+
     }
 }

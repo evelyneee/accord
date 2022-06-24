@@ -12,7 +12,6 @@ struct JoinServerSheetView: View {
     @State var errorText: String? = nil
 
     @Binding var isPresented: Bool
-    @StateObject var updater: ServerListView.UpdateView
     var body: some View {
         VStack {
             Text("Join a server")
@@ -68,7 +67,6 @@ struct JoinServerSheetView: View {
                 }
 
                 isPresented.toggle()
-                updater.updateView()
             case let .failure(err):
                 errorText = "Error: \(err.localizedDescription)"
                 print("error: \(err)")

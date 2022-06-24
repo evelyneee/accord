@@ -21,11 +21,6 @@ extension ServerListView {
     }
 
     func assignPrivateReadStates(_ entries: [ReadStateEntry]) {
-        let privateReadStateDict = entries.generateKeyMap()
-        Storage.privateChannels.enumerated().forEach {
-            Storage.privateChannels[$0].read_state = entries[keyed: $1.id, privateReadStateDict]
-        }
-        print("Binded to private channels")
         Self.readStates.removeAll()
     }
 }
@@ -60,7 +55,7 @@ extension GatewayD {
         }
     }
 
-    func assignReadStates() {
+    func assignReadStates(_ appModel: AppGlobals) {
         guard let readState = read_state else { return }
         let stateDict = readState.entries.generateKeyMap()
         guilds.enumerated().forEach { index, guild in

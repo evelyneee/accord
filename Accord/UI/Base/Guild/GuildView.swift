@@ -9,9 +9,9 @@ import Foundation
 import SwiftUI
 
 struct GuildView: View {
-    var guild: Guild
+    
+    @Binding var guild: Guild
     @Binding var selection: Int?
-    @StateObject var updater: ServerListView.UpdateView
     @State var invitePopup: Bool = false
     
     @State var width: CGFloat?
@@ -29,13 +29,14 @@ struct GuildView: View {
                 } else {
                     Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=512", size: nil)
                         .equatable()
+                        .scaledToFit()
                         .cornerRadius(3)
                         .animation(nil, value: UUID())
                         .edgesIgnoringSafeArea(.all)
                         .padding(.vertical, 5)
                 }
             }
-            ForEach(guild.channels, id: \.id) { channel in
+            ForEach($guild.channels, id: \.id) { $channel in
                 if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
@@ -53,27 +54,22 @@ struct GuildView: View {
                                     ChannelView(channel, guild.name)
                                         .equatable()
                                         .onAppear {
-                                            let prevCount = channel.read_state?.mention_count
                                             channel.read_state?.mention_count = 0
                                             channel.read_state?.last_message_id = channel.last_message_id
-                                            if prevCount != 0 { self.updater.updateView() }
                                         }
-                                        .onDisappear {
-                                            let prevCount = channel.read_state?.mention_count
+                                        .onDisappear { [channel] in
                                             channel.read_state?.mention_count = 0
                                             channel.read_state?.last_message_id = channel.last_message_id
-                                            if prevCount != 0 { self.updater.updateView() }
                                         }
                                 )
                             }
                         }, label: {
                             ServerListViewCell(
-                                channel: channel,
-                                updater: self.updater
+                                channel: $channel
                             )
                         }
                     )
-                    .buttonStyle(BorderlessButtonStyle())
+                    .buttonStyle(.borderless)
                     .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
                     .opacity(channel.read_state != nil && channel.read_state?.last_message_id != channel.last_message_id ? 1 : 0.5)
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
@@ -177,9 +173,8 @@ struct GuildView: View {
 }
 
 struct GuildListPreview: View {
-    @State var guild: Guild
+    @Binding var guild: Guild
     @Binding var selectedServer: String?
-    @Binding var updater: Bool
     var body: some View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))

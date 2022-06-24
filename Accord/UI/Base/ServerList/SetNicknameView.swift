@@ -12,7 +12,8 @@ struct SetNicknameView: View {
     var user: User?
 
     /// The guild ID to set the nickname in
-    let guildID: String
+    @Environment(\.guildID)
+    var guildID: String
 
     @Binding var isPresented: Bool
 

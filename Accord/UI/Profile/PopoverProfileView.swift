@@ -92,7 +92,10 @@ struct RolesView: View {
 
 struct PopoverProfileView: View {
     @State var user: User?
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     @State var guildMember: GuildMember? = nil
     @State var fullUser: User? = nil
     @State var hovered: Int?
@@ -221,6 +224,7 @@ struct PopoverProfileView: View {
                     }) {
                         RolesView(tags: roles)
                     }
+                    Divider()
                     Button(action: {
                         Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
                             token: Globals.token,
@@ -233,7 +237,7 @@ struct PopoverProfileView: View {
                             switch $0 {
                             case let .success(channel):
                                 print(channel)
-                                Storage.privateChannels.append(channel)
+                                AppGlobals.newItemPublisher.send((channel, nil))
                                 MentionSender.shared.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)

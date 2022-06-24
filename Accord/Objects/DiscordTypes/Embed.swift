@@ -30,11 +30,20 @@ final class Embed: Codable, Hashable, Identifiable {
         hasher.combine((timestamp ?? "") + (url ?? "") + (title ?? ""))
     }
 
-    final class Field: Codable, Identifiable {
+    final class Field: Codable, Hashable, Identifiable {
+        static func == (lhs: Embed.Field, rhs: Embed.Field) -> Bool {
+            return lhs.id == rhs.id && lhs.value == rhs.value
+        }
+        
         var id: String { name }
         var name: String
         var inline: Bool?
         var value: String
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(value)
+        }
     }
 
     final class Author: Codable {

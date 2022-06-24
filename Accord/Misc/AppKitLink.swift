@@ -46,7 +46,6 @@ struct FetchScrollView: NSViewRepresentable {
             .children
             .filter { $0.label == "enclosingTableView" }
             .first?.value as? NSTableView
-        print(tableView)
         return tableView
     }
 

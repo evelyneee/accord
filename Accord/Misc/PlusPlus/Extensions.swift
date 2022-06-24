@@ -98,7 +98,7 @@ extension Color {
 struct Folder<Content: View>: View {
     var icon: [Guild]
     var color: Color
-    @Binding var read: Bool
+    var read: Bool
     var mentionCount: Int?
     var content: () -> Content
 

@@ -8,25 +8,33 @@
 import SwiftUI
 
 struct DMButton: View {
+    
     @Binding var selection: Int?
     @Binding var selectedServer: String?
     @Binding var selectedGuild: Guild?
-    @StateObject var updater: ServerListView.UpdateView
     @State var mentionCount: Int?
     @State var iconHovered: Bool = false
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         Button(action: {
             DispatchQueue.global().async {
-                Storage.privateChannels = Storage.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
+                let sorted = appModel.privateChannels.sorted(by: { $0.last_message_id ?? "" > $1.last_message_id ?? "" })
+                DispatchQueue.main.async {
+                    appModel.privateChannels = sorted
+                }
             }
             if let selection = selection, let id = self.selectedGuild?.id {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             selectedServer = "@me"
-            selection = nil
-            self.selectedGuild = nil
+            //self.selectedGuild = nil
             if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? Int {
                 self.selection = selectionPrevious
+            } else {
+                selection = nil
             }
         }) {
             Image(systemName: "bubble.right.fill")
@@ -42,10 +50,8 @@ struct DMButton: View {
         }
         .redBadge($mentionCount)
         .buttonStyle(BorderlessButtonStyle())
-        .onReceive(self.updater.$updater, perform: { _ in
-            DispatchQueue.global().async {
-                self.mentionCount = Storage.privateChannels.compactMap { $0.read_state?.mention_count }.reduce(0, +)
-            }
+        .onReceive(self.appModel.$privateChannels, perform: { _ in
+            self.mentionCount = appModel.privateChannels.compactMap { $0.read_state?.mention_count }.reduce(0, +)
         })
     }
 }

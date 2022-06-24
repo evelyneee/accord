@@ -8,10 +8,15 @@
 import SwiftUI
 
 struct AuthorTextView: View {
+    
     var message: Message
     var pronouns: String?
     var nick: String?
     @Binding var role: String?
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack(spacing: 1) {
             Text(nick ?? message.author?.username ?? "Unknown User")
