@@ -38,9 +38,7 @@ struct DMButton: View {
             }
         }) {
             Image(systemName: "bubble.right.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 17, height: 17)
+                .font(.system(size: 16))
                 .padding()
                 .frame(width: 45, height: 45)
                 .background(selectedServer == "@me" || iconHovered ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))

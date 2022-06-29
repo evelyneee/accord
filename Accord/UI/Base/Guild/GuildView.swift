@@ -135,17 +135,14 @@ struct GuildView: View {
                 HStack {
                     switch guild.premium_tier {
                     case 1:
-                        Image(systemName: "star").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star")
+                            .font(.system(size: 15))
                     case 2:
-                        Image(systemName: "star.leadinghalf.filled").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star.leadinghalf.filled")
+                            .font(.system(size: 15))
                     case 3:
-                        Image(systemName: "star.fill").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 15))
                     default:
                         EmptyView()
                     }

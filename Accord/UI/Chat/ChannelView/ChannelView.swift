@@ -264,9 +264,7 @@ struct ChannelView: View, Equatable {
                             }
                         }) {
                             Image(systemName: "arrowtriangle.down.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 33, height: 33)
+                                .font(.system(size: 40))
                                 .opacity(0.9)
                         }
                         .buttonStyle(.borderless)

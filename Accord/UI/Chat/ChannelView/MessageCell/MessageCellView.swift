@@ -122,7 +122,6 @@ struct MessageCellView: View, Equatable {
                                 } else {
                                     AsyncMarkdown(message.content)
                                         .equatable()
-                                        .lineSpacing(1.15)
                                         .padding(.leading, leftPadding)
                                         .popover(isPresented: $popup, content: {
                                             PopoverProfileView(user: message.author)
@@ -144,7 +143,6 @@ struct MessageCellView: View, Equatable {
                                 } else {
                                     AsyncMarkdown(message.content)
                                         .equatable()
-                                        .lineSpacing(10)
                                 }
                             }
                         }

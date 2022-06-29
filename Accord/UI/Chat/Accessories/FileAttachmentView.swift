@@ -56,9 +56,7 @@ struct FileAttachmentView: View {
                 }
             }) {
                 Image(systemName: "magnifyingglass")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 15, height: 15)
+                    .font(.system(size: 17))
                     .contentShape(Rectangle())
             }
             .buttonStyle(.borderless)
@@ -69,9 +67,7 @@ struct FileAttachmentView: View {
                 NSWorkspace.shared.open(url)
             }, label: {
                 Image(systemName: "square.and.arrow.down")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 15, height: 15)
+                    .font(.system(size: 17))
                     .contentShape(Rectangle())
             })
             .buttonStyle(.borderless)

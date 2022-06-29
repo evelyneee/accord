@@ -96,10 +96,8 @@ struct ChatControls: View {
                         } else {
                             ZStack(alignment: .center) {
                                 Image(systemName: "doc")
-                                    .resizable()
-                                    .scaledToFit()
+                                    .font(.largeTitle)
                                     .foregroundColor(Color.primary.opacity(0.4))
-                                    .frame(width: 48, height: 48)
                             }
                             .frame(width: 130, height: 130)
                             .background(Color.black.opacity(0.2))
@@ -298,11 +296,9 @@ struct ChatControls: View {
             fileImport.toggle()
         }) {
             Image(systemName: "plus.circle.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
     }
 
     var nitrolessButton: some View {
@@ -310,11 +306,9 @@ struct ChatControls: View {
             nitroless.toggle()
         }) {
             Image(systemName: "rectangle.grid.3x2.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
         .popover(isPresented: $nitroless, content: {
             NitrolessView(chatText: $viewModel.textFieldContents).equatable()
                 .frame(width: 300, height: 400)
@@ -326,11 +320,9 @@ struct ChatControls: View {
             emotes.toggle()
         }) {
             Image(systemName: "face.smiling.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
         .keyboardShortcut("e", modifiers: [.command])
         .popover(isPresented: $emotes, content: {
             NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
