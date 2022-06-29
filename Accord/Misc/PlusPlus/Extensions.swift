@@ -95,6 +95,29 @@ extension Color {
     }
 }
 
+struct FolderIcon: View {
+    var guild: Guild
+    
+    var body: some View {
+        if let icon = guild.icon {
+            Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
+                .equatable()
+                .clipShape(Circle())
+                .frame(width: 16, height: 16)
+        } else {
+            if let name = guild.name {
+                Text(name.components(separatedBy: " ").compactMap(\.first).map(String.init).joined())
+                    .equatable()
+                    .frame(width: 16, height: 16)
+            } else {
+                Image(systemName: "questionmark")
+                    .equatable()
+                    .frame(width: 16, height: 16)
+            }
+        }
+    }
+}
+
 struct Folder<Content: View>: View {
     var icon: [Guild]
     var color: Color
@@ -121,40 +144,12 @@ struct Folder<Content: View>: View {
                             ZStack(alignment: .bottomTrailing) {
                                 VStack(spacing: 3) {
                                     HStack(spacing: 3) {
-                                        if let guild = icon.first, let icon = guild.icon {
-                                            Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                                .equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 16, height: 16)
-                                        } else {
-                                            Spacer().frame(width: 16, height: 16)
-                                        }
-                                        if let guild = icon[safe: 1], let icon = guild.icon {
-                                            Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                                .equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 16, height: 16)
-                                        } else {
-                                            Spacer().frame(width: 16, height: 16)
-                                        }
+                                        FolderIcon(guild: icon.first!)
+                                        FolderIcon(guild: icon[safe: 1]!)
                                     }
                                     HStack(spacing: 3) {
-                                        if let guild = icon[safe: 2], let icon = guild.icon {
-                                            Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                                .equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 16, height: 16)
-                                        } else {
-                                            Spacer().frame(width: 16, height: 16)
-                                        }
-                                        if let guild = icon[safe: 3], let icon = guild.icon {
-                                            Attachment(cdnURL + "/icons/\(guild.id)/\(icon).png?size=24")
-                                                .equatable()
-                                                .clipShape(Circle())
-                                                .frame(width: 16, height: 16)
-                                        } else {
-                                            Spacer().frame(width: 16, height: 16)
-                                        }
+                                        FolderIcon(guild: icon[safe: 2]!)
+                                        FolderIcon(guild: icon[safe: 3]!)
                                     }
                                 }
                                 .frame(width: 45, height: 45)
