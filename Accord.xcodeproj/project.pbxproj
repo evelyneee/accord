@@ -384,6 +384,14 @@
 			name = Debug;
 			sourceTree = "<group>";
 		};
+		9E0E615A286E1B7C0058BA87 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		9E39B26627869C4800069424 /* Accessories */ = {
 			isa = PBXGroup;
 			children = (
@@ -607,7 +615,6 @@
 			isa = PBXGroup;
 			children = (
 				9EC5FA1A2845BACC00C2A416 /* AvatarView.swift */,
-				9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */,
 				9EC5FA202845BC0600C2A416 /* AuthorText.swift */,
 				9EC5FA242846B7ED00C2A416 /* MessageCellMenu.swift */,
 				9EC5FA262846B9D700C2A416 /* ReactionsGrid.swift */,
@@ -772,6 +779,7 @@
 		A8FA9A9B266823B4003710A4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				9E0E615A286E1B7C0058BA87 /* Components */,
 				9EF5FFD8285CE0CD001B68FA /* Forum */,
 				9EC5FA162845B67500C2A416 /* Login */,
 				9E6BCC5B277E43CF0085F279 /* Search */,

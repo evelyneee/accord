@@ -53,11 +53,11 @@ final class ChatControlsViewModel: ObservableObject {
 
     func checkText(guildID: String, channelID: String) async {
         let ogContents = await textFieldContents
-        let mentions = await textFieldContents.matches(precomputed: RegexExpressions.chatTextMentions)
-        let channels = await textFieldContents.matches(precomputed: RegexExpressions.chatTextChannels)
-        let slashes = await textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
-        let emoji = await textFieldContents.matches(precomputed: RegexExpressions.chatTextEmoji)
-        let emotes = await textFieldContents.matches(precomputed: RegexExpressions.completedEmote)
+        let mentions = ogContents.matches(precomputed: RegexExpressions.chatTextMentions)
+        let channels = ogContents.matches(precomputed: RegexExpressions.chatTextChannels)
+        let slashes = ogContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
+        let emoji = ogContents.matches(precomputed: RegexExpressions.chatTextEmoji)
+        let emotes = ogContents.matches(precomputed: RegexExpressions.completedEmote)
 
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
@@ -101,7 +101,7 @@ final class ChatControlsViewModel: ObservableObject {
                 }
             }
         } else if let command = slashes.last?.trimmingCharacters(in: .letters.inverted),
-                  await textFieldContents.prefix(1) == "/", guildID != "@me"
+                  ogContents.prefix(1) == "/", guildID != "@me"
         {
             guard !locked else {
                 runOnUnlock = { [weak self] in
