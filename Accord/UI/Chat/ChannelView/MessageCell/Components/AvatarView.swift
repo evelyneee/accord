@@ -47,7 +47,7 @@ struct AvatarView: View {
             }) {
                 GifView(imageURL).drawingGroup()
             }.popover(isPresented: $popup, content: {
-                PopoverProfileView(user: author, guildID: self.guildID)
+                PopoverProfileView(user: author)
             }).buttonStyle(.borderless)
         } else {
             Button(action: {
@@ -55,7 +55,7 @@ struct AvatarView: View {
             }) {
                 Attachment(imageURL).drawingGroup()
             }.popover(isPresented: $popup, content: {
-                PopoverProfileView(user: author, guildID: self.guildID)
+                PopoverProfileView(user: author)
             }).buttonStyle(.borderless)
         }
     }

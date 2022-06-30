@@ -358,7 +358,9 @@ struct ChatControls: View {
                     }
                     HStack {
                         fileImportButton
-                        Divider().frame(height: 20)
+                        Divider()
+                            .frame(height: 20)
+                            .padding(.horizontal, 3)
                         mainTextField
                         if nitrolessEnabled {
                             nitrolessButton
