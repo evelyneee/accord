@@ -33,7 +33,7 @@ struct PinsView: View {
                     replyingTo: $replyingTo
                 )
                 Button("Jump") {
-                    ChannelView.scrollTo.send((message.channel_id, message.id))
+                    ChannelView.scrollTo.send((message.channelID, message.id))
                 }
                 .buttonStyle(.borderless)
             }

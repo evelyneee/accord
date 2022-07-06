@@ -35,7 +35,7 @@ struct MessageCellMenu: View {
             Button(message.pinned == false ? "Pin" : "Unpin") {
                 let url = URL(string: rootURL)?
                     .appendingPathComponent("channels")
-                    .appendingPathComponent(message.channel_id)
+                    .appendingPathComponent(message.channelID)
                     .appendingPathComponent("pins")
                     .appendingPathComponent(message.id)
                 DispatchQueue.global().async {
@@ -43,7 +43,7 @@ struct MessageCellMenu: View {
                         token: Globals.token,
                         type: message.pinned == false ? .PUT : .DELETE,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                     ))
                     DispatchQueue.main.async {
                         message.pinned?.toggle()
@@ -60,7 +60,7 @@ struct MessageCellMenu: View {
             Button("Remove member") {
                 let url = URL(string: rootURL)?
                     .appendingPathComponent("channels")
-                    .appendingPathComponent(self.message.channel_id)
+                    .appendingPathComponent(self.message.channelID)
                     .appendingPathComponent("recipients")
                     .appendingPathComponent(message.author!.id)
                 DispatchQueue.global().async {
@@ -68,7 +68,7 @@ struct MessageCellMenu: View {
                         token: Globals.token,
                         type: .DELETE,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/@me/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/@me/\(self.message.channelID)"
                     ))
                 }
             }
@@ -86,7 +86,7 @@ struct MessageCellMenu: View {
                 bodyObject: ["communication_disabled_until": time],
                 type: .PATCH,
                 discordHeaders: true,
-                referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)",
+                referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)",
                 json: true
             ))
         }
@@ -100,7 +100,7 @@ struct MessageCellMenu: View {
             }
             Button("Copy message link") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("https://discord.com/channels/\(message.guild_id ?? guildID)/\(message.channel_id)/\(message.id)", forType: .string)
+                NSPasteboard.general.setString("https://discord.com/channels/\(message.guildID ?? guildID)/\(message.channelID)/\(message.id)", forType: .string)
             }
             Button("Copy user ID") {
                 guard let id = message.author?.id else { return }
@@ -143,7 +143,7 @@ struct MessageCellMenu: View {
                             bodyObject: ["delete_message_days": 1],
                             type: .PUT,
                             discordHeaders: true,
-                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                         ))
                     }
                 }
@@ -160,7 +160,7 @@ struct MessageCellMenu: View {
                             token: Globals.token,
                             type: .DELETE,
                             discordHeaders: true,
-                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                         ))
                     }
                 }

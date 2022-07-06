@@ -15,19 +15,19 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
 
     var author: User?
     var nick: String?
-    var channel_id: String
-    var guild_id: String?
+    var channelID: String
+    var guildID: String?
     var content: String
-    var edited_timestamp: Date?
+    var editedTimestamp: Date?
     var id: String
     var embeds: [Embed]?
-    var mention_everyone: Bool?
+    var mentionEveryone: Bool?
     var mentions: [User]
     var user_mentioned: Bool?
 
     var userMentioned: Bool { user_mentioned ?? false }
     var bottomInset: CGFloat {
-        (isSameAuthor && referenced_message == nil ? 0.5 : 13.0) - (userMentioned ? 3.0 : 0.0)
+        (isSameAuthor && referencedMessage == nil ? 0.5 : 13.0) - (userMentioned ? 3.0 : 0.0)
     }
 
     var pinned: Bool?
@@ -37,12 +37,25 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var inSameDay: Bool { self._inSameDay ?? true }
     var type: MessageType
     var attachments: [AttachedFiles]
-    var referenced_message: Reply?
+    var referencedMessage: Reply?
     // var message_reference: Reply? // in the mentions endpoint
-    let sticker_items: [StickerItem]?
+    let stickerItems: [StickerItem]?
     var reactions: [Reaction]?
     var interaction: Interaction?
 
+    enum CodingKeys: String, CodingKey {
+        case author, nick, content, id, embeds,
+             mentions, pinned, timestamp, processedTimestamp,
+             _inSameDay, type, attachments, reactions, interaction,
+            user_mentioned
+        case channelID = "channel_id"
+        case guildID = "guild_id"
+        case editedTimestamp = "edited_timestamp"
+        case mentionEveryone = "mention_everyone"
+        case referencedMessage = "referenced_message"
+        case stickerItems = "sticker_items"
+    }
+    
     var identifier: String {
         content + id
     }
@@ -57,14 +70,14 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
             token: Globals.token,
             type: .DELETE,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+            referer: "https://discord.com/channels/\(guildID ?? "@me")/\(channelID)",
             empty: true
         )
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(id)"), headers: headers)
     }
 
     func edit(now: String) {
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: Headers(
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(id)"), headers: Headers(
             token: Globals.token,
             bodyObject: ["content": now],
             type: .PATCH,

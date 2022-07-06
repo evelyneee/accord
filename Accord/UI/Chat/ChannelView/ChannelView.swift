@@ -43,11 +43,14 @@ struct ChannelView: View, Equatable {
     }
 
     @StateObject var viewModel: ChannelViewViewModel
-
-    var guildID: String
-    var channelID: String
-    var channelName: String
+    
+    var channelName: String {
+        channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
+    }
+    
     var guildName: String
+    
+    var channel: Channel
 
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
@@ -89,9 +92,7 @@ struct ChannelView: View, Equatable {
     // MARK: - init
 
     init(_ channel: Channel, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
-        guildID = channel.guild_id ?? "@me"
-        channelID = channel.id
-        channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
+        self.channel = channel
         self.guildName = guildName ?? "Direct Messages"
         if let model {
             self._viewModel = model
@@ -111,12 +112,12 @@ struct ChannelView: View, Equatable {
         MessageCellView(
             message: message,
             nick: viewModel.nicks[message.author?.id ?? ""],
-            replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
+            replyNick: viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
             pronouns: viewModel.pronouns[message.author?.id ?? ""],
             avatar: viewModel.avatars[message.author?.id ?? ""],
             permissions: $viewModel.permissions,
             role: $viewModel.roles[message.author?.id ?? ""],
-            replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
+            replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
             replyingTo: $replyingTo
         )
         .equatable()
@@ -236,14 +237,14 @@ struct ChannelView: View, Equatable {
                             viewModel?.cancellable.removeAll()
                             viewModel?.connect()
                             if viewModel?.guildID == "@me" {
-                                try? wss.subscribeToDM(self.channelID)
+                                try? wss.subscribeToDM(self.channel.id)
                             } else {
-                                try? wss.subscribe(to: self.guildID)
+                                try? wss.subscribe(to: self.channel.guild_id ?? "@me")
                             }
-                            viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID)
+                            viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
                         })
                         .onReceive(Self.scrollTo, perform: { channelID, id in
-                            guard channelID == self.channelID else { return }
+                            guard channelID == self.channel.id else { return }
                             if viewModel.messages.map(\.id).contains(id) {
                                 withAnimation(.easeInOut(duration: 0.5), {
                                     proxy.scrollTo(id, anchor: .center)
@@ -260,7 +261,7 @@ struct ChannelView: View, Equatable {
                         Button(action: { [weak viewModel] in
                             self.scrolledOutOfBounds = false
                             messageFetchQueue.async {
-                                viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID, scrollAfter: true)
+                                viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me", scrollAfter: true)
                             }
                         }) {
                             Image(systemName: "arrowtriangle.down.circle.fill")
@@ -288,7 +289,7 @@ struct ChannelView: View, Equatable {
                 await self.viewModel.setPermissions(self.appModel)
             }
         }
-        .channelProperties(channelID: self.channelID, guildID: self.guildID)
+        .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
         .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)".replacingOccurrences(of: "#", with: "")))
         .presentedWindowToolbarStyle(.unifiedCompact)
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
@@ -315,6 +316,25 @@ struct ChannelView: View, Equatable {
                 }
             }
             ToolbarItemGroup {
+                if let topic = self.channel.topic {
+                    Image(systemName: "info.circle.fill")
+                        .popupOnClick(buttonStyle: .bordered) {
+                            VStack(alignment: .leading) {
+                                Text("#" + self.channelName)
+                                    .fontWeight(.semibold)
+                                Text(topic)
+                                if let threads = self.channel.threads {
+                                    Section("Threads", content: {
+                                        ForEach(threads, id: \.id) { thread in
+                                            Text(thread.name ?? "")
+                                        }
+                                    })
+                                }
+
+                            }
+                            .padding(10)
+                        }
+                }
                 Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))

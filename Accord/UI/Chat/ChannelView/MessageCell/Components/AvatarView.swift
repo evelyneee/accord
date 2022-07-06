@@ -40,23 +40,24 @@ struct AvatarView: View {
     }
 
     @ViewBuilder
-    var body: some View {
-        if animated, gifPfp {
-            Button(action: {
-                popup = true
-            }) {
-                GifView(imageURL).drawingGroup()
-            }.popover(isPresented: $popup, content: {
-                PopoverProfileView(user: author)
-            }).buttonStyle(.borderless)
+    private var image: some View {
+        if animated && gifPfp {
+            GifView(imageURL).drawingGroup()
         } else {
-            Button(action: {
-                popup = true
-            }) {
-                Attachment(imageURL).drawingGroup()
-            }.popover(isPresented: $popup, content: {
-                PopoverProfileView(user: author)
-            }).buttonStyle(.borderless)
+            Attachment(imageURL).equatable()
         }
+    }
+    
+    @ViewBuilder
+    var body: some View {
+        Button(action: {
+            popup.toggle()
+        }) {
+            image
+        }
+        .popover(isPresented: $popup, content: {
+            PopoverProfileView(user: author)
+        })
+        .buttonStyle(.borderless)
     }
 }

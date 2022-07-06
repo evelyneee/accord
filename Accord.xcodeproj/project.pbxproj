@@ -16,6 +16,8 @@
 		370AF4122834504C0055AA1D /* JoinServerSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370AF4112834504C0055AA1D /* JoinServerSheetView.swift */; };
 		373EE5BA2838FF410077B7A4 /* SetNicknameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373EE5B92838FF410077B7A4 /* SetNicknameView.swift */; };
 		37B9DE0B2840EA44003C15DA /* Highlighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B9DE0A2840EA44003C15DA /* Highlighting.swift */; };
+		9E0E615E286E23CB0058BA87 /* Popup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0E615D286E23CB0058BA87 /* Popup.swift */; };
+		9E0E61602875665D0058BA87 /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0E615F2875665D0058BA87 /* Folder.swift */; };
 		9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E13BEE328078F5D001DF4F2 /* ZStream.swift */; };
 		9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98762780CD1A008C6AFD /* AccordAlert.swift */; };
 		9E2C98792780F573008C6AFD /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2C98782780F573008C6AFD /* Gateway.swift */; };
@@ -164,6 +166,8 @@
 		49F29FAE26A0A52900C1205A /* Accord */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Accord; path = Accord.app/Contents/MacOS/Accord; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E0088CD279366FD00F36D6B /* NativeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRPC.swift; sourceTree = "<group>"; };
 		9E0088CF27937F5300F36D6B /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
+		9E0E615D286E23CB0058BA87 /* Popup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popup.swift; sourceTree = "<group>"; };
+		9E0E615F2875665D0058BA87 /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
 		9E13BEE328078F5D001DF4F2 /* ZStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZStream.swift; sourceTree = "<group>"; };
 		9E2C98762780CD1A008C6AFD /* AccordAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordAlert.swift; sourceTree = "<group>"; };
 		9E2C98782780F573008C6AFD /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
@@ -388,6 +392,8 @@
 			isa = PBXGroup;
 			children = (
 				9EC5FA1E2845BBCA00C2A416 /* GridStack.swift */,
+				9E0E615D286E23CB0058BA87 /* Popup.swift */,
+				9E0E615F2875665D0058BA87 /* Folder.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -926,6 +932,7 @@
 				A80FEC2B2724FD35005F9950 /* ImageProcessing.swift in Sources */,
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
+				9E0E61602875665D0058BA87 /* Folder.swift in Sources */,
 				9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */,
 				9EC5FA312846BE8300C2A416 /* StickerView.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
@@ -960,6 +967,7 @@
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				9EC5FA252846B7ED00C2A416 /* MessageCellMenu.swift in Sources */,
 				A82A062026D98193007B9B27 /* Settings.swift in Sources */,
+				9E0E615E286E23CB0058BA87 /* Popup.swift in Sources */,
 				9EC5FA2F2846BE2000C2A416 /* WelcomeMessageView.swift in Sources */,
 				9EC5FA272846B9D700C2A416 /* ReactionsGrid.swift in Sources */,
 				9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */,

@@ -29,13 +29,13 @@ struct GuildHoverAnimation: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .frame(width: frame, height: frame)
+            .background(!hasIcon && hovered ? color : Color.clear)
             .onHover(perform: { res in
                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                     hovered = res
                 }
             })
-            .frame(width: frame, height: frame)
-            .background(!hasIcon && hovered ? color : Color.clear)
             .cornerRadius(hovered || selected ? 15 : frame / 2)
     }
 }

@@ -51,11 +51,9 @@ struct GridStack<T: Identifiable & Hashable, Content: View>: View {
             .id(UUID())
         } else if let columns = columns {
             let chunked = self.array.chunked(by: columns)
-            let _ = print(chunked)
             VStack(alignment: self.verticalAlignment) {
                 ForEach(0 ..< (chunked.count), id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
-                        let _ = print(row)
                         ForEach(chunked[row], id: \.self) { item in
                             content(item)
                                 .id(item.id)

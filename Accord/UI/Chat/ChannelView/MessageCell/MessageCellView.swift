@@ -56,7 +56,7 @@ struct MessageCellView: View, Equatable {
 
     var body: some View {
         VStack(alignment: .leading) {
-            if let reply = message.referenced_message {
+            if let reply = message.referencedMessage {
                 ReplyView (
                     reply: reply,
                     replyNick: replyNick,
@@ -100,7 +100,7 @@ struct MessageCellView: View, Equatable {
                 }
             default:
                 HStack(alignment: .top) {
-                    if let author = message.author, !(message.isSameAuthor && message.referenced_message == nil && message.inSameDay) {
+                    if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
                         AvatarView (
                             author: author,
                             avatar: self.avatar
@@ -114,7 +114,7 @@ struct MessageCellView: View, Equatable {
                         .fixedSize()
                     }
                     VStack(alignment: .leading) {
-                        if message.isSameAuthor && message.referenced_message == nil && message.inSameDay {
+                        if message.isSameAuthor && message.referencedMessage == nil && message.inSameDay {
                             if !message.content.isEmpty {
                                 if self.editing {
                                     editingTextField
@@ -150,7 +150,7 @@ struct MessageCellView: View, Equatable {
                     Spacer()
                 }
             }
-            if let stickerItems = message.sticker_items,
+            if let stickerItems = message.stickerItems,
                stickerItems.isEmpty == false
             {
                 StickerView(

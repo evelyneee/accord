@@ -65,19 +65,19 @@ extension ServerListView: MentionSenderDelegate {
 
     func newMessage(in channelID: String, message: Message) {
         let messageID = message.id
-        let isDM = message.guild_id == nil
-        let guildID = message.guild_id ?? "@me"
+        let isDM = message.guildID == nil
+        let guildID = message.guildID ?? "@me"
         newMessageProcessThread.async {
             let ids = message.mentions.map(\.id)
             if ids.contains(user_id) || (appModel.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                let matchingGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: message.guild_id ?? ""]
-                let matchingChannel = matchingGuild?.channels[keyed: message.channel_id] ?? appModel.privateChannels[keyed: message.channel_id]
+                let matchingGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
+                let matchingChannel = matchingGuild?.channels[keyed: message.channelID] ?? appModel.privateChannels[keyed: message.channelID]
                 showNotification(
                     title: message.author?.username ?? "Unknown User",
                     subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
                     description: message.content,
                     pfpURL: pfpURL(message.author?.id, message.author?.avatar, "128"),
-                    id: message.channel_id
+                    id: message.channelID
                 )
                 self.addMention(guild: guildID, channel: channelID)
             }

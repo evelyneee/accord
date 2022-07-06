@@ -225,15 +225,15 @@ final class ChatControlsViewModel: ObservableObject {
                 system?.avatar = nil
                 let message = Message(
                     author: system,
-                    channel_id: channelID,
-                    guild_id: guildID,
+                    channelID: channelID,
+                    guildID: guildID,
                     content: help,
                     id: generateFakeNonce(),
                     mentions: [],
                     timestamp: .init(),
                     type: .default,
                     attachments: .init(),
-                    sticker_items: .init()
+                    stickerItems: .init()
                 )
                 let gatewayMessage = GatewayEventCodable(d: message)
                 let encoder = JSONEncoder()
@@ -297,12 +297,12 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channelID)/messages"), headers: Headers(
             token: Globals.token,
-            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channelID, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channel_id)",
+            referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channelID)",
             empty: true,
             json: true
         ))

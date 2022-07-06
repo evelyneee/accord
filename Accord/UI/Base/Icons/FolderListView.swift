@@ -123,6 +123,11 @@ struct ServerIconCell: View {
         .onReceive(self.appModel.objectWillChange, perform: { _ in
             self.mentionCount = pingCount(guild: guild)
         })
+        .onAppear {
+            if self.mentionCount == nil {
+                self.mentionCount = pingCount(guild: guild)
+            }
+        }
         .buttonStyle(BorderlessButtonStyle())
         .redBadge($mentionCount)
     }

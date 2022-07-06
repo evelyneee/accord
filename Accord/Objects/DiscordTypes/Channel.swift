@@ -20,36 +20,6 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     let position: Int?
     // TODO: Overwrite objects
     var permission_overwrites: [PermissionOverwrites]?
-
-    struct PermissionOverwrites: Decodable {
-        var allow: Permissions
-        var deny: Permissions
-        var id: String
-        var type: Int
-    }
-
-    func hasPermission(_ perms: Permissions) -> Bool {
-        var allowed = true
-        for overwrite in permission_overwrites ?? [] {
-            if overwrite.id == user_id ||
-                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false,
-                overwrite.allow.contains(perms)
-            {
-                return true
-            }
-            if overwrite.id == user_id ||
-                // for the role permissions
-                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
-                // for the everyone permissions
-                overwrite.id == guild_id,
-                overwrite.deny.contains(perms)
-            {
-                allowed = false
-            }
-        }
-        return allowed
-    }
-
     var name: String?
     var topic: String?
     var nsfw: Bool?
@@ -84,6 +54,35 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(read_state)
+    }
+    
+    struct PermissionOverwrites: Decodable {
+        var allow: Permissions
+        var deny: Permissions
+        var id: String
+        var type: Int
+    }
+
+    func hasPermission(_ perms: Permissions) -> Bool {
+        var allowed = true
+        for overwrite in permission_overwrites ?? [] {
+            if overwrite.id == user_id ||
+                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false,
+                overwrite.allow.contains(perms)
+            {
+                return true
+            }
+            if overwrite.id == user_id ||
+                // for the role permissions
+                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
+                // for the everyone permissions
+                overwrite.id == guild_id,
+                overwrite.deny.contains(perms)
+            {
+                allowed = false
+            }
+        }
+        return allowed
     }
 }
 

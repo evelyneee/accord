@@ -33,7 +33,7 @@ struct AuthorTextView: View {
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+                Text(message.editedTimestamp != nil ? " (edited at \(message.editedTimestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
