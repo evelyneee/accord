@@ -47,8 +47,8 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var shown: Bool?
     var message_count: Int?
 
-    var computedName: String {
-        name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
+    @MainActor var computedName: String {
+        name ?? recipients?.map(\.computedUsername).joined(separator: ", ") ?? "Unknown Channel"
     }
 
     func hash(into hasher: inout Hasher) {

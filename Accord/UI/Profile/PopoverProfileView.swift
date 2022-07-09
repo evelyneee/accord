@@ -170,6 +170,7 @@ struct PopoverProfileView: View {
                 if let banner = fullUser?.banner, let id = user?.id {
                     Attachment(cdnURL + "/banners/\(id)/\(banner).png?size=320")
                         .equatable()
+                        .scaledToFit()
                         .frame(width: 290)
                 } else {
                     Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)

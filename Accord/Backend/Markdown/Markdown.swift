@@ -159,7 +159,7 @@ public final class Markdown {
                     
                     for id in channels {
                         let channel = Array(channelNameStorage)[keyed: id]
-                        return promise(.success(Text("#\(channel?.computedName ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
+                        return promise(.success(Text("#\(await channel?.computedName ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
                     }
                 }
             }

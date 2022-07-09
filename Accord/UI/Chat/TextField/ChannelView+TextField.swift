@@ -8,6 +8,21 @@
 import Foundation
 import SwiftUI
 
+struct SquishyButtonTextStyle: ButtonStyle {
+    @State var hover = false
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(2)
+            .padding(.horizontal, 3)
+            .background(self.hover ? Color.secondary.opacity((configuration.isPressed ? 0.5 : 0.25)) : nil)
+            .cornerRadius(5)
+            .foregroundColor(configuration.isPressed ? .secondary : .white)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.linear(duration: 0.05), value: configuration.isPressed)
+            .onHover(perform: { h in withAnimation(.linear(duration: 0.1)) { self.hover = h } })
+    }
+}
+
 extension ChannelView {
     var blurredTextField: some View {
         VStack(alignment: .leading, spacing: 0) { [unowned viewModel] in
@@ -44,6 +59,52 @@ extension ChannelView {
                 .padding(.vertical, 4)
                 .padding(.horizontal, 10)
                 Divider()
+            } else if let error = viewModel.error {
+                HStack {
+                    Group {
+                        Text("Error loading: ").bold()
+                        +
+                        Text(String(error.code)).bold()
+                        +
+                        Text(" " + (error.message ?? "Unknown error")).bold()
+                    }
+                    .lineLimit(0)
+                    .font(.subheadline)
+                    Spacer()
+                    Button(action: { [weak viewModel] in
+                        if error.code == 502 || error.code == -1009 {
+                            concurrentQueue.async {
+                                wss?.reset()
+                            }
+                        } else {
+                            self.viewModel.error = nil
+                            viewModel?.cancellable.forEach { $0.cancel() }
+                            viewModel?.cancellable.removeAll()
+                            viewModel?.connect()
+                            if viewModel?.guildID == "@me" {
+                                try? wss.subscribeToDM(self.channel.id)
+                            } else {
+                                try? wss.subscribe(to: self.channel.guild_id ?? "@me")
+                            }
+                            viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
+                        }
+                    }) {
+                        if error.code == 502 || error.code == -1009 {
+                            Text("Reconnect")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        } else {
+                            Text("Try again")
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .buttonStyle(SquishyButtonTextStyle())
+                }
+                .foregroundColor(.white)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 10)
+                .background(Color.red)
             }
             ChatControls(
                 guildID: viewModel.guildID,

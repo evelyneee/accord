@@ -55,7 +55,7 @@ final class Gateway {
             return
         }
 
-        if message.contains("Not authenticated") || message.contains("Authentication failed") {
+        if message.contains("not authenticated") || message.contains("authentication failed") {
             logOut()
         }
     }

@@ -20,6 +20,12 @@ struct NavigationLazyView<Content: View>: View {
     }
 }
 
+extension Reachability {
+    var connected: Bool {
+        connection == .wifi || connection == .cellular
+    }
+}
+
 struct GuildHoverAnimation: ViewModifier {
     var color: Color = Color.accentColor.opacity(0.5)
     var hasIcon: Bool
@@ -79,9 +85,13 @@ struct ServerListView: View {
     @State var popup: Bool = false
 
     var onlineButton: some View {
-        Button("Offline") {
+        Button(action: {
             AccordApp.error(text: "Offline", additionalDescription: "Check your network connection")
-        }
+        }, label: {
+            Image(systemName: "exclamationmark.circle.fill")
+                .font(.title)
+        })
+        .buttonStyle(.borderless)
     }
     
     var performInView = PassthroughSubject<() -> Void, Never>()
@@ -127,19 +137,21 @@ struct ServerListView: View {
                 }
             }
         }
-        .buttonStyle(BorderlessButtonStyle())
+        .buttonStyle(.borderless)
     }
 
     var body: some View {
-        let _ = Self._printChanges()
         NavigationView {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
                     
                     LazyVStack {
-                        if !NetworkCore.shared.connected {
+                        if reachability?.connected == false {
                             onlineButton.buttonStyle(BorderlessButtonStyle())
+                            Color.gray
+                                .frame(width: 30, height: 1)
+                                .opacity(0.75)
                         }
                         DMButton(
                             selection: self.$selection,

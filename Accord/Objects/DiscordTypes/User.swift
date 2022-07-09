@@ -15,6 +15,9 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     var id: String
     var username: String
+    @MainActor var computedUsername: String {
+        Storage.users[self.id]?.relationship?.nickname ?? self.username
+    }
     var discriminator: String
     var avatar: String?
     var bot: Bool?
@@ -31,6 +34,7 @@ final class User: Codable, Equatable, Identifiable, Hashable {
     var roleColor: String?
     var banner: String?
     var banner_color: String?
+    var relationship: Relationship?
 
     func isMe() -> Bool { user_id == id }
 

@@ -17,8 +17,6 @@ struct ChatControls: View {
 //
 //    @FocusState private var focusedField: FocusedElements?
 
-    @State var chatTextFieldContents: String = ""
-    @State var pfps: [String: NSImage] = [:]
     var guildID: String
     var channelID: String
     var chatText: String
@@ -30,10 +28,8 @@ struct ChatControls: View {
     @State var fileImport: Bool = false
     @Binding var fileUploads: [(Data?, URL?)]
     @State var dragOver: Bool = false
-    @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: Globals.plugins.count)
     @StateObject var viewModel = ChatControlsViewModel()
     @State var typing: Bool = false
-    weak var textField: NSTextField?
     @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
 
     var textFieldText: String {

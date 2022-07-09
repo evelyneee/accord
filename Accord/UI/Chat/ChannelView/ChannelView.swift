@@ -100,7 +100,7 @@ struct ChannelView: View, Equatable {
             _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
         }
         viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
-        if wss.connection?.state == .cancelled {
+        if wss?.connection?.state == .cancelled {
             concurrentQueue.async {
                 wss?.reset()
             }
@@ -140,6 +140,10 @@ struct ChannelView: View, Equatable {
                 }
             }
         }
+        .environment(\.openURL, OpenURLAction { url in
+            print(url)
+            return .handled
+        })
     }
     
     var messagesView: some View {

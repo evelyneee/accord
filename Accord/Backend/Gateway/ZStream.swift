@@ -47,9 +47,9 @@ final class ZStream {
             // and we store the output in a mutable data object
             var outputData = Data()
 
-            defer {
-                free(dstBufferPtr)
-            }
+//            defer {
+//                free(dstBufferPtr)
+//            }
 
             // loop labels :D
             mainLoop: repeat {

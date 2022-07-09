@@ -5,10 +5,9 @@
 //  Created by evelyn on 2021-10-22.
 //
 
-import AppKit
 import Combine
-import Foundation
 import SwiftUI
+import Network
 
 final class ChannelViewViewModel: ObservableObject, Equatable {
     @MainActor static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
@@ -50,6 +49,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @Environment(\.user)
     var user: User
 
+    @Published var error: DiscordError? = nil
+    
     var guildID: String
     var channelID: String
 
@@ -67,7 +68,15 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         self.channel = channel
         channelID = channel.id
         guildID = channel.guild_id ?? "@me"
-        guard wss != nil else { return }
+        guard wss?.connection?.state == .ready else {
+            print("No active websocket connection")
+            if reachability?.connected == true {
+                self.error = .init(code: 502, message: "Bad Gateway connection")
+            } else {
+                self.error = .init(code: -1009, message: "The network connection appears to be offline")
+            }
+            return
+        }
         connect()
         loadChannel(channel)
     }
@@ -167,7 +176,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     }
                     guard let author = message.author else { return }
                     await MainActor.run {
-                        Storage.users[author.id] = author
+                        if Storage.users[author.id] == nil {
+                            Storage.users[author.id] = author
+                        }
                     }
                     withAnimation(Animation.easeInOut(duration: 0.05)) {
                         let message = message
@@ -360,7 +371,23 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             case .finished: break
             case let .failure(error):
                 print(error)
-                MentionSender.shared.deselect()
+                if let error = error as? Request.FetchErrors {
+                    switch error {
+                    case .invalidRequest: break
+                    case .invalidForm: break
+                    case .badResponse(let response):
+                        if let response = response as? HTTPURLResponse {
+                            self.error = .init(code: response.statusCode, message: "HTTP request failed")
+                        }
+                    case .notRequired: break
+                    case .decodingError(_, _): break
+                    case .noData: break
+                    case .discordError(code: let code, message: let message):
+                        self.error = .init(code: code ?? 0, message: message)
+                    }
+                } else if let error = error as? URLError {
+                    self.error = .init(code: error.code.rawValue, message: error.localizedDescription)
+                }
             }
         }) { [weak self] messages in
             guard let self = self else { return }
@@ -392,7 +419,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         await self.messages.forEach { message in
             guard let author = message.author else { return }
             DispatchQueue.main.async {
-                Storage.users[author.id] = author
+                if Storage.users[author.id] == nil {
+                    Storage.users[author.id] = author
+                }
             }
         }
     }

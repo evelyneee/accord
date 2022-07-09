@@ -13,7 +13,7 @@ struct ServerListViewCell: View {
     var guildID: String { channel.guild_id ?? "@me" }
     @State var status: String? = nil
 
-    private var dmLabelView: some View {
+    @MainActor private var dmLabelView: some View {
         HStack {
             ZStack(alignment: .bottomTrailing) {
                 Attachment(pfpURL(
@@ -39,7 +39,7 @@ struct ServerListViewCell: View {
         }
     }
 
-    @ViewBuilder
+    @MainActor @ViewBuilder
     private var labelView: some View {
         switch channel.type {
         case .normal:

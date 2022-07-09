@@ -8,6 +8,11 @@
 import Foundation
 import Combine
 
+enum GenericErrors: Error {
+    case noConnection
+    case badGateway
+}
+
 enum Storage {
     
     public static var emotes = [String: [DiscordEmote]]()

@@ -54,7 +54,7 @@ struct ContentView: View {
                             guard wss == nil else {
                                 throw LoadErrors.alreadyLoaded
                             }
-                            guard NetworkCore.shared.connected else {
+                            guard reachability?.connected == true else {
                                 throw LoadErrors.offline
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {

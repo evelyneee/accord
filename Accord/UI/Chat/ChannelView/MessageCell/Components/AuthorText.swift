@@ -12,6 +12,23 @@ struct AuthorTextView: View {
     var message: Message
     var pronouns: String?
     var nick: String?
+    
+    @Environment(\.guildID)
+    var guildID: String
+    
+    @MainActor
+    var nickname: String? {
+        if self.guildID == "@me" {
+            return _nickname
+        }
+        return nil
+    }
+    
+    @MainActor
+    var _nickname: String? {
+        Storage.users[self.message.author?.id ?? ""]?.relationship?.nickname
+    }
+    
     @Binding var role: String?
     
     @EnvironmentObject
@@ -19,7 +36,7 @@ struct AuthorTextView: View {
     
     var body: some View {
         HStack(spacing: 1) {
-            Text(nick ?? message.author?.username ?? "Unknown User")
+            Text(self.nickname ?? nick ?? _nickname ?? message.author?.username ?? "Unknown User")
                 .foregroundColor({ () -> Color in
                     if let role = role, let color = Storage.roleColors[role]?.0, !message.isSameAuthor {
                         return Color(int: color)

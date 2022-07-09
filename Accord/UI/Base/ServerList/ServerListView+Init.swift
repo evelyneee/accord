@@ -24,21 +24,30 @@ extension ServerListView {
             return
         }
         
+        let relationshipKeys = readyPacket.relationships.generateKeyMap()
+        
+        readyPacket.users.forEach {
+            if let idx = relationshipKeys[$0.id] {
+                $0.relationship = readyPacket.relationships[idx]
+            }
+        }
+        
+        print(readyPacket.users.compactMap(\.relationship).compactMap(\.nickname))
+        
         Storage.users = readyPacket.users
-            .map { [$0.id: $0] }
-            .flatMap { $0 }
+            .flatMap { [$0.id: $0] }
             .reduce([String: User]()) { dict, tuple in
                 var nextDict = dict
                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                 return nextDict
             }
         
-        let keys = readyPacket.users.generateKeyMap()
+        let keys = Storage.users.values.generateKeyMap()
         appModel.privateChannels = readyPacket.private_channels.map { c -> Channel in
             var c = c
             if c.recipients?.isEmpty != false {
                 c.recipients = c.recipient_ids?
-                    .compactMap { readyPacket.users[keyed: $0, keys] }
+                    .compactMap { Array(Storage.users.values)[keyed: $0, keys] }
             }
             return c
         }

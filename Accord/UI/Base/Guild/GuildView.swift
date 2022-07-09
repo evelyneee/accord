@@ -209,7 +209,7 @@ private struct SizePreferenceKey: PreferenceKey {
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }
 
-func showPanel(_ channel: Channel) {
+@MainActor func showPanel(_ channel: Channel) {
     let panel2 = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 600), styleMask: [.titled, .nonactivatingPanel, .closable], backing: .buffered, defer: true)
     panel2.title = channel.computedName
     panel2.level = .init(Int(CGWindowLevelForKey(CGWindowLevelKey.floatingWindow)))
