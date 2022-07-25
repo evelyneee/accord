@@ -10,18 +10,25 @@ import Foundation
 import SwiftUI
 
 final class AsyncMarkdownModel: ObservableObject {
+    
+    @MainActor
     init(text: String) {
         markdown = Text(text)
     }
 
-    @Published var markdown: Text
-    @Published var loaded: Bool = false
-
+    @MainActor @Published
+    var markdown: Text
+    
+    @MainActor @Published
+    var loaded: Bool = false
+    
+    @MainActor @Published
     var hasEmojiOnly: Bool = false
 
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
 
+    @_optimize(speed)
     func make(text: String, usernames: [String:String]) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
@@ -65,9 +72,10 @@ struct AsyncMarkdown: View, Equatable {
     @EnvironmentObject
     var appModel: AppGlobals
 
+    @MainActor
     init(_ text: String, binded: Binding<String>? = nil) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
-        _text = binded ?? Binding.constant(text)
+        _text = binded ?? .constant(text)
     }
 
     @ViewBuilder
@@ -75,7 +83,7 @@ struct AsyncMarkdown: View, Equatable {
         if !model.hasEmojiOnly || model.loaded {
             model.markdown
                 .textSelection(.enabled)
-                .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
                 .fixedSize(horizontal: false, vertical: true)
                 .onChange(of: self.text, perform: { [weak model] text in
                     model?.make(text: text, usernames: Storage.usernames)
@@ -83,8 +91,6 @@ struct AsyncMarkdown: View, Equatable {
                 .onAppear { [weak model] in
                     model?.make(text: text, usernames: Storage.usernames)
                 }
-        } else {
-            EmptyView()
         }
     }
 }

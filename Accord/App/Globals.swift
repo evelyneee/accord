@@ -32,7 +32,6 @@ enum Storage {
     }
     
     public static var globals: AppGlobals? = nil
-    
 }
 
 @MainActor
@@ -58,7 +57,7 @@ final class AppGlobals: ObservableObject {
     var cancellable: AnyCancellable?
     
     @MainActor @Published
-    public var folders = [GuildFolder]()
+    public var folders = ContiguousArray<GuildFolder>()
     
     @MainActor @Published
     public var privateChannels = [Channel]()

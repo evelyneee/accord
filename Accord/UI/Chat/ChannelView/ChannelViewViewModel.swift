@@ -71,7 +71,14 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         guard wss?.connection?.state == .ready else {
             print("No active websocket connection")
             if reachability?.connected == true {
-                self.error = .init(code: 502, message: "Bad Gateway connection")
+                Task.detached {
+                    self.error = .init(code: 502, message: "Bad Gateway connection")
+                    let res = await wss.reset()
+                    if (res) {
+                        self.connect()
+                        self.loadChannel(channel)
+                    }
+                }
             } else {
                 self.error = .init(code: -1009, message: "The network connection appears to be offline")
             }
@@ -94,13 +101,13 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     func loadChannel(_ channel: Channel) {
         messageFetchQueue.async { [weak self] in
             guard let self = self else { return }
+            self.getMessages(channelID: self.channelID, guildID: self.guildID)
             if self.guildID == "@me" {
                 try? wss.subscribeToDM(self.channelID)
             } else {
                 try? wss.subscribe(to: self.guildID)
             }
             self.loadPermissions(channel)
-            self.getMessages(channelID: self.channelID, guildID: self.guildID)
             MentionSender.shared.removeMentions(server: self.guildID)
         }
     }
@@ -260,15 +267,15 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         memberDecodable.member?.user.username ??
                         "Unknown User"
 
-                    DispatchQueue.main.async {
+                    await MainActor.run {
                         if self.typing.contains(isKnownAs) == false {
                             self.typing.append(isKnownAs)
                         }
                     }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
-                        guard self?.typing.isEmpty == false else { return }
-                        self?.typing.removeLast()
+                    try await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000))
+                    await MainActor.run {
+                        guard !self.typing.isEmpty else { return }
+                        self.typing.removeLast()
                     }
                 }
             }
@@ -344,7 +351,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             json: true
         ))
     }
-
+    
+    @_optimize(speed)
     func getMessages(channelID: String, guildID: String, scrollAfter: Bool = false) {
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
             token: Globals.token,
@@ -483,11 +491,11 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 let member = try self.loadCachedUser(id)
                 toRemove.append(id)
                 memberLoad(member)
-            } catch { print(error) }
+            } catch { dprint(error) }
         }
         allUserIDs = allUserIDs.filter { !toRemove.contains($0) }
         if !(allUserIDs.isEmpty) {
-            print(allUserIDs, "websocket request")
+            dprint(allUserIDs, "websocket request")
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
         }
     }

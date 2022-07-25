@@ -43,7 +43,7 @@ struct GuildView: View {
                         .foregroundColor(Color.secondary)
                         .font(.system(size: 10))
                 } else {
-                    NavigationLink(
+                    NavigationLink (
                         tag: Int(channel.id) ?? 0,
                         selection: self.$selection,
                         destination: {

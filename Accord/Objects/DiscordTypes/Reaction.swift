@@ -8,6 +8,12 @@
 import Foundation
 
 final class Reaction: Identifiable, Hashable, Codable {
+    internal init(count: Int, me: Bool, emoji: ReactionEmote) {
+        self.count = count
+        self.me = me
+        self.emoji = emoji
+    }
+    
     static func == (lhs: Reaction, rhs: Reaction) -> Bool {
         return lhs.id == rhs.id && lhs.me == rhs.me && lhs.count == rhs.count
     }
@@ -26,6 +32,12 @@ final class Reaction: Identifiable, Hashable, Codable {
 }
 
 final class ReactionEmote: Codable {
+    internal init(id: String? = nil, name: String? = nil, animated: Bool? = nil) {
+        self.id = id
+        self.name = name
+        self.animated = animated
+    }
+    
     var id: String?
     var name: String?
     var animated: Bool?

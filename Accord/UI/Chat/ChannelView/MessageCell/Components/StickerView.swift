@@ -21,6 +21,7 @@ struct StickerView: View {
             } else {
                 Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=160")
                     .equatable()
+                    .scaledToFit()
                     .frame(width: 160, height: 160)
                     .cornerRadius(3)
                     .padding(.leading, leftPadding)

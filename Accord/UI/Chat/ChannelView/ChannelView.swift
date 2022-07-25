@@ -107,7 +107,7 @@ struct ChannelView: View, Equatable {
         }
     }
 
-    @inline(__always)
+    @_transparent
     func cell(for message: Message) -> some View {
         MessageCellView(
             message: message,
@@ -140,10 +140,6 @@ struct ChannelView: View, Equatable {
                 }
             }
         }
-        .environment(\.openURL, OpenURLAction { url in
-            print(url)
-            return .handled
-        })
     }
     
     var messagesView: some View {
@@ -213,15 +209,14 @@ struct ChannelView: View, Equatable {
     
     
     var body: some View {
-        HStack(content: {
+        HStack {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     ScrollViewReader { proxy in
                         List {
                             Spacer().frame(height: 15)
                             if metalRenderer {
-                                messagesView
-                                    .drawingGroup()
+                                messagesView.drawingGroup()
                             } else {
                                 messagesView
                             }
@@ -236,17 +231,6 @@ struct ChannelView: View, Equatable {
                         .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
                         .rotationEffect(.radians(.pi))
                         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                        .onReceive(NotificationCenter.default.publisher(for: NSWorkspace.didWakeNotification), perform: { [weak viewModel] _ in
-                            viewModel?.cancellable.forEach { $0.cancel() }
-                            viewModel?.cancellable.removeAll()
-                            viewModel?.connect()
-                            if viewModel?.guildID == "@me" {
-                                try? wss.subscribeToDM(self.channel.id)
-                            } else {
-                                try? wss.subscribe(to: self.channel.guild_id ?? "@me")
-                            }
-                            viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
-                        })
                         .onReceive(Self.scrollTo, perform: { channelID, id in
                             guard channelID == self.channel.id else { return }
                             if viewModel.messages.map(\.id).contains(id) {
@@ -287,8 +271,9 @@ struct ChannelView: View, Equatable {
                         }
                     }
             }
-        })
+        }
         .onAppear {
+            print(type(of: self.body))
             Task.detached {
                 await self.viewModel.setPermissions(self.appModel)
             }

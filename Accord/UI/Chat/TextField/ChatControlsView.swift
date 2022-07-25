@@ -17,20 +17,34 @@ struct ChatControls: View {
 //
 //    @FocusState private var focusedField: FocusedElements?
 
+    @StateObject var viewModel = ChatControlsViewModel()
+    
     var guildID: String
     var channelID: String
     var chatText: String
-    @Binding var replyingTo: Message?
-    @Binding var mentionUser: Bool
     var permissions: Permissions
+    
+    @MainActor @Binding
+    var replyingTo: Message?
+    
+    @MainActor @Binding
+    var mentionUser: Bool
+    
+    @MainActor @Binding
+    var fileUploads: [(Data?, URL?)]
+    
     @State var nitroless = false
     @State var emotes = false
-    @State var fileImport: Bool = false
-    @Binding var fileUploads: [(Data?, URL?)]
     @State var dragOver: Bool = false
-    @StateObject var viewModel = ChatControlsViewModel()
-    @State var typing: Bool = false
-    @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
+    
+    @MainActor @State
+    var fileImport: Bool = false
+    
+    @MainActor @State
+    var typing: Bool = false
+    
+    @AppStorage("Nitroless")
+    var nitrolessEnabled: Bool = false
 
     var textFieldText: String {
         permissions.contains(.sendMessages) ?
@@ -75,48 +89,6 @@ struct ChatControls: View {
 //        }
 //    }
     
-    var mediaView: some View {
-        HStack {
-            ForEach(Array(zip(self.fileUploads.indices, self.fileUploads)), id: \.1.1) { offset, item in
-                let data = item.0
-                let url = item.1
-                VStack(alignment: .leading, content: {
-                    ZStack(alignment: .topTrailing) {
-                        if let data = data, let nsImage = NSImage(data: data) {
-                            Image(nsImage: nsImage)
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(5)
-                                .frame(height: 130)
-                            
-                        } else {
-                            ZStack(alignment: .center) {
-                                Image(systemName: "doc")
-                                    .font(.largeTitle)
-                                    .foregroundColor(Color.primary.opacity(0.4))
-                            }
-                            .frame(width: 130, height: 130)
-                            .background(Color.black.opacity(0.2))
-                            .cornerRadius(5)
-                        }
-                        
-                        Image(systemName: "xmark.circle.fill")
-                            .resizable()
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.black, Color.white.opacity(0.5))
-                            .frame(width: 22, height: 22)
-                            .onTapGesture {
-                                self.fileUploads.remove(at: offset)
-                            }
-                            .padding(4)
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Text(url?.lastPathComponent ?? "")
-                })
-            }
-        }
-    }
-
     var matchedUsersView: some View {
         VStack {
             MatchesView(
@@ -348,7 +320,7 @@ struct ChatControls: View {
                     }
                     if !fileUploads.isEmpty {
                         ScrollView(.horizontal, showsIndicators: true) {
-                            mediaView
+                            FileUploadsView(fileUploads: self.$fileUploads)
                         }
                         Divider().padding(.bottom, 7)
                     }

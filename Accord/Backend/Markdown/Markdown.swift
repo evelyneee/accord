@@ -87,6 +87,7 @@ public final class Markdown {
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
+    @_optimize(speed)
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool) -> TextPublisher {
         if !(word.contains("*") || word.contains("~") || word.contains("/") || word.contains("_") || word.contains(">") || word.contains("<") || word.contains("`")) {
             if highlight {
@@ -152,7 +153,6 @@ public final class Markdown {
                         Text(" ")
                 ))
             }
-            
             if !channels.isEmpty {
                 Task {
                     guard let channelNameStorage = await Storage.globals?.folders.map(\.guilds).joined().map(\.channels).joined() else { return }
@@ -187,6 +187,7 @@ public final class Markdown {
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
+    @_optimize(speed)
     public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
         let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
@@ -202,13 +203,14 @@ public final class Markdown {
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
+    @_optimize(speed)
     public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
 
         let codeBlockMarkerRawOffsets = newlines
             .lazy
             .enumerated()
-            .filter { $0.element.prefix(3) == "```" }
+            .filter { $0.element.prefix(3) == "```" || $0.element.suffix(3) == "```" }
             .map(\.offset)
 
         let indexes = codeBlockMarkerRawOffsets

@@ -8,6 +8,24 @@
 import Foundation
 import SwiftUI
 
+struct FolderListHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+
+    typealias Value = CGFloat
+}
+
+struct InsetGetter: View {
+    var body: some View {
+        GeometryReader { geometry in
+            return Rectangle().fill(Color.clear).preference(key: FolderListHeightPreferenceKey.self, value: geometry.size.height)
+        }
+    }
+}
+
 extension ServerListView {
     struct FolderListView: View {
         @Binding var selectedServer: String?
@@ -18,7 +36,7 @@ extension ServerListView {
         
         @EnvironmentObject
         var appModel: AppGlobals
-
+        
         func color(_ folder: GuildFolder) -> Color {
             if let color = folder.color {
                 return Color(int: color)
@@ -58,6 +76,7 @@ extension ServerListView {
                 }
             }
             .padding(.trailing, 6)
+            .background(InsetGetter())
         }
     }
 }
@@ -73,6 +92,9 @@ struct ServerIconCell: View {
     
     @EnvironmentObject
     var appModel: AppGlobals
+    
+    @State var offsetY: CGFloat = CGFloat.zero
+    @State var viewHeight: CGFloat = CGFloat.zero
 
     func updateSelection(old: String?, new: String?) {
         DispatchQueue.global().async {
@@ -103,18 +125,17 @@ struct ServerIconCell: View {
     }
 
     var body: some View {
-        Button(action: {
+        HStack {
+            RoundedRectangle(cornerRadius: 5)
+                .fill()
+                .foregroundColor(Color.primary)
+                .frame(width: 5, height: selectedServer == guild.id || hovering ? 30 : 5)
+                .animation(Animation.easeInOut(duration: 0.1), value: UUID())
+                .opacity(unreadMessages(guild: guild) || selectedServer == guild.id ? 1 : 0)
+            GuildListPreview(guild: $guild, selectedServer: $selectedServer.animation())
+        }
+        .onTapGesture {
             self.updateSelection(old: selectedServer, new: guild.id)
-        }) {
-            HStack {
-                RoundedRectangle(cornerRadius: 5)
-                    .fill()
-                    .foregroundColor(Color.primary)
-                    .frame(width: 5, height: selectedServer == guild.id || hovering ? 30 : 5)
-                    .animation(Animation.easeInOut(duration: 0.1), value: UUID())
-                    .opacity(unreadMessages(guild: guild) || selectedServer == guild.id ? 1 : 0)
-                GuildListPreview(guild: $guild, selectedServer: $selectedServer.animation())
-            }
         }
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")
@@ -130,5 +151,17 @@ struct ServerIconCell: View {
         }
         .buttonStyle(BorderlessButtonStyle())
         .redBadge($mentionCount)
+        .onPreferenceChange(FolderListHeightPreferenceKey.self, perform: { self.viewHeight = $0 })
+        .offset(x: 0, y: self.offsetY)
+        .zIndex(self.offsetY == .zero ? -1 : 1)
+        .gesture(
+            DragGesture()
+                .onChanged { gesture in
+                    self.offsetY = gesture.translation.height
+                }
+                .onEnded { gesture in
+                    print(viewHeight / gesture.translation.height)
+                }
+        )
     }
 }

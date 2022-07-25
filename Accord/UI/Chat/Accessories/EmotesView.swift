@@ -40,7 +40,7 @@ struct EmotesView: View, Equatable {
                 ScrollView {
                     Spacer().frame(height: 45)
                     LazyVStack(alignment: .leading) {
-                        if search == "" {
+                        if search.isEmpty {
                             let keys = Array(Storage.emotes.keys)
                             let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
                             ForEach(nonEmptyKeys, id: \.self) { key in

@@ -14,7 +14,6 @@ struct AvatarView: View {
     var guildID: String
     
     var avatar: String?
-    @State private var popup = false
 
     var animated: Bool {
         (avatar ?? author.avatar)?.prefix(2) == "a_"
@@ -26,6 +25,8 @@ struct AvatarView: View {
 
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
+    
+    @Binding var popup: Bool
 
     var imageURL: String {
         if let avatar = avatar {
@@ -48,7 +49,6 @@ struct AvatarView: View {
         }
     }
     
-    @ViewBuilder
     var body: some View {
         Button(action: {
             popup.toggle()

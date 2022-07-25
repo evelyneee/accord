@@ -13,16 +13,12 @@ import SwiftUI
 struct GifView: View {
     init(_ url: String) {
         self.url = url
-        prep()
     }
 
     var url: String
     
     @MainActor @State
     var currentImage: NSImage = .init()
-    
-    @State
-    var animatedImages: [NSImage] = []
     
     @State var counterValue: Int = 0
     @State var duration: Double = 0
@@ -33,11 +29,9 @@ struct GifView: View {
     @ViewBuilder
     var body: some View {
         HStack {
-            if !animatedImages.isEmpty {
-                Image(nsImage: currentImage)
-                    .resizable()
-                    .scaledToFit()
-            }
+            Image(nsImage: currentImage)
+                .resizable()
+                .scaledToFit()
         }
         .onAppear(perform: self.prep)
     }
@@ -59,7 +53,6 @@ struct GifView: View {
                             case let .success(data):
                                 let gif = Gif(data: data)
                                 guard let animatedImages = gif?.animatedImages, let calculatedDuration = gif?.calculatedDuration else { return }
-                                self.animatedImages = animatedImages
                                 self.duration = Double(CFTimeInterval(calculatedDuration))
                                 DispatchQueue.main.async {
                                     self.timer = Timer.publish(
@@ -93,7 +86,7 @@ struct GifView: View {
                     .replaceError(with: Data())
                     .sink { data in
                         let gif = Gif(data: data)
-                        animatedImages = gif?.animatedImages ?? []
+                        let animatedImages = gif?.animatedImages ?? []
                         duration = Double(CFTimeInterval(gif?.calculatedDuration ?? 0))
                         DispatchQueue.main.async {
                             self.timer = Timer.publish(
@@ -109,6 +102,7 @@ struct GifView: View {
                                     return
                                 }
                                 (self.value) += 1 % (animatedImages.count)
+                                self.currentImage = animatedImages[self.value]
                             }
                         }
                     }

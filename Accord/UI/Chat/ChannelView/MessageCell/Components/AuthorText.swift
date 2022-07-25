@@ -46,15 +46,15 @@ struct AuthorTextView: View {
                 .font(.chatTextFont)
                 .fontWeight(.semibold)
                 +
-                Text("  \(message.processedTimestamp ?? "")")
+            Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text(message.editedTimestamp != nil ? " (edited at \(message.editedTimestamp?.makeProperHour() ?? "unknown time"))" : "")
+            Text(message.editedTimestamp != nil ? " (edited at \(message.editedTimestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
             if message.author?.bot == true {

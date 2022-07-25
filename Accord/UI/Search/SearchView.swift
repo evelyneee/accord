@@ -17,8 +17,11 @@ struct SearchView: View {
     @EnvironmentObject
     var appModel: AppGlobals
     
-    @State var matches: [Channel] = []
-    @State var matchedUsers = [User]()
+    @State
+    var matches: [Channel] = []
+    
+    @State
+    var matchedUsers = [User]()
     
     func match() async -> [Channel] {
                 

@@ -56,24 +56,17 @@ struct LoadingView: View {
 
     var body: some View {
         VStack {
-            Spacer()
-            HStack {
-                Spacer()
-                VStack {
-                    Image(nsImage: NSApplication.shared.applicationIconImage)
-                        .saturation(0.0).modifier(TiltAnimation())
-                    LoadingView.greetings.randomElement()!
-                        .fontWeight(.medium)
-                        .font(.title2)
-                        .textSelection(.enabled)
-                        .padding(5)
-                    Text("Connecting")
-                        .foregroundColor(Color.secondary)
-                }
-                Spacer()
-            }
-            Spacer()
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .saturation(0.0).modifier(TiltAnimation())
+            LoadingView.greetings.randomElement()!
+                .fontWeight(.medium)
+                .font(.title2)
+                .textSelection(.enabled)
+                .padding(5)
+            Text("Connecting")
+                .foregroundColor(Color.secondary)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .focusable(false)
     }
 }

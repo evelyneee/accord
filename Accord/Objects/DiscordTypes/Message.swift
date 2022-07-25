@@ -10,9 +10,9 @@ import Foundation
 
 struct Message: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds
+        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds && lhs.reactions == rhs.reactions
     }
-
+    
     var author: User?
     var nick: String?
     var channelID: String
@@ -40,20 +40,46 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var referencedMessage: Reply?
     // var message_reference: Reply? // in the mentions endpoint
     let stickerItems: [StickerItem]?
-    var reactions: [Reaction]?
+    var _reactions: [Reaction]?
+    
+    var reactions: [Reaction] {
+        get {
+            self._reactions ?? []
+        }
+        set(value) {
+            self._reactions = value
+        }
+    }
+    
     var interaction: Interaction?
 
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case author, nick, content, id, embeds,
              mentions, pinned, timestamp, processedTimestamp,
-             _inSameDay, type, attachments, reactions, interaction,
+             _inSameDay, type, attachments, interaction,
             user_mentioned
+        case _reactions = "reactions"
         case channelID = "channel_id"
         case guildID = "guild_id"
         case editedTimestamp = "edited_timestamp"
         case mentionEveryone = "mention_everyone"
         case referencedMessage = "referenced_message"
         case stickerItems = "sticker_items"
+        case reference = "message_reference"
+    }
+    
+    var reference: MessageReference?
+
+    struct MessageReference: Codable {
+        var messageID: String
+        var guildID: String?
+        var channelID: String
+        
+        enum CodingKeys: String, CodingKey {
+            case channelID = "channel_id"
+            case guildID = "guild_id"
+            case messageID = "message_id"
+        }
     }
     
     var identifier: String {

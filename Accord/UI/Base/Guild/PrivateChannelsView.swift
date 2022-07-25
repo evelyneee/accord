@@ -9,14 +9,13 @@ import SwiftUI
 
 struct PrivateChannelsView: View {
     
-    @Binding var privateChannels: [Channel]
     @Binding var selection: Int?
     
     @EnvironmentObject
     var appModel: AppGlobals
     
     var body: some View {
-        ForEach($privateChannels, id: \.id) { $channel in
+        ForEach($appModel.privateChannels, id: \.id) { $channel in
             NavigationLink(
                 tag: Int(channel.id) ?? 0,
                 selection: self.$selection,

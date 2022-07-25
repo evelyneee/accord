@@ -199,6 +199,7 @@ struct ProfileEditingView: View {
                         } else if let banner = self.user?.banner, let id = self.user?.id {
                             Attachment(cdnURL + "/banners/\(id)/\(banner).png?size=320")
                                 .equatable()
+                                .scaledToFit()
                                 .frame(width: 290)
                         } else {
                             Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)

@@ -17,6 +17,7 @@ private var encoder: ISO8601DateFormatter = {
 struct MessageCellMenu: View {
     @State var message: Message
     
+    
     @Environment(\.guildID)
     var guildID: String
     
@@ -25,6 +26,7 @@ struct MessageCellMenu: View {
     @Binding var editing: Bool
     @Binding var popup: Bool
     @Binding var showEditNicknamePopover: Bool
+    @Binding var reactionPopup: Bool
 
     @ViewBuilder
     private var moderationSection: some View {
@@ -241,18 +243,25 @@ struct MessageCellMenu: View {
     }
 
     var body: some View {
-        Button("Reply") {
-            replyingTo = message
-        }
-        if message.author?.id == Globals.user?.id {
-            Button("Edit") {
-                self.editing.toggle()
+        Group {
+            Button("Reply") {
+                replyingTo = message
             }
-        }
-        if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
-            Button("Delete") {
-                DispatchQueue.global().async {
-                    message.delete()
+            if self.permissions.contains(.addReactions) {
+                Button("Add Reaction") {
+                    self.reactionPopup.toggle()
+                }
+            }
+            if message.author?.id == Globals.user?.id {
+                Button("Edit") {
+                    self.editing.toggle()
+                }
+            }
+            if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
+                Button("Delete") {
+                    DispatchQueue.global().async {
+                        message.delete()
+                    }
                 }
             }
         }

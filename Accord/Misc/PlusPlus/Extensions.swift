@@ -55,6 +55,24 @@ extension KeyedDecodingContainer {
     }
 }
 
+@propertyWrapper
+struct EmptyArrayCodable<T: Codable & ExpressibleByArrayLiteral> {
+    var wrappedValue: T = .init()
+}
+
+extension EmptyArrayCodable: Codable {
+    init(from decoder: Decoder) throws {
+        print("decoder")
+        let container = try decoder.singleValueContainer()
+        wrappedValue = (try? container.decode(T.self)) ?? []
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.wrappedValue)
+    }
+}
+
 extension Color {
     init(hex: String) {
         let hex = hex

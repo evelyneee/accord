@@ -42,28 +42,30 @@ struct GridStack<T: Identifiable & Hashable, Content: View>: View {
                         ForEach(0 ..< Int(round(Double(array.count / rows))), id: \.self) { column in
                             content(self.array[row * column])
                                 .id(self.array[row * column].id)
-                                .onAppear { print(self.array[row * column].id) }
                         }
                     }
                     .id(UUID())
+                    .fixedSize()
                 }
             }
             .id(UUID())
+            .fixedSize()
         } else if let columns = columns {
-            let chunked = self.array.chunked(by: columns)
+            let chunked = self.$array.arrayLiteral.chunked(by: columns)
             VStack(alignment: self.verticalAlignment) {
                 ForEach(0 ..< (chunked.count), id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
-                        ForEach(chunked[row], id: \.self) { item in
+                        ForEach(chunked[row], id: \.self) { $item in
                             content(item)
                                 .id(item.id)
-                                .onAppear { print(item.id) }
                         }
                     }
                     .id(UUID())
+                    .fixedSize()
                 }
             }
             .id(UUID())
+            .fixedSize()
         }
     }
 }
@@ -73,5 +75,17 @@ extension Array {
         return stride(from: 0, to: self.count, by: chunkSize).map {
             Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
         }
+    }
+}
+
+extension Binding: Equatable where Value: Equatable {
+    public static func == (lhs: Binding<Value>, rhs: Binding<Value>) -> Bool {
+        lhs.wrappedValue == rhs.wrappedValue
+    }
+}
+
+extension Binding: Hashable where Value: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.wrappedValue)
     }
 }

@@ -10,6 +10,20 @@ import Foundation
 private let ENABLE_LINE_LOGGING: Bool = true
 private let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
 
+public func dprint(
+    _ items: Any..., // first variadic parameter
+    file: String = #fileID, // file name which is not meant to be specified
+    _ items2: Any..., // second variadic parameter
+    line: Int = #line, // line number
+    separator: String = " "
+) {
+    let file = ENABLE_FILE_EXTENSION_LOGGING ?
+        file.components(separatedBy: "/").last ?? "Accord" :
+        file.components(separatedBy: "/").last?.components(separatedBy: ".").first ?? "Accord"
+    let line = ENABLE_LINE_LOGGING ? ":\(String(line))" : ""
+    log(items: items, file: file, line: line, separator: separator)
+}
+
 // this is meant to override the print function globally in scope
 // the normal signature of the print function is print(_ items: Any...)
 // if we wanna override it, we can't use a single variadic parameter because

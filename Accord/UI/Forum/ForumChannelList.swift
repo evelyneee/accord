@@ -23,7 +23,8 @@ struct ThreadSearchResult: Decodable {
 
 final class ForumChannelListModel: ObservableObject {
     
-    @Published var channels: [(channel: Channel, message: Message)] = .init()
+    @MainActor @Published
+    var channels: [(channel: Channel, message: Message)] = .init()
     
     func loadChannels(for forumID: String) {
         let url = root

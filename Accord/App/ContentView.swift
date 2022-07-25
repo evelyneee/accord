@@ -45,7 +45,7 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
-                        guard Globals.token != "" else { modalIsPresented = true; return }
+                        guard !Globals.token.isEmpty else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
                                 loaded = true

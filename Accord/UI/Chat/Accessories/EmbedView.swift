@@ -47,12 +47,19 @@ struct EmbedView: View, Equatable {
                                 .clipShape(Circle())
                         }
                         if let urlString = author.url, let url = URL(string: urlString) {
-                            Link(author.name, destination: url)
-                                .font(.system(size: 14))
+                            Button(action: {
+                                NSWorkspace.shared.open(url)
+                            }) {
+                                Text(author.name)
+                                    .fontWeight(.semibold)
+                                    .font(.system(size: 13.5))
+                                    .foregroundColor(Color.primary.opacity(0.85))
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
                         } else {
                             Text(author.name)
-                                .fontWeight(.semibold)
-                                .font(.system(size: 14))
+                                .fontWeight(.medium)
+                                .font(.system(size: 13.5))
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -61,7 +68,7 @@ struct EmbedView: View, Equatable {
                 if let title = embed?.title {
                     Text(title)
                         .fontWeight(.semibold)
-                        .font(.system(size: 14))
+                        .font(.system(size: 13.5))
                         .padding(.vertical, 2)
                 }
                 if let description = embed?.description {
@@ -89,11 +96,12 @@ struct EmbedView: View, Equatable {
                     GridStack(fields, rowAlignment: .leading, columns: 4) { field in
                         VStack(alignment: .leading) {
                             Text(field.name)
+                                .font(.system(size: 12))
+                                .fontWeight(.semibold)
                                 .lineLimit(0)
-                                .font(.subheadline)
                             AsyncMarkdown(field.value)
                                 .equatable()
-                                .fixedSize(horizontal: false, vertical: true)
+                                .font(.system(size: 12))
                         }
                     }
                     .padding(.vertical, 2)
@@ -101,9 +109,10 @@ struct EmbedView: View, Equatable {
             }
             .padding(.leading, 2)
             .padding(.vertical, 5)
+            .padding(5)
             Spacer()
         }
-        .frame(maxWidth: 400)
+        .frame(maxWidth: 420)
         .background(Color(NSColor.disabledControlTextColor).opacity(0.2))
         .cornerRadius(5)
     }

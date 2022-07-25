@@ -18,17 +18,26 @@ struct MentionsView: View {
 
     var body: some View {
         List(mentions, id: \.id) { message in
-            MessageCellView(
-                message: message,
-                nick: nil,
-                replyNick: nil,
-                pronouns: nil,
-                avatar: nil,
-                permissions: .constant(.init()),
-                role: Binding.constant(nil),
-                replyRole: Binding.constant(nil),
-                replyingTo: $replyingTo
-            )
+            ZStack(alignment: .topTrailing) {
+                MessageCellView(
+                    message: message,
+                    nick: nil,
+                    replyNick: nil,
+                    pronouns: nil,
+                    avatar: nil,
+                    permissions: .constant(.init()),
+                    role: Binding.constant(nil),
+                    replyRole: Binding.constant(nil),
+                    replyingTo: $replyingTo
+                )
+                Button("Jump") {
+                    MentionSender.shared.select(channel: Channel(id: message.channelID, type: .normal, guild_id: message.reference?.guildID, position: nil, parent_id: nil))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                        ChannelView.scrollTo.send((message.channelID, message.id))
+                    })
+                }
+                .buttonStyle(.borderless)
+            }
         }
         .onAppear(perform: {
             messageFetchQueue.async {

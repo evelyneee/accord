@@ -11,13 +11,12 @@ struct ReactionsGridView: View {
     
     @Environment(\.channelID)
     var channelID: String
-
-    var messageID: String
-    @State var reactions: [Reaction]
+    
+    @Binding var message: Message
 
     var body: some View {
-        GridStack($reactions, rowAlignment: .leading, columns: 6, content: { reaction in
-            ReactionView(messageID: messageID, reaction: reaction)
+        GridStack($message.reactions, rowAlignment: .leading, columns: 6, content: { reaction in
+            ReactionView(messageID: message.id, reaction: reaction)
         })
         .fixedSize()
     }

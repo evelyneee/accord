@@ -50,7 +50,8 @@ final class ChatControlsViewModel: ObservableObject {
             self?.findView()
         }
     }
-
+    
+    @_optimize(speed)
     func checkText(guildID: String, channelID: String) async {
         let ogContents = await textFieldContents
         let mentions = ogContents.matches(precomputed: RegexExpressions.chatTextMentions)
@@ -68,7 +69,7 @@ final class ChatControlsViewModel: ObservableObject {
             }
         }
 
-        guard await !textFieldContents.isEmpty else {
+        guard !ogContents.isEmpty else {
             DispatchQueue.main.async {
                 self.matchedEmoji.removeAll()
                 self.matchedCommands.removeAll()
@@ -152,20 +153,21 @@ final class ChatControlsViewModel: ObservableObject {
             }
         }
     }
-
+    
+    @MainActor
     func findView() {
         AppKitLink<NSTextField>.introspect { textField, _ in
             textField.lineBreakMode = .byWordWrapping
             textField.usesSingleLineMode = false
         }
     }
-
+    
+    @MainActor
     func clearMatches() {
-        DispatchQueue.main.async {
-            self.matchedEmoji.removeAll()
-            self.matchedUsers.removeAll()
-            self.matchedChannels.removeAll()
-        }
+        self.matchedUsers.removeAll()
+        self.matchedRoles.removeAll()
+        self.matchedEmoji.removeAll()
+        self.matchedChannels.removeAll()
     }
 
     func send(text: String, guildID: String, channelID: String) {
@@ -188,8 +190,9 @@ final class ChatControlsViewModel: ObservableObject {
 
     func executeCommand(guildID: String, channelID: String) async throws {
         guard let command = command else {
-            if await textFieldContents.prefix(6) == "/nick " {
-                let nick = await textFieldContents.dropFirst(6).stringLiteral
+            let textFieldContents = await textFieldContents
+            if textFieldContents.prefix(6) == "/nick " {
+                let nick = textFieldContents.dropFirst(6).stringLiteral
                 Request.ping(url: URL(string: "\(rootURL)/guilds/\(guildID)/members/%40me/nick"), headers: Headers(
                     token: Globals.token,
                     bodyObject: ["nick": nick],
@@ -198,19 +201,19 @@ final class ChatControlsViewModel: ObservableObject {
                     json: true
                 ))
                 emptyTextField()
-            } else if await textFieldContents.prefix(6) == "/shrug" {
+            } else if textFieldContents.prefix(6) == "/shrug" {
                 send(text: #"¯\_(ツ)_/¯"#, guildID: guildID, channelID: channelID)
                 emptyTextField()
-            } else if await textFieldContents.prefix(6) == "/debug" {
+            } else if textFieldContents.prefix(6) == "/debug" {
                 sendDebugLog(guildID: guildID, channelID: channelID)
                 emptyTextField()
-            } else if await textFieldContents.prefix(6) == "/reset" {
-                wss.reset()
+            } else if textFieldContents.prefix(6) == "/reset" {
+                print(await wss.reset())
                 emptyTextField()
-            } else if await textFieldContents.prefix(12) == "/reset force" {
+            } else if textFieldContents.prefix(12) == "/reset force" {
                 wss.hardReset()
                 emptyTextField()
-            } else if await textFieldContents.prefix(5) == "/help" {
+            } else if textFieldContents.prefix(5) == "/help" {
                 let help = """
                 **Slash commands**
                 `/shrug`: shrug

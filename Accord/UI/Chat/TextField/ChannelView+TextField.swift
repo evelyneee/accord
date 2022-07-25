@@ -110,9 +110,9 @@ extension ChannelView {
                 guildID: viewModel.guildID,
                 channelID: viewModel.channelID,
                 chatText: "Message #\(channelName)",
+                permissions: viewModel.permissions,
                 replyingTo: $replyingTo,
                 mentionUser: $mentionUser,
-                permissions: viewModel.permissions,
                 fileUploads: self.$fileUploads
             )
             .padding(13)
@@ -122,6 +122,16 @@ extension ChannelView {
         .padding([.horizontal, .bottom], 12)
         .padding(.bottom, 2)
         .background(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+    }
+}
+
+extension View {
+    func gradientBackground(_ color: Color?) -> some View {
+        if #available(macOS 13.0, *) {
+            return self.background(color?.gradient ?? Color.primary.gradient)
+        } else {
+            return self.background(color)
+        }
     }
 }
 

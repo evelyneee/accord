@@ -39,28 +39,16 @@ extension ServerListView: MentionSenderDelegate {
     }
 
     func removeMentions(server: String) {
-        let index = appModel.folders.map { ServerListView.fastIndexGuild(server, array: $0.guilds) }
-        for (index1, index2) in index.enumerated() {
-            guard let index2 = index2 else { return }
+        let index = appModel.folders.map { $0.guilds[indexOf: server] }
+        for (index1, index2) in index.enumerated().filter({ $0.element != nil }) {
             DispatchQueue.main.async {
-                appModel.folders[index1].guilds[index2].channels.forEach { $0.read_state?.mention_count = 0 }
+                appModel.folders[index1].guilds[index2!].channels.forEach { $0.read_state?.mention_count = 0 }
             }
         }
     }
 
     func select(channel: Channel) {
-        let guildID = channel.guild_id ?? "@me"
-        if guildID == "@me" {
-            print("direct message")
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "DMSelect"), object: nil, userInfo: ["index": channel.id])
-        }
-        let index = appModel.folders.map { ServerListView.fastIndexGuild(guildID, array: $0.guilds) }
-        print(index)
-        for (i, v) in index.enumerated() {
-            guard let v = v else { continue }
-            print("uwu")
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Refresh"), object: nil, userInfo: [appModel.folders[i].guilds[v].id: Int(channel.id) ?? 0])
-        }
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: channel.guild_id == nil ? "DMSelect" : "Refresh"), object: nil, userInfo: [channel.guild_id ?? "index": channel.guild_id == nil ? channel.id : Int(channel.id) ?? 0])
     }
 
     func newMessage(in channelID: String, message: Message) {

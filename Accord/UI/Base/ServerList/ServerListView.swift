@@ -66,23 +66,21 @@ struct ServerListView: View {
     @MainActor @State
     var selectedGuild: Guild? = nil
     
-    var upcomingGuild: Guild? = nil
-    var upcomingSelection: Int? = nil
-    
     @MainActor @AppStorage("SelectedServer")
     var selectedServer: String?
     
-    @ObservedObject
+    @MainActor @ObservedObject
     public var appModel: AppGlobals = .init()
     
     internal static var readStates: [ReadStateEntry] = .init()
     var statusText: String? = nil
     @State var status: String? = nil
-    @State var bag = Set<AnyCancellable>()
     @State var iconHovered: Bool = false
     @State var isShowingJoinServerSheet: Bool = false
     
     @State var popup: Bool = false
+    
+    @ObservedObject var viewModel: ServerListViewModel = ServerListViewModel(guild: nil, readyPacket: nil)
 
     var onlineButton: some View {
         Button(action: {
@@ -183,11 +181,8 @@ struct ServerListView: View {
                     List {
                         settingsLink
                         Divider()
-                        PrivateChannelsView(
-                            privateChannels: self.$appModel.privateChannels,
-                            selection: self.$selection
-                        )
-                        .animation(nil, value: UUID())
+                        PrivateChannelsView(selection: self.$selection)
+                            .animation(nil, value: UUID())
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)
@@ -232,9 +227,9 @@ struct ServerListView: View {
             self.popup.toggle()
         })
         .onAppear {
-            if let upcomingGuild = upcomingGuild {
+            if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.selectedGuild = upcomingGuild
-                self.selection = self.upcomingSelection
+                self.selection = self.viewModel.upcomingSelection
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {

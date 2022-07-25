@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-extension Collection where Element: Identifiable {
+extension Sequence where Element: Identifiable {
     func generateKeyMap() -> [Element.ID: Int] {
         enumerated().lazy
             .compactMap { [$1.id: $0] }
@@ -50,6 +50,32 @@ extension Slice {
 }
 
 extension Array where Element: Identifiable {
+    subscript(keyed id: Self.Element.ID, keyMap: [Self.Element.ID: Int]? = nil) -> Self.Element? {
+        get {
+            let keys = keyMap ?? generateKeyMap()
+            guard let element = keys[id] else { return nil }
+            return self[element]
+        }
+        set {
+            let keys = keyMap ?? generateKeyMap()
+            guard let element = keys[id], let newValue = newValue else { return }
+            self[element] = newValue
+        }
+    }
+
+    subscript(indexOf id: Self.Element.ID, keyMap: [Self.Element.ID: Int]? = nil) -> Int? {
+        let keys = keyMap ?? generateKeyMap()
+        return keys[id]
+    }
+}
+
+extension Sequence {
+    func makeContiguousArray() -> ContiguousArray<Self.Element> {
+        ContiguousArray(self)
+    }
+}
+
+extension ContiguousArray where Element: Identifiable {
     subscript(keyed id: Self.Element.ID, keyMap: [Self.Element.ID: Int]? = nil) -> Self.Element? {
         get {
             let keys = keyMap ?? generateKeyMap()

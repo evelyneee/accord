@@ -48,7 +48,7 @@ struct AccordApp: App {
     @SceneBuilder
     var body: some Scene {
         WindowGroup {
-            if self.token == "" {
+            if self.token.isEmpty {
                 LoginView()
                     .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
@@ -66,25 +66,7 @@ struct AccordApp: App {
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
-                        DispatchQueue.global().async {
-                            Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
-                                contentType: "application/x-www-form-urlencoded",
-                                token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
-                                bodyObject: ["grant_type": "client_credentials"],
-                                type: .POST
-                            )) {
-                                switch $0 {
-                                case let .success(data):
-                                    let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                                    if let token = packet?["access_token"] as? String {
-                                        spotifyToken = token
-                                    }
-                                case let .failure(error):
-                                    print(error)
-                                }
-                            }
-                            NetworkCore.shared = NetworkCore()
-                        }
+                        self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()
                         }
@@ -139,6 +121,28 @@ struct AccordApp: App {
                     .tag(Tabs.rpc)
             }
             .frame(minHeight: 500)
+        }
+    }
+    
+    func loadSpotifyToken() {
+        DispatchQueue.global().async {
+            Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
+                contentType: "application/x-www-form-urlencoded",
+                token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
+                bodyObject: ["grant_type": "client_credentials"],
+                type: .POST
+            )) {
+                switch $0 {
+                case let .success(data):
+                    let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    if let token = packet?["access_token"] as? String {
+                        spotifyToken = token
+                    }
+                case let .failure(error):
+                    print(error)
+                }
+            }
+            NetworkCore.shared = NetworkCore()
         }
     }
 }

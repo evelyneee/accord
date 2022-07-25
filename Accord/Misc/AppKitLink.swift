@@ -10,6 +10,8 @@ import Foundation
 import SwiftUI
 
 final class AppKitLink<V: NSView> {
+    
+    @_optimize(speed) @MainActor
     class func introspectView(_ root: NSView, _ completion: @escaping ((_ nsView: V, _ subviewCount: Int) -> Void)) {
         for child in root.subviews {
             if let view = child as? V {
@@ -19,7 +21,8 @@ final class AppKitLink<V: NSView> {
             }
         }
     }
-
+    
+    @_optimize(speed) @MainActor
     class func introspect(_ completion: @escaping ((_ nsView: V, _ subviewCount: Int) -> Void)) {
         guard let view = NSApplication.shared.keyWindow?.contentView else { return }
         for child in view.subviews {

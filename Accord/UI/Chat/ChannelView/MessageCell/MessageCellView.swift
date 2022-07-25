@@ -13,7 +13,8 @@ struct MessageCellView: View, Equatable {
         lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
 
-    var message: Message
+    @State var message: Message
+    
     var nick: String?
     var replyNick: String?
     var pronouns: String?
@@ -28,11 +29,15 @@ struct MessageCellView: View, Equatable {
     @Binding var permissions: Permissions
     @Binding var role: String?
     @Binding var replyRole: String?
-    @Binding var replyingTo: Message?
+    
+    @MainActor @Binding
+    var replyingTo: Message?
+    
     @State var editing: Bool = false
     @State var popup: Bool = false
     @State var editedText: String = ""
     @State var showEditNicknamePopover: Bool = false
+    @State var reactionPopup: Bool = false
 
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
@@ -44,7 +49,9 @@ struct MessageCellView: View, Equatable {
     
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
-            message.edit(now: self.editedText)
+            DispatchQueue.global().async {
+                message.edit(now: self.editedText)
+            }
             self.editing = false
             self.editedText = ""
         }
@@ -103,13 +110,11 @@ struct MessageCellView: View, Equatable {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
                         AvatarView (
                             author: author,
-                            avatar: self.avatar
+                            avatar: self.avatar,
+                            popup: self.$popup
                         )
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
-                        .popover(isPresented: $popup, content: {
-                            PopoverProfileView(user: message.author)
-                        })
                         .padding(.trailing, 1.5)
                         .fixedSize()
                     }
@@ -118,6 +123,7 @@ struct MessageCellView: View, Equatable {
                             if !message.content.isEmpty {
                                 if self.editing {
                                     editingTextField
+                                        .font(.chatTextFont)
                                         .padding(.leading, leftPadding)
                                 } else {
                                     AsyncMarkdown(message.content)
@@ -140,6 +146,7 @@ struct MessageCellView: View, Equatable {
                             if !message.content.isEmpty {
                                 if self.editing {
                                     editingTextField
+                                        .font(.chatTextFont)
                                 } else {
                                     AsyncMarkdown(message.content)
                                         .equatable()
@@ -151,17 +158,18 @@ struct MessageCellView: View, Equatable {
                 }
                 .if(Storage.users[self.message.author?.id ?? ""]?.relationship?.type == .blocked, transform: { $0.hidden() })
             }
-            if let stickerItems = message.stickerItems,
-               stickerItems.isEmpty == false
-            {
+            if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
                 StickerView(
                     stickerItems: stickerItems
                 )
+                .fixedSize()
             }
-            ForEach(message.embeds ?? [], id: \.id) { embed in
-                EmbedView(embed: embed)
-                    .equatable()
-                    .padding(.leading, leftPadding)
+            if let embeds = message.embeds, !embeds.isEmpty {
+                ForEach(embeds, id: \.id) { embed in
+                    EmbedView(embed: embed)
+                        .equatable()
+                        .padding(.leading, leftPadding)
+                }
             }
             if !message.attachments.isEmpty {
                 AttachmentView(media: message.attachments)
@@ -176,12 +184,12 @@ struct MessageCellView: View, Equatable {
                     .padding(.top, 5)
                     .fixedSize()
             }
-            if let reactions = message.reactions, !reactions.isEmpty {
+            if !message.reactions.isEmpty {
                 ReactionsGridView (
-                    messageID: self.message.id,
-                    reactions: reactions
+                    message: $message
                 )
                 .padding(.leading, leftPadding)
+                .fixedSize()
             }
         }
         .contextMenu {
@@ -191,12 +199,37 @@ struct MessageCellView: View, Equatable {
                 replyingTo: self.$replyingTo,
                 editing: self.$editing,
                 popup: self.$popup,
-                showEditNicknamePopover: self.$showEditNicknamePopover
+                showEditNicknamePopover: self.$showEditNicknamePopover,
+                reactionPopup: self.$reactionPopup
             )
         }
         .popover(isPresented: $showEditNicknamePopover) {
             SetNicknameView(user: message.author, isPresented: $showEditNicknamePopover)
                 .padding()
         }
+        .popover(isPresented: self.$reactionPopup, content: {
+            EmotesView(onSelect: { emote in
+                self.reactionPopup = false
+                let emoji = emote.name + ":" + emote.id
+                let url = root
+                    .appendingPathComponent("channels")
+                    .appendingPathComponent(channelID)
+                    .appendingPathComponent("messages")
+                    .appendingPathComponent(self.message.id)
+                    .appendingPathComponent("reactions")
+                    .appendingPathComponent(emoji)
+                    .appendingPathComponent("@me")
+                    .appendingQueryParameters([
+                        "location":"Message"
+                    ])
+                Request.ping(url: url, headers: Headers(
+                    token: Globals.token,
+                    type: .PUT,
+                    discordHeaders: true,
+                    referer: "https://discord.com/channels/@me"
+                ))
+                self.message._reactions?.append(Reaction(count: 1, me: true, emoji: .init(id: emote.id, name: emote.name, animated: emote.animated)))
+            })
+        })
     }
 }

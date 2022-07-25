@@ -381,7 +381,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
             webView.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: webView.bottomAnchor),
         ])
-        if siteKey != "" {
+        if !siteKey.isEmpty {
             webView.loadHTMLString(generateHTML, baseURL: URL(string: "https://discord.com")!)
         }
         return webView
