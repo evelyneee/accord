@@ -42,7 +42,7 @@ struct MessageCellView: View, Equatable {
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
 
-    private let leftPadding: CGFloat = 44.5
+    private let leftPadding: Double = 44.5
 
     @EnvironmentObject
     var appModel: AppGlobals

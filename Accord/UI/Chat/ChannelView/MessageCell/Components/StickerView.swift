@@ -9,7 +9,7 @@ import SwiftUI
 
 struct StickerView: View {
     var stickerItems: [StickerItem]
-    private let leftPadding: CGFloat = 44.5
+    private let leftPadding: Double = 44.5
 
     var body: some View {
         ForEach(stickerItems, id: \.id) { sticker in

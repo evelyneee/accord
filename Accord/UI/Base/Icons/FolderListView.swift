@@ -9,13 +9,13 @@ import Foundation
 import SwiftUI
 
 struct FolderListHeightPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+    static var defaultValue: Double = 0
 
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    static func reduce(value: inout Double, nextValue: () -> Double) {
         value = nextValue()
     }
 
-    typealias Value = CGFloat
+    typealias Value = Double
 }
 
 struct InsetGetter: View {
@@ -93,8 +93,8 @@ struct ServerIconCell: View {
     @EnvironmentObject
     var appModel: AppGlobals
     
-    @State var offsetY: CGFloat = CGFloat.zero
-    @State var viewHeight: CGFloat = CGFloat.zero
+    @State var offsetY: Double = Double.zero
+    @State var viewHeight: Double = Double.zero
 
     func updateSelection(old: String?, new: String?) {
         DispatchQueue.global().async {

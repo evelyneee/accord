@@ -14,7 +14,7 @@ struct GuildView: View {
     @Binding var selection: Int?
     @State var invitePopup: Bool = false
     
-    @State var width: CGFloat?
+    @State var width: Double?
     
     var body: some View {
         List {

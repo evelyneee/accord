@@ -17,14 +17,14 @@ extension String {
 public extension NSColor {
     static func color(from int: Int) -> NSColor? {
         let hex = String(format: "%06X", int)
-        let r, g, b: CGFloat
+        let r, g, b: Double
         if hex.count == 6 {
             let scanner = Scanner(string: hex)
             var hexNumber: UInt64 = 0
             if scanner.scanHexInt64(&hexNumber) {
-                r = CGFloat((hexNumber & 0xFF0000) >> 16) / 255
-                g = CGFloat((hexNumber & 0xFF00) >> 8) / 255
-                b = CGFloat(hexNumber & 0xFF) / 255
+                r = Double((hexNumber & 0xFF0000) >> 16) / 255
+                g = Double((hexNumber & 0xFF00) >> 8) / 255
+                b = Double(hexNumber & 0xFF) / 255
                 if pastelColors {
                     return NSColor(calibratedRed: r + 0.1, green: g + 0.1, blue: b + 0.1, alpha: 1)
                 } else {
@@ -76,10 +76,10 @@ extension NSImage {
         )
 
         return NSColor(
-            red: CGFloat(bitmap[0]) / 255,
-            green: CGFloat(bitmap[1]) / 255,
-            blue: CGFloat(bitmap[2]) / 255,
-            alpha: CGFloat(bitmap[3]) / 255
+            red: Double(bitmap[0]) / 255,
+            green: Double(bitmap[1]) / 255,
+            blue: Double(bitmap[2]) / 255,
+            alpha: Double(bitmap[3]) / 255
         )
     }
 }

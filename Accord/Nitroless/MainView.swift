@@ -11,7 +11,7 @@ import SwiftUI
 struct EmoteButton: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? CGFloat(0.85) : 1.0)
+            .scaleEffect(configuration.isPressed ? Double(0.85) : 1.0)
             .animation(.spring(), value: configuration.isPressed)
             .padding(.bottom, 3)
     }

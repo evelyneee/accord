@@ -20,7 +20,7 @@ extension CGImage {
 
 extension NSImage {
     // Thanks Amy 🙂
-    func downsample(to pointSize: CGSize? = nil, scale: CGFloat? = nil) -> Data? {
+    func downsample(to pointSize: CGSize? = nil, scale: Double? = nil) -> Data? {
         let size = pointSize ?? CGSize(width: size.width, height: size.height)
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let data = tiffRepresentation as CFData?,
@@ -30,7 +30,7 @@ extension NSImage {
         return downsampled
     }
 
-    private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
+    private func downsample(source: CGImageSource, size: CGSize, scale: Double?) -> Data? {
         let maxDimensionInPixels = max(size.width, size.height) * (scale ?? 1)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                   kCGImageSourceShouldCacheImmediately: true,
@@ -62,7 +62,7 @@ extension NSImage {
 }
 
 extension Data {
-    func downsample(to size: CGSize, scale: CGFloat? = nil) -> Data? {
+    func downsample(to size: CGSize, scale: Double? = nil) -> Data? {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let imageSource = CGImageSourceCreateWithData(self as CFData, imageSourceOptions) else { return nil }
         let downsampled = downsample(source: imageSource, size: size, scale: scale)
@@ -70,7 +70,7 @@ extension Data {
         return downsampled
     }
 
-    private func downsample(source: CGImageSource, size: CGSize, scale: CGFloat?) -> Data? {
+    private func downsample(source: CGImageSource, size: CGSize, scale: Double?) -> Data? {
         let maxDimensionInPixels = Swift.max(size.width, size.height) * (scale ?? 1)
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                   kCGImageSourceShouldCacheImmediately: true,

@@ -273,7 +273,6 @@ struct ChannelView: View, Equatable {
             }
         }
         .onAppear {
-            print(type(of: self.body))
             Task.detached {
                 await self.viewModel.setPermissions(self.appModel)
             }

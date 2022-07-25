@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-@available(macOS 11.0, *)
 struct SettingsView: View {
     @AppStorage("MusicPlatform")
     var selectedPlatform: String = "appleMusic"

@@ -8,6 +8,16 @@
 import AVKit
 import SwiftUI
 
+extension CGFloat {
+    init?(optional: Int?) {
+        if let optional {
+            self.init(optional)
+        } else {
+            return nil
+        }
+    }
+}
+
 struct EmbedView: View, Equatable {
     weak var embed: Embed?
 
@@ -90,6 +100,14 @@ struct EmbedView: View, Equatable {
                     VideoPlayer(player: AVPlayer(url: url))
                         .cornerRadius(5)
                         .maxFrame(width: 380, height: 300, originalWidth: video.width ?? 0, originalHeight: video.height ?? 0)
+                        .padding(.vertical, 2)
+                } else if let image = embed?.thumbnail {
+                    Attachment(image.url)
+                        .equatable()
+                        .scaledToFit()
+                        .frame(width: CGFloat(optional: image.width), height: CGFloat(optional: image.height))
+                        .frame(idealWidth: Double(image.width ?? 100), maxWidth: 380, maxHeight: 300)
+                        .cornerRadius(5)
                         .padding(.vertical, 2)
                 }
                 if let fields = embed?.fields {

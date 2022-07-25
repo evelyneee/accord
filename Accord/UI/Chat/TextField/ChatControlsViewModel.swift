@@ -221,6 +221,7 @@ final class ChatControlsViewModel: ObservableObject {
                 `/reset`: resume websocket connection
                 `/reset force`: force reset websocket connection
                 """
+                let original = Globals.user
                 let system = Globals.user
                 system?.id = generateFakeNonce()
                 system?.username = "Accord"
@@ -243,6 +244,7 @@ final class ChatControlsViewModel: ObservableObject {
                 encoder.dateEncodingStrategy = .iso8601
                 let data = try encoder.encode(gatewayMessage)
                 wss.messageSubject.send((data, channelID, false))
+                Globals.user = original
             }
             return
         }

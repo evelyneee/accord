@@ -244,10 +244,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     message.processedTimestamp = message.timestamp.makeProperDate()
                     message.user_mentioned = message.mentions.map(\.id).contains(user_id)
                     let messageMap = await self.messages.generateKeyMap()
-                    let message = message
+                    let msg = message
                     await MainActor.run {
-                        guard let index = messageMap[message.id] else { return }
-                        self.setMessage(index, message)
+                        guard let index = messageMap[msg.id] else { return }
+                        self.setMessage(index, msg)
                     }
                 }
             }

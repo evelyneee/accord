@@ -29,7 +29,7 @@ extension Reachability {
 struct GuildHoverAnimation: ViewModifier {
     var color: Color = Color.accentColor.opacity(0.5)
     var hasIcon: Bool
-    var frame: CGFloat = 45
+    var frame: Double = 45
     var selected: Bool
     @State var hovered: Bool = false
 

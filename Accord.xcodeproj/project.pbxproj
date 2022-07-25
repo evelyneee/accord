@@ -1140,6 +1140,8 @@
 				ENABLE_PREVIEWS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Accord;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1183,6 +1185,8 @@
 				ENABLE_PREVIEWS = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				INFOPLIST_FILE = "$(SRCROOT)/Accord/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Accord;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

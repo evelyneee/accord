@@ -11,15 +11,15 @@ import SwiftUI
 struct RolesView: View {
     var tags: [String]
 
-    @State private var totalHeight = CGFloat.infinity
+    @State private var totalHeight = Double.infinity
 
     var body: some View {
         self.generateContent().frame(maxHeight: totalHeight)
     }
 
     private func generateContent() -> some View {
-        var width = CGFloat.zero
-        var height = CGFloat.zero
+        var width = Double.zero
+        var height = Double.zero
 
         return ZStack(alignment: .topLeading) {
             ForEach(self.tags, id: \.self) { tag in
@@ -79,7 +79,7 @@ struct RolesView: View {
         return Color.secondary
     }
 
-    private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
+    private func viewHeightReader(_ binding: Binding<Double>) -> some View {
         GeometryReader { geometry -> Color in
             let rect = geometry.frame(in: .local)
             DispatchQueue.main.async {

@@ -30,8 +30,15 @@ extension Gateway {
         switch event.t {
         case .messageACK: break
         case .sessionsReplace: break
-        case .channelCreate: break
-        // let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+        case .channelCreate:
+            let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+            print("success 1")
+            if channel.d.guild_id == nil { // is a dm
+                print("success")
+                DispatchQueue.main.async {
+                    Storage.globals?.privateChannels.append(channel.d)
+                }
+            }
         case .channelUpdate: break
         case .channelDelete: break
         case .guildCreate:
