@@ -176,7 +176,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     if let firstMessage = await self.messages.first {
                         message.sameAuthor = firstMessage.author?.id == message.author?.id
                     }
-                    if let count = await self.messages.count, count == 50 {
+                    if await self.messages.count == 50 {
                         _ = await MainActor.run {
                             self.messages.removeLast()
                         }
