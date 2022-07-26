@@ -83,6 +83,7 @@
 		9EDD136627D5A55A000685E6 /* String++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136527D5A55A000685E6 /* String++.swift */; };
 		9EDD136827D6F951000685E6 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136727D6F951000685E6 /* Regex.swift */; };
 		9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDDB1B22831E4FC00510036 /* Reachability.swift */; };
+		9EEC6D6B288F684B0005DF30 /* MessageUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEC6D6A288F684B0005DF30 /* MessageUpdate.swift */; };
 		9EF5FFDA285CE0FE001B68FA /* ForumChannelList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF5FFD9285CE0FE001B68FA /* ForumChannelList.swift */; };
 		9EF5FFDC285E010C001B68FA /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF5FFDB285E010C001B68FA /* Globals.swift */; };
 		A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */; };
@@ -238,6 +239,7 @@
 		9EDD136527D5A55A000685E6 /* String++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String++.swift"; sourceTree = "<group>"; };
 		9EDD136727D6F951000685E6 /* Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 		9EDDB1B22831E4FC00510036 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		9EEC6D6A288F684B0005DF30 /* MessageUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageUpdate.swift; sourceTree = "<group>"; };
 		9EF5FFD9285CE0FE001B68FA /* ForumChannelList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForumChannelList.swift; sourceTree = "<group>"; };
 		9EF5FFDB285E010C001B68FA /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelViewViewModel.swift; sourceTree = "<group>"; };
@@ -422,6 +424,7 @@
 				A8B1F29726CB166C00E8FDC5 /* Events.swift */,
 				A82A061D26D97D5C007B9B27 /* GatewayStructure.swift */,
 				9EA295202753D1480014927D /* MemberList.swift */,
+				9EEC6D6A288F684B0005DF30 /* MessageUpdate.swift */,
 			);
 			path = GatewayPayloads;
 			sourceTree = "<group>";
@@ -959,6 +962,7 @@
 				A82A061E26D97D5C007B9B27 /* GatewayStructure.swift in Sources */,
 				9E96EB7A27DEC33D00BB3C8A /* Gateway+VoiceState.swift in Sources */,
 				9EC5FA1B2845BACC00C2A416 /* AvatarView.swift in Sources */,
+				9EEC6D6B288F684B0005DF30 /* MessageUpdate.swift in Sources */,
 				9E6BCC64277E8E850085F279 /* Print++.swift in Sources */,
 				9E2C98772780CD1A008C6AFD /* AccordAlert.swift in Sources */,
 				A80FEC2F2724FD35005F9950 /* UserNotifications.swift in Sources */,

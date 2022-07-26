@@ -19,7 +19,7 @@ extension CGFloat {
 }
 
 struct EmbedView: View, Equatable {
-    weak var embed: Embed?
+    @Binding var embed: Embed
 
     static func == (_: EmbedView, _: EmbedView) -> Bool {
         true
@@ -29,7 +29,7 @@ struct EmbedView: View, Equatable {
 
     var body: some View {
         HStack(spacing: 0) {
-            if let color = embed?.color {
+            if let color = embed.color {
                 if #available(macOS 13.0, *) {
                     RoundedRectangle(cornerRadius: 1)
                         .fill(Color(int: color).gradient)
@@ -48,7 +48,7 @@ struct EmbedView: View, Equatable {
                     .padding(.trailing, 5)
             }
             VStack(alignment: .leading) {
-                if let author = embed?.author {
+                if let author = embed.author {
                     HStack {
                         if let iconURL = author.proxy_icon_url ?? author.icon_url {
                             Attachment(iconURL, size: CGSize(width: 48, height: 48))
@@ -75,25 +75,25 @@ struct EmbedView: View, Equatable {
                     }
                     .padding(.vertical, 2)
                 }
-                if let title = embed?.title {
+                if let title = embed.title {
                     Text(title)
                         .fontWeight(.semibold)
                         .font(.system(size: 13.5))
                         .padding(.vertical, 2)
                 }
-                if let description = embed?.description {
+                if let description = embed.description {
                     AsyncMarkdown(description)
                         .lineSpacing(3)
                         .padding(.vertical, 2)
                 }
-                if let image = embed?.image {
+                if let image = embed.image {
                     Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))
                         .equatable()
                         .cornerRadius(5)
                         .maxFrame(width: 380, height: 300, originalWidth: image.width ?? 0, originalHeight: image.height ?? 0)
                         .padding(.vertical, 2)
                 }
-                if let video = embed?.video,
+                if let video = embed.video,
                    let urlString = video.proxy_url ?? video.url,
                    let url = URL(string: urlString)
                 {
@@ -101,16 +101,16 @@ struct EmbedView: View, Equatable {
                         .cornerRadius(5)
                         .maxFrame(width: 380, height: 300, originalWidth: video.width ?? 0, originalHeight: video.height ?? 0)
                         .padding(.vertical, 2)
-                } else if let image = embed?.thumbnail {
+                } else if let image = embed.thumbnail {
                     Attachment(image.url)
                         .equatable()
                         .scaledToFit()
-                        .frame(width: CGFloat(optional: image.width), height: CGFloat(optional: image.height))
+                        .frame(width: min(380, CGFloat(optional: image.width) ?? 100.0))
                         .frame(idealWidth: Double(image.width ?? 100), maxWidth: 380, maxHeight: 300)
                         .cornerRadius(5)
                         .padding(.vertical, 2)
                 }
-                if let fields = embed?.fields {
+                if let fields = embed.fields {
                     GridStack(fields, rowAlignment: .leading, columns: 4) { field in
                         VStack(alignment: .leading) {
                             Text(field.name)

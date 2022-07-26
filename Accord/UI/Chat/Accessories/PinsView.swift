@@ -19,10 +19,10 @@ struct PinsView: View {
     @Environment(\.presentationMode) private var presentationMode
 
     var body: some View {
-        List(pins, id: \.id) { message in
+        List($pins, id: \.id) { $message in
             ZStack(alignment: .topTrailing) {
                 MessageCellView(
-                    message: message,
+                    message: $message,
                     nick: nil,
                     replyNick: nil,
                     pronouns: nil,

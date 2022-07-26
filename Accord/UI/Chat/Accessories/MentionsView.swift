@@ -17,10 +17,10 @@ struct MentionsView: View {
     @Environment(\.presentationMode) private var presentationMode
 
     var body: some View {
-        List(mentions, id: \.id) { message in
+        List($mentions, id: \.id) { $message in
             ZStack(alignment: .topTrailing) {
                 MessageCellView(
-                    message: message,
+                    message: $message,
                     nick: nil,
                     replyNick: nil,
                     pronouns: nil,

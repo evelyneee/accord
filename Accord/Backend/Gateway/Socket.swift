@@ -63,8 +63,10 @@ extension Gateway {
     }
 
     func reset() {
-        print("resetting from function")
+        print("resetting")
 
+        hasReset = true
+        
         if let state = wss.connection?.state, case NWConnection.State.failed = state {
             close(.protocolCode(.protocolError))
         }
@@ -80,7 +82,9 @@ extension Gateway {
     }
     
     func reset() async -> Bool {
-        print("resetting from function")
+        print("resetting")
+        
+        hasReset = true
 
         if let state = wss.connection?.state, case NWConnection.State.failed = state {
             close(.protocolCode(.protocolError))
@@ -100,7 +104,10 @@ extension Gateway {
     }
 
     func hardReset() {
-        print("hard resetting from function")
+        print("hard resetting")
+        
+        hasReset = true
+        
         close(.protocolCode(.normalClosure))
         concurrentQueue.async {
             guard let new = try? Gateway(

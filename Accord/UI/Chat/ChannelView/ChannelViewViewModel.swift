@@ -231,7 +231,6 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             }
             .store(in: &cancellable)
-
         wss.editSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
@@ -240,14 +239,22 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 Task.detached {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-                    guard var message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
-                    message.processedTimestamp = message.timestamp.makeProperDate()
-                    message.user_mentioned = message.mentions.map(\.id).contains(user_id)
-                    let messageMap = await self.messages.generateKeyMap()
-                    let msg = message
-                    await MainActor.run {
-                        guard let index = messageMap[msg.id] else { return }
-                        self.setMessage(index, msg)
+                    if var message = try? decoder.decode(GatewayMessage.self, from: msg).d {
+                        message.processedTimestamp = message.timestamp.makeProperDate()
+                        message.user_mentioned = message.mentions.map(\.id).contains(user_id)
+                        let messageMap = await self.messages.generateKeyMap()
+                        let msg = message
+                        await MainActor.run {
+                            guard let index = messageMap[msg.id] else { return }
+                            self.setMessage(index, msg)
+                        }
+                    } else if let messageUpdate = try? decoder.decode(GatewayEventCodable<MessageUpdate>.self, from: msg).d {
+                        let messageMap = await self.messages.generateKeyMap()
+                        let msg = messageUpdate
+                        await MainActor.run {
+                            guard let index = messageMap[msg.id] else { return }
+                            self.setEmbeds(index, msg)
+                        }
                     }
                 }
             }
@@ -311,6 +318,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     
     @MainActor func setMessage(_ idx: Int, _ message: Message) {
         self.messages[idx] = message
+    }
+    
+    @MainActor func setEmbeds(_ idx: Int, _ message: MessageUpdate) {
+        self.messages[idx].embeds = message.embeds
     }
 
     private func memberLoad(_ person: GuildMember) {

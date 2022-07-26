@@ -10,6 +10,8 @@ import Combine
 import Foundation
 import Network
 
+var hasReset: Bool = false
+
 // The second version of Accord's gateway.
 // This uses Network.framework instead of URLSessionWebSocketTask
 final class Gateway {
@@ -29,7 +31,7 @@ final class Gateway {
     private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
 
     var presencePipeline = [String: PassthroughSubject<PresenceUpdate, Never>]()
-        
+            
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
         case .ready:
@@ -55,7 +57,7 @@ final class Gateway {
             return
         }
 
-        if message.contains("not authenticated") || message.contains("authentication failed") {
+        if (message.contains("not authenticated") || message.contains("authentication failed")) && !hasReset {
             logOut()
         }
     }

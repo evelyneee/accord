@@ -108,9 +108,10 @@ struct ChannelView: View, Equatable {
     }
 
     @_transparent
-    func cell(for message: Message) -> some View {
-        MessageCellView(
-            message: message,
+    func cell(for binding: Binding<Message>) -> some View {
+        let message = binding.wrappedValue
+        return MessageCellView(
+            message: binding,
             nick: viewModel.nicks[message.author?.id ?? ""],
             replyNick: viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
             pronouns: viewModel.pronouns[message.author?.id ?? ""],
@@ -143,9 +144,9 @@ struct ChannelView: View, Equatable {
     }
     
     var messagesView: some View {
-        ForEach(viewModel.messages, id: \.identifier) { message in
+        ForEach($viewModel.messages, id: \.identifier) { $message in
             if message.inSameDay {
-                cell(for: message)
+                cell(for: $message)
             } else {
                 VStack {
                     HStack {
@@ -162,7 +163,7 @@ struct ChannelView: View, Equatable {
                             .opacity(0.4)
                     }
                     .padding(.top)
-                    cell(for: message)
+                    cell(for: $message)
                 }
             }
         }

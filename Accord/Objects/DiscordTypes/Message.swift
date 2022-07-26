@@ -88,6 +88,8 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(content)
+        hasher.combine(embeds?.count ?? 0)
     }
 
     func delete() {

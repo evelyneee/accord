@@ -13,7 +13,7 @@ struct MessageCellView: View, Equatable {
         lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
 
-    @State var message: Message
+    @Binding var message: Message
     
     var nick: String?
     var replyNick: String?
@@ -164,7 +164,7 @@ struct MessageCellView: View, Equatable {
                 )
                 .fixedSize()
             }
-            if let embeds = message.embeds, !embeds.isEmpty {
+            if let embeds = Binding($message.embeds), !embeds.wrappedValue.isEmpty {
                 ForEach(embeds, id: \.id) { embed in
                     EmbedView(embed: embed)
                         .equatable()
