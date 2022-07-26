@@ -54,11 +54,6 @@ extension ServerListView {
         
         let keys = Storage.users.values.generateKeyMap()
 
-        let privateReadStateDict = readyPacket.read_state?.entries.generateKeyMap()
-        appModel.privateChannels.enumerated().forEach {
-            appModel.privateChannels[$0].read_state = readyPacket.read_state?.entries[keyed: $1.id, privateReadStateDict]
-        }
-        
         appModel.privateChannels = readyPacket.private_channels.map { c -> Channel in
             var c = c
             if c.recipients?.isEmpty != false {
@@ -71,6 +66,11 @@ extension ServerListView {
             guard let firstStr = $0.last_message_id, let first = Int64(firstStr),
                   let secondStr = $1.last_message_id, let second = Int64(secondStr) else { return false }
             return first > second
+        }
+        
+        let privateReadStateDict = readyPacket.read_state?.entries.generateKeyMap()
+        appModel.privateChannels.enumerated().forEach {
+            appModel.privateChannels[$0].read_state = readyPacket.read_state?.entries[keyed: $1.id, privateReadStateDict]
         }
         
         print("Binded to private channels")

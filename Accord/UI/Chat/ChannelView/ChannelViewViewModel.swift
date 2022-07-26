@@ -412,6 +412,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             guard let self = self else { return }
             Task {
                 await MainActor.run {
+                    self.error = nil
                     self.messages = messages
                 }
                 if messages.count < 50 {

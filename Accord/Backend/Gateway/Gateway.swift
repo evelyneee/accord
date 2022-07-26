@@ -110,6 +110,10 @@ final class Gateway {
         compress: Bool = true,
         decompressor: ZStream? = nil
     ) throws {
+        if let session_id, let seq {
+            self.sessionID = session_id
+            self.seq = seq
+        }
         if let decompressor = decompressor {
             self.decompressor = decompressor
         }
@@ -140,7 +144,9 @@ final class Gateway {
         guard connection?.state != .cancelled else { return } // Don't listen for hello if there is no connection
         connection?.receiveMessage { [weak self] data, _, _, error in
             guard let self = self else { return }
-
+            
+            print("Got HELLO")
+            
             if let error = error {
                 return print(error)
             }
@@ -176,6 +182,7 @@ final class Gateway {
             }
             do {
                 if let session_id = session_id, let seq = seq {
+                    print("resuming")
                     try self.reconnect(session_id: session_id, seq: seq)
                 } else {
                     try self.identify()

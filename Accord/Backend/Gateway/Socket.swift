@@ -62,8 +62,8 @@ extension Gateway {
         })
     }
 
-    func reset() {
-        print("resetting")
+    func reset(_ function: String = #function) {
+        print("resetting", function)
 
         hasReset = true
         

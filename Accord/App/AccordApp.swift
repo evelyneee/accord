@@ -149,6 +149,7 @@ struct AccordApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func onSleepNote(_: NSNotification) {
+        print("bye bye")
         wss?.close(.protocolCode(.protocolError))
     }
 
