@@ -7,7 +7,12 @@
 
 import SwiftUI
 
-struct AvatarView: View {
+struct AvatarView: View, Equatable {
+    
+    static func == (lhs: AvatarView, rhs: AvatarView) -> Bool {
+        lhs.author == rhs.author
+    }
+    
     var author: User
     
     @Environment(\.guildID)

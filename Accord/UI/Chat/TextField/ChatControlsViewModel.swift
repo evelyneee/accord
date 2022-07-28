@@ -157,8 +157,11 @@ final class ChatControlsViewModel: ObservableObject {
     @MainActor
     func findView() {
         AppKitLink<NSTextField>.introspect { textField, _ in
+            print("found view!!!!")
             textField.lineBreakMode = .byWordWrapping
             textField.usesSingleLineMode = false
+            textField.allowsDefaultTighteningForTruncation = true
+            textField.lineBreakStrategy = .standard
         }
     }
     

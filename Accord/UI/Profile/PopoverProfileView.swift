@@ -96,6 +96,9 @@ struct PopoverProfileView: View {
     @Environment(\.guildID)
     var guildID: String
     
+    @EnvironmentObject
+    var globals: AppGlobals
+    
     @State var guildMember: GuildMember? = nil
     @State var fullUser: User? = nil
     @State var hovered: Int?
@@ -238,7 +241,6 @@ struct PopoverProfileView: View {
                             switch $0 {
                             case let .success(channel):
                                 print(channel)
-                                AppGlobals.newItemPublisher.send((channel, nil))
                                 MentionSender.shared.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)

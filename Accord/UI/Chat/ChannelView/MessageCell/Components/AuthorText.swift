@@ -7,7 +7,10 @@
 
 import SwiftUI
 
-struct AuthorTextView: View {
+struct AuthorTextView: View, Equatable {
+    static func == (lhs: AuthorTextView, rhs: AuthorTextView) -> Bool {
+        lhs.nick == rhs.nick && lhs.role == rhs.role
+    }
     
     var message: Message
     var pronouns: String?

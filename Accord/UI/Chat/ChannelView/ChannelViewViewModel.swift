@@ -68,7 +68,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         self.channel = channel
         channelID = channel.id
         guildID = channel.guild_id ?? "@me"
-        guard wss?.connection?.state == .ready else {
+        if wss?.connection?.state != .ready {
             print("No active websocket connection")
             if reachability?.connected == true {
                 Task.detached {
@@ -83,9 +83,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 self.error = .init(code: -1009, message: "The network connection appears to be offline")
             }
             return
+        } else {
+            loadChannel(channel)
+            connect()
         }
-        connect()
-        loadChannel(channel)
     }
     
     @MainActor

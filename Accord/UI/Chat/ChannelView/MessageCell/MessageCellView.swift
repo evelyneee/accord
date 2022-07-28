@@ -113,6 +113,7 @@ struct MessageCellView: View, Equatable {
                             avatar: self.avatar,
                             popup: self.$popup
                         )
+                        .equatable()
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
                         .padding(.trailing, 1.5)
@@ -141,6 +142,7 @@ struct MessageCellView: View, Equatable {
                                 nick: self.nick,
                                 role: self.$role
                             )
+                            .equatable()
                             .fixedSize()
                             Spacer().frame(height: 1.3)
                             if !message.content.isEmpty {
