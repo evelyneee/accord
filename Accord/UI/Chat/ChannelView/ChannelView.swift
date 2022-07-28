@@ -99,7 +99,6 @@ struct ChannelView: View, Equatable {
         } else {
             _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
         }
-        viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
     }
 
     @_transparent
@@ -269,6 +268,7 @@ struct ChannelView: View, Equatable {
             }
         }
         .onAppear {
+            viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
             Task.detached {
                 await self.viewModel.setPermissions(self.appModel)
             }
