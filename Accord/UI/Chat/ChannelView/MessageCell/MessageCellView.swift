@@ -105,6 +105,13 @@ struct MessageCellView: View, Equatable {
                     )
                     .padding(.leading, leftPadding)
                 }
+            case .channelMessagePin:
+                if let user = message.author {
+                    MessagePinView(
+                        user: user
+                    )
+                    .padding(.leading, leftPadding)
+                }
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
