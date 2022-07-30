@@ -34,7 +34,13 @@ struct AttachmentView: View {
     @State var quickLookURL: URL?
     var body: some View {
         ForEach(media, id: \.url) { obj in
-            if obj.content_type?.contains("image/") == true, obj.content_type?.contains("gif") == false {
+            if obj.filename.contains("SPOILER") {
+                Attachment(obj.url, size: CGSize(width: 500, height: 500)).equatable()
+                    .cornerRadius(5)
+                    .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
+                    .accessibility(label: Text(obj.description ?? "Image"))
+                    .modifier(MediaSpoiler())
+            } else if obj.content_type?.contains("image/") == true, obj.content_type?.contains("gif") == false {
                 Button(action: { [weak obj] in
                     guard let obj = obj else { return }
                     if let quickLookURL = quickLookURL {
