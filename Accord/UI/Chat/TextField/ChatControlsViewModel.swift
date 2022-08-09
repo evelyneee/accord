@@ -9,6 +9,7 @@ import AppKit
 import Combine
 import Foundation
 import SwiftUI
+import MachO
 
 final class ChatControlsViewModel: ObservableObject {
     
@@ -288,9 +289,47 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
+    let NATIVE_EXECUTION = Int32(0)
+    let EMULATED_EXECUTION = Int32(1)
+    let UNKONWN_EXECUTION = -Int32(1)
+    
+    func processIsTranslated() -> Int32 {
+        var ret = Int32(0)
+        var size = ret.bitWidth
+        let result = sysctlbyname("sysctl.proc_translated", &ret, &size, nil, 0)
+        if result == -1 {
+            if (errno == ENOENT){
+                return 0
+            }
+            return -1
+        }
+        return ret
+    }
+    
+    func processIsTranslatedStr() -> String {
+            switch processIsTranslated() {
+            case NATIVE_EXECUTION:
+                return "Native"
+            case EMULATED_EXECUTION:
+                return "Rosetta"
+            default:
+                return "Unknown"
+            }
+    }
+    
+    func getArch() -> String? {
+        guard let archRaw = NXGetLocalArchInfo().pointee.name else {
+            return nil
+        }
+        return String(cString: archRaw)
+    }
+    
     var debugLog: String {
+        
         """
         **Accord Debug Log**
+        macOS Version: \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))
+        Architecture: \(getArch() ?? "Unknown CPU") (\(processIsTranslatedStr()))
         Version: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
         Gateway State: \(wss.connection?.state as Any)
         Compression: \(wss.compress ? "Enabled" : "Disabled")

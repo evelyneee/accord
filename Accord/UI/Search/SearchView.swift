@@ -12,7 +12,9 @@ struct SearchView: View {
     
     @State var text: String = ""
     @State var results: [Channel] = .init()
-    @Environment(\.presentationMode) var presentationMode
+    
+    @Environment(\.presentationMode)
+    var presentationMode
     
     @EnvironmentObject
     var appModel: AppGlobals
