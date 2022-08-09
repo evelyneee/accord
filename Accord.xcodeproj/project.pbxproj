@@ -1175,7 +1175,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.4.2;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
@@ -1220,7 +1220,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.4.2;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
