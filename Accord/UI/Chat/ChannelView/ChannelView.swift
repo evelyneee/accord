@@ -272,19 +272,31 @@ struct ChannelView: View, Equatable {
                     }
             }
             if showSearch {
-                List(searchMessages, id: \.id) { message in
-                    MessageCellView(
-                        message: message,
-                        nick: nil,
-                        replyNick: nil,
-                        pronouns: nil,
-                        avatar: nil,
-                        guildID: self.guildID,
-                        permissions: .constant(.init()),
-                        role: Binding.constant(nil),
-                        replyRole: Binding.constant(nil),
-                        replyingTo: $replyingTo
-                    )
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Search results")
+                            .font(.system(.title3, design: .rounded))
+                        Button(action: {
+                            self.showSearch = false
+                            self.searchMessages.removeAll()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 18))
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                    List($searchMessages, id: \.id) { $message in
+                        ZStack(alignment: .topTrailing) {
+                            cell(for: $message)
+                            Button("Jump") {
+                                MentionSender.shared.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                                    ChannelView.scrollTo.send((message.channelID, message.id))
+                                })
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
                 }
             }
         }
@@ -306,7 +318,7 @@ struct ChannelView: View, Equatable {
             return true
         }
         .searchable(text: $searchText) {
-            Toggle("Filter by pinned", isOn: $searchForPinnedMessages)
+            Toggle("Search pinned messages", isOn: $searchForPinnedMessages)
         }
         .onSubmit(of: .search) {
             showSearch = !searchText.isEmpty || self.searchForPinnedMessages
@@ -381,7 +393,7 @@ struct ChannelView: View, Equatable {
         
         let url = URL(string: rootURL)!
             .appendingPathComponent("guilds")
-            .appendingPathComponent(self.guildID)
+            .appendingPathComponent(self.channel.guild_id ?? "@me")
             .appendingPathComponent("messages")
             .appendingPathComponent("search")
             .appendingQueryParameters(queryParams)

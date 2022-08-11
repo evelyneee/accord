@@ -163,7 +163,7 @@
 		370AF4112834504C0055AA1D /* JoinServerSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinServerSheetView.swift; sourceTree = "<group>"; };
 		373EE5B92838FF410077B7A4 /* SetNicknameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNicknameView.swift; sourceTree = "<group>"; };
 		37B9DE0A2840EA44003C15DA /* Highlighting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Highlighting.swift; sourceTree = "<group>"; };
-		37EFC425285E30D700F38FF3 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchResult.swift; path = Accord/Objects/DiscordTypes/SearchResult.swift; sourceTree = "<group>"; };
+		37EFC425285E30D700F38FF3 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		490B2AAA278D20A100EA4F31 /* Accord_1.0.0_Universal.zip */ = {isa = PBXFileReference; explicitFileType = archive.zip; includeInIndex = 0; path = Accord_1.0.0_Universal.zip; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAB278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-amd64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-amd64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
 		490B2AAC278D20A100EA4F31 /* me.evelyn.accord_1.0.0_darwin-arm64.deb */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "me.evelyn.accord_1.0.0_darwin-arm64.deb"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -339,7 +339,6 @@
 		32F4C94E256D7D3300343BB3 = {
 			isa = PBXGroup;
 			children = (
-				37EFC425285E30D700F38FF3 /* SearchResult.swift */,
 				9E6B71072783ABD500A26CB6 /* README.md */,
 				32F4C959256D7D3300343BB3 /* Accord */,
 				32ADD5872583997E008D1715 /* Frameworks */,
@@ -458,6 +457,7 @@
 				A8B1F29926CB169800E8FDC5 /* Message.swift */,
 				A82A062326D98259007B9B27 /* ReadState.swift */,
 				A8A14CC226CE9A29006C4AEC /* Roles.swift */,
+				37EFC425285E30D700F38FF3 /* SearchResult.swift */,
 				A82A061F26D98193007B9B27 /* Settings.swift */,
 				A82A062126D981B4007B9B27 /* Status.swift */,
 				A8F84D6226DF19E5007A8625 /* Sticker.swift */,
@@ -1173,7 +1173,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = L9735M962H;
+				DEVELOPMENT_TEAM = VF46MYDSGH;
 				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -1190,7 +1190,7 @@
 				MARKETING_VERSION = 1.4.2;
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = blue.serena.accord;
+				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.accord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -1218,7 +1218,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = L9735M962H;
+				DEVELOPMENT_TEAM = VF46MYDSGH;
 				DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
