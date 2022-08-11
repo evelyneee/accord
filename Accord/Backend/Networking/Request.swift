@@ -184,6 +184,7 @@ public final class Request {
         request: URLRequest? = nil,
         url: URL? = nil,
         headers: Headers? = nil,
+        decoder: JSONDecoder = JSONDecoder(),
         completion: @escaping (Result<T, Error>) -> Void
     ) {
         let request: URLRequest? = {
@@ -212,7 +213,7 @@ public final class Request {
                     return completion(.failure(FetchErrors.notRequired)) // Bail out if we don't ask for a type
                 }
                 do {
-                    let value = try JSONDecoder().decode(T.self, from: data)
+                    let value = try decoder.decode(T.self, from: data)
                     return completion(.success(value))
                 } catch {
                     guard let error = try? JSONDecoder().decode(DiscordError.self, from: data) else {
