@@ -248,7 +248,7 @@ final class MediaRemoteWrapper {
     class func updatePresence(status: String? = nil) {
         guard !Self.rateLimit else { return }
         rateLimit = true
-        MediaRemoteWrapper.getCurrentlyPlayingSong()
+        Self.bag.insert(MediaRemoteWrapper.getCurrentlyPlayingSong()
             .sink(receiveCompletion: {
                 switch $0 {
                 case .finished: break
@@ -299,7 +299,6 @@ final class MediaRemoteWrapper {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     rateLimit = false
                 }
-            })
-            .store(in: &Self.bag)
+            }))
     }
 }

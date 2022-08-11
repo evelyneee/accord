@@ -2,7 +2,7 @@
 //  MessagePinView.swift
 //  Accord
 //
-//  Created by charlotte on 2022-07-27.
+//  Created by evelyn on 2022-07-27.
 //
 
 import SwiftUI

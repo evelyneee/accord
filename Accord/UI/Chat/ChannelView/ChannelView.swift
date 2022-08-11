@@ -147,7 +147,7 @@ struct ChannelView: View, Equatable {
             if message.inSameDay {
                 cell(for: $message)
             } else {
-                VStack {
+                VStack(alignment: .leading) {
                     HStack {
                         Color.secondary
                             .frame(height: 0.75)

@@ -49,8 +49,9 @@ struct MessageCellView: View, Equatable {
     
     var editingTextField: some View {
         TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
+            let text = self.editedText
             DispatchQueue.global().async {
-                message.edit(now: self.editedText)
+                message.edit(now: text)
             }
             self.editing = false
             self.editedText = ""
@@ -112,6 +113,22 @@ struct MessageCellView: View, Equatable {
                     )
                     .padding(.leading, leftPadding)
                 }
+            case .userBoostedServer:
+                if let user = message.author {
+                    ServerBoostView(
+                        user: user
+                    )
+                    .padding(.leading, leftPadding)
+                }
+            case .guildReachedLevelOne:
+                ServerLevelUpView(level: 1)
+                    .padding(.leading, leftPadding)
+            case .guildReachedLevelTwo:
+                ServerLevelUpView(level: 2)
+                    .padding(.leading, leftPadding)
+            case .guildReachedLevelThree:
+                ServerLevelUpView(level: 3)
+                    .padding(.leading, leftPadding)
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {

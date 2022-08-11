@@ -105,6 +105,7 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     }
 
     func edit(now: String) {
+        print("edit time")
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(id)"), headers: Headers(
             token: Globals.token,
             bodyObject: ["content": now],

@@ -333,8 +333,7 @@ final class ChatControlsViewModel: ObservableObject {
         Version: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
         Gateway State: \(wss.connection?.state as Any)
         Compression: \(wss.compress ? "Enabled" : "Disabled")
-        Message Subscriber: \(String(reflecting: wss.messageSubject))
-        Compressor State: \(wss.decompressor.status)
+        Compressor State: \(wss.decompressor.status.rawValue)
         Connection State: \(reachability?.connection as Any)
         """
     }

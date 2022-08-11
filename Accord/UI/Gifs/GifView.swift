@@ -34,6 +34,7 @@ struct GifView: View {
                 .scaledToFit()
         }
         .onAppear(perform: self.prep)
+        .environment(\.colorScheme, .dark)
     }
 
     func prep() {

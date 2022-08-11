@@ -56,12 +56,10 @@ struct NewInviteSheet: View {
                     .foregroundColor(.secondary)
                 HStack {
                     if let code {
-                        Text("https://discord.gg/" + code)
-                            .fontWeight(.medium)
-                            .textSelection(.enabled)
-                            .padding(4)
-                            .background(Color(NSColor.alternatingContentBackgroundColors[1]))
-                            .cornerRadius(4)
+                        TextField("", text: .constant("https://discord.gg/" + code))
+                            .textFieldStyle(.roundedBorder)
+                            .controlSize(.large)
+                            .frame(maxWidth: 200)
                     } else {
                         Text(verbatim: "https://discord.gg/a1b2c3d4e5")
                             .fontWeight(.medium)
@@ -72,6 +70,7 @@ struct NewInviteSheet: View {
                         NSPasteboard.general.setString("https://discord.gg/" + (self.code ?? ""), forType: .string)
                     }
                     .disabled(code == nil)
+                    .controlSize(.large)
                 }
             }
         }

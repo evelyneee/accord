@@ -15,11 +15,12 @@ struct JoinServerSheetView: View {
     var body: some View {
         VStack {
             Text("Join a server")
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.bold)
 
             TextField("Invite Code", text: $inviteCode)
                 .textFieldStyle(.roundedBorder)
+                .controlSize(.large)
                 .onExitCommand {
                     isPresented.toggle()
                 }
