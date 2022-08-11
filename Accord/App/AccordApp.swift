@@ -32,9 +32,9 @@ var reachability: Reachability? = {
 
 @main
 struct AccordApp: App {
+    
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State var popup: Bool = false
     @State var token = Globals.token
 
     private enum Tabs: Hashable {
@@ -48,7 +48,7 @@ struct AccordApp: App {
     @SceneBuilder
     var body: some Scene {
         WindowGroup {
-            if self.token == "" {
+            if self.token.isEmpty {
                 LoginView()
                     .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
@@ -60,49 +60,13 @@ struct AccordApp: App {
                         loaded = false
                     }
                     .preferredColorScheme(darkMode ? .dark : nil)
-                    .sheet(isPresented: $popup, onDismiss: {}) {
-                        SearchView()
-                            .focusable()
-                            .touchBar {
-                                Button(action: {
-                                    popup.toggle()
-                                }) {
-                                    Image(systemName: "magnifyingglass")
-                                }
-                            }
-                    }
                     .focusable()
-                    .touchBar {
-                        Button(action: {
-                            popup.toggle()
-                        }) {
-                            Image(systemName: "magnifyingglass")
-                        }
-                    }
                     .onAppear {
                         // Globals.loadVersion()
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
-                        DispatchQueue.global().async {
-                            Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
-                                contentType: "application/x-www-form-urlencoded",
-                                token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
-                                bodyObject: ["grant_type": "client_credentials"],
-                                type: .POST
-                            )) {
-                                switch $0 {
-                                case let .success(data):
-                                    let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                                    if let token = packet?["access_token"] as? String {
-                                        spotifyToken = token
-                                    }
-                                case let .failure(error):
-                                    print(error)
-                                }
-                            }
-                            NetworkCore.shared = NetworkCore()
-                        }
+                        self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()
                         }
@@ -119,7 +83,7 @@ struct AccordApp: App {
             SidebarCommands() // 1
             CommandMenu("Navigate") {
                 Button("Show quick jump") {
-                    popup.toggle()
+                    NotificationCenter.default.post(name: .init("red.evelyn.accord.Search"), object: nil)
                 }.keyboardShortcut("k")
                 #if DEBUG
                     Button("Error", action: {
@@ -159,10 +123,33 @@ struct AccordApp: App {
             .frame(minHeight: 500)
         }
     }
+    
+    func loadSpotifyToken() {
+        DispatchQueue.global().async {
+            Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
+                contentType: "application/x-www-form-urlencoded",
+                token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
+                bodyObject: ["grant_type": "client_credentials"],
+                type: .POST
+            )) {
+                switch $0 {
+                case let .success(data):
+                    let packet = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    if let token = packet?["access_token"] as? String {
+                        spotifyToken = token
+                    }
+                case let .failure(error):
+                    print(error)
+                }
+            }
+            NetworkCore.shared = NetworkCore()
+        }
+    }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func onSleepNote(_: NSNotification) {
+        print("bye bye")
         wss?.close(.protocolCode(.protocolError))
     }
 

@@ -11,15 +11,15 @@ import SwiftUI
 struct RolesView: View {
     var tags: [String]
 
-    @State private var totalHeight = CGFloat.infinity
+    @State private var totalHeight = Double.infinity
 
     var body: some View {
         self.generateContent().frame(maxHeight: totalHeight)
     }
 
     private func generateContent() -> some View {
-        var width = CGFloat.zero
-        var height = CGFloat.zero
+        var width = Double.zero
+        var height = Double.zero
 
         return ZStack(alignment: .topLeading) {
             ForEach(self.tags, id: \.self) { tag in
@@ -50,12 +50,17 @@ struct RolesView: View {
 
     @ViewBuilder
     private func item(for role: String) -> some View {
-        if let roleName = roleNames[role] {
+        if let roleName = Storage.roleNames[role] {
             HStack(spacing: 4) {
-                Circle()
-                    .fill()
-                    .foregroundColor(color(for: role))
-                    .frame(width: 10, height: 10)
+                if #available(macOS 13.0, *) {
+                    Circle()
+                        .fill(color(for: role).gradient)
+                        .frame(width: 10, height: 10)
+                } else {
+                    Circle()
+                        .fill(color(for: role))
+                        .frame(width: 10, height: 10)
+                }
                 Text(roleName)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -68,13 +73,13 @@ struct RolesView: View {
     }
 
     func color(for role: String) -> Color {
-        if let roleColor = roleColors[role]?.0 {
+        if let roleColor = Storage.roleColors[role]?.0 {
             return Color(int: roleColor)
         }
         return Color.secondary
     }
 
-    private func viewHeightReader(_ binding: Binding<CGFloat>) -> some View {
+    private func viewHeightReader(_ binding: Binding<Double>) -> some View {
         GeometryReader { geometry -> Color in
             let rect = geometry.frame(in: .local)
             DispatchQueue.main.async {
@@ -87,7 +92,13 @@ struct RolesView: View {
 
 struct PopoverProfileView: View {
     @State var user: User?
+    
+    @Environment(\.guildID)
     var guildID: String
+    
+    @EnvironmentObject
+    var globals: AppGlobals
+    
     @State var guildMember: GuildMember? = nil
     @State var fullUser: User? = nil
     @State var hovered: Int?
@@ -162,6 +173,7 @@ struct PopoverProfileView: View {
                 if let banner = fullUser?.banner, let id = user?.id {
                     Attachment(cdnURL + "/banners/\(id)/\(banner).png?size=320")
                         .equatable()
+                        .scaledToFit()
                         .frame(width: 290)
                 } else {
                     Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
@@ -210,15 +222,15 @@ struct PopoverProfileView: View {
                         Divider()
                     }
                     if let roles = self.guildMember?.roles?.sorted(by: { lhs, rhs in
-                        if let lhs = roleColors[lhs]?.1, let rhs = roleColors[rhs]?.1 {
+                        if let lhs = Storage.roleColors[lhs]?.1, let rhs = Storage.roleColors[rhs]?.1 {
                             return lhs > rhs
                         } else { return true }
                     }) {
                         RolesView(tags: roles)
                     }
+                    Divider()
                     Button(action: {
                         Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             bodyObject: ["recipients": [user?.id ?? ""]],
                             type: .POST,
@@ -229,7 +241,6 @@ struct PopoverProfileView: View {
                             switch $0 {
                             case let .success(channel):
                                 print(channel)
-                                ServerListView.privateChannels.append(channel)
                                 MentionSender.shared.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)

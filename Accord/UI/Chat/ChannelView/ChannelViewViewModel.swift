@@ -5,13 +5,12 @@
 //  Created by evelyn on 2021-10-22.
 //
 
-import AppKit
 import Combine
-import Foundation
 import SwiftUI
+import Network
 
 final class ChannelViewViewModel: ObservableObject, Equatable {
-    static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
+    @MainActor static func == (lhs: ChannelViewViewModel, rhs: ChannelViewViewModel) -> Bool {
         lhs.messages == rhs.messages &&
             lhs.nicks == rhs.nicks &&
             lhs.roles == rhs.roles &&
@@ -19,23 +18,39 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             lhs.pronouns == rhs.pronouns
     }
 
-    @Published var messages: [Message] = .init()
-    @Published var nicks: [String: String] = .init()
-    @Published var roles: [String: String] = .init()
-    @Published var avatars: [String: String] = .init()
-    @Published var pronouns: [String: String] = .init()
+    @MainActor @Published
+    var messages: [Message] = .init()
+    
+    @MainActor @Published
+    var nicks: [String: String] = .init()
+    
+    @MainActor @Published
+    var roles: [String: String] = .init()
+    
+    @MainActor @Published
+    var avatars: [String: String] = .init()
+    
+    @MainActor @Published
+    var pronouns: [String: String] = .init()
 
-    @Published var memberList: [OPSItems] = .init()
-    @Published var typing: [String] = .init()
+    @MainActor @Published
+    var memberList: [OPSItems] = .init()
+    
+    @MainActor @Published
+    var typing: [String] = .init()
 
     var cancellable: Set<AnyCancellable> = .init()
-    @Published var permissions: Permissions = .init()
+    
+    @MainActor @Published
+    var permissions: Permissions = .init()
     
     @Published var noMoreMessages = false
 
     @Environment(\.user)
     var user: User
 
+    @Published var error: DiscordError? = nil
+    
     var guildID: String
     var channelID: String
 
@@ -47,24 +62,53 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         return decoder
     }()
 
+    let channel: Channel
+    
     init(channel: Channel) {
+        self.channel = channel
         channelID = channel.id
         guildID = channel.guild_id ?? "@me"
-        guard wss != nil else { return }
-        connect()
-        loadChannel(channel)
+        if wss?.connection?.state != .ready {
+            print("No active websocket connection")
+            if reachability?.connected == true {
+                Task.detached {
+                    self.error = .init(code: 502, message: "Bad Gateway connection")
+                    let res = await wss.reset()
+                    if (res) {
+                        self.connect()
+                        self.loadChannel(channel)
+                    }
+                }
+            } else {
+                self.error = .init(code: -1009, message: "The network connection appears to be offline")
+            }
+            return
+        } else {
+            loadChannel(channel)
+            connect()
+        }
+    }
+    
+    @MainActor
+    func setPermissions(_ model: AppGlobals) async {
+        if !(guildID == "@me" || self.channel.overridePermissions == true) {
+            let perms = model.permissionsAllowed(self.channel.permission_overwrites ?? [], guildID: self.guildID)
+            await MainActor.run {
+                self.permissions = perms
+            }
+        }
     }
 
     func loadChannel(_ channel: Channel) {
         messageFetchQueue.async { [weak self] in
             guard let self = self else { return }
+            self.getMessages(channelID: self.channelID, guildID: self.guildID)
             if self.guildID == "@me" {
                 try? wss.subscribeToDM(self.channelID)
             } else {
                 try? wss.subscribe(to: self.guildID)
             }
             self.loadPermissions(channel)
-            self.getMessages(channelID: self.channelID, guildID: self.guildID)
             MentionSender.shared.removeMentions(server: self.guildID)
         }
     }
@@ -77,13 +121,6 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 ])
                 if channel.owner_id == user_id {
                     self.permissions.insert(.kickMembers)
-                }
-            }
-        } else {
-            Self.permissionQueue.async { [weak self] in
-                let perms = channel.permission_overwrites?.allAllowed(guildID: self?.guildID ?? "") ?? .init()
-                DispatchQueue.main.async {
-                    self?.permissions = perms
                 }
             }
         }
@@ -129,24 +166,35 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.messageSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in
-                guard channelID == self?.channelID else { return }
-                guard var message = try? Self.decoder.decode(GatewayMessage.self, from: msg).d else { return }
-                message.processedTimestamp = message.timestamp.makeProperDate()
-                message.user_mentioned = message.mentions.map(\.id).contains(user_id)
-                if self?.guildID != "@me", !(self?.roles.keys.contains(message.author?.id ?? "") ?? false) {
-                    self?.loadUser(for: message.author?.id)
-                }
-                if let firstMessage = self?.messages.first {
-                    message.sameAuthor = firstMessage.author?.id == message.author?.id
-                }
-                DispatchQueue.main.async {
-                    if let count = self?.messages.count, count == 50 {
-                        self?.messages.removeLast()
+                guard let self = self, channelID == self.channelID else { return }
+                Task.detached {
+                    guard var message = try? Self.decoder.decode(GatewayMessage.self, from: msg).d else { return }
+                    message.processedTimestamp = message.timestamp.makeProperDate()
+                    message.user_mentioned = message.mentions.map(\.id).contains(user_id)
+                    if self.guildID != "@me", await !(self.roles.keys.contains(message.author?.id ?? "") ) {
+                        self.loadUser(for: message.author?.id)
+                    }
+                    if let firstMessage = await self.messages.first {
+                        message.sameAuthor = firstMessage.author?.id == message.author?.id
+                    }
+                    if await self.messages.count == 50 {
+                        _ = await MainActor.run {
+                            self.messages.removeLast()
+                        }
                     }
                     guard let author = message.author else { return }
-                    Storage.usernames[author.id] = author.username
+                    await MainActor.run {
+                        if Storage.users[author.id] == nil {
+                            Storage.users[author.id] = author
+                        }
+                    }
                     withAnimation(Animation.easeInOut(duration: 0.05)) {
-                        self?.messages.insert(message, at: 0)
+                        let message = message
+                        Task {
+                            await MainActor.run {
+                                self.messages.insert(message, at: 0)
+                            }
+                        }
                     }
                 }
             }
@@ -169,33 +217,46 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         wss.deleteSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
-                guard channelID == self?.channelID else { return }
-                let messageMap = self?.messages.generateKeyMap()
-                guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg),
-                      let message = gatewayMessage.d,
-                      let index = messageMap?[message.id] else { return }
-                DispatchQueue.main.async {
-                    withAnimation(Animation.easeInOut(duration: 0.05)) {
-                        let i: Int = index
-                        self?.messages.remove(at: i)
+                guard let self = self, channelID == self.channelID else { return }
+                Task.detached {
+                    let messageMap = await self.messages.generateKeyMap()
+                    guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg),
+                          let message = gatewayMessage.d,
+                          let index = messageMap[message.id] else { return }
+                    await MainActor.run {
+                        withAnimation(Animation.easeInOut(duration: 0.05)) {
+                            let i: Int = index
+                            self.messages.remove(at: i)
+                        }
                     }
                 }
             }
             .store(in: &cancellable)
-
         wss.editSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
                 // Received a message from backend
-                guard channelID == self?.channelID else { return }
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-                guard var message = try? decoder.decode(GatewayMessage.self, from: msg).d else { return }
-                message.processedTimestamp = message.timestamp.makeProperDate()
-                message.user_mentioned = message.mentions.map(\.id).contains(user_id)
-                let messageMap = self?.messages.generateKeyMap()
-                DispatchQueue.main.async {
-                    self?.messages[keyed: message.id, messageMap] = message
+                guard let self = self, channelID == self.channelID else { return }
+                Task.detached {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+                    if var message = try? decoder.decode(GatewayMessage.self, from: msg).d {
+                        message.processedTimestamp = message.timestamp.makeProperDate()
+                        message.user_mentioned = message.mentions.map(\.id).contains(user_id)
+                        let messageMap = await self.messages.generateKeyMap()
+                        let msg = message
+                        await MainActor.run {
+                            guard let index = messageMap[msg.id] else { return }
+                            self.setMessage(index, msg)
+                        }
+                    } else if let messageUpdate = try? decoder.decode(GatewayEventCodable<MessageUpdate>.self, from: msg).d {
+                        let messageMap = await self.messages.generateKeyMap()
+                        let msg = messageUpdate
+                        await MainActor.run {
+                            guard let index = messageMap[msg.id] else { return }
+                            self.setEmbeds(index, msg)
+                        }
+                    }
                 }
             }
             .store(in: &cancellable)
@@ -204,52 +265,64 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID in
 
-                guard channelID == self?.channelID,
+                guard let self = self, channelID == self.channelID,
                       let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                      memberDecodable.user_id != self?.user.id else { return }
+                      memberDecodable.user_id != self.user.id else { return }
+                Task.detached {
+                    let isKnownAs =
+                        await self.nicks[memberDecodable.user_id] ??
+                        memberDecodable.member?.nick ??
+                        memberDecodable.member?.user.username ??
+                        "Unknown User"
 
-                let isKnownAs =
-                    self?.nicks[memberDecodable.user_id] ??
-                    memberDecodable.member?.nick ??
-                    memberDecodable.member?.user.username ??
-                    "Unknown User"
-
-                DispatchQueue.main.async {
-                    if self?.typing.contains(isKnownAs) == false {
-                        self?.typing.append(isKnownAs)
+                    await MainActor.run {
+                        if self.typing.contains(isKnownAs) == false {
+                            self.typing.append(isKnownAs)
+                        }
                     }
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
-                    guard self?.typing.isEmpty == false else { return }
-                    self?.typing.removeLast()
+                    try await Task.sleep(nanoseconds: UInt64(5 * 1_000_000_000))
+                    await MainActor.run {
+                        guard !self.typing.isEmpty else { return }
+                        self.typing.removeLast()
+                    }
                 }
             }
             .store(in: &cancellable)
         wss.memberListSubject
             .receive(on: RunLoop.main)
-            .sink { [unowned self] list in
-                if self.memberList.isEmpty {
-                    let list = Array(list.d.ops.compactMap(\.items).joined())
-                        .map { item -> OPSItems in
-                            let new = item
-                            new.member?.roles = new.member?.roles?
-                                .compactMap { id -> (String, (Int, Int))? in
-                                    if let color = roleColors[id] {
-                                        return (id, color)
+            .sink { [weak self] list in
+                guard let self = self else { return }
+                Task.detached {
+                    if await self.memberList.isEmpty {
+                        let list = Array(list.d.ops.compactMap(\.items).joined())
+                            .map { item -> OPSItems in
+                                let new = item
+                                new.member?.roles = new.member?.roles?
+                                    .compactMap { id -> (String, (Int, Int))? in
+                                        if let color = Storage.roleColors[id] {
+                                            return (id, color)
+                                        }
+                                        return nil
                                     }
-                                    return nil
-                                }
-                                .sorted(by: { $0.1.1 > $1.1.1 })
-                                .map(\.0)
-                            return new
+                                    .sorted(by: { $0.1.1 > $1.1.1 })
+                                    .map(\.0)
+                                return new
+                            }
+                        await MainActor.run {
+                            self.memberList = list
                         }
-                    DispatchQueue.main.async {
-                        self.memberList = list
                     }
                 }
             }
             .store(in: &cancellable)
+    }
+    
+    @MainActor func setMessage(_ idx: Int, _ message: Message) {
+        self.messages[idx] = message
+    }
+    
+    @MainActor func setEmbeds(_ idx: Int, _ message: MessageUpdate) {
+        self.messages[idx].embeds = message.embeds
     }
 
     private func memberLoad(_ person: GuildMember) {
@@ -264,7 +337,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         if let roles = person.roles {
             let foregroundRoleColor = roles
                 .compactMap { id -> (String, (Int, Int))? in
-                    if let color = roleColors[id] {
+                    if let color = Storage.roleColors[id] {
                         return (id, color)
                     }
                     return nil
@@ -279,10 +352,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         }
     }
 
-    func ack(channelID: String, guildID: String) {
-        guard let last = messages.first?.id else { return }
+    func ack(channelID: String, guildID: String) async {
+        guard let last = await messages.first?.id else { return }
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(last)/ack"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["token": NSNull()], // I don't understand why this is needed, but it wasn't when I first implemented ack...
             type: .POST,
@@ -291,10 +363,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             json: true
         ))
     }
-
+    
+    @_optimize(speed)
     func getMessages(channelID: String, guildID: String, scrollAfter: Bool = false) {
         RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?limit=50"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .GET,
             discordHeaders: true,
@@ -307,6 +379,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard element != output.last else { return element }
                 var element = element
                 element.processedTimestamp = element.timestamp.makeProperDate()
+                element._inSameDay = Calendar.current.isDate(element.timestamp, inSameDayAs: output[index + 1].timestamp)
                 element.sameAuthor = output[index + 1].author?.id == element.author?.id
                 element.user_mentioned = element.mentions.map(\.id).contains(user_id)
                 return element
@@ -318,33 +391,58 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             case .finished: break
             case let .failure(error):
                 print(error)
-                MentionSender.shared.deselect()
+                if let error = error as? Request.FetchErrors {
+                    switch error {
+                    case .invalidRequest: break
+                    case .invalidForm: break
+                    case .badResponse(let response):
+                        if let response = response as? HTTPURLResponse {
+                            self.error = .init(code: response.statusCode, message: "HTTP request failed")
+                        }
+                    case .notRequired: break
+                    case .decodingError(_, _): break
+                    case .noData: break
+                    case .discordError(code: let code, message: let message):
+                        self.error = .init(code: code ?? 0, message: message)
+                    }
+                } else if let error = error as? URLError {
+                    self.error = .init(code: error.code.rawValue, message: error.localizedDescription)
+                }
             }
         }) { [weak self] messages in
-            self?.messages = messages
-            if messages.count < 50 {
-                self?.noMoreMessages = true
-            }
-            if scrollAfter {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                    ChannelView.scrollTo.send((self?.channelID ?? "", messages.first?.id ?? ""))
-                })
-            }
-            messageFetchQueue.async {
-                guildID == "@me" ? self?.fakeNicksObject() : self?.performSecondStageLoad()
-                self?.loadPronouns()
-                self?.ack(channelID: channelID, guildID: guildID)
-                self?.cacheUsernames()
+            guard let self = self else { return }
+            Task {
+                await MainActor.run {
+                    self.error = nil
+                    self.messages = messages
+                }
+                if messages.count < 50 {
+                    self.noMoreMessages = true
+                }
+                if scrollAfter {
+                    let channelID = self.channelID
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                        ChannelView.scrollTo.send((channelID, messages.first?.id ?? ""))
+                    })
+                }
+                Task.detached {
+                    guildID == "@me" ? await self.fakeNicksObject() : await self.performSecondStageLoad()
+                    await self.loadPronouns()
+                    await self.ack(channelID: channelID, guildID: guildID)
+                    await self.cacheUsernames()
+                }
             }
         }
         .store(in: &cancellable)
     }
 
-    func cacheUsernames() {
-        messages.forEach { message in
+    func cacheUsernames() async {
+        await self.messages.forEach { message in
             guard let author = message.author else { return }
             DispatchQueue.main.async {
-                Storage.usernames[author.id] = author.username
+                if Storage.users[author.id] == nil {
+                    Storage.users[author.id] = author
+                }
             }
         }
     }
@@ -358,9 +456,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         memberLoad(person)
     }
 
-    func fakeNicksObject() {
+    func fakeNicksObject() async {
         guard guildID == "@me" else { return }
-        let _nicks: [String: String] = messages
+        let _nicks: [String: String] = await messages
             .compactMap { [$0.author?.id ?? "": $0.author?.username ?? ""] }
             .flatMap { $0 }
             .reduce([String: String]()) { dict, tuple in
@@ -373,9 +471,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         }
     }
 
-    func loadPronouns() {
+    func loadPronouns() async {
         guard Globals.pronounDB else { return }
-        RequestPublisher.fetch([String: String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
+        await RequestPublisher.fetch([String: String].self, url: URL(string: "https://pronoundb.org/api/v1/lookup-bulk"), headers: Headers(
             bodyObject: [
                 "platform": "discord",
                 "ids": messages.compactMap { $0.author?.id }.joined(separator: ","),
@@ -383,17 +481,21 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             type: .GET
         ))
         .replaceError(with: [:])
-        .receive(on: DispatchQueue.main)
         .sink { [weak self] value in
-            self?.pronouns = value.mapValues {
-                pronounDBFormed(pronoun: $0)
+            guard let self = self else { return }
+            Task {
+                await MainActor.run {
+                    self.pronouns = value.mapValues {
+                        pronounDBFormed(pronoun: $0)
+                    }
+                }
             }
         }
         .store(in: &cancellable)
     }
 
-    func performSecondStageLoad() {
-        var allUserIDs: [String] = messages
+    func performSecondStageLoad() async {
+        var allUserIDs: [String] = await messages
             .compactMap { $0.author?.id }
             .removingDuplicates()
         var toRemove: [String] = .init()
@@ -402,18 +504,25 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 let member = try self.loadCachedUser(id)
                 toRemove.append(id)
                 memberLoad(member)
-            } catch { print(error) }
+            } catch { dprint(error) }
         }
         allUserIDs = allUserIDs.filter { !toRemove.contains($0) }
         if !(allUserIDs.isEmpty) {
-            print(allUserIDs, "websocket request")
+            dprint(allUserIDs, "websocket request")
             try? wss.getMembers(ids: allUserIDs, guild: guildID)
         }
     }
 
-    func loadMoreMessages() {
-        RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?before=\(messages.last?.id ?? "")&limit=50"), headers: Headers(
-            userAgent: discordUserAgent,
+    func loadMoreMessages() async {
+        let url = await root
+            .appendingPathComponent("channels")
+            .appendingPathComponent(channelID)
+            .appendingPathComponent("messages")
+            .appendingQueryParameters([
+                "before":messages.last?.id ?? "",
+                "limit":"50"
+            ])
+        RequestPublisher.fetch([Message].self, url: url, headers: Headers(
             token: Globals.token,
             type: .GET,
             discordHeaders: true,
@@ -424,6 +533,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard element != msg.last else { return element }
                 var element = element
                 element.processedTimestamp = element.timestamp.makeProperDate()
+                element._inSameDay = Calendar.current.isDate(element.timestamp, inSameDayAs: msg[index + 1].timestamp)
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 element.user_mentioned = element.mentions.map(\.id).contains(user_id)
                 return element
@@ -436,14 +546,26 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             if messages.isEmpty {
                 self?.noMoreMessages = true
             }
-            self?.messages.append(contentsOf: messages)
+            guard let self = self else { return }
+            Task {
+                await MainActor.run {
+                    self.messages.append(contentsOf: messages)
+                }
+            }
         }
         .store(in: &cancellable)
     }
 
     func loadAroundMessage(id: String) {
-        RequestPublisher.fetch([Message].self, url: URL(string: "\(rootURL)/channels/\(channelID)/messages?around=\(id)&limit=50"), headers: Headers(
-            userAgent: discordUserAgent,
+        let url = root
+            .appendingPathComponent("channels")
+            .appendingPathComponent(channelID)
+            .appendingPathComponent("messages")
+            .appendingQueryParameters([
+                "around":id,
+                "limit":"50"
+            ])
+        RequestPublisher.fetch([Message].self, url: url, headers: Headers(
             token: Globals.token,
             type: .GET,
             discordHeaders: true,
@@ -454,21 +576,21 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 guard element != msg.last else { return element }
                 var element = element
                 element.processedTimestamp = element.timestamp.makeProperDate()
+                element._inSameDay = Calendar.current.isDate(element.timestamp, inSameDayAs: msg[index + 1].timestamp)
                 element.sameAuthor = msg[index + 1].author?.id == element.author?.id
                 element.user_mentioned = element.mentions.map(\.id).contains(user_id)
                 return element
             }
         }
         .receive(on: RunLoop.main)
-        .sink(receiveCompletion: { _ in
-
-        }) { [weak self] messages in
-            self?.messages = messages
+        .replaceError(with: [])
+        .map { [weak self] in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 ChannelView.scrollTo.send((self?.channelID ?? "", id))
             }
+            return $0
         }
-        .store(in: &cancellable)
+        .assign(to: &self.$messages)
     }
 }
 

@@ -10,22 +10,43 @@ import Foundation
 import SwiftUI
 
 final class AsyncMarkdownModel: ObservableObject {
+    
+    @MainActor
     init(text: String) {
         markdown = Text(text)
     }
 
-    @Published var markdown: Text
-    @Published var loaded: Bool = false
-
+    @MainActor @Published
+    var markdown: Text
+    
+    @MainActor @Published
+    var loaded: Bool = false
+    
+    @MainActor @Published
     var hasEmojiOnly: Bool = false
 
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
 
-    func make(text: String) {
+    @_optimize(speed)
+    func make(text: String, usernames: [String:String]) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
-            self?.cancellable = Markdown.markAll(text: text, Storage.usernames, font: emojis)
+            guard (text.contains("*") ||
+                   text.contains("~") ||
+                   text.contains("/") ||
+                   text.contains("_") ||
+                   text.contains(">") ||
+                   text.contains("<") ||
+                   text.contains("`")) ||
+                    text.count > 100 else {
+                DispatchQueue.main.async {
+                    self?.hasEmojiOnly = emojis
+                    self?.loaded = true
+                }
+                return
+            }
+            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis)
                 .replaceError(with: Text(text))
                 .sink { [weak self] text in
                     DispatchQueue.main.async {
@@ -47,10 +68,14 @@ struct AsyncMarkdown: View, Equatable {
 
     @StateObject var model: AsyncMarkdownModel
     @Binding var text: String
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
+    @MainActor
     init(_ text: String, binded: Binding<String>? = nil) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
-        _text = binded ?? Binding.constant(text)
+        _text = binded ?? .constant(text)
     }
 
     @ViewBuilder
@@ -58,14 +83,13 @@ struct AsyncMarkdown: View, Equatable {
         if !model.hasEmojiOnly || model.loaded {
             model.markdown
                 .textSelection(.enabled)
-                .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
-                .animation(nil, value: UUID())
+                .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
                 .fixedSize(horizontal: false, vertical: true)
                 .onChange(of: self.text, perform: { [weak model] text in
-                    model?.make(text: text)
+                    model?.make(text: text, usernames: Storage.usernames)
                 })
                 .onAppear { [weak model] in
-                    model?.make(text: text)
+                    model?.make(text: text, usernames: Storage.usernames)
                 }
         }
     }

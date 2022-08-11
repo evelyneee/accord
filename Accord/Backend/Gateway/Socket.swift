@@ -9,10 +9,6 @@ import Combine
 import Foundation
 import Network
 
-final class Notifications {
-    static var privateChannels: [String] = []
-}
-
 extension Gateway {
     func close(_ closeCode: NWProtocolWebSocket.CloseCode) {
         let metadata = NWProtocolWebSocket.Metadata(opcode: .close)
@@ -47,7 +43,6 @@ extension Gateway {
             metadata: [NWProtocolWebSocket.Metadata(opcode: .text)]
         )
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        print(jsonData)
         connection?.send(content: jsonData, contentContext: context, completion: .contentProcessed { error in
             if let error = error {
                 print(error)
@@ -67,9 +62,11 @@ extension Gateway {
         })
     }
 
-    func reset() {
-        print("resetting from function")
+    func reset(_ function: String = #function) {
+        print("resetting", function)
 
+        hasReset = true
+        
         if let state = wss.connection?.state, case NWConnection.State.failed = state {
             close(.protocolCode(.protocolError))
         }
@@ -83,9 +80,34 @@ extension Gateway {
             wss = new
         }
     }
+    
+    func reset() async -> Bool {
+        print("resetting")
+        
+        hasReset = true
+
+        if let state = wss.connection?.state, case NWConnection.State.failed = state {
+            close(.protocolCode(.protocolError))
+        }
+        return await withCheckedContinuation { continuation in
+            concurrentQueue.async {
+                guard let new = try? Gateway(
+                    url: Gateway.gatewayURL,
+                    session_id: wss.sessionID,
+                    seq: wss.seq,
+                    compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                ) else { return }
+                wss = new
+                return continuation.resume(with: .success(true))
+            }
+        }
+    }
 
     func hardReset() {
-        print("hard resetting from function")
+        print("hard resetting")
+        
+        hasReset = true
+        
         close(.protocolCode(.normalClosure))
         concurrentQueue.async {
             guard let new = try? Gateway(

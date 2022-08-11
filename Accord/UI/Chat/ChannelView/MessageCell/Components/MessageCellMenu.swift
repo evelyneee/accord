@@ -16,12 +16,17 @@ private var encoder: ISO8601DateFormatter = {
 
 struct MessageCellMenu: View {
     @State var message: Message
+    
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     var permissions: Permissions
     @Binding var replyingTo: Message?
     @Binding var editing: Bool
     @Binding var popup: Bool
     @Binding var showEditNicknamePopover: Bool
+    @Binding var reactionPopup: Bool
 
     @ViewBuilder
     private var moderationSection: some View {
@@ -32,16 +37,15 @@ struct MessageCellMenu: View {
             Button(message.pinned == false ? "Pin" : "Unpin") {
                 let url = URL(string: rootURL)?
                     .appendingPathComponent("channels")
-                    .appendingPathComponent(message.channel_id)
+                    .appendingPathComponent(message.channelID)
                     .appendingPathComponent("pins")
                     .appendingPathComponent(message.id)
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
-                        userAgent: discordUserAgent,
                         token: Globals.token,
                         type: message.pinned == false ? .PUT : .DELETE,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                     ))
                     DispatchQueue.main.async {
                         message.pinned?.toggle()
@@ -58,16 +62,15 @@ struct MessageCellMenu: View {
             Button("Remove member") {
                 let url = URL(string: rootURL)?
                     .appendingPathComponent("channels")
-                    .appendingPathComponent(self.message.channel_id)
+                    .appendingPathComponent(self.message.channelID)
                     .appendingPathComponent("recipients")
                     .appendingPathComponent(message.author!.id)
                 DispatchQueue.global().async {
                     Request.ping(url: url, headers: Headers(
-                        userAgent: discordUserAgent,
                         token: Globals.token,
                         type: .DELETE,
                         discordHeaders: true,
-                        referer: "https://discord.com/channels/@me/\(self.message.channel_id)"
+                        referer: "https://discord.com/channels/@me/\(self.message.channelID)"
                     ))
                 }
             }
@@ -81,12 +84,11 @@ struct MessageCellMenu: View {
             .appendingPathComponent(message.author!.id)
         DispatchQueue.global().async {
             Request.ping(url: url, headers: Headers(
-                userAgent: discordUserAgent,
                 token: Globals.token,
                 bodyObject: ["communication_disabled_until": time],
                 type: .PATCH,
                 discordHeaders: true,
-                referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)",
+                referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)",
                 json: true
             ))
         }
@@ -100,7 +102,7 @@ struct MessageCellMenu: View {
             }
             Button("Copy message link") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("https://discord.com/channels/\(message.guild_id ?? guildID)/\(message.channel_id)/\(message.id)", forType: .string)
+                NSPasteboard.general.setString("https://discord.com/channels/\(message.guildID ?? guildID)/\(message.channelID)/\(message.id)", forType: .string)
             }
             Button("Copy user ID") {
                 guard let id = message.author?.id else { return }
@@ -139,12 +141,11 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(message.author!.id)
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             bodyObject: ["delete_message_days": 1],
                             type: .PUT,
                             discordHeaders: true,
-                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                         ))
                     }
                 }
@@ -158,11 +159,10 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(message.author!.id)
                     DispatchQueue.global().async {
                         Request.ping(url: url, headers: Headers(
-                            userAgent: discordUserAgent,
                             token: Globals.token,
                             type: .DELETE,
                             discordHeaders: true,
-                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channel_id)"
+                            referer: "https://discord.com/channels/\(guildID)/\(self.message.channelID)"
                         ))
                     }
                 }
@@ -243,18 +243,25 @@ struct MessageCellMenu: View {
     }
 
     var body: some View {
-        Button("Reply") {
-            replyingTo = message
-        }
-        if message.author?.id == Globals.user?.id {
-            Button("Edit") {
-                self.editing.toggle()
+        Group {
+            Button("Reply") {
+                replyingTo = message
             }
-        }
-        if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
-            Button("Delete") {
-                DispatchQueue.global().async {
-                    message.delete()
+            if self.permissions.contains(.addReactions) {
+                Button("Add Reaction") {
+                    self.reactionPopup.toggle()
+                }
+            }
+            if message.author?.id == Globals.user?.id {
+                Button("Edit") {
+                    self.editing.toggle()
+                }
+            }
+            if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
+                Button("Delete") {
+                    DispatchQueue.global().async {
+                        message.delete()
+                    }
                 }
             }
         }

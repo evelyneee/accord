@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Channel: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.read_state == rhs.read_state
     }
 
     let id: String
@@ -19,36 +20,6 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     let position: Int?
     // TODO: Overwrite objects
     var permission_overwrites: [PermissionOverwrites]?
-
-    struct PermissionOverwrites: Decodable {
-        var allow: Permissions
-        var deny: Permissions
-        var id: String
-        var type: Int
-    }
-
-    func hasPermission(_ perms: Permissions) -> Bool {
-        var allowed = true
-        for overwrite in permission_overwrites ?? [] {
-            if overwrite.id == user_id ||
-                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false,
-                overwrite.allow.contains(perms)
-            {
-                return true
-            }
-            if overwrite.id == user_id ||
-                // for the role permissions
-                ServerListView.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
-                // for the everyone permissions
-                overwrite.id == guild_id,
-                overwrite.deny.contains(perms)
-            {
-                allowed = false
-            }
-        }
-        return allowed
-    }
-
     var name: String?
     var topic: String?
     var nsfw: Bool?
@@ -76,12 +47,42 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var shown: Bool?
     var message_count: Int?
 
-    var computedName: String {
-        name ?? recipients?.map(\.username).joined(separator: ", ") ?? "Unknown Channel"
+    @MainActor var computedName: String {
+        name ?? recipients?.map(\.computedUsername).joined(separator: ", ") ?? "Unknown Channel"
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(read_state)
+    }
+    
+    struct PermissionOverwrites: Decodable {
+        var allow: Permissions
+        var deny: Permissions
+        var id: String
+        var type: Int
+    }
+
+    func hasPermission(_ perms: Permissions) -> Bool {
+        var allowed = true
+        for overwrite in permission_overwrites ?? [] {
+            if overwrite.id == user_id ||
+                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false,
+                overwrite.allow.contains(perms)
+            {
+                return true
+            }
+            if overwrite.id == user_id ||
+                // for the role permissions
+                Storage.mergedMembers[guild_id ?? "@me"]?.roles.contains(overwrite.id) ?? false ||
+                // for the everyone permissions
+                overwrite.id == guild_id,
+                overwrite.deny.contains(perms)
+            {
+                allowed = false
+            }
+        }
+        return allowed
     }
 }
 

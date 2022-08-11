@@ -21,6 +21,11 @@ public enum RequestTypes: String {
 }
 
 final class DiscordError: Codable {
+    internal init(code: Int, message: String? = nil) {
+        self.code = code
+        self.message = message
+    }
+    
     var code: Int
     var message: String?
 }
@@ -145,7 +150,6 @@ final class Headers {
 }
 
 var standardHeaders = Headers(
-    userAgent: discordUserAgent,
     contentType: nil,
     token: Globals.token,
     type: .GET,
@@ -196,10 +200,6 @@ public final class Request {
         guard var request = request else { return completion(.failure(FetchErrors.invalidRequest)) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
-            print("No active websocket connection")
-            return
-        }
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(.failure(error)) }
 
@@ -249,10 +249,6 @@ public final class Request {
         guard var request = request else { return completion(.failure(FetchErrors.invalidRequest)) }
         var config = URLSessionConfiguration.default
         config.setProxy()
-        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
-            print("No active websocket connection")
-            return
-        }
 
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return completion(.failure(error)) }
@@ -326,18 +322,12 @@ public final class Request {
         guard var request = request else { return }
         var config = URLSessionConfiguration.default
         config.setProxy()
-        guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
-            print("No active websocket connection")
-            return
-        }
-
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return }
         request.httpBody = try? Request.createMultipartBody(with: try payloadJson?.jsonString(), fileURLs: [fileURL].compactMap(\.self), boundary: boundary)
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
-            print(response as? HTTPURLResponse)
             if let data = data {
                 return completion(.success((data, response as? HTTPURLResponse)))
             } else if let error = error {
@@ -386,7 +376,6 @@ public final class Request {
             }
 
         body.append("--\(boundary)--\r\n")
-        print(String(data: body, encoding: .utf8))
         return body
     }
 }
@@ -418,10 +407,6 @@ public final class RequestPublisher {
         }()
         guard var request = request else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
         var config = URLSessionConfiguration.default
-        if wss != nil, headers?.discordHeaders == true, wss?.connection?.state != NWConnection.State.ready {
-            print("No active websocket connection")
-            wss.reset()
-        }
         // Set headers
         do { try headers?.set(request: &request, config: &config) } catch { return Empty(completeImmediately: true).eraseToAnyPublisher() }
 
@@ -484,15 +469,6 @@ public final class RequestPublisher {
             }()
             guard var request = request else { throw "Bad request" }
             var config = URLSessionConfiguration.default
-            guard !(wss != nil && headers?.discordHeaders == true && wss?.connection?.state != NWConnection.State.ready) else {
-                print("No active websocket connection")
-                concurrentQueue.async {
-                    if wss.connection?.state != .preparing {
-                        wss?.reset()
-                    }
-                }
-                throw "No active websocket connection"
-            }
             // Set headers
             do { try headers?.set(request: &request, config: &config) } catch { throw "Could not set headers" }
 

@@ -31,8 +31,6 @@ struct Attachment: View, Equatable {
         HStack {
             Image(nsImage: imageLoader.image)
                 .resizable()
-                .frame(idealWidth: imageLoader.image.size.width, idealHeight: imageLoader.image.size.height)
-                .scaledToFit()
         }
         .onAppear {
             imageLoader.load()
@@ -70,7 +68,10 @@ struct HoveredAttachment: View, Equatable {
 }
 
 final class ImageLoaderAndCache: ObservableObject {
-    @Published var image: NSImage = .init()
+    
+    @MainActor @Published
+    var image: NSImage = .init()
+    
     private var url: URL?
     private var size: CGSize?
     private let queue = DispatchQueue.global(qos: .userInteractive)

@@ -20,27 +20,35 @@ extension Gateway {
         case .hello:
             print("missed hello?")
         case .invalidSession:
-            print(String(data: event.data, encoding: .utf8))
             hardReset()
         default: break
         }
         if let s = event.s {
             seq = s
         }
+                
         switch event.t {
         case .messageACK: break
         case .sessionsReplace: break
-        case .channelCreate: break
-        // let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+        case .channelCreate:
+            let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+            print("success 1")
+            if channel.d.guild_id == nil { // is a dm
+                print("success")
+                DispatchQueue.main.async {
+                    Storage.globals?.privateChannels.append(channel.d)
+                }
+            }
         case .channelUpdate: break
         case .channelDelete: break
         case .guildCreate:
             let guild = try JSONDecoder().decode(GatewayEventContent<Guild>.self, from: event.data)
             let folder = GuildFolder(guild_ids: [guild.d.id])
             folder.guilds.append(guild.d)
-            ServerListView.folders.append(folder)
-        case .guildDelete:
-            print(String(data: event.data, encoding: .utf8))
+            Task {
+                await AppGlobals.newItemPublisher.send((nil, folder))
+            }
+        case .guildDelete: break
         case .guildMemberAdd: break
         case .guildMemberRemove: break
         case .guildMemberUpdate: break
@@ -59,22 +67,8 @@ extension Gateway {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
             guard message.author?.id != user_id else { return }
-            let ids = message.mentions.map(\.id)
-            let guildID = message.guild_id ?? "@me"
             guard let channelID = event.channelID else { print("wat"); break }
-            MentionSender.shared.newMessage(in: channelID, with: message.id, isDM: message.guild_id == nil)
-            if ids.contains(user_id) || (ServerListView.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[keyed: message.guild_id ?? ""]
-                let matchingChannel = matchingGuild?.channels[keyed: message.channel_id] ?? ServerListView.privateChannels[keyed: message.channel_id]
-                showNotification(
-                    title: message.author?.username ?? "Unknown User",
-                    subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
-                    description: message.content,
-                    pfpURL: pfpURL(message.author?.id, message.author?.avatar, "128"),
-                    id: message.channel_id
-                )
-                MentionSender.shared.addMention(guild: guildID, channel: channelID)
-            }
+            MentionSender.shared.newMessage(in: channelID, message: message)
         case .messageUpdate:
             if let channelID = event.channelID {
                 editSubject.send((event.data, channelID))

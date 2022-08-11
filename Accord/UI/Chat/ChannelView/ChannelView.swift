@@ -10,17 +10,47 @@ import AVKit
 import Combine
 import SwiftUI
 
+private struct ChannelIDKey: EnvironmentKey {
+    static let defaultValue = ""
+}
+
+private struct GuildIDKey: EnvironmentKey {
+    static let defaultValue = ""
+}
+
+extension EnvironmentValues {
+    var channelID: String {
+        get { self[ChannelIDKey.self] }
+        set { self[ChannelIDKey.self] = newValue }
+    }
+    var guildID: String {
+        get { self[GuildIDKey.self] }
+        set { self[GuildIDKey.self] = newValue }
+    }
+}
+
+extension View {
+    func channelProperties(channelID: String, guildID: String) -> some View {
+        self
+            .environment(\.channelID, channelID)
+            .environment(\.guildID, guildID)
+    }
+}
+
 struct ChannelView: View, Equatable {
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         lhs.viewModel == rhs.viewModel
     }
 
     @StateObject var viewModel: ChannelViewViewModel
-
-    var guildID: String
-    var channelID: String
-    var channelName: String
+    
+    var channelName: String {
+        channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
+    }
+    
     var guildName: String
+    
+    var channel: Channel
 
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
@@ -60,59 +90,79 @@ struct ChannelView: View, Equatable {
     static var scrollTo = PassthroughSubject<(String, String), Never>()
     
     @State var scrolledOutOfBounds: Bool = false
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     // MARK: - init
 
     init(_ channel: Channel, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
-        guildID = channel.guild_id ?? "@me"
-        channelID = channel.id
-        channelName = channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
+        self.channel = channel
         self.guildName = guildName ?? "Direct Messages"
         if let model {
             self._viewModel = model
         } else {
             _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
         }
-        viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
-        if wss.connection?.state == .cancelled {
-            concurrentQueue.async {
-                wss?.reset()
+    }
+
+    @_transparent
+    func cell(for binding: Binding<Message>) -> some View {
+        let message = binding.wrappedValue
+        return MessageCellView(
+            message: binding,
+            nick: viewModel.nicks[message.author?.id ?? ""],
+            replyNick: viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
+            pronouns: viewModel.pronouns[message.author?.id ?? ""],
+            avatar: viewModel.avatars[message.author?.id ?? ""],
+            permissions: $viewModel.permissions,
+            role: $viewModel.roles[message.author?.id ?? ""],
+            replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
+            replyingTo: $replyingTo
+        )
+        .equatable()
+        .id(message.id)
+        .listRowInsets(EdgeInsets(
+            top: 3.5,
+            leading: 0,
+            bottom: message.bottomInset,
+            trailing: 0
+        ))
+        .padding(.horizontal, 5.0)
+        .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
+        .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
+        .onAppear { [unowned viewModel] in
+            if viewModel.messages.count >= 50,
+               message == viewModel.messages[viewModel.messages.count - 2]
+            {
+                Task.detached {
+                    await viewModel.loadMoreMessages()
+                }
             }
         }
     }
-
+    
     var messagesView: some View {
-        ForEach(viewModel.messages, id: \.identifier) { message in
-            MessageCellView(
-                message: message,
-                nick: viewModel.nicks[message.author?.id ?? ""],
-                replyNick: viewModel.nicks[message.referenced_message?.author?.id ?? ""],
-                pronouns: viewModel.pronouns[message.author?.id ?? ""],
-                avatar: viewModel.avatars[message.author?.id ?? ""],
-                guildID: viewModel.guildID,
-                permissions: $viewModel.permissions,
-                role: $viewModel.roles[message.author?.id ?? ""],
-                replyRole: $viewModel.roles[message.referenced_message?.author?.id ?? ""],
-                replyingTo: $replyingTo
-            )
-            .equatable()
-            .id(message.id)
-            .listRowInsets(EdgeInsets(
-                top: 3.5,
-                leading: 0,
-                bottom: message.bottomInset,
-                trailing: 0
-            ))
-            .padding(.horizontal, 5.0)
-            .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
-            .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
-            .onAppear { [unowned viewModel] in
-                if viewModel.messages.count >= 50,
-                   message == viewModel.messages[viewModel.messages.count - 2]
-                {
-                    messageFetchQueue.async {
-                        viewModel.loadMoreMessages()
+        ForEach($viewModel.messages, id: \.identifier) { $message in
+            if message.inSameDay {
+                cell(for: $message)
+            } else {
+                VStack {
+                    HStack {
+                        Color.secondary
+                            .frame(height: 0.75)
+                            .opacity(0.4)
+                        Text(message.processedTimestamp?.components(separatedBy: " at ").first ?? "Today")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                        Color.secondary
+                            .frame(height: 0.75)
+                            .opacity(0.4)
                     }
+                    .padding(.top)
+                    cell(for: $message)
                 }
             }
         }
@@ -126,50 +176,52 @@ struct ChannelView: View, Equatable {
             VStack {
                 HStack(alignment: .bottom) {
                     Circle()
-                        .foregroundColor(.gray)
                         .frame(width: 35, height: 35)
                         .padding(.trailing, 1.5)
                         .fixedSize()
                     
                     VStack(alignment: .leading) {
-                        Rectangle()
-                            .frame(width: 30 * CGFloat(Int.random(in: 3...20)), height: 13 * CGFloat(Int.random(in: 1...5)))
-                            .cornerRadius(6)
-                        Rectangle()
-                            .frame(width: 20 * CGFloat(Int.random(in: 3...10)), height: 13)
-                            .cornerRadius(6)
+                        Text(UUID().uuidString.prefix(Int.random(in: 5...20)).stringLiteral)
+                            .font(.chatTextFont)
+                        Text((0..<Int.random(in: 1...6)).map { _ in UUID().uuidString }.joined(separator: " "))
+                            .font(.chatTextFont)
                         Spacer().frame(height: 1.3)
                     }
                 }
-                .foregroundColor(.gray)
-                .opacity(0.5)
+                .foregroundColor(.secondary.opacity(0.4))
                 Spacer()
             }
+            .redacted(reason: .placeholder)
         }
     }
-
+    
+    @ViewBuilder
+    private var channelHeaderView: some View {
+        Divider()
+        Text("This is the start of the channel")
+            .font(.system(size: 15))
+            .fontWeight(.semibold)
+        Text("Welcome to #\(channelName)!")
+            .bold()
+            .dynamicTypeSize(.xxxLarge)
+            .font(.largeTitle)
+    }
+    
+    
     var body: some View {
-        HStack(content: {
+        HStack {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     ScrollViewReader { proxy in
                         List {
                             Spacer().frame(height: 15)
                             if metalRenderer {
-                                messagesView
-                                    .drawingGroup()
+                                messagesView.drawingGroup()
                             } else {
                                 messagesView
                             }
                             if viewModel.noMoreMessages {
-                                Divider()
-                                Text("This is the start of the channel")
-                                    .rotationEffect(.degrees(180))
-                                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                                Text("Welcome to #\(channelName)!")
-                                    .bold()
-                                    .dynamicTypeSize(.xxxLarge)
-                                    .font(.largeTitle)
+                                channelHeaderView
                                     .rotationEffect(.degrees(180))
                                     .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                             } else {
@@ -179,19 +231,8 @@ struct ChannelView: View, Equatable {
                         .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
                         .rotationEffect(.radians(.pi))
                         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                        .onReceive(NotificationCenter.default.publisher(for: NSWorkspace.didWakeNotification), perform: { [weak viewModel] _ in
-                            viewModel?.cancellable.forEach { $0.cancel() }
-                            viewModel?.cancellable.removeAll()
-                            viewModel?.connect()
-                            if viewModel?.guildID == "@me" {
-                                try? wss.subscribeToDM(self.channelID)
-                            } else {
-                                try? wss.subscribe(to: self.guildID)
-                            }
-                            viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID)
-                        })
                         .onReceive(Self.scrollTo, perform: { channelID, id in
-                            guard channelID == self.channelID else { return }
+                            guard channelID == self.channel.id else { return }
                             if viewModel.messages.map(\.id).contains(id) {
                                 withAnimation(.easeInOut(duration: 0.5), {
                                     proxy.scrollTo(id, anchor: .center)
@@ -208,13 +249,11 @@ struct ChannelView: View, Equatable {
                         Button(action: { [weak viewModel] in
                             self.scrolledOutOfBounds = false
                             messageFetchQueue.async {
-                                viewModel?.getMessages(channelID: self.channelID, guildID: self.guildID, scrollAfter: true)
+                                viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me", scrollAfter: true)
                             }
                         }) {
                             Image(systemName: "arrowtriangle.down.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 33, height: 33)
+                                .font(.system(size: 40))
                                 .opacity(0.9)
                         }
                         .buttonStyle(.borderless)
@@ -232,7 +271,6 @@ struct ChannelView: View, Equatable {
                         }
                     }
             }
-            
             if showSearch {
                 List(searchMessages, id: \.id) { message in
                     MessageCellView(
@@ -249,7 +287,14 @@ struct ChannelView: View, Equatable {
                     )
                 }
             }
-        })
+        }
+        .onAppear {
+            viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
+            Task.detached {
+                await self.viewModel.setPermissions(self.appModel)
+            }
+        }
+        .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
         .navigationTitle(Text("\(viewModel.guildID == "@me" ? "" : "#")\(channelName)".replacingOccurrences(of: "#", with: "")))
         .presentedWindowToolbarStyle(.unifiedCompact)
         .onDrop(of: ["public.file-url"], isTargeted: Binding.constant(false)) { providers -> Bool in
@@ -285,6 +330,25 @@ struct ChannelView: View, Equatable {
                 }
             }
             ToolbarItemGroup {
+                if let topic = self.channel.topic {
+                    Image(systemName: "info.circle.fill")
+                        .popupOnClick(buttonStyle: .bordered) {
+                            VStack(alignment: .leading) {
+                                Text("#" + self.channelName)
+                                    .fontWeight(.semibold)
+                                Text(topic)
+                                if let threads = self.channel.threads {
+                                    Section("Threads", content: {
+                                        ForEach(threads, id: \.id) { thread in
+                                            Text(thread.name ?? "")
+                                        }
+                                    })
+                                }
+
+                            }
+                            .padding(10)
+                        }
+                }
                 Toggle(isOn: $pins) {
                     Image(systemName: "pin.fill")
                         .rotationEffect(.degrees(45))
@@ -347,7 +411,7 @@ struct MemberListView: View {
         List(self.$list, id: \.id) { $ops in
             if let group = ops.group {
                 Text(
-                    "\(group.id == "offline" ? "OFFLINE" : group.id == "online" ? "OFFLINE" : roleNames[group.id ?? ""]?.uppercased() ?? "") - \(group.count ?? 0)"
+                    "\(group.id == "offline" ? "OFFLINE" : group.id == "online" ? "OFFLINE" : Storage.roleNames[group.id ?? ""]?.uppercased() ?? "") - \(group.count ?? 0)"
                 )
                 .fontWeight(.semibold)
                 .font(.system(size: 10))
@@ -377,7 +441,7 @@ struct MemberListViewCell: View {
                     Text(ops.member?.nick ?? ops.member?.user.username ?? "")
                         .fontWeight(.medium)
                         .foregroundColor({ () -> Color in
-                            if let role = ops.member?.roles?.first, let color = roleColors[role]?.0 {
+                            if let role = ops.member?.roles?.first, let color = Storage.roleColors[role]?.0 {
                                 return Color(int: color)
                             }
                             return Color.primary
@@ -393,7 +457,7 @@ struct MemberListViewCell: View {
         }
         .buttonStyle(.borderless)
         .popover(isPresented: self.$popup, content: {
-            PopoverProfileView(user: ops.member?.user, guildID: guildID)
+            PopoverProfileView(user: ops.member?.user)
         })
     }
 }

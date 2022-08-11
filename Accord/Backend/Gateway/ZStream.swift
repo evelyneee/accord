@@ -47,41 +47,24 @@ final class ZStream {
             // and we store the output in a mutable data object
             var outputData = Data()
 
-            defer {
-                free(dstBufferPtr)
-            }
+//            defer {
+//                free(dstBufferPtr)
+//            }
 
             // loop labels :D
             mainLoop: repeat {
-                status = compression_stream_process(&stream, 0)
-
+                status = compression_stream_process(&stream, stream.src_size == 0 ? Int32(COMPRESSION_STREAM_FINALIZE.rawValue) : 0)
                 switch status {
-                case COMPRESSION_STATUS_OK:
-                    // Going to call _process at least once more, so prepare for that
-                    if stream.dst_size == 0 {
-                        // Output buffer full...
-
-                        // Write out to outputData
-                        outputData.append(dstBufferPtr, count: dstBufferSize)
-
-                        // Re-use dstBuffer
-                        stream.dst_ptr = dstBufferPtr
-                        stream.dst_size = dstBufferSize
-                    } else {
-                        if stream.dst_ptr > dstBufferPtr {
-                            outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
-                            // terminate process
-                            break mainLoop
-                        }
-                    }
-
-                case COMPRESSION_STATUS_END:
-                    // We are done, just write out the output buffer if there's anything in it
-                    print("doneeeee")
-                    if stream.dst_ptr > dstBufferPtr {
-                        outputData.append(dstBufferPtr, count: stream.dst_ptr - dstBufferPtr)
-                        break mainLoop
-                    }
+                case COMPRESSION_STATUS_OK, COMPRESSION_STATUS_END:
+                    
+                    outputData.append(dstBufferPtr, count: dstBufferSize - self.stream.dst_size)
+                    
+                    // recycle the buffer
+                    stream.dst_ptr = dstBufferPtr
+                    stream.dst_size = dstBufferSize
+                    
+                case COMPRESSION_STATUS_ERROR:
+                    return outputData
                 default:
                     break mainLoop
                 }

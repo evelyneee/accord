@@ -21,15 +21,21 @@ private struct UserKey: EnvironmentKey {
 }
 
 struct ContentView: View {
+    
     @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
-    @State var serverListView: ServerListView?
+    
+    @MainActor @State
+    var serverListView: ServerListView?
 
     enum LoadErrors: Error {
         case alreadyLoaded
         case offline
     }
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
 
     @ViewBuilder
     var body: some View {
@@ -39,7 +45,7 @@ struct ContentView: View {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
-                        guard Globals.token != "" else { modalIsPresented = true; return }
+                        guard !Globals.token.isEmpty else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
                                 loaded = true
@@ -48,7 +54,7 @@ struct ContentView: View {
                             guard wss == nil else {
                                 throw LoadErrors.alreadyLoaded
                             }
-                            guard NetworkCore.shared.connected else {
+                            guard reachability?.connected == true else {
                                 throw LoadErrors.offline
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {

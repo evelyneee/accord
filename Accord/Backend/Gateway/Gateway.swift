@@ -10,6 +10,8 @@ import Combine
 import Foundation
 import Network
 
+var hasReset: Bool = false
+
 // The second version of Accord's gateway.
 // This uses Network.framework instead of URLSessionWebSocketTask
 final class Gateway {
@@ -29,7 +31,7 @@ final class Gateway {
     private(set) var memberListSubject = PassthroughSubject<MemberListUpdate, Never>()
 
     var presencePipeline = [String: PassthroughSubject<PresenceUpdate, Never>]()
-
+            
     private(set) var stateUpdateHandler: (NWConnection.State) -> Void = { state in
         switch state {
         case .ready:
@@ -55,7 +57,7 @@ final class Gateway {
             return
         }
 
-        if message.contains("Not authenticated") || message.contains("Authentication failed") {
+        if (message.contains("not authenticated") || message.contains("authentication failed")) && !hasReset {
             logOut()
         }
     }
@@ -108,6 +110,10 @@ final class Gateway {
         compress: Bool = true,
         decompressor: ZStream? = nil
     ) throws {
+        if let session_id, let seq {
+            self.sessionID = session_id
+            self.seq = seq
+        }
         if let decompressor = decompressor {
             self.decompressor = decompressor
         }
@@ -138,7 +144,9 @@ final class Gateway {
         guard connection?.state != .cancelled else { return } // Don't listen for hello if there is no connection
         connection?.receiveMessage { [weak self] data, _, _, error in
             guard let self = self else { return }
-
+            
+            print("Got HELLO")
+            
             if let error = error {
                 return print(error)
             }
@@ -174,6 +182,7 @@ final class Gateway {
             }
             do {
                 if let session_id = session_id, let seq = seq {
+                    print("resuming")
                     try self.reconnect(session_id: session_id, seq: seq)
                 } else {
                     try self.identify()
@@ -185,7 +194,7 @@ final class Gateway {
     }
 
     private func listen() {
-        guard connection?.state != .cancelled else { return }
+        guard connection?.state != .cancelled else { print("wtf"); return }
         connection?.receiveMessage { [weak self] data, context, _, error in
             guard let self = self else { return }
             if let error = error {
@@ -268,9 +277,6 @@ final class Gateway {
     }
 
     private func heartbeat() throws {
-        guard !pendingHeartbeat else {
-            return AccordApp.error(GatewayErrors.heartbeatMissed, additionalDescription: "Check your network connection")
-        }
         let packet: [String: Any] = [
             "op": 1,
             "d": seq,

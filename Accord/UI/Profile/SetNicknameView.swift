@@ -12,7 +12,8 @@ struct SetNicknameView: View {
     var user: User?
 
     /// The guild ID to set the nickname in
-    let guildID: String
+    @Environment(\.guildID)
+    var guildID: String
 
     @Binding var isPresented: Bool
 
@@ -61,7 +62,6 @@ struct SetNicknameView: View {
         let body = ["nick": newNicknameText]
 
         Request.fetch(url: url, headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: body,
             type: .PATCH,

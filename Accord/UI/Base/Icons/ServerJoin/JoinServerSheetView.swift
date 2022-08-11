@@ -12,7 +12,6 @@ struct JoinServerSheetView: View {
     @State var errorText: String? = nil
 
     @Binding var isPresented: Bool
-    @StateObject var updater: ServerListView.UpdateView
     var body: some View {
         VStack {
             Text("Join a server")
@@ -58,7 +57,7 @@ struct JoinServerSheetView: View {
         let joinURL = URL(string: rootURL)!
             .appendingPathComponent("invites")
             .appendingPathComponent(inviteCode)
-        Request.fetch(request: nil, url: joinURL, headers: .init(userAgent: discordUserAgent, token: Globals.token, bodyObject: nil, type: .POST, discordHeaders: true, cached: false)) { result in
+        Request.fetch(request: nil, url: joinURL, headers: .init(token: Globals.token, type: .POST, discordHeaders: true)) { result in
             switch result {
             case let .success(data):
                 let decoder = JSONDecoder()
@@ -68,7 +67,6 @@ struct JoinServerSheetView: View {
                 }
 
                 isPresented.toggle()
-                updater.updateView()
             case let .failure(err):
                 errorText = "Error: \(err.localizedDescription)"
                 print("error: \(err)")

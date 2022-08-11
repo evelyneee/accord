@@ -7,9 +7,17 @@
 
 import SwiftUI
 
-struct AvatarView: View {
+struct AvatarView: View, Equatable {
+    
+    static func == (lhs: AvatarView, rhs: AvatarView) -> Bool {
+        lhs.author == rhs.author
+    }
+    
     var author: User
+    
+    @Environment(\.guildID)
     var guildID: String
+    
     var avatar: String?
 
     var animated: Bool {
@@ -22,6 +30,8 @@ struct AvatarView: View {
 
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
+    
+    @Binding var popup: Bool
 
     var imageURL: String {
         if let avatar = avatar {
@@ -36,11 +46,23 @@ struct AvatarView: View {
     }
 
     @ViewBuilder
-    var body: some View {
-        if animated, gifPfp {
+    private var image: some View {
+        if animated && gifPfp {
             GifView(imageURL).drawingGroup()
         } else {
             Attachment(imageURL).equatable()
         }
+    }
+    
+    var body: some View {
+        Button(action: {
+            popup.toggle()
+        }) {
+            image
+        }
+        .popover(isPresented: $popup, content: {
+            PopoverProfileView(user: author)
+        })
+        .buttonStyle(.borderless)
     }
 }

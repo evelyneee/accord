@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+
 struct ChatControls: View {
 //    enum FocusedElements: Hashable {
 //        case mainTextField
@@ -16,24 +17,34 @@ struct ChatControls: View {
 //
 //    @FocusState private var focusedField: FocusedElements?
 
-    @State var chatTextFieldContents: String = ""
-    @State var pfps: [String: NSImage] = [:]
+    @StateObject var viewModel = ChatControlsViewModel()
+    
     var guildID: String
     var channelID: String
     var chatText: String
-    @Binding var replyingTo: Message?
-    @Binding var mentionUser: Bool
     var permissions: Permissions
+    
+    @MainActor @Binding
+    var replyingTo: Message?
+    
+    @MainActor @Binding
+    var mentionUser: Bool
+    
+    @MainActor @Binding
+    var fileUploads: [(Data?, URL?)]
+    
     @State var nitroless = false
     @State var emotes = false
-    @State var fileImport: Bool = false
-    @Binding var fileUploads: [(Data?, URL?)]
     @State var dragOver: Bool = false
-    @State var pluginPoppedUp: [Bool] = Array(repeating: false, count: Globals.plugins.count)
-    @StateObject var viewModel = ChatControlsViewModel()
-    @State var typing: Bool = false
-    weak var textField: NSTextField?
-    @AppStorage("Nitroless") var nitrolessEnabled: Bool = false
+    
+    @MainActor @State
+    var fileImport: Bool = false
+    
+    @MainActor @State
+    var typing: Bool = false
+    
+    @AppStorage("Nitroless")
+    var nitrolessEnabled: Bool = false
 
     var textFieldText: String {
         permissions.contains(.sendMessages) ?
@@ -59,7 +70,9 @@ struct ChatControls: View {
                     self.mentionUser = true
                 }
             } else if viewModel?.textFieldContents.prefix(1) == "/" {
-                try? viewModel?.executeCommand(guildID: guildID, channelID: channelID)
+                Task.detached {
+                    try await self.viewModel.executeCommand(guildID: guildID, channelID: channelID)
+                }
             } else {
                 viewModel?.send(text: contents, guildID: guildID, channelID: channelID)
             }
@@ -76,67 +89,58 @@ struct ChatControls: View {
 //        }
 //    }
     
-    var mediaView: some View {
-        HStack {
-            ForEach(Array(zip(self.fileUploads.indices, self.fileUploads)), id: \.1.1) { offset, item in
-                let data = item.0
-                let url = item.1
-                VStack(alignment: .leading, content: {
-                    ZStack(alignment: .topTrailing) {
-                        if let data = data, let nsImage = NSImage(data: data) {
-                            Image(nsImage: nsImage)
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(5)
-                                .frame(height: 130)
-                            
-                        } else {
-                            ZStack(alignment: .center) {
-                                Image(systemName: "doc")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .foregroundColor(Color.primary.opacity(0.4))
-                                    .frame(width: 48, height: 48)
-                            }
-                            .frame(width: 130, height: 130)
-                            .background(Color.black.opacity(0.2))
-                            .cornerRadius(5)
+    var matchedUsersView: some View {
+        VStack {
+            MatchesView(
+                elements: viewModel.matchedUsers.prefix(10),
+                id: \.id,
+                action: { [weak viewModel] user in
+                    if let range = viewModel?.textFieldContents.ranges(of: "@").last {
+                        viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
+                    }
+                    viewModel?.textFieldContents.append("<@\(user.id)> ")
+                },
+                label: { user in
+                    HStack {
+                        Attachment(pfpURL(user.id, user.avatar, discriminator: user.discriminator))
+                            .equatable()
+                            .clipShape(Circle())
+                            .frame(width: 23, height: 23)
+                        Text(user.username).foregroundColor(.primary)
+                        +
+                        Text("#" + user.discriminator)
+                        Spacer()
+                    }
+                }
+            )
+            if viewModel.matchedUsers.count < 5 {
+                if !viewModel.matchedRoles.isEmpty {
+                    Divider()
+                }
+                MatchesView(
+                    elements: viewModel.matchedRoles.sorted(by: >).prefix(4),
+                    id: \.key,
+                    action: { [weak viewModel] key, _ in
+                        if let range = viewModel?.textFieldContents.ranges(of: "@").last {
+                            viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
                         }
-                        
-                        Image(systemName: "xmark.circle.fill")
-                            .resizable()
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.black, Color.white.opacity(0.5))
-                            .frame(width: 22, height: 22)
-                            .onTapGesture {
-                                self.fileUploads.remove(at: offset)
-                            }
-                            .padding(4)
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Text(url?.lastPathComponent ?? "")
-                })
+                        viewModel?.textFieldContents.append("<@\(key)> ")
+                    },
+                    label: { id, roleName in
+                        HStack {
+                            Text("@" + roleName)
+                                .foregroundColor({
+                                    if let color = Storage.roleColors[id.dropFirst().stringLiteral]?.0 {
+                                        return Color(int: color)
+                                    }
+                                    return .primary
+                                }())
+                            Spacer()
+                        }
+                    }
+                )
             }
         }
-    }
-
-    var matchedUsersView: some View {
-        MatchesView(
-            elements: viewModel.matchedUsers.sorted(by: >).prefix(10),
-            id: \.key,
-            action: { [weak viewModel] key, _ in
-                if let range = viewModel?.textFieldContents.ranges(of: "@").last {
-                    viewModel?.textFieldContents.removeSubrange(range.lowerBound ..< viewModel!.textFieldContents.endIndex)
-                }
-                viewModel?.textFieldContents.append("<@!\(key)> ")
-            },
-            label: { _, username in
-                HStack {
-                    Text(username)
-                    Spacer()
-                }
-            }
-        )
     }
 
     var matchedCommandsView: some View {
@@ -163,6 +167,7 @@ struct ChatControls: View {
                     VStack(alignment: .leading) {
                         Text(command.name)
                             .fontWeight(.semibold)
+                            .foregroundColor(.primary)
                         Text(command.description)
                     }
                     Spacer()
@@ -259,11 +264,9 @@ struct ChatControls: View {
             fileImport.toggle()
         }) {
             Image(systemName: "plus.circle.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
     }
 
     var nitrolessButton: some View {
@@ -271,11 +274,9 @@ struct ChatControls: View {
             nitroless.toggle()
         }) {
             Image(systemName: "rectangle.grid.3x2.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
         .popover(isPresented: $nitroless, content: {
             NitrolessView(chatText: $viewModel.textFieldContents).equatable()
                 .frame(width: 300, height: 400)
@@ -287,11 +288,9 @@ struct ChatControls: View {
             emotes.toggle()
         }) {
             Image(systemName: "face.smiling.fill")
-                .resizable()
-                .scaledToFit()
+                .font(.system(size: 16.5))
         }
         .buttonStyle(BorderlessButtonStyle())
-        .frame(width: 17.5, height: 17.5)
         .keyboardShortcut("e", modifiers: [.command])
         .popover(isPresented: $emotes, content: {
             NavigationLazyView(EmotesView(chatText: $viewModel.textFieldContents).equatable())
@@ -306,7 +305,8 @@ struct ChatControls: View {
                     if !(viewModel.matchedUsers.isEmpty) ||
                         !(viewModel.matchedEmoji.isEmpty) ||
                         !(viewModel.matchedChannels.isEmpty) ||
-                        !(viewModel.matchedCommands.isEmpty) &&
+                        !(viewModel.matchedCommands.isEmpty) ||
+                        !(viewModel.matchedRoles.isEmpty) &&
                         !viewModel.textFieldContents.isEmpty
                     {
                         VStack {
@@ -320,13 +320,15 @@ struct ChatControls: View {
                     }
                     if !fileUploads.isEmpty {
                         ScrollView(.horizontal, showsIndicators: true) {
-                            mediaView
+                            FileUploadsView(fileUploads: self.$fileUploads)
                         }
                         Divider().padding(.bottom, 7)
                     }
                     HStack {
                         fileImportButton
-                        Divider().frame(height: 20)
+                        Divider()
+                            .frame(height: 20)
+                            .padding(.horizontal, 3)
                         mainTextField
                         if nitrolessEnabled {
                             nitrolessButton
@@ -334,10 +336,10 @@ struct ChatControls: View {
                         emotesButton
                     }
                     .disabled(!self.permissions.contains(.sendMessages))
-                    .onReceive(viewModel.$textFieldContents) { [weak viewModel] _ in
-                        if !typing, viewModel?.textFieldContents != "" {
+                    .onReceive(viewModel.$textFieldContents) { _ in
+                        if !typing, viewModel.textFieldContents != "" {
                             messageSendQueue.async {
-                                viewModel?.type(channelID: self.channelID, guildID: self.guildID)
+                                viewModel.type(channelID: self.channelID, guildID: self.guildID)
                             }
                             typing = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
@@ -345,8 +347,8 @@ struct ChatControls: View {
                             }
                         }
                         // viewModel?.markdown()
-                        textQueue.async {
-                            viewModel?.checkText(guildID: guildID, channelID: channelID)
+                        Task.detached {
+                            await viewModel.checkText(guildID: guildID, channelID: channelID)
                         }
                     }
                 }

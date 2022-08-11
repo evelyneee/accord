@@ -15,6 +15,9 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     var id: String
     var username: String
+    @MainActor var computedUsername: String {
+        Storage.users[self.id]?.relationship?.nickname ?? self.username
+    }
     var discriminator: String
     var avatar: String?
     var bot: Bool?
@@ -31,6 +34,7 @@ final class User: Codable, Equatable, Identifiable, Hashable {
     var roleColor: String?
     var banner: String?
     var banner_color: String?
+    var relationship: Relationship?
 
     func isMe() -> Bool { user_id == id }
 
@@ -38,7 +42,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func addFriend(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            type: .PUT,
 //            discordHeaders: true,
@@ -49,7 +52,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func removeFriend(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            type: .DELETE,
 //            discordHeaders: true,
@@ -60,7 +62,6 @@ final class User: Codable, Equatable, Identifiable, Hashable {
 
     func block(_: String, _: String) {
 //        let headers = Headers(
-//            userAgent: discordUserAgent,
 //            token: Globals.token,
 //            bodyObject: ["type":2],
 //            type: .PUT,

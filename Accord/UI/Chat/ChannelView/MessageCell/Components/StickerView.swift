@@ -9,7 +9,7 @@ import SwiftUI
 
 struct StickerView: View {
     var stickerItems: [StickerItem]
-    private let leftPadding: CGFloat = 44.5
+    private let leftPadding: Double = 44.5
 
     var body: some View {
         ForEach(stickerItems, id: \.id) { sticker in
@@ -21,6 +21,7 @@ struct StickerView: View {
             } else {
                 Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=160")
                     .equatable()
+                    .scaledToFit()
                     .frame(width: 160, height: 160)
                     .cornerRadius(3)
                     .padding(.leading, leftPadding)

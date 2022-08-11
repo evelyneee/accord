@@ -12,22 +12,25 @@ extension ServerListView: MentionSenderDelegate {
     func addMention(guild: String, channel: String) {
         if guild == "@me" {
             guard channel != String(selection ?? 0) else { print("currently reading already"); return }
-            guard let index = Self.privateChannels.generateKeyMap()[channel] else { return }
-            Self.privateChannels[index].read_state?.mention_count? += 1
+            guard let index = appModel.privateChannels.generateKeyMap()[channel] else { return }
+            DispatchQueue.main.async {
+                appModel.privateChannels[index].read_state?.mention_count? += 1
+            }
         }
         guard channel != String(selection ?? 0) else { print("currently reading already"); return }
-        let index = Self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
+        let index = appModel.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
         for (i, v) in index.enumerated() {
             guard let v = v else { continue }
-            var folderList = Self.folders[i].guilds[v].channels
-            folderList.append(contentsOf: Self.privateChannels)
+            var folderList = appModel.folders[i].guilds[v].channels
+            folderList.append(contentsOf: appModel.privateChannels)
             if let index = fastIndexChannels(channel, array: folderList) {
-                Self.folders[i].guilds[v].channels[index].read_state?.mention_count? += 1
+                DispatchQueue.main.async {
+                    appModel.folders[i].guilds[v].channels[index].read_state?.mention_count? += 1
+                }
             }
         }
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Updater"), object: nil, userInfo: [:])
-            viewUpdater.updateView()
+            self.appModel.objectWillChange.send()
         }
     }
 
@@ -36,56 +39,49 @@ extension ServerListView: MentionSenderDelegate {
     }
 
     func removeMentions(server: String) {
-        let index = Self.folders.map { ServerListView.fastIndexGuild(server, array: $0.guilds) }
-        for (index1, index2) in index.enumerated() {
-            guard let index2 = index2 else { return }
+        let index = appModel.folders.map { $0.guilds[indexOf: server] }
+        for (index1, index2) in index.enumerated().filter({ $0.element != nil }) {
             DispatchQueue.main.async {
-                Self.folders[index1].guilds[index2].channels.forEach { $0.read_state?.mention_count = 0 }
+                appModel.folders[index1].guilds[index2!].channels.forEach { $0.read_state?.mention_count = 0 }
             }
-        }
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Updater"), object: nil, userInfo: [:])
-            viewUpdater.updateView()
         }
     }
 
     func select(channel: Channel) {
-        let guildID = channel.guild_id ?? "@me"
-        if guildID == "@me" {
-            print("direct message")
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "DMSelect"), object: nil, userInfo: ["index": channel.id])
-        }
-        let index = Self.folders.map { ServerListView.fastIndexGuild(guildID, array: $0.guilds) }
-        print(index)
-        for (i, v) in index.enumerated() {
-            guard let v = v else { continue }
-            print("uwu")
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Refresh"), object: nil, userInfo: [Self.folders[i].guilds[v].index ?? 0: Int(channel.id) ?? 0])
-        }
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: channel.guild_id == nil ? "DMSelect" : "Refresh"), object: nil, userInfo: [channel.guild_id ?? "index": channel.guild_id == nil ? channel.id : Int(channel.id) ?? 0])
     }
 
-    func newMessage(in channelID: String, with messageID: String, isDM: Bool) {
+    func newMessage(in channelID: String, message: Message) {
+        let messageID = message.id
+        let isDM = message.guildID == nil
+        let guildID = message.guildID ?? "@me"
         newMessageProcessThread.async {
+            let ids = message.mentions.map(\.id)
+            if ids.contains(user_id) || (appModel.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
+                let matchingGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
+                let matchingChannel = matchingGuild?.channels[keyed: message.channelID] ?? appModel.privateChannels[keyed: message.channelID]
+                showNotification(
+                    title: message.author?.username ?? "Unknown User",
+                    subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
+                    description: message.content,
+                    pfpURL: pfpURL(message.author?.id, message.author?.avatar, "128"),
+                    id: message.channelID
+                )
+                self.addMention(guild: guildID, channel: channelID)
+            }
             if isDM {
-                guard let index = ServerListView.privateChannels.generateKeyMap()[channelID] else { return }
+                guard let index = appModel.privateChannels.generateKeyMap()[channelID] else { return }
                 DispatchQueue.main.async {
-                    ServerListView.privateChannels[index].last_message_id = messageID
+                    self.appModel.privateChannels[index].last_message_id = messageID
                 }
             } else {
                 guard channelID != String(self.selection ?? 0) else { print("currently reading already"); return }
-                ServerListView.folders.enumerated().forEach { index1, folder in
+                appModel.folders.enumerated().forEach { index1, folder in
                     folder.guilds.enumerated().forEach { index2, guild in
                         guild.channels.enumerated().forEach { index3, channel in
                             if channel.id == channelID {
-                                let messagesWereRead = channel.last_message_id == channel.read_state?.last_message_id
                                 DispatchQueue.main.async {
-                                    ServerListView.folders[index1].guilds[index2].channels[index3].last_message_id = messageID
-                                }
-                                if messagesWereRead {
-                                    DispatchQueue.main.async {
-                                        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "Updater"), object: nil, userInfo: [:])
-                                        viewUpdater.updateView()
-                                    }
+                                    appModel.folders[index1].guilds[index2].channels[index3].last_message_id = messageID
                                 }
                             }
                         }

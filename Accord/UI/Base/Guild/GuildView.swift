@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 struct GuildView: View {
-    var guild: Guild
+    
+    @Binding var guild: Guild
     @Binding var selection: Int?
-    @StateObject var updater: ServerListView.UpdateView
     @State var invitePopup: Bool = false
     
-    @State var width: CGFloat?
+    @State var width: Double?
     
     var body: some View {
         List {
@@ -29,20 +29,21 @@ struct GuildView: View {
                 } else {
                     Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=512", size: nil)
                         .equatable()
+                        .scaledToFit()
                         .cornerRadius(3)
                         .animation(nil, value: UUID())
                         .edgesIgnoringSafeArea(.all)
                         .padding(.vertical, 5)
                 }
             }
-            ForEach(guild.channels, id: \.id) { channel in
+            ForEach($guild.channels, id: \.id) { $channel in
                 if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
                         .font(.system(size: 10))
                 } else {
-                    NavigationLink(
+                    NavigationLink (
                         tag: Int(channel.id) ?? 0,
                         selection: self.$selection,
                         destination: {
@@ -53,27 +54,22 @@ struct GuildView: View {
                                     ChannelView(channel, guild.name)
                                         .equatable()
                                         .onAppear {
-                                            let prevCount = channel.read_state?.mention_count
                                             channel.read_state?.mention_count = 0
                                             channel.read_state?.last_message_id = channel.last_message_id
-                                            if prevCount != 0 { self.updater.updateView() }
                                         }
-                                        .onDisappear {
-                                            let prevCount = channel.read_state?.mention_count
+                                        .onDisappear { [channel] in
                                             channel.read_state?.mention_count = 0
                                             channel.read_state?.last_message_id = channel.last_message_id
-                                            if prevCount != 0 { self.updater.updateView() }
                                         }
                                 )
                             }
                         }, label: {
                             ServerListViewCell(
-                                channel: channel,
-                                updater: self.updater
+                                channel: $channel
                             )
                         }
                     )
-                    .buttonStyle(BorderlessButtonStyle())
+                    .buttonStyle(.borderless)
                     .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
                     .opacity(channel.read_state != nil && channel.read_state?.last_message_id != channel.last_message_id ? 1 : 0.5)
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
@@ -92,6 +88,11 @@ struct GuildView: View {
                             showWindow(channel)
                         }) {
                             Text("Open in new window")
+                        }
+                        Button(action: {
+                            showPanel(channel)
+                        }) {
+                            Text("Open in new panel")
                         }
                     }
                     .animation(nil, value: UUID())
@@ -134,17 +135,14 @@ struct GuildView: View {
                 HStack {
                     switch guild.premium_tier {
                     case 1:
-                        Image(systemName: "star").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star")
+                            .font(.system(size: 15))
                     case 2:
-                        Image(systemName: "star.leadinghalf.filled").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star.leadinghalf.filled")
+                            .font(.system(size: 15))
                     case 3:
-                        Image(systemName: "star.fill").resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 15))
                     default:
                         EmptyView()
                     }
@@ -172,23 +170,22 @@ struct GuildView: View {
 }
 
 struct GuildListPreview: View {
-    @State var guild: Guild
-    @Binding var selectedServer: Int?
-    @Binding var updater: Bool
+    @Binding var guild: Guild
+    @Binding var selectedServer: String?
     var body: some View {
         if let icon = guild.icon {
             Attachment(iconURL(guild.id, icon))
                 .equatable()
-                .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.index))
+                .modifier(GuildHoverAnimation(hasIcon: true, selected: selectedServer == guild.id))
         } else {
             if let name = guild.name {
                 Text(name.components(separatedBy: " ").compactMap(\.first).map(String.init).joined())
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.id))
             } else {
                 Image(systemName: "questionmark")
                     .equatable()
-                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.index))
+                    .modifier(GuildHoverAnimation(hasIcon: false, selected: selectedServer == guild.id))
             }
         }
     }
@@ -210,4 +207,13 @@ extension View {
 private struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
+}
+
+@MainActor func showPanel(_ channel: Channel) {
+    let panel2 = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 600), styleMask: [.titled, .nonactivatingPanel, .closable], backing: .buffered, defer: true)
+    panel2.title = channel.computedName
+    panel2.level = .init(Int(CGWindowLevelForKey(CGWindowLevelKey.floatingWindow)))
+    panel2.contentView = NSHostingView(rootView: ChannelView(channel, channel.guild_name))
+    panel2.collectionBehavior = [.fullScreenAuxiliary]
+    panel2.orderFrontRegardless()
 }

@@ -11,7 +11,7 @@ import SwiftUI
 struct EmoteButton: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? CGFloat(0.85) : 1.0)
+            .scaleEffect(configuration.isPressed ? Double(0.85) : 1.0)
             .animation(.spring(), value: configuration.isPressed)
             .padding(.bottom, 3)
     }
@@ -43,7 +43,7 @@ struct NitrolessView: View, Equatable {
                 TextField("Search for emotes", text: $search)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 LazyVGrid(columns: columns) {
-                    ForEach(Array(allEmotes.keys.filter { search != "" ? $0.contains(search) : true }), id: \.self) { key in
+                    ForEach(Array(allEmotes.keys.filter { search.isEmpty ? true : $0.contains(search) }), id: \.self) { key in
                         Button(action: {
                             guard let emote = allEmotes[key] else { return }
                             chatText.append(contentsOf: "\(Self.nitrolessRoot)emotes/\(key)\(emote)")

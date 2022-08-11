@@ -43,8 +43,8 @@ func showNotification(title: String, subtitle: String, description: String? = ni
     func newNotification(_ message: Message) {
         let content = UNMutableNotificationContent()
 
-        let matchingGuild = Array(ServerListView.folders.map(\.guilds).joined())[message.guild_id ?? ""]
-        let matchingChannel = matchingGuild?.channels?[message.channel_id] ?? ServerListView.privateChannels[message.channel_id]
+        let matchingGuild = Array(appModel.folders.map(\.guilds).joined())[message.guild_id ?? ""]
+        let matchingChannel = matchingGuild?.channels?[message.channelID] ?? appModel.privateChannels[message.channelID]
 
         print(matchingChannel)
 
@@ -100,7 +100,7 @@ func showNotification(title: String, subtitle: String, description: String? = ni
                     outgoingMessageType: .outgoingMessageText,
                     content: message.content,
                     speakableGroupName: INSpeakableString(spokenPhrase: matchingChannel?.computedName ?? message.author?.username ?? ""),
-                    conversationIdentifier: message.channel_id,
+                    conversationIdentifier: message.channelID,
                     serviceName: nil,
                     sender: senderPerson,
                     attachments: nil

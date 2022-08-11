@@ -10,7 +10,6 @@ import SwiftUI
 struct JoinServerButton: View {
     @State var isShowingJoinServerSheet: Bool = false
     @State var iconHovered: Bool = false
-    @StateObject var viewUpdater: ServerListView.UpdateView
 
     private var iconView: some View {
         Image(systemName: "plus")
@@ -30,7 +29,7 @@ struct JoinServerButton: View {
         })
         .buttonStyle(.borderless)
         .sheet(isPresented: $isShowingJoinServerSheet) {
-            JoinServerSheetView(isPresented: $isShowingJoinServerSheet, updater: viewUpdater)
+            JoinServerSheetView(isPresented: $isShowingJoinServerSheet)
                 .frame(width: 300, height: 120)
                 .padding()
         }

@@ -23,8 +23,8 @@ final class VisualStudioCodeRPC {
         let cgWindowListInfo = CGWindowListCopyWindowInfo(options, CGWindowID(0))
         let cgWindowListInfo2 = cgWindowListInfo as NSArray? as? [[String: Any]]
         guard let windows = (cgWindowListInfo2?.filter { $0["kCGWindowOwnerName"] as? String == "Code" }.compactMap { $0["kCGWindowName"] as? String }) else { return [] }
-        print(windows.filter { $0 != "Code" && $0 != "" && $0 != "Focus Proxy" && $0 != "Menubar" })
-        return windows.filter { $0 != "Code" && $0 != "" && $0 != "Focus Proxy" && $0 != "Menubar" }
+        print(windows.filter { $0 != "Code" && !$0.isEmpty && $0 != "Focus Proxy" && $0 != "Menubar" })
+        return windows.filter { $0 != "Code" && !$0.isEmpty && $0 != "Focus Proxy" && $0 != "Menubar" }
     }
 
     class func getRPCInfo() -> (file: String?, workspace: String?) {

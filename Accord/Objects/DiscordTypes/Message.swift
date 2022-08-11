@@ -10,61 +10,102 @@ import Foundation
 
 struct Message: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds
+        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds && lhs.reactions == rhs.reactions
     }
-
+    
     var author: User?
     var nick: String?
-    var channel_id: String
-    var guild_id: String?
+    var channelID: String
+    var guildID: String?
     var content: String
-    var edited_timestamp: Date?
+    var editedTimestamp: Date?
     var id: String
     var embeds: [Embed]?
-    var mention_everyone: Bool?
+    var mentionEveryone: Bool?
     var mentions: [User]
     var user_mentioned: Bool?
 
     var userMentioned: Bool { user_mentioned ?? false }
-    var bottomInset: CGFloat {
-        (isSameAuthor && referenced_message == nil ? 0.5 : 13.0) - (userMentioned ? 3.0 : 0.0)
+    var bottomInset: Double {
+        (isSameAuthor && referencedMessage == nil ? 0.5 : 13.0) - (userMentioned ? 3.0 : 0.0)
     }
 
     var pinned: Bool?
     var timestamp: Date
     var processedTimestamp: String?
+    var _inSameDay: Bool?
+    var inSameDay: Bool { self._inSameDay ?? true }
     var type: MessageType
     var attachments: [AttachedFiles]
-    var referenced_message: Reply?
+    var referencedMessage: Reply?
     // var message_reference: Reply? // in the mentions endpoint
-    let sticker_items: [StickerItem]?
-    var reactions: [Reaction]?
+    let stickerItems: [StickerItem]?
+    var _reactions: [Reaction]?
+    
+    var reactions: [Reaction] {
+        get {
+            self._reactions ?? []
+        }
+        set(value) {
+            self._reactions = value
+        }
+    }
+    
     var interaction: Interaction?
 
+    enum CodingKeys: String, CodingKey, CaseIterable {
+        case author, nick, content, id, embeds,
+             mentions, pinned, timestamp, processedTimestamp,
+             _inSameDay, type, attachments, interaction,
+            user_mentioned
+        case _reactions = "reactions"
+        case channelID = "channel_id"
+        case guildID = "guild_id"
+        case editedTimestamp = "edited_timestamp"
+        case mentionEveryone = "mention_everyone"
+        case referencedMessage = "referenced_message"
+        case stickerItems = "sticker_items"
+        case reference = "message_reference"
+    }
+    
+    var reference: MessageReference?
+
+    struct MessageReference: Codable {
+        var messageID: String
+        var guildID: String?
+        var channelID: String
+        
+        enum CodingKeys: String, CodingKey {
+            case channelID = "channel_id"
+            case guildID = "guild_id"
+            case messageID = "message_id"
+        }
+    }
+    
     var identifier: String {
         content + id
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(content)
+        hasher.combine(embeds?.count ?? 0)
     }
 
     func delete() {
         let headers = Headers(
-            userAgent: discordUserAgent,
             contentType: nil,
             token: Globals.token,
             type: .DELETE,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guild_id ?? "")/\(channel_id)",
+            referer: "https://discord.com/channels/\(guildID ?? "@me")/\(channelID)",
             empty: true
         )
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: headers)
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(id)"), headers: headers)
     }
 
     func edit(now: String) {
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(channel_id)/messages/\(id)"), headers: Headers(
-            userAgent: discordUserAgent,
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages/\(id)"), headers: Headers(
             token: Globals.token,
             bodyObject: ["content": now],
             type: .PATCH,

@@ -12,7 +12,7 @@ protocol MentionSenderDelegate {
     func deselect()
     func removeMentions(server: String)
     func select(channel: Channel)
-    func newMessage(in: String, with: String, isDM: Bool)
+    func newMessage(in: String, message: Message)
 }
 
 class MentionSender {
@@ -34,7 +34,7 @@ class MentionSender {
         delegate?.select(channel: channel)
     }
 
-    func newMessage(in channel: String, with messageID: String, isDM: Bool) {
-        delegate?.newMessage(in: channel, with: messageID, isDM: isDM)
+    func newMessage(in channel: String, message: Message) {
+        delegate?.newMessage(in: channel, message: message)
     }
 }

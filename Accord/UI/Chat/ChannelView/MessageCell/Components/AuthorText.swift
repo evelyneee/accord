@@ -7,16 +7,41 @@
 
 import SwiftUI
 
-struct AuthorTextView: View {
+struct AuthorTextView: View, Equatable {
+    static func == (lhs: AuthorTextView, rhs: AuthorTextView) -> Bool {
+        lhs.nick == rhs.nick && lhs.role == rhs.role
+    }
+    
     var message: Message
     var pronouns: String?
     var nick: String?
+    
+    @Environment(\.guildID)
+    var guildID: String
+    
+    @MainActor
+    var nickname: String? {
+        if self.guildID == "@me" {
+            return _nickname
+        }
+        return nil
+    }
+    
+    @MainActor
+    var _nickname: String? {
+        Storage.users[self.message.author?.id ?? ""]?.relationship?.nickname
+    }
+    
     @Binding var role: String?
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack(spacing: 1) {
-            Text(nick ?? message.author?.username ?? "Unknown User")
+            Text(self.nickname ?? nick ?? _nickname ?? message.author?.username ?? "Unknown User")
                 .foregroundColor({ () -> Color in
-                    if let role = role, let color = roleColors[role]?.0, !message.isSameAuthor {
+                    if let role = role, let color = Storage.roleColors[role]?.0, !message.isSameAuthor {
                         return Color(int: color)
                     }
                     return Color.primary
@@ -24,15 +49,15 @@ struct AuthorTextView: View {
                 .font(.chatTextFont)
                 .fontWeight(.semibold)
                 +
-                Text("  \(message.processedTimestamp ?? "")")
+            Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text(message.edited_timestamp != nil ? " (edited at \(message.edited_timestamp?.makeProperHour() ?? "unknown time"))" : "")
+            Text(message.editedTimestamp != nil ? " (edited at \(message.editedTimestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
                 +
-                Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
+            Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
                 .font(.subheadline)
             if message.author?.bot == true {

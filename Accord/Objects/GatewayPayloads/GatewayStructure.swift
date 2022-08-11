@@ -30,11 +30,26 @@ struct GatewayD: Decodable {
     var private_channels: [Channel]
     @IgnoreFailure
     var users: [User]
+    @IgnoreFailure
+    var relationships: [Relationship]
 }
 
-final class Relationship: Codable {
-    var user_id: String
-    var nick: String?
-    var type: Int?
+final class Relationship: Codable, Identifiable {
+    var userID: String
+    var nickname: String?
+    var type: RelationshipType
     var id: String
+    
+    enum RelationshipType: Int, Codable {
+        case none = 0
+        case friend = 1
+        case blocked = 2
+        case incomingFriendRequest = 3
+        case outgoingFriendRequest = 4
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case nickname, type, id
+    }
 }

@@ -23,7 +23,8 @@ struct ThreadSearchResult: Decodable {
 
 final class ForumChannelListModel: ObservableObject {
     
-    @Published var channels: [(channel: Channel, message: Message)] = .init()
+    @MainActor @Published
+    var channels: [(channel: Channel, message: Message)] = .init()
     
     func loadChannels(for forumID: String) {
         let url = root
@@ -39,7 +40,6 @@ final class ForumChannelListModel: ObservableObject {
                 "offset": "0"
             ])
         RequestPublisher.fetch(ThreadSearchResult.self, url: url, headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .GET,
             discordHeaders: true,
@@ -90,6 +90,7 @@ struct ForumChannelList: View {
                         }
                         .padding(7)
                     }
+                    .frame(maxWidth: .infinity)
                 })
             }
             .onAppear {

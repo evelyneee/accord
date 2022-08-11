@@ -9,14 +9,31 @@ import AppKit
 import Combine
 import Foundation
 import SwiftUI
+import MachO
 
 final class ChatControlsViewModel: ObservableObject {
-    @Published var matchedUsers: [String: String] = .init()
-    @Published var matchedChannels: [Channel] = .init()
-    @Published var matchedEmoji: [DiscordEmote] = .init()
-    @Published var matchedCommands: [SlashCommandStorage.Command] = .init()
-    @Published var textFieldContents: String = .init()
-    @Published var percent: String? = nil
+    
+    @MainActor @Published
+    var matchedUsers: [User] = .init()
+    
+    @MainActor @Published
+    var matchedRoles: [String:String] = .init()
+    
+    @MainActor @Published
+    var matchedChannels: [Channel] = .init()
+    
+    @MainActor @Published
+    var matchedEmoji: [DiscordEmote] = .init()
+    
+    @MainActor @Published
+    var matchedCommands: [SlashCommandStorage.Command] = .init()
+    
+    @MainActor @Published
+    var textFieldContents: String = .init()
+    
+    @MainActor @Published
+    var percent: String? = nil
+    
     var observation: NSKeyValueObservation?
     var command: SlashCommandStorage.Command?
 
@@ -27,32 +44,33 @@ final class ChatControlsViewModel: ObservableObject {
     var silentTyping: Bool = false
 
     var locked: Bool = false
-    var runOnUnlock: (() -> Void)?
+    var runOnUnlock: (() async -> Void)?
 
     init() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             self?.findView()
         }
     }
-
-    func checkText(guildID: String, channelID: String) {
-        let ogContents = textFieldContents
-        let mentions = textFieldContents.matches(precomputed: RegexExpressions.chatTextMentionsRegex)
-        let channels = textFieldContents.matches(precomputed: RegexExpressions.chatTextChannelsRegex)
-        let slashes = textFieldContents.matches(precomputed: RegexExpressions.chatTextSlashCommandRegex)
-        let emoji = textFieldContents.matches(precomputed: RegexExpressions.chatTextEmojiRegex)
-        let emotes = textFieldContents.matches(precomputed: RegexExpressions.completedEmoteRegex)
+    
+    @_optimize(speed)
+    func checkText(guildID: String, channelID: String) async {
+        let ogContents = await textFieldContents
+        let mentions = ogContents.matches(precomputed: RegexExpressions.chatTextMentions)
+        let channels = ogContents.matches(precomputed: RegexExpressions.chatTextChannels)
+        let slashes = ogContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
+        let emoji = ogContents.matches(precomputed: RegexExpressions.chatTextEmoji)
+        let emotes = ogContents.matches(precomputed: RegexExpressions.completedEmote)
 
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
-            guard let matched: DiscordEmote = Array(Emotes.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
+            guard let matched: DiscordEmote = Array(Storage.emotes.values.joined()).filter({ $0.name.lowercased() == emote.lowercased() }).first else { return }
             DispatchQueue.main.async {
                 if self.textFieldContents != ogContents { return }
                 self.textFieldContents = self.textFieldContents.replacingOccurrences(of: emoji, with: "<\((matched.animated ?? false) ? "a" : ""):\(matched.name):\(matched.id)> ")
             }
         }
 
-        guard !textFieldContents.isEmpty else {
+        guard !ogContents.isEmpty else {
             DispatchQueue.main.async {
                 self.matchedEmoji.removeAll()
                 self.matchedCommands.removeAll()
@@ -63,29 +81,33 @@ final class ChatControlsViewModel: ObservableObject {
         }
 
         if let search = mentions.last?.lowercased() {
-            let matched: [String: String] = Storage.usernames
-                .mapValues { $0.lowercased() }
-                .filterValues { $0.contains(search) }
-                .prefix(10)
-                .literal()
-            DispatchQueue.main.async {
-                self.matchedUsers = matched
+            let matchedUsers = await Storage.users
+                .filterValues { $0.username.lowercased().contains(search.lowercased()) }
+                .map(\.value)
+            let matchedRoles = Storage.roleNames
+                .filterValues { $0.lowercased().contains(search) }
+                .mapKeys { "&" + $0 }
+            await MainActor.run {
+                self.matchedUsers = matchedUsers
+                self.matchedRoles = matchedRoles
             }
         } else if let search = channels.last {
-            let matches = ServerListView.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
-            let joined: [Channel] = Array(Array(Array(matches).joined()).joined())
-                .filter { $0.guild_id == guildID }
-                .prefix(10)
-                .literal()
-            DispatchQueue.main.async {
-                self.matchedChannels = joined
+            Task.detached {
+                let matches = await Storage.globals?.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
+                let joined: [Channel] = Array(Array(Array(matches ?? []).joined()).joined())
+                    .filter { $0.guild_id == guildID }
+                    .prefix(10)
+                    .literal()
+                DispatchQueue.main.async {
+                    self.matchedChannels = joined
+                }
             }
         } else if let command = slashes.last?.trimmingCharacters(in: .letters.inverted),
-                  textFieldContents.prefix(1) == "/", guildID != "@me"
+                  ogContents.prefix(1) == "/", guildID != "@me"
         {
             guard !locked else {
                 runOnUnlock = { [weak self] in
-                    self?.checkText(guildID: guildID, channelID: channelID)
+                    await self?.checkText(guildID: guildID, channelID: channelID)
                 }
                 return
             }
@@ -118,10 +140,12 @@ final class ChatControlsViewModel: ObservableObject {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 self.locked = false
-                self.runOnUnlock?()
+                Task.detached {
+                    await self.runOnUnlock?()
+                }
             }
         } else if let key = emoji.last {
-            let matched = Array(Emotes.emotes.values.joined())
+            let matched = Array(Storage.emotes.values.joined())
                 .filter { $0.name.lowercased().contains(key) }
                 .prefix(10)
                 .literal()
@@ -130,25 +154,28 @@ final class ChatControlsViewModel: ObservableObject {
             }
         }
     }
-
+    
+    @MainActor
     func findView() {
         AppKitLink<NSTextField>.introspect { textField, _ in
+            print("found view!!!!")
             textField.lineBreakMode = .byWordWrapping
             textField.usesSingleLineMode = false
+            textField.allowsDefaultTighteningForTruncation = true
+            textField.lineBreakStrategy = .standard
         }
     }
-
+    
+    @MainActor
     func clearMatches() {
-        DispatchQueue.main.async {
-            self.matchedEmoji.removeAll()
-            self.matchedUsers.removeAll()
-            self.matchedChannels.removeAll()
-        }
+        self.matchedUsers.removeAll()
+        self.matchedRoles.removeAll()
+        self.matchedEmoji.removeAll()
+        self.matchedChannels.removeAll()
     }
 
     func send(text: String, guildID: String, channelID: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["content": text, "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
@@ -165,12 +192,12 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
-    func executeCommand(guildID: String, channelID: String) throws {
+    func executeCommand(guildID: String, channelID: String) async throws {
         guard let command = command else {
+            let textFieldContents = await textFieldContents
             if textFieldContents.prefix(6) == "/nick " {
                 let nick = textFieldContents.dropFirst(6).stringLiteral
                 Request.ping(url: URL(string: "\(rootURL)/guilds/\(guildID)/members/%40me/nick"), headers: Headers(
-                    userAgent: discordUserAgent,
                     token: Globals.token,
                     bodyObject: ["nick": nick],
                     type: .PATCH,
@@ -185,7 +212,7 @@ final class ChatControlsViewModel: ObservableObject {
                 sendDebugLog(guildID: guildID, channelID: channelID)
                 emptyTextField()
             } else if textFieldContents.prefix(6) == "/reset" {
-                wss.reset()
+                print(await wss.reset())
                 emptyTextField()
             } else if textFieldContents.prefix(12) == "/reset force" {
                 wss.hardReset()
@@ -198,6 +225,7 @@ final class ChatControlsViewModel: ObservableObject {
                 `/reset`: resume websocket connection
                 `/reset force`: force reset websocket connection
                 """
+                let original = Globals.user
                 let system = Globals.user
                 system?.id = generateFakeNonce()
                 system?.username = "Accord"
@@ -205,27 +233,28 @@ final class ChatControlsViewModel: ObservableObject {
                 system?.avatar = nil
                 let message = Message(
                     author: system,
-                    channel_id: channelID,
-                    guild_id: guildID,
+                    channelID: channelID,
+                    guildID: guildID,
                     content: help,
                     id: generateFakeNonce(),
                     mentions: [],
                     timestamp: .init(),
                     type: .default,
                     attachments: .init(),
-                    sticker_items: .init()
+                    stickerItems: .init()
                 )
                 let gatewayMessage = GatewayEventCodable(d: message)
                 let encoder = JSONEncoder()
                 encoder.dateEncodingStrategy = .iso8601
                 let data = try encoder.encode(gatewayMessage)
                 wss.messageSubject.send((data, channelID, false))
+                Globals.user = original
             }
             return
         }
         var options: [[String: Any]] = []
         if command.options?.count != 0 {
-            let args: [(key: String, value: Any)] = textFieldContents
+            let args: [(key: String, value: Any)] = await textFieldContents
                 .matches(for: #"(\S+):((?:(?! \S+:).)+)"#)
                 .compactMap { arg -> (key: String, value: Any)? in
                     let components = arg.components(separatedBy: ":")
@@ -260,9 +289,47 @@ final class ChatControlsViewModel: ObservableObject {
         }
     }
 
+    let NATIVE_EXECUTION = Int32(0)
+    let EMULATED_EXECUTION = Int32(1)
+    let UNKONWN_EXECUTION = -Int32(1)
+    
+    func processIsTranslated() -> Int32 {
+        var ret = Int32(0)
+        var size = ret.bitWidth
+        let result = sysctlbyname("sysctl.proc_translated", &ret, &size, nil, 0)
+        if result == -1 {
+            if (errno == ENOENT){
+                return 0
+            }
+            return -1
+        }
+        return ret
+    }
+    
+    func processIsTranslatedStr() -> String {
+            switch processIsTranslated() {
+            case NATIVE_EXECUTION:
+                return "Native"
+            case EMULATED_EXECUTION:
+                return "Rosetta"
+            default:
+                return "Unknown"
+            }
+    }
+    
+    func getArch() -> String? {
+        guard let archRaw = NXGetLocalArchInfo().pointee.name else {
+            return nil
+        }
+        return String(cString: archRaw)
+    }
+    
     var debugLog: String {
+        
         """
         **Accord Debug Log**
+        macOS Version: \(String(describing: ProcessInfo.processInfo.operatingSystemVersionString))
+        Architecture: \(getArch() ?? "Unknown CPU") (\(processIsTranslatedStr()))
         Version: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
         Gateway State: \(wss.connection?.state as Any)
         Compression: \(wss.compress ? "Enabled" : "Disabled")
@@ -277,13 +344,12 @@ final class ChatControlsViewModel: ObservableObject {
     }
 
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
-        Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channel_id)/messages"), headers: Headers(
-            userAgent: discordUserAgent,
+        Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channelID)/messages"), headers: Headers(
             token: Globals.token,
-            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channel_id, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channelID, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
             discordHeaders: true,
-            referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channel_id)",
+            referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channelID)",
             empty: true,
             json: true
         ))
@@ -340,7 +406,6 @@ final class ChatControlsViewModel: ObservableObject {
     func type(channelID: String, guildID: String) {
         guard !silentTyping else { return }
         Request.ping(url: URL(string: rootURL + "/channels/\(channelID)/typing"), headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             type: .POST,
             discordHeaders: true,

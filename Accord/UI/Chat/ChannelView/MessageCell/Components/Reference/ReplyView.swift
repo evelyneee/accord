@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct ReplyView: View {
+    
     let reply: Reply
     var replyNick: String?
     @Binding var replyRole: String?
 
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
     var body: some View {
         HStack {
             RoundedRectangle(cornerRadius: 5)
@@ -29,7 +33,7 @@ struct ReplyView: View {
             Text(replyNick ?? reply.author?.username ?? "")
                 .font(.subheadline)
                 .foregroundColor({ () -> Color in
-                    if let replyRole = replyRole, let color = roleColors[replyRole]?.0 {
+                    if let replyRole = replyRole, let color = Storage.roleColors[replyRole]?.0 {
                         return Color(int: color)
                     }
                     return Color.primary
@@ -40,7 +44,7 @@ struct ReplyView: View {
             }, label: { [weak reply] in
                 let content = reply?.content ?? ""
                 let hasAttachment = !(reply?.attachments ?? []).isEmpty
-                Text(content != "" ? content : hasAttachment ? "Click to see attachment" : "       ")
+                Text(!content.isEmpty ? content : hasAttachment ? "Click to see attachment" : "       ")
                     .font(.subheadline)
                     .lineLimit(0)
                     .foregroundColor(.secondary)

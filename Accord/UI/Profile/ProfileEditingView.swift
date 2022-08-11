@@ -41,7 +41,6 @@ struct ProfileEditingView: View {
                 url = url?.appendingPathComponent("settings")
             }
             Request.fetch(User.self, url: url, headers: Headers(
-                userAgent: discordUserAgent,
                 token: Globals.token,
                 bodyObject: dict,
                 type: .PATCH,
@@ -200,6 +199,7 @@ struct ProfileEditingView: View {
                         } else if let banner = self.user?.banner, let id = self.user?.id {
                             Attachment(cdnURL + "/banners/\(id)/\(banner).png?size=320")
                                 .equatable()
+                                .scaledToFit()
                                 .frame(width: 290)
                         } else {
                             Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)

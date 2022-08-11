@@ -48,20 +48,30 @@ struct NewInviteSheet: View {
             Text("Create a new invite")
                 .font(.title)
                 .fontWeight(.bold)
-            if let code = code {
+                .padding(.bottom, 5)
+            VStack(alignment: .leading) {
+                Text("code".uppercased())
+                    .fontWeight(.semibold)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
                 HStack {
-                    HStack(spacing: 0) {
-                        Text("Invite Code: ")
-                            .fontWeight(.medium)
+                    if let code {
                         Text("https://discord.gg/" + code)
                             .fontWeight(.medium)
                             .textSelection(.enabled)
+                            .padding(4)
+                            .background(Color(NSColor.alternatingContentBackgroundColors[1]))
+                            .cornerRadius(4)
+                    } else {
+                        Text(verbatim: "https://discord.gg/a1b2c3d4e5")
+                            .fontWeight(.medium)
+                            .blur(radius: 5)
                     }
-                    .padding(5)
                     Button("Copy") {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString("https://discord.gg/" + (self.code ?? ""), forType: .string)
                     }
+                    .disabled(code == nil)
                 }
             }
         }
@@ -149,7 +159,6 @@ struct NewInviteSheet: View {
             .appendingPathComponent(String(selection))
             .appendingPathComponent("invites")
         Request.fetch(InviteUpdate.self, url: url, headers: Headers(
-            userAgent: discordUserAgent,
             token: Globals.token,
             bodyObject: ["max_age": maxAge,
                          "max_uses": maxUses,
