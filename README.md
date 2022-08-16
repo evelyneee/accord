@@ -1,5 +1,5 @@
-## Accord
-A faster discord client for your Mac. 
+# Accord
+A faster, native discord client for your Mac. Here's a [screenshot](https://github.com/evelyneee/accord#screenshot).
 
 ### OS Requirement
 
@@ -43,3 +43,7 @@ This project is licensed under the BSD 4 clause license.
 ### Support
 * If you have questions, feel free to [ask them in our Discord server](https://discord.gg/nUGnmA9yFH)!
 * If you'd like to report an issue, [please do so here](https://github.com/evelyneee/accord/issues/new).
+
+## Screenshot
+
+<img width="1196" alt="Screen Shot 2022-08-15 at 8 44 04 PM" src="https://user-images.githubusercontent.com/70823629/184759736-cef96abb-1b8d-4d69-97d9-e3b32ca8df67.png">
