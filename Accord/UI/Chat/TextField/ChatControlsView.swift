@@ -221,6 +221,7 @@ struct ChatControls: View {
     var mainTextField: some View {
         TextField(textFieldText, text: $viewModel.textFieldContents)
             // .focused($focusedField, equals: .mainTextField)
+            .font(.chatTextFont)
             .onSubmit {
                 typing = false
                 send()

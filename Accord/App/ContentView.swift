@@ -16,6 +16,23 @@ extension EnvironmentValues {
     }
 }
 
+@objc
+class NSScreenAccord: NSScreen {
+    @objc override open var safeAreaInsets: NSEdgeInsets {
+        get {
+            print("CALLED")
+            return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }
+    }
+    
+    @objc override open var visibleFrame: NSRect {
+        get {
+            print("CALLED")
+            return self.frame
+        }
+    }
+}
+
 private struct UserKey: EnvironmentKey {
     static let defaultValue = Globals.user!
 }
@@ -36,7 +53,7 @@ struct ContentView: View {
     
     @EnvironmentObject
     var appModel: AppGlobals
-
+    
     @ViewBuilder
     var body: some View {
         if modalIsPresented {
@@ -58,7 +75,7 @@ struct ContentView: View {
                                 throw LoadErrors.offline
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                NSApp.keyWindow?.identifier = NSUserInterfaceItemIdentifier("AccordMainWindow")
+                                NSApp.mainWindow?.identifier = NSUserInterfaceItemIdentifier("AccordMainWindow")
                             }
                             print("hiiiii")
                             let new = try Gateway(

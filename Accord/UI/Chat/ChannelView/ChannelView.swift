@@ -274,8 +274,13 @@ struct ChannelView: View, Equatable {
             if showSearch {
                 VStack(alignment: .leading) {
                     HStack {
-                        Text("Search results")
-                            .font(.system(.title3, design: .rounded))
+                        TextField("Search", text: self.$searchText)
+                            .textFieldStyle(.roundedBorder)
+                            .controlSize(.large)
+                            .onSubmit {
+                                self.search()
+                            }
+                        Spacer()
                         Button(action: {
                             self.showSearch = false
                             self.searchMessages.removeAll()
@@ -285,19 +290,29 @@ struct ChannelView: View, Equatable {
                         }
                         .buttonStyle(.borderless)
                     }
-                    List($searchMessages, id: \.id) { $message in
-                        ZStack(alignment: .topTrailing) {
-                            cell(for: $message)
-                            Button("Jump") {
-                                MentionSender.shared.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                                    ChannelView.scrollTo.send((message.channelID, message.id))
-                                })
+                    .padding(.horizontal, 5)
+                    .padding(.trailing, 5)
+                    .padding(.top, 10)
+                    ScrollView {
+                        LazyVStack(alignment: .leading) {
+                            ForEach($searchMessages, id: \.id) { $message in
+                                ZStack(alignment: .topTrailing) {
+                                    cell(for: $message)
+                                    Button("Jump") {
+                                        MentionSender.shared.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                                            ChannelView.scrollTo.send((message.channelID, message.id))
+                                        })
+                                    }
+                                }
                             }
-                            .buttonStyle(.borderless)
                         }
                     }
+                    .onDisappear {
+                        self.searchMessages.removeAll()
+                    }
                 }
+                .frame(maxWidth: 400)
             }
         }
         .onAppear {
@@ -317,9 +332,6 @@ struct ChannelView: View, Equatable {
             })
             return true
         }
-        .searchable(text: $searchText) {
-            Toggle("Search pinned messages", isOn: $searchForPinnedMessages)
-        }
         .onSubmit(of: .search) {
             showSearch = !searchText.isEmpty || self.searchForPinnedMessages
             if showSearch {
@@ -334,11 +346,18 @@ struct ChannelView: View, Equatable {
                     }, label: {
                         Image(systemName: "sidebar.leading")
                     })
-                    Image(systemName: "number")
-                        .resizable()
-                        .frame(width: 13, height: 13)
-                        .foregroundColor(.secondary)
-                        .padding(.trailing, -2)
+                    if guildName == "Direct Messages" {
+                        Text("@")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                            .padding(.trailing, -2)
+                    } else {
+                        Image(systemName: "number")
+                            .resizable()
+                            .frame(width: 13, height: 13)
+                            .foregroundColor(.secondary)
+                            .padding(.trailing, -2)
+                    }
                 }
             }
             ToolbarItemGroup {
@@ -375,6 +394,10 @@ struct ChannelView: View, Equatable {
                 .popover(isPresented: $mentions) {
                     MentionsView(replyingTo: Binding.constant(nil))
                         .frame(width: 500, height: 600)
+                }
+                Toggle(isOn: $showSearch.animation()) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 13, weight: .semibold))
                 }
                 Toggle(isOn: $memberListShown.animation()) {
                     Image(systemName: "person.2.fill")

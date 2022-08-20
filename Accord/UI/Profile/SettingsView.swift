@@ -39,7 +39,7 @@ struct SettingsView: View {
                         SettingsToggleView(key: "GifProfilePictures", title: "Enable Gif Profile Pictures", detail: "Experimental")
                         SettingsToggleView(key: "ShowHiddenChannels", title: "Show hidden channels", detail: "Please don't use this")
                         SettingsToggleView(key: "CompressGateway", title: "Enable Gateway Stream Compression", detail: "Recommended", defaultToggle: true)
-                        SettingsToggleView(key: "Highlighting", title: "Use dark blockchain technology", detail: "Ask around for what this does!")
+                        SettingsToggleView(key: "Highlighting", title: "Enable Bionic Reading on messages")
                     }
 
                     HStack(alignment: .top) {

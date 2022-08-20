@@ -42,7 +42,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     var cancellable: Set<AnyCancellable> = .init()
     
     @MainActor @Published
-    var permissions: Permissions = .init()
+    var permissions: Permissions = [.sendMessages, .readMessages, .addReactions]
     
     @Published var noMoreMessages = false
 

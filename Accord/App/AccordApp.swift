@@ -224,7 +224,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func loadWindowRect(_: AnyObject?) {
         guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
-        NSApp.keyWindow?.setFrame(from: desc)
+        NSApp.mainWindow?.setFrame(from: desc)
     }
 
     @objc func togglePopover(_ sender: AnyObject?) {
@@ -236,7 +236,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func windowClosed(_: AnyObject?) {
-        guard NSApp.keyWindow?.identifier == NSUserInterfaceItemIdentifier("AccordMainWindow") else { return }
-        UserDefaults.standard.set(NSApp.keyWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
+        guard NSApp.mainWindow?.identifier == NSUserInterfaceItemIdentifier("AccordMainWindow") else { return }
+        UserDefaults.standard.set(NSApp.mainWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
     }
 }

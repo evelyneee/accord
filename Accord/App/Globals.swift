@@ -84,7 +84,7 @@ final class AppGlobals: ObservableObject {
 
         let everyonePerms = perms.filter { $0.id == guildID }
         permsArray.insert(.init([
-            .sendMessages, .readMessages, .changeNickname,
+            .sendMessages, .readMessages, .changeNickname, .addReactions
         ]))
         permsArray.remove(Permissions(everyonePerms.map(\.deny)))
         permsArray.insert(Permissions(everyonePerms.map(\.allow)))
