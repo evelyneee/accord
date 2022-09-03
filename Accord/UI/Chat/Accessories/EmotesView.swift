@@ -28,6 +28,13 @@ struct EmotesView: View, Equatable {
     @State var recentsenabled = true
     @State var search = ""
     
+    enum Selection: Hashable {
+        case emotes
+        case stickers
+    }
+    
+    @State var selection: Selection = .emotes
+    
     @Environment(\.dismiss)
     var dismiss
     
@@ -37,66 +44,72 @@ struct EmotesView: View, Equatable {
     var body: some View {
         HStack {
             ZStack(alignment: .top) {
-                ScrollView {
-                    Spacer().frame(height: 45)
-                    LazyVStack(alignment: .leading) {
-                        if search.isEmpty {
-                            let keys = Array(Storage.emotes.keys)
-                            let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
-                            ForEach(nonEmptyKeys, id: \.self) { key in
-                                Section(header: Text(key.components(separatedBy: "$")[1])) {
+                VStack {
+                    TextField("Search emotes", text: $search)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .background(Material.thick) // blurred background
+                        .onSubmit {
+                            self.onSelect(DiscordEmote(id: "stock", name: self.search))
+                            self.dismiss()
+                        }
+                    TabView(selection: self.$selection) {
+                        ScrollView {
+                            Spacer().frame(height: 45)
+                            LazyVStack(alignment: .leading) {
+                                if search.isEmpty {
+                                    let keys = Array(Storage.emotes.keys)
+                                    let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
+                                    ForEach(nonEmptyKeys, id: \.self) { key in
+                                        Section(header: Text(key.components(separatedBy: "$")[1])) {
+                                            LazyVGrid(columns: columns) {
+                                                ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
+                                                    Button(action: {
+                                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
+                                                        onSelect(emote)
+                                                        self.dismiss()
+                                                    }) {
+                                                        VStack {
+                                                            HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
+                                                                .frame(width: 29, height: 29)
+                                                                .fixedSize()
+                                                        }
+                                                        .frame(width: 30, height: 30)
+                                                        .fixedSize()
+                                                    }
+                                                    .buttonStyle(EmoteButton())
+                                                    .fixedSize()
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                } else {
                                     LazyVGrid(columns: columns) {
-                                        ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
+                                        ForEach(Storage.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                                 onSelect(emote)
                                                 self.dismiss()
                                             }) {
-                                                VStack {
-                                                    HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
-                                                        .frame(width: 29, height: 29)
-                                                        .fixedSize()
-                                                }
-                                                .frame(width: 30, height: 30)
-                                                .fixedSize()
+                                                HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
+                                                    .frame(width: 29, height: 29)
+                                                    .fixedSize()
                                             }
+                                            .fixedSize()
                                             .buttonStyle(EmoteButton())
                                             .fixedSize()
                                         }
                                     }
                                 }
                             }
-
-                        } else {
-                            LazyVGrid(columns: columns) {
-                                ForEach(Storage.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
-                                    Button(action: {
-                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
-                                        onSelect(emote)
-                                        self.dismiss()
-                                    }) {
-                                        HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
-                                            .frame(width: 29, height: 29)
-                                            .fixedSize()
-                                    }
-                                    .fixedSize()
-                                    .buttonStyle(EmoteButton())
-                                    .fixedSize()
-                                }
-                            }
                         }
+                        .padding()
+                        .tabItem({Text("Emotes")})
+                        Text("Stickers")
+                            .tabItem({Text("Stickers")})
                     }
                 }
-                .padding()
-                
-                TextField("Search emotes", text: $search)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .background(Material.thick) // blurred background
-                    .onSubmit {
-                        self.onSelect(DiscordEmote(id: "stock", name: self.search))
-                        self.dismiss()
-                    }
             }
         }
         .frame(minWidth: 250, maxWidth: .infinity, maxHeight: .infinity)

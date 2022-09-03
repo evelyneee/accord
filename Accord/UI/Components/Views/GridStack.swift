@@ -7,7 +7,12 @@
 
 import SwiftUI
 
-struct GridStack<T: Identifiable & Hashable, Content: View>: View {
+struct GridStack<T: Identifiable & Hashable, Content: View>: View, Equatable {
+    
+    static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        lhs.array == rhs.array
+    }
+    
     let rows: Int?
     let columns: Int?
     let verticalAlignment: SwiftUI.HorizontalAlignment

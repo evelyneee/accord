@@ -30,6 +30,34 @@ var reachability: Reachability? = {
     return reachability
 }()
 
+class NSWorkspace2: NSWorkspace {
+    @objc func open2(
+        _ url: URL,
+        configuration: NSWorkspace.OpenConfiguration,
+        completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
+    ) {
+        if url.absoluteString.contains("discord.com/channels/") {
+            let comp = Array(url.pathComponents.suffix(3))
+            guard comp.count == 3 else {
+                return
+            }
+            MentionSender.shared.select(channel: Channel(
+                id: comp[1],
+                type: .normal,
+                guild_id: comp[0],
+                position: nil,
+                parent_id: nil
+            ))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                ChannelView.scrollTo.send((comp[1], comp[2]))
+            })
+        } else {
+            NSWorkspace.shared.open(url)
+            completionHandler?(nil, nil)
+        }
+    }
+}
+
 @main
 struct AccordApp: App {
     
@@ -66,6 +94,9 @@ struct AccordApp: App {
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
+                        guard let method = class_getInstanceMethod(NSWorkspace.self, #selector(NSWorkspace.open(_:configuration:completionHandler:))),
+                              let new = class_getInstanceMethod(NSWorkspace2.self, #selector(NSWorkspace2.open2)) else { return }
+                        method_exchangeImplementations(method, new)
                         self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()

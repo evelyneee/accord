@@ -129,6 +129,7 @@ struct EmbedView: View, Equatable {
                                     .font(.system(size: 12))
                             }
                         }
+                        .equatable()
                         .padding(.vertical, 2)
                     }
                 }

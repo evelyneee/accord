@@ -18,6 +18,7 @@ struct ReactionsGridView: View {
         GridStack($message.reactions, rowAlignment: .leading, columns: 6, content: { reaction in
             ReactionView(messageID: message.id, reaction: reaction)
         })
+        .equatable()
         .fixedSize()
     }
 }

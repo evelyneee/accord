@@ -297,13 +297,7 @@ final class ChatControlsViewModel: ObservableObject {
         var ret = Int32(0)
         var size = ret.bitWidth
         let result = sysctlbyname("sysctl.proc_translated", &ret, &size, nil, 0)
-        if result == -1 {
-            if (errno == ENOENT){
-                return 0
-            }
-            return -1
-        }
-        return ret
+        return result == -1 ? errno == ENOENT ? 0 : -1 : ret
     }
     
     func processIsTranslatedStr() -> String {

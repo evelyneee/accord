@@ -25,102 +25,104 @@ struct SquishyButtonTextStyle: ButtonStyle {
 
 extension ChannelView {
     var blurredTextField: some View {
-        VStack(alignment: .leading, spacing: 0) { [unowned viewModel] in
-            if replyingTo != nil || !viewModel.typing.isEmpty {
-                HStack {
-                    if let replied = replyingTo {
-                        Text("replying to \(replied.author?.username ?? "")")
-                            .lineLimit(0)
-                            .font(.subheadline)
+        GroupBox {
+            VStack(alignment: .leading, spacing: 0) { [unowned viewModel] in
+                if replyingTo != nil || !viewModel.typing.isEmpty {
+                    HStack {
+                        if let replied = replyingTo {
+                            Text("replying to \(replied.author?.username ?? "")")
+                                .lineLimit(0)
+                                .font(.subheadline)
+                        }
+                        if !(viewModel.typing.isEmpty) {
+                            Text("\(viewModel.typing.joined(separator: ", ")) \(viewModel.typing.count == 1 ? "is" : "are") typing")
+                                .lineLimit(0)
+                                .font(.subheadline)
+                        }
+                        if replyingTo != nil {
+                            Spacer()
+                            Button(action: {
+                                mentionUser.toggle()
+                            }, label: {
+                                Image(systemName: mentionUser ? "bell.fill" : "bell")
+                                    .foregroundColor(mentionUser ? .accentColor : .secondary)
+                                    .accessibility(label: Text(mentionUser ? "Mention users" : "Don't mention users"))
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                            Button(action: {
+                                replyingTo = nil
+                            }, label: {
+                                Image(systemName: "xmark.circle.fill")
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                        }
                     }
-                    if !(viewModel.typing.isEmpty) {
-                        Text("\(viewModel.typing.joined(separator: ", ")) \(viewModel.typing.count == 1 ? "is" : "are") typing")
-                            .lineLimit(0)
-                            .font(.subheadline)
-                    }
-                    if replyingTo != nil {
+                    .padding(.bottom, 5)
+                    .padding(.horizontal, 5)
+                    Divider().padding(.bottom, 3)
+                } else if let error = viewModel.error {
+                    HStack {
+                        Group {
+                            Text("Error loading: ").bold()
+                            +
+                            Text(String(error.code)).bold()
+                            +
+                            Text(" " + (error.message ?? "Unknown error")).bold()
+                        }
+                        .lineLimit(0)
+                        .font(.subheadline)
                         Spacer()
-                        Button(action: {
-                            mentionUser.toggle()
-                        }, label: {
-                            Image(systemName: mentionUser ? "bell.fill" : "bell")
-                                .foregroundColor(mentionUser ? .accentColor : .secondary)
-                                .accessibility(label: Text(mentionUser ? "Mention users" : "Don't mention users"))
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
-                        Button(action: {
-                            replyingTo = nil
-                        }, label: {
-                            Image(systemName: "xmark.circle.fill")
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
-                    }
-                }
-                .padding(.vertical, 4)
-                .padding(.horizontal, 10)
-                Divider()
-            } else if let error = viewModel.error {
-                HStack {
-                    Group {
-                        Text("Error loading: ").bold()
-                        +
-                        Text(String(error.code)).bold()
-                        +
-                        Text(" " + (error.message ?? "Unknown error")).bold()
-                    }
-                    .lineLimit(0)
-                    .font(.subheadline)
-                    Spacer()
-                    Button(action: { [weak viewModel] in
-                        if error.code == 502 || error.code == -1009 {
-                            concurrentQueue.async {
-                                wss?.reset()
-                            }
-                        } else {
-                            self.viewModel.error = nil
-                            viewModel?.cancellable.forEach { $0.cancel() }
-                            viewModel?.cancellable.removeAll()
-                            viewModel?.connect()
-                            if viewModel?.guildID == "@me" {
-                                try? wss.subscribeToDM(self.channel.id)
+                        Button(action: { [weak viewModel] in
+                            if error.code == 502 || error.code == -1009 {
+                                concurrentQueue.async {
+                                    wss?.reset()
+                                }
                             } else {
-                                try? wss.subscribe(to: self.channel.guild_id ?? "@me")
+                                self.viewModel.error = nil
+                                viewModel?.cancellable.forEach { $0.cancel() }
+                                viewModel?.cancellable.removeAll()
+                                viewModel?.connect()
+                                if viewModel?.guildID == "@me" {
+                                    try? wss.subscribeToDM(self.channel.id)
+                                } else {
+                                    try? wss.subscribe(to: self.channel.guild_id ?? "@me")
+                                }
+                                viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
                             }
-                            viewModel?.getMessages(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
+                        }) {
+                            if error.code == 502 || error.code == -1009 {
+                                Text("Reconnect")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            } else {
+                                Text("Try again")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            }
                         }
-                    }) {
-                        if error.code == 502 || error.code == -1009 {
-                            Text("Reconnect")
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                        } else {
-                            Text("Try again")
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                        }
+                        .buttonStyle(SquishyButtonTextStyle())
                     }
-                    .buttonStyle(SquishyButtonTextStyle())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 5)
+                    .background(Color.red.opacity(0.8))
+                    .cornerRadius(3)
+                    .padding(.bottom, 3)
                 }
-                .foregroundColor(.white)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 10)
-                .background(Color.red)
+                ChatControls(
+                    guildID: viewModel.guildID,
+                    channelID: viewModel.channelID,
+                    chatText: "Message #\(channelName)",
+                    permissions: viewModel.permissions,
+                    replyingTo: $replyingTo,
+                    mentionUser: $mentionUser,
+                    fileUploads: self.$fileUploads
+                )
+                .padding(10)
             }
-            ChatControls(
-                guildID: viewModel.guildID,
-                channelID: viewModel.channelID,
-                chatText: "Message #\(channelName)",
-                permissions: viewModel.permissions,
-                replyingTo: $replyingTo,
-                mentionUser: $mentionUser,
-                fileUploads: self.$fileUploads
-            )
-            .padding(13)
         }
-        .background(Color(NSColor.alternatingContentBackgroundColors[1]))
-        .clipShape(RoundedCorners(tl: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, tr: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, bl: 9, br: 9))
+//        .background(Color(NSColor.alternatingContentBackgroundColors[1]))
+//        .clipShape(RoundedCorners(tl: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, tr: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, bl: 9, br: 9))
         .padding([.horizontal, .bottom], 12)
-        .padding(.bottom, 2)
         .background(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
     }
 }

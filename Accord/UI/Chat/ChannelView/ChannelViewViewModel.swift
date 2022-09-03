@@ -73,10 +73,23 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             if reachability?.connected == true {
                 Task.detached {
                     self.error = .init(code: 502, message: "Bad Gateway connection")
-                    let res = await wss.reset()
-                    if (res) {
+                    if let res = await wss?.reset(), res {
                         self.connect()
                         self.loadChannel(channel)
+                    } else {
+                        concurrentQueue.async {
+                            guard let new = try? Gateway(
+                                url: Gateway.gatewayURL,
+                                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                            ) else { return }
+                            new.ready().sink(receiveCompletion: {
+                                if case Subscribers.Completion.finished = $0 {
+                                    self.connect()
+                                    self.loadChannel(channel)
+                                }
+                            }, receiveValue: doNothing).store(in: &new.bag)
+                            wss = new
+                        }
                     }
                 }
             } else {
@@ -393,17 +406,13 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 print(error)
                 if let error = error as? Request.FetchErrors {
                     switch error {
-                    case .invalidRequest: break
-                    case .invalidForm: break
                     case .badResponse(let response):
                         if let response = response as? HTTPURLResponse {
                             self.error = .init(code: response.statusCode, message: "HTTP request failed")
                         }
-                    case .notRequired: break
-                    case .decodingError(_, _): break
-                    case .noData: break
                     case .discordError(code: let code, message: let message):
                         self.error = .init(code: code ?? 0, message: message)
+                    default: break
                     }
                 } else if let error = error as? URLError {
                     self.error = .init(code: error.code.rawValue, message: error.localizedDescription)
