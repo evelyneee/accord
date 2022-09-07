@@ -93,13 +93,12 @@ extension ServerListView {
         readyPacket.assignReadStates(appModel)
         readyPacket.order()
         var guildOrder = readyPacket.user_settings?.guild_positions ?? []
-        var folderTemp = readyPacket.user_settings?.guild_folders ?? []
-
+        let folderTemp = readyPacket.user_settings?.guild_folders ?? []
+        
         // Create a folder for every guild outside folders
         readyPacket.guilds.forEach { guild in
             if !guildOrder.contains(guild.id) {
                 guildOrder.insert(guild.id, at: 0)
-                folderTemp.insert(GuildFolder(name: nil, color: nil, guild_ids: [guild.id]), at: 0)
             }
         }
 

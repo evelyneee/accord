@@ -78,6 +78,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         self.loadChannel(channel)
                     } else {
                         concurrentQueue.async {
+                            print("force resetting")
                             guard let new = try? Gateway(
                                 url: Gateway.gatewayURL,
                                 compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true

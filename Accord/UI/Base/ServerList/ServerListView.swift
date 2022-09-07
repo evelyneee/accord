@@ -143,7 +143,6 @@ struct ServerListView: View {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
-                    
                     LazyVStack {
                         if reachability?.connected == false {
                             onlineButton.buttonStyle(BorderlessButtonStyle())

@@ -47,7 +47,7 @@ extension ServerListView {
         
         var body: some View {
             ForEach($appModel.folders, id: \.hashValue) { $folder in
-                if folder.guilds.count != 1 {
+                if folder.guilds.count > 1 {
                     Folder(
                         icon: Array(folder.guilds.prefix(4)),
                         color: self.color(folder),
@@ -65,6 +65,7 @@ extension ServerListView {
                         }
                     }
                     .padding(.bottom, 1)
+                    .id(folder.guilds.first?.id)
                 } else if let guild = $folder.guilds.first {
                     ServerIconCell(
                         guild: guild,
@@ -73,10 +74,11 @@ extension ServerListView {
                         selectedGuild: self.$selectedGuild
                     )
                     .fixedSize()
+                    .id(guild.id)
                 }
             }
             .padding(.trailing, 6)
-            .background(InsetGetter())
+            // .background(InsetGetter())
         }
     }
 }
@@ -151,17 +153,17 @@ struct ServerIconCell: View {
         }
         .buttonStyle(BorderlessButtonStyle())
         .redBadge($mentionCount)
-        .onPreferenceChange(FolderListHeightPreferenceKey.self, perform: { self.viewHeight = $0 })
-        .offset(x: 0, y: self.offsetY)
-        .zIndex(self.offsetY == .zero ? -1 : 1)
-        .gesture(
-            DragGesture()
-                .onChanged { gesture in
-                    self.offsetY = gesture.translation.height
-                }
-                .onEnded { gesture in
-                    print(viewHeight / gesture.translation.height)
-                }
-        )
+//        .onPreferenceChange(FolderListHeightPreferenceKey.self, perform: { self.viewHeight = $0 })
+//        .offset(x: 0, y: self.offsetY)
+//        .zIndex(self.offsetY == .zero ? -1 : 1)
+//        .gesture(
+//            DragGesture()
+//                .onChanged { gesture in
+//                    self.offsetY = gesture.translation.height
+//                }
+//                .onEnded { gesture in
+//                    print(viewHeight / gesture.translation.height)
+//                }
+//        )
     }
 }

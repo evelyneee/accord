@@ -50,7 +50,6 @@ struct AttachmentView: View {
                         Request.fetch(url: URL(string: obj.url), headers: .init(type: .GET)) {
                             switch $0 {
                             case let .success(data):
-                                print(data)
                                 let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
                                     .appendingPathComponent(obj.filename)
                                 try? data.write(to: path)
@@ -70,6 +69,11 @@ struct AttachmentView: View {
                 }
                 .buttonStyle(.borderless)
                 .quickLookPreview(self.$quickLookURL)
+                .onChange(of: self.quickLookURL, perform: { [quickLookURL] url in
+                    if let quickLookURL, url == nil {
+                        try? FileManager.default.removeItem(at: quickLookURL)
+                    }
+                })
             } else if obj.content_type?.contains("gif") == true {
                 GifView(obj.url)
                     .cornerRadius(5)
