@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+      
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+      
+  workflow_dispatch:
+  
+jobs:
+  build:
+    name: Build
+    runs-on: macos-12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Select Xcode version (14.0)
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_14.0.app
+          
+      - name: Build app
+        run: |
+          xcodebuild CODE_SIGNING_ALLOWED="NO" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_IDENTITY="" BUILD_DIR=${{ github.workspace }}/xcodebuild
+          
+          mkdir -p ${{ github.workspace }}/product
+          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app ${{ github.workspace }}/product
+          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app.dSYM ${{ github.workspace }}/product
+          
+          cd ${{ github.workspace }}/product
+          zip -r ${{ github.workspace }}/Accord.zip .
+          
+      - name: Upload app to artifacts
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: Accord
+          path: ${{ github.workspace }}/Accord.zip
