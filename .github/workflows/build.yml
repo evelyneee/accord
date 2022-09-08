@@ -36,7 +36,7 @@ jobs:
           
           mkdir -p ${{ github.workspace }}/product
           cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app ${{ github.workspace }}/product
-          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app.dYSM ${{ github.workspace }}/product
+          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app.dSYM ${{ github.workspace }}/product
           
           cd ${{ github.workspace }}/product
           zip -r ${{ github.workspace }}/Accord.zip .
