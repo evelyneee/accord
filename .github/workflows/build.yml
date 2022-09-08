@@ -34,8 +34,15 @@ jobs:
         run: |
           xcodebuild CODE_SIGNING_ALLOWED="NO" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_IDENTITY="" BUILD_DIR=${{ github.workspace }}/xcodebuild
           
+          mkdir -p ${{ github.workspace }}/product
+          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app ${{ github.workspace }}/product
+          cp -R ${{ github.workspace }}/xcodebuild/Release/Accord.app.dYSM ${{ github.workspace }}/product
+          
+          cd ${{ github.workspace }}/product
+          zip -r ${{ github.workspace }}/Accord.zip .
+          
       - name: Upload app to artifacts
         uses: actions/upload-artifact@v3.1.0
         with:
           name: Accord
-          path: ${{ github.workspace }}/xcodebuild/Release/Accord.app
+          path: ${{ github.workspace }}/Accord.zip
