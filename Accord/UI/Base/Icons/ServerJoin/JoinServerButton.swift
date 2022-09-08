@@ -15,7 +15,7 @@ struct JoinServerButton: View {
         Image(systemName: "plus")
             .imageScale(.large)
             .frame(width: 45, height: 45)
-            .background(self.isShowingJoinServerSheet ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
+            .background(self.isShowingJoinServerSheet ? Color.accentColor.opacity(0.5) : Color(NSColor.secondaryLabelColor).opacity(0.2))
             .cornerRadius(iconHovered || self.isShowingJoinServerSheet ? 13.5 : 23.5)
     }
 

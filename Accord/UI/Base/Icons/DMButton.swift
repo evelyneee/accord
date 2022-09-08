@@ -46,7 +46,7 @@ struct DMButton: View {
                 .font(.system(size: 16))
                 .padding()
                 .frame(width: 45, height: 45)
-                .background(selectedServer == "@me" || iconHovered ? Color.accentColor.opacity(0.5) : Color(NSColor.windowBackgroundColor))
+                .background(selectedServer == "@me" || iconHovered ? Color.accentColor.opacity(0.5) : Color(NSColor.secondaryLabelColor).opacity(0.2))
                 .cornerRadius(iconHovered || selectedServer == "@me" ? 13.5 : 23.5)
                 .foregroundColor(selectedServer == "@me" || iconHovered ? Color.white : nil)
                 .onHover(perform: { h in withAnimation(Animation.easeInOut(duration: 0.2)) { self.iconHovered = h } })
