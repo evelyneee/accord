@@ -47,15 +47,16 @@ struct GuildHoverAnimation: ViewModifier {
 }
 
 func pingCount(guild: Guild) -> Int {
-    let intArray = guild.channels.compactMap { $0.read_state?.mention_count }
-    return intArray.reduce(0, +)
+    guild.channels.reduce(0, { num, channel in
+        num + (channel.read_state?.mention_count ?? 0)
+    })
 }
 
 func unreadMessages(guild: Guild) -> Bool {
-    let array = guild.channels
+    let array = !guild.channels
         .filter { $0.read_state != nil }
-        .compactMap { $0.last_message_id == $0.read_state?.last_message_id }
-        .contains(false)
+        .filter { $0.last_message_id != $0.read_state?.last_message_id }
+        .isEmpty
     return array
 }
 

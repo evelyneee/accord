@@ -36,7 +36,7 @@ extension Gateway {
             if channel.d.guild_id == nil { // is a dm
                 print("success")
                 DispatchQueue.main.async {
-                    Storage.globals?.privateChannels.append(channel.d)
+                    Storage.globals?.privateChannels.insert(channel.d, at: 0)
                 }
             }
         case .channelUpdate: break

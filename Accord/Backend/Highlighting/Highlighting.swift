@@ -12,12 +12,12 @@ enum Highlighting {
     @available(macOS 12, *)
     static func parse(_ text: String) -> AttributedString {
         let base = [0, 1, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6, 6]
-        let invalid = Array(text)
-            .map { char in
+        let invalid = !Array(text)
+            .filter { char in
                 guard let scalar = char.unicodeScalars.first else { return false }
-                return CharacterSet.letters.contains(scalar)
+                return !CharacterSet.letters.contains(scalar)
             }
-            .contains(false)
+            .isEmpty
         guard !invalid else { return AttributedString(text) }
         var letters = Array(text)
         let index = base.indices.contains(letters.count) ? base[letters.count] : 7
