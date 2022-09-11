@@ -76,6 +76,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     if let res = await wss?.reset(), res {
                         self.connect()
                         self.loadChannel(channel)
+                        self.error = nil
                     } else {
                         concurrentQueue.async {
                             print("force resetting")
@@ -87,6 +88,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                                 if case Subscribers.Completion.finished = $0 {
                                     self.connect()
                                     self.loadChannel(channel)
+                                    self.error = nil
                                 }
                             }, receiveValue: doNothing).store(in: &new.bag)
                             wss = new
@@ -117,11 +119,13 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         messageFetchQueue.async { [weak self] in
             guard let self = self else { return }
             self.getMessages(channelID: self.channelID, guildID: self.guildID)
-            if self.guildID == "@me" {
-                try? wss.subscribeToDM(self.channelID)
-            } else {
-                try? wss.subscribe(to: self.guildID)
-            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                if self.guildID == "@me" {
+                    try? wss.subscribeToDM(self.channelID)
+                } else {
+                    try? wss.subscribe(to: self.guildID)
+                }
+            })
             self.loadPermissions(channel)
             MentionSender.shared.removeMentions(server: self.guildID)
         }

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import RegexBuilder
 
 enum RegexExpressions {
     static func precompute() {
