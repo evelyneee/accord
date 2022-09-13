@@ -53,9 +53,15 @@ struct RolesView: View {
         if let roleName = Storage.roleNames[role] {
             HStack(spacing: 4) {
                 if #available(macOS 13.0, *) {
+                    #if canImport(WeatherKit)
                     Circle()
                         .fill(color(for: role).gradient)
                         .frame(width: 10, height: 10)
+                    #else
+                    Circle()
+                        .fill(color(for: role))
+                        .frame(width: 10, height: 10)
+                    #endif
                 } else {
                     Circle()
                         .fill(color(for: role))

@@ -130,7 +130,11 @@ extension ChannelView {
 extension View {
     func gradientBackground(_ color: Color?) -> some View {
         if #available(macOS 13.0, *) {
+            #if canImport(WeatherKit)
             return self.background(color?.gradient ?? Color.primary.gradient)
+            #else
+            return self.background(color)
+            #endif
         } else {
             return self.background(color)
         }
