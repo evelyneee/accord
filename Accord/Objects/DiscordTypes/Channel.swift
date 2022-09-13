@@ -24,6 +24,12 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var topic: String?
     var nsfw: Bool?
     var last_message_id: String?
+    var lastMessageDate: Int64 {
+        if let last_message_id, let num = Int(last_message_id) {
+            return Int64(((num / 4194304) + 1420070400000))
+        }
+        return 0
+    }
     // var bitrate: Int?
     // var user_limit: Int?
     // var rate_limit_per_user: Int?

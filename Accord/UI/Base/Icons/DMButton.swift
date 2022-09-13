@@ -23,9 +23,7 @@ struct DMButton: View {
             DispatchQueue.global().async {
                 let sorted = appModel.privateChannels
                     .sorted {
-                        guard let firstStr = $0.last_message_id, let first = Int64(firstStr),
-                              let secondStr = $1.last_message_id, let second = Int64(secondStr) else { return false }
-                        return first > second
+                        $0.lastMessageDate > $1.lastMessageDate
                     }
                 DispatchQueue.main.async {
                     appModel.privateChannels = sorted
