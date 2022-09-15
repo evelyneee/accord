@@ -127,7 +127,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             })
             self.loadPermissions(channel)
-            MentionSender.shared.removeMentions(server: self.guildID)
+            Storage.globals?.removeMentions(server: self.guildID)
         }
     }
 

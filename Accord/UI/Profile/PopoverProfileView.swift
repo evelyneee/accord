@@ -247,7 +247,7 @@ struct PopoverProfileView: View {
                             switch $0 {
                             case let .success(channel):
                                 print(channel)
-                                MentionSender.shared.select(channel: channel)
+                                Storage.globals?.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
                             }

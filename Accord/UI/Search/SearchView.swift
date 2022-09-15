@@ -56,7 +56,7 @@ struct SearchView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                     .onSubmit {
                         if let channel = self.matches.first {
-                            MentionSender.shared.select(channel: channel)
+                            Storage.globals?.select(channel: channel)
                             presentationMode.wrappedValue.dismiss()
                         }
                     }
@@ -77,7 +77,7 @@ struct SearchView: View {
                             case let .success(channel):
                                 print(channel)
                                 AppGlobals.newItemPublisher.send((channel, nil))
-                                MentionSender.shared.select(channel: channel)
+                                Storage.globals?.select(channel: channel)
                             case let .failure(error):
                                 AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
                             }
@@ -102,7 +102,7 @@ struct SearchView: View {
                 }
                 ForEach(matches, id: \.id) { channel in
                     Button(action: {
-                        MentionSender.shared.select(channel: channel)
+                        Storage.globals?.select(channel: channel)
                         presentationMode.wrappedValue.dismiss()
                     }, label: {
                         HStack {

@@ -194,8 +194,12 @@ public final class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     @_optimize(speed)
-    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool) -> TextArrayPublisher {
-        let line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
+    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, allowLinkShortening: Bool) -> TextArrayPublisher {
+        var line = line
+        if !allowLinkShortening {
+            print("disabling link shortening")
+            line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
+        }
         let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
         let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first) }
         return Publishers.MergeMany(pubs)
@@ -204,13 +208,13 @@ public final class Markdown {
     }
 
     /**
-     markLine: Simple Publisher that combines an array of word and line publishers for a text section
+     markAll: Simple Publisher that combines an array of word and line publishers for a text section
      - Parameter text: The text being processed
      - Parameter members: Dictionary of channel members from which we get the mentions
      - Returns AnyPublisher with SwiftUI Text view
      **/
     @_optimize(speed)
-    public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false) -> TextPublisher {
+    public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false, allowLinkShortening: Bool = false) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
 
         let codeBlockMarkerRawOffsets = newlines
@@ -229,7 +233,7 @@ public final class Markdown {
             }
             .compactMap(\.self)
 
-        let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting) }
+        let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting, allowLinkShortening: allowLinkShortening) }
         var strippedPublishers = pubs
             .map { [$0] }
             .joined()

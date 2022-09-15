@@ -299,7 +299,7 @@ struct ChannelView: View, Equatable {
                                 ZStack(alignment: .topTrailing) {
                                     cell(for: $message)
                                     Button("Jump") {
-                                        MentionSender.shared.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
+                                        Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                                             ChannelView.scrollTo.send((message.channelID, message.id))
                                         })

@@ -96,7 +96,7 @@ struct EmbedView: View, Equatable {
                             .padding(.vertical, 2)
                     }
                     if let description = embed.description {
-                        AsyncMarkdown(description)
+                        AsyncMarkdown(description, linkShortening: true)
                             .lineSpacing(3)
                             .padding(.vertical, 2)
                     }
@@ -131,7 +131,7 @@ struct EmbedView: View, Equatable {
                                     .font(.system(size: 12))
                                     .fontWeight(.semibold)
                                     .lineLimit(0)
-                                AsyncMarkdown(field.value)
+                                AsyncMarkdown(field.value, linkShortening: true)
                                     .equatable()
                                     .font(.system(size: 12))
                             }
@@ -141,9 +141,7 @@ struct EmbedView: View, Equatable {
                     }
                 }
                 .padding(5)
-                Spacer()
             }
         }
-        .frame(maxWidth: 420)
     }
 }

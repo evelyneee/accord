@@ -157,8 +157,5 @@ extension ServerListView {
 
         self.appModel = appModel
         Storage.globals = appModel
-        
-        // Remote control now switched on
-        MentionSender.shared.delegate = self
     }
 }

@@ -41,7 +41,7 @@ class NSWorkspace2: NSWorkspace {
             guard comp.count == 3 else {
                 return
             }
-            MentionSender.shared.select(channel: Channel(
+            Storage.globals?.select(channel: Channel(
                 id: comp[1],
                 type: .normal,
                 guild_id: comp[0],

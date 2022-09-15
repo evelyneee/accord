@@ -29,7 +29,7 @@ final class AsyncMarkdownModel: ObservableObject {
     static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
 
     @_optimize(speed)
-    func make(text: String, usernames: [String:String]) {
+    func make(text: String, usernames: [String:String], allowLinkShortening: Bool) {
         Self.queue.async { [weak self] in
             let emojis = text.hasEmojisOnly
             guard (text.contains("*") ||
@@ -46,7 +46,7 @@ final class AsyncMarkdownModel: ObservableObject {
                 }
                 return
             }
-            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis)
+            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis, allowLinkShortening: allowLinkShortening)
                 .replaceError(with: Text(text))
                 .sink { [weak self] text in
                     DispatchQueue.main.async {
@@ -71,11 +71,14 @@ struct AsyncMarkdown: View, Equatable {
     
     @EnvironmentObject
     var appModel: AppGlobals
+    
+    var linkShortening: Bool
 
     @MainActor
-    init(_ text: String, binded: Binding<String>? = nil) {
+    init(_ text: String, binded: Binding<String>? = nil, linkShortening: Bool = false) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
         _text = binded ?? .constant(text)
+        self.linkShortening = linkShortening
     }
 
     @ViewBuilder
@@ -86,10 +89,10 @@ struct AsyncMarkdown: View, Equatable {
                 .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
                 .fixedSize(horizontal: false, vertical: true)
                 .onChange(of: self.text, perform: { [weak model] text in
-                    model?.make(text: text, usernames: Storage.usernames)
+                    model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                 })
                 .onAppear { [weak model] in
-                    model?.make(text: text, usernames: Storage.usernames)
+                    model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                 }
         }
     }

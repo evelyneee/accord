@@ -33,7 +33,7 @@ final class ForumChannelListModel: ObservableObject {
             .appendingPathComponent("threads")
             .appendingPathComponent("search")
             .appendingQueryParameters([
-                "archived":"true",
+                "archived":"false",
                 "sort_by": "last_message_time",
                 "sort_order": "desc",
                 "limit": "25",
@@ -46,10 +46,11 @@ final class ForumChannelListModel: ObservableObject {
             referer: "https://discord.com/" + "@me/" + "channels/" + forumID
         ))
         .map {
-            Array(zip($0.threads, $0.firstMessages))
+            print($0)
+            return Array(zip($0.threads, $0.firstMessages))
         }
         .map {
-            $0.map {
+            return $0.map {
                 var new = $0
                 new.0.overridePermissions = true
                 return new
@@ -78,17 +79,20 @@ struct ForumChannelList: View {
                     }
                 }, label: {
                     GroupBox {
-                        VStack(alignment: .leading) {
-                            Text(channel.computedName)
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .lineLimit(0)
-                            Text(message.content)
-                                .lineLimit(0)
-                                .font(.chatTextFont)
-                                .foregroundColor(.secondary)
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(channel.computedName)
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .lineLimit(0)
+                                Text(message.content)
+                                    .lineLimit(0)
+                                    .font(.chatTextFont)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(7)
+                            Spacer()
                         }
-                        .padding(7)
                     }
                     .frame(maxWidth: .infinity)
                 })
