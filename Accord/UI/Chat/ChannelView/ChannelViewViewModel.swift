@@ -127,7 +127,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
             })
             self.loadPermissions(channel)
-            Storage.globals?.removeMentions(server: self.guildID)
+            DispatchQueue.main.async {
+                Storage.globals?.removeMentions(server: self.guildID)
+            }
         }
     }
 

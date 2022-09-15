@@ -41,13 +41,15 @@ class NSWorkspace2: NSWorkspace {
             guard comp.count == 3 else {
                 return
             }
-            Storage.globals?.select(channel: Channel(
-                id: comp[1],
-                type: .normal,
-                guild_id: comp[0],
-                position: nil,
-                parent_id: nil
-            ))
+            DispatchQueue.main.async {
+                Storage.globals?.select(channel: Channel(
+                    id: comp[1],
+                    type: .normal,
+                    guild_id: comp[0],
+                    position: nil,
+                    parent_id: nil
+                ))
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 ChannelView.scrollTo.send((comp[1], comp[2]))
             })
