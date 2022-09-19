@@ -41,7 +41,7 @@ final class OPSItems: Codable {
         if let member = member {
             return member.user.id
         } else {
-            return group!.id ?? ""
+            return group?.id ?? ""
         }
     }
 }

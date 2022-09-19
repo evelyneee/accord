@@ -92,11 +92,14 @@ struct EmbedView: View, Equatable {
                     if let title = embed.title {
                         Text(title)
                             .fontWeight(.semibold)
+                            .frame(maxWidth: 400)
                             .font(.system(size: 13.5))
                             .padding(.vertical, 2)
+                            .lineLimit(0)
                     }
                     if let description = embed.description {
                         AsyncMarkdown(description, linkShortening: true)
+                            .frame(maxWidth: 400)
                             .lineSpacing(3)
                             .padding(.vertical, 2)
                     }
@@ -119,8 +122,7 @@ struct EmbedView: View, Equatable {
                         Attachment(image.url)
                             .equatable()
                             .scaledToFit()
-                            .frame(width: min(380, CGFloat(optional: image.width) ?? 100.0))
-                            .frame(idealWidth: Double(image.width ?? 100), maxWidth: 380, maxHeight: 300)
+                            .maxFrame(width: 380, height: 300, originalWidth: image.width ?? 0, originalHeight: image.height ?? 0)
                             .cornerRadius(7)
                             .padding(.vertical, 2)
                     }

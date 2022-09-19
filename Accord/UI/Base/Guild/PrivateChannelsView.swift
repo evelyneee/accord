@@ -25,8 +25,10 @@ struct PrivateChannelsView: View {
                             .equatable()
                             .environmentObject(self.appModel)
                             .onAppear {
-                                channel.read_state?.mention_count = 0
-                                channel.read_state?.last_message_id = channel.last_message_id
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                                    channel.read_state?.mention_count = 0
+                                    channel.read_state?.last_message_id = channel.last_message_id
+                                })
                             }
                             .onDisappear {
                                 channel.read_state?.mention_count = 0

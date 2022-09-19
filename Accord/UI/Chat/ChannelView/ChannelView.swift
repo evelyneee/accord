@@ -144,13 +144,33 @@ struct ChannelView: View, Equatable {
     
     var messagesView: some View {
         ForEach($viewModel.messages, id: \.identifier) { $message in
-            if message.inSameDay {
-                cell(for: $message)
+            let cell = cell(for: $message)
+            let showNewMessagesLine = channel.read_state?.last_message_id == message.id && channel.read_state?.last_message_id != channel.last_message_id
+            if showNewMessagesLine {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Color.red
+                            .frame(height: 1)
+                            .opacity(0.4)
+                        Text("New messages")
+                            .foregroundColor(.red)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                        Color.red
+                            .frame(height: 1)
+                            .opacity(0.4)
+                    }
+                    .padding(.top)
+                    cell
+                }
+            } else if message.inSameDay {
+                cell
             } else {
                 VStack(alignment: .leading) {
                     HStack {
                         Color.secondary
-                            .frame(height: 0.75)
+                            .frame(height: 1)
                             .opacity(0.4)
                         Text(message.processedTimestamp?.components(separatedBy: " at ").first ?? "Today")
                             .foregroundColor(.secondary)
@@ -158,11 +178,11 @@ struct ChannelView: View, Equatable {
                             .fontWeight(.medium)
                             .padding(.horizontal, 8)
                         Color.secondary
-                            .frame(height: 0.75)
+                            .frame(height: 1)
                             .opacity(0.4)
                     }
                     .padding(.top)
-                    cell(for: $message)
+                    cell
                 }
             }
         }
@@ -316,7 +336,9 @@ struct ChannelView: View, Equatable {
             }
         }
         .onAppear {
-            viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
+            DispatchQueue.main.async {
+                viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
+            }
             Task.detached {
                 await self.viewModel.setPermissions(self.appModel)
             }

@@ -201,7 +201,9 @@ final class MediaRemoteWrapper {
         }
     }
 
-    static var bag = Set<AnyCancellable>()
+    static var cancellable: AnyCancellable? = nil
+    static var cancellable2: AnyCancellable? = nil
+    
     static var rateLimit: Bool = false
     static var status: String?
 
@@ -221,7 +223,7 @@ final class MediaRemoteWrapper {
     }
 
     private class func updateWithArtworkURL(_ song: Song, artworkURL: String) {
-        ExternalImages.proxiedURL(appID: musicRPCAppID, url: artworkURL)
+        self.cancellable2 = ExternalImages.proxiedURL(appID: musicRPCAppID, url: artworkURL)
             .replaceError(with: [])
             .sink { out in
                 guard let url = out.first?.external_asset_path else { return }
@@ -242,13 +244,12 @@ final class MediaRemoteWrapper {
                     )
                 }
             }
-            .store(in: &bag)
     }
 
     class func updatePresence(status: String? = nil) {
         guard !Self.rateLimit else { return }
         rateLimit = true
-        Self.bag.insert(MediaRemoteWrapper.getCurrentlyPlayingSong()
+        self.cancellable = MediaRemoteWrapper.getCurrentlyPlayingSong()
             .sink(receiveCompletion: {
                 switch $0 {
                 case .finished: break
@@ -299,6 +300,6 @@ final class MediaRemoteWrapper {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     rateLimit = false
                 }
-            }))
+            })
     }
 }
