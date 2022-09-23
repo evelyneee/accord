@@ -89,19 +89,21 @@ struct EmbedView: View, Equatable {
                         }
                         .padding(.bottom, 2)
                     }
-                    if let title = embed.title {
-                        Text(title)
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: 400)
-                            .font(.system(size: 13.5))
-                            .padding(.vertical, 2)
-                            .lineLimit(0)
-                    }
-                    if let description = embed.description {
-                        AsyncMarkdown(description, linkShortening: true)
-                            .frame(maxWidth: 400)
-                            .lineSpacing(3)
-                            .padding(.vertical, 2)
+                    VStack(alignment: .leading) {
+                        if let title = embed.title {
+                            Text(title)
+                                .fontWeight(.semibold)
+                                .font(.system(size: 13.5))
+                                .padding(.vertical, 2)
+                                .lineLimit(0)
+                                .fixedSize(horizontal: false, vertical: false)
+                        }
+                        if let description = embed.description {
+                            AsyncMarkdown(description, linkShortening: true)
+                                .lineSpacing(3)
+                                .padding(.vertical, 2)
+                                .fixedSize(horizontal: false, vertical: false)
+                        }
                     }
                     if let image = embed.image {
                         Attachment(image.url, size: CGSize(width: image.width ?? 400, height: image.width ?? 300))

@@ -54,9 +54,12 @@ struct GuildView: View {
                                     ChannelView(channel, guild.name)
                                         .equatable()
                                         .onAppear {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                                                channel.read_state?.mention_count = 0
-                                                channel.read_state?.last_message_id = channel.last_message_id
+                                            let channelID = channel.id
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                                if self.selection == Int(channelID) {
+                                                    channel.read_state?.mention_count = 0
+                                                    channel.read_state?.last_message_id = channel.last_message_id
+                                                }
                                             })
                                         }
                                         .onDisappear { [channel] in
