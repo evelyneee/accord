@@ -97,13 +97,7 @@ public final class Markdown {
             }
         }
         let emoteIDs = word.matches(precomputed: RegexExpressions.emojiID)
-        var fontSize = ""
-        if #available(macOS 13.0, *) {
-            fontSize = "96"
-        } else {
-            fontSize = "48"
-        }
-        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? fontSize : "32")") {
+        if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "48" : "32")") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
                 .map { image -> NSImage in

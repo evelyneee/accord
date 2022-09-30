@@ -313,24 +313,23 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .sink { [weak self] list in
                 guard let self = self else { return }
                 Task.detached {
-                    if await self.memberList.isEmpty {
-                        let list = Array(list.d.ops.compactMap(\.items).joined())
-                            .map { item -> OPSItems in
-                                let new = item
-                                new.member?.roles = new.member?.roles?
-                                    .compactMap { id -> (String, (Int, Int))? in
-                                        if let color = Storage.roleColors[id] {
-                                            return (id, color)
-                                        }
-                                        return nil
+                    let list = Array(list.d.ops.compactMap(\.items).joined())
+                        .map { item -> OPSItems in
+                            let new = item
+                            new.member?.roles = new.member?.roles?
+                                .compactMap { id -> (String, (Int, Int))? in
+                                    if let color = Storage.roleColors[id] {
+                                        return (id, color)
                                     }
-                                    .sorted(by: { $0.1.1 > $1.1.1 })
-                                    .map(\.0)
-                                return new
-                            }
-                        await MainActor.run {
-                            self.memberList = list
+                                    return nil
+                                }
+                                .sorted(by: { $0.1.1 > $1.1.1 })
+                                .map(\.0)
+                            return new
                         }
+                    print(list.count)
+                    await MainActor.run {
+                        self.memberList.append(contentsOf: list)
                     }
                 }
             }

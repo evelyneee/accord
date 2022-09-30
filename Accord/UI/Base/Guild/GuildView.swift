@@ -76,7 +76,6 @@ struct GuildView: View {
                     )
                     .buttonStyle(.borderless)
                     .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
-                    .opacity(channel.read_state != nil && channel.read_state?.last_message_id != channel.last_message_id ? 1 : 0.75)
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
                     .contextMenu {
                         Button("Copy Channel ID") {

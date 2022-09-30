@@ -13,6 +13,7 @@ final class MemberListUpdate: Decodable {
 
 final class MemberList: Decodable {
     var ops: [ListOPS]
+    var guild_id: String?
 }
 
 final class ListOPS: Decodable {

@@ -409,14 +409,12 @@ final class Gateway {
         try send(json: packet)
     }
 
-    func memberList(for guild: String, in channel: String) throws {
+    func memberList(for guild: String, in channel: String, channels: [[Int]] = [[0, 99]]) throws {
         let packet: [String: Any] = [
             "op": 14,
             "d": [
                 "channels": [
-                    channel: [[
-                        0, 99,
-                    ]],
+                    channel: channels,
                 ],
                 "guild_id": guild,
             ],
