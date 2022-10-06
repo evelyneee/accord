@@ -16,7 +16,8 @@ struct GatewayStructure: Decodable {
 
 struct GatewayD: Decodable {
     var v: Int?
-    var user_settings: DiscordSettings?
+    var user_settings: DiscordSettings
+    var user_guild_settings: UserGuildSettings
     var user: User
     var session_id: String
     var read_state: ReadState?

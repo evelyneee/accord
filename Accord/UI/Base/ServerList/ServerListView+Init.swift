@@ -12,13 +12,16 @@ extension ServerListView {
     // This is very messy but it allows the rest of the code to be cleaner. Sorry not sorry!
     @_optimize(speed)
     init(_ readyPacket: GatewayD) {
-                
+        
+        self.discordSettings = readyPacket.user_settings
+        self.userGuildSettings = readyPacket.user_guild_settings
+        
         let appModel = AppGlobals()
         
         let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? String
         
         // Set status for the indicator
-        status = readyPacket.user_settings?.status
+        status = readyPacket.user_settings.status
 
         // If there are no folders there's nothing to do
         guard appModel.folders.isEmpty else {
@@ -87,16 +90,16 @@ extension ServerListView {
                 return guild
             }
         
-        statusText = readyPacket.user_settings?.custom_status?.text
+        statusText = readyPacket.user_settings.custom_status?.text
         
         // Order the channels
         readyPacket.assignReadStates(appModel)
         readyPacket.order()
-        var guildOrder = readyPacket.user_settings?.guild_positions ?? []
-        var folderTemp = readyPacket.user_settings?.guild_folders ?? []
+        var guildOrder = readyPacket.user_settings.guild_positions
+        var folderTemp = readyPacket.user_settings.guild_folders
         
         // Create a folder for every guild outside folders
-        let folderGuildIDsList = readyPacket.user_settings?.guild_folders.map(\.guild_ids).joined() ?? [[]].joined()
+        let folderGuildIDsList = readyPacket.user_settings.guild_folders.map(\.guild_ids).joined().joined()
         readyPacket.guilds.forEach { guild in
             if !guildOrder.contains(guild.id) {
                 guildOrder.insert(guild.id, at: 0)
@@ -146,16 +149,16 @@ extension ServerListView {
 
         appModel.folders = ContiguousArray(folders)
         
-        MediaRemoteWrapper.status = readyPacket.user_settings?.status
+        MediaRemoteWrapper.status = readyPacket.user_settings.status
         Activity.current = Activity (
             emoji: StatusEmoji(
-                name: readyPacket.user_settings?.custom_status?.emoji_name ?? Array(Storage.emotes.values.joined())[keyed: readyPacket.user_settings?.custom_status?.emoji_id ?? ""]?.name,
-                id: readyPacket.user_settings?.custom_status?.emoji_id,
+                name: readyPacket.user_settings.custom_status?.emoji_name ?? Array(Storage.emotes.values.joined())[keyed: readyPacket.user_settings.custom_status?.emoji_id ?? ""]?.name,
+                id: readyPacket.user_settings.custom_status?.emoji_id,
                 animated: false
             ),
             name: "Custom Status",
             type: 4,
-            state: readyPacket.user_settings?.custom_status?.text
+            state: readyPacket.user_settings.custom_status?.text
         )
         wss?.presences.append(Activity.current!)
 

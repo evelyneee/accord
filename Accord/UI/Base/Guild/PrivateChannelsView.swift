@@ -21,7 +21,7 @@ struct PrivateChannelsView: View {
                 selection: self.$selection,
                 destination: {
                     NavigationLazyView(
-                        ChannelView(channel)
+                        ChannelView($channel)
                             .equatable()
                             .environmentObject(self.appModel)
                             .onAppear {
@@ -66,7 +66,7 @@ struct PrivateChannelsView: View {
                     channel.read_state?.last_message_id = channel.last_message_id
                 }
                 Button("Open in new window") {
-                    showWindow(channel)
+                    showWindow(channel, globals: self.appModel)
                 }
             }
         }

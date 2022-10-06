@@ -16,19 +16,19 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var filename: String
     var description: String?
-    var content_type: String?
+    var contentType: String?
     var size: Int
     var url: String
-    var proxy_url: String
+    var proxyURL: String
     var height: Int?
     var width: Int?
 
     var isVideo: Bool {
-        content_type?.prefix(6) == "video/"
+        contentType?.prefix(6) == "video/"
     }
 
     var isImage: Bool {
-        content_type?.prefix(6) == "image/"
+        contentType?.prefix(6) == "image/"
     }
 
     var isFile: Bool {
@@ -37,5 +37,17 @@ final class AttachedFiles: Codable, Identifiable, Equatable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case filename
+        case description
+        case contentType = "content_type"
+        case size
+        case url
+        case proxyURL = "proxy_url"
+        case height
+        case width
     }
 }

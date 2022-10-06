@@ -12,9 +12,19 @@ struct GuildView: View {
     
     @Binding var guild: Guild
     @Binding var selection: Int?
+        
     @State var invitePopup: Bool = false
     
     @State var width: Double?
+    
+    @EnvironmentObject
+    var appModel: AppGlobals
+    
+    @EnvironmentObject
+    var userSettings: UserGuildSettings
+    
+    @AppStorage("HideMutedChannels")
+    var hideMutedChannels: Bool = false
     
     var body: some View {
         List {
@@ -37,7 +47,8 @@ struct GuildView: View {
                 }
             }
             ForEach($guild.channels, id: \.id) { $channel in
-                if channel.type == .section {
+                if hideMutedChannels && (hideMutedChannels ? false : (userSettings.mutedChannels.contains(channel.id) || userSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
+                } else if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
@@ -51,7 +62,7 @@ struct GuildView: View {
                                 NavigationLazyView(ForumChannelList(forumChannel: channel))
                             } else {
                                 NavigationLazyView(
-                                    ChannelView(channel, guild.name)
+                                    ChannelView($channel, guild.name)
                                         .equatable()
                                         .onAppear {
                                             let channelID = channel.id
@@ -82,21 +93,33 @@ struct GuildView: View {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(channel.id, forType: .string)
                         }
-                        Button(action: {
+                        Button("Mark as read") {
                             channel.read_state?.mention_count = 0
                             channel.read_state?.last_message_id = channel.last_message_id
-                        }) {
-                            Text("Mark as read")
                         }
-                        Button(action: {
-                            showWindow(channel)
-                        }) {
-                            Text("Open in new window")
+                        Button("Open in new window") {
+                            showWindow(channel, globals: self.appModel)
                         }
-                        Button(action: {
-                            showPanel(channel)
-                        }) {
-                            Text("Open in new panel")
+                        Button("Open in new panel") {
+                            showPanel(channel, globals: self.appModel)
+                        }
+                        //#warning("TODO: Check for permissions for this")
+                        Divider()
+                        Button("Delete channel") {
+                            let headers = Headers(
+                                contentType: nil,
+                                token: Globals.token,
+                                type: .DELETE,
+                                discordHeaders: true,
+                                referer: "https://discord.com/channels/@me",
+                                empty: true
+                            )
+                            Request.ping(url: URL(string: rootURL + "/channels/\(channel.id)"), headers: headers)
+                            if String(self.selection ?? 0) == channel.id {
+                                self.selection = nil
+                            }
+                            guard let index = guild.channels[indexOf: channel.id] else { return }
+                            guild.channels.remove(at: index)
                         }
                     }
                     .animation(nil, value: UUID())
@@ -213,11 +236,11 @@ private struct SizePreferenceKey: PreferenceKey {
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }
 
-@MainActor func showPanel(_ channel: Channel) {
+@MainActor func showPanel(_ channel: Channel, globals: AppGlobals) {
     let panel2 = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 400, height: 600), styleMask: [.titled, .nonactivatingPanel, .closable], backing: .buffered, defer: true)
     panel2.title = channel.computedName
     panel2.level = .init(Int(CGWindowLevelForKey(CGWindowLevelKey.floatingWindow)))
-    panel2.contentView = NSHostingView(rootView: ChannelView(channel, channel.guild_name))
+    panel2.contentView = NSHostingView(rootView: ChannelView(.constant(channel), channel.guild_name).environmentObject(globals))
     panel2.collectionBehavior = [.fullScreenAuxiliary]
     panel2.orderFrontRegardless()
 }

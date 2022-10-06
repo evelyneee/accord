@@ -72,7 +72,7 @@ struct ForumChannelList: View {
         NavigationView {
             List(self.model.channels, id: \.channel.id) { channel, message in
                 NavigationLink(tag: channel, selection: self.$selectedChannel, destination: {
-                    if let selectedChannel {
+                    if let selectedChannel = Binding($selectedChannel) {
                         NavigationLazyView(
                             ChannelView(selectedChannel).equatable()
                         )

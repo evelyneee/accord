@@ -37,6 +37,34 @@ extension View {
     }
 }
 
+struct MessagePlaceholders: View {
+    var body : some View {
+        ForEach(1..<20) { _ in
+            let prefix = Int.random(in: 5...20)
+            let words = Int.random(in: 1...6)
+            VStack {
+                HStack(alignment: .bottom) {
+                    Circle()
+                        .frame(width: 35, height: 35)
+                        .padding(.trailing, 1.5)
+                        .fixedSize()
+                    
+                    VStack(alignment: .leading) {
+                        Text(UUID().uuidString.prefix(prefix).stringLiteral)
+                            .font(.chatTextFont)
+                        Text((0..<words).map { _ in UUID().uuidString }.joined(separator: " "))
+                            .font(.chatTextFont)
+                        Spacer().frame(height: 1.3)
+                    }
+                }
+                .foregroundColor(.secondary.opacity(0.4))
+                Spacer()
+            }
+            .redacted(reason: .placeholder)
+        }
+    }
+}
+
 struct ChannelView: View, Equatable {
     static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
         lhs.viewModel == rhs.viewModel
@@ -50,7 +78,7 @@ struct ChannelView: View, Equatable {
     
     var guildName: String
     
-    var channel: Channel
+    @Binding var channel: Channel
 
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
@@ -96,13 +124,13 @@ struct ChannelView: View, Equatable {
 
     // MARK: - init
 
-    init(_ channel: Channel, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
-        self.channel = channel
+    init(_ channel: Binding<Channel>, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
+        self._channel = channel
         self.guildName = guildName ?? "Direct Messages"
         if let model {
             self._viewModel = model
         } else {
-            _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel))
+            _viewModel = StateObject(wrappedValue: ChannelViewViewModel(channel: channel.wrappedValue))
         }
     }
 
@@ -191,30 +219,6 @@ struct ChannelView: View, Equatable {
         .fixedSize(horizontal: false, vertical: true)
     }
     
-    var messagePlaceholderView : some View {
-        ForEach(1..<20) { _ in
-            VStack {
-                HStack(alignment: .bottom) {
-                    Circle()
-                        .frame(width: 35, height: 35)
-                        .padding(.trailing, 1.5)
-                        .fixedSize()
-                    
-                    VStack(alignment: .leading) {
-                        Text(UUID().uuidString.prefix(Int.random(in: 5...20)).stringLiteral)
-                            .font(.chatTextFont)
-                        Text((0..<Int.random(in: 1...6)).map { _ in UUID().uuidString }.joined(separator: " "))
-                            .font(.chatTextFont)
-                        Spacer().frame(height: 1.3)
-                    }
-                }
-                .foregroundColor(.secondary.opacity(0.4))
-                Spacer()
-            }
-            .redacted(reason: .placeholder)
-        }
-    }
-    
     @ViewBuilder
     private var channelHeaderView: some View {
         Divider()
@@ -245,7 +249,7 @@ struct ChannelView: View, Equatable {
                                     .rotationEffect(.degrees(180))
                                     .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
                             } else {
-                                messagePlaceholderView
+                                MessagePlaceholders()
                             }
                         }
                         .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))

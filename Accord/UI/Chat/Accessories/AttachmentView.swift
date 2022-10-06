@@ -40,7 +40,7 @@ struct AttachmentView: View {
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))
                     .modifier(MediaSpoiler())
-            } else if obj.content_type?.contains("image/") == true, obj.content_type?.contains("gif") == false {
+            } else if obj.contentType?.contains("image/") == true, obj.contentType?.contains("gif") == false {
                 Button(action: { [weak obj] in
                     guard let obj = obj else { return }
                     if let quickLookURL = quickLookURL {
@@ -74,12 +74,12 @@ struct AttachmentView: View {
                         try? FileManager.default.removeItem(at: quickLookURL)
                     }
                 })
-            } else if obj.content_type?.contains("gif") == true {
+            } else if obj.contentType?.contains("gif") == true {
                 GifView(obj.url)
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)
                     .accessibility(label: Text(obj.description ?? "Image"))
-            } else if obj.content_type?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxy_url) {
+            } else if obj.contentType?.prefix(6).stringLiteral == "video/", let url = URL(string: obj.proxyURL) {
                 VideoPlayer(player: AVPlayer(url: url))
                     .cornerRadius(5)
                     .maxFrame(width: 350, height: 350, originalWidth: obj.width, originalHeight: obj.height)

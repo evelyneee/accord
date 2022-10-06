@@ -7,7 +7,24 @@
 
 import Foundation
 
-class DiscordSettings: Decodable {
+class DiscordSettings: ObservableObject, Decodable {
+    internal init() {
+        self.theme = .dark
+        self.status = ""
+        self.render_reactions = nil
+        self.render_embeds = nil
+        self.message_display_compact = nil
+        self.inline_embed_media = nil
+        self.inline_attachment_media = nil
+        self.gif_auto_play = nil
+        self.guild_positions = []
+        self.custom_status = nil
+        self.animate_stickers = nil
+        self.animate_emoji = nil
+        self.afk_timeout = nil
+        self.guild_folders = []
+    }
+    
     var theme: SyncedTheme
     var status: String
     var render_reactions: Bool?
@@ -15,8 +32,8 @@ class DiscordSettings: Decodable {
     var message_display_compact: Bool?
     var inline_embed_media: Bool?
     var inline_attachment_media: Bool?
+    @DefaultEmptyArray
     var guild_positions: [String]
-    @IgnoreFailure
     var guild_folders: [GuildFolder]
     var gif_auto_play: Bool?
     var custom_status: Status?

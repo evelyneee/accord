@@ -24,7 +24,7 @@ struct FileAttachmentView: View {
 
     var body: some View {
         HStack {
-            Image(nsImage: NSWorkspace.shared.icon(for: UTType(mimeType: file.content_type ?? "application/text") ?? .text))
+            Image(nsImage: NSWorkspace.shared.icon(for: UTType(mimeType: file.contentType ?? "application/text") ?? .text))
             VStack(alignment: .leading) {
                 Text(file.filename)
                     .fontWeight(.medium)

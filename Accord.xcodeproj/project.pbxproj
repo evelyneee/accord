@@ -89,6 +89,7 @@
 		9EDD136627D5A55A000685E6 /* String++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136527D5A55A000685E6 /* String++.swift */; };
 		9EDD136827D6F951000685E6 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136727D6F951000685E6 /* Regex.swift */; };
 		9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDDB1B22831E4FC00510036 /* Reachability.swift */; };
+		9EE7E13628EA234D0021BE4F /* UserGuildSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE7E13528EA234D0021BE4F /* UserGuildSettings.swift */; };
 		9EEC6D6D2890429E0005DF30 /* MessageUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEC6D6C2890429E0005DF30 /* MessageUpdate.swift */; };
 		9EF5FFDA285CE0FE001B68FA /* ForumChannelList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF5FFD9285CE0FE001B68FA /* ForumChannelList.swift */; };
 		9EF5FFDC285E010C001B68FA /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF5FFDB285E010C001B68FA /* Globals.swift */; };
@@ -250,6 +251,7 @@
 		9EDD136527D5A55A000685E6 /* String++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String++.swift"; sourceTree = "<group>"; };
 		9EDD136727D6F951000685E6 /* Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 		9EDDB1B22831E4FC00510036 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		9EE7E13528EA234D0021BE4F /* UserGuildSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserGuildSettings.swift; sourceTree = "<group>"; };
 		9EEC6D6C2890429E0005DF30 /* MessageUpdate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageUpdate.swift; sourceTree = "<group>"; };
 		9EF5FFD9285CE0FE001B68FA /* ForumChannelList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForumChannelList.swift; sourceTree = "<group>"; };
 		9EF5FFDB285E010C001B68FA /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
@@ -466,6 +468,7 @@
 				9E82875027BD6C5400953A7B /* Permissions.swift */,
 				9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */,
 				9EB330422837236F007D38EF /* InviteUpdate.swift */,
+				9EE7E13528EA234D0021BE4F /* UserGuildSettings.swift */,
 			);
 			path = DiscordTypes;
 			sourceTree = "<group>";
@@ -867,7 +870,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1400;
+				LastUpgradeCheck = 1410;
 				TargetAttributes = {
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
@@ -979,6 +982,7 @@
 				A89845422698C3FD00B1C9DB /* GifManager.swift in Sources */,
 				A80FEC36272779F2005F9950 /* PluginLoader.swift in Sources */,
 				9E0E61602875665D0058BA87 /* Folder.swift in Sources */,
+				9EE7E13628EA234D0021BE4F /* UserGuildSettings.swift in Sources */,
 				9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */,
 				9EC5FA312846BE8300C2A416 /* StickerView.swift in Sources */,
 				9ED4A5AF276E334600BD485C /* AppKitLink.swift in Sources */,
@@ -1137,6 +1141,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

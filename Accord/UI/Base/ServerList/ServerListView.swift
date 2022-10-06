@@ -79,6 +79,15 @@ struct ServerListView: View {
     @MainActor @ObservedObject
     public var appModel: AppGlobals = .init()
     
+    @MainActor @ObservedObject
+    public var discordSettings: DiscordSettings = .init()
+    
+    @MainActor @ObservedObject
+    public var userGuildSettings: UserGuildSettings = .init()
+    
+    @AppStorage("DiscordColorScheme")
+    var discordColorScheme: Bool = false
+    
     internal static var readStates: [ReadStateEntry] = .init()
     var statusText: String? = nil
     @State var status: String? = nil
@@ -201,6 +210,15 @@ struct ServerListView: View {
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
         }
         .environmentObject(self.appModel)
+        .environmentObject(self.discordSettings)
+        .environmentObject(self.userGuildSettings)
+        .preferredColorScheme({
+            if self.discordColorScheme {
+                return self.discordSettings.theme == .dark ? .dark : .light
+            } else {
+                return nil
+            }
+        }())
         .navigationViewStyle(DoubleColumnNavigationViewStyle())
         // .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .sheet(isPresented: $popup, onDismiss: {}) {

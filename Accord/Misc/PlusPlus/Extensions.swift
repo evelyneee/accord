@@ -157,7 +157,7 @@ extension Color {
     }
 }
 
-func showWindow(_ channel: Channel) {
+func showWindow(_ channel: Channel, globals: AppGlobals) {
     var windowRef: NSWindow
     windowRef = NSWindow(
         contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
@@ -165,7 +165,7 @@ func showWindow(_ channel: Channel) {
         backing: .buffered, defer: false
     )
     windowRef.delegate = nil
-    windowRef.contentView = NSHostingView(rootView: ChannelView(channel))
+    windowRef.contentView = NSHostingView(rootView: ChannelView(.constant(channel)).environmentObject(globals))
     windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
     windowRef.isReleasedWhenClosed = false
     windowRef.makeKeyAndOrderFront(nil)

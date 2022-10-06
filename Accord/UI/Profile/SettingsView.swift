@@ -18,10 +18,87 @@ struct SettingsView: View {
     @State var username: String = Globals.user?.username ?? "Unknown User"
     @Environment(\.colorScheme) var colorScheme
 
+    @AppStorage("HideMutedChannels")
+    var hideMutedChannels: Bool = false
+    
+    let toggles: [SettingsToggleView] = [
+        SettingsToggleView(
+            key: "pronounDB",
+            title: "Enable PronounDB integration"
+        ),
+        SettingsToggleView(
+            key: "darkMode",
+            title: "Always dark mode"
+        ),
+        SettingsToggleView(
+            key: "MentionsMenuBarItemEnabled",
+            title: "Enable the mentions menu bar popup"
+        ),
+        SettingsToggleView(
+            key: "Nitroless",
+            title: "Enable Nitroless support"
+        ),
+        SettingsToggleView(
+            key: "SilentTyping",
+            title: "Enable silent typing"
+        ),
+        SettingsToggleView(
+            key: "MetalRenderer",
+            title: "Enable the Metal Renderer for the chat view",
+            detail: "Experimental"
+        ),
+        SettingsToggleView(
+            key: "GifProfilePictures",
+            title: "Enable Gif Profile Pictures",
+            detail: "Experimental"
+        ),
+        SettingsToggleView(
+            key: "ShowHiddenChannels",
+            title: "Show hidden channels",
+            detail: "Please don't use this"
+        ),
+        SettingsToggleView(
+            key: "CompressGateway",
+            title: "Enable Gateway Stream Compression",
+            detail: "Recommended",
+            defaultToggle: true
+        ),
+        SettingsToggleView(
+            key: "Highlighting",
+            title: "Enable Bionic Reading on messages"
+        ),
+        SettingsToggleView(
+            key: "HideMutedChannels",
+            title: "Hide muted channels"
+        ),
+        SettingsToggleView(
+            key: "DiscordColorScheme",
+            title: "Use shared Discord appearance"
+        ),
+        SettingsToggleView(
+            key: "XcodeRPC",
+            title: "Enable Xcode Rich Presence"
+        ),
+        SettingsToggleView(
+            key: "AppleMusicRPC", title: "Enable Apple Music Rich Presence"
+        ),
+        SettingsToggleView(
+            key: "SpotifyRPC",
+            title: "Enable Spotify Rich Presence in Apple Music",
+            detail: "This will show your currently playing Apple Music song in Spotify Presence"
+        ),
+        SettingsToggleView(
+            key: "VSCodeRPCEnabled",
+            title: "Enable Visual Studio Code Rich Presence",
+            detail: "This requires the screen recording permission"
+        ),
+    ]
+    
     var body: some View {
         List {
             LazyVStack(alignment: .leading) {
                 VSplitView {
+                    #if DEBUG
                     Group {
                         SettingsToggleView(key: "pfpShown", title: "Show profile pictures")
                         SettingsToggleView(key: "discordStockSettings", title: "Use stock discord settings")
@@ -29,19 +106,8 @@ struct SettingsView: View {
                         SettingsToggleView(key: "enableSuffixRemover", title: "Enable useless suffix remover")
                     }
                     .disabled(true)
-                    Group {
-                        SettingsToggleView(key: "pronounDB", title: "Enable PronounDB integration")
-                        SettingsToggleView(key: "darkMode", title: "Always dark mode")
-                        SettingsToggleView(key: "MentionsMenuBarItemEnabled", title: "Enable the mentions menu bar popup")
-                        SettingsToggleView(key: "Nitroless", title: "Enable Nitroless support")
-                        SettingsToggleView(key: "SilentTyping", title: "Enable silent typing")
-                        SettingsToggleView(key: "MetalRenderer", title: "Enable the Metal Renderer for the chat view", detail: "Experimental")
-                        SettingsToggleView(key: "GifProfilePictures", title: "Enable Gif Profile Pictures", detail: "Experimental")
-                        SettingsToggleView(key: "ShowHiddenChannels", title: "Show hidden channels", detail: "Please don't use this")
-                        SettingsToggleView(key: "CompressGateway", title: "Enable Gateway Stream Compression", detail: "Recommended", defaultToggle: true)
-                        SettingsToggleView(key: "Highlighting", title: "Enable Bionic Reading on messages")
-                    }
-
+                    #endif
+                    ForEach(self.toggles) { $0 }
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)
@@ -61,12 +127,6 @@ struct SettingsView: View {
                             Button("Youtube Music", action: { self.selectedPlatform = Platforms.youtubeMusic.rawValue })
                         }
                         .padding()
-                    }
-                    Group {
-                        SettingsToggleView(key: "XcodeRPC", title: "Enable Xcode Rich Presence")
-                        SettingsToggleView(key: "AppleMusicRPC", title: "Enable Apple Music Rich Presence")
-                        SettingsToggleView(key: "SpotifyRPC", title: "Enable Spotify Rich Presence in Apple Music", detail: "This will show your currently playing Apple Music song in Spotify Presence")
-                        SettingsToggleView(key: "VSCodeRPCEnabled", title: "Enable Visual Studio Code Rich Presence", detail: "This requires the screen recording permission")
                     }
                 }
                 .toggleStyle(SwitchToggleStyle())
@@ -124,7 +184,10 @@ public extension FileManager {
     }
 }
 
-struct SettingsToggleView: View {
+struct SettingsToggleView: View, Identifiable {
+    
+    var id: String { key }
+    
     var key: String
     var title: String
     var detail: String?
