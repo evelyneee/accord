@@ -62,7 +62,7 @@ struct PlatformNavigationLink<Destination: View, Label: View>: View {
     @ViewBuilder
     var body: some View {
         if #available(macOS 13.0, *) {
-            label()
+            NavigationLink(value: self.item, label: label)
         } else {
             NavigationLink (
                 tag: item,

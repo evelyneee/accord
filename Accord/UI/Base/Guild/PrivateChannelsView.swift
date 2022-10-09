@@ -18,29 +18,23 @@ struct PrivateChannelsView: View {
                 item: channel,
                 selection: self.$appModel.selectedChannel,
                 destination: {
-                    Group {
-                        if channel.type == .forum {
-                            NavigationLazyView(ForumChannelList(forumChannel: channel))
-                        } else if let channel = self.appModel.selectedChannel {
-                            NavigationLazyView(
-                                ChannelView(self.$appModel.selectedChannel)
-                                    .equatable()
-                                    .onAppear {
-                                        let channelID = channel.id
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
-                                            if self.appModel.selectedChannel?.id == channelID {
-                                                channel.read_state?.mention_count = 0
-                                                channel.read_state?.last_message_id = channel.last_message_id
-                                            }
-                                        })
-                                    }
-                                    .onDisappear { [channel] in
+                    NavigationLazyView(
+                        ChannelView(self.$appModel.selectedChannel)
+                            .equatable()
+                            .onAppear {
+                                let channelID = channel.id
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                    if self.appModel.selectedChannel?.id == channelID {
                                         channel.read_state?.mention_count = 0
                                         channel.read_state?.last_message_id = channel.last_message_id
                                     }
-                            )
-                        }
-                    }
+                                })
+                            }
+                            .onDisappear { [channel] in
+                                channel.read_state?.mention_count = 0
+                                channel.read_state?.last_message_id = channel.last_message_id
+                            }
+                    )
                 },
                 label: {
                     ServerListViewCell(channel: .constant(channel))

@@ -11,9 +11,7 @@ import SwiftUI
 struct GuildView: View {
     
     @Binding var guild: Guild
-    
-    @Binding var selectedChannel: Channel?
-        
+            
     @State var invitePopup: Bool = false
     
     @State var width: Double?
@@ -29,7 +27,7 @@ struct GuildView: View {
     
     var body: some View {
         #warning("Add back banners")
-        List(guild.channels, id: \.self, selection: $selectedChannel) { channel in
+        List(guild.channels, id: \.self, selection: self.$appModel.selectedChannel) { channel in
             if hideMutedChannels && (hideMutedChannels ? false : (userSettings.mutedChannels.contains(channel.id) || userSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
             } else if channel.type == .section {
                 Text(channel.name?.uppercased() ?? "")
@@ -39,19 +37,19 @@ struct GuildView: View {
             } else {
                 PlatformNavigationLink(
                     item: channel,
-                    selection: self.$selectedChannel,
+                    selection: self.$appModel.selectedChannel,
                     destination: {
                         Group {
                             if channel.type == .forum {
                                 NavigationLazyView(ForumChannelList(forumChannel: channel))
-                            } else if let channel = selectedChannel {
+                            } else if let channel = self.appModel.selectedChannel {
                                 NavigationLazyView(
                                     ChannelView(self.$appModel.selectedChannel, guild.name)
                                         .equatable()
                                         .onAppear {
                                             let channelID = channel.id
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
-                                                if self.selectedChannel?.id == channelID {
+                                                if self.appModel.selectedChannel?.id == channelID {
                                                     channel.read_state?.mention_count = 0
                                                     channel.read_state?.last_message_id = channel.last_message_id
                                                 }
@@ -71,7 +69,6 @@ struct GuildView: View {
                         )
                     }
                 )
-                .buttonStyle(.borderless)
                 .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
                 .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
                 .contextMenu {
@@ -101,8 +98,8 @@ struct GuildView: View {
                             empty: true
                         )
                         Request.ping(url: URL(string: rootURL + "/channels/\(channel.id)"), headers: headers)
-                        if self.selectedChannel?.id == channel.id {
-                            self.selectedChannel = nil
+                        if self.appModel.selectedChannel?.id == channel.id {
+                            self.appModel.selectedChannel = nil
                         }
                         guard let index = guild.channels[indexOf: channel.id] else { return }
                         guild.channels.remove(at: index)
@@ -111,7 +108,6 @@ struct GuildView: View {
                 .animation(nil, value: UUID())
             }
         }
-        .navigationTitle(Text("Channels"))
         //.listStyle(.sidebar)
         .readSize {
             self.width = $0.width
@@ -175,7 +171,7 @@ struct GuildView: View {
             .padding(.leading, 16)
             .menuStyle(BorderlessButtonMenuStyle())
             .sheet(isPresented: self.$invitePopup, content: {
-                NewInviteSheet(selection: self.$selectedChannel, isPresented: self.$invitePopup)
+                NewInviteSheet(selection: self.$appModel.selectedChannel, isPresented: self.$invitePopup)
                     .frame(width: 350, height: 250)
             })
         }

@@ -186,10 +186,8 @@ struct ServerListView: View {
                 if selectedServer == "@me" {
                     PrivateChannelsView()
                         .animation(nil, value: UUID())
-                        .padding(.top, 5)
-                        .animation(nil, value: UUID())
                 } else if let selectedGuild = selectedGuild {
-                    GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild), selectedChannel: self.$appModel.selectedChannel)
+                    GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild))
                         .animation(nil, value: UUID())
                 }
             }

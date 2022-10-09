@@ -117,6 +117,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         self.avatars.removeAll()
         self.messages.removeAll()
         self.nicks.removeAll()
+        self.typing.removeAll()
         self.pronouns.removeAll()
     }
     
