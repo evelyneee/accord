@@ -113,11 +113,10 @@ struct ServerIconCell: View {
             }
             DispatchQueue.main.async {
                 self.selectedChannel = nil
-                if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
+                if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String {
                     self.selectedGuild = guild
                     self.selectedServer = new
-                    #warning("Fix this too")
-                    //self.selectedChannel = value
+                    self.selectedChannel = self.selectedGuild?.channels.first(where: { $0.id == value })
                 } else {
                     self.selectedGuild = guild
                     self.selectedServer = new

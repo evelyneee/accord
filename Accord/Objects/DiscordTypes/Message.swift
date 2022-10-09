@@ -71,7 +71,7 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var reference: MessageReference?
 
     struct MessageReference: Codable {
-        var messageID: String
+        var messageID: String?
         var guildID: String?
         var channelID: String
         
