@@ -29,7 +29,6 @@ struct InsetGetter: View {
 extension ServerListView {
     struct FolderListView: View {
         @Binding var selectedServer: String?
-        @Binding var selectedChannel: Channel?
         @Binding var selectedGuild: Guild?
 
         @State var isShowingJoinServerSheet: Bool = false
@@ -58,7 +57,7 @@ extension ServerListView {
                             ServerIconCell(
                                 guild: $guild,
                                 selectedServer: self.$selectedServer,
-                                selectedChannel: self.$selectedChannel,
+                                selectedChannel: self.$appModel.selectedChannel,
                                 selectedGuild: self.$selectedGuild
                             )
                             .fixedSize()
@@ -70,7 +69,7 @@ extension ServerListView {
                     ServerIconCell(
                         guild: guild,
                         selectedServer: self.$selectedServer,
-                        selectedChannel: self.$selectedChannel,
+                        selectedChannel: self.$appModel.selectedChannel,
                         selectedGuild: self.$selectedGuild
                     )
                     .fixedSize()

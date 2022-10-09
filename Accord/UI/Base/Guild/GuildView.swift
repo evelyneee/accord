@@ -28,6 +28,7 @@ struct GuildView: View {
     var hideMutedChannels: Bool = false
     
     var body: some View {
+        #warning("Add back banners")
         List(guild.channels, id: \.self, selection: $selectedChannel) { channel in
             if hideMutedChannels && (hideMutedChannels ? false : (userSettings.mutedChannels.contains(channel.id) || userSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
             } else if channel.type == .section {

@@ -158,16 +158,15 @@ struct ServerListView: View {
                                 .frame(width: 30, height: 1)
                                 .opacity(0.75)
                         }
-//                        DMButton(
-//                            selection: self.selection,
-//                            selectedServer: self.$selectedServer,
-//                            selectedGuild: self.$selectedGuild
-//                        )
-//                        .fixedSize()
+                        DMButton(
+                            selectedServer: self.$selectedServer,
+                            selectedGuild: self.$selectedGuild
+                        )
+                        .fixedSize()
                         Color.gray
                             .frame(width: 30, height: 1)
                             .opacity(0.75)
-                        FolderListView(selectedServer: self.$selectedServer, selectedChannel: self.$appModel.selectedChannel, selectedGuild: self.$selectedGuild)
+                        FolderListView(selectedServer: self.$selectedServer, selectedGuild: self.$selectedGuild)
                             .padding(.trailing, 3.5)
                         Color.gray
                             .frame(width: 30, height: 1)
@@ -185,16 +184,10 @@ struct ServerListView: View {
                 // MARK: - Loading UI
                 
                 if selectedServer == "@me" {
-                    List {
-                        settingsLink
-                        Divider()
-                        #warning("Fix DMs")
-//                        PrivateChannelsView(selection: self.selectedChannel)
-//                            .animation(nil, value: UUID())
-                    }
-                    .padding(.top, 5)
-                    .listStyle(.sidebar)
-                    .animation(nil, value: UUID())
+                    PrivateChannelsView()
+                        .animation(nil, value: UUID())
+                        .padding(.top, 5)
+                        .animation(nil, value: UUID())
                 } else if let selectedGuild = selectedGuild {
                     GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild), selectedChannel: self.$appModel.selectedChannel)
                         .animation(nil, value: UUID())
@@ -254,16 +247,14 @@ struct ServerListView: View {
                   let firstKey = uInfo.first else { return }
             print(firstKey)
             self.selectedServer = firstKey.key
-            #warning("Fix this")
-            //self.selection.wrappedValue = firstKey.value
             self.selectedGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: firstKey.key]
+            self.appModel.selectedChannel = self.selectedGuild?.channels.first(where: { $0.id == String(firstKey.value) })
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: String],
                   let index = uInfo["index"], let number = Int(index) else { return }
             self.selectedServer = "@me"
-            #warning("Fix this")
-            //self.selectedChannel.wrappedValue = number
+            self.appModel.selectedChannel = self.appModel.privateChannels.first(where: { $0.id == String(number) })
         })
         .onReceive(NotificationCenter.default.publisher(for: .init("red.evelyn.accord.Search")), perform: { _ in
             self.popup.toggle()

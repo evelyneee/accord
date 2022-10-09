@@ -8,36 +8,42 @@
 import SwiftUI
 
 struct PrivateChannelsView: View {
-    
-    @Binding var selection: Int?
-    
+        
     @EnvironmentObject
     var appModel: AppGlobals
     
     var body: some View {
-        ForEach($appModel.privateChannels, id: \.id) { $channel in
-            NavigationLink(
-                tag: Int(channel.id) ?? 0,
-                selection: self.$selection,
+        List(appModel.privateChannels, id: \.self, selection: self.$appModel.selectedChannel) { channel in
+            PlatformNavigationLink(
+                item: channel,
+                selection: self.$appModel.selectedChannel,
                 destination: {
-                    NavigationLazyView(
-                        ChannelView(.constant(channel))
-                            .equatable()
-                            .environmentObject(self.appModel)
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                                    channel.read_state?.mention_count = 0
-                                    channel.read_state?.last_message_id = channel.last_message_id
-                                })
-                            }
-                            .onDisappear {
-                                channel.read_state?.mention_count = 0
-                                channel.read_state?.last_message_id = channel.last_message_id
-                            }
-                    )
+                    Group {
+                        if channel.type == .forum {
+                            NavigationLazyView(ForumChannelList(forumChannel: channel))
+                        } else if let channel = self.appModel.selectedChannel {
+                            NavigationLazyView(
+                                ChannelView(self.$appModel.selectedChannel)
+                                    .equatable()
+                                    .onAppear {
+                                        let channelID = channel.id
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                            if self.appModel.selectedChannel?.id == channelID {
+                                                channel.read_state?.mention_count = 0
+                                                channel.read_state?.last_message_id = channel.last_message_id
+                                            }
+                                        })
+                                    }
+                                    .onDisappear { [channel] in
+                                        channel.read_state?.mention_count = 0
+                                        channel.read_state?.last_message_id = channel.last_message_id
+                                    }
+                            )
+                        }
+                    }
                 },
                 label: {
-                    ServerListViewCell(channel: $channel)
+                    ServerListViewCell(channel: .constant(channel))
                         .environmentObject(self.appModel)
                         .animation(nil, value: UUID())
                 }
@@ -57,7 +63,7 @@ struct PrivateChannelsView: View {
                         empty: true
                     )
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channel.id)"), headers: headers)
-                    self.selection = nil
+                    self.appModel.selectedChannel = nil
                     guard let index = appModel.privateChannels[indexOf: channel.id] else { return }
                     appModel.privateChannels.remove(at: index)
                 }

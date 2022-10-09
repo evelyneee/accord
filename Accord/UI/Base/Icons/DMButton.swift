@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DMButton: View {
     
-    @Binding var selection: Int?
     @Binding var selectedServer: String?
     @Binding var selectedGuild: Guild?
     @State var mentionCount: Int?
@@ -20,6 +19,7 @@ struct DMButton: View {
     
     var body: some View {
         Button(action: {
+            self.appModel.selectedChannel = nil
             DispatchQueue.global().async {
                 let sorted = appModel.privateChannels
                     .sorted {
@@ -29,15 +29,15 @@ struct DMButton: View {
                     appModel.privateChannels = sorted
                 }
             }
-            if let selection = selection, let id = self.selectedGuild?.id {
-                UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
+            if let selection = appModel.selectedChannel, let id = self.selectedGuild?.id {
+                UserDefaults.standard.set(selection.id, forKey: "AccordChannelIn\(id)")
             }
             selectedServer = "@me"
             //self.selectedGuild = nil
-            if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? Int {
-                self.selection = selectionPrevious
+            if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? String {
+                self.appModel.selectedChannel = self.appModel.privateChannels.first(where: { $0.id == selectionPrevious })
             } else {
-                selection = nil
+                appModel.selectedChannel = nil
             }
         }) {
             Image(systemName: "bubble.right.fill")
