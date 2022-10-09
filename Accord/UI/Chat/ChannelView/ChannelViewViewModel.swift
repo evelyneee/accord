@@ -62,47 +62,62 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         return decoder
     }()
 
-    let channel: Channel
+    var channel: Channel!
     
-    init(channel: Channel) {
+    init(channel: Channel?) {
         self.channel = channel
-        channelID = channel.id
-        guildID = channel.guild_id ?? "@me"
-        if wss?.connection?.state != .ready {
-            print("No active websocket connection")
-            if reachability?.connected == true {
-                Task.detached {
-                    self.error = .init(code: 502, message: "Bad Gateway connection")
-                    if let res = await wss?.reset(), res {
-                        self.connect()
-                        self.loadChannel(channel)
-                        self.error = nil
-                    } else {
-                        concurrentQueue.async {
-                            print("force resetting")
-                            guard let new = try? Gateway(
-                                url: Gateway.gatewayURL,
-                                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
-                            ) else { return }
-                            new.ready().sink(receiveCompletion: {
-                                if case Subscribers.Completion.finished = $0 {
-                                    self.connect()
-                                    self.loadChannel(channel)
-                                    self.error = nil
-                                }
-                            }, receiveValue: doNothing).store(in: &new.bag)
-                            wss = new
+        channelID = channel?.id ?? "@me"
+        guildID = channel?.guild_id ?? "@me"
+        if let channel {
+            if wss?.connection?.state != .ready {
+                print("No active websocket connection")
+                if reachability?.connected == true {
+                    Task.detached {
+                        self.error = .init(code: 502, message: "Bad Gateway connection")
+                        if let res = await wss?.reset(), res {
+                            self.connect()
+                            self.loadChannel(channel)
+                            self.error = nil
+                        } else {
+                            concurrentQueue.async {
+                                print("force resetting")
+                                guard let new = try? Gateway(
+                                    url: Gateway.gatewayURL,
+                                    compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                                ) else { return }
+                                new.ready().sink(receiveCompletion: {
+                                    if case Subscribers.Completion.finished = $0 {
+                                        self.connect()
+                                        self.loadChannel(channel)
+                                        self.error = nil
+                                    }
+                                }, receiveValue: doNothing).store(in: &new.bag)
+                                wss = new
+                            }
                         }
                     }
+                } else {
+                    self.error = .init(code: -1009, message: "The network connection appears to be offline")
                 }
+                return
             } else {
-                self.error = .init(code: -1009, message: "The network connection appears to be offline")
+                loadChannel(channel)
+                connect()
             }
-            return
-        } else {
-            loadChannel(channel)
-            connect()
         }
+    }
+    
+    @MainActor
+    func emptyChannel() {
+        self.error = nil
+        self.cancellable.removeAll()
+        self.permissions = [.sendMessages, .readMessages, .addReactions]
+        self.noMoreMessages = false
+        self.roles.removeAll()
+        self.avatars.removeAll()
+        self.messages.removeAll()
+        self.nicks.removeAll()
+        self.pronouns.removeAll()
     }
     
     @MainActor

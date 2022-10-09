@@ -63,7 +63,7 @@ final class AppGlobals: ObservableObject {
     public var privateChannels = [Channel]()
     
     @MainActor @Published
-    var serverListViewSelection: Int? = nil
+    var selectedChannel: Channel? = nil
     
     static var newItemPublisher = PassthroughSubject<(Channel?, GuildFolder?), Never>()
     

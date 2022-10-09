@@ -12,7 +12,7 @@ import SwiftUI
 struct NewInviteSheet: View {
     @State var code: String?
     @State var errorText: String? = nil
-    @Binding var selection: Int?
+    @Binding var selection: Channel?
     @Binding var isPresented: Bool
     @State var maxAge: Int = 0
     @State var maxUses: Int = 0
@@ -155,7 +155,7 @@ struct NewInviteSheet: View {
         }
         let url = URL(string: rootURL)?
             .appendingPathComponent("channels")
-            .appendingPathComponent(String(selection))
+            .appendingPathComponent(String(selection.id))
             .appendingPathComponent("invites")
         Request.fetch(InviteUpdate.self, url: url, headers: Headers(
             token: Globals.token,

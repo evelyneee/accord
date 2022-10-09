@@ -21,7 +21,7 @@ struct PrivateChannelsView: View {
                 selection: self.$selection,
                 destination: {
                     NavigationLazyView(
-                        ChannelView($channel)
+                        ChannelView(.constant(channel))
                             .equatable()
                             .environmentObject(self.appModel)
                             .onAppear {

@@ -29,7 +29,7 @@ struct InsetGetter: View {
 extension ServerListView {
     struct FolderListView: View {
         @Binding var selectedServer: String?
-        @Binding var selection: Int?
+        @Binding var selectedChannel: Channel?
         @Binding var selectedGuild: Guild?
 
         @State var isShowingJoinServerSheet: Bool = false
@@ -58,7 +58,7 @@ extension ServerListView {
                             ServerIconCell(
                                 guild: $guild,
                                 selectedServer: self.$selectedServer,
-                                selection: self.$selection,
+                                selectedChannel: self.$selectedChannel,
                                 selectedGuild: self.$selectedGuild
                             )
                             .fixedSize()
@@ -70,7 +70,7 @@ extension ServerListView {
                     ServerIconCell(
                         guild: guild,
                         selectedServer: self.$selectedServer,
-                        selection: self.$selection,
+                        selectedChannel: self.$selectedChannel,
                         selectedGuild: self.$selectedGuild
                     )
                     .fixedSize()
@@ -86,7 +86,7 @@ extension ServerListView {
 struct ServerIconCell: View {
     @Binding var guild: Guild
     @Binding var selectedServer: String?
-    @Binding var selection: Int?
+    @Binding var selectedChannel: Channel?
     @Binding var selectedGuild: Guild?
     @State var hovering: Bool = false
 
@@ -100,7 +100,7 @@ struct ServerIconCell: View {
 
     func updateSelection(old: String?, new: String?) {
         DispatchQueue.global().async {
-            if let selection = selection, old == "@me" {
+            if let selection = selectedChannel?.id, old == "@me" {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
             }
             guard let new = new else {
@@ -109,15 +109,16 @@ struct ServerIconCell: View {
                     self.selectedGuild = guild
                 }
             }
-            if let selection = selection, let id = selectedGuild?.id {
+            if let selection = selectedChannel?.id, let id = selectedGuild?.id {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             DispatchQueue.main.async {
-                self.selection = nil
+                self.selectedChannel = nil
                 if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? Int {
                     self.selectedGuild = guild
                     self.selectedServer = new
-                    self.selection = value
+                    #warning("Fix this too")
+                    //self.selectedChannel = value
                 } else {
                     self.selectedGuild = guild
                     self.selectedServer = new

@@ -61,14 +61,6 @@ func unreadMessages(guild: Guild) -> Bool {
 }
 
 struct ServerListView: View {
-
-    var selection: Binding<Int?> {
-        Binding(get: {
-            self.appModel.serverListViewSelection
-        }) {
-            self.appModel.serverListViewSelection = $0
-        }
-    }
     
     @MainActor @State
     var selectedGuild: Guild? = nil
@@ -130,7 +122,7 @@ struct ServerListView: View {
     }
 
     var settingsLink: some View {
-        NavigationLink(destination: SettingsView(), tag: 0, selection: self.selection) {
+        NavigationLink(destination: SettingsView(), tag: Channel.init(id: "Settings", type: .directory, position: nil, parent_id: nil), selection: self.$appModel.selectedChannel) {
             HStack {
                 ZStack(alignment: .bottomTrailing) {
                     Image(nsImage: NSImage(data: avatar) ?? NSImage()).resizable()
@@ -155,7 +147,7 @@ struct ServerListView: View {
     }
 
     var body: some View {
-        NavigationView {
+        PlatformNavigationView(sidebar: {
             HStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
                     // MARK: - Messages button
@@ -166,16 +158,16 @@ struct ServerListView: View {
                                 .frame(width: 30, height: 1)
                                 .opacity(0.75)
                         }
-                        DMButton(
-                            selection: self.selection,
-                            selectedServer: self.$selectedServer,
-                            selectedGuild: self.$selectedGuild
-                        )
-                        .fixedSize()
+//                        DMButton(
+//                            selection: self.selection,
+//                            selectedServer: self.$selectedServer,
+//                            selectedGuild: self.$selectedGuild
+//                        )
+//                        .fixedSize()
                         Color.gray
                             .frame(width: 30, height: 1)
                             .opacity(0.75)
-                        FolderListView(selectedServer: self.$selectedServer, selection: self.selection, selectedGuild: self.$selectedGuild)
+                        FolderListView(selectedServer: self.$selectedServer, selectedChannel: self.$appModel.selectedChannel, selectedGuild: self.$selectedGuild)
                             .padding(.trailing, 3.5)
                         Color.gray
                             .frame(width: 30, height: 1)
@@ -196,19 +188,45 @@ struct ServerListView: View {
                     List {
                         settingsLink
                         Divider()
-                        PrivateChannelsView(selection: self.selection)
-                            .animation(nil, value: UUID())
+                        #warning("Fix DMs")
+//                        PrivateChannelsView(selection: self.selectedChannel)
+//                            .animation(nil, value: UUID())
                     }
                     .padding(.top, 5)
                     .listStyle(.sidebar)
                     .animation(nil, value: UUID())
                 } else if let selectedGuild = selectedGuild {
-                    GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild), selection: self.selection)
+                    GuildView(guild: Binding($selectedGuild) ?? .constant(selectedGuild), selectedChannel: self.$appModel.selectedChannel)
                         .animation(nil, value: UUID())
                 }
             }
             .frame(minWidth: 300, maxWidth: 500, maxHeight: .infinity)
-        }
+        }, detail: {
+            Group {
+                let channel = self.appModel.selectedChannel
+                if let channel, channel.type == .forum {
+                    NavigationLazyView(ForumChannelList(forumChannel: channel))
+                } else if let channel {
+                    NavigationLazyView(
+                        ChannelView(self.$appModel.selectedChannel, channel.guild_name)
+                            .equatable()
+                            .onAppear {
+                                let channelID = channel.id
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                    if self.appModel.selectedChannel?.id == channelID {
+                                        channel.read_state?.mention_count = 0
+                                        channel.read_state?.last_message_id = channel.last_message_id
+                                    }
+                                })
+                            }
+                            .onDisappear { [channel] in
+                                channel.read_state?.mention_count = 0
+                                channel.read_state?.last_message_id = channel.last_message_id
+                            }
+                    )
+                }
+            }
+        })
         .environmentObject(self.appModel)
         .environmentObject(self.discordSettings)
         .environmentObject(self.userGuildSettings)
@@ -219,8 +237,6 @@ struct ServerListView: View {
                 return nil
             }
         }())
-        .navigationViewStyle(DoubleColumnNavigationViewStyle())
-        // .navigationViewStyle(DoubleColumnNavigationViewStyle())
         .sheet(isPresented: $popup, onDismiss: {}) {
             SearchView()
                 .focusable()
@@ -238,14 +254,16 @@ struct ServerListView: View {
                   let firstKey = uInfo.first else { return }
             print(firstKey)
             self.selectedServer = firstKey.key
-            self.selection.wrappedValue = firstKey.value
+            #warning("Fix this")
+            //self.selection.wrappedValue = firstKey.value
             self.selectedGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: firstKey.key]
         })
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("DMSelect")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: String],
                   let index = uInfo["index"], let number = Int(index) else { return }
             self.selectedServer = "@me"
-            self.selection.wrappedValue = number
+            #warning("Fix this")
+            //self.selectedChannel.wrappedValue = number
         })
         .onReceive(NotificationCenter.default.publisher(for: .init("red.evelyn.accord.Search")), perform: { _ in
             self.popup.toggle()
@@ -253,7 +271,7 @@ struct ServerListView: View {
         .onAppear {
             if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.selectedGuild = upcomingGuild
-                self.selection.wrappedValue = self.viewModel.upcomingSelection
+                //self.selectedChannel.wrappedValue = self.viewModel.upcomingSelection
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
@@ -271,7 +289,7 @@ struct ServerListView: View {
         }
         .toolbar {
             ToolbarItemGroup {
-                if selection.wrappedValue == nil {
+                if self.appModel.selectedChannel == nil {
                     Toggle(isOn: Binding.constant(false)) {
                         Image(systemName: "bell.badge.fill")
                     }

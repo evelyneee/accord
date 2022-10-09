@@ -10,13 +10,13 @@ import Foundation
 extension AppGlobals {
     func addMention(guild: String, channel: String) {
         if guild == "@me" {
-            guard channel != String(serverListViewSelection ?? 0) else { print("currently reading already"); return }
+            guard channel != selectedChannel?.id else { print("currently reading already"); return }
             guard let index = self.privateChannels.generateKeyMap()[channel] else { return }
             DispatchQueue.main.async {
                 self.privateChannels[index].read_state?.mention_count? += 1
             }
         }
-        guard channel != String(serverListViewSelection ?? 0) else { print("currently reading already"); return }
+        guard channel != selectedChannel?.id else { print("currently reading already"); return }
         let index = self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
         for (i, v) in index.enumerated() {
             guard let v = v else { continue }
@@ -34,7 +34,7 @@ extension AppGlobals {
     }
 
     func deselect() {
-        serverListViewSelection = nil
+        selectedChannel = nil
     }
 
     func removeMentions(server: String) {
@@ -74,7 +74,7 @@ extension AppGlobals {
                     self.self.privateChannels[index].last_message_id = messageID
                 }
             } else {
-                guard channelID != String(self.serverListViewSelection ?? 0) else { print("currently reading already"); return }
+                guard channelID != self.selectedChannel?.id else { print("currently reading already"); return }
                 self.folders.enumerated().forEach { index1, folder in
                     folder.guilds.enumerated().forEach { index2, guild in
                         guild.channels.enumerated().forEach { index3, channel in

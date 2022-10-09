@@ -70,7 +70,8 @@ struct ChannelView: View, Equatable {
         lhs.viewModel == rhs.viewModel
     }
 
-    @StateObject var viewModel: ChannelViewViewModel
+    @StateObject
+    var viewModel: ChannelViewViewModel
     
     var channelName: String {
         channel.name ?? channel.recipients?.first?.username ?? "Unknown channel"
@@ -78,7 +79,11 @@ struct ChannelView: View, Equatable {
     
     var guildName: String
     
-    @Binding var channel: Channel
+    var channel: Channel! {
+        self._channel
+    }
+    
+    @Binding var _channel: Channel?
 
     // Whether or not there is a message send in progress
     @State var sending: Bool = false
@@ -124,8 +129,8 @@ struct ChannelView: View, Equatable {
 
     // MARK: - init
 
-    init(_ channel: Binding<Channel>, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
-        self._channel = channel
+    init(_ channel: Binding<Channel?>, _ guildName: String? = nil, model: StateObject<ChannelViewViewModel>? = nil) {
+        self.__channel = channel
         self.guildName = guildName ?? "Direct Messages"
         if let model {
             self._viewModel = model
@@ -134,6 +139,54 @@ struct ChannelView: View, Equatable {
         }
     }
 
+    func channelReset(_ channel: Channel) {
+        self.viewModel.emptyChannel()
+        self.viewModel.channel = channel
+        self.viewModel.channelID = channel.id
+        self.viewModel.guildID = channel.guild_id ?? "@me"
+        if wss?.connection?.state != .ready {
+            print("No active websocket connection")
+            if reachability?.connected == true {
+                Task.detached {
+                    await MainActor.run {
+                        self.viewModel.error = .init(code: 502, message: "Bad Gateway connection")
+                    }
+                    if let res = await wss?.reset(), res {
+                        await MainActor.run {
+                            self.viewModel.connect()
+                            self.viewModel.loadChannel(channel)
+                            self.error = nil
+                        }
+                    } else {
+                        concurrentQueue.async {
+                            print("force resetting")
+                            guard let new = try? Gateway(
+                                url: Gateway.gatewayURL,
+                                compress: UserDefaults.standard.value(forKey: "CompressGateway") as? Bool ?? true
+                            ) else { return }
+                            new.ready().sink(receiveCompletion: {
+                                if case Subscribers.Completion.finished = $0 {
+                                    DispatchQueue.main.async {
+                                        self.viewModel.connect()
+                                        self.viewModel.loadChannel(channel)
+                                        self.error = nil
+                                    }
+                                }
+                            }, receiveValue: doNothing).store(in: &new.bag)
+                            wss = new
+                        }
+                    }
+                }
+            } else {
+                self.viewModel.error = .init(code: -1009, message: "The network connection appears to be offline")
+            }
+            return
+        } else {
+            self.viewModel.loadChannel(channel)
+            self.viewModel.connect()
+        }
+    }
+    
     @_transparent
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
@@ -231,8 +284,16 @@ struct ChannelView: View, Equatable {
             .font(.largeTitle)
     }
     
-    
+    @ViewBuilder
     var body: some View {
+        if _channel != nil {
+            core
+        } else {
+            EmptyView()
+        }
+    }
+    
+    var core: some View {
         HStack {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
@@ -339,6 +400,7 @@ struct ChannelView: View, Equatable {
                 .frame(maxWidth: 400)
             }
         }
+        .onChange(of: self.channel, perform: channelReset)
         .onAppear {
             DispatchQueue.main.async {
                 viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []

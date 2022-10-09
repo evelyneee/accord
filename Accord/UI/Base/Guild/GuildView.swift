@@ -11,7 +11,8 @@ import SwiftUI
 struct GuildView: View {
     
     @Binding var guild: Guild
-    @Binding var selection: Int?
+    
+    @Binding var selectedChannel: Channel?
         
     @State var invitePopup: Bool = false
     
@@ -27,47 +28,29 @@ struct GuildView: View {
     var hideMutedChannels: Bool = false
     
     var body: some View {
-        List {
-            if let banner = guild.banner {
-                if banner.prefix(2) == "a_" {
-//                    GifView(cdnURL + "/banners/\(guild.id)/\(banner).gif?size=512")
-//                        .drawingGroup()
-//                        .cornerRadius(3)
-//                        .animation(nil, value: UUID())
-//                        .edgesIgnoringSafeArea(.all)
-//                        .padding(.vertical, 5)
-                } else {
-                    Attachment(cdnURL + "/banners/\(guild.id)/\(banner).png?size=512", size: nil)
-                        .equatable()
-                        .scaledToFit()
-                        .cornerRadius(3)
-                        .animation(nil, value: UUID())
-                        .edgesIgnoringSafeArea(.all)
-                        .padding(.vertical, 5)
-                }
-            }
-            ForEach($guild.channels, id: \.id) { $channel in
-                if hideMutedChannels && (hideMutedChannels ? false : (userSettings.mutedChannels.contains(channel.id) || userSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
-                } else if channel.type == .section {
-                    Text(channel.name?.uppercased() ?? "")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.secondary)
-                        .font(.system(size: 10))
-                } else {
-                    NavigationLink (
-                        tag: Int(channel.id) ?? 0,
-                        selection: self.$selection,
-                        destination: {
+        List(guild.channels, id: \.self, selection: $selectedChannel) { channel in
+            if hideMutedChannels && (hideMutedChannels ? false : (userSettings.mutedChannels.contains(channel.id) || userSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
+            } else if channel.type == .section {
+                Text(channel.name?.uppercased() ?? "")
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.secondary)
+                    .font(.system(size: 10))
+            } else {
+                PlatformNavigationLink(
+                    item: channel,
+                    selection: self.$selectedChannel,
+                    destination: {
+                        Group {
                             if channel.type == .forum {
                                 NavigationLazyView(ForumChannelList(forumChannel: channel))
-                            } else {
+                            } else if let channel = selectedChannel {
                                 NavigationLazyView(
-                                    ChannelView($channel, guild.name)
+                                    ChannelView(self.$appModel.selectedChannel, guild.name)
                                         .equatable()
                                         .onAppear {
                                             let channelID = channel.id
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
-                                                if self.selection == Int(channelID) {
+                                                if self.selectedChannel?.id == channelID {
                                                     channel.read_state?.mention_count = 0
                                                     channel.read_state?.last_message_id = channel.last_message_id
                                                 }
@@ -79,54 +62,56 @@ struct GuildView: View {
                                         }
                                 )
                             }
-                        }, label: {
-                            ServerListViewCell(
-                                channel: $channel
-                            )
                         }
-                    )
-                    .buttonStyle(.borderless)
-                    .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
-                    .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
-                    .contextMenu {
-                        Button("Copy Channel ID") {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(channel.id, forType: .string)
-                        }
-                        Button("Mark as read") {
-                            channel.read_state?.mention_count = 0
-                            channel.read_state?.last_message_id = channel.last_message_id
-                        }
-                        Button("Open in new window") {
-                            showWindow(channel, globals: self.appModel)
-                        }
-                        Button("Open in new panel") {
-                            showPanel(channel, globals: self.appModel)
-                        }
-                        //#warning("TODO: Check for permissions for this")
-                        Divider()
-                        Button("Delete channel") {
-                            let headers = Headers(
-                                contentType: nil,
-                                token: Globals.token,
-                                type: .DELETE,
-                                discordHeaders: true,
-                                referer: "https://discord.com/channels/@me",
-                                empty: true
-                            )
-                            Request.ping(url: URL(string: rootURL + "/channels/\(channel.id)"), headers: headers)
-                            if String(self.selection ?? 0) == channel.id {
-                                self.selection = nil
-                            }
-                            guard let index = guild.channels[indexOf: channel.id] else { return }
-                            guild.channels.remove(at: index)
-                        }
+                    },
+                    label: {
+                        ServerListViewCell(
+                            channel: .constant(channel)
+                        )
                     }
-                    .animation(nil, value: UUID())
+                )
+                .buttonStyle(.borderless)
+                .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
+                .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
+                .contextMenu {
+                    Button("Copy Channel ID") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(channel.id, forType: .string)
+                    }
+                    Button("Mark as read") {
+                        channel.read_state?.mention_count = 0
+                        channel.read_state?.last_message_id = channel.last_message_id
+                    }
+                    Button("Open in new window") {
+                        showWindow(channel, globals: self.appModel)
+                    }
+                    Button("Open in new panel") {
+                        showPanel(channel, globals: self.appModel)
+                    }
+                    //#warning("TODO: Check for permissions for this")
+                    Divider()
+                    Button("Delete channel") {
+                        let headers = Headers(
+                            contentType: nil,
+                            token: Globals.token,
+                            type: .DELETE,
+                            discordHeaders: true,
+                            referer: "https://discord.com/channels/@me",
+                            empty: true
+                        )
+                        Request.ping(url: URL(string: rootURL + "/channels/\(channel.id)"), headers: headers)
+                        if self.selectedChannel?.id == channel.id {
+                            self.selectedChannel = nil
+                        }
+                        guard let index = guild.channels[indexOf: channel.id] else { return }
+                        guild.channels.remove(at: index)
+                    }
                 }
+                .animation(nil, value: UUID())
             }
         }
-        .listStyle(.sidebar)
+        .navigationTitle(Text("Channels"))
+        //.listStyle(.sidebar)
         .readSize {
             self.width = $0.width
         }
@@ -189,7 +174,7 @@ struct GuildView: View {
             .padding(.leading, 16)
             .menuStyle(BorderlessButtonMenuStyle())
             .sheet(isPresented: self.$invitePopup, content: {
-                NewInviteSheet(selection: self.$selection, isPresented: self.$invitePopup)
+                NewInviteSheet(selection: self.$selectedChannel, isPresented: self.$invitePopup)
                     .frame(width: 350, height: 250)
             })
         }
