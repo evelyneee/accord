@@ -35,11 +35,6 @@ struct PrivateChannelsView: View {
                                 channel.read_state?.last_message_id = channel.last_message_id
                             }
                     )
-                },
-                label: {
-                    ServerListViewCell(channel: .constant(channel))
-                        .environmentObject(self.appModel)
-                        .animation(nil, value: UUID())
                 }
             )
             .contextMenu {

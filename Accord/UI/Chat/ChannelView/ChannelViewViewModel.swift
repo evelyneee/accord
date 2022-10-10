@@ -49,10 +49,14 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @Environment(\.user)
     var user: User
 
-    @Published var error: DiscordError? = nil
+    @MainActor @Published
+    var error: DiscordError? = nil
     
     var guildID: String
-    var channelID: String
+    
+    var channelID: String {
+        self.channel?.id ?? ""
+    }
 
     static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
 
@@ -66,18 +70,24 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     
     init(channel: Channel?) {
         self.channel = channel
-        channelID = channel?.id ?? "@me"
         guildID = channel?.guild_id ?? "@me"
+    }
+    
+    func initializeChannel() {
         if let channel {
             if wss?.connection?.state != .ready {
                 print("No active websocket connection")
                 if reachability?.connected == true {
                     Task.detached {
-                        self.error = .init(code: 502, message: "Bad Gateway connection")
+                        await MainActor.run {
+                            self.error = .init(code: 502, message: "Bad Gateway connection")
+                        }
                         if let res = await wss?.reset(), res {
                             self.connect()
                             self.loadChannel(channel)
-                            self.error = nil
+                            await MainActor.run {
+                                self.error = nil
+                            }
                         } else {
                             concurrentQueue.async {
                                 print("force resetting")
@@ -89,7 +99,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                                     if case Subscribers.Completion.finished = $0 {
                                         self.connect()
                                         self.loadChannel(channel)
-                                        self.error = nil
+                                        DispatchQueue.main.async {
+                                            self.error = nil
+                                        }
                                     }
                                 }, receiveValue: doNothing).store(in: &new.bag)
                                 wss = new
@@ -97,7 +109,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         }
                     }
                 } else {
-                    self.error = .init(code: -1009, message: "The network connection appears to be offline")
+                    DispatchQueue.main.async {
+                        self.error = .init(code: -1009, message: "The network connection appears to be offline")
+                    }
                 }
                 return
             } else {
@@ -109,15 +123,16 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     
     @MainActor
     func emptyChannel() {
-        self.error = nil
+        print("called")
         self.cancellable.removeAll()
+        self.messages.removeAll()
+        self.typing.removeAll()
+        self.error = nil
         self.permissions = [.sendMessages, .readMessages, .addReactions]
         self.noMoreMessages = false
         self.roles.removeAll()
         self.avatars.removeAll()
-        self.messages.removeAll()
         self.nicks.removeAll()
-        self.typing.removeAll()
         self.pronouns.removeAll()
     }
     
@@ -176,7 +191,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         .appendingPathComponent("members")
                         .appendingPathComponent(user.user.id) else { return }
                     let request = URLRequest(url: url)
-                    let response = URLResponse(url: url, mimeType: "application/discord-guild-member", expectedContentLength: data.count, textEncodingName: "utf8")
+                    let response = URLResponse(url: url, mimeType: "application/json", expectedContentLength: data.count, textEncodingName: nil)
                     let fakeURLResponse = CachedURLResponse(response: response, data: data)
                     cache.storeCachedResponse(fakeURLResponse, for: request)
                 } catch { print(error) }
@@ -430,14 +445,20 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     switch error {
                     case .badResponse(let response):
                         if let response = response as? HTTPURLResponse {
-                            self.error = .init(code: response.statusCode, message: "HTTP request failed")
+                            DispatchQueue.main.async {
+                                self.error = .init(code: response.statusCode, message: "HTTP request failed")
+                            }
                         }
                     case .discordError(code: let code, message: let message):
-                        self.error = .init(code: code ?? 0, message: message)
+                        DispatchQueue.main.async {
+                            self.error = .init(code: code ?? 0, message: message)
+                        }
                     default: break
                     }
                 } else if let error = error as? URLError {
-                    self.error = .init(code: error.code.rawValue, message: error.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.error = .init(code: error.code.rawValue, message: error.localizedDescription)
+                    }
                 }
             }
         }) { [weak self] messages in
@@ -533,9 +554,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         allUserIDs.forEach { id in
             do {
                 let member = try self.loadCachedUser(id)
+                print(member)
                 toRemove.append(id)
                 memberLoad(member)
-            } catch { dprint(error) }
+            } catch {}
         }
         allUserIDs = allUserIDs.filter { !toRemove.contains($0) }
         if !(allUserIDs.isEmpty) {

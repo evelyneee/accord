@@ -612,8 +612,8 @@
 		9EC5FA142845B61E00C2A416 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				9EB3303928344A10007D38EF /* DMButton.swift */,
 				9E82874C27BB515F00953A7B /* FolderListView.swift */,
+				9EB3303928344A10007D38EF /* DMButton.swift */,
 				9EC5FA132845B60500C2A416 /* ServerJoin */,
 			);
 			path = Icons;
@@ -748,7 +748,6 @@
 			isa = PBXGroup;
 			children = (
 				9ECE42B9279E131B00883D0A /* TextField */,
-				9E39B26627869C4800069424 /* Accessories */,
 				A82A05FB26D3F3AC007B9B27 /* ChannelView */,
 			);
 			path = Chat;
@@ -798,6 +797,7 @@
 		A82A05FB26D3F3AC007B9B27 /* ChannelView */ = {
 			isa = PBXGroup;
 			children = (
+				9E39B26627869C4800069424 /* Accessories */,
 				32F3742A25733D8000ADB7E6 /* ChannelView.swift */,
 				A80FEC2227234DE7005F9950 /* ChannelViewViewModel.swift */,
 				9EC5FA1C2845BB9700C2A416 /* MessageCell */,

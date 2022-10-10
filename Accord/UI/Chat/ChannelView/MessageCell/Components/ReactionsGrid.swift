@@ -15,7 +15,7 @@ struct ReactionsGridView: View {
     @Binding var message: Message
 
     var body: some View {
-        GridStack($message.reactions, rowAlignment: .leading, columns: 6, content: { reaction in
+        GridStack($message.reactions, rowAlignment: .leading, columns: 6, content: { $reaction in
             ReactionView(messageID: message.id, reaction: reaction)
         })
         .equatable()
@@ -59,7 +59,8 @@ struct ReactionView: View {
                 referer: "https://discord.com/channels/@me"
             ))
             reaction.me.toggle()
-            if reaction.me { reaction.count -= 1 } else { reaction.count += 1 }
+            me.toggle()
+            if reaction.me { reaction.count += 1 } else { reaction.count -= 1 }
         }) {
             GroupBox {
                 HStack {
@@ -75,7 +76,7 @@ struct ReactionView: View {
                         .fontWeight(.medium)
                 }
             }
-            .foregroundColor(reaction.me ? .blue : nil)
+            .foregroundColor(reaction.me || me ? .accentColor : nil)
         }
         .buttonStyle(.borderless)
         .padding(4)

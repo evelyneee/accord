@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct GridStack<T: Identifiable & Hashable, Content: View>: View, Equatable {
+struct GridStack<T: RandomAccessCollection & Equatable, Content: View>: View, Equatable where T.Index == Int, T.Element: Identifiable & Hashable {
     
     static func == (_ lhs: Self, _ rhs: Self) -> Bool {
         lhs.array == rhs.array
@@ -17,20 +17,11 @@ struct GridStack<T: Identifiable & Hashable, Content: View>: View, Equatable {
     let columns: Int?
     let verticalAlignment: SwiftUI.HorizontalAlignment
     let horizontalAlignment: SwiftUI.VerticalAlignment
-    @Binding var array: [T]
-    let content: (T) -> Content
+    var array: T
+    let content: (T.Element) -> Content
 
-    init(_ array: [T], rowAlignment: SwiftUI.HorizontalAlignment = .center, columnAlignment: SwiftUI.VerticalAlignment = .center, rows: Int? = nil, columns: Int? = nil, @ViewBuilder content: @escaping (T) -> Content) {
-        self._array = .constant(array)
-        verticalAlignment = rowAlignment
-        horizontalAlignment = columnAlignment
-        self.rows = rows
-        self.columns = columns
-        self.content = content
-    }
-    
-    init(_ array: Binding<[T]>, rowAlignment: SwiftUI.HorizontalAlignment = .center, columnAlignment: SwiftUI.VerticalAlignment = .center, rows: Int? = nil, columns: Int? = nil, @ViewBuilder content: @escaping (T) -> Content) {
-        self._array = array
+    init(_ array: T, rowAlignment: SwiftUI.HorizontalAlignment = .center, columnAlignment: SwiftUI.VerticalAlignment = .center, rows: Int? = nil, columns: Int? = nil, @ViewBuilder content: @escaping (T.Element) -> Content) {
+        self.array = array
         verticalAlignment = rowAlignment
         horizontalAlignment = columnAlignment
         self.rows = rows
@@ -56,11 +47,11 @@ struct GridStack<T: Identifiable & Hashable, Content: View>: View, Equatable {
             .id(UUID())
             .fixedSize()
         } else if let columns = columns {
-            let chunked = self.$array.arrayLiteral.chunked(by: columns)
+            let chunked = self.array.arrayLiteral.chunked(by: columns)
             VStack(alignment: self.verticalAlignment) {
                 ForEach(0 ..< (chunked.count), id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
-                        ForEach(chunked[row], id: \.self) { $item in
+                        ForEach(chunked[row], id: \.self) { item in
                             content(item)
                                 .id(item.id)
                         }
@@ -72,6 +63,7 @@ struct GridStack<T: Identifiable & Hashable, Content: View>: View, Equatable {
             .id(UUID())
             .fixedSize()
         }
+        
     }
 }
 

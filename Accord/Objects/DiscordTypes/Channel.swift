@@ -10,7 +10,7 @@ import SwiftUI
 
 struct Channel: Decodable, Equatable, Identifiable, Hashable {
     static func == (lhs: Channel, rhs: Channel) -> Bool {
-        lhs.id == rhs.id && lhs.read_state == rhs.read_state
+        lhs.id == rhs.id
     }
 
     let id: String
@@ -59,7 +59,6 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
-        hasher.combine(read_state)
     }
     
     struct PermissionOverwrites: Decodable {

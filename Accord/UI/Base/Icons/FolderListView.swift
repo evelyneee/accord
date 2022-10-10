@@ -56,9 +56,7 @@ extension ServerListView {
                         ForEach($folder.guilds, id: \.id) { $guild in
                             ServerIconCell(
                                 guild: $guild,
-                                selectedServer: self.$selectedServer,
-                                selectedChannel: self.$appModel.selectedChannel,
-                                selectedGuild: self.$selectedGuild
+                                selectedServer: self.$selectedServer
                             )
                             .fixedSize()
                         }
@@ -68,9 +66,7 @@ extension ServerListView {
                 } else if let guild = $folder.guilds.first {
                     ServerIconCell(
                         guild: guild,
-                        selectedServer: self.$selectedServer,
-                        selectedChannel: self.$appModel.selectedChannel,
-                        selectedGuild: self.$selectedGuild
+                        selectedServer: self.$selectedServer
                     )
                     .fixedSize()
                     .id(guild.id)
@@ -84,9 +80,10 @@ extension ServerListView {
 
 struct ServerIconCell: View {
     @Binding var guild: Guild
-    @Binding var selectedServer: String?
-    @Binding var selectedChannel: Channel?
-    @Binding var selectedGuild: Guild?
+    
+    @Binding @MainActor
+    var selectedServer: String?
+    
     @State var hovering: Bool = false
 
     @State var mentionCount: Int?
@@ -98,45 +95,40 @@ struct ServerIconCell: View {
     @State var viewHeight: Double = Double.zero
 
     func updateSelection(old: String?, new: String?) {
+        self.appModel.selectedChannel = nil
         DispatchQueue.global().async {
-            if let selection = selectedChannel?.id, old == "@me" {
+            if let selection = self.appModel.selectedChannel?.id, old == "@me" {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
             }
             guard let new = new else {
                 return DispatchQueue.main.async {
                     self.selectedServer = new
-                    self.selectedGuild = guild
+                    self.appModel.selectedGuild = guild
                 }
             }
-            if let selection = selectedChannel?.id, let id = selectedGuild?.id {
+            if let selection = self.appModel.selectedChannel?.id, let id = self.appModel.selectedGuild?.id {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
             }
             DispatchQueue.main.async {
-                self.selectedChannel = nil
-                if let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String {
-                    self.selectedGuild = guild
-                    self.selectedServer = new
-                    self.selectedChannel = self.selectedGuild?.channels.first(where: { $0.id == value })
-                } else {
-                    self.selectedGuild = guild
-                    self.selectedServer = new
-                }
+                self.appModel.selectedGuild = guild
+                self.selectedServer = new
             }
         }
     }
 
     var body: some View {
-        HStack {
-            RoundedRectangle(cornerRadius: 5)
-                .fill()
-                .foregroundColor(Color.primary)
-                .frame(width: 5, height: selectedServer == guild.id || hovering ? 30 : 5)
-                .animation(Animation.easeInOut(duration: 0.1), value: UUID())
-                .opacity(unreadMessages(guild: guild) || selectedServer == guild.id ? 1 : 0)
-            GuildListPreview(guild: $guild, selectedServer: $selectedServer.animation())
-        }
-        .onTapGesture {
+        Button {
             self.updateSelection(old: selectedServer, new: guild.id)
+        } label: {
+            HStack {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill()
+                    .foregroundColor(Color.primary)
+                    .frame(width: 5, height: selectedServer == guild.id || hovering ? 30 : 5)
+                    .animation(Animation.easeInOut(duration: 0.1), value: UUID())
+                    .opacity(unreadMessages(guild: guild) || selectedServer == guild.id ? 1 : 0)
+                GuildListPreview(guild: $guild, selectedServer: $selectedServer.animation())
+            }
         }
         .accessibility(
             label: Text(guild.name ?? "Unknown Guild") + Text(String(pingCount(guild: guild)) + " mentions") + Text(unreadMessages(guild: guild) ? "Unread messages" : "No unread messages")

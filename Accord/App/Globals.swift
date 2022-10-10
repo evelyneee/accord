@@ -65,6 +65,9 @@ final class AppGlobals: ObservableObject {
     @MainActor @Published
     var selectedChannel: Channel? = nil
     
+    @MainActor @Published
+    var selectedGuild: Guild? = nil
+    
     static var newItemPublisher = PassthroughSubject<(Channel?, GuildFolder?), Never>()
     
     func permissionsAllowed(_ perms: [Channel.PermissionOverwrites], guildID: String) -> Permissions {

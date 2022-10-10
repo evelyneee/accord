@@ -27,47 +27,23 @@ struct PlatformNavigationView<Sidebar: View, Detail: View>: View {
     }
 }
 
-struct PlatformNavigationList<SelectionValue: Hashable, Content: View>: View {
-    
-    var selection: Binding<SelectionValue>
-    var content: () -> Content
-        
-    init(
-        selection: Binding<SelectionValue>,
-        @ViewBuilder content: @escaping () -> Content
-    ) {
-        self.selection = selection
-        self.content = content
-    }
-    
-    @ViewBuilder
-    var body: some View {
-        if #available(macOS 13.0, *) {
-            List(selection: selection, content: content)
-        } else {
-            List(content: content)
-        }
-    }
-}
 
-
-struct PlatformNavigationLink<Destination: View, Label: View>: View {
+struct PlatformNavigationLink<Destination: View>: View {
     
     var item: Channel
     @Binding var selection: Channel?
     
     var destination: () -> Destination
-    var label: () -> Label
     
     @ViewBuilder
     var body: some View {
         if #available(macOS 13.0, *) {
-            NavigationLink(value: self.item, label: label)
+            ServerListViewCell(channel: .constant(item))
         } else {
             NavigationLink (
                 tag: item,
                 selection: $selection,
-                destination: destination, label: label)
+                destination: destination, label: { ServerListViewCell(channel: .constant(item)) })
 
         }
     }
