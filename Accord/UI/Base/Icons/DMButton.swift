@@ -19,7 +19,6 @@ struct DMButton: View {
     
     var body: some View {
         Button(action: {
-            self.appModel.selectedChannel = nil
             DispatchQueue.global().async {
                 let sorted = appModel.privateChannels
                     .sorted {
@@ -33,7 +32,7 @@ struct DMButton: View {
                 UserDefaults.standard.set(selection.id, forKey: "AccordChannelIn\(id)")
             }
             selectedServer = "@me"
-            //self.selectedGuild = nil
+            self.selectedGuild = nil
             if let selectionPrevious = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? String {
                 self.appModel.selectedChannel = self.appModel.privateChannels.first(where: { $0.id == selectionPrevious })
             } else {
