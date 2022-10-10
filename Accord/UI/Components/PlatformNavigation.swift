@@ -9,17 +9,19 @@ import SwiftUI
 
 struct PlatformNavigationView<Sidebar: View, Detail: View>: View {
     
-    var sidebar: () -> Sidebar
-    var detail: () -> Detail
+    @ViewBuilder var sidebar: () -> Sidebar
+    @ViewBuilder var detail: () -> Detail
     
     @ViewBuilder
     var body: some View {
         if #available(macOS 13.0, *) {
+            #if canImport(WeatherKit)
             NavigationSplitView {
                 sidebar()
             } detail: {
                 detail()
             }
+            #endif
         } else {
             NavigationView(content: sidebar)
                 .navigationViewStyle(DoubleColumnNavigationViewStyle())
@@ -37,6 +39,7 @@ struct PlatformNavigationLink<Destination: View>: View {
     
     @ViewBuilder
     var body: some View {
+        
         if #available(macOS 13.0, *) {
             ServerListViewCell(channel: .constant(item))
         } else {

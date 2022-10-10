@@ -18,7 +18,8 @@ struct DMButton: View {
     var appModel: AppGlobals
     
     var body: some View {
-        Button(action: {
+        Button(action: { [weak appModel] in
+            guard let appModel = appModel else { return }
             DispatchQueue.global().async {
                 let sorted = appModel.privateChannels
                     .sorted {

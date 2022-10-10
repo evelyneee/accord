@@ -164,30 +164,32 @@ struct ServerListView: View {
                     guildView(guild)
                 }
             }
-        }, detail: {
-            Group {
-                if let channel = self.appModel.selectedChannel, channel.type == .forum {
-                    NavigationLazyView(ForumChannelList(forumChannel: channel))
-                } else {
-                    ChannelView(self.$appModel.selectedChannel, self.appModel.selectedChannel?.guild_name ?? "Accord")
-                        .equatable()
-                        .onAppear {
-                            if let channel = self.appModel.selectedChannel {
-                                let channelID = channel.id
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
-                                    if self.appModel.selectedChannel?.id == channelID {
-                                        channel.read_state?.mention_count = 0
-                                        channel.read_state?.last_message_id = channel.last_message_id
-                                    }
-                                })
+        }, detail: { [weak appModel] in
+            if let appModel {
+                Group {
+                    if let channel = appModel.selectedChannel, channel.type == .forum {
+                        NavigationLazyView(ForumChannelList(forumChannel: channel))
+                    } else {
+                        ChannelView(self.$appModel.selectedChannel, appModel.selectedChannel?.guild_name ?? "Accord")
+                            .equatable()
+                            .onAppear {
+                                if let channel = appModel.selectedChannel {
+                                    let channelID = channel.id
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                        if appModel.selectedChannel?.id == channelID {
+                                            channel.read_state?.mention_count = 0
+                                            channel.read_state?.last_message_id = channel.last_message_id
+                                        }
+                                    })
+                                }
                             }
-                        }
-                        .onDisappear {
-                            if let channel = self.appModel.selectedChannel {
-                                channel.read_state?.mention_count = 0
-                                channel.read_state?.last_message_id = channel.last_message_id
+                            .onDisappear {
+                                if let channel = appModel.selectedChannel {
+                                    channel.read_state?.mention_count = 0
+                                    channel.read_state?.last_message_id = channel.last_message_id
+                                }
                             }
-                        }
+                    }
                 }
             }
         })

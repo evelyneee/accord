@@ -67,9 +67,9 @@ extension ServerListView {
                             }
                         }
                     )
-                    .onReceive(self.appModel.$selectedGuild, perform: { guild in
+                    .onReceive(self.appModel.$selectedGuild, perform: { [weak appModel] guild in
                         if let guild, let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String, channel.id == value {
-                            self.appModel.selectedChannel = channel
+                            appModel?.selectedChannel = channel
                         }
                     })
                     .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
@@ -91,7 +91,7 @@ extension ServerListView {
                         }
                         //#warning("TODO: Check for permissions for this")
                         Divider()
-                        Button("Delete channel") {
+                        Button("Delete channel") { [weak appModel] in
                             let headers = Headers(
                                 contentType: nil,
                                 token: Globals.token,
@@ -105,7 +105,7 @@ extension ServerListView {
                                 self.appModel.selectedChannel = nil
                             }
                             guard let index = guild.channels[indexOf: channel.id] else { return }
-                            self.appModel.selectedGuild?.channels.remove(at: index)
+                            appModel?.selectedGuild?.channels.remove(at: index)
                         }
                     }
                     .animation(nil, value: UUID())

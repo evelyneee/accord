@@ -274,8 +274,8 @@ struct ChannelView: View, Equatable {
                         .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
                         .rotationEffect(.radians(.pi))
                         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                        .onReceive(Self.scrollTo, perform: { channelID, id in
-                            guard channelID == self.channel.id else { return }
+                        .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
+                            guard let viewModel, channelID == self.channel.id else { return }
                             if viewModel.messages.map(\.id).contains(id) {
                                 withAnimation(.easeInOut(duration: 0.5), {
                                     proxy.scrollTo(id, anchor: .center)
@@ -358,9 +358,10 @@ struct ChannelView: View, Equatable {
                 .frame(maxWidth: 400)
             }
         }
-        .onReceive(self.appModel.$selectedChannel, perform: { channel in
-            if let channel = channel, self.appModel.selectedChannel?.id != self.viewModel.channel?.id {
-                self.appModel.selectedChannel = channel
+        .onReceive(self.appModel.$selectedChannel, perform: { [weak appModel, weak viewModel] channel in
+            guard let appModel, let viewModel else { return }
+            if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
+                appModel.selectedChannel = channel
                 self.channelReset(channel)
             }
         })
