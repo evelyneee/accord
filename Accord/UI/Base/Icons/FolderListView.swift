@@ -95,7 +95,6 @@ struct ServerIconCell: View {
     @State var viewHeight: Double = Double.zero
 
     func updateSelection(old: String?, new: String?) {
-        self.appModel.selectedChannel = nil
         DispatchQueue.global().async {
             if let selection = self.appModel.selectedChannel?.id, old == "@me" {
                 UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
