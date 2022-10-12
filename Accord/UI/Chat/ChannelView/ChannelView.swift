@@ -251,43 +251,47 @@ struct ChannelView: View, Equatable {
         }
     }
     
+    var list: some View {
+        ScrollViewReader { proxy in
+            List {
+                Spacer().frame(height: 15)
+                if metalRenderer {
+                    messagesView.drawingGroup()
+                } else {
+                    messagesView
+                }
+                if viewModel.noMoreMessages {
+                    channelHeaderView
+                        .rotationEffect(.degrees(180))
+                        .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                } else {
+                    MessagePlaceholders()
+                }
+            }
+            .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+            .rotationEffect(.radians(.pi))
+            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+            .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
+                guard let viewModel, channelID == self.channel.id else { return }
+                if viewModel.messages.map(\.id).contains(id) {
+                    withAnimation(.easeInOut(duration: 0.5), {
+                        proxy.scrollTo(id, anchor: .center)
+                    })
+                } else {
+                    self.scrolledOutOfBounds = true
+                    messageFetchQueue.async {
+                        viewModel.loadAroundMessage(id: id)
+                    }
+                }
+            })
+        }
+    }
+    
     var core: some View {
         HStack {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
-                    ScrollViewReader { proxy in
-                        List {
-                            Spacer().frame(height: 15)
-                            if metalRenderer {
-                                messagesView.drawingGroup()
-                            } else {
-                                messagesView
-                            }
-                            if viewModel.noMoreMessages {
-                                channelHeaderView
-                                    .rotationEffect(.degrees(180))
-                                    .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                            } else {
-                                MessagePlaceholders()
-                            }
-                        }
-                        .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
-                        .rotationEffect(.radians(.pi))
-                        .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                        .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
-                            guard let viewModel, channelID == self.channel.id else { return }
-                            if viewModel.messages.map(\.id).contains(id) {
-                                withAnimation(.easeInOut(duration: 0.5), {
-                                    proxy.scrollTo(id, anchor: .center)
-                                })
-                            } else {
-                                self.scrolledOutOfBounds = true
-                                messageFetchQueue.async {
-                                    viewModel.loadAroundMessage(id: id)
-                                }
-                            }
-                        })
-                    }
+                    list
                     if self.scrolledOutOfBounds {
                         Button(action: { [weak viewModel] in
                             self.scrolledOutOfBounds = false

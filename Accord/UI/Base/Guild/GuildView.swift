@@ -72,7 +72,12 @@ extension ServerListView {
                             appModel?.selectedChannel = channel
                         }
                     })
-                    .foregroundColor(channel.read_state != nil && channel.read_state?.last_message_id == channel.last_message_id ? Color.secondary : nil)
+                    .foregroundColor({ () -> Color? in
+                        if let messageID = channel.read_state?.last_message_id, messageID != channel.last_message_id {
+                            return nil
+                        }
+                        return Color.secondary
+                    }())
                     .padding((channel.type == .guild_public_thread || channel.type == .guild_private_thread) ? .leading : [])
                     .contextMenu {
                         Button("Copy Channel ID") {

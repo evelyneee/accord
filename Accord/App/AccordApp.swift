@@ -30,12 +30,13 @@ var reachability: Reachability? = {
     return reachability
 }()
 
-class NSWorkspace2: NSWorkspace {
+class NSWorkspace2 {
     @objc func open2(
         _ url: URL,
         configuration: NSWorkspace.OpenConfiguration,
         completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
     ) {
+        print("overridden method")
         if url.absoluteString.contains("discord.com/channels/") {
             let comp = Array(url.pathComponents.suffix(3))
             guard comp.count == 3 else {
@@ -54,9 +55,22 @@ class NSWorkspace2: NSWorkspace {
                 ChannelView.scrollTo.send((comp[1], comp[2]))
             })
         } else {
-            NSWorkspace.shared.open(url)
-            completionHandler?(nil, nil)
+            Orig().open_orig(
+                url,
+                configuration: configuration,
+                completionHandler: completionHandler
+            )
         }
+    }
+}
+
+class Orig {
+    @objc func open_orig(
+        _ url: URL,
+        configuration: NSWorkspace.OpenConfiguration,
+        completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
+    ) {
+        print("uwu")
     }
 }
 
