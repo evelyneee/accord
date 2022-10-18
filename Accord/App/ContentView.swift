@@ -39,7 +39,6 @@ private struct UserKey: EnvironmentKey {
 
 struct ContentView: View {
     
-    @State var modalIsPresented: Bool = false
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
     
@@ -56,13 +55,10 @@ struct ContentView: View {
     
     @ViewBuilder
     var body: some View {
-        if modalIsPresented {
-            LoginView()
-        } else if !loaded {
+        if !loaded {
             LoadingView()
                 .onAppear {
                     concurrentQueue.async {
-                        guard !Globals.token.isEmpty else { modalIsPresented = true; return }
                         do {
                             guard serverListView == nil else {
                                 loaded = true

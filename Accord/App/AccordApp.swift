@@ -79,7 +79,15 @@ struct AccordApp: App {
     
     @State var loaded: Bool = false
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State var token = Globals.token
+    
+    @State var token: String? = {
+        let tokenData = KeychainManager.load(key: keychainItemName)
+        if let tokenData, let token = String(data: tokenData, encoding: .utf8), AppGlobals.validateToken(token) {
+            return token
+        } else {
+            return nil
+        }
+    }()
 
     private enum Tabs: Hashable {
         case general, rpc
@@ -92,11 +100,16 @@ struct AccordApp: App {
     @SceneBuilder
     var body: some Scene {
         WindowGroup {
-            if self.token.isEmpty {
+            if self.token == nil {
                 LoginView()
                     .frame(width: 700, height: 400)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
-                        self.token = Globals.token
+                        let tokenData = KeychainManager.load(key: keychainItemName)
+                        if let tokenData, let token = String(data: tokenData, encoding: .utf8) {
+                            self.token = token
+                        } else {
+                            self.token = nil
+                        }
                     }
             } else {
                 ContentView(loaded: $loaded)
@@ -110,9 +123,9 @@ struct AccordApp: App {
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
-                        guard let method = class_getInstanceMethod(NSWorkspace.self, #selector(NSWorkspace.open(_:configuration:completionHandler:))),
-                              let new = class_getInstanceMethod(NSWorkspace2.self, #selector(NSWorkspace2.open2)) else { return }
-                        method_exchangeImplementations(method, new)
+//                        guard let method = class_getInstanceMethod(NSWorkspace.self, #selector(NSWorkspace.open(_:configuration:completionHandler:))),
+//                              let new = class_getInstanceMethod(NSWorkspace2.self, #selector(NSWorkspace2.open2)) else { return }
+//                        method_exchangeImplementations(method, new)
                         self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()

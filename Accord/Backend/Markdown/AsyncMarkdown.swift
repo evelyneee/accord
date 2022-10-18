@@ -40,9 +40,12 @@ final class AsyncMarkdownModel: ObservableObject {
                    text.contains("<") ||
                    text.contains("`")) ||
                     text.count > 100 else {
-                DispatchQueue.main.async {
-                    self?.hasEmojiOnly = emojis
-                    self?.loaded = true
+                guard let self else { return }
+                Task {
+                    await MainActor.run {
+                        self.hasEmojiOnly = emojis
+                        self.loaded = true
+                    }
                 }
                 return
             }

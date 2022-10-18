@@ -147,15 +147,15 @@ struct ChannelView: View, Equatable {
         self.viewModel.initializeChannel()
     }
     
-    @_transparent
+    @_transparent @ViewBuilder
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
-        return MessageCellView(
+        MessageCellView(
             message: binding,
-            nick: viewModel.nicks[message.author?.id ?? ""],
-            replyNick: viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
-            pronouns: viewModel.pronouns[message.author?.id ?? ""],
-            avatar: viewModel.avatars[message.author?.id ?? ""],
+            nick: $viewModel.nicks[message.author?.id ?? ""],
+            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
+            pronouns: $viewModel.pronouns[message.author?.id ?? ""],
+            avatar: $viewModel.avatars[message.author?.id ?? ""],
             permissions: $viewModel.permissions,
             role: $viewModel.roles[message.author?.id ?? ""],
             replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
@@ -312,7 +312,8 @@ struct ChannelView: View, Equatable {
             if memberListShown {
                 MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
                     .frame(width: 250)
-                    .onAppear { [unowned viewModel] in
+                    .onAppear { [weak viewModel] in
+                        guard let viewModel else { return }
                         if viewModel.memberList.isEmpty, viewModel.guildID != "@me" {
                             try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
                         }

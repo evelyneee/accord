@@ -353,7 +353,9 @@ final class ChatControlsViewModel: ObservableObject {
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.addValue(Globals.token, forHTTPHeaderField: "Authorization")
+        if let token = Globals.token {
+            request.addValue(token, forHTTPHeaderField: "Authorization")
+        }
         
         let packet: [String:Any] = file.count > 1 ? [
             "content": text,

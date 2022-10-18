@@ -8,6 +8,7 @@
 import Foundation
 
 extension AppGlobals {
+    @MainActor
     func addMention(guild: String, channel: String) {
         if guild == "@me" {
             guard channel != selectedChannel?.id else { print("currently reading already"); return }
@@ -33,10 +34,12 @@ extension AppGlobals {
         }
     }
 
+    @MainActor
     func deselect() {
         selectedChannel = nil
     }
 
+    @MainActor
     func removeMentions(server: String) {
         let index = self.folders.map { $0.guilds[indexOf: server] }
         for (index1, index2) in index.enumerated().filter({ $0.element != nil }) {
@@ -46,15 +49,17 @@ extension AppGlobals {
         }
     }
 
+    @MainActor
     func select(channel: Channel) {
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: channel.guild_id == nil ? "DMSelect" : "Refresh"), object: nil, userInfo: [channel.guild_id ?? "index": channel.guild_id == nil ? channel.id : Int(channel.id) ?? 0])
     }
 
+    @MainActor
     func newMessage(in channelID: String, message: Message) {
         let messageID = message.id
         let isDM = message.guildID == nil
         let guildID = message.guildID ?? "@me"
-        DispatchQueue.global().async {
+        Task {
             let ids = message.mentions.map(\.id)
             if ids.contains(user_id) || (self.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
                 let matchingGuild = Array(self.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]

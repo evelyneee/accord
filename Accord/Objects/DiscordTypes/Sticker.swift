@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Sticker: Codable {
+final class Sticker: Codable, Identifiable, Equatable, Hashable {
     var id: String
     var pack_id: String?
     var name: String
@@ -19,6 +19,14 @@ final class Sticker: Codable {
     var guild_id: String?
     var user: User?
     var sort_value: Int?
+    
+    static func == (lhs: Sticker, rhs: Sticker) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 enum StickerType: Int, Codable {

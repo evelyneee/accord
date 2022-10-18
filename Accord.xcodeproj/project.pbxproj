@@ -56,6 +56,7 @@
 		9E96EB7A27DEC33D00BB3C8A /* Gateway+VoiceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */; };
 		9EA295212753D1490014927D /* MemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA295202753D1480014927D /* MemberList.swift */; };
 		9EA3272A28810F5100F55DF0 /* ServerListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA3272928810F5100F55DF0 /* ServerListViewModel.swift */; };
+		9EA7EFA728F8C1A20012E311 /* StickersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA7EFA628F8C1A20012E311 /* StickersView.swift */; };
 		9EB3303828344929007D38EF /* PrivateChannelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303728344929007D38EF /* PrivateChannelsView.swift */; };
 		9EB3303A28344A10007D38EF /* DMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303928344A10007D38EF /* DMButton.swift */; };
 		9EB3303C2835B295007D38EF /* PermissionOverwrites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */; };
@@ -217,6 +218,7 @@
 		9E96EB7927DEC33D00BB3C8A /* Gateway+VoiceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Gateway+VoiceState.swift"; sourceTree = "<group>"; };
 		9EA295202753D1480014927D /* MemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberList.swift; sourceTree = "<group>"; };
 		9EA3272928810F5100F55DF0 /* ServerListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerListViewModel.swift; sourceTree = "<group>"; };
+		9EA7EFA628F8C1A20012E311 /* StickersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickersView.swift; sourceTree = "<group>"; };
 		9EB3303728344929007D38EF /* PrivateChannelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateChannelsView.swift; sourceTree = "<group>"; };
 		9EB3303928344A10007D38EF /* DMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMButton.swift; sourceTree = "<group>"; };
 		9EB3303B2835B295007D38EF /* PermissionOverwrites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionOverwrites.swift; sourceTree = "<group>"; };
@@ -427,6 +429,7 @@
 				9E8F8CA72774037F00A77600 /* MentionsView.swift */,
 				9ECE08F4277286E3001BA0F7 /* PinsView.swift */,
 				9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */,
+				9EA7EFA628F8C1A20012E311 /* StickersView.swift */,
 			);
 			path = Accessories;
 			sourceTree = "<group>";
@@ -1017,6 +1020,7 @@
 				9E7E4D34279C7E2F008FAF15 /* AsyncMarkdown.swift in Sources */,
 				9EDD136627D5A55A000685E6 /* String++.swift in Sources */,
 				9E13BEE428078F5D001DF4F2 /* ZStream.swift in Sources */,
+				9EA7EFA728F8C1A20012E311 /* StickersView.swift in Sources */,
 				A80FEC2327234DE7005F9950 /* ChannelViewViewModel.swift in Sources */,
 				A864BE612686700300B244BE /* MainView.swift in Sources */,
 				9EC5FA252846B7ED00C2A416 /* MessageCellMenu.swift in Sources */,

@@ -15,10 +15,10 @@ struct MessageCellView: View, Equatable {
 
     @Binding var message: Message
     
-    var nick: String?
-    var replyNick: String?
-    var pronouns: String?
-    var avatar: String?
+    @Binding var nick: String?
+    @Binding var replyNick: String?
+    @Binding var pronouns: String?
+    @Binding var avatar: String?
     
     @Environment(\.channelID)
     var channelID: String

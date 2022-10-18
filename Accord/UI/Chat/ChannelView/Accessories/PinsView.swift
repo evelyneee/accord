@@ -23,10 +23,10 @@ struct PinsView: View {
             ZStack(alignment: .topTrailing) {
                 MessageCellView(
                     message: $message,
-                    nick: nil,
-                    replyNick: nil,
-                    pronouns: nil,
-                    avatar: nil,
+                    nick: .constant(nil),
+                    replyNick: .constant(nil),
+                    pronouns: .constant(nil),
+                    avatar: .constant(nil),
                     permissions: .constant(.init()),
                     role: Binding.constant(nil),
                     replyRole: Binding.constant(nil),

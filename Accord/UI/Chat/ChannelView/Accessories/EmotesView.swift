@@ -106,7 +106,7 @@ struct EmotesView: View, Equatable {
                         }
                         .padding()
                         .tabItem({Text("Emotes")})
-                        Text("Stickers")
+                        StickersView()
                             .tabItem({Text("Stickers")})
                     }
                 }

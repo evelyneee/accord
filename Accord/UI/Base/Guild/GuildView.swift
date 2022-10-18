@@ -174,8 +174,8 @@ extension ServerListView {
                 
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(width: (self.width ?? 190) - 32, alignment: .trailing)
             })
-            .frame(width: (self.width ?? 190) - 32, alignment: .trailing)
             .padding(.leading, 16)
             .menuStyle(BorderlessButtonMenuStyle())
             .sheet(isPresented: self.$invitePopup, content: {

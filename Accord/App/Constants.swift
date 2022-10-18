@@ -47,7 +47,16 @@ enum Globals {
 
     // static var suffixes: Bool = UserDefaults.standard.bool(forKey: "enableSuffixRemover")
     static var pronounDB: Bool = UserDefaults.standard.bool(forKey: "pronounDB")
-    static var token: String = .init(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+    
+    static var token: String? {
+        get {
+            Storage.globals?.token
+        }
+        set(new) {
+            Storage.globals?.token = new ?? ""
+        }
+    }
+    
     static var user: User?
     static var plugins: [AccordPlugin] = []
 

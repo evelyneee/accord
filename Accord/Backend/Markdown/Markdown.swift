@@ -81,6 +81,17 @@ public final class Markdown {
         }
     }
 
+    class func checkDisallowedCharacters(_ word: String) -> Bool {
+        !(word.contains("*") ||
+          word.contains("~") ||
+          word.contains("/") ||
+          word.contains("_") ||
+          word.contains(">") ||
+          word.contains("<") ||
+          word.contains("`")
+        )
+    }
+    
     /**
      markWord: Simple Publisher that sends a text view with the processed word
      - Parameter word: The String being processed
@@ -89,7 +100,7 @@ public final class Markdown {
      **/
     @_optimize(speed)
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool) -> TextPublisher {
-        if !(word.contains("*") || word.contains("~") || word.contains("/") || word.contains("_") || word.contains(">") || word.contains("<") || word.contains("`")) {
+        if checkDisallowedCharacters(word) {
             if highlight {
                 return Just(Text(bionicMarkdown(word)) + Text(" ")).eraseToAny()
             } else {

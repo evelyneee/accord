@@ -68,7 +68,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     var nsfw_level: Int
     // TODO: StageInstance objects
     // var stage_instances: [StageInstances]
-    // var stickers: [Sticker]?
+    var stickers: [Sticker]?
 
     var mergedMember: MergedMember?
     var guildPermissions: String?

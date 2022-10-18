@@ -34,7 +34,6 @@ enum Storage {
     public static var globals: AppGlobals? = nil
 }
 
-@MainActor
 final class AppGlobals: ObservableObject {
     
     init() {
@@ -45,11 +44,15 @@ final class AppGlobals: ObservableObject {
         Storage.globals = self
         self.cancellable = Self.newItemPublisher.sink { [weak self] channel, folder in
             if let channel {
-                self?.privateChannels.append(channel)
-                Storage.globals = self
+                DispatchQueue.main.async {
+                    self?.privateChannels.append(channel)
+                    Storage.globals = self
+                }
             } else if let folder {
-                self?.folders.append(folder)
-                Storage.globals = self
+                DispatchQueue.main.async {
+                    self?.folders.append(folder)
+                    Storage.globals = self
+                }
             }
         }
     }
@@ -68,11 +71,35 @@ final class AppGlobals: ObservableObject {
     @MainActor @Published
     var selectedGuild: Guild? = nil
     
+    @Published
+    public var token: String? = {
+        let tokenData = KeychainManager.load(key: keychainItemName)
+        if let tokenData, let token = String(data: tokenData, encoding: .utf8), AppGlobals.validateToken(token) {
+            return token
+        } else {
+            return nil
+        }
+    }()
+    
+    static func validateToken(_ token: String) -> Bool {
+        let components = token.components(separatedBy: ".")
+        if let id = components.first,
+           let data = id.data(using: .utf8),
+           let decoded = Data(base64Encoded: data),
+           let result = try? String(decoded),
+           Int(result) != nil {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     static var newItemPublisher = PassthroughSubject<(Channel?, GuildFolder?), Never>()
     
+    @MainActor
     func permissionsAllowed(_ perms: [Channel.PermissionOverwrites], guildID: String) -> Permissions {
         var permsArray = Permissions(
-            self.folders.lazy
+            folders.lazy
                 .map(\.guilds)
                 .joined()
                 .filter { $0.id == guildID }

@@ -242,10 +242,19 @@ final class Gateway {
     }
 
     private func identify() throws {
+        let token: String? = {
+            let tokenData = KeychainManager.load(key: keychainItemName)
+            if let tokenData, let token = String(data: tokenData, encoding: .utf8), AppGlobals.validateToken(token) {
+                return token
+            } else {
+                return nil
+            }
+        }()
+        guard let token else { wss.close(.protocolCode(.abnormalClosure)); return }
         let packet: [String: Any] = [
             "op": 2,
             "d": [
-                "token": Globals.token,
+                "token": token,
                 "capabilities": 253,
                 "compress": false,
                 "client_state": [

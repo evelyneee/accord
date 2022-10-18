@@ -124,6 +124,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     @MainActor
     func emptyChannel() {
         print("called")
+        self.cancellable.forEach { $0.cancel() }
         self.cancellable.removeAll()
         self.messages.removeAll()
         self.typing.removeAll()
@@ -214,6 +215,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     }
 
     func connect() {
+        self.cancellable.forEach { $0.cancel() }
+        self.cancellable.removeAll()
         wss.messageSubject
             .receive(on: webSocketQueue)
             .sink { [weak self] msg, channelID, _ in

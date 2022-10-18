@@ -119,7 +119,7 @@ struct LoginView: View {
                 if !loginViewDataModel.token.isEmpty {
                     KeychainManager.save(key: keychainItemName, data: loginViewDataModel.token.data(using: String.Encoding.utf8) ?? Data())
                     Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                    NSApplication.shared.restart()
+                    NSApp.restart()
                 } else {
                     try? viewModel?.login(loginViewDataModel.email, loginViewDataModel.password, loginViewDataModel.twoFactor)
                 }
@@ -263,7 +263,7 @@ struct LoginView: View {
                                         KeychainManager.save(key: keychainItemName, data: response.token!.data(using: String.Encoding.utf8) ?? Data())
                                         Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
                                         self.loginViewDataModel.captcha = false
-                                        NSApplication.shared.restart()
+                                        NSApp.restart()
                                     case let .failure(error):
                                         print(error)
                                     default: break
@@ -311,13 +311,7 @@ final class LoginViewViewModel: ObservableObject {
                 if let checktoken = response.token {
                     KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
                     Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                    let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
-                    let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
-                    let task = Process()
-                    task.launchPath = "/usr/bin/open"
-                    task.arguments = [path]
-                    task.launch()
-                    exit(EXIT_SUCCESS)
+                    NSApp.restart()
                 } else {
                     if let captchaKey = response.captcha_sitekey {
                         DispatchQueue.main.async {
