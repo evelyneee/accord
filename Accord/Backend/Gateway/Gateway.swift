@@ -391,12 +391,13 @@ final class Gateway {
     }
 
     func reconnect(session_id: String? = nil, seq: Int? = nil) throws {
+        guard let token = Globals.token else { throw "No token" }
         let packet: [String: Any] = [
             "op": 6,
             "d": [
                 "seq": seq ?? self.seq,
                 "session_id": session_id ?? sessionID ?? "",
-                "token": Globals.token,
+                "token": token,
             ],
         ]
         try send(json: packet)
