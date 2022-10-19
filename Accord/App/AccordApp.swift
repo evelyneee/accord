@@ -113,6 +113,7 @@ struct AccordApp: App {
                     }
             } else {
                 ContentView(loaded: $loaded)
+                    .frame(minWidth: 960, minHeight: 540)
                     .onDisappear {
                         loaded = false
                     }

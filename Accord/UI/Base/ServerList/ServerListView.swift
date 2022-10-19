@@ -161,12 +161,15 @@ struct ServerListView: View {
                 
                 // MARK: - Loading UI
                 
-                if selectedServer == "@me" {
-                    PrivateChannelsView()
-                        .animation(nil, value: UUID())
-                } else if let guild = self.appModel.selectedGuild {
-                    guildView(guild)
+                Group {
+                    if selectedServer == "@me" {
+                        PrivateChannelsView()
+                            .animation(nil, value: UUID())
+                    } else if let guild = self.appModel.selectedGuild {
+                        guildView(guild)
+                    }
                 }
+                .frame(minWidth: 240)
             }
         }, detail: { [weak appModel] in
             if let appModel {
