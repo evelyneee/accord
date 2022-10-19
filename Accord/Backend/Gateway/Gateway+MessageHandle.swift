@@ -46,7 +46,7 @@ extension Gateway {
             let folder = GuildFolder(guild_ids: [guild.d.id])
             folder.guilds.append(guild.d)
             Task {
-                await AppGlobals.newItemPublisher.send((nil, folder))
+                AppGlobals.newItemPublisher.send((nil, folder))
             }
         case .guildDelete: break
         case .guildMemberAdd: break
