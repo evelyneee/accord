@@ -118,7 +118,6 @@ struct AccordApp: App {
                         loaded = false
                     }
                     .preferredColorScheme(darkMode ? .dark : nil)
-                    .focusable()
                     .onAppear {
                         // Globals.loadVersion()
                         // DispatchQueue(label: "socket").async {
