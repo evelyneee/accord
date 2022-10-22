@@ -117,9 +117,7 @@ struct LoginView: View {
                 UserDefaults.standard.set(self.loginViewDataModel.proxyIP, forKey: "proxyIP")
                 UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
                 if !loginViewDataModel.token.isEmpty {
-                    KeychainManager.save(key: keychainItemName, data: loginViewDataModel.token.data(using: String.Encoding.utf8) ?? Data())
-                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                    NSApp.restart()
+                    AccordApp.tokenUpdate.send(loginViewDataModel.token)
                 } else {
                     try? viewModel?.login(loginViewDataModel.email, loginViewDataModel.password, loginViewDataModel.twoFactor)
                 }
@@ -219,10 +217,8 @@ struct LoginView: View {
                             switch completion {
                             case let .success(value):
                                 if let token = value.token {
-                                    KeychainManager.save(key: keychainItemName, data: token.data(using: .utf8) ?? Data())
-                                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                    AccordApp.tokenUpdate.send(token)
                                     self.loginViewDataModel.captcha = false
-                                    NSApplication.shared.restart()
                                 }
                             case let .failure(error):
                                 print(error)
@@ -244,10 +240,8 @@ struct LoginView: View {
                         switch completion {
                         case let .success(response):
                             if let token = response.token {
-                                KeychainManager.save(key: keychainItemName, data: token.data(using: String.Encoding.utf8) ?? Data())
-                                Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                AccordApp.tokenUpdate.send(token)
                                 self.loginViewDataModel.captcha = false
-                                NSApplication.shared.restart()
                             }
                             if let ticket = response.ticket {
                                 Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
@@ -260,10 +254,8 @@ struct LoginView: View {
                                 )) { completion in
                                     switch completion {
                                     case let .success(response) where response.token != nil:
-                                        KeychainManager.save(key: keychainItemName, data: response.token!.data(using: String.Encoding.utf8) ?? Data())
-                                        Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
+                                        AccordApp.tokenUpdate.send(response.token)
                                         self.loginViewDataModel.captcha = false
-                                        NSApp.restart()
                                     case let .failure(error):
                                         print(error)
                                     default: break
@@ -309,9 +301,7 @@ final class LoginViewViewModel: ObservableObject {
             switch completion {
             case let .success(response):
                 if let checktoken = response.token {
-                    KeychainManager.save(key: keychainItemName, data: checktoken.data(using: String.Encoding.utf8) ?? Data())
-                    Globals.token = String(decoding: KeychainManager.load(key: keychainItemName) ?? Data(), as: UTF8.self)
-                    NSApp.restart()
+                    AccordApp.tokenUpdate.send(checktoken)
                 } else {
                     if let captchaKey = response.captcha_sitekey {
                         DispatchQueue.main.async {

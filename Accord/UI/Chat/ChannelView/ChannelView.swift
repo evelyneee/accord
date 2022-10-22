@@ -248,6 +248,7 @@ struct ChannelView: View, Equatable {
     var body: some View {
         if _channel != nil {
             core
+                .presentedWindowToolbarStyle(.unifiedCompact)
         }
     }
     
@@ -399,13 +400,11 @@ struct ChannelView: View, Equatable {
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 HStack {
-                    if #unavailable(macOS 13.0) {
-                        Button(action: {
-                            NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
-                        }, label: {
-                            Image(systemName: "sidebar.leading")
-                        })
-                    }
+                    Button(action: {
+                        NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+                    }, label: {
+                        Image(systemName: "sidebar.leading")
+                    })
                     if guildName == "Direct Messages" {
                         Text("@")
                             .font(.title3)

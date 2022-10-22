@@ -159,16 +159,17 @@ extension Color {
 func showWindow(_ channel: Channel, globals: AppGlobals) {
     var windowRef: NSWindow
     windowRef = NSWindow(
-        contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
+        contentRect: NSRect(x: 0, y: 0, width: 750, height: 650),
         styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView, .resizable],
         backing: .buffered, defer: false
     )
+    windowRef.toolbarStyle = .unifiedCompact
     windowRef.delegate = nil
-    var newGlobals = AppGlobals()
+    let newGlobals = AppGlobals()
     DispatchQueue.main.async {
         newGlobals.selectedChannel = channel
         windowRef.contentView = NSHostingView(rootView: ChannelView(.constant(channel)).environmentObject(newGlobals))
-        windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
+        windowRef.title = "\(channel.computedName) - Accord"
         windowRef.isReleasedWhenClosed = false
         windowRef.makeKeyAndOrderFront(nil)
     }

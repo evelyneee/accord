@@ -9,6 +9,7 @@ import AppKit
 import Foundation
 import SwiftUI
 import UserNotifications
+import Combine
 
 var allowReconnection: Bool = false
 var reachability: Reachability? = {
@@ -96,6 +97,8 @@ struct AccordApp: App {
     init() {
         _ = reachability
     }
+    
+    static let tokenUpdate = PassthroughSubject<String?, Never>()
 
     @SceneBuilder
     var body: some Scene {
@@ -103,16 +106,22 @@ struct AccordApp: App {
             if self.token == nil {
                 LoginView()
                     .frame(width: 700, height: 400)
-                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoggedIn"))) { _ in
-                        let tokenData = KeychainManager.load(key: keychainItemName)
-                        if let tokenData, let token = String(data: tokenData, encoding: .utf8) {
-                            self.token = token
-                        } else {
-                            self.token = nil
-                        }
-                    }
+                    .onReceive(Self.tokenUpdate, perform: { token in
+                        print(token)
+                        self.token = token
+                        Storage.globals?.token = token
+                        Globals.token = token
+                        KeychainManager.save(key: keychainItemName, data: token?.data(using: .utf8) ?? .init())
+                    })
             } else if token != nil {
                 ContentView(loaded: $loaded)
+                    .onReceive(Self.tokenUpdate, perform: { token in
+                        print(token)
+                        self.token = token
+                        Storage.globals?.token = token
+                        Globals.token = token
+                        KeychainManager.save(key: keychainItemName, data: token?.data(using: .utf8) ?? .init())
+                    })
                     .onDisappear {
                         loaded = false
                     }
@@ -152,7 +161,7 @@ struct AccordApp: App {
             }
             CommandMenu("Account") {
                 Button("Log out") {
-                    logOut()
+                    AccordApp.tokenUpdate.send(nil)
                 }
                 #if DEBUG
                     Menu("Debug") {
