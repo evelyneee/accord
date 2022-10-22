@@ -552,10 +552,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         var toRemove: [String] = .init()
         allUserIDs.forEach { id in
             do {
-//                let member = try self.loadCachedUser(id)
-//                print(member)
-//                toRemove.append(id)
-//                memberLoad(member)
+                let member = try self.loadCachedUser(id)
+                print(member)
+                toRemove.append(id)
+                memberLoad(member)
             } catch {}
         }
         allUserIDs = allUserIDs.filter { !toRemove.contains($0) }

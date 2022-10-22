@@ -107,7 +107,6 @@ struct AccordApp: App {
                 LoginView()
                     .frame(width: 700, height: 400)
                     .onReceive(Self.tokenUpdate, perform: { token in
-                        print(token)
                         self.token = token
                         Storage.globals?.token = token
                         Globals.token = token
@@ -116,7 +115,6 @@ struct AccordApp: App {
             } else if token != nil {
                 ContentView(loaded: $loaded)
                     .onReceive(Self.tokenUpdate, perform: { token in
-                        print(token)
                         self.token = token
                         Storage.globals?.token = token
                         Globals.token = token
@@ -292,7 +290,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func loadWindowRect(_: AnyObject?) {
         guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
-//        NSApp.mainWindow?.setFrame(from: desc)
+        NSApp.mainWindow?.setFrame(from: desc)
     }
 
     @objc func togglePopover(_ sender: AnyObject?) {

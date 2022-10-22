@@ -27,7 +27,6 @@
 		9E4F3FC527764E200003E383 /* GifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F3FC427764E200003E383 /* GifView.swift */; };
 		9E5145A8282FC8FD0070828B /* ProfileEditingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */; };
 		9E6470672741B9960026686C /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6470662741B9960026686C /* GuildView.swift */; };
-		9E65C7882903681A00F95D06 /* FlipList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E65C7872903681A00F95D06 /* FlipList.swift */; };
 		9E6878ED283BB9EB001DD5AB /* FileAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */; };
 		9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */; };
 		9E6B71032783A6FE00A26CB6 /* Github.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B71022783A6FD00A26CB6 /* Github.swift */; };
@@ -189,7 +188,6 @@
 		9E4F3FC427764E200003E383 /* GifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifView.swift; sourceTree = "<group>"; };
 		9E5145A7282FC8FD0070828B /* ProfileEditingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditingView.swift; sourceTree = "<group>"; };
 		9E6470662741B9960026686C /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
-		9E65C7872903681A00F95D06 /* FlipList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlipList.swift; sourceTree = "<group>"; };
 		9E6878EC283BB9EB001DD5AB /* FileAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAttachmentView.swift; sourceTree = "<group>"; };
 		9E6B70FF27834F4600A26CB6 /* SwiftUI++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI++.swift"; sourceTree = "<group>"; };
 		9E6B71022783A6FD00A26CB6 /* Github.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Github.swift; sourceTree = "<group>"; };
@@ -418,7 +416,6 @@
 				9E9348672894A93E00E1AC5F /* Modifiers */,
 				9E9348662894A93900E1AC5F /* Views */,
 				9EE2467D28F192DD004AB87B /* PlatformNavigation.swift */,
-				9E65C7872903681A00F95D06 /* FlipList.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -937,7 +934,6 @@
 				9E2C98792780F573008C6AFD /* Gateway.swift in Sources */,
 				A80FEC2D2724FD35005F9950 /* Networking++.swift in Sources */,
 				9EF5FFDA285CE0FE001B68FA /* ForumChannelList.swift in Sources */,
-				9E65C7882903681A00F95D06 /* FlipList.swift in Sources */,
 				9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */,
 				32AA719125EAEEDA00550BA5 /* Request.swift in Sources */,
 				A8CD4C9F267CF9EB00E2C4F1 /* Keychain.swift in Sources */,
