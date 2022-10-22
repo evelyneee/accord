@@ -47,8 +47,10 @@ final class ChatControlsViewModel: ObservableObject {
     var runOnUnlock: (() async -> Void)?
 
     init() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            self?.findView()
+        if #unavailable(macOS 13.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.findView()
+            }
         }
     }
     

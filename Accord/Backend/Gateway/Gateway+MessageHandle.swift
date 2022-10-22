@@ -67,8 +67,8 @@ extension Gateway {
                 messageSubject.send((event.data, channelID, author.id == user_id))
             }
             guard message.author?.id != user_id else { return }
-            guard let channelID = event.channelID else { print("wat"); break }
             DispatchQueue.main.async {
+                guard let channelID = event.channelID, Storage.globals?.selectedChannel?.id == channelID else { print("wat"); return }
                 Storage.globals?.newMessage(in: channelID, message: message)
             }
         case .messageUpdate:

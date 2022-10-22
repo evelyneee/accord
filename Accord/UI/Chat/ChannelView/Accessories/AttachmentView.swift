@@ -25,7 +25,7 @@ func frameSize(width: Double, height: Double, originalWidth: Int?, originalHeigh
 public extension View {
     func maxFrame(width: Double, height: Double, originalWidth: Int?, originalHeight: Int?) -> some View {
         let (width, height) = frameSize(width: width, height: height, originalWidth: originalWidth, originalHeight: originalHeight)
-        return frame(width: width, height: height)
+        return frame(width: CGFloat(Int(width)), height: CGFloat(Int(height)))
     }
 }
 

@@ -62,7 +62,6 @@ struct EmptyArrayCodable<T: Codable & ExpressibleByArrayLiteral> {
 
 extension EmptyArrayCodable: Codable {
     init(from decoder: Decoder) throws {
-        print("decoder")
         let container = try decoder.singleValueContainer()
         wrappedValue = (try? container.decode(T.self)) ?? []
     }

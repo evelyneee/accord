@@ -141,7 +141,6 @@ struct MessageCellView: View, Equatable {
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
                         .padding(.trailing, 1.5)
-                        .fixedSize()
                     }
                     VStack(alignment: .leading) {
                         if message.isSameAuthor && message.referencedMessage == nil && message.inSameDay {
@@ -163,11 +162,10 @@ struct MessageCellView: View, Equatable {
                             AuthorTextView(
                                 message: self.message,
                                 pronouns: self.pronouns,
-                                nick: self.nick,
+                                nick: self.$nick,
                                 role: self.$role
                             )
                             .equatable()
-                            .fixedSize()
                             Spacer().frame(height: 1.3)
                             if !message.content.isEmpty {
                                 if self.editing {
@@ -188,10 +186,9 @@ struct MessageCellView: View, Equatable {
                 StickerView(
                     stickerItems: stickerItems
                 )
-                .fixedSize()
             }
-            if let embeds = Binding($message.embeds), !embeds.wrappedValue.isEmpty {
-                ForEach(embeds, id: \.id) { embed in
+            if !message.embeds.isEmpty {
+                ForEach($message.embeds, id: \.id) { embed in
                     EmbedView(embed: embed)
                         .equatable()
                         .padding(.leading, leftPadding)
@@ -208,14 +205,12 @@ struct MessageCellView: View, Equatable {
                     .cornerRadius(5)
                     .padding(.leading, leftPadding)
                     .padding(.top, 5)
-                    .fixedSize()
             }
             if !message.reactions.isEmpty {
                 ReactionsGridView (
                     message: $message
                 )
                 .padding(.leading, leftPadding)
-                .fixedSize()
             }
         }
         .contextMenu {

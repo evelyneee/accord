@@ -24,12 +24,10 @@ struct ReplyView: View {
                 .frame(width: 53, height: 17)
                 .padding(.bottom, -15)
                 .padding(.trailing, -30)
-                .fixedSize()
             Attachment(pfpURL(reply.author?.id, reply.author?.avatar, discriminator: reply.author?.discriminator ?? "0005", "16"))
                 .equatable()
                 .frame(width: 15, height: 15)
                 .clipShape(Circle())
-                .fixedSize()
             Text(replyNick ?? reply.author?.username ?? "")
                 .font(.subheadline)
                 .foregroundColor({ () -> Color in

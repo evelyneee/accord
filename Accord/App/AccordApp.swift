@@ -111,9 +111,8 @@ struct AccordApp: App {
                             self.token = nil
                         }
                     }
-            } else {
+            } else if token != nil {
                 ContentView(loaded: $loaded)
-                    .frame(minWidth: 960, minHeight: 540)
                     .onDisappear {
                         loaded = false
                     }
@@ -284,7 +283,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func loadWindowRect(_: AnyObject?) {
         guard let desc = UserDefaults.standard.object(forKey: "MainWindowFrame") as? NSWindow.PersistableFrameDescriptor else { return }
-        NSApp.mainWindow?.setFrame(from: desc)
+//        NSApp.mainWindow?.setFrame(from: desc)
     }
 
     @objc func togglePopover(_ sender: AnyObject?) {

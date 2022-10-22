@@ -26,7 +26,7 @@ final class AsyncMarkdownModel: ObservableObject {
     var hasEmojiOnly: Bool = false
 
     private var cancellable: AnyCancellable?
-    static let queue = DispatchQueue(label: "textQueue", attributes: .concurrent)
+    static let queue = DispatchQueue(label: "textQueue")
 
     @_optimize(speed)
     func make(text: String, usernames: [String:String], allowLinkShortening: Bool) {
@@ -41,11 +41,9 @@ final class AsyncMarkdownModel: ObservableObject {
                    text.contains("`")) ||
                     text.count > 100 else {
                 guard let self else { return }
-                Task {
-                    await MainActor.run {
-                        self.hasEmojiOnly = emojis
-                        self.loaded = true
-                    }
+                DispatchQueue.main.async {
+                    self.hasEmojiOnly = emojis
+                    self.loaded = true
                 }
                 return
             }
@@ -55,11 +53,9 @@ final class AsyncMarkdownModel: ObservableObject {
                     DispatchQueue.main.async {
                         self?.loaded = true
                         self?.markdown = text
+                        self?.hasEmojiOnly = emojis
                     }
                 }
-            DispatchQueue.main.async {
-                self?.hasEmojiOnly = emojis
-            }
         }
     }
 }
@@ -87,16 +83,28 @@ struct AsyncMarkdown: View, Equatable {
     @ViewBuilder
     var body: some View {
         if !model.hasEmojiOnly || model.loaded {
-            model.markdown
-                .textSelection(.enabled)
-                .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
-                .fixedSize(horizontal: false, vertical: true)
-                .onChange(of: self.text, perform: { [weak model] text in
-                    model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                })
-                .onAppear { [weak model] in
-                    model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                }
+            if #available(macOS 13.0, *) {
+                model.markdown
+                    .textSelection(.enabled)
+                    .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                    .onChange(of: self.text, perform: { [weak model] text in
+                        model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                    })
+                    .onAppear { [weak model] in
+                        model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                    }
+            } else {
+                model.markdown
+                    .textSelection(.enabled)
+                    .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onChange(of: self.text, perform: { [weak model] text in
+                        model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                    })
+                    .onAppear { [weak model] in
+                        model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                    }
+            }
         }
     }
 }

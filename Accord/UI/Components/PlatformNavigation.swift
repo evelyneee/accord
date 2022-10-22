@@ -14,7 +14,7 @@ struct PlatformNavigationView<Sidebar: View, Detail: View>: View {
     
     @ViewBuilder
     var body: some View {
-        if #available(macOS 13.0, *) {
+        if #available(macOS 13.0, *), ENABLE_NAVIGATIONSPLITVIEW {
             #if canImport(WeatherKit)
             NavigationSplitView {
                 sidebar()
@@ -40,8 +40,10 @@ struct PlatformNavigationLink<Destination: View>: View {
     @ViewBuilder
     var body: some View {
         
-        if #available(macOS 13.0, *) {
-            ServerListViewCell(channel: .constant(item))
+        if #available(macOS 13.0, *), ENABLE_NAVIGATIONSPLITVIEW {
+            NavigationLink(value: self.item, label: {
+                ServerListViewCell(channel: .constant(item))
+            })
         } else {
             NavigationLink (
                 tag: item,

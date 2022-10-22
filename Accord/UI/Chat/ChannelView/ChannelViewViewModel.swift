@@ -208,9 +208,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .appendingPathComponent("members")
             .appendingPathComponent(id) else { throw "Bad url" }
         let request = URLRequest(url: url)
-        guard let user = cache.cachedResponse(for: request) else { throw "No user data" }
+        guard let user = cache.cachedResponse(for: request) else { throw Request.FetchErrors.noData }
         let cachedObject = try JSONDecoder().decode(GuildMember.GuildMemberSaved.self, from: user.data)
-        guard !cachedObject.isOutdated else { throw "Outdated object" }
+        guard !cachedObject.isOutdated else { throw Request.FetchErrors.noData }
         return cachedObject.member
     }
 
@@ -242,13 +242,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                             Storage.users[author.id] = author
                         }
                     }
-                    withAnimation(Animation.easeInOut(duration: 0.05)) {
-                        let message = message
-                        Task {
-                            await MainActor.run {
-                                self.messages.insert(message, at: 0)
-                            }
-                        }
+                    let message2 = message
+                    DispatchQueue.main.async {
+                        self.messages.insert(message2, at: 0)
                     }
                 }
             }
@@ -277,11 +273,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     guard let gatewayMessage = try? JSONDecoder().decode(GatewayDeletedMessage.self, from: msg),
                           let message = gatewayMessage.d,
                           let index = messageMap[message.id] else { return }
-                    await MainActor.run {
-                        withAnimation(Animation.easeInOut(duration: 0.05)) {
-                            let i: Int = index
-                            self.messages.remove(at: i)
-                        }
+                    DispatchQueue.main.async {
+                        let i: Int = index
+                        self.messages.remove(at: i)
                     }
                 }
             }
@@ -321,7 +315,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 
                 guard let self = self, channelID == self.channelID,
                       let memberDecodable = try? JSONDecoder().decode(TypingEvent.self, from: msg).d,
-                      memberDecodable.user_id != self.user.id else { return }
+                      memberDecodable.user_id != user_id else { return }
                 Task.detached {
                     let isKnownAs =
                         await self.nicks[memberDecodable.user_id] ??
@@ -472,7 +466,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     self.messages = messages
                 }
                 if messages.count < 50 {
-                    self.noMoreMessages = true
+                    DispatchQueue.main.async {
+                        self.noMoreMessages = true
+                    }
                 }
                 if scrollAfter {
                     let channelID = self.channelID
@@ -556,10 +552,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         var toRemove: [String] = .init()
         allUserIDs.forEach { id in
             do {
-                let member = try self.loadCachedUser(id)
-                print(member)
-                toRemove.append(id)
-                memberLoad(member)
+//                let member = try self.loadCachedUser(id)
+//                print(member)
+//                toRemove.append(id)
+//                memberLoad(member)
             } catch {}
         }
         allUserIDs = allUserIDs.filter { !toRemove.contains($0) }
@@ -603,10 +599,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 self?.noMoreMessages = true
             }
             guard let self = self else { return }
-            Task {
-                await MainActor.run {
-                    self.messages.append(contentsOf: messages)
-                }
+            DispatchQueue.main.async {
+                self.messages.append(contentsOf: messages)
             }
         }
         .store(in: &cancellable)

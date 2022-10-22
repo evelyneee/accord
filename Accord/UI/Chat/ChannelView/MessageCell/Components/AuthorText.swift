@@ -14,7 +14,7 @@ struct AuthorTextView: View, Equatable {
     
     var message: Message
     var pronouns: String?
-    var nick: String?
+    @Binding var nick: String?
     
     @Environment(\.guildID)
     var guildID: String

@@ -58,14 +58,18 @@ struct LoadingView: View {
         VStack {
             Image(nsImage: NSApplication.shared.applicationIconImage)
                 .saturation(0.0).modifier(TiltAnimation())
+                .focusable(false)
             LoadingView.greetings.randomElement()!
                 .fontWeight(.medium)
                 .font(.title2)
                 .textSelection(.enabled)
                 .padding(5)
+                .focusable(false)
             Text("Connecting")
                 .foregroundColor(Color.secondary)
+                .focusable(false)
         }
+        .focusable(false)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .focusable(false)
     }

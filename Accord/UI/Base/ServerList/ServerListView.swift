@@ -178,7 +178,6 @@ struct ServerListView: View {
                         NavigationLazyView(ForumChannelList(forumChannel: channel))
                     } else {
                         ChannelView(self.$appModel.selectedChannel, appModel.selectedChannel?.guild_name ?? "Accord")
-                            .equatable()
                             .onAppear {
                                 if let channel = appModel.selectedChannel {
                                     let channelID = channel.id

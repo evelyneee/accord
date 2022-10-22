@@ -19,7 +19,6 @@ struct ReactionsGridView: View {
             ReactionView(messageID: message.id, reaction: reaction)
         })
         .equatable()
-        .fixedSize()
     }
 }
 

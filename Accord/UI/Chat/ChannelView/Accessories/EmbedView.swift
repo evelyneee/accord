@@ -84,7 +84,6 @@ struct EmbedView: View, Equatable {
                                 Text(author.name)
                                     .fontWeight(.medium)
                                     .font(.system(size: 14.5))
-                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(.bottom, 2)
@@ -96,13 +95,11 @@ struct EmbedView: View, Equatable {
                                 .font(.system(size: 13.5))
                                 .padding(.vertical, 2)
                                 .lineLimit(0)
-                                .fixedSize(horizontal: false, vertical: false)
                         }
                         if let description = embed.description {
                             AsyncMarkdown(description, linkShortening: true)
                                 .lineSpacing(3)
                                 .padding(.vertical, 2)
-                                .fixedSize(horizontal: false, vertical: false)
                         }
                     }
                     if let image = embed.image {
@@ -116,14 +113,13 @@ struct EmbedView: View, Equatable {
                        let urlString = video.proxy_url ?? video.url,
                        let url = URL(string: urlString)
                     {
-                        VideoPlayer(player: AVPlayer(url: url))
+                        VideoPlayerController(url: url)
                             .cornerRadius(5)
                             .maxFrame(width: 380, height: 300, originalWidth: video.width ?? 0, originalHeight: video.height ?? 0)
                             .padding(.vertical, 2)
                     } else if let image = embed.thumbnail {
                         Attachment(image.url)
                             .equatable()
-                            .scaledToFit()
                             .maxFrame(width: 380, height: 300, originalWidth: image.width ?? 0, originalHeight: image.height ?? 0)
                             .cornerRadius(7)
                             .padding(.vertical, 2)

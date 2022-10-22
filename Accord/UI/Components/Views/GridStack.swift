@@ -40,7 +40,6 @@ struct GridStack<T: RandomAccessCollection & Equatable, Content: View>: View, Eq
                                 .id(self.array[row * column].id)
                         }
                     }
-                    .id(UUID())
                     .fixedSize()
                 }
             }

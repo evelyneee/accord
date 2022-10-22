@@ -48,7 +48,6 @@ extension ServerListView {
                                 } else if let channel = self.appModel.selectedChannel {
                                     NavigationLazyView(
                                         ChannelView(self.$appModel.selectedChannel, guild.name)
-                                            .equatable()
                                             .onAppear {
                                                 let channelID = channel.id
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
@@ -174,7 +173,12 @@ extension ServerListView {
                 
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .frame(width: (self.width ?? 190) - 32, alignment: .trailing)
+                .frame(width: {
+                    if let width, width >= 190 {
+                        return width - 32
+                    }
+                    return CGFloat(self.width ?? 150)
+                }(), alignment: .trailing)
             })
             .padding(.leading, 16)
             .menuStyle(BorderlessButtonMenuStyle())

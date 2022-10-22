@@ -20,7 +20,8 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     var content: String
     var editedTimestamp: Date?
     var id: String
-    var embeds: [Embed]?
+    @EmptyArrayCodable
+    var embeds: [Embed]
     var mentionEveryone: Bool?
     var mentions: [User]
     var user_mentioned: Bool?
@@ -89,7 +90,7 @@ struct Message: Codable, Equatable, Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(content)
-        hasher.combine(embeds?.count ?? 0)
+        hasher.combine(embeds.count)
     }
 
     func delete() {

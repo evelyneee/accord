@@ -20,7 +20,6 @@ struct PrivateChannelsView: View {
                 destination: {
                     NavigationLazyView(
                         ChannelView(self.$appModel.selectedChannel)
-                            .equatable()
                             .onAppear {
                                 let channelID = channel.id
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
