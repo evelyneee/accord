@@ -15,7 +15,7 @@ struct ReactionsGridView: View {
     @Binding var message: Message
 
     var body: some View {
-        GridStack($message.reactions, rowAlignment: .leading, columns: 6, content: { $reaction in
+        GridStack(message.reactions, rowAlignment: .leading, columns: 6, content: { reaction in
             ReactionView(messageID: message.id, reaction: reaction)
         })
         .equatable()

@@ -435,7 +435,6 @@ public final class RequestPublisher {
         guard let url = url else { return EmptyImagePublisher }
         let request = URLRequest(url: url)
         if let cachedImage = cache.cachedResponse(for: request), let img = NSImage(data: cachedImage.data) {
-            print("loading cached image")
             return Just(img).eraseToAny()
         }
         return URLSession.shared.dataTaskPublisher(for: url)

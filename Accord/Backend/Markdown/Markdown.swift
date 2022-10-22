@@ -202,7 +202,6 @@ public final class Markdown {
     public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, allowLinkShortening: Bool) -> TextArrayPublisher {
         var line = line
         if !allowLinkShortening {
-            print("disabling link shortening")
             line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         }
         let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
