@@ -10,9 +10,10 @@ final class KeychainManager {
             kSecValueData as String: data,
         ] as [String: Any]
 
-        SecItemDelete(query as CFDictionary)
-
-        return SecItemAdd(query as CFDictionary, nil)
+        return DispatchQueue.main.sync {
+            SecItemDelete(query as CFDictionary)
+            return SecItemAdd(query as CFDictionary, nil)
+        }
     }
 
     class func load(key: String) -> Data? {

@@ -217,7 +217,9 @@ struct LoginView: View {
                             switch completion {
                             case let .success(value):
                                 if let token = value.token {
-                                    AccordApp.tokenUpdate.send(token)
+                                    DispatchQueue.main.async {
+                                        AccordApp.tokenUpdate.send(token)
+                                    }
                                     self.loginViewDataModel.captcha = false
                                 }
                             case let .failure(error):
@@ -240,7 +242,9 @@ struct LoginView: View {
                         switch completion {
                         case let .success(response):
                             if let token = response.token {
-                                AccordApp.tokenUpdate.send(token)
+                                DispatchQueue.main.async {
+                                    AccordApp.tokenUpdate.send(token)
+                                }
                                 self.loginViewDataModel.captcha = false
                             }
                             if let ticket = response.ticket {
@@ -254,7 +258,9 @@ struct LoginView: View {
                                 )) { completion in
                                     switch completion {
                                     case let .success(response) where response.token != nil:
-                                        AccordApp.tokenUpdate.send(response.token)
+                                        DispatchQueue.main.async {
+                                            AccordApp.tokenUpdate.send(response.token)
+                                        }
                                         self.loginViewDataModel.captcha = false
                                     case let .failure(error):
                                         print(error)
