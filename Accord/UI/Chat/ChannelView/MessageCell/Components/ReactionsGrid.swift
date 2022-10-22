@@ -34,7 +34,6 @@ struct ReactionView: View {
     
     var body: some View {
         Button(action: {
-            print("troll")
             var emoji = (reaction.emoji.name ?? "null")
             if let id = reaction.emoji.id {
                 emoji.append(":" + (id))

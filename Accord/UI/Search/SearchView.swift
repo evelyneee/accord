@@ -28,7 +28,7 @@ struct SearchView: View {
     func match() async -> [Channel] {
                 
         let usernames = Storage.users.lazy
-            .filter { $0.value.username.lowercased().contains(self.text.dropLast(5).stringLiteral.lowercased()) }
+            .filter { $0.value.username.lowercased().contains(self.text.lowercased()) }
             .map(\.value)
         
         self.matchedUsers = usernames
@@ -39,11 +39,7 @@ struct SearchView: View {
             .map(\.channels)
             .joined()
             .filter { $0.computedName.lowercased().contains(self.text.lowercased()) }
-        
-        let dmMatches: [Channel] = appModel.privateChannels.lazy
-            .filter { $0.computedName.lowercased().contains(text.lowercased()) }
-    
-        return matches + dmMatches
+        return matches
     }
 
     var body: some View {
@@ -63,86 +59,88 @@ struct SearchView: View {
             }
             List {
                 Spacer().frame(height: 25)
-                ForEach(matchedUsers, id: \.id) { user in
-                    Button(action: {
-                        Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
-                            token: Globals.token,
-                            bodyObject: ["recipients": [user.id]],
-                            type: .POST,
-                            discordHeaders: true,
-                            referer: "https://discord.com/channels/@me",
-                            json: true
-                        )) {
-                            switch $0 {
-                            case let .success(channel):
-                                print(channel)
-                                AppGlobals.newItemPublisher.send((channel, nil))
-                                Storage.globals?.select(channel: channel)
-                            case let .failure(error):
-                                AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
+                LazyVStack {
+                    ForEach(matchedUsers, id: \.id) { user in
+                        Button(action: {
+                            Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
+                                token: Globals.token,
+                                bodyObject: ["recipients": [user.id]],
+                                type: .POST,
+                                discordHeaders: true,
+                                referer: "https://discord.com/channels/@me",
+                                json: true
+                            )) {
+                                switch $0 {
+                                case let .success(channel):
+                                    print(channel)
+                                    AppGlobals.newItemPublisher.send((channel, nil))
+                                    Storage.globals?.select(channel: channel)
+                                case let .failure(error):
+                                    AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
+                                }
                             }
-                        }
-                        presentationMode.wrappedValue.dismiss()
-                    }, label: {
-                        HStack {
-                            Attachment(pfpURL(user.id, user.avatar, discriminator: user.discriminator))
-                                .equatable()
-                                .clipShape(Circle())
-                                .frame(width: 23, height: 23)
-                            Text(user.username)
-                                .foregroundColor(.primary)
-                                .font(.system(size: 15))
-                            +
-                            Text("#" + user.discriminator)
-                                .font(.system(size: 15))
-                            Spacer()
-                        }
-                    })
-                    .buttonStyle(.borderless)
-                }
-                ForEach(matches, id: \.id) { channel in
-                    Button(action: {
-                        Storage.globals?.select(channel: channel)
-                        presentationMode.wrappedValue.dismiss()
-                    }, label: {
-                        HStack {
-                            if let icon = channel.guild_icon {
-                                Attachment(iconURL(channel.guild_id, icon))
+                            presentationMode.wrappedValue.dismiss()
+                        }, label: {
+                            HStack {
+                                Attachment(pfpURL(user.id, user.avatar, discriminator: user.discriminator))
                                     .equatable()
                                     .clipShape(Circle())
                                     .frame(width: 23, height: 23)
-                            } else if channel.recipients?.count == 1 {
-                                Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar, discriminator: channel.recipients?[0].discriminator ?? "0005"))
-                                    .equatable()
-                                    .clipShape(Circle())
-                                    .frame(width: 23, height: 23)
-                            } else if let icon = channel.icon {
-                                Attachment(cdnURL + "/channel-icons/\(channel.id)/\(icon).png?size=48")
-                                    .equatable()
-                                    .clipShape(Circle())
-                                    .frame(width: 23, height: 23)
-                            }
-                            Text(channel.computedName)
-                                .foregroundColor(Color(NSColor.textColor))
-                                .font(.system(size: 15))
-                            if let guildName = channel.guild_name {
-                                Text(" — \(guildName)")
-                                    .foregroundColor(.secondary)
+                                Text(user.username)
+                                    .foregroundColor(.primary)
                                     .font(.system(size: 15))
+                                +
+                                Text("#" + user.discriminator)
+                                    .font(.system(size: 15))
+                                Spacer()
                             }
-                            Spacer()
+                        })
+                        .buttonStyle(.borderless)
+                    }
+                    ForEach(matches, id: \.id) { channel in
+                        Button(action: {
+                            Storage.globals?.select(channel: channel)
+                            presentationMode.wrappedValue.dismiss()
+                        }, label: {
+                            HStack {
+                                if let icon = channel.guild_icon {
+                                    Attachment(iconURL(channel.guild_id, icon))
+                                        .equatable()
+                                        .clipShape(Circle())
+                                        .frame(width: 23, height: 23)
+                                } else if channel.recipients?.count == 1 {
+                                    Attachment(pfpURL(channel.recipients?[0].id, channel.recipients?[0].avatar, discriminator: channel.recipients?[0].discriminator ?? "0005"))
+                                        .equatable()
+                                        .clipShape(Circle())
+                                        .frame(width: 23, height: 23)
+                                } else if let icon = channel.icon {
+                                    Attachment(cdnURL + "/channel-icons/\(channel.id)/\(icon).png?size=48")
+                                        .equatable()
+                                        .clipShape(Circle())
+                                        .frame(width: 23, height: 23)
+                                }
+                                Text(channel.computedName)
+                                    .foregroundColor(Color(NSColor.textColor))
+                                    .font(.system(size: 15))
+                                if let guildName = channel.guild_name {
+                                    Text(" — \(guildName)")
+                                        .foregroundColor(.secondary)
+                                        .font(.system(size: 15))
+                                }
+                                Spacer()
+                            }
+                        })
+                        .buttonStyle(.borderless)
+                    }
+                    .onChange(of: self.text, perform: { text in
+                        Task.detached {
+                            let matches = await self.match()
+                            await MainActor.run {
+                                self.matches = matches
+                            }
                         }
                     })
-                    .buttonStyle(.plain)
                 }
-                .onChange(of: self.text, perform: { text in
-                    Task.detached {
-                        let matches = await self.match()
-                        await MainActor.run {
-                            self.matches = matches
-                        }
-                    }
-                })
                 Spacer()
             }
             .listStyle(.plain)
