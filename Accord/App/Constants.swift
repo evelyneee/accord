@@ -45,7 +45,7 @@ var spotifyToken: String?
 #if !canImport(WeatherKit)
 let ENABLE_NAVIGATIONSPLITVIEW: Bool = false
 #else
-let ENABLE_NAVIGATIONSPLITVIEW: Bool = false
+let ENABLE_NAVIGATIONSPLITVIEW: Bool = true
 #endif
 
 enum Globals {

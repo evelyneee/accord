@@ -65,10 +65,7 @@ struct MessagePlaceholders: View {
     }
 }
 
-struct ChannelView: View, Equatable {
-    static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
-        lhs.channel?.id == rhs.channel?.id
-    }
+struct ChannelView: View {
 
     @StateObject
     var viewModel: ChannelViewViewModel
@@ -246,9 +243,11 @@ struct ChannelView: View, Equatable {
     
     @ViewBuilder
     var body: some View {
-        if _channel != nil {
+        if self._channel != nil {
             core
-                .presentedWindowToolbarStyle(.unifiedCompact)
+                .onAppear {
+                    print(self.appModel)
+                }
         }
     }
     
@@ -373,7 +372,7 @@ struct ChannelView: View, Equatable {
         })
         .onAppear {
             DispatchQueue.main.async {
-                viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
+                viewModel.memberList = channel?.recipients?.map(OPSItems.init) ?? []
             }
             Task.detached {
                 await self.viewModel.initializeChannel()

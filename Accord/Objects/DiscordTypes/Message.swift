@@ -10,7 +10,11 @@ import Foundation
 
 struct Message: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: Message, rhs: Message) -> Bool {
-        lhs.id == rhs.id && lhs.content == rhs.content && lhs.embeds == rhs.embeds && lhs.reactions == rhs.reactions
+        lhs.id == rhs.id &&
+        lhs.content == rhs.content &&
+        lhs.embeds == rhs.embeds &&
+        lhs.reactions == rhs.reactions &&
+        lhs.author?.id == rhs.author?.id
     }
     
     var author: User?
