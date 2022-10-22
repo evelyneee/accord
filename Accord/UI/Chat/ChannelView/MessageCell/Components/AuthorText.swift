@@ -24,7 +24,7 @@ struct AuthorTextView: View, Equatable {
         if self.guildID == "@me" {
             return _nickname
         }
-        return nil
+        return nick
     }
     
     @MainActor
@@ -39,7 +39,7 @@ struct AuthorTextView: View, Equatable {
     
     var body: some View {
         HStack(spacing: 1) {
-            Text(self.nickname ?? nick ?? _nickname ?? message.author?.username ?? "Unknown User")
+            Text(self.nickname ?? message.author?.username ?? "Unknown User")
                 .foregroundColor({ () -> Color in
                     if let role = role, let color = Storage.roleColors[role]?.0, !message.isSameAuthor {
                         return Color(int: color)

@@ -12,7 +12,7 @@ import SwiftUI
 
 let cachesURL: URL = FileManager.default.urls(for: FileManager.SearchPathDirectory.cachesDirectory, in: FileManager.SearchPathDomainMask.userDomainMask)[0]
 let diskCacheURL = cachesURL.appendingPathComponent("DownloadCache")
-let cache = URLCache(memoryCapacity: 1000, diskCapacity: 1_000_000, directory: diskCacheURL)
+let cache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 1_000_000, directory: diskCacheURL)
 
 struct Attachment: View, Equatable {
     static func == (lhs: Attachment, rhs: Attachment) -> Bool {

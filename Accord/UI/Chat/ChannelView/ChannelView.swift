@@ -47,6 +47,7 @@ struct MessagePlaceholders: View {
                     Circle()
                         .frame(width: 35, height: 35)
                         .padding(.trailing, 1.5)
+                        .fixedSize()
                     
                     VStack(alignment: .leading) {
                         Text(UUID().uuidString.prefix(prefix).stringLiteral)
@@ -64,7 +65,10 @@ struct MessagePlaceholders: View {
     }
 }
 
-struct ChannelView: View {
+struct ChannelView: View, Equatable {
+    static func == (lhs: ChannelView, rhs: ChannelView) -> Bool {
+        lhs.channel?.id == rhs.channel?.id
+    }
 
     @StateObject
     var viewModel: ChannelViewViewModel
@@ -76,7 +80,7 @@ struct ChannelView: View {
     var guildName: String
     
     var channel: Channel! {
-        self.appModel.selectedChannel ?? self._channel 
+        self._channel ?? self.appModel.selectedChannel
     }
     
     @Binding var _channel: Channel?
@@ -168,8 +172,7 @@ struct ChannelView: View {
         .padding(.horizontal, 5.0)
         .padding(.vertical, message.userMentioned ? 3.0 : 0.0)
         .background(message.userMentioned ? Color.yellow.opacity(0.1).cornerRadius(7) : nil)
-        .onAppear { [weak viewModel] in
-            guard let viewModel else { return }
+        .onAppear { [unowned viewModel] in
             if viewModel.messages.count >= 50,
                message == viewModel.messages[viewModel.messages.count - 2]
             {
@@ -182,7 +185,9 @@ struct ChannelView: View {
     
     var messagesView: some View {
         ForEach($viewModel.messages, id: \.identifier) { $message in
-            if channel.read_state?.last_message_id == message.id && channel.read_state?.last_message_id != channel.last_message_id {
+            let cell = cell(for: $message)
+            let showNewMessagesLine = channel.read_state?.last_message_id == message.id && channel.read_state?.last_message_id != channel.last_message_id
+            if showNewMessagesLine {
                 VStack(alignment: .leading) {
                     HStack {
                         Color.red
@@ -198,10 +203,10 @@ struct ChannelView: View {
                             .opacity(0.4)
                     }
                     .padding(.top)
-                    cell(for: $message)
+                    cell
                 }
             } else if message.inSameDay {
-                cell(for: $message)
+                cell
             } else {
                 VStack(alignment: .leading) {
                     HStack {
@@ -218,12 +223,13 @@ struct ChannelView: View {
                             .opacity(0.4)
                     }
                     .padding(.top)
-                    cell(for: $message)
+                    cell
                 }
             }
         }
-        .rotationEffect(.radians(.pi))
+        .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+        .fixedSize(horizontal: false, vertical: true)
     }
     
     @ViewBuilder
@@ -282,7 +288,7 @@ struct ChannelView: View {
     }
     
     var core: some View {
-        HStack(spacing: 0) {
+        HStack {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     list

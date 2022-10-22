@@ -164,10 +164,14 @@ func showWindow(_ channel: Channel, globals: AppGlobals) {
         backing: .buffered, defer: false
     )
     windowRef.delegate = nil
-    windowRef.contentView = NSHostingView(rootView: ChannelView(.constant(channel)).environmentObject(globals))
-    windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
-    windowRef.isReleasedWhenClosed = false
-    windowRef.makeKeyAndOrderFront(nil)
+    var newGlobals = AppGlobals()
+    DispatchQueue.main.async {
+        newGlobals.selectedChannel = channel
+        windowRef.contentView = NSHostingView(rootView: ChannelView(.constant(channel)).environmentObject(newGlobals))
+        windowRef.title = "\(channel.name ?? "Unknown Channel") - Accord"
+        windowRef.isReleasedWhenClosed = false
+        windowRef.makeKeyAndOrderFront(nil)
+    }
 }
 
 func pronounDBFormed(pronoun: String?) -> String {
