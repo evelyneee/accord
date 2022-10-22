@@ -61,24 +61,26 @@ struct EmotesView: View, Equatable {
                                     let keys = Array(Storage.emotes.keys)
                                     let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
                                     ForEach(nonEmptyKeys, id: \.self) { key in
-                                        Section(header: Text(key.components(separatedBy: "$")[1])) {
-                                            LazyVGrid(columns: columns) {
-                                                ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
-                                                    Button(action: {
-                                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
-                                                        onSelect(emote)
-                                                        self.dismiss()
-                                                    }) {
-                                                        VStack {
-                                                            HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
-                                                                .frame(width: 29, height: 29)
-                                                                .fixedSize()
+                                        if !(Storage.emotes[key]?.isEmpty == false) {
+                                            Section(header: Text(key.components(separatedBy: "$")[1])) {
+                                                LazyVGrid(columns: columns) {
+                                                    ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
+                                                        Button(action: {
+                                                            chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
+                                                            onSelect(emote)
+                                                            self.dismiss()
+                                                        }) {
+                                                            VStack {
+                                                                HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
+                                                                    .frame(width: 29, height: 29)
+                                                                    .fixedSize()
+                                                            }
+                                                            .frame(width: 30, height: 30)
+                                                            .fixedSize()
                                                         }
-                                                        .frame(width: 30, height: 30)
+                                                        .buttonStyle(EmoteButton())
                                                         .fixedSize()
                                                     }
-                                                    .buttonStyle(EmoteButton())
-                                                    .fixedSize()
                                                 }
                                             }
                                         }

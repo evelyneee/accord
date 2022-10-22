@@ -99,7 +99,7 @@ public final class Markdown {
      - Returns AnyPublisher with SwiftUI Text view
      **/
     @_optimize(speed)
-    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool) -> TextPublisher {
+    public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool, channelInfo: (guild: String, channel: String)) -> TextPublisher {
         if checkDisallowedCharacters(word) {
             if highlight {
                 return Just(Text(bionicMarkdown(word)) + Text(" ")).eraseToAny()
@@ -147,13 +147,54 @@ public final class Markdown {
             guard dict.isEmpty else { return }
             
             for id in mentions {
-                return promise(.success(
-                    Text("@\(members[id] ?? "Unknown User")")
-                        .foregroundColor(Color.accentColor)
-                        .underline()
-                        +
-                        Text(" ")
-                ))
+                if let member = members[id] {
+                    return promise(.success(
+                        Text("@\(member)")
+                            .foregroundColor(Color.accentColor)
+                            .underline()
+                            +
+                            Text(" ")
+                    ))
+                } else {
+                    DispatchQueue.main.async {
+                        if let member = Storage.users[id] {
+                            return promise(.success(
+                                Text("@\(member.username)")
+                                    .foregroundColor(Color.accentColor)
+                                    .underline()
+                                    +
+                                    Text(" ")
+                            ))
+                        } else {
+                            DispatchQueue.global().async {
+                                do {
+                                    guard let url = URL(string: rootURL)?
+                                        .appendingPathComponent("guilds")
+                                        .appendingPathComponent(channelInfo.guild)
+                                        .appendingPathComponent("members")
+                                        .appendingPathComponent(id) else { return promise(.failure("bad url")) }
+                                    let request = URLRequest(url: url)
+                                    guard let user = cache.cachedResponse(for: request) else { throw Request.FetchErrors.noData }
+                                    let cachedObject = try? JSONDecoder().decode(GuildMember.GuildMemberSaved.self, from: user.data)
+                                    guard !(cachedObject?.isOutdated == true) else { throw Request.FetchErrors.noData }
+                                    let member = cachedObject?.member
+                                    if let member {
+                                        return promise(.success(
+                                            Text("@\(member.nick ?? member.user.username)")
+                                                .foregroundColor(Color.accentColor)
+                                                .underline()
+                                            +
+                                            Text(" ")
+                                        ))
+                                    } else { throw "no member" }
+                                } catch {
+                                    try? wss.getMembers(ids: [id], guild: channelInfo.guild)
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
             for id in roleMentions {
                 return promise(.success(
@@ -199,13 +240,13 @@ public final class Markdown {
      - Returns AnyPublisher with array of SwiftUI Text views
      **/
     @_optimize(speed)
-    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, allowLinkShortening: Bool) -> TextArrayPublisher {
+    public class func markLine(_ line: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, allowLinkShortening: Bool, channelInfo: (guild: String, channel: String)) -> TextArrayPublisher {
         var line = line
         if !allowLinkShortening {
             line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         }
         let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
-        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first) }
+        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first, channelInfo: channelInfo) }
         return Publishers.MergeMany(pubs)
             .collect()
             .eraseToAnyPublisher()
@@ -218,7 +259,7 @@ public final class Markdown {
      - Returns AnyPublisher with SwiftUI Text view
      **/
     @_optimize(speed)
-    public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false, allowLinkShortening: Bool = false) -> TextPublisher {
+    public class func markAll(text: String, _ members: [String: String] = [:], font: Bool = false, allowLinkShortening: Bool = false, channelInfo: (guild: String, channel: String)) -> TextPublisher {
         let newlines = text.split(whereSeparator: \.isNewline)
 
         let codeBlockMarkerRawOffsets = newlines
@@ -237,7 +278,7 @@ public final class Markdown {
             }
             .compactMap(\.self)
 
-        let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting, allowLinkShortening: allowLinkShortening) }
+        let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting, allowLinkShortening: allowLinkShortening, channelInfo: channelInfo) }
         var strippedPublishers = pubs
             .map { [$0] }
             .joined()

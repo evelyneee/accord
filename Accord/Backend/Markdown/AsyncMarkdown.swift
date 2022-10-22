@@ -14,6 +14,7 @@ final class AsyncMarkdownModel: ObservableObject {
     @MainActor
     init(text: String) {
         markdown = Text(text)
+        self.channelInfo = nil
     }
 
     @MainActor @Published
@@ -27,6 +28,8 @@ final class AsyncMarkdownModel: ObservableObject {
 
     private var cancellable: AnyCancellable?
     static let queue = DispatchQueue(label: "textQueue")
+    
+    var channelInfo: (String, String)?
 
     @_optimize(speed)
     func make(text: String, usernames: [String:String], allowLinkShortening: Bool) {
@@ -39,7 +42,8 @@ final class AsyncMarkdownModel: ObservableObject {
                    text.contains(">") ||
                    text.contains("<") ||
                    text.contains("`")) ||
-                    text.count > 100 else {
+                    text.count > 100,
+                  let channelInfo = self?.channelInfo else {
                 guard let self else { return }
                 DispatchQueue.main.async {
                     self.hasEmojiOnly = emojis
@@ -47,7 +51,7 @@ final class AsyncMarkdownModel: ObservableObject {
                 }
                 return
             }
-            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis, allowLinkShortening: allowLinkShortening)
+            self?.cancellable = Markdown.markAll(text: text, usernames, font: emojis, allowLinkShortening: allowLinkShortening, channelInfo: channelInfo)
                 .replaceError(with: Text(text))
                 .sink { [weak self] text in
                     DispatchQueue.main.async {
@@ -73,6 +77,12 @@ struct AsyncMarkdown: View, Equatable {
     
     var linkShortening: Bool
 
+    @Environment(\.guildID)
+    var guildID: String
+    
+    @Environment(\.channelID)
+    var channelID: String
+    
     @MainActor
     init(_ text: String, binded: Binding<String>? = nil, linkShortening: Bool = false) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
@@ -91,6 +101,7 @@ struct AsyncMarkdown: View, Equatable {
                         model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                     })
                     .onAppear { [weak model] in
+                        model?.channelInfo = (guildID, channelID)
                         model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                     }
             } else {
@@ -102,6 +113,7 @@ struct AsyncMarkdown: View, Equatable {
                         model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                     })
                     .onAppear { [weak model] in
+                        model?.channelInfo = (guildID, channelID)
                         model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                     }
             }
