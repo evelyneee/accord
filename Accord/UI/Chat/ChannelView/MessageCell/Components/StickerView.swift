@@ -17,6 +17,13 @@ struct StickerView: View {
                 GifView("https://cdn.discordapp.com/stickers/\(sticker.id).json")
                     .frame(width: 160, height: 160)
                     .cornerRadius(3)
+                    .drawingGroup()
+                    .padding(.leading, leftPadding)
+            } else if sticker.format_type == .apng {
+                GifView("https://cdn.discordapp.com/stickers/\(sticker.id).png?size=160")
+                    .frame(width: 160, height: 160)
+                    .cornerRadius(3)
+                    .drawingGroup()
                     .padding(.leading, leftPadding)
             } else {
                 Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=160")
