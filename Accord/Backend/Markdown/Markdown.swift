@@ -68,6 +68,7 @@ public final class Markdown {
 
      ***/
 
+    @available(macOS 12.0, *)
     class func bionicMarkdown(_ word: String) -> AttributedString {
         var markdown = try? AttributedString(markdown: word)
         markdown = markdown?.transformingAttributes(\.presentationIntent) { transformer in
@@ -101,7 +102,7 @@ public final class Markdown {
     @_optimize(speed)
     public class func markWord(_ word: String, _ members: [String: String] = [:], font: Bool, highlight: Bool, quote: Bool, channelInfo: (guild: String, channel: String)) -> TextPublisher {
         if checkDisallowedCharacters(word) {
-            if highlight {
+            if #available(macOS 12.0, *), highlight {
                 return Just(Text(bionicMarkdown(word)) + Text(" ")).eraseToAny()
             } else {
                 return Just(Text(word) + Text(" ")).eraseToAny()
@@ -224,7 +225,7 @@ public final class Markdown {
                 return promise(.success(Text(word) + Text(" ")))
             }
 
-            if highlight {
+            if #available(macOS 12.0, *), highlight {
                 return promise(.success(Text(bionicMarkdown(word)) + Text(" ")))
             } else {
                 return promise(.success(appleMarkdown(word)))

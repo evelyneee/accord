@@ -115,6 +115,12 @@ extension ServerListView {
 
         if let previousServer = previousServer, previousServer != "@me" {
             print("setting")
+            appModel.selectedGuild = guildTemp[keyed: previousServer]
+            if let guild = guildTemp[keyed: previousServer],
+                let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String,
+                let channel = guild.channels.first(where: { $0.id == value }) {
+                appModel.selectedChannel = channel
+            }
             self.viewModel = ServerListViewModel(guild: guildTemp[keyed: previousServer], readyPacket: readyPacket)
             self.selectedServer = previousServer
         } else {

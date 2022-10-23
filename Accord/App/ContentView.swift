@@ -55,9 +55,13 @@ struct ContentView: View {
     
     @ViewBuilder
     var body: some View {
-        if !loaded {
+        if let serverListView = serverListView {
+            serverListView
+        } else {
             LoadingView()
+                .padding(200)
                 .onAppear {
+                    print("h")
                     concurrentQueue.async {
                         do {
                             guard serverListView == nil else {
@@ -124,12 +128,9 @@ struct ContentView: View {
                             failedToConnect(error)
                         }
                     }
+
                 }
-        } else if let serverListView = serverListView {
-            serverListView
-        } else {
-            Text("Why are we here??")
-                .padding(200)
+
         }
     }
 

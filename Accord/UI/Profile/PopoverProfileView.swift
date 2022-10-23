@@ -235,32 +235,60 @@ struct PopoverProfileView: View {
                         RolesView(tags: roles)
                     }
                     Divider()
-                    Button(action: {
-                        Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
-                            token: Globals.token,
-                            bodyObject: ["recipients": [user?.id ?? ""]],
-                            type: .POST,
-                            discordHeaders: true,
-                            referer: "https://discord.com/channels/@me",
-                            json: true
-                        )) {
-                            switch $0 {
-                            case let .success(channel):
-                                print(channel)
-                                Storage.globals?.select(channel: channel)
-                            case let .failure(error):
-                                AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
+                    if #available(macOS 12.0, *) {
+                        Button(action: {
+                            Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
+                                token: Globals.token,
+                                bodyObject: ["recipients": [user?.id ?? ""]],
+                                type: .POST,
+                                discordHeaders: true,
+                                referer: "https://discord.com/channels/@me",
+                                json: true
+                            )) {
+                                switch $0 {
+                                case let .success(channel):
+                                    print(channel)
+                                    Storage.globals?.select(channel: channel)
+                                case let .failure(error):
+                                    AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
+                                }
+                            }
+                        }) {
+                            HStack {
+                                Text("Message")
+                                    .frame(maxWidth: .infinity)
                             }
                         }
-                    }) {
-                        HStack {
-                            Text("Message")
-                                .frame(maxWidth: .infinity)
+                        .controlSize(.large)
+                        .transition(AnyTransition.opacity)
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Button(action: {
+                            Request.fetch(Channel.self, url: URL(string: "https://discord.com/api/v9/users/@me/channels"), headers: Headers(
+                                token: Globals.token,
+                                bodyObject: ["recipients": [user?.id ?? ""]],
+                                type: .POST,
+                                discordHeaders: true,
+                                referer: "https://discord.com/channels/@me",
+                                json: true
+                            )) {
+                                switch $0 {
+                                case let .success(channel):
+                                    print(channel)
+                                    Storage.globals?.select(channel: channel)
+                                case let .failure(error):
+                                    AccordApp.error(error, text: "Failed to open dm", reconnectOption: false)
+                                }
+                            }
+                        }) {
+                            HStack {
+                                Text("Message")
+                                    .frame(maxWidth: .infinity)
+                            }
                         }
+                        .controlSize(.large)
+                        .transition(AnyTransition.opacity)
                     }
-                    .controlSize(.large)
-                    .buttonStyle(.borderedProminent)
-                    .transition(AnyTransition.opacity)
                 }
                 .padding(14)
                 .background(Color(NSColor.windowBackgroundColor))

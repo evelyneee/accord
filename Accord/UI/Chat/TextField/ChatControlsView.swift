@@ -217,15 +217,27 @@ struct ChatControls: View {
             }
         )
     }
-
-    var mainTextField: some View {
-        TextField(textFieldText, text: $viewModel.textFieldContents)
-            // .focused($focusedField, equals: .mainTextField)
-            .font(.chatTextFont)
-            .onSubmit {
+    
+    @ViewBuilder
+    var textField: some View {
+        if #available(macOS 12.0, *) {
+            TextField(textFieldText, text: $viewModel.textFieldContents)
+                .font(.chatTextFont)
+                .onSubmit {
+                    typing = false
+                    send()
+                }
+        } else {
+            TextField(textFieldText, text: $viewModel.textFieldContents, onCommit: {
                 typing = false
                 send()
-            }
+            })
+            .font(.chatTextFont)
+        }
+    }
+
+    var mainTextField: some View {
+        textField
             .layoutPriority(1)
             .animation(nil, value: UUID())
             .fixedSize(horizontal: false, vertical: true)

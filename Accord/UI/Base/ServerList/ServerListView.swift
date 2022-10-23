@@ -207,6 +207,14 @@ struct ServerListView: View {
                 return nil
             }
         }())
+        .onDisappear {
+            if let selection = self.appModel.selectedChannel?.id, self.selectedServer == "@me" {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelDMs")
+            }
+            if let selection = self.appModel.selectedChannel?.id, let id = self.appModel.selectedGuild?.id {
+                UserDefaults.standard.set(selection, forKey: "AccordChannelIn\(id)")
+            }
+        }
         .sheet(isPresented: $popup, onDismiss: {}) {
             SearchView()
                 .focusable()

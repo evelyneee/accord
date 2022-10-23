@@ -63,9 +63,16 @@ extension ServerListView {
                     }
                     .padding(.bottom, 1)
                     .id(folder.guilds.first?.id)
-                } else if let guild = $folder.guilds.first {
+                } else if #available(macOS 12.0, *), let guild = $folder.guilds.first {
                     ServerIconCell(
                         guild: guild,
+                        selectedServer: self.$selectedServer
+                    )
+                    .fixedSize()
+                    .id(guild.wrappedValue.id)
+                } else if let guild = folder.guilds.first {
+                    ServerIconCell(
+                        guild: .constant(guild),
                         selectedServer: self.$selectedServer
                     )
                     .fixedSize()

@@ -107,7 +107,7 @@ struct SettingsView: View {
                     }
                     .disabled(true)
                     #endif
-                    ForEach(self.toggles) { $0 }
+                    ForEach(self.toggles) { $0.id($0.key) }
                     HStack(alignment: .top) {
                         Text("Music platform")
                             .font(.title3)

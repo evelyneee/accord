@@ -78,6 +78,7 @@
 		9EC5FA2F2846BE2000C2A416 /* WelcomeMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA2E2846BE2000C2A416 /* WelcomeMessageView.swift */; };
 		9EC5FA312846BE8300C2A416 /* StickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA302846BE8300C2A416 /* StickerView.swift */; };
 		9EC5FA352846C1B400C2A416 /* MatchesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5FA342846C1B400C2A416 /* MatchesView.swift */; };
+		9EC8D278290564E10096E6C7 /* BigSur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC8D277290564E10096E6C7 /* BigSur.swift */; };
 		9ECB0F3F2766D3DA0019ADAE /* MessageCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */; };
 		9ECE08F5277286E3001BA0F7 /* PinsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE08F4277286E3001BA0F7 /* PinsView.swift */; };
 		9ECE42BB279E133900883D0A /* ChatControlsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */; };
@@ -242,6 +243,7 @@
 		9EC5FA342846C1B400C2A416 /* MatchesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesView.swift; sourceTree = "<group>"; };
 		9EC5FA362849196A00C2A416 /* RTCSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCSocket.swift; sourceTree = "<group>"; };
 		9EC5FA3828491D3500C2A416 /* Opcodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Opcodes.swift; sourceTree = "<group>"; };
+		9EC8D277290564E10096E6C7 /* BigSur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigSur.swift; sourceTree = "<group>"; };
 		9ECB0F3E2766D3DA0019ADAE /* MessageCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCellView.swift; sourceTree = "<group>"; };
 		9ECE08F4277286E3001BA0F7 /* PinsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinsView.swift; sourceTree = "<group>"; };
 		9ECE42BA279E133900883D0A /* ChatControlsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatControlsViewModel.swift; sourceTree = "<group>"; };
@@ -416,6 +418,7 @@
 				9E9348672894A93E00E1AC5F /* Modifiers */,
 				9E9348662894A93900E1AC5F /* Views */,
 				9EE2467D28F192DD004AB87B /* PlatformNavigation.swift */,
+				9EC8D277290564E10096E6C7 /* BigSur.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -969,6 +972,7 @@
 				9EF5FFDC285E010C001B68FA /* Globals.swift in Sources */,
 				9E6B710027834F4600A26CB6 /* SwiftUI++.swift in Sources */,
 				9EDD136827D6F951000685E6 /* Regex.swift in Sources */,
+				9EC8D278290564E10096E6C7 /* BigSur.swift in Sources */,
 				9EA295212753D1490014927D /* MemberList.swift in Sources */,
 				9EC5FA122845B50000C2A416 /* JoinServerButton.swift in Sources */,
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
@@ -1202,7 +1206,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.6;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
@@ -1251,7 +1255,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.6;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";

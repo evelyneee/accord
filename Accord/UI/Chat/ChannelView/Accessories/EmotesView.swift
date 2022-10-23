@@ -35,8 +35,8 @@ struct EmotesView: View, Equatable {
     
     @State var selection: Selection = .emotes
     
-    @Environment(\.dismiss)
-    var dismiss
+    @Environment(\.presentationMode)
+    var presentationMode
     
     @EnvironmentObject
     var appModel: AppGlobals
@@ -51,7 +51,7 @@ struct EmotesView: View, Equatable {
                         .background(Material.thick) // blurred background
                         .onSubmit {
                             self.onSelect(DiscordEmote(id: "stock", name: self.search))
-                            self.dismiss()
+                            self.presentationMode.wrappedValue.dismiss()
                         }
                     TabView(selection: self.$selection) {
                         ScrollView {
@@ -68,7 +68,7 @@ struct EmotesView: View, Equatable {
                                                         Button(action: {
                                                             chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                                             onSelect(emote)
-                                                            self.dismiss()
+                                                            self.presentationMode.wrappedValue.dismiss()
                                                         }) {
                                                             VStack {
                                                                 HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
@@ -92,7 +92,7 @@ struct EmotesView: View, Equatable {
                                             Button(action: {
                                                 chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
                                                 onSelect(emote)
-                                                self.dismiss()
+                                                self.presentationMode.wrappedValue.dismiss()
                                             }) {
                                                 HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
                                                     .frame(width: 29, height: 29)
@@ -108,8 +108,10 @@ struct EmotesView: View, Equatable {
                         }
                         .padding()
                         .tabItem({Text("Emotes")})
-                        StickersView()
-                            .tabItem({Text("Stickers")})
+                        if #available(macOS 12.0, *) {
+                            StickersView()
+                                .tabItem({Text("Stickers")})
+                        }
                     }
                 }
             }

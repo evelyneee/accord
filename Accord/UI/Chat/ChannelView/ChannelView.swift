@@ -245,9 +245,6 @@ struct ChannelView: View {
     var body: some View {
         if self._channel != nil {
             core
-                .onAppear {
-                    print(self.appModel)
-                }
         }
     }
     
@@ -429,11 +426,22 @@ struct ChannelView: View {
                                     .fontWeight(.semibold)
                                 Text(topic)
                                 if let threads = self.channel.threads {
-                                    Section("Threads", content: {
-                                        ForEach(threads, id: \.id) { thread in
-                                            Text(thread.name ?? "")
+                                    if #available(macOS 12.0, *) {
+                                        Section("Threads", content: {
+                                            ForEach(threads, id: \.id) { thread in
+                                                Text(thread.name ?? "")
+                                            }
+                                        })
+                                    } else {
+                                        VStack {
+                                            Text("Threads")
+                                            Section(content: {
+                                                ForEach(threads, id: \.id) { thread in
+                                                    Text(thread.name ?? "")
+                                                }
+                                            })
                                         }
-                                    })
+                                    }
                                 }
 
                             }

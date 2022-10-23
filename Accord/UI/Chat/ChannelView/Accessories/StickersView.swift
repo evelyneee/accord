@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@available(macOS 12.0, *)
 struct StickersView: View {
     
     @EnvironmentObject
@@ -73,8 +74,13 @@ struct StickersView: View {
             }
         }
         .listRowBackground(Color.clear)
-        .task {
-            self.stickersLoaded = await self.stickers
+        .onAppear {
+            Task.detached {
+                let stickers = await self.stickers
+                await MainActor.run {
+                    self.stickersLoaded = stickers
+                }
+            }
         }
     }
 }

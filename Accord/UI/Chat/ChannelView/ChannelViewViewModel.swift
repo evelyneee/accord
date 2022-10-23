@@ -553,7 +553,6 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         allUserIDs.forEach { id in
             do {
                 let member = try self.loadCachedUser(id)
-                print(member)
                 toRemove.append(id)
                 memberLoad(member)
             } catch {}

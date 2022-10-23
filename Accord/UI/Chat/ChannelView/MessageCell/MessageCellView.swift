@@ -196,12 +196,14 @@ struct MessageCellView: View, Equatable {
             }
             if !message.attachments.isEmpty {
                 AttachmentView(media: message.attachments)
-                    .background {
-                        Rectangle()
-                            .foregroundColor(Color(NSColor.windowBackgroundColor))
-                            .cornerRadius(5)
-                        ProgressView()
-                    }
+                    .background(
+                        ZStack {
+                            Rectangle()
+                                .foregroundColor(Color(NSColor.windowBackgroundColor))
+                                .cornerRadius(5)
+                            ProgressView()
+                        }
+                    )
                     .cornerRadius(5)
                     .padding(.leading, leftPadding)
                     .padding(.top, 5)
