@@ -24,11 +24,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
-      - name: Select Xcode version (14.0)
+      - name: Select Xcode version (14.1)
         run: |
-          sudo xcode-select --switch /Applications/Xcode_14.0.app
+          sudo xcode-select --switch /Applications/Xcode_14.1.app
           
       - name: Build app
         run: |
@@ -42,7 +42,7 @@ jobs:
           zip -r ${{ github.workspace }}/Accord.zip .
           
       - name: Upload app to artifacts
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3
         with:
           name: Accord
           path: ${{ github.workspace }}/Accord.zip
