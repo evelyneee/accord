@@ -113,20 +113,24 @@ struct LoginView: View {
             .accentColor(.clear)
             .controlSize(.large)
             Button("Login") { [weak viewModel] in
-                viewModel?.loginError = nil
-                UserDefaults.standard.set(self.loginViewDataModel.proxyIP, forKey: "proxyIP")
-                UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
-                if !loginViewDataModel.token.isEmpty {
-                    AccordApp.tokenUpdate.send(loginViewDataModel.token)
-                } else {
-                    try? viewModel?.login(loginViewDataModel.email, loginViewDataModel.password, loginViewDataModel.twoFactor)
-                }
-                print("logging in")
+                login(viewModel)
             }
             .keyboardShortcut(.return)
             .controlSize(.large)
         }
         .padding(.top, 5)
+    }
+    
+    private func login(_ viewModel: LoginViewViewModel?) {
+        viewModel?.loginError = nil
+        UserDefaults.standard.set(self.loginViewDataModel.proxyIP, forKey: "proxyIP")
+        UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
+        if !loginViewDataModel.token.isEmpty {
+            AccordApp.tokenUpdate.send(loginViewDataModel.token)
+        } else {
+            try? viewModel?.login(loginViewDataModel.email, loginViewDataModel.password, loginViewDataModel.twoFactor)
+        }
+        print("logging in")
     }
 
     private var AccordIconView: some View {
@@ -146,8 +150,12 @@ struct LoginView: View {
                     .textFieldStyle(.roundedBorder)
                 SecureField("Password:", text: $loginViewDataModel.password)
                     .textFieldStyle(.roundedBorder)
-            }.tabItem {
+            }
+            .tabItem {
                 Text("Email and Password")
+            }
+            .onSubmit { [weak viewModel] in
+                login(viewModel)
             }
             .frame(maxHeight: 200)
             .padding()
