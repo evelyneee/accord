@@ -154,9 +154,6 @@ struct LoginView: View {
             .tabItem {
                 Text("Email and Password")
             }
-            .onSubmit { [weak viewModel] in
-                login(viewModel)
-            }
             .frame(maxHeight: 200)
             .padding()
             Form {
@@ -166,6 +163,9 @@ struct LoginView: View {
                 Text("Token")
             }
             .padding()
+        }
+        .onSubmit { [weak viewModel] in
+            login(viewModel)
         }
     }
 
