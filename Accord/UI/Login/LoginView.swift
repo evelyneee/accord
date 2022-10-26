@@ -107,12 +107,18 @@ struct LoginView: View {
     private var bottomView: some View {
         HStack {
             Spacer()
+            if viewModel.loggingIn {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                    .padding(.horizontal, 3)
+            }
             Button("Cancel") {
                 exit(EXIT_SUCCESS)
             }
             .accentColor(.clear)
             .controlSize(.large)
             Button("Login") { [weak viewModel] in
+                viewModel?.loggingIn = true
                 viewModel?.loginError = nil
                 UserDefaults.standard.set(self.loginViewDataModel.proxyIP, forKey: "proxyIP")
                 UserDefaults.standard.set(self.loginViewDataModel.proxyPort, forKey: "proxyPort")
@@ -205,7 +211,13 @@ struct LoginView: View {
 
             HStack {
                 Spacer()
+                if viewModel.mfaLoggingIn {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding(.horizontal, 3)
+                }
                 Button("Login") {
+                    viewModel.mfaLoggingIn = true
                     if let ticket = viewModel.ticket {
                         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
                             token: Globals.token,
@@ -291,6 +303,8 @@ final class LoginViewViewModel: ObservableObject {
     @Published var captchaPayload: String?
     @Published var ticket: String? = nil
     @Published var loginError: Error? = nil
+    @Published var loggingIn: Bool = false
+    @Published var mfaLoggingIn: Bool = false
 
     init() {}
 
