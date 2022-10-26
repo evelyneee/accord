@@ -208,78 +208,16 @@ struct LoginView: View {
             SecureField("Six-digit MFA code", text: $loginViewDataModel.twoFactor)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 100)
+                .onSubmit {
+                    mfaLogin()
+                }
 
             Spacer()
 
             HStack {
                 Spacer()
                 Button("Login") {
-                    if let ticket = viewModel.ticket {
-                        Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
-                            token: Globals.token,
-                            bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
-                            type: .POST,
-                            discordHeaders: true,
-                            json: true
-                        )) { completion in
-                            switch completion {
-                            case let .success(value):
-                                if let token = value.token {
-                                    DispatchQueue.main.async {
-                                        AccordApp.tokenUpdate.send(token)
-                                    }
-                                    self.loginViewDataModel.captcha = false
-                                }
-                            case let .failure(error):
-                                print(error)
-                            }
-                        }
-                        return
-                    }
-                    self.loginViewDataModel.captchaPayload = loginViewDataModel.notification["key"] as? String ?? ""
-                    Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
-                        bodyObject: [
-                            "email": loginViewDataModel.email,
-                            "password": loginViewDataModel.password,
-                            "captcha_key": loginViewDataModel.captchaPayload ?? "",
-                        ],
-                        type: .POST,
-                        discordHeaders: true,
-                        json: true
-                    )) { completion in
-                        switch completion {
-                        case let .success(response):
-                            if let token = response.token {
-                                DispatchQueue.main.async {
-                                    AccordApp.tokenUpdate.send(token)
-                                }
-                                self.loginViewDataModel.captcha = false
-                            }
-                            if let ticket = response.ticket {
-                                Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
-                                    contentType: "application/json",
-                                    token: Globals.token,
-                                    bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    json: true
-                                )) { completion in
-                                    switch completion {
-                                    case let .success(response) where response.token != nil:
-                                        DispatchQueue.main.async {
-                                            AccordApp.tokenUpdate.send(response.token)
-                                        }
-                                        self.loginViewDataModel.captcha = false
-                                    case let .failure(error):
-                                        print(error)
-                                    default: break
-                                    }
-                                }
-                            }
-                        case let .failure(error):
-                            print(error)
-                        }
-                    }
+                    mfaLogin()
                 }
                 .controlSize(.large)
             }
@@ -289,6 +227,75 @@ struct LoginView: View {
     private var captchaView: some View {
         CaptchaViewControllerSwiftUI(token: captchaPublicKey)
             .transition(AnyTransition.moveAway)
+    }
+    
+    private func mfaLogin() {
+        if let ticket = viewModel.ticket {
+            Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
+                token: Globals.token,
+                bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
+                type: .POST,
+                discordHeaders: true,
+                json: true
+            )) { completion in
+                switch completion {
+                case let .success(value):
+                    if let token = value.token {
+                        DispatchQueue.main.async {
+                            AccordApp.tokenUpdate.send(token)
+                        }
+                        self.loginViewDataModel.captcha = false
+                    }
+                case let .failure(error):
+                    print(error)
+                }
+            }
+            return
+        }
+        self.loginViewDataModel.captchaPayload = loginViewDataModel.notification["key"] as? String ?? ""
+        Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
+            bodyObject: [
+                "email": loginViewDataModel.email,
+                "password": loginViewDataModel.password,
+                "captcha_key": loginViewDataModel.captchaPayload ?? "",
+            ],
+            type: .POST,
+            discordHeaders: true,
+            json: true
+        )) { completion in
+            switch completion {
+            case let .success(response):
+                if let token = response.token {
+                    DispatchQueue.main.async {
+                        AccordApp.tokenUpdate.send(token)
+                    }
+                    self.loginViewDataModel.captcha = false
+                }
+                if let ticket = response.ticket {
+                    Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
+                        contentType: "application/json",
+                        token: Globals.token,
+                        bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
+                        type: .POST,
+                        discordHeaders: true,
+                        json: true
+                    )) { completion in
+                        switch completion {
+                        case let .success(response) where response.token != nil:
+                            DispatchQueue.main.async {
+                                AccordApp.tokenUpdate.send(response.token)
+                            }
+                            self.loginViewDataModel.captcha = false
+                        case let .failure(error):
+                            print(error)
+                        default: break
+                        }
+                    }
+                }
+            case let .failure(error):
+                print(error)
+            }
+        }
     }
 }
 
