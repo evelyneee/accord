@@ -3,18 +3,18 @@ A faster, native discord client for your Mac. Here's a [screenshot](https://gith
 
 ### OS Requirement
 
-Accord requires macOS Monterey (12.0) or higher
+Accord requires macOS Big Sur (11.0) or higher
 
 ### Installing
 
 #### Homebrew [Recommended]
-[If you have Homebrew installed on your Mac](https://brew.sh), you can get the latest Accord release by installing the `accord` package:
+[If you have Homebrew installed on your Mac](https://brew.sh), you can get the latest Accord release by installing the `accord` cask:
 ```
-brew install --cask accord
+$ brew install --cask accord
 ```
 To upgrade Accord using Homebrew, run the following:
 ```
-brew upgrade --cask accord
+$ brew upgrade --cask accord
 ```
 
 #### GitHub Releases [Recommended]
@@ -24,21 +24,16 @@ Alternatively, you can [download the latest version of Accord via GitHub release
 [Install Accord via TestFlight](https://itunes.apple.com/us/app/testflight/id899247664?mt=8). This allows you to receive automatic updates, give feedback to the project, and stay up-to-date with changelogs. However, the TestFlight might be less updated.
 
 ### Building
-Xcode is required.
-1. Download the project and open it in Xcode 
-2. In the project settings, select Signing & Capabilities tab, select your development team and input a new bundle id.
-3. Open your terminal app and cd into the directory. 
-4. Run `xcodebuild` 
+Xcode 14.1 or above is required.
+1. Download the project and open it in Xcode.
+2. In the project settings, select the `Signing & Capabilities tab`, select your development team and input a new bundle ID.
+3. Open your terminal app and `cd` into the directory. 
+4. Run `xcodebuild`.
 
 The built product will be in the `build/Release` directory
 
-### macOS Big Sur
-macOS 11 is currently unsupported, the last supported but broken code for it is in the `big-sur` branch. 
-Some features are missing, but it could definitely be ported back to the main codebase
-If you want to help and have a macOS Big Sur device and a lot of dedication, PRs are welcomed, however I cannot maintain such OS support myself.
-
 ### Licensing
-This project is licensed under the BSD 4 clause license.
+This project is licensed under the BSD 4-clause license.
 
 ### Support
 * If you have questions, feel free to [ask them in our Discord server](https://discord.gg/nUGnmA9yFH)!

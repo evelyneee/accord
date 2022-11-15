@@ -304,34 +304,34 @@ final class LoginViewViewModel: ObservableObject {
             discordHeaders: true,
             json: true
         )) { [weak self] completion in
-            switch completion {
-            case let .success(response):
-                if let checktoken = response.token {
-                    AccordApp.tokenUpdate.send(checktoken)
-                } else {
-                    if let captchaKey = response.captcha_sitekey {
-                        DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                switch completion {
+                case let .success(response):
+                    if let checktoken = response.token {
+                        AccordApp.tokenUpdate.send(checktoken)
+                    } else {
+                        if let captchaKey = response.captcha_sitekey {
                             self?.captchaVCKey = captchaKey
                             captchaPublicKey = captchaKey
                             self?.state = .captcha
+                        } else if let ticket = response.ticket {
+                            self?.state = .twoFactor
+                            self?.ticket = ticket
+                            dprint("[Login debug] Got ticket")
                         }
-                    } else if let ticket = response.ticket {
-                        self?.state = .twoFactor
-                        self?.ticket = ticket
-                        dprint("[Login debug] Got ticket")
                     }
-                }
-                if let error = response.message {
-                    switch error {
-                    case "Invalid Form Body":
-                        self?.loginError = DiscordLoginErrors.invalidForm
-                    default:
-                        self?.loginError = DiscordLoginErrors.invalidForm
+                    if let error = response.message {
+                        switch error {
+                        case "Invalid Form Body":
+                            self?.loginError = DiscordLoginErrors.invalidForm
+                        default:
+                            self?.loginError = DiscordLoginErrors.invalidForm
+                        }
                     }
+                case let .failure(error):
+                    print(error)
+                    self?.loginError = error
                 }
-            case let .failure(error):
-                print(error)
-                self?.loginError = error
             }
         }
     }
