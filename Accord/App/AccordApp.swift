@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 import UserNotifications
 import Combine
-import ellekit
 
 var allowReconnection: Bool = false
 var reachability: Reachability? = {
