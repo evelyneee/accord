@@ -37,37 +37,37 @@ class NSWorkspace2 {
         configuration: NSWorkspace.OpenConfiguration,
         completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
     ) {
-        print("overridden method")
-        if url.absoluteString.contains("discord.com/channels/") {
-            let comp = Array(url.pathComponents.suffix(3))
-            guard comp.count == 3 else {
-                return
-            }
-            DispatchQueue.main.async {
-                Storage.globals?.select(channel: Channel(
-                    id: comp[1],
-                    type: .normal,
-                    guild_id: comp[0],
-                    position: nil,
-                    parent_id: nil
-                ))
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                ChannelView.scrollTo.send((comp[1], comp[2]))
-            })
-        } else {
-            NSWorkspace.shared.open(url)
-        }
+
     }
 }
 
 var orig: UnsafeMutableRawPointer?
 
-var last: Double = 0.0
+typealias Body = @convention (c) (NSWorkspace, Selector, URL, NSWorkspace.OpenConfiguration, ((NSRunningApplication?, (Error)?) -> Void)?) -> Void
 
-@_cdecl("jumpout")
-func replacement(_ self: NSLayoutConstraint, _ sel: Selector, _ const: Double) {
-    unsafeBitCast(orig, to: (@convention (c) (NSLayoutConstraint, Selector, Double) -> Void).self)(self, sel, const)
+@_cdecl("replacement_url_thing")
+func replacementURLHook(_ self: NSWorkspace, _ sel: Selector, _ url: URL, configuration: NSWorkspace.OpenConfiguration, completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil) {
+    print("overridden method")
+    if url.absoluteString.contains("discord.com/channels/") {
+        let comp = Array(url.pathComponents.suffix(3))
+        guard comp.count == 3 else {
+            return
+        }
+        DispatchQueue.main.async {
+            Storage.globals?.select(channel: Channel(
+                id: comp[1],
+                type: .normal,
+                guild_id: comp[0],
+                position: nil,
+                parent_id: nil
+            ))
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            ChannelView.scrollTo.send((comp[1], comp[2]))
+        })
+    } else {
+        unsafeBitCast(orig, to: Body.self)(self, sel, url, configuration, completionHandler)
+    }
 }
 
 @main
@@ -120,61 +120,14 @@ struct AccordApp: App {
                     }
                     .preferredColorScheme(darkMode ? .dark : nil)
                     .onAppear {
-                        // Globals.loadVersion()
-                        // DispatchQueue(label: "socket").async {
-                        //     let rpc = IPC().start()
-                        // }
-                        // -[NSWindow(NSDisplayCycle) _postWindowNeedsUpdateConstraintsUnlessPostingDisabled] + 1844
                         
-//                        let target: @convention (c) (NSLayoutConstraint, Selector, Double) -> Void = replacement
-//                        
-//                        messageHook(
-//                            NSLayoutConstraint.self,
-//                            NSSelectorFromString("setConstant:"),
-//                            unsafeBitCast(target, to: OpaquePointer.self),
-//                            &orig
-//                        )
-                        
-                        // NSDisplayCycle
-                        
-//                        let imp = class_getMethodImplementation(
-//                            NSClassFromString("NSWindow"),
-//                            NSSelectorFromString("_postWindowNeedsUpdateConstraintsUnlessPostingDisabled")
-//                        )!
-//
-//                        let pointer = UnsafeMutableRawPointer(bitPattern: UInt(bitPattern: imp) + 1772)
-//
-//                        print(pointer)
-//
-//                        let target: @convention(c) () -> Void = jumpout
-//                        let target_addr = Int(unsafeBitCast(target, to: UInt.self))
-//
-//                        patchFunction(pointer!, {
-//                            movk(.x16, target_addr % 65536)
-//                            movk(.x16, (target_addr / 65536) % 65536, lsl: 16)
-//                            movk(.x16, ((target_addr / 65536) / 65536) % 65536, lsl: 32)
-//                            movk(.x16, ((target_addr / 65536) / 65536) / 65536, lsl: 48) // stop overflow error :)
-//                            br(.x16)
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                            ret()
-//                        })
+                        let rep: Accord.Body = replacementURLHook
                         
                         messageHook(
                             NSWorkspace.self,
                             #selector(NSWorkspace.open(_:configuration:completionHandler:)),
-                            class_getMethodImplementation(NSWorkspace2.self, #selector(NSWorkspace2.open2))!,
-                            nil
+                            unsafeBitCast(rep, to: OpaquePointer.self),
+                            &orig
                         )
                         self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
@@ -350,3 +303,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(NSApp.mainWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
     }
 }
+
