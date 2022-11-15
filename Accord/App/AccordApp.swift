@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import UserNotifications
 import Combine
+import ellekit
 
 var allowReconnection: Bool = false
 var reachability: Reachability? = {
@@ -56,23 +57,18 @@ class NSWorkspace2 {
                 ChannelView.scrollTo.send((comp[1], comp[2]))
             })
         } else {
-            Orig().open_orig(
-                url,
-                configuration: configuration,
-                completionHandler: completionHandler
-            )
+            NSWorkspace.shared.open(url)
         }
     }
 }
 
-class Orig {
-    @objc func open_orig(
-        _ url: URL,
-        configuration: NSWorkspace.OpenConfiguration,
-        completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
-    ) {
-        print("uwu")
-    }
+var orig: UnsafeMutableRawPointer?
+
+var last: Double = 0.0
+
+@_cdecl("jumpout")
+func replacement(_ self: NSLayoutConstraint, _ sel: Selector, _ const: Double) {
+    unsafeBitCast(orig, to: (@convention (c) (NSLayoutConstraint, Selector, Double) -> Void).self)(self, sel, const)
 }
 
 @main
@@ -99,7 +95,7 @@ struct AccordApp: App {
     }
     
     static let tokenUpdate = PassthroughSubject<String?, Never>()
-
+    
     @SceneBuilder
     var body: some Scene {
         WindowGroup {
@@ -129,9 +125,58 @@ struct AccordApp: App {
                         // DispatchQueue(label: "socket").async {
                         //     let rpc = IPC().start()
                         // }
-//                        guard let method = class_getInstanceMethod(NSWorkspace.self, #selector(NSWorkspace.open(_:configuration:completionHandler:))),
-//                              let new = class_getInstanceMethod(NSWorkspace2.self, #selector(NSWorkspace2.open2)) else { return }
-//                        method_exchangeImplementations(method, new)
+                        // -[NSWindow(NSDisplayCycle) _postWindowNeedsUpdateConstraintsUnlessPostingDisabled] + 1844
+                        
+//                        let target: @convention (c) (NSLayoutConstraint, Selector, Double) -> Void = replacement
+//                        
+//                        messageHook(
+//                            NSLayoutConstraint.self,
+//                            NSSelectorFromString("setConstant:"),
+//                            unsafeBitCast(target, to: OpaquePointer.self),
+//                            &orig
+//                        )
+                        
+                        // NSDisplayCycle
+                        
+//                        let imp = class_getMethodImplementation(
+//                            NSClassFromString("NSWindow"),
+//                            NSSelectorFromString("_postWindowNeedsUpdateConstraintsUnlessPostingDisabled")
+//                        )!
+//
+//                        let pointer = UnsafeMutableRawPointer(bitPattern: UInt(bitPattern: imp) + 1772)
+//
+//                        print(pointer)
+//
+//                        let target: @convention(c) () -> Void = jumpout
+//                        let target_addr = Int(unsafeBitCast(target, to: UInt.self))
+//
+//                        patchFunction(pointer!, {
+//                            movk(.x16, target_addr % 65536)
+//                            movk(.x16, (target_addr / 65536) % 65536, lsl: 16)
+//                            movk(.x16, ((target_addr / 65536) / 65536) % 65536, lsl: 32)
+//                            movk(.x16, ((target_addr / 65536) / 65536) / 65536, lsl: 48) // stop overflow error :)
+//                            br(.x16)
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                            ret()
+//                        })
+                        
+                        messageHook(
+                            NSWorkspace.self,
+                            #selector(NSWorkspace.open(_:configuration:completionHandler:)),
+                            class_getMethodImplementation(NSWorkspace2.self, #selector(NSWorkspace2.open2))!,
+                            nil
+                        )
                         self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()
