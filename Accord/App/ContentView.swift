@@ -61,7 +61,6 @@ struct ContentView: View {
             LoadingView()
                 .padding(200)
                 .onAppear {
-                    print("h")
                     concurrentQueue.async {
                         do {
                             guard serverListView == nil else {

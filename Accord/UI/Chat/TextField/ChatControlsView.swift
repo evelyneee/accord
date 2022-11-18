@@ -244,7 +244,7 @@ struct ChatControls: View {
             .onReceive(
                 NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))
                     .debounce(for: .seconds(0.5), scheduler: RunLoop.current)
-            ) { [weak viewModel] _ in
+            ) { _ in
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                 if let rawData = data,
                    let string = String(data: rawData, encoding: .utf8),
@@ -358,7 +358,8 @@ struct ChatControls: View {
                 }
                 .textFieldStyle(PlainTextFieldStyle())
                 .fileImporter(isPresented: $fileImport, allowedContentTypes: [.data]) { result in
-                    self.fileUploads.append((try? Data(contentsOf: try! result.get()), try? result.get()))
+                    guard let url = try? result.get() else { return }
+                    self.fileUploads.append((try? Data(contentsOf: url), try? result.get()))
                 }
                 .onExitCommand { self.replyingTo = nil }
             }

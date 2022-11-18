@@ -230,7 +230,6 @@ struct ServerListView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Refresh")), perform: { pub in
             guard let uInfo = pub.userInfo as? [String: Int],
                   let firstKey = uInfo.first else { return }
-            print(firstKey)
             self.selectedServer = firstKey.key
             self.appModel.selectedGuild = Array(appModel.folders.map(\.guilds).joined())[keyed: firstKey.key]
             self.appModel.selectedChannel = self.appModel.selectedGuild?.channels.first(where: { $0.id == String(firstKey.value) })
@@ -247,7 +246,6 @@ struct ServerListView: View {
         .onAppear {
             if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.appModel.selectedGuild = upcomingGuild
-                //self.selectedChannel.wrappedValue = self.viewModel.upcomingSelection
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {

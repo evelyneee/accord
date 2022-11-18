@@ -19,3 +19,18 @@ extension Publisher {
         mapError { $0 as Error }.eraseToAnyPublisher()
     }
 }
+
+precedencegroup ForwardApplication {
+    associativity: left
+    higherThan: AssignmentPrecedence
+}
+
+infix operator |> : ForwardApplication
+
+public func |> <T, U>(x: T, f: (T) -> U) -> U {
+    return f(x)
+}
+
+public func |> <T, U>(x: T, keyPath: KeyPath<T, U>) -> U {
+    return x[keyPath: keyPath]
+}

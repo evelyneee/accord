@@ -35,7 +35,7 @@ struct PlatformNavigationLink<Destination: View>: View {
     var item: Channel
     @Binding var selection: Channel?
     
-    var destination: () -> Destination
+    @ViewBuilder var destination: () -> Destination
     
     @ViewBuilder
     var body: some View {
