@@ -13,7 +13,7 @@ struct PrivateChannelsView: View {
     var appModel: AppGlobals
     
     var body: some View {
-        List(appModel.privateChannels, id: \.self, selection: self.$appModel.selectedChannel) { channel in
+        List($appModel.privateChannels, id: \.id, selection: self.$appModel.selectedChannel) { $channel in
             PlatformNavigationLink(
                 item: channel,
                 selection: self.$appModel.selectedChannel,

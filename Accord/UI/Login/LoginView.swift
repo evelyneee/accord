@@ -231,7 +231,7 @@ struct LoginView: View {
                     self.loginViewDataModel.captchaPayload = loginViewDataModel.notification["key"] as? String ?? ""
                     Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
                         bodyObject: [
-                            "email": loginViewDataModel.email,
+                            "login": loginViewDataModel.email,
                             "password": loginViewDataModel.password,
                             "captcha_key": loginViewDataModel.captchaPayload ?? "",
                         ],
@@ -297,7 +297,7 @@ final class LoginViewViewModel: ObservableObject {
     func login(_ email: String, _ password: String, _: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
             bodyObject: [
-                "email": email,
+                "login": email,
                 "password": password,
             ],
             type: .POST,

@@ -364,6 +364,7 @@ struct ChannelView: View {
             guard let appModel, let viewModel else { return }
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
                 appModel.selectedChannel = channel
+                print("set channel")
                 self.channelReset(channel)
             }
         })

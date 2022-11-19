@@ -244,7 +244,7 @@ struct ChatControls: View {
             .onReceive(
                 NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))
                     .debounce(for: .seconds(0.5), scheduler: RunLoop.current)
-            ) { [weak viewModel] _ in
+            ) { _ in
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                 if let rawData = data,
                    let string = String(data: rawData, encoding: .utf8),
@@ -376,11 +376,7 @@ extension Data {
 
 extension Array where Element: Hashable {
     func removingDuplicates() -> [Element] {
-        var addedDict: [Element: Bool] = .init()
-
-        return filter {
-            addedDict.updateValue(true, forKey: $0) == nil
-        }
+        return Array(Set(self))
     }
 
     mutating func removeDuplicates() {
