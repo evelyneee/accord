@@ -39,6 +39,7 @@
 		9E6BCC64277E8E850085F279 /* Print++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC63277E8E850085F279 /* Print++.swift */; };
 		9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodeRPC.swift */; };
 		9E745EC8292A5885001EBE4A /* CallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745EC7292A5885001EBE4A /* CallView.swift */; };
+		9E745ED0292A6146001EBE4A /* AccordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745ECF292A6146001EBE4A /* AccordTests.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7834D12781F2D500ABB9F8 /* Combine++.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
@@ -142,6 +143,16 @@
 		A8F84D6326DF19E5007A8625 /* Sticker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F84D6226DF19E5007A8625 /* Sticker.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		9E745ED1292A6146001EBE4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 32F4C94F256D7D3300343BB3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 32F4C956256D7D3300343BB3;
+			remoteInfo = Accord;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		32ADD59925839980008D1715 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -204,6 +215,8 @@
 		9E6BCC63277E8E850085F279 /* Print++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Print++.swift"; sourceTree = "<group>"; };
 		9E6BCC65277E908B0085F279 /* XcodeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeRPC.swift; sourceTree = "<group>"; };
 		9E745EC7292A5885001EBE4A /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
+		9E745ECD292A6146001EBE4A /* AccordTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AccordTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E745ECF292A6146001EBE4A /* AccordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordTests.swift; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7834D12781F2D500ABB9F8 /* Combine++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine++.swift"; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
@@ -319,6 +332,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9E745ECA292A6146001EBE4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -353,6 +373,7 @@
 			children = (
 				9E6B71072783ABD500A26CB6 /* README.md */,
 				32F4C959256D7D3300343BB3 /* Accord */,
+				9E745ECE292A6146001EBE4A /* AccordTests */,
 				32ADD5872583997E008D1715 /* Frameworks */,
 				32F4C958256D7D3300343BB3 /* Products */,
 			);
@@ -363,6 +384,7 @@
 			children = (
 				490B2AAE278D20B100EA4F31 /* Debug */,
 				490B2AAD278D20AA00EA4F31 /* Release */,
+				9E745ECD292A6146001EBE4A /* AccordTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -562,6 +584,14 @@
 				9EFACB9728D3DB82005AA690 /* AppModel++.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		9E745ECE292A6146001EBE4A /* AccordTests */ = {
+			isa = PBXGroup;
+			children = (
+				9E745ECF292A6146001EBE4A /* AccordTests.swift */,
+			);
+			path = AccordTests;
 			sourceTree = "<group>";
 		};
 		9E7BC56B27472308008E3FAB /* Markdown */ = {
@@ -878,17 +908,39 @@
 			productReference = 32F4C957256D7D3300343BB3 /* Accord.app */;
 			productType = "com.apple.product-type.application";
 		};
+		9E745ECC292A6146001EBE4A /* AccordTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E745ED3292A6146001EBE4A /* Build configuration list for PBXNativeTarget "AccordTests" */;
+			buildPhases = (
+				9E745EC9292A6146001EBE4A /* Sources */,
+				9E745ECA292A6146001EBE4A /* Frameworks */,
+				9E745ECB292A6146001EBE4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9E745ED2292A6146001EBE4A /* PBXTargetDependency */,
+			);
+			name = AccordTests;
+			productName = AccordTests;
+			productReference = 9E745ECD292A6146001EBE4A /* AccordTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		32F4C94F256D7D3300343BB3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1300;
+				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
 					32F4C956256D7D3300343BB3 = {
 						CreatedOnToolsVersion = 12.2;
+					};
+					9E745ECC292A6146001EBE4A = {
+						CreatedOnToolsVersion = 14.1;
+						TestTargetID = 32F4C956256D7D3300343BB3;
 					};
 				};
 			};
@@ -907,6 +959,7 @@
 			projectRoot = "";
 			targets = (
 				32F4C956256D7D3300343BB3 /* Accord */,
+				9E745ECC292A6146001EBE4A /* AccordTests */,
 			);
 		};
 /* End PBXProject section */
@@ -917,6 +970,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				32F4C95F256D7D3500343BB3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E745ECB292A6146001EBE4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1060,7 +1120,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9E745EC9292A6146001EBE4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E745ED0292A6146001EBE4A /* AccordTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9E745ED2292A6146001EBE4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 32F4C956256D7D3300343BB3 /* Accord */;
+			targetProxy = 9E745ED1292A6146001EBE4A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		32F4C97B256D7D3500343BB3 /* Debug */ = {
@@ -1278,6 +1354,44 @@
 			};
 			name = Release;
 		};
+		9E745ED4292A6146001EBE4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VF46MYDSGH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.AccordTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Accord.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Accord";
+			};
+			name = Debug;
+		};
+		9E745ED5292A6146001EBE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VF46MYDSGH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = red.evelyn.AccordTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Accord.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Accord";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1295,6 +1409,15 @@
 			buildConfigurations = (
 				32F4C97E256D7D3500343BB3 /* Debug */,
 				32F4C97F256D7D3500343BB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E745ED3292A6146001EBE4A /* Build configuration list for PBXNativeTarget "AccordTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E745ED4292A6146001EBE4A /* Debug */,
+				9E745ED5292A6146001EBE4A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

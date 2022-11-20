@@ -43,7 +43,6 @@ final class SlashCommands {
                 "id": id,
                 "type": dataType,
                 "name": appName,
-                "guild_id": guildID,
                 "application_command": [
                     "application_id": applicationID,
                     "default_member_permissions": NSNull(),
@@ -54,18 +53,25 @@ final class SlashCommands {
                     "name": appName,
                     "type": appType,
                     "version": appVersion,
-                    "options": options.map { option -> [String: Any] in
-                        [
-                            "description": option.description,
-                            "name": option.name,
-                            "required": option.required ?? false,
-                            "type": option.type,
-                        ]
-                    },
-                ],
+                    "options": { () -> Any? in
+                        let dict = options.map { option -> [String: Any] in
+                            [
+                                "description": option.description,
+                                "name": option.name,
+                                "required": option.required ?? false,
+                                "type": option.type,
+                            ]
+                        }
+                        if dict.isEmpty {
+                            return nil
+                        }
+                        return dict
+                    }(),
+                ].compactMapValues { $0 },
             ],
             "nonce": generateFakeNonce(),
         ]
+        
         Request.multipartData(
             url: URL(string: "\(rootURL)/interactions"),
             with: params,
