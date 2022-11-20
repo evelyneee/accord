@@ -15,8 +15,7 @@ enum LoginState {
 }
 
 enum DiscordLoginErrors: Error {
-    case invalidForm
-    case missingFields
+    case error(String)
 }
 
 extension NSApplication {
@@ -63,8 +62,7 @@ struct LoginView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notification in
-            self.viewModel.state = .twoFactor
-            self.loginViewDataModel.notification = notification.userInfo as? [String: Any] ?? [:]
+            try? self.viewModel.login(self.loginViewDataModel.email, self.loginViewDataModel.password, notification.userInfo?["key"] as? String ?? "")
             print(notification)
         }
         .padding()
@@ -96,8 +94,12 @@ struct LoginView: View {
     private var errorView: some View {
         if let error = viewModel.loginError {
             switch error {
-            case DiscordLoginErrors.invalidForm:
-                Text("Wrong username/password")
+            case DiscordLoginErrors.error(let str):
+                if str == "Invalid Form Body" {
+                    Text("Error: ")+Text("Invalid form body, check your mailbox for verifications")
+                } else {
+                    Text("Error: ")+Text(str).foregroundColor(.red)
+                }
             default:
                 EmptyView()
             }
@@ -178,6 +180,7 @@ struct LoginView: View {
                     }
                     .padding([.bottom], 20)
                     AccordTabView
+                    errorView
                 }
             }
             .padding()
@@ -216,6 +219,7 @@ struct LoginView: View {
                         )) { completion in
                             switch completion {
                             case let .success(value):
+                                dump(value)
                                 if let token = value.token {
                                     DispatchQueue.main.async {
                                         AccordApp.tokenUpdate.send(token)
@@ -227,50 +231,6 @@ struct LoginView: View {
                             }
                         }
                         return
-                    }
-                    self.loginViewDataModel.captchaPayload = loginViewDataModel.notification["key"] as? String ?? ""
-                    Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
-                        bodyObject: [
-                            "login": loginViewDataModel.email,
-                            "password": loginViewDataModel.password,
-                            "captcha_key": loginViewDataModel.captchaPayload ?? "",
-                        ],
-                        type: .POST,
-                        discordHeaders: true,
-                        json: true
-                    )) { completion in
-                        switch completion {
-                        case let .success(response):
-                            if let token = response.token {
-                                DispatchQueue.main.async {
-                                    AccordApp.tokenUpdate.send(token)
-                                }
-                                self.loginViewDataModel.captcha = false
-                            }
-                            if let ticket = response.ticket {
-                                Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/mfa/totp"), headers: Headers(
-                                    contentType: "application/json",
-                                    token: Globals.token,
-                                    bodyObject: ["code": loginViewDataModel.twoFactor, "ticket": ticket],
-                                    type: .POST,
-                                    discordHeaders: true,
-                                    json: true
-                                )) { completion in
-                                    switch completion {
-                                    case let .success(response) where response.token != nil:
-                                        DispatchQueue.main.async {
-                                            AccordApp.tokenUpdate.send(response.token)
-                                        }
-                                        self.loginViewDataModel.captcha = false
-                                    case let .failure(error):
-                                        print(error)
-                                    default: break
-                                    }
-                                }
-                            }
-                        case let .failure(error):
-                            print(error)
-                        }
                     }
                 }
                 .controlSize(.large)
@@ -294,12 +254,13 @@ final class LoginViewViewModel: ObservableObject {
 
     init() {}
 
-    func login(_ email: String, _ password: String, _: String) throws {
+    func login(_ email: String, _ password: String, _ captcha: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
             bodyObject: [
                 "login": email,
                 "password": password,
-            ],
+                "captcha_key":captcha
+            ].compactMapValues { $0 },
             type: .POST,
             discordHeaders: true,
             json: true
@@ -307,6 +268,13 @@ final class LoginViewViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch completion {
                 case let .success(response):
+                    dump(response)
+                    if let error = response.message {
+                        print(error)
+                        self?.loginError = DiscordLoginErrors.error(error)
+                        self?.state = .initial
+                        return
+                    }
                     if let checktoken = response.token {
                         AccordApp.tokenUpdate.send(checktoken)
                     } else {
@@ -318,14 +286,6 @@ final class LoginViewViewModel: ObservableObject {
                             self?.state = .twoFactor
                             self?.ticket = ticket
                             dprint("[Login debug] Got ticket")
-                        }
-                    }
-                    if let error = response.message {
-                        switch error {
-                        case "Invalid Form Body":
-                            self?.loginError = DiscordLoginErrors.invalidForm
-                        default:
-                            self?.loginError = DiscordLoginErrors.invalidForm
                         }
                     }
                 case let .failure(error):

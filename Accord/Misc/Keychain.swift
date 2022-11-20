@@ -9,9 +9,10 @@ final class KeychainManager {
             kSecAttrAccessGroup as String: "group.evelyn.accord",
             kSecValueData as String: data,
         ] as [String: Any]
-
-        SecItemDelete(query as CFDictionary)
-        return SecItemAdd(query as CFDictionary, nil)
+        return DispatchQueue.global().sync {
+            SecItemDelete(query as CFDictionary)
+            return SecItemAdd(query as CFDictionary, nil)
+        }
     }
 
     class func load(key: String) -> Data? {

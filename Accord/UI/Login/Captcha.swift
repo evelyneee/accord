@@ -47,7 +47,7 @@ struct CaptchaViewControllerSwiftUI: NSViewRepresentable {
 final class ScriptHandler: NSObject, WKScriptMessageHandler {
     func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key": message.body as! String])
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "Captcha"), object: nil, userInfo: ["key": message.body as? String ?? "ERROR GETTING MESSAGE BODY"])
         }
     }
 }

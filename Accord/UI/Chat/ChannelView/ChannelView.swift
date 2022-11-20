@@ -144,7 +144,7 @@ struct ChannelView: View {
         self.viewModel.initializeChannel()
     }
     
-    @_transparent @ViewBuilder
+    @_transparent @_optimize(speed) @ViewBuilder
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
         MessageCellView(
