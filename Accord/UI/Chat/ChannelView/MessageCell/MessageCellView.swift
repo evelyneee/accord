@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MessageCellView: View, Equatable {
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
-        lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
+        lhs.message.id == rhs.message.id && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
 
     @Binding var message: Message

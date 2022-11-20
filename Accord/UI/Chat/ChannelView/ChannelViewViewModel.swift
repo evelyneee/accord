@@ -22,16 +22,16 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     var messages: [Message] = .init()
     
     @MainActor @Published
-    var nicks: [String: String] = .init()
+    var nicks: [String?: String] = .init()
     
     @MainActor @Published
-    var roles: [String: String] = .init()
+    var roles: [String?: String] = .init()
     
     @MainActor @Published
-    var avatars: [String: String] = .init()
+    var avatars: [String?: String] = .init()
     
     @MainActor @Published
-    var pronouns: [String: String] = .init()
+    var pronouns: [String?: String] = .init()
 
     @MainActor @Published
     var memberList: [OPSItems] = .init()

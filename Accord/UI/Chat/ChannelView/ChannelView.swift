@@ -149,13 +149,13 @@ struct ChannelView: View {
         let message = binding.wrappedValue
         MessageCellView(
             message: binding,
-            nick: $viewModel.nicks[message.author?.id ?? ""],
-            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
-            pronouns: $viewModel.pronouns[message.author?.id ?? ""],
-            avatar: $viewModel.avatars[message.author?.id ?? ""],
+            nick: $viewModel.nicks[message.author?.id],
+            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id],
+            pronouns: $viewModel.pronouns[message.author?.id],
+            avatar: $viewModel.avatars[message.author?.id],
             permissions: $viewModel.permissions,
-            role: $viewModel.roles[message.author?.id ?? ""],
-            replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
+            role: $viewModel.roles[message.author?.id],
+            replyRole: $viewModel.roles[message.referencedMessage?.author?.id],
             replyingTo: $replyingTo
         )
         .equatable()
