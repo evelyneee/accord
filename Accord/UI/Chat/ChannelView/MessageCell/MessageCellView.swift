@@ -129,6 +129,13 @@ struct MessageCellView: View, Equatable {
             case .guildReachedLevelThree:
                 ServerLevelUpView(level: 3)
                     .padding(.leading, leftPadding)
+            case .call:
+                if let user = message.author {
+                    CallView(
+                        user: user
+                    )
+                    .padding(.leading, leftPadding)
+                }
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
