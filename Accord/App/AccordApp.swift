@@ -121,6 +121,8 @@ struct AccordApp: App {
                     .preferredColorScheme(darkMode ? .dark : nil)
                     .onAppear {
                         
+                        UserDefaults.standard.set(false, forKey: "NSWindowAssertWhenDisplayCycleLimitReached")
+                        
                         let rep: Accord.Body = replacementURLHook
                         
                         messageHook(
