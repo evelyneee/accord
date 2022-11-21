@@ -167,8 +167,8 @@ struct MessageCellView: View, Equatable {
                             }
                         } else {
                             AuthorTextView(
-                                message: self.message,
-                                pronouns: self.pronouns,
+                                message: self.$message,
+                                pronouns: self.$pronouns,
                                 nick: self.$nick,
                                 role: self.$role
                             )

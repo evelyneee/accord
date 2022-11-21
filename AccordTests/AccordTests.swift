@@ -10,6 +10,7 @@ import Accord
 
 import XCTest
 import Combine
+import SwiftUI
 
 final class AccordTests: XCTestCase {
 
@@ -23,22 +24,28 @@ final class AccordTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testMarkdownParser() async throws {
-        let markdown = """
-        **uwu**
-        > orange
-        >orange
-        *apple*
-        """
-        let markdownParsed = try await Markdown.markAll(text: markdown, channelInfo: ("", "")).values.first(where: { _ in true })
-        print(markdownParsed)
-    }
-
-    func testPerformanceExample() throws {
+    func testMarkdownParser() {
         // This is an example of a performance test case.
         measure {
-            // Put the code you want to measure the time of here.
+            let sem = DispatchSemaphore(value: 0)
+            Task.detached {
+                let markdown = """
+                **uwu**
+                > orange
+                >orange
+                *apple*
+                **uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu** **uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu** **uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu****uwu**
+                > orange
+                > orange
+                > orange
+                > orange
+                > orange> orange
+                *apple* *apple* *apple* *apple* *apple* *apple* *apple*
+                """
+                _ = try await Markdown.markAll(text: markdown, channelInfo: ("", "")).values.first(where: { _ in true })
+                sem.signal()
+            }
+            sem.wait()
         }
     }
-
 }

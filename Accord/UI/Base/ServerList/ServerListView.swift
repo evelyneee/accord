@@ -162,6 +162,8 @@ struct ServerListView: View {
                 // MARK: - Loading UI
                 
                 Group {
+                    // these aren't separate views due to the STUPID problem where navigationsplitview glitches
+                    // if the list isn't in the same view :(
                     if selectedServer == "@me" {
                         privateChannelsView.animation(nil, value: UUID())
                     } else if let guild = self.appModel.selectedGuild {
