@@ -39,7 +39,7 @@ struct StickersView: View {
     
     var body: some View {
         ScrollView {
-            GridStack(self.$stickersLoaded, rowAlignment: .center, columns: 2) { $sticker in
+            GridStack(self.$stickersLoaded, rowAlignment: .center, columns: 3) { $sticker in
                 Button {
                     // {"content":"","nonce":"1033465155922427904","tts":false,"sticker_ids":["862588476410691624"]}
                     Request.ping(url: URL(string: "\(rootURL)/channels/\(channelID)/messages"), headers: Headers(
@@ -52,23 +52,24 @@ struct StickersView: View {
                         json: true
                     ))
                 } label: {
-                    if sticker.format_type == .lottie {
-                        GifView("https://cdn.discordapp.com/stickers/\(sticker.id).json")
-                            .frame(width: 75, height: 75)
-                            .cornerRadius(3)
-                            .drawingGroup()
-                    } else if sticker.format_type == .apng {
-                        GifView("https://cdn.discordapp.com/stickers/\(sticker.id).png?size=96")
-                            .frame(width: 75, height: 75)
-                            .cornerRadius(3)
-                            .drawingGroup()
-                    } else {
-                        Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=96")
-                            .equatable()
-                            .scaledToFit()
-                            .frame(width: 75, height: 75)
-                            .cornerRadius(3)
+                    Group {
+                        if sticker.format_type == .lottie {
+                            GifView("https://cdn.discordapp.com/stickers/\(sticker.id).json")
+                                .frame(width: 75, height: 75)
+                                .cornerRadius(3)
+                        } else if sticker.format_type == .apng {
+                            GifView("https://cdn.discordapp.com/stickers/\(sticker.id).png?size=96")
+                                .frame(width: 75, height: 75)
+                                .cornerRadius(3)
+                        } else {
+                            Attachment("https://media.discordapp.net/stickers/\(sticker.id).png?size=96")
+                                .equatable()
+                                .scaledToFit()
+                                .frame(width: 75, height: 75)
+                                .cornerRadius(3)
+                        }
                     }
+                    .drawingGroup()
                 }
                 .buttonStyle(.borderless)
             }
