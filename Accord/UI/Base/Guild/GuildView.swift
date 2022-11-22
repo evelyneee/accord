@@ -71,6 +71,12 @@ extension ServerListView {
                            let value = guild.newChannelID,
                            channel.id == value {
                             print("SET CHANNEL")
+                            if self.appModel.selectedChannel?.guild_id == nil {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    appModel?.selectedChannel = channel
+                                }
+                                return
+                            }
                             appModel?.selectedChannel = channel
                         }
                     })

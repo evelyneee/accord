@@ -33,6 +33,11 @@ extension ServerListView {
                         )
                     }
                 )
+                .onAppear {
+                    if UserDefaults.standard.string(forKey: "AccordChannelDMs") == channel.id {
+                        self.appModel.selectedChannel = channel
+                    }
+                }
                 .contextMenu {
                     Button("Copy Channel ID") {
                         NSPasteboard.general.clearContents()

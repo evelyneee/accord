@@ -387,17 +387,17 @@ struct ChannelView: View {
                 await self.viewModel.initializeChannel()
                 await self.viewModel.setPermissions(self.appModel)
                 DispatchQueue.main.async {
-                    if let recipients = channel.recipients, !recipients.isEmpty {
+                    if let recipients = viewModel.channel.recipients, !recipients.isEmpty {
                         viewModel.memberList = recipients.map(OPSItems.init)
                     }
                     if let cache = Storage.globals?.listCache[viewModel.channelID] {
                         DispatchQueue.main.async {
                             self.viewModel.memberList = cache
                         }
-                    } else if channel.guild_id != "@me", memberListShown {
-                        try? wss.subscribeWithList(for: channel.guild_id ?? "@me", in: channel.id)
-                    } else if channel.guild_id != "@me" {
-                        try? wss.subscribe(to: channel.guild_id ?? "@me")
+                    } else if viewModel.channel.guild_id != "@me", memberListShown {
+                        try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
+                    } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
+                        try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")
                     }
                 }
             }
