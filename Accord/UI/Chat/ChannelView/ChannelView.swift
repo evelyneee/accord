@@ -147,6 +147,7 @@ struct ChannelView: View {
     @_transparent @_optimize(speed) @ViewBuilder
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
+        let blocked = Storage.users[message.author?.id ?? ""]?.relationship?.type == .blocked
         MessageCellView(
             message: binding,
             nick: $viewModel.nicks[message.author?.id],
@@ -159,6 +160,7 @@ struct ChannelView: View {
             replyingTo: $replyingTo
         )
         .equatable()
+        .if(blocked, transform: { $0.hidden() })
         .id(message.id)
         .listRowInsets(EdgeInsets(
             top: 3.5,
@@ -226,7 +228,6 @@ struct ChannelView: View {
         }
         .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-        .fixedSize(horizontal: false, vertical: true)
     }
     
     @ViewBuilder
@@ -377,7 +378,7 @@ struct ChannelView: View {
                     DispatchQueue.main.async {
                         self.viewModel.memberList = cache
                     }
-                } else if viewModel.memberList.isEmpty, channel.guild_id != "@me", memberListShown {
+                } else if viewModel.memberList.isEmpty, let guildID = channel.guild_id, guildID != "@me", memberListShown {
                     try? wss?.memberList(for: channel.guild_id ?? "@me", in: channel.id)
                 }
             }
@@ -394,7 +395,7 @@ struct ChannelView: View {
                         DispatchQueue.main.async {
                             self.viewModel.memberList = cache
                         }
-                    } else if viewModel.channel.guild_id != "@me", memberListShown {
+                    } else if let guildID = channel.guild_id, guildID != "@me", memberListShown {
                         try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
                     } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
                         try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")

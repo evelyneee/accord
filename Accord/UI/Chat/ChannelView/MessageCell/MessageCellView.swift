@@ -187,7 +187,6 @@ struct MessageCellView: View, Equatable {
                     }
                     Spacer()
                 }
-                .if(Storage.users[self.message.author?.id ?? ""]?.relationship?.type == .blocked, transform: { $0.hidden() })
             }
             if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
                 StickerView(
