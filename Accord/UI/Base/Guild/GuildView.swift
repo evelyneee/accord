@@ -67,7 +67,10 @@ extension ServerListView {
                         }
                     )
                     .onReceive(self.appModel.$selectedGuild, perform: { [weak appModel] guild in
-                        if let guild, let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String, channel.id == value {
+                        if let guild,
+                           let value = guild.newChannelID,
+                           channel.id == value {
+                            print("SET CHANNEL")
                             appModel?.selectedChannel = channel
                         }
                     })

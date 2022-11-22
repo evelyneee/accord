@@ -40,6 +40,7 @@
 		9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6BCC65277E908B0085F279 /* XcodeRPC.swift */; };
 		9E745EC8292A5885001EBE4A /* CallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745EC7292A5885001EBE4A /* CallView.swift */; };
 		9E745ED0292A6146001EBE4A /* AccordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745ECF292A6146001EBE4A /* AccordTests.swift */; };
+		9E745EEE292C2C76001EBE4A /* NSTableView++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E745EED292C2C76001EBE4A /* NSTableView++.swift */; };
 		9E7803A0273B6FCE000A8DDD /* LoginPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */; };
 		9E7834D22781F2D500ABB9F8 /* Combine++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7834D12781F2D500ABB9F8 /* Combine++.swift */; };
 		9E7BC56D27472317008E3FAB /* Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BC56C27472317008E3FAB /* Markdown.swift */; };
@@ -217,6 +218,7 @@
 		9E745EC7292A5885001EBE4A /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
 		9E745ECD292A6146001EBE4A /* AccordTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AccordTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E745ECF292A6146001EBE4A /* AccordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordTests.swift; sourceTree = "<group>"; };
+		9E745EED292C2C76001EBE4A /* NSTableView++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTableView++.swift"; sourceTree = "<group>"; };
 		9E78039F273B6FCE000A8DDD /* LoginPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPayloads.swift; sourceTree = "<group>"; };
 		9E7834D12781F2D500ABB9F8 /* Combine++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine++.swift"; sourceTree = "<group>"; };
 		9E7BC56C27472317008E3FAB /* Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markdown.swift; sourceTree = "<group>"; };
@@ -548,6 +550,7 @@
 				9EB3582327BFFD3E0046A136 /* Collection++.swift */,
 				9EDD136527D5A55A000685E6 /* String++.swift */,
 				9E56E09E29245AC600FDCF37 /* ObjC.swift */,
+				9E745EED292C2C76001EBE4A /* NSTableView++.swift */,
 			);
 			path = PlusPlus;
 			sourceTree = "<group>";
@@ -1045,6 +1048,7 @@
 				9E8F8CA82774037F00A77600 /* MentionsView.swift in Sources */,
 				9E6BCC66277E908B0085F279 /* XcodeRPC.swift in Sources */,
 				9E4F3FC527764E200003E383 /* GifView.swift in Sources */,
+				9E745EEE292C2C76001EBE4A /* NSTableView++.swift in Sources */,
 				9E82875127BD6C5400953A7B /* Permissions.swift in Sources */,
 				A80FEC31272583B4005F9950 /* Embed.swift in Sources */,
 				A8A14CC326CE9A29006C4AEC /* Roles.swift in Sources */,

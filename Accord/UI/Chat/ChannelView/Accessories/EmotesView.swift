@@ -48,39 +48,36 @@ struct EmotesView: View, Equatable {
                     TextField("Search emotes", text: $search)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .background(Material.thick) // blurred background
                         .onSubmit {
                             self.onSelect(DiscordEmote(id: "stock", name: self.search))
                             self.presentationMode.wrappedValue.dismiss()
                         }
                     TabView(selection: self.$selection) {
                         ScrollView {
-                            Spacer().frame(height: 45)
                             LazyVStack(alignment: .leading) {
                                 if search.isEmpty {
                                     let keys = Array(Storage.emotes.keys)
                                     let nonEmptyKeys = keys.filter { !(Storage.emotes[$0] ?? []).isEmpty }
+                                    let _ = print(keys, nonEmptyKeys)
                                     ForEach(nonEmptyKeys, id: \.self) { key in
-                                        if !(Storage.emotes[key]?.isEmpty == false) {
-                                            Section(header: Text(key.components(separatedBy: "$")[1])) {
-                                                LazyVGrid(columns: columns) {
-                                                    ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
-                                                        Button(action: {
-                                                            chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
-                                                            onSelect(emote)
-                                                            self.presentationMode.wrappedValue.dismiss()
-                                                        }) {
-                                                            VStack {
-                                                                HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
-                                                                    .frame(width: 29, height: 29)
-                                                                    .fixedSize()
-                                                            }
-                                                            .frame(width: 30, height: 30)
-                                                            .fixedSize()
+                                        Section(header: Text(key.components(separatedBy: "$")[1])) {
+                                            LazyVGrid(columns: columns) {
+                                                ForEach(Storage.emotes[key] ?? [], id: \.id) { emote in
+                                                    Button(action: {
+                                                        chatText.append(contentsOf: "<\(emote.animated ?? false ? "a" : ""):\(emote.name):\(emote.id)> ")
+                                                        onSelect(emote)
+                                                        self.presentationMode.wrappedValue.dismiss()
+                                                    }) {
+                                                        VStack {
+                                                            HoveredAttachment(cdnURL + "/emojis/\(emote.id).png?size=48").equatable()
+                                                                .frame(width: 29, height: 29)
+                                                                .fixedSize()
                                                         }
-                                                        .buttonStyle(EmoteButton())
+                                                        .frame(width: 30, height: 30)
                                                         .fixedSize()
                                                     }
+                                                    .buttonStyle(EmoteButton())
+                                                    .fixedSize()
                                                 }
                                             }
                                         }

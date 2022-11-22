@@ -178,12 +178,26 @@ struct AccordApp: App {
                     .tabItem {
                         Label("General", systemImage: "gear")
                     }
-                    .tag(Tabs.general)
+                    .tag(0)
                 ProfileEditingView()
                     .tabItem {
                         Label("Profile", systemImage: "person")
                     }
-                    .tag(Tabs.rpc)
+                    .tag(1)
+                VStack {
+                    Button("Log out") {
+                        logOut()
+                    }
+                    .controlSize(.large)
+                    .dynamicTypeSize(.xxxLarge)
+                    .keyboardShortcut(.defaultAction)
+                    .accentColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+                .tabItem {
+                    Label("Log out", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                .tag(2)
             }
             .frame(minHeight: 500)
         }

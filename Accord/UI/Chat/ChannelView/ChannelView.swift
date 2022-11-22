@@ -265,7 +265,7 @@ struct ChannelView: View {
                     MessagePlaceholders()
                 }
             }
-            .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+            .background(Color(NSColor.alternatingContentBackgroundColors[0]))
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
             .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
@@ -285,7 +285,7 @@ struct ChannelView: View {
     }
     
     var core: some View {
-        HStack {
+        HStack(spacing: 0) {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     list
@@ -307,6 +307,7 @@ struct ChannelView: View {
                 blurredTextField
             }
             if memberListShown {
+                Divider()
                 MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
                     .frame(width: 250)
                     .onAppear { [weak viewModel] in
@@ -317,6 +318,7 @@ struct ChannelView: View {
                     }
             }
             if showSearch {
+                Divider()
                 VStack(alignment: .leading) {
                     HStack {
                         TextField("Search", text: self.$searchText)
@@ -361,20 +363,43 @@ struct ChannelView: View {
             }
         }
         .onReceive(self.appModel.$selectedChannel, perform: { [weak appModel, weak viewModel] channel in
-            guard let appModel, let viewModel else { return }
+            guard let appModel, let viewModel, channel?.type != .section else { self.appModel.selectedChannel = self.viewModel.channel; return }
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
-                appModel.selectedChannel = channel
+                if channel.guild_id != self.viewModel.guildID {
+                    self.viewModel.memberList.removeAll()
+                }
+                if let recipients = channel.recipients, !recipients.isEmpty {
+                    viewModel.memberList = recipients.map(OPSItems.init)
+                }
                 print("set channel")
                 self.channelReset(channel)
+                if let cache = Storage.globals?.listCache[viewModel.channelID] {
+                    DispatchQueue.main.async {
+                        self.viewModel.memberList = cache
+                    }
+                } else if viewModel.memberList.isEmpty, channel.guild_id != "@me", memberListShown {
+                    try? wss?.memberList(for: channel.guild_id ?? "@me", in: channel.id)
+                }
             }
         })
         .onAppear {
-            DispatchQueue.main.async {
-                viewModel.memberList = channel?.recipients?.map(OPSItems.init) ?? []
-            }
             Task.detached {
                 await self.viewModel.initializeChannel()
                 await self.viewModel.setPermissions(self.appModel)
+                DispatchQueue.main.async {
+                    if let recipients = channel.recipients, !recipients.isEmpty {
+                        viewModel.memberList = recipients.map(OPSItems.init)
+                    }
+                    if let cache = Storage.globals?.listCache[viewModel.channelID] {
+                        DispatchQueue.main.async {
+                            self.viewModel.memberList = cache
+                        }
+                    } else if channel.guild_id != "@me", memberListShown {
+                        try? wss.subscribeWithList(for: channel.guild_id ?? "@me", in: channel.id)
+                    } else if channel.guild_id != "@me" {
+                        try? wss.subscribe(to: channel.guild_id ?? "@me")
+                    }
+                }
             }
         }
         .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")

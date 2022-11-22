@@ -248,7 +248,11 @@ struct ServerListView: View {
         .onAppear {
             if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.appModel.selectedGuild = upcomingGuild
-                //self.selectedChannel.wrappedValue = self.viewModel.upcomingSelection
+                if let id = upcomingGuild.newChannelID {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                        self.appModel.selectedChannel = upcomingGuild.channels.first(where: { $0.id == id })
+                    })
+                }
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {
