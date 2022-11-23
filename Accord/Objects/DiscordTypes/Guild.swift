@@ -12,6 +12,12 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
         lhs.id == rhs.id && lhs.channels == rhs.channels
     }
 
+    var newChannelID: String? {
+        return UserDefaults.standard.object(forKey: "AccordChannelIn\(self.id)") as? String ??
+        self.rules_channel_id ??
+        self.channels.first(where: { $0.name?.contains("general") ?? false })?.id
+    }
+    
     let id: String
     let name: String?
     var icon: String?
@@ -37,7 +43,7 @@ struct Guild: Decodable, Equatable, Hashable, Identifiable {
     // var application_id: String?
     // var system_channel_id: String?
     // var system_channel_flags: Int?
-    // var rules_channel_id: String?
+     var rules_channel_id: String?
     // TODO: ISO8061 timestamp
     // var joined_at: ISO8061
     var large: Bool?

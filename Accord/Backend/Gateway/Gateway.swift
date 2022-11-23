@@ -407,6 +407,7 @@ final class Gateway {
     }
 
     func subscribe(to guild: String) throws {
+        print("subscribing")
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -419,7 +420,31 @@ final class Gateway {
         try send(json: packet)
     }
 
+    var requestedMemberListsForGuilds: Set<String> = .init()
+    
+    func subscribeWithList(for guild: String, in channel: String, channels: [[Int]] = [[0, 99]]) throws {
+        guard !requestedMemberListsForGuilds.contains(guild) else { return }
+        self.requestedMemberListsForGuilds.insert(guild)
+        print("requesting subscribing list")
+        let packet: [String: Any] = [
+            "op": 14,
+            "d": [
+                "typing": true,
+                "activities": true,
+                "threads": true,
+                "guild_id": guild,
+                "channels": [
+                    channel: channels,
+                ],
+            ],
+        ]
+        try send(json: packet)
+    }
+    
     func memberList(for guild: String, in channel: String, channels: [[Int]] = [[0, 99]]) throws {
+        guard !requestedMemberListsForGuilds.contains(guild) else { return }
+        self.requestedMemberListsForGuilds.insert(guild)
+        print("requesting member list")
         let packet: [String: Any] = [
             "op": 14,
             "d": [

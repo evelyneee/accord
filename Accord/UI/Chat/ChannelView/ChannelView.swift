@@ -144,21 +144,23 @@ struct ChannelView: View {
         self.viewModel.initializeChannel()
     }
     
-    @_transparent @ViewBuilder
+    @_transparent @_optimize(speed) @ViewBuilder
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
+        let blocked = Storage.users[message.author?.id ?? ""]?.relationship?.type == .blocked
         MessageCellView(
             message: binding,
-            nick: $viewModel.nicks[message.author?.id ?? ""],
-            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
-            pronouns: $viewModel.pronouns[message.author?.id ?? ""],
-            avatar: $viewModel.avatars[message.author?.id ?? ""],
+            nick: $viewModel.nicks[message.author?.id],
+            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id],
+            pronouns: $viewModel.pronouns[message.author?.id],
+            avatar: $viewModel.avatars[message.author?.id],
             permissions: $viewModel.permissions,
-            role: $viewModel.roles[message.author?.id ?? ""],
-            replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
+            role: $viewModel.roles[message.author?.id],
+            replyRole: $viewModel.roles[message.referencedMessage?.author?.id],
             replyingTo: $replyingTo
         )
         .equatable()
+        .if(blocked, transform: { $0.hidden() })
         .id(message.id)
         .listRowInsets(EdgeInsets(
             top: 3.5,
@@ -226,7 +228,6 @@ struct ChannelView: View {
         }
         .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-        .fixedSize(horizontal: false, vertical: true)
     }
     
     @ViewBuilder
@@ -265,7 +266,7 @@ struct ChannelView: View {
                     MessagePlaceholders()
                 }
             }
-            .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+            .background(Color(NSColor.alternatingContentBackgroundColors[0]))
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
             .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
@@ -285,7 +286,7 @@ struct ChannelView: View {
     }
     
     var core: some View {
-        HStack {
+        HStack(spacing: 0) {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     list
@@ -307,6 +308,7 @@ struct ChannelView: View {
                 blurredTextField
             }
             if memberListShown {
+                Divider()
                 MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
                     .frame(width: 250)
                     .onAppear { [weak viewModel] in
@@ -317,6 +319,7 @@ struct ChannelView: View {
                     }
             }
             if showSearch {
+                Divider()
                 VStack(alignment: .leading) {
                     HStack {
                         TextField("Search", text: self.$searchText)
@@ -361,19 +364,43 @@ struct ChannelView: View {
             }
         }
         .onReceive(self.appModel.$selectedChannel, perform: { [weak appModel, weak viewModel] channel in
-            guard let appModel, let viewModel else { return }
+            guard let appModel, let viewModel, channel?.type != .section else { self.appModel.selectedChannel = self.viewModel.channel; return }
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
-                appModel.selectedChannel = channel
+                if channel.guild_id != self.viewModel.guildID {
+                    self.viewModel.memberList.removeAll()
+                }
+                if let recipients = channel.recipients, !recipients.isEmpty {
+                    viewModel.memberList = recipients.map(OPSItems.init)
+                }
+                print("set channel")
                 self.channelReset(channel)
+                if let cache = Storage.globals?.listCache[viewModel.channelID] {
+                    DispatchQueue.main.async {
+                        self.viewModel.memberList = cache
+                    }
+                } else if viewModel.memberList.isEmpty, let guildID = channel.guild_id, guildID != "@me", memberListShown {
+                    try? wss?.memberList(for: channel.guild_id ?? "@me", in: channel.id)
+                }
             }
         })
         .onAppear {
-            DispatchQueue.main.async {
-                viewModel.memberList = channel?.recipients?.map(OPSItems.init) ?? []
-            }
             Task.detached {
                 await self.viewModel.initializeChannel()
                 await self.viewModel.setPermissions(self.appModel)
+                DispatchQueue.main.async {
+                    if let recipients = viewModel.channel.recipients, !recipients.isEmpty {
+                        viewModel.memberList = recipients.map(OPSItems.init)
+                    }
+                    if let cache = Storage.globals?.listCache[viewModel.channelID] {
+                        DispatchQueue.main.async {
+                            self.viewModel.memberList = cache
+                        }
+                    } else if let guildID = channel.guild_id, guildID != "@me", memberListShown {
+                        try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
+                    } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
+                        try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")
+                    }
+                }
             }
         }
         .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")

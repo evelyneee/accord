@@ -25,9 +25,10 @@ final public class Reaction: Identifiable, Hashable, Codable {
     var identifier: String { emoji.id ?? emoji.name ?? "some emoji" }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
         hasher.combine(me)
         hasher.combine(count)
+        hasher.combine(emoji.id)
+        hasher.combine(emoji.name)
     }
 }
 

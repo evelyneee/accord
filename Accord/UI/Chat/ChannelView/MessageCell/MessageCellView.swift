@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MessageCellView: View, Equatable {
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
-        lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
+        lhs.message.id == rhs.message.id && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
 
     @Binding var message: Message
@@ -129,6 +129,13 @@ struct MessageCellView: View, Equatable {
             case .guildReachedLevelThree:
                 ServerLevelUpView(level: 3)
                     .padding(.leading, leftPadding)
+            case .call:
+                if let user = message.author {
+                    CallView(
+                        user: user
+                    )
+                    .padding(.leading, leftPadding)
+                }
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
@@ -160,8 +167,8 @@ struct MessageCellView: View, Equatable {
                             }
                         } else {
                             AuthorTextView(
-                                message: self.message,
-                                pronouns: self.pronouns,
+                                message: self.$message,
+                                pronouns: self.$pronouns,
                                 nick: self.$nick,
                                 role: self.$role
                             )
@@ -180,7 +187,6 @@ struct MessageCellView: View, Equatable {
                     }
                     Spacer()
                 }
-                .if(Storage.users[self.message.author?.id ?? ""]?.relationship?.type == .blocked, transform: { $0.hidden() })
             }
             if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
                 StickerView(

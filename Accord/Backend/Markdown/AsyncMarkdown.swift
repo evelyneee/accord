@@ -60,6 +60,9 @@ final class AsyncMarkdownModel: ObservableObject {
                         self?.hasEmojiOnly = emojis
                     }
                 }
+            DispatchQueue.main.async {
+                self?.hasEmojiOnly = emojis
+            }
         }
     }
 }

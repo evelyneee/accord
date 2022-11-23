@@ -71,6 +71,9 @@ final class AppGlobals: ObservableObject {
     @MainActor @Published
     var selectedGuild: Guild? = nil
     
+    @MainActor
+    var listCache: [String:[OPSItems]] = [:]
+    
     @Published
     public var token: String? = {
         let tokenData = KeychainManager.load(key: keychainItemName)

@@ -29,6 +29,17 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       enableThreadSanitizer = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E745ECC292A6146001EBE4A"
+               BuildableName = "AccordTests.xctest"
+               BlueprintName = "AccordTests"
+               ReferencedContainer = "container:Accord.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

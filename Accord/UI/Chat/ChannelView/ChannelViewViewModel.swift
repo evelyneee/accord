@@ -22,16 +22,16 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     var messages: [Message] = .init()
     
     @MainActor @Published
-    var nicks: [String: String] = .init()
+    var nicks: [String?: String] = .init()
     
     @MainActor @Published
-    var roles: [String: String] = .init()
+    var roles: [String?: String] = .init()
     
     @MainActor @Published
-    var avatars: [String: String] = .init()
+    var avatars: [String?: String] = .init()
     
     @MainActor @Published
-    var pronouns: [String: String] = .init()
+    var pronouns: [String?: String] = .init()
 
     @MainActor @Published
     var memberList: [OPSItems] = .init()
@@ -154,8 +154,6 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 if self.guildID == "@me" {
                     try? wss.subscribeToDM(self.channelID)
-                } else {
-                    try? wss.subscribe(to: self.guildID)
                 }
             })
             self.loadPermissions(channel)
@@ -338,10 +336,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             .store(in: &cancellable)
         wss.memberListSubject
             .receive(on: RunLoop.main)
-            .sink { [weak self] list in
+            .sink { [weak self] listRoot in
                 guard let self = self else { return }
                 Task.detached {
-                    let list = Array(list.d.ops.compactMap(\.items).joined())
+                    let list = Array(listRoot.d.ops.compactMap(\.items).joined())
                         .map { item -> OPSItems in
                             let new = item
                             new.member?.roles = new.member?.roles?
@@ -355,8 +353,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                                 .map(\.0)
                             return new
                         }
-                    print(list.count)
                     await MainActor.run {
+                        Storage.globals?.listCache[listRoot.d.guild_id ?? self.guildID] = list
                         self.memberList.append(contentsOf: list)
                     }
                 }

@@ -9,11 +9,11 @@ import SwiftUI
 
 struct AuthorTextView: View, Equatable {
     static func == (lhs: AuthorTextView, rhs: AuthorTextView) -> Bool {
-        lhs.nick == rhs.nick && lhs.role == rhs.role
+        lhs.message.id == rhs.message.id && lhs.nick == rhs.nick && lhs.role == rhs.role
     }
     
-    var message: Message
-    var pronouns: String?
+    @Binding var message: Message
+    @Binding var pronouns: String?
     @Binding var nick: String?
     
     @Environment(\.guildID)

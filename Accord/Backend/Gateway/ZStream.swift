@@ -57,6 +57,10 @@ final class ZStream {
                 switch status {
                 case COMPRESSION_STATUS_OK, COMPRESSION_STATUS_END:
                     
+                    if dstBufferSize - self.stream.dst_size <= 0 {
+                        break mainLoop
+                    }
+                    
                     outputData.append(dstBufferPtr, count: dstBufferSize - self.stream.dst_size)
                     
                     // recycle the buffer
@@ -64,7 +68,7 @@ final class ZStream {
                     stream.dst_size = dstBufferSize
                     
                 case COMPRESSION_STATUS_ERROR:
-                    return outputData
+                    break mainLoop
                 default:
                     break mainLoop
                 }

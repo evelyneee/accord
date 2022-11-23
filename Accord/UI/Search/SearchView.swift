@@ -145,6 +145,7 @@ struct SearchView: View {
             }
             .listStyle(.plain)
             .frame(height: 300)
+            .focusable(false)
         }
         .frame(width: 400)
         .padding()

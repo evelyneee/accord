@@ -326,7 +326,7 @@ public final class Request {
         do { try headers?.set(request: &request, config: &config) } catch { return }
         request.httpBody = try? Request.createMultipartBody(with: try payloadJson?.jsonString(), fileURLs: [fileURL].compactMap(\.self), boundary: boundary)
         request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
+        
         URLSession(configuration: config).dataTask(with: request, completionHandler: { data, response, error in
             if let data = data {
                 return completion(.success((data, response as? HTTPURLResponse)))

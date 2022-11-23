@@ -53,15 +53,9 @@ struct RolesView: View {
         if let roleName = Storage.roleNames[role] {
             HStack(spacing: 4) {
                 if #available(macOS 13.0, *) {
-                    #if canImport(WeatherKit)
                     Circle()
                         .fill(color(for: role).gradient)
                         .frame(width: 10, height: 10)
-                    #else
-                    Circle()
-                        .fill(color(for: role))
-                        .frame(width: 10, height: 10)
-                    #endif
                 } else {
                     Circle()
                         .fill(color(for: role))
@@ -181,8 +175,10 @@ struct PopoverProfileView: View {
                         .equatable()
                         .scaledToFit()
                         .frame(width: 290)
-                } else {
-                    Color(NSColor.windowBackgroundColor).frame(height: 100).opacity(0.75)
+                } else if let color = fullUser?.banner_color,
+                          let colorInt = Int(color.dropFirst(), radix: 16),
+                          let nsColor = NSColor.color(from: colorInt) {
+                    Color(nsColor).frame(height: 100).opacity(0.75)
                 }
                 Spacer()
             }

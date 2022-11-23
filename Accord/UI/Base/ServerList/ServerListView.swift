@@ -162,9 +162,10 @@ struct ServerListView: View {
                 // MARK: - Loading UI
                 
                 Group {
+                    // these aren't separate views due to the STUPID problem where navigationsplitview glitches
+                    // if the list isn't in the same view :(
                     if selectedServer == "@me" {
-                        PrivateChannelsView()
-                            .animation(nil, value: UUID())
+                        privateChannelsView.animation(nil, value: UUID())
                     } else if let guild = self.appModel.selectedGuild {
                         guildView(guild)
                     }
@@ -247,7 +248,11 @@ struct ServerListView: View {
         .onAppear {
             if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.appModel.selectedGuild = upcomingGuild
-                //self.selectedChannel.wrappedValue = self.viewModel.upcomingSelection
+                if let id = upcomingGuild.newChannelID {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                        self.appModel.selectedChannel = upcomingGuild.channels.first(where: { $0.id == id })
+                    })
+                }
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {

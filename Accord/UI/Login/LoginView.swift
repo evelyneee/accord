@@ -15,8 +15,7 @@ enum LoginState {
 }
 
 enum DiscordLoginErrors: Error {
-    case invalidForm
-    case missingFields
+    case error(String)
 }
 
 extension NSApplication {
@@ -63,8 +62,7 @@ struct LoginView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("Captcha"))) { notification in
-            self.viewModel.state = .twoFactor
-            self.loginViewDataModel.notification = notification.userInfo as? [String: Any] ?? [:]
+            try? self.viewModel.login(self.loginViewDataModel.email, self.loginViewDataModel.password, notification.userInfo?["key"] as? String ?? "")
             print(notification)
         }
         .padding()
@@ -96,8 +94,12 @@ struct LoginView: View {
     private var errorView: some View {
         if let error = viewModel.loginError {
             switch error {
-            case DiscordLoginErrors.invalidForm:
-                Text("Wrong username/password")
+            case DiscordLoginErrors.error(let str):
+                if str == "Invalid Form Body" {
+                    Text("Error: ")+Text("Invalid form body, check your mailbox for verifications")
+                } else {
+                    Text("Error: ")+Text(str).foregroundColor(.red)
+                }
             default:
                 EmptyView()
             }
@@ -192,6 +194,7 @@ struct LoginView: View {
                     }
                     .padding([.bottom], 20)
                     AccordTabView
+                    errorView
                 }
             }
             .padding()
@@ -323,44 +326,44 @@ final class LoginViewViewModel: ObservableObject {
 
     init() {}
 
-    func login(_ email: String, _ password: String, _: String) throws {
+    func login(_ email: String, _ password: String, _ captcha: String) throws {
         Request.fetch(LoginResponse.self, url: URL(string: "\(rootURL)/auth/login"), headers: Headers(
             bodyObject: [
-                "email": email,
+                "login": email,
                 "password": password,
-            ],
+                "captcha_key":captcha
+            ].compactMapValues { $0 },
             type: .POST,
             discordHeaders: true,
             json: true
         )) { [weak self] completion in
-            switch completion {
-            case let .success(response):
-                if let checktoken = response.token {
-                    AccordApp.tokenUpdate.send(checktoken)
-                } else {
-                    if let captchaKey = response.captcha_sitekey {
-                        DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                switch completion {
+                case let .success(response):
+                    dump(response)
+                    if let error = response.message {
+                        print(error)
+                        self?.loginError = DiscordLoginErrors.error(error)
+                        self?.state = .initial
+                        return
+                    }
+                    if let checktoken = response.token {
+                        AccordApp.tokenUpdate.send(checktoken)
+                    } else {
+                        if let captchaKey = response.captcha_sitekey {
                             self?.captchaVCKey = captchaKey
                             captchaPublicKey = captchaKey
                             self?.state = .captcha
+                        } else if let ticket = response.ticket {
+                            self?.state = .twoFactor
+                            self?.ticket = ticket
+                            dprint("[Login debug] Got ticket")
                         }
-                    } else if let ticket = response.ticket {
-                        self?.state = .twoFactor
-                        self?.ticket = ticket
-                        dprint("[Login debug] Got ticket")
                     }
+                case let .failure(error):
+                    print(error)
+                    self?.loginError = error
                 }
-                if let error = response.message {
-                    switch error {
-                    case "Invalid Form Body":
-                        self?.loginError = DiscordLoginErrors.invalidForm
-                    default:
-                        self?.loginError = DiscordLoginErrors.invalidForm
-                    }
-                }
-            case let .failure(error):
-                print(error)
-                self?.loginError = error
             }
         }
     }

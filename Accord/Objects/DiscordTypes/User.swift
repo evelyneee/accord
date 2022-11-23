@@ -10,7 +10,7 @@ import Foundation
 
 final class User: Codable, Equatable, Identifiable, Hashable {
     static func == (lhs: User, rhs: User) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.username == rhs.username
     }
 
     var id: String

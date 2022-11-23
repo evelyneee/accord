@@ -8,13 +8,23 @@
 import SwiftUI
 
 struct Folder<Content: View>: View {
+    internal init(icon: [Guild], color: Color, read: Bool, mentionCount: Int? = nil, content: @escaping () -> Content) {
+        self.icon = icon
+        self.color = color
+        self.read = read
+        self.mentionCount = mentionCount
+        self.content = content
+        self._collapsed = .init(wrappedValue: true, "Collapsed\(icon.map(\.id).joined())")
+    }
+    
+    
     var icon: [Guild]
     var color: Color
     var read: Bool
     var mentionCount: Int?
     var content: () -> Content
 
-    @State private var collapsed: Bool = true
+    @AppStorage private var collapsed: Bool
 
     let gridLayout: [GridItem] = GridItem.multiple(count: 2, spacing: 0)
 

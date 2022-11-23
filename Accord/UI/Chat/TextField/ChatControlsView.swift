@@ -243,8 +243,8 @@ struct ChatControls: View {
             .fixedSize(horizontal: false, vertical: true)
             .onReceive(
                 NotificationCenter.default.publisher(for: NSNotification.Name("red.evelyn.accord.PasteEvent"))
-                    .debounce(for: RunLoop.SchedulerTimeType.Stride(floatLiteral: 0.05), scheduler: RunLoop.current)
-            ) { [weak viewModel] _ in
+                    .debounce(for: .seconds(0.5), scheduler: RunLoop.current)
+            ) { _ in
                 let data = NSPasteboard.general.pasteboardItems?.first?.data(forType: .fileURL)
                 if let rawData = data,
                    let string = String(data: rawData, encoding: .utf8),
@@ -252,15 +252,6 @@ struct ChatControls: View {
                    let data = try? Data(contentsOf: url)
                 {
                     self.fileUploads.append((data, url))
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        if let textCount = viewModel?.textFieldContents.count,
-                           let pathComponentsCount = url.pathComponents.last?.count
-                        {
-                            if textCount >= pathComponentsCount {
-                                viewModel?.textFieldContents.removeLast(pathComponentsCount)
-                            }
-                        }
-                    }
                 } else if let image = NSImage(pasteboard: NSPasteboard.general) {
                     self.fileUploads.append((image.png, URL(string: "file:///image0.png")!))
                 }
@@ -385,11 +376,7 @@ extension Data {
 
 extension Array where Element: Hashable {
     func removingDuplicates() -> [Element] {
-        var addedDict: [Element: Bool] = .init()
-
-        return filter {
-            addedDict.updateValue(true, forKey: $0) == nil
-        }
+        return Array(Set(self))
     }
 
     mutating func removeDuplicates() {
