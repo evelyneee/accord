@@ -51,7 +51,9 @@ extension AppGlobals {
 
     @MainActor
     func select(channel: Channel) {
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: channel.guild_id == nil ? "DMSelect" : "Refresh"), object: nil, userInfo: [channel.guild_id ?? "index": channel.guild_id == nil ? channel.id : Int(channel.id) ?? 0])
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: channel.guild_id == nil ? "DMSelect" : "Refresh"), object: nil, userInfo: [channel.guild_id ?? "index": channel.guild_id == nil ? channel.id : Int(channel.id) ?? 0])
+        }
     }
 
     @MainActor

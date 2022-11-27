@@ -100,7 +100,7 @@ struct AsyncMarkdown: View, Equatable {
                 if #available(macOS 13.0, *) {
                     model.markdown
                         .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                        .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
                         .onChange(of: self.text, perform: { [weak model] text in
                             model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                         })
@@ -111,7 +111,7 @@ struct AsyncMarkdown: View, Equatable {
                 } else {
                     model.markdown
                         .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                        .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
                         .fixedSize(horizontal: false, vertical: true)
                         .onChange(of: self.text, perform: { [weak model] text in
                             model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)

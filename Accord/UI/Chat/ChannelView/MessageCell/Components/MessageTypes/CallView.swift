@@ -11,6 +11,6 @@ struct CallView: View {
     var user: User
 
     var body: some View {
-        Label(user.username + " started a call.", image: "phone.fill")
+        Label(user.username + " started a call.", systemImage: "phone.fill").font(Font.chatTextFont.weight(.medium))
     }
 }
