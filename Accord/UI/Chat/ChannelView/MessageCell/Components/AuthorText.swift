@@ -75,6 +75,7 @@ struct AuthorTextView: View, Equatable {
                     .font(.subheadline)
                     .background(RoundedRectangle(cornerRadius: 4).fill().foregroundColor(Color.accentColor))
                     .padding(.horizontal, 4)
+                
             }
         }
     }

@@ -152,7 +152,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             guard let self = self else { return }
             self.getMessages(channelID: self.channelID, guildID: self.guildID)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                if self.guildID == "@me" {
+                if channel.guild_id == nil || channel.guild_id == "@me" {
                     try? wss.subscribeToDM(self.channelID)
                 }
             })
