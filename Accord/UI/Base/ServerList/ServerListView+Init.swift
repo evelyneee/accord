@@ -13,10 +13,10 @@ extension ServerListView {
     @_optimize(speed)
     init(_ readyPacket: GatewayD) {
         
-        self.discordSettings = readyPacket.user_settings
-        self.userGuildSettings = readyPacket.user_guild_settings
-        
         let appModel = AppGlobals()
+        
+        appModel.discordSettings = readyPacket.user_settings
+        appModel.userGuildSettings = readyPacket.user_guild_settings
         
         let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? String
         

@@ -1,4 +1,5 @@
 # Accord
+
 A faster, native discord client for your Mac. Here's a [screenshot](https://github.com/evelyneee/accord#screenshot).
 
 ### OS Requirement

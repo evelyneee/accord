@@ -31,8 +31,7 @@ extension ServerListView {
                 }
             }
             ForEach(guild.channels, id: \.self) { channel in
-                if hideMutedChannels && (hideMutedChannels ? false : (userGuildSettings.mutedChannels.contains(channel.id) || userGuildSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
-                } else if channel.type == .section {
+                if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
