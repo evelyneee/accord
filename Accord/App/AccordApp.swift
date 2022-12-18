@@ -125,18 +125,6 @@ struct AccordApp: App {
                     }
                     .preferredColorScheme(darkMode ? .dark : nil)
                     .onAppear {
-                        
-                        // VariableFrameDurationIsSupported
-                                                
-                        let sym = dlsym(dlopen("libsubstrate.dylib", RTLD_NOW)!, "MSHookFunction")!
-                        
-                        let hook = unsafeBitCast(sym, to: (@convention (c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void).self)
-                        
-                        let _: Void = hook(
-                            dlsym(dlopen(nil, RTLD_NOW), "_VariableFrameDurationIsSupported"),
-                            dlsym(dlopen(nil, RTLD_NOW), "ReplacementFrameDuration")
-                        )
-                        
                         UserDefaults.standard.set(false, forKey: "NSWindowAssertWhenDisplayCycleLimitReached")
                         
                         let rep: Accord.Body = replacementURLHook
