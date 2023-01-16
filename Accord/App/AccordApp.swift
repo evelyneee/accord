@@ -119,6 +119,7 @@ struct AccordApp: App {
                             class_getMethodImplementation(NSWorkspace2.self, #selector(NSWorkspace2.open2))!,
                             nil
                         )
+                        
                         self.loadSpotifyToken()
                         DispatchQueue.global(qos: .background).async {
                             RegexExpressions.precompute()

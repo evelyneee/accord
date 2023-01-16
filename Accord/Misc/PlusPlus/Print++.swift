@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import os.log
 
 private let ENABLE_LINE_LOGGING: Bool = true
 private let ENABLE_FILE_EXTENSION_LOGGING: Bool = false
+private let logger = Logger(subsystem: "red.evelyn.accord", category: "Accord")
 
 public func dprint(
     _ items: Any..., // first variadic parameter
@@ -71,5 +73,5 @@ private func log<T>(items: [T], file: String, line: String? = nil, separator: St
         }
         out.append(separator)
     }
-    Swift.print("[\(file)\(line ?? "")]", out)
+    logger.log("[\(file)\(line ?? "")] \(out)")
 }

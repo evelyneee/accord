@@ -32,10 +32,16 @@ enum SymbolRenderingMode2 {
 @available(macOS 11.0, *) @available(macOS, deprecated: 12.0)
 struct Material: View {
     
+    @_disfavoredOverload
     static var thick = Self.init()
     
     var body: some View {
-        Color.secondary
+        NSViewWrapper({
+            let view = NSVisualEffectView()
+            view.material = .popover
+            view.blendingMode = .withinWindow
+            return view
+        }())
     }
 }
 
@@ -76,11 +82,11 @@ extension View {
                 self.onSubmit(of: SubmitTriggers.text, action)
             }
         } else {
-            HStack {
-                self
+            ZStack(alignment: .trailing) {
                 Button(submitType == .search ? "Search" : "Send") {
                     action()
                 }
+                self
             }
         }
     }

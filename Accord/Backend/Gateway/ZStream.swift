@@ -33,7 +33,7 @@ final class ZStream {
         let hasHeader = data.prefix(2) == Data([0x78, 0x9C])
         let data = hasHeader ? data.dropFirst(2) : data
         let outputData = data.withUnsafeBytes { buf -> Data? in
-            let bytes = buf.bindMemory(to: UInt8.self).baseAddress!
+            guard let bytes = buf.bindMemory(to: UInt8.self).baseAddress else { return nil }
             // setup the stream's source
             stream.src_ptr = bytes
             stream.src_size = data.count
@@ -73,7 +73,6 @@ final class ZStream {
             return outputData
         }
         guard let outputData = outputData else { throw "No data returned" }
-        lock = false
         return outputData
     }
 

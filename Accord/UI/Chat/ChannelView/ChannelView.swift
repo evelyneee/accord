@@ -266,6 +266,7 @@ struct ChannelView: View {
                 }
             }
             .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
+            .background(Color(NSColor.alternatingContentBackgroundColors[0]))
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
             .onReceive(Self.scrollTo, perform: { [weak viewModel] channelID, id in
@@ -285,7 +286,7 @@ struct ChannelView: View {
     }
     
     var core: some View {
-        HStack {
+        ZStack(alignment: .trailing) {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomTrailing) {
                     list
@@ -306,65 +307,85 @@ struct ChannelView: View {
                 }
                 blurredTextField
             }
-            if memberListShown {
-                MemberListView(guildID: viewModel.guildID, list: $viewModel.memberList)
-                    .frame(width: 250)
-                    .onAppear { [weak viewModel] in
-                        guard let viewModel else { return }
-                        if viewModel.memberList.isEmpty, viewModel.guildID != "@me" {
-                            try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
-                        }
-                    }
-            }
-            if showSearch {
-                VStack(alignment: .leading) {
-                    HStack {
-                        TextField("Search", text: self.$searchText)
-                            .textFieldStyle(.roundedBorder)
-                            .controlSize(.large)
-                            .onSubmit {
-                                self.search()
+            HStack(spacing: 0) {
+                Divider()
+                if showSearch {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            TextField("Search", text: self.$searchText)
+                                .textFieldStyle(.roundedBorder)
+                                .controlSize(.large)
+                                .onSubmit {
+                                    self.search()
+                                }
+                            Spacer()
+                            Button(action: {
+                                self.showSearch = false
+                                self.searchMessages.removeAll()
+                            }) {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 18))
                             }
-                        Spacer()
-                        Button(action: {
-                            self.showSearch = false
-                            self.searchMessages.removeAll()
-                        }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 18))
+                            .buttonStyle(.borderless)
                         }
-                        .buttonStyle(.borderless)
-                    }
-                    .padding(.horizontal, 5)
-                    .padding(.trailing, 5)
-                    .padding(.top, 10)
-                    ScrollView {
-                        LazyVStack(alignment: .leading) {
-                            ForEach($searchMessages, id: \.id) { $message in
-                                ZStack(alignment: .topTrailing) {
-                                    cell(for: $message)
-                                    Button("Jump") {
-                                        Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                                            ChannelView.scrollTo.send((message.channelID, message.id))
-                                        })
+                        .padding()
+                        .onDeleteCommand {
+                            withAnimation(.linear(duration: 0.1)) {
+                                self.searchMessages.removeAll()
+                                self.showSearch = false
+                            }
+                        }
+                        List {
+                            LazyVStack(alignment: .leading) {
+                                ForEach($searchMessages, id: \.id) { $message in
+                                    ZStack(alignment: .topTrailing) {
+                                        cell(for: $message)
+                                        Button("Jump") {
+                                            Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+                                                ChannelView.scrollTo.send((message.channelID, message.id))
+                                            })
+                                        }
                                     }
                                 }
                             }
                         }
+                        .onDisappear {
+                            self.searchMessages.removeAll()
+                        }
                     }
-                    .onDisappear {
-                        self.searchMessages.removeAll()
-                    }
+                    .frame(maxWidth: 400)
                 }
-                .frame(maxWidth: 400)
+                if memberListShown {
+                    MemberListView(guildID: $viewModel.guildID, list: $viewModel.memberList)
+                        .frame(width: 250)
+                        .onAppear { [weak viewModel] in
+                            guard let viewModel else { return }
+                            if viewModel.memberList.isEmpty, viewModel.guildID != "@me" {
+                                try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
+                            }
+                        }
+                        .onDeleteCommand {
+                            self.memberListShown = false
+                        }
+                }
             }
+            .background(Material.thick)
         }
         .onReceive(self.appModel.$selectedChannel, perform: { [weak appModel, weak viewModel] channel in
             guard let appModel, let viewModel else { return }
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
+                if channel.guild_id != self.viewModel.guildID {
+                    self.viewModel.memberList.removeAll()
+                    if self.channel.guild_id == "@me" {
+                        viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
+                    }
+                }
                 appModel.selectedChannel = channel
                 self.channelReset(channel)
+                if self.viewModel.memberList.isEmpty {
+                    try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
+                }
             }
         })
         .onAppear {
@@ -467,7 +488,7 @@ struct ChannelView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .semibold))
                 }
-                Toggle(isOn: $memberListShown.animation()) {
+                Toggle(isOn: $memberListShown.animation(Animation.timingCurve(0.44, -0.14, 0.26, 1.19))) {
                     Image(systemName: "person.2.fill")
                 }
             }
@@ -508,7 +529,7 @@ struct ChannelView: View {
 }
 
 struct MemberListView: View {
-    var guildID: String
+    @Binding var guildID: String
     @Binding var list: [OPSItems]
     var body: some View {
         List(self.$list, id: \.id) { $ops in
@@ -523,6 +544,17 @@ struct MemberListView: View {
             } else {
                 MemberListViewCell(guildID: self.guildID, ops: $ops)
             }
+        }
+    }
+}
+
+extension NSTableView {
+    open override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        
+        backgroundColor = NSColor.clear
+        if let esv = enclosingScrollView {
+            esv.drawsBackground = false
         }
     }
 }

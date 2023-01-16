@@ -92,31 +92,33 @@ struct AsyncMarkdown: View, Equatable {
 
     @ViewBuilder
     var body: some View {
-        Group {
-            if !model.hasEmojiOnly || model.loaded {
-                if #available(macOS 13.0, *) {
-                    model.markdown
-                        .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
-                        .onChange(of: self.text, perform: { [weak model] text in
-                            model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                        })
-                        .onAppear { [weak model] in
-                            model?.channelInfo = (guildID, channelID)
-                            model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                        }
-                } else {
-                    model.markdown
-                        .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .onChange(of: self.text, perform: { [weak model] text in
-                            model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                        })
-                        .onAppear { [weak model] in
-                            model?.channelInfo = (guildID, channelID)
-                            model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
-                        }
+        if !self.text.isEmpty {
+            Group {
+                if !model.hasEmojiOnly || model.loaded {
+                    if #available(macOS 13.0, *) {
+                        model.markdown
+                            .textSelection(.enabled)
+                            .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                            .onChange(of: self.text, perform: { [weak model] text in
+                                model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                            })
+                            .onAppear { [weak model] in
+                                model?.channelInfo = (guildID, channelID)
+                                model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                            }
+                    } else {
+                        model.markdown
+                            .textSelection(.enabled)
+                            .font(self.model.hasEmojiOnly ? .system(size: 48, design: .rounded) : .chatTextFont)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onChange(of: self.text, perform: { [weak model] text in
+                                model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                            })
+                            .onAppear { [weak model] in
+                                model?.channelInfo = (guildID, channelID)
+                                model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
+                            }
+                    }
                 }
             }
         }

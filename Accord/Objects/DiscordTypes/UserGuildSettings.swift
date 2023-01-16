@@ -7,13 +7,19 @@
 
 import Foundation
 
-class UserGuildSettings: ObservableObject, Codable {
+class UserGuildSettings: ObservableObject, Decodable {
+    
     var entries: [UserGuildSettingsEntry]
+    
     var mutedChannels: Set<String>
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.entries = try container.decode([UserGuildSettings.UserGuildSettingsEntry].self, forKey: .entries)
+        if let entries = try? container.decode([UserGuildSettings.UserGuildSettingsEntry].self, forKey: .entries) {
+            self.entries = entries
+        } else {
+            self.entries = []
+        }
         
         self.mutedChannels = Set(self.entries
             .map(\.overrides)
