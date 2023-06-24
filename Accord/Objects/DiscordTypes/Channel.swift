@@ -128,4 +128,5 @@ enum ChannelType: Int, Codable {
     case stage = 13
     case directory = 14
     case forum = 15
+    case media = 16
 }
