@@ -144,21 +144,23 @@ struct ChannelView: View {
         self.viewModel.initializeChannel()
     }
     
-    @_transparent @ViewBuilder
+    @_transparent @_optimize(speed) @ViewBuilder
     func cell(for binding: Binding<Message>) -> some View {
         let message = binding.wrappedValue
+        let blocked = Storage.users[message.author?.id ?? ""]?.relationship?.type == .blocked
         MessageCellView(
             message: binding,
-            nick: $viewModel.nicks[message.author?.id ?? ""],
-            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id ?? ""],
-            pronouns: $viewModel.pronouns[message.author?.id ?? ""],
-            avatar: $viewModel.avatars[message.author?.id ?? ""],
+            nick: $viewModel.nicks[message.author?.id],
+            replyNick: $viewModel.nicks[message.referencedMessage?.author?.id],
+            pronouns: $viewModel.pronouns[message.author?.id],
+            avatar: $viewModel.avatars[message.author?.id],
             permissions: $viewModel.permissions,
-            role: $viewModel.roles[message.author?.id ?? ""],
-            replyRole: $viewModel.roles[message.referencedMessage?.author?.id ?? ""],
+            role: $viewModel.roles[message.author?.id],
+            replyRole: $viewModel.roles[message.referencedMessage?.author?.id],
             replyingTo: $replyingTo
         )
         .equatable()
+        .if(blocked, transform: { $0.hidden() })
         .id(message.id)
         .listRowInsets(EdgeInsets(
             top: 3.5,
@@ -226,7 +228,6 @@ struct ChannelView: View {
         }
         .rotationEffect(.degrees(180))
         .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-        .fixedSize(horizontal: false, vertical: true)
     }
     
     @ViewBuilder
@@ -373,7 +374,7 @@ struct ChannelView: View {
             .background(Material.thick)
         }
         .onReceive(self.appModel.$selectedChannel, perform: { [weak appModel, weak viewModel] channel in
-            guard let appModel, let viewModel else { return }
+            guard let appModel, let viewModel, channel?.type != .section else { self.appModel.selectedChannel = self.viewModel.channel; return }
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
                 if channel.guild_id != self.viewModel.guildID {
                     self.viewModel.memberList.removeAll()
@@ -389,12 +390,23 @@ struct ChannelView: View {
             }
         })
         .onAppear {
-            DispatchQueue.main.async {
-                viewModel.memberList = channel?.recipients?.map(OPSItems.init) ?? []
-            }
             Task.detached {
                 await self.viewModel.initializeChannel()
                 await self.viewModel.setPermissions(self.appModel)
+                DispatchQueue.main.async {
+                    if let recipients = viewModel.channel.recipients, !recipients.isEmpty {
+                        viewModel.memberList = recipients.map(OPSItems.init)
+                    }
+                    if let cache = Storage.globals?.listCache[viewModel.channelID] {
+                        DispatchQueue.main.async {
+                            self.viewModel.memberList = cache
+                        }
+                    } else if let guildID = channel.guild_id, guildID != "@me", memberListShown {
+                        try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
+                    } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
+                        try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")
+                    }
+                }
             }
         }
         .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")

@@ -7,38 +7,37 @@
 
 import SwiftUI
 
-struct PrivateChannelsView: View {
-        
-    @EnvironmentObject
-    var appModel: AppGlobals
-    
-    var body: some View {
+extension ServerListView {
+    var privateChannelsView: some View {
         List(selection: self.$appModel.selectedChannel) {
-            ForEach(appModel.privateChannels, id: \.self) { channel in
+            ForEach(self.$appModel.privateChannels, id: \.self) { $channel in
                 PlatformNavigationLink(
                     item: channel,
                     selection: self.$appModel.selectedChannel,
                     destination: {
-                        if let channel = self.appModel.selectedChannel {
-                            NavigationLazyView(
-                                ChannelView(self.$appModel.selectedChannel)
-                                    .onAppear {
-                                        let channelID = channel.id
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
-                                            if self.appModel.selectedChannel?.id == channelID {
-                                                self.appModel.selectedChannel?.read_state?.mention_count = 0
-                                                self.appModel.selectedChannel?.read_state?.last_message_id = channel.last_message_id
-                                            }
-                                        })
-                                    }
-                                    .onDisappear { [channel] in
-                                        channel.read_state?.mention_count = 0
-                                        channel.read_state?.last_message_id = channel.last_message_id
-                                    }
-                            )
-                        }
+                        NavigationLazyView(
+                            ChannelView(self.$appModel.selectedChannel)
+                                .onAppear {
+                                    let channelID = channel.id
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: { [channelID] in
+                                        if self.appModel.selectedChannel?.id == channelID {
+                                            self.appModel.selectedChannel?.read_state?.mention_count = 0
+                                            self.appModel.selectedChannel?.read_state?.last_message_id = channel.last_message_id
+                                        }
+                                    })
+                                }
+                                .onDisappear { [channel] in
+                                    channel.read_state?.mention_count = 0
+                                    channel.read_state?.last_message_id = channel.last_message_id
+                                }
+                        )
                     }
                 )
+                .onAppear {
+                    if UserDefaults.standard.string(forKey: "AccordChannelDMs") == channel.id {
+                        self.appModel.selectedChannel = channel
+                    }
+                }
                 .contextMenu {
                     Button("Copy Channel ID") {
                         NSPasteboard.general.clearContents()
@@ -68,5 +67,6 @@ struct PrivateChannelsView: View {
                 }
             }
         }
+
     }
 }

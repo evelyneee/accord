@@ -13,10 +13,10 @@ extension ServerListView {
     @_optimize(speed)
     init(_ readyPacket: GatewayD) {
         
-        self.discordSettings = readyPacket.user_settings
-        self.userGuildSettings = readyPacket.user_guild_settings
-        
         let appModel = AppGlobals()
+        
+        appModel.discordSettings = readyPacket.user_settings
+        appModel.userGuildSettings = readyPacket.user_guild_settings
         
         let previousServer = UserDefaults.standard.object(forKey: "SelectedServer") as? String
         
@@ -116,11 +116,6 @@ extension ServerListView {
         if let previousServer = previousServer, previousServer != "@me" {
             print("setting")
             appModel.selectedGuild = guildTemp[keyed: previousServer]
-            if let guild = guildTemp[keyed: previousServer],
-                let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String,
-                let channel = guild.channels.first(where: { $0.id == value }) {
-                appModel.selectedChannel = channel
-            }
             self.viewModel = ServerListViewModel(guild: guildTemp[keyed: previousServer], readyPacket: readyPacket)
             self.selectedServer = previousServer
         } else {

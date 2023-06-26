@@ -37,28 +37,42 @@ class NSWorkspace2 {
         configuration: NSWorkspace.OpenConfiguration,
         completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil
     ) {
-        print("overridden method")
-        if url.absoluteString.contains("discord.com/channels/") {
-            let comp = Array(url.pathComponents.suffix(3))
-            guard comp.count == 3 else {
-                return
-            }
-            DispatchQueue.main.async {
-                Storage.globals?.select(channel: Channel(
-                    id: comp[1],
-                    type: .normal,
-                    guild_id: comp[0],
-                    position: nil,
-                    parent_id: nil
-                ))
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                ChannelView.scrollTo.send((comp[1], comp[2]))
-            })
-        } else {
-            NSWorkspace.shared.open(url)
-        }
+
     }
+}
+
+var orig: UnsafeMutableRawPointer?
+
+typealias Body = @convention (c) (NSWorkspace, Selector, URL, NSWorkspace.OpenConfiguration, ((NSRunningApplication?, (Error)?) -> Void)?) -> Void
+
+@_cdecl("replacement_url_thing")
+func replacementURLHook(_ self: NSWorkspace, _ sel: Selector, _ url: URL, configuration: NSWorkspace.OpenConfiguration, completionHandler: ((NSRunningApplication?, Error?) -> Void)? = nil) {
+    print("overridden method")
+    if url.absoluteString.contains("discord.com/channels/") {
+        let comp = Array(url.pathComponents.suffix(3))
+        guard comp.count == 3 else {
+            return
+        }
+        DispatchQueue.main.async {
+            Storage.globals?.select(channel: Channel(
+                id: comp[1],
+                type: .normal,
+                guild_id: comp[0],
+                position: nil,
+                parent_id: nil
+            ))
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            ChannelView.scrollTo.send((comp[1], comp[2]))
+        })
+    } else {
+        unsafeBitCast(orig, to: Body.self)(self, sel, url, configuration, completionHandler)
+    }
+}
+
+@_cdecl("ReplacementFrameDuration")
+public func frameduration() -> Int {
+    1
 }
 
 @main
@@ -113,11 +127,13 @@ struct AccordApp: App {
                     .onAppear {
                         UserDefaults.standard.set(false, forKey: "NSWindowAssertWhenDisplayCycleLimitReached")
                         
+                        let rep: Accord.Body = replacementURLHook
+                        
                         messageHook(
                             NSWorkspace.self,
                             #selector(NSWorkspace.open(_:configuration:completionHandler:)),
-                            class_getMethodImplementation(NSWorkspace2.self, #selector(NSWorkspace2.open2))!,
-                            nil
+                            unsafeBitCast(rep, to: OpaquePointer.self),
+                            &orig
                         )
                         
                         self.loadSpotifyToken()
@@ -167,12 +183,26 @@ struct AccordApp: App {
                     .tabItem {
                         Label("General", systemImage: "gear")
                     }
-                    .tag(Tabs.general)
+                    .tag(0)
                 ProfileEditingView()
                     .tabItem {
                         Label("Profile", systemImage: "person")
                     }
-                    .tag(Tabs.rpc)
+                    .tag(1)
+                VStack {
+                    Button("Log out") {
+                        logOut()
+                    }
+                    .controlSize(.large)
+                    .dynamicTypeSize(.xxxLarge)
+                    .keyboardShortcut(.defaultAction)
+                    .accentColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+                .tabItem {
+                    Label("Log out", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                .tag(2)
             }
             .frame(minHeight: 500)
         }
@@ -294,3 +324,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(NSApp.mainWindow?.frameDescriptor ?? "", forKey: "MainWindowFrame")
     }
 }
+

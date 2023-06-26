@@ -9,11 +9,11 @@ import SwiftUI
 
 struct AuthorTextView: View, Equatable {
     static func == (lhs: AuthorTextView, rhs: AuthorTextView) -> Bool {
-        lhs.nick == rhs.nick && lhs.role == rhs.role
+        lhs.message.id == rhs.message.id && lhs.nick == rhs.nick && lhs.role == rhs.role
     }
     
-    var message: Message
-    var pronouns: String?
+    @Binding var message: Message
+    @Binding var pronouns: String?
     @Binding var nick: String?
     
     @Environment(\.guildID)
@@ -47,7 +47,7 @@ struct AuthorTextView: View, Equatable {
                     return Color.primary
                 }())
                 .font(.chatTextFont)
-                .fontWeight(.semibold)
+                .fontWeight(.medium)
                 +
             Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
@@ -62,19 +62,20 @@ struct AuthorTextView: View, Equatable {
                 .font(.subheadline)
             if message.author?.bot == true {
                 Text("Bot")
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, 3)
                     .foregroundColor(Color.white)
                     .font(.subheadline)
-                    .background(Capsule().fill().foregroundColor(Color.red))
+                    .background(RoundedRectangle(cornerRadius: 4).fill().foregroundColor(Color.accentColor))
                     .padding(.horizontal, 4)
             }
             if message.author?.system == true {
                 Text("System")
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, 3)
                     .foregroundColor(Color.white)
                     .font(.subheadline)
-                    .background(Capsule().fill().foregroundColor(Color.purple))
+                    .background(RoundedRectangle(cornerRadius: 4).fill().foregroundColor(Color.accentColor))
                     .padding(.horizontal, 4)
+                
             }
         }
     }

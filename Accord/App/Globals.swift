@@ -5,7 +5,7 @@
 //  Created by evelyn on 2022-06-18.
 //
 
-import Foundation
+import SwiftUI
 import Combine
 
 enum GenericErrors: Error {
@@ -70,6 +70,18 @@ final class AppGlobals: ObservableObject {
     
     @MainActor @Published
     var selectedGuild: Guild? = nil
+    
+    @MainActor
+    var listCache: [String:[OPSItems]] = [:]
+    
+    @MainActor @Published
+    public var discordSettings: DiscordSettings = .init()
+    
+    @MainActor @Published
+    public var userGuildSettings: UserGuildSettings = .init()
+    
+    @AppStorage("HideMutedChannels")
+    var hideMutedChannels: Bool = false
     
     @Published
     public var token: String? = {

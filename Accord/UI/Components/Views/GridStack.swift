@@ -43,23 +43,20 @@ struct GridStack<T: RandomAccessCollection & Equatable, Content: View>: View, Eq
                     .fixedSize()
                 }
             }
-            .id(UUID())
             .fixedSize()
         } else if let columns = columns {
             let chunked = self.array.arrayLiteral.chunked(by: columns)
             VStack(alignment: self.verticalAlignment) {
                 ForEach(0 ..< (chunked.count), id: \.self) { row in
                     HStack(alignment: self.horizontalAlignment) {
-                        ForEach(chunked[row], id: \.self) { item in
+                        ForEach(chunked[row], id: \.id) { item in
                             content(item)
                                 .id(item.id)
                         }
                     }
-                    .id(UUID())
                     .fixedSize()
                 }
             }
-            .id(UUID())
             .fixedSize()
         }
         

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MessageCellView: View, Equatable {
     static func == (lhs: MessageCellView, rhs: MessageCellView) -> Bool {
-        lhs.message == rhs.message && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
+        lhs.message.id == rhs.message.id && lhs.nick == rhs.nick && lhs.avatar == rhs.avatar
     }
 
     @Binding var message: Message
@@ -48,7 +48,8 @@ struct MessageCellView: View, Equatable {
     var appModel: AppGlobals
     
     var editingTextField: some View {
-        TextField("Edit your message", text: self.$editedText, onEditingChanged: { _ in }) {
+        TextField("Edit your message", text: self.$editedText)
+        .onSubmit {
             let text = self.editedText
             DispatchQueue.global().async {
                 message.edit(now: text)
@@ -60,6 +61,9 @@ struct MessageCellView: View, Equatable {
         .onAppear {
             self.editedText = message.content
         }
+        .onChange(of: self.message.content, perform: { content in
+            self.editedText = content
+        })
     }
 
     var body: some View {
@@ -129,6 +133,13 @@ struct MessageCellView: View, Equatable {
             case .guildReachedLevelThree:
                 ServerLevelUpView(level: 3)
                     .padding(.leading, leftPadding)
+            case .call:
+                if let user = message.author {
+                    CallView(
+                        user: user
+                    )
+                    .padding(.leading, leftPadding)
+                }
             default:
                 HStack(alignment: .top) {
                     if let author = message.author, !(message.isSameAuthor && message.referencedMessage == nil && message.inSameDay) {
@@ -144,43 +155,38 @@ struct MessageCellView: View, Equatable {
                     }
                     VStack(alignment: .leading) {
                         if message.isSameAuthor && message.referencedMessage == nil && message.inSameDay {
-                            if !message.content.isEmpty {
-                                if self.editing {
-                                    editingTextField
-                                        .font(.chatTextFont)
-                                        .padding(.leading, leftPadding)
-                                } else {
-                                    AsyncMarkdown(message.content)
-                                        .equatable()
-                                        .padding(.leading, leftPadding)
-                                        .popover(isPresented: $popup, content: {
-                                            PopoverProfileView(user: message.author)
-                                        })
-                                }
+                            if self.editing {
+                                editingTextField
+                                    .font(.chatTextFont)
+                                    .padding(.leading, leftPadding)
+                            } else if !message.content.isEmpty {
+                                AsyncMarkdown(message.content)
+                                    .equatable()
+                                    .padding(.leading, leftPadding)
+                                    .popover(isPresented: $popup, content: {
+                                        PopoverProfileView(user: message.author)
+                                    })
                             }
                         } else {
                             AuthorTextView(
-                                message: self.message,
-                                pronouns: self.pronouns,
+                                message: self.$message,
+                                pronouns: self.$pronouns,
                                 nick: self.$nick,
                                 role: self.$role
                             )
                             .equatable()
                             Spacer().frame(height: 1.3)
-                            if !message.content.isEmpty {
-                                if self.editing {
-                                    editingTextField
-                                        .font(.chatTextFont)
-                                } else {
-                                    AsyncMarkdown(message.content)
-                                        .equatable()
-                                }
+                            if self.editing {
+                                editingTextField
+                                    .font(.chatTextFont)
+                            } else if !message.content.isEmpty {
+                                AsyncMarkdown(message.content)
+                                    .equatable()
                             }
                         }
                     }
                     Spacer()
                 }
-                .if(Storage.users[self.message.author?.id ?? ""]?.relationship?.type == .blocked, transform: { $0.hidden() })
             }
             if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
                 StickerView(

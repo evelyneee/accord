@@ -72,17 +72,8 @@ struct ServerListView: View {
     @MainActor @ObservedObject
     public var appModel: AppGlobals = .init()
     
-    @MainActor @ObservedObject
-    public var discordSettings: DiscordSettings = .init()
-    
-    @MainActor @ObservedObject
-    public var userGuildSettings: UserGuildSettings = .init()
-    
     @AppStorage("DiscordColorScheme")
     var discordColorScheme: Bool = false
-    
-    @AppStorage("HideMutedChannels")
-    var hideMutedChannels: Bool = false
     
     internal static var readStates: [ReadStateEntry] = .init()
     var statusText: String? = nil
@@ -162,9 +153,10 @@ struct ServerListView: View {
                 // MARK: - Loading UI
                 
                 Group {
+                    // these aren't separate views due to the STUPID problem where navigationsplitview glitches
+                    // if the list isn't in the same view :(
                     if selectedServer == "@me" {
-                        PrivateChannelsView()
-                            .animation(nil, value: UUID())
+                        privateChannelsView.animation(nil, value: UUID())
                     } else if let guild = self.appModel.selectedGuild {
                         guildView(guild)
                     }
@@ -198,11 +190,11 @@ struct ServerListView: View {
             }
         })
         .environmentObject(self.appModel)
-        .environmentObject(self.discordSettings)
-        .environmentObject(self.userGuildSettings)
+        .environmentObject(self.appModel.discordSettings)
+        .environmentObject(self.appModel.userGuildSettings)
         .preferredColorScheme({
             if self.discordColorScheme {
-                return self.discordSettings.theme == .dark ? .dark : .light
+                return self.appModel.discordSettings.theme == .dark ? .dark : .light
             } else {
                 return nil
             }
@@ -246,6 +238,11 @@ struct ServerListView: View {
         .onAppear {
             if let upcomingGuild = self.viewModel.upcomingGuild {
                 self.appModel.selectedGuild = upcomingGuild
+                if let id = upcomingGuild.newChannelID {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                        self.appModel.selectedChannel = upcomingGuild.channels.first(where: { $0.id == id })
+                    })
+                }
             }
             DispatchQueue.global().async {
                 try? wss?.updatePresence(status: MediaRemoteWrapper.status ?? "offline", since: 0) {

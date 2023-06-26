@@ -52,6 +52,20 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var threads: [Channel]?
     var shown: Bool?
     var message_count: Int?
+    
+    @MainActor
+    lazy var muted: Bool = {
+        if let globals = Storage.globals {
+            return !(
+                globals.hideMutedChannels &&
+                (globals.hideMutedChannels ? false :
+                    (globals.userGuildSettings.mutedChannels.contains(self.id)
+                     || globals.userGuildSettings.mutedChannels.contains(self.parent_id ?? self.id))
+                )
+            )
+        }
+        return false
+    }()
 
     @MainActor var computedName: String {
         name ?? recipients?.map(\.computedUsername).joined(separator: ", ") ?? "Unknown Channel"

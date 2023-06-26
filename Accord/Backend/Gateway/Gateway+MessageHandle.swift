@@ -26,7 +26,7 @@ extension Gateway {
         if let s = event.s {
             seq = s
         }
-                
+                        
         switch event.t {
         case .messageACK: break
         case .sessionsReplace: break
@@ -55,7 +55,9 @@ extension Gateway {
         case .guildMemberChunk:
             memberChunkSubject.send(event.data)
         case .guildMemberListUpdate:
+            print("GOT UPDATE OBJECT")
             let list = try JSONDecoder().decode(MemberListUpdate.self, from: JSONSerialization.data(withJSONObject: ["d": event.d]))
+            dump(list)
             memberListSubject.send(list)
         case .inviteCreate: break
         case .inviteDelete: break

@@ -1,4 +1,5 @@
 # Accord
+
 A faster, native discord client for your Mac. Here's a [screenshot](https://github.com/evelyneee/accord#screenshot).
 
 ### OS Requirement
@@ -41,4 +42,5 @@ This project is licensed under the BSD 4-clause license.
 
 ## Screenshot
 
-<img width="1196" alt="Screen Shot 2022-08-15 at 8 44 04 PM" src="https://user-images.githubusercontent.com/70823629/184759736-cef96abb-1b8d-4d69-97d9-e3b32ca8df67.png">
+<img width="1390" alt="Screenshot 2022-12-01 at 9 23 29 PM" src="https://user-images.githubusercontent.com/70823629/205200522-810e8bff-23ab-49ee-a886-63cbf61bfe61.png">
+

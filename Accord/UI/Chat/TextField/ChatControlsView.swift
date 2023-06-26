@@ -377,11 +377,7 @@ extension Data {
 
 extension Array where Element: Hashable {
     func removingDuplicates() -> [Element] {
-        var addedDict: [Element: Bool] = .init()
-
-        return filter {
-            addedDict.updateValue(true, forKey: $0) == nil
-        }
+        return Array(Set(self))
     }
 
     mutating func removeDuplicates() {

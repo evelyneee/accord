@@ -31,8 +31,7 @@ extension ServerListView {
                 }
             }
             ForEach(guild.channels, id: \.self) { channel in
-                if hideMutedChannels && (hideMutedChannels ? false : (userGuildSettings.mutedChannels.contains(channel.id) || userGuildSettings.mutedChannels.contains(channel.parent_id ?? channel.id))) {
-                } else if channel.type == .section {
+                if channel.type == .section {
                     Text(channel.name?.uppercased() ?? "")
                         .fontWeight(.bold)
                         .foregroundColor(Color.secondary)
@@ -67,7 +66,16 @@ extension ServerListView {
                         }
                     )
                     .onReceive(self.appModel.$selectedGuild, perform: { [weak appModel] guild in
-                        if let guild, let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String, channel.id == value {
+                        if let guild,
+                           let value = guild.newChannelID,
+                           channel.id == value {
+                            print("SET CHANNEL")
+                            if self.appModel.selectedChannel?.guild_id == nil {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    appModel?.selectedChannel = channel
+                                }
+                                return
+                            }
                             appModel?.selectedChannel = channel
                         }
                     })
