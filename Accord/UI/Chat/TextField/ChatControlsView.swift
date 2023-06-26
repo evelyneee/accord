@@ -158,7 +158,7 @@ struct ChatControls: View {
             },
             label: { command in
                 HStack {
-                    if let command = command, let avatar = command.avatar {
+                    if let avatar = command.avatar {
                         Attachment(cdnURL + "/avatars/\(command.application_id)/\(avatar).png?size=48")
                             .equatable()
                             .frame(width: 22, height: 22)

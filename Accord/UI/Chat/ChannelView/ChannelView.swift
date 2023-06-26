@@ -560,16 +560,16 @@ struct MemberListView: View {
     }
 }
 
-extension NSTableView {
-    open override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        
-        backgroundColor = NSColor.clear
-        if let esv = enclosingScrollView {
-            esv.drawsBackground = false
-        }
-    }
-}
+//extension NSTableView {
+//    open override func viewDidMoveToWindow() {
+//        super.viewDidMoveToWindow()
+//        
+//        backgroundColor = NSColor.clear
+//        if let esv = enclosingScrollView {
+//            esv.drawsBackground = false
+//        }
+//    }
+//}
 
 struct MemberListViewCell: View {
     var guildID: String
