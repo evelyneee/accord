@@ -138,7 +138,7 @@ struct SafeVideoPlayer: View {
 }
 
 extension Font {
-    static var chatTextFont = Font.system(size: 14.5)
+    static var chatTextFont = Font.system(size: 15.5)
 }
 
 extension View {
@@ -154,6 +154,18 @@ extension View {
 class NoInsetHostingView<V>: NSHostingView<V> where V: View {
     override var safeAreaInsets: NSEdgeInsets {
         .init()
+    }
+}
+
+struct TextFieldStyle: GroupBoxStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading) {
+            configuration.label
+            configuration.content
+        }
+        .padding(5)
+        .background(Color(NSColor.windowBackgroundColor).opacity(0.7))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
 

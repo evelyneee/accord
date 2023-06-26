@@ -42,7 +42,7 @@ struct ContentView: View {
     @State var wsCancellable = Set<AnyCancellable>()
     @Binding var loaded: Bool
     
-    @MainActor @State
+    @State
     var serverListView: ServerListView?
 
     enum LoadErrors: Error {

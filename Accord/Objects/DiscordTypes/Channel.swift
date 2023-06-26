@@ -49,6 +49,7 @@ struct Channel: Decodable, Equatable, Identifiable, Hashable {
     var overridePermissions: Bool?
     var read_state: ReadStateEntry?
     var guild_name: String?
+    
     var threads: [Channel]?
     var shown: Bool?
     var message_count: Int?
@@ -128,4 +129,9 @@ enum ChannelType: Int, Codable {
     case stage = 13
     case directory = 14
     case forum = 15
+    case unknown4 = 16
+    case unknown5 = 17
+    case unknown6 = 18
+    case unknown7 = 19
+
 }

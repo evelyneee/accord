@@ -51,15 +51,15 @@ struct AuthorTextView: View, Equatable {
                 +
             Text("  \(message.processedTimestamp ?? "")")
                 .foregroundColor(Color.secondary)
-                .font(.subheadline)
+                .font(.system(size: 12))
                 +
             Text(message.editedTimestamp != nil ? " (edited at \(message.editedTimestamp?.makeProperHour() ?? "unknown time"))" : "")
                 .foregroundColor(Color.secondary)
-                .font(.subheadline)
+                .font(.system(size: 12))
                 +
             Text((pronouns != nil) ? " • \(pronouns ?? "Use my name")" : "")
                 .foregroundColor(Color.secondary)
-                .font(.subheadline)
+                .font(.system(size: 12))
             if message.author?.bot == true {
                 Text("Bot")
                     .padding(.horizontal, 3)

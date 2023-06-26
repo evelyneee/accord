@@ -8,8 +8,9 @@
 import Foundation
 import SwiftUI
 
+@usableFromInline
 enum Highlighting {
-    @available(macOS 12, *)
+    @available(macOS 12, *) @inlinable
     static func parse(_ text: String) -> AttributedString {
         let base = [0, 1, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6, 6]
         let invalid = !Array(text)

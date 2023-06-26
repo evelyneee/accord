@@ -53,22 +53,16 @@ final class SlashCommands {
                     "name": appName,
                     "type": appType,
                     "version": appVersion,
-                    "options": { () -> Any? in
-                        let dict = options.map { option -> [String: Any] in
-                            [
-                                "description": option.description,
-                                "name": option.name,
-                                "required": option.required ?? false,
-                                "type": option.type,
-                            ]
-                        }
-                        if dict.isEmpty {
-                            return nil
-                        }
-                        return dict
-                    }(),
-                ].compactMapValues { $0 },
-            ],
+                    "options": options.map { option -> [String: Any] in
+                        [
+                            "description": option.description,
+                            "name": option.name,
+                            "required": option.required ?? false,
+                            "type": option.type,
+                        ]
+                    },
+                ] as [String : Any],
+            ] as [String : Any],
             "nonce": generateFakeNonce(),
         ]
         

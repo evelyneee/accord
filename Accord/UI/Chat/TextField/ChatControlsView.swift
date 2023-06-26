@@ -222,7 +222,7 @@ struct ChatControls: View {
     var textField: some View {
         if #available(macOS 12.0, *) {
             TextField(textFieldText, text: $viewModel.textFieldContents)
-                .font(.chatTextFont)
+                .font(.system(size: 16))
                 .onSubmit {
                     typing = false
                     send()
@@ -232,7 +232,7 @@ struct ChatControls: View {
                 typing = false
                 send()
             })
-            .font(.chatTextFont)
+            .font(.system(size: 16))
         }
     }
 

@@ -258,18 +258,18 @@ final class Gateway {
                 "capabilities": 253,
                 "compress": false,
                 "client_state": [
-                    "guild_hashes": [:],
+                    "guild_hashes": [String:Any](),
                     "highest_last_message_id": "0",
                     "read_state_version": 0,
                     "user_guild_settings_version": -1,
                     "user_settings_version": -1,
-                ],
+                ] as [String : Any],
                 "presence": [
-                    "activities": [],
+                    "activities": [Any](),
                     "afk": false,
                     "since": 0,
                     "status": "online",
-                ],
+                ] as [String : Any],
                 "properties": [
                     "os": "Mac OS X",
                     "browser": "Discord Client",
@@ -279,8 +279,8 @@ final class Gateway {
                     "os_version": NSWorkspace.shared.kernelVersion,
                     "os_arch": "x64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
-                ],
-            ],
+                ] as [String : Any],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -385,7 +385,7 @@ final class Gateway {
                 "since": since,
                 "activities": activities.map(\.dictValue),
                 "afk": false,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -398,7 +398,7 @@ final class Gateway {
                 "seq": seq ?? self.seq,
                 "session_id": session_id ?? sessionID ?? "",
                 "token": token,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
         wssThread.async {
@@ -407,7 +407,7 @@ final class Gateway {
     }
 
     func subscribe(to guild: String) throws {
-        print("subscribing")
+        guard guild != "@me" else { return }
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -415,7 +415,7 @@ final class Gateway {
                 "typing": true,
                 "activities": true,
                 "threads": true,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -445,6 +445,7 @@ final class Gateway {
         guard !requestedMemberListsForGuilds.contains(guild) else { return }
         self.requestedMemberListsForGuilds.insert(guild)
         print("requesting member list")
+        guard guild != "@me" else { return }
         let packet: [String: Any] = [
             "op": 14,
             "d": [
@@ -452,7 +453,7 @@ final class Gateway {
                     channel: channels,
                 ],
                 "guild_id": guild,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -474,7 +475,7 @@ final class Gateway {
                 "limit": 0,
                 "user_ids": ids,
                 "guild_id": guild,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -491,7 +492,7 @@ final class Gateway {
                 "nonce": generateFakeNonce(),
                 "offset": 0,
                 "type": 1,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }
@@ -506,7 +507,7 @@ final class Gateway {
                 "limit": limit,
                 "nonce": generateFakeNonce(),
                 "type": 1,
-            ],
+            ] as [String : Any],
         ]
         try send(json: packet)
     }

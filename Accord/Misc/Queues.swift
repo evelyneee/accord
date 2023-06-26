@@ -15,7 +15,7 @@ let textQueue = DispatchQueue(label: "AccordTextQueue", attributes: .concurrent)
 let imageQueue = DispatchQueue(label: "AccordImageQueue", attributes: .concurrent)
 
 // The thread the websocket operations run on
-let wssThread = DispatchQueue(label: "AccordWSOperationsQueue", attributes: .concurrent)
+let wssThread = DispatchQueue(label: "AccordWSOperationsQueue")
 
 // The thread websocket events are decoded
 let webSocketQueue = DispatchQueue(label: "AccordWSDecodingQueue", attributes: .concurrent)
@@ -27,7 +27,7 @@ let concurrentQueue = DispatchQueue(label: "AccordMainWSQueue", attributes: .con
 let messageFetchQueue = DispatchQueue(label: "AccordMessageFetchQueue", attributes: .concurrent)
 
 // Message sending queue - Used by ChatControlsView
-let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue", attributes: .concurrent)
+let messageSendQueue = DispatchQueue(label: "AccordMessageSendQueue")
 
 // Gif loading queue
 let gifQueue = DispatchQueue(label: "AccordGifQueue", attributes: .concurrent)

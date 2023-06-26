@@ -75,7 +75,7 @@ final class ImageLoaderAndCache: ObservableObject {
     
     private var url: URL?
     private var size: CGSize?
-    private let queue = DispatchQueue.global(qos: .userInteractive)
+    private let queue = DispatchQueue(label: "imageQueue", attributes: .concurrent)
 
     init(imageURL: String, size: CGSize? = nil) {
         url = URL(string: imageURL)

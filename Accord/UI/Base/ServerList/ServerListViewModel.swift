@@ -15,8 +15,12 @@ final class ServerListViewModel: ObservableObject {
             self.upcomingSelection = UserDefaults.standard.integer(forKey: "AccordChannelIn\(guild?.id ?? "")")
             DispatchQueue.global().async {
                 self.setEmotes(readyPacket)
-                Storage.roleColors = RoleManager.arrangeroleColors(guilds: readyPacket.guilds)
-                Storage.roleNames = RoleManager.arrangeroleNames(guilds: readyPacket.guilds)
+                let colors = RoleManager.arrangeroleColors(guilds: readyPacket.guilds)
+                let names = RoleManager.arrangeroleNames(guilds: readyPacket.guilds)
+                DispatchQueue.main.async {
+                    Storage.roleColors = colors
+                    Storage.roleNames = names
+                }
             }
         }
     }

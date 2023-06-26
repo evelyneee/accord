@@ -137,7 +137,7 @@ struct AccordApp: App {
                         )
                         
                         self.loadSpotifyToken()
-                        DispatchQueue.global(qos: .background).async {
+                        smallOperationQueue.async {
                             RegexExpressions.precompute()
                         }
                         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) {
@@ -209,7 +209,7 @@ struct AccordApp: App {
     }
     
     func loadSpotifyToken() {
-        DispatchQueue.global().async {
+        smallOperationQueue.async {
             Request.fetch(url: URL(string: "https://accounts.spotify.com/api/token"), headers: Headers(
                 contentType: "application/x-www-form-urlencoded",
                 token: "Basic " + ("b5d5657a93c248a88b83c630a4488a78" + ":" + "faa98c11d92e493689fd797761bc1849").toBase64(),
@@ -256,7 +256,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "_MRPlayerPlaybackQueueContentItemsChangedNotification"), object: nil, queue: nil) { _ in
             print("Song Changed")
-            DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+            smallOperationQueue.asyncAfter(deadline: .now() + 2) {
                 MediaRemoteWrapper.updatePresence()
             }
         }

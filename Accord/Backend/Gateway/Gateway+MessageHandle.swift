@@ -8,6 +8,8 @@
 import Combine
 import Foundation
 
+let decoder = JSONDecoder()
+
 extension Gateway {
     func handleMessage(event: GatewayEvent) throws {
         switch event.op {
@@ -31,7 +33,7 @@ extension Gateway {
         case .messageACK: break
         case .sessionsReplace: break
         case .channelCreate:
-            let channel = try JSONDecoder().decode(GatewayEventContent<Channel>.self, from: event.data)
+            let channel = try decoder.decode(GatewayEventContent<Channel>.self, from: event.data)
             print("success 1")
             if channel.d.guild_id == nil { // is a dm
                 print("success")
@@ -42,7 +44,7 @@ extension Gateway {
         case .channelUpdate: break
         case .channelDelete: break
         case .guildCreate:
-            let guild = try JSONDecoder().decode(GatewayEventContent<Guild>.self, from: event.data)
+            let guild = try decoder.decode(GatewayEventContent<Guild>.self, from: event.data)
             let folder = GuildFolder(guild_ids: [guild.d.id])
             folder.guilds.append(guild.d)
             Task {
@@ -55,14 +57,12 @@ extension Gateway {
         case .guildMemberChunk:
             memberChunkSubject.send(event.data)
         case .guildMemberListUpdate:
-            print("GOT UPDATE OBJECT")
-            let list = try JSONDecoder().decode(MemberListUpdate.self, from: JSONSerialization.data(withJSONObject: ["d": event.d]))
-            dump(list)
+            let list = try decoder.decode(MemberListUpdate.self, from: JSONSerialization.data(withJSONObject: ["d": event.d]))
             memberListSubject.send(list)
         case .inviteCreate: break
         case .inviteDelete: break
         case .messageCreate:
-            let decoder = JSONDecoder()
+            let decoder = decoder
             decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
             let message = try decoder.decode(GatewayEventContent<Message>.self, from: event.data).d
             if let channelID = event.channelID, let author = message.author {
@@ -86,7 +86,7 @@ extension Gateway {
         case .messageReactionRemoveAll: break
         case .messageReactionRemoveEmoji: break
         case .presenceUpdate:
-            let event = try JSONDecoder().decode(GatewayEventContent<PresenceUpdate>.self, from: event.data)
+            let event = try decoder.decode(GatewayEventContent<PresenceUpdate>.self, from: event.data)
             presencePipeline[event.d.user.id]?.send(event.d)
         case .typingStart:
             if let channelID = event.channelID {
@@ -112,7 +112,7 @@ extension Gateway {
         case .guildApplicationCommandsUpdate:
             print("uwu")
             if let guildID = event.guildID {
-                let commands = try JSONDecoder().decode(
+                let commands = try decoder.decode(
                     SlashCommandStorage.GuildApplicationCommandsUpdateEvent.self,
                     from: event.data
                 )

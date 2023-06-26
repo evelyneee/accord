@@ -40,7 +40,7 @@ struct MessageCellMenu: View {
                     .appendingPathComponent(message.channelID)
                     .appendingPathComponent("pins")
                     .appendingPathComponent(message.id)
-                DispatchQueue.global().async {
+                smallOperationQueue.async {
                     Request.ping(url: url, headers: Headers(
                         token: Globals.token,
                         type: message.pinned == false ? .PUT : .DELETE,
@@ -65,7 +65,7 @@ struct MessageCellMenu: View {
                     .appendingPathComponent(self.message.channelID)
                     .appendingPathComponent("recipients")
                     .appendingPathComponent(message.author!.id)
-                DispatchQueue.global().async {
+                smallOperationQueue.async {
                     Request.ping(url: url, headers: Headers(
                         token: Globals.token,
                         type: .DELETE,
@@ -82,7 +82,7 @@ struct MessageCellMenu: View {
             .appendingPathComponent(guildID)
             .appendingPathComponent("members")
             .appendingPathComponent(message.author!.id)
-        DispatchQueue.global().async {
+        smallOperationQueue.async {
             Request.ping(url: url, headers: Headers(
                 token: Globals.token,
                 bodyObject: ["communication_disabled_until": time],
@@ -139,7 +139,7 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(guildID)
                         .appendingPathComponent("bans")
                         .appendingPathComponent(message.author!.id)
-                    DispatchQueue.global().async {
+                    smallOperationQueue.async {
                         Request.ping(url: url, headers: Headers(
                             token: Globals.token,
                             bodyObject: ["delete_message_days": 1],
@@ -157,7 +157,7 @@ struct MessageCellMenu: View {
                         .appendingPathComponent(guildID)
                         .appendingPathComponent("members")
                         .appendingPathComponent(message.author!.id)
-                    DispatchQueue.global().async {
+                    smallOperationQueue.async {
                         Request.ping(url: url, headers: Headers(
                             token: Globals.token,
                             type: .DELETE,
@@ -259,7 +259,7 @@ struct MessageCellMenu: View {
             }
             if message.author?.id == Globals.user?.id || self.permissions.contains(.manageMessages) {
                 Button("Delete") {
-                    DispatchQueue.global().async {
+                    userOperationQueue.async {
                         message.delete()
                     }
                 }

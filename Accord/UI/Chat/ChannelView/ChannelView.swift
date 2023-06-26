@@ -65,6 +65,15 @@ struct MessagePlaceholders: View {
     }
 }
 
+extension View {
+    func noSeparators() -> some View {
+        if #available(macOS 13.0, *) {
+            return self.listRowSeparator(.hidden)
+        }
+        return self
+    }
+}
+
 struct ChannelView: View {
 
     @StateObject
@@ -252,19 +261,22 @@ struct ChannelView: View {
     var list: some View {
         ScrollViewReader { proxy in
             List {
-                Spacer().frame(height: 15)
-                if metalRenderer {
-                    messagesView.drawingGroup()
-                } else {
-                    messagesView
+                Group {
+                    Spacer().frame(height: 15)
+                    if metalRenderer {
+                        messagesView.drawingGroup()
+                    } else {
+                        messagesView
+                    }
+                    if viewModel.noMoreMessages {
+                        channelHeaderView
+                            .rotationEffect(.degrees(180))
+                            .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
+                    } else {
+                        MessagePlaceholders()
+                    }
                 }
-                if viewModel.noMoreMessages {
-                    channelHeaderView
-                        .rotationEffect(.degrees(180))
-                        .scaleEffect(x: -1.0, y: 1.0, anchor: .center)
-                } else {
-                    MessagePlaceholders()
-                }
+                .noSeparators()
             }
             .listRowBackground(colorScheme == .dark ? Color.darkListBackground : Color(NSColor.controlBackgroundColor))
             .background(Color(NSColor.alternatingContentBackgroundColors[0]))
@@ -342,7 +354,7 @@ struct ChannelView: View {
                                     ZStack(alignment: .topTrailing) {
                                         cell(for: $message)
                                         Button("Jump") {
-                                            Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, parent_id: nil))
+                                            Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: self.channel.guild_id, position: nil, permission_overwrites: .init(), parent_id: nil))
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                                                 ChannelView.scrollTo.send((message.channelID, message.id))
                                             })
@@ -362,7 +374,7 @@ struct ChannelView: View {
                         .frame(width: 250)
                         .onAppear { [weak viewModel] in
                             guard let viewModel else { return }
-                            if viewModel.memberList.isEmpty, viewModel.guildID != "@me" {
+                            if viewModel.memberList.isEmpty && viewModel.guildID != "@me" {
                                 try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
                             }
                         }
@@ -378,7 +390,7 @@ struct ChannelView: View {
             if let channel = channel, appModel.selectedChannel?.id != viewModel.channel?.id {
                 if channel.guild_id != self.viewModel.guildID {
                     self.viewModel.memberList.removeAll()
-                    if self.channel.guild_id == "@me" {
+                    if self.channel?.guild_id == "@me" || self.channel?.guild_id == nil {
                         viewModel.memberList = channel.recipients?.map(OPSItems.init) ?? []
                     }
                 }
@@ -401,7 +413,7 @@ struct ChannelView: View {
                         DispatchQueue.main.async {
                             self.viewModel.memberList = cache
                         }
-                    } else if let guildID = channel.guild_id, guildID != "@me", memberListShown {
+                    } else if let guildID = channel?.guild_id, guildID != "@me", memberListShown {
                         try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
                     } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
                         try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")
@@ -553,8 +565,10 @@ struct MemberListView: View {
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
                 .padding([.top])
+                .noSeparators()
             } else {
                 MemberListViewCell(guildID: self.guildID, ops: $ops)
+                    .noSeparators()
             }
         }
     }

@@ -120,6 +120,7 @@ extension ChannelView {
                 .padding(10)
             }
         }
+        .groupBoxStyle(TextFieldStyle())
 //        .background(Color(NSColor.alternatingContentBackgroundColors[1]))
 //        .clipShape(RoundedCorners(tl: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, tr: replyingTo != nil || !viewModel.typing.isEmpty ? 6 : 9, bl: 9, br: 9))
         .padding([.horizontal, .bottom], 12)
@@ -130,11 +131,7 @@ extension ChannelView {
 extension View {
     func gradientBackground(_ color: Color?) -> some View {
         if #available(macOS 13.0, *) {
-            #if canImport(WeatherKit)
             return self.background(color?.gradient ?? Color.primary.gradient)
-            #else
-            return self.background(color)
-            #endif
         } else {
             return self.background(color)
         }

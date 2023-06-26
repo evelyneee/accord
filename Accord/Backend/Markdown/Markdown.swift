@@ -15,6 +15,7 @@ public final class Markdown {
 
     static var highlighting: Bool = UserDefaults.standard.value(forKey: "Highlighting") as? Bool ?? false
 
+    @usableFromInline
     enum MarkdownErrors: Error {
         case unsupported // For the new Markdown Parser, which is unavailable on Big Sur
     }
@@ -26,6 +27,7 @@ public final class Markdown {
     public static var newLinePublisher: TextArrayPublisher = Just<[Text]>.init([Text("\n")]).setFailureType(to: Error.self).eraseToAnyPublisher()
     fileprivate static let blankCharacter = "‎" // Not an empty string
 
+    @inlinable
     class func appleMarkdown(_ text: String) -> Text {
         do {
             if #available(macOS 12, *) {
@@ -68,7 +70,7 @@ public final class Markdown {
 
      ***/
 
-    @available(macOS 12.0, *)
+    @available(macOS 12.0, *) @inlinable
     class func bionicMarkdown(_ word: String) -> AttributedString {
         var markdown = try? AttributedString(markdown: word)
         markdown = markdown?.transformingAttributes(\.presentationIntent) { transformer in
@@ -81,7 +83,8 @@ public final class Markdown {
             return highlighted
         }
     }
-
+    
+    @inlinable
     class func checkDisallowedCharacters(_ word: String) -> Bool {
         !(word.contains("*") ||
           word.contains("~") ||
@@ -112,20 +115,36 @@ public final class Markdown {
         if let id = emoteIDs.first, let emoteURL = URL(string: cdnURL + "/emojis/\(id).png?size=\(font ? "48" : "32")") {
             return RequestPublisher.image(url: emoteURL)
                 .replaceError(with: NSImage(systemSymbolName: "wifi.slash", accessibilityDescription: "No connection") ?? NSImage())
-                .map { image -> NSImage in
-                    guard !font else { return image }
-                    image.size = NSSize(width: 16, height: 16)
-                    return image
-                }
-                .map {
-                    Text(Image(nsImage: $0)).font(font ? .system(size: 48) : .system(size: 14)) + Text(" ")
+                .map { image -> Text in
+                    if !font {
+                        image.size = NSSize(width: 14, height: 14)
+                    }
+                    return Text(Image(nsImage: image)).font(font ? .system(size: 40) : .system(size: 14)) + Text(" ")
                 }
                 .eraseToAny()
         }
         return Future { promise in
-            let mentions = word.matches(precomputed: RegexExpressions.mentions)
-            let roleMentions = word.matches(precomputed: RegexExpressions.roleMentions)
-            let channels = word.matches(precomputed: RegexExpressions.channels)
+            let mentions = word.matches(precomputed: RegexExpressions.mentions).map { (str) -> String in
+                if str.hasPrefix("@!") {
+                    return String(str.dropFirst(2))
+                }
+                if str.first == "@" {
+                    return String(str.dropFirst())
+                }
+                return str
+            }
+            let roleMentions = word.matches(precomputed: RegexExpressions.roleMentions).map { (str) -> String in
+                if str.hasPrefix("@&") {
+                    return String(str.dropFirst())
+                }
+                return str
+            }
+            let channels = word.matches(precomputed: RegexExpressions.channels).map { (str) -> String in
+                if str.first == "#" {
+                    return String(str.dropFirst())
+                }
+                return str
+            }
             let songIDs = word.matches(precomputed: RegexExpressions.songIDs)
             let platforms = word.matches(precomputed: RegexExpressions.platforms)
                 .replaceAllOccurences(of: "music.apple", with: "applemusic")
@@ -157,40 +176,38 @@ public final class Markdown {
                             Text(" ")
                     ))
                 } else {
-                    DispatchQueue.main.async {
-                        if let member = Storage.users[id] {
-                            return promise(.success(
-                                Text("@\(member.username)")
-                                    .foregroundColor(Color.accentColor)
-                                    .underline()
-                                    +
-                                    Text(" ")
-                            ))
-                        } else {
-                            DispatchQueue.global().async {
-                                do {
-                                    guard let url = URL(string: rootURL)?
-                                        .appendingPathComponent("guilds")
-                                        .appendingPathComponent(channelInfo.guild)
-                                        .appendingPathComponent("members")
-                                        .appendingPathComponent(id) else { return promise(.failure("bad url")) }
-                                    let request = URLRequest(url: url)
-                                    guard let user = cache.cachedResponse(for: request) else { throw Request.FetchErrors.noData }
-                                    let cachedObject = try? JSONDecoder().decode(GuildMember.GuildMemberSaved.self, from: user.data)
-                                    guard !(cachedObject?.isOutdated == true) else { throw Request.FetchErrors.noData }
-                                    let member = cachedObject?.member
-                                    if let member {
-                                        return promise(.success(
-                                            Text("@\(member.nick ?? member.user.username)")
-                                                .foregroundColor(Color.accentColor)
-                                                .underline()
-                                            +
-                                            Text(" ")
-                                        ))
-                                    } else { throw "no member" }
-                                } catch {
-                                    try? wss.getMembers(ids: [id], guild: channelInfo.guild)
-                                }
+                    if let member = Storage.users[id] {
+                        return promise(.success(
+                            Text("@\(member.username)")
+                                .foregroundColor(Color.accentColor)
+                                .underline()
+                                +
+                                Text(" ")
+                        ))
+                    } else {
+                        userOperationQueue.async {
+                            do {
+                                guard let url = URL(string: rootURL)?
+                                    .appendingPathComponent("guilds")
+                                    .appendingPathComponent(channelInfo.guild)
+                                    .appendingPathComponent("members")
+                                    .appendingPathComponent(id) else { return promise(.failure("bad url")) }
+                                let request = URLRequest(url: url)
+                                guard let user = cache.cachedResponse(for: request) else { throw Request.FetchErrors.noData }
+                                let cachedObject = try? JSONDecoder().decode(GuildMember.GuildMemberSaved.self, from: user.data)
+                                guard !(cachedObject?.isOutdated == true) else { throw Request.FetchErrors.noData }
+                                let member = cachedObject?.member
+                                if let member {
+                                    return promise(.success(
+                                        Text("@\(member.nick ?? member.user.username)")
+                                            .foregroundColor(Color.accentColor)
+                                            .underline()
+                                        +
+                                        Text(" ")
+                                    ))
+                                } else { throw "no member" }
+                            } catch {
+                                try? wss.getMembers(ids: [id], guild: channelInfo.guild)
                             }
                         }
                     }
@@ -207,7 +224,7 @@ public final class Markdown {
                 ))
             }
             if !channels.isEmpty {
-                Task {
+                Task.detached {
                     guard let channelNameStorage = await Storage.globals?.folders.map(\.guilds).joined().map(\.channels).joined() else { return }
                     
                     for id in channels {
@@ -246,10 +263,23 @@ public final class Markdown {
         if !allowLinkShortening {
             line = line.replacingOccurrences(of: "](", with: "]\(blankCharacter)(") // disable link shortening forcefully
         }
+                
         let words = line.matchRange(precomputed: RegexExpressions.line).map { line[$0].trimmingCharacters(in: .whitespaces) }
-        let pubs: [AnyPublisher<Text, Error>] = words.map { markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first, channelInfo: channelInfo) }
+        
+        var overrideFont: Font? = nil
+        if let firstWord = words.first, line.hasPrefix("# ") || line.hasPrefix("## ") || line.hasPrefix("### ") {
+            overrideFont = .system(size: CGFloat(16 + 24 / firstWord.count), weight: .bold)
+        }
+        
+        let pubs: [AnyPublisher<Text, Error>] = words.map {
+            markWord($0, members, font: font, highlight: highlight, quote: line.first == $0.first, channelInfo: channelInfo)
+        }
         return Publishers.MergeMany(pubs)
             .collect()
+            .map {
+                if let overrideFont { return $0.map { $0.font(overrideFont) } }
+                return $0
+            }
             .eraseToAnyPublisher()
     }
 
@@ -264,20 +294,19 @@ public final class Markdown {
         let newlines = text.split(whereSeparator: \.isNewline)
 
         let codeBlockMarkerRawOffsets = newlines
-            .lazy
             .enumerated()
-            .filter { $0.element.prefix(3) == "```" || $0.element.suffix(3) == "```" }
-            .map(\.offset)
+            .compactMap { (offset, element) -> Int? in
+                guard element.prefix(3) == "```" || element.suffix(3) == "```" else { return nil }
+                return offset
+            }
 
         let indexes = codeBlockMarkerRawOffsets
-            .lazy
             .indices
-            .filter { $0 % 2 == 0 }
-            .map { number -> (Int, Int)? in
+            .compactMap { number -> (Int, Int)? in
+                guard number % 2 == 0 else { return nil }
                 if !codeBlockMarkerRawOffsets.indices.contains(number + 1) { return nil }
                 return (codeBlockMarkerRawOffsets[number], codeBlockMarkerRawOffsets[number + 1])
             }
-            .compactMap(\.self)
 
         let pubs = newlines.map { markLine(String($0), members, font: font, highlight: (text.count > 100) && highlighting, allowLinkShortening: allowLinkShortening, channelInfo: channelInfo) }
         var strippedPublishers = pubs
@@ -369,10 +398,18 @@ final class NSAttributedMarkdown {
             )
         }
 
-        static var italic = try? NSRegularExpression(pattern: #"(\*|_)(.*?)\1"#)
-        static var bold = try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
-        static var strikeThrough = try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
-        static var mono = try? NSRegularExpression(pattern: #"(`(\w+(\s\w+)*)`)"#)
+        static var italic: FastRegex? = {
+            try? NSRegularExpression(pattern: #"(\*|_)(.*?)\1"#)
+        }()
+        static var bold: FastRegex? = {
+            try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
+        }()
+        static var strikeThrough: FastRegex? = {
+            try? NSRegularExpression(pattern: #"(\*\*|__)(.*?)\1"#)
+        }()
+        static var mono: FastRegex? = {
+            try? NSRegularExpression(pattern: #"(`(\w+(\s\w+)*)`)"#)
+        }()
     }
 }
 

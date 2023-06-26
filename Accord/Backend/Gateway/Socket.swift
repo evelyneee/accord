@@ -38,6 +38,7 @@ extension Gateway {
     }
 
     func send<C: Collection>(json: C) throws {
+        print(json)
         let context = NWConnection.ContentContext(
             identifier: "textContext",
             metadata: [NWProtocolWebSocket.Metadata(opcode: .text)]

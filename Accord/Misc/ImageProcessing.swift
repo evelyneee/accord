@@ -35,7 +35,7 @@ extension NSImage {
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                   kCGImageSourceShouldCacheImmediately: true,
                                   kCGImageSourceCreateThumbnailWithTransform: true,
-                                  kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+                                           kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as [CFString : Any] as CFDictionary
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }
@@ -75,7 +75,7 @@ extension Data {
         let downsampledOptions = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                   kCGImageSourceShouldCacheImmediately: true,
                                   kCGImageSourceCreateThumbnailWithTransform: true,
-                                  kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+                                           kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as [CFString : Any] as CFDictionary
         guard let downScaledImage = CGImageSourceCreateThumbnailAtIndex(source, 0, downsampledOptions) else { return nil }
         return downScaledImage.png
     }

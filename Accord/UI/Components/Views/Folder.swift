@@ -59,7 +59,6 @@ struct Folder<Content: View>: View {
                             }
                         } else {
                             if #available(macOS 13.0, *) {
-                                #if canImport(WeatherKit)
                                 Image(systemName: "folder.fill")
                                     .font(.title2)
                                     .foregroundColor(color.lighter().opacity(0.75))
@@ -68,16 +67,6 @@ struct Folder<Content: View>: View {
                                     .background(color.opacity(0.65).gradient)
                                     .cornerRadius(15)
                                     .frame(width: 45, height: 45)
-                                #else
-                                Image(systemName: "folder.fill")
-                                    .font(.title2)
-                                    .foregroundColor(color.lighter().opacity(0.75))
-                                    .padding()
-                                    .frame(width: 45, height: 45)
-                                    .background(color.opacity(0.65))
-                                    .cornerRadius(15)
-                                    .frame(width: 45, height: 45)
-                                #endif
                             } else {
                                 Image(systemName: "folder.fill")
                                     .font(.title2)

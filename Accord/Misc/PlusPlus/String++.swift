@@ -71,25 +71,21 @@ extension String {
 }
 
 extension String {
-    func matches(for regex: String? = nil, precomputed: NSRegularExpression? = nil) -> [String] {
+    func matches(for regex: String? = nil, precomputed: FastRegex? = nil) -> [String] {
         let regex = precomputed ?? (try? NSRegularExpression(pattern: regex!))
-        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
-        guard let mapped = results?.compactMap({ result -> String? in
-            if let range = Range(result.range, in: self) {
-                return String(self[range])
-            } else {
-                return nil
-            }
+        let results = regex?.matches(in: self, options: .anchored, range: NSRange(startIndex..., in: self))
+        guard let mapped = results?.compactMap({
+            return String(self[$0])
         }) else {
             return []
         }
         return mapped
     }
 
-    func matchRange(for regex: String? = nil, precomputed: NSRegularExpression? = nil) -> [Range<String.Index>] {
+    func matchRange(for regex: String? = nil, precomputed: FastRegex? = nil) -> [Range<String.Index>] {
         let regex = precomputed ?? (try? NSRegularExpression(pattern: regex!))
-        let results = regex?.matches(in: self, range: NSRange(startIndex..., in: self))
-        guard let mapped = results?.compactMap({ Range($0.range, in: self) }) else {
+        let results = regex?.matches(in: self, options: .anchored, range: NSRange(startIndex..., in: self))
+        guard let mapped = results?.compactMap({ $0 }) else {
             return []
         }
         return mapped

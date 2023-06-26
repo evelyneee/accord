@@ -11,7 +11,7 @@ import Intents
 import UserNotifications
 
 func showNotification(title: String, subtitle: String, description: String? = nil, pfpURL _: String, id: String) {
-    DispatchQueue.global().async {
+    userOperationQueue.async {
         let content = UNMutableNotificationContent()
         content.title = title
         if subtitle != title {

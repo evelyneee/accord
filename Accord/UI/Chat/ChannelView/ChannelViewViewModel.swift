@@ -150,6 +150,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     func loadChannel(_ channel: Channel) {
         messageFetchQueue.async { [weak self] in
             guard let self = self else { return }
+            print(self.guildID)
             self.getMessages(channelID: self.channelID, guildID: self.guildID)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 if channel.guild_id == nil || channel.guild_id == "@me" {
@@ -242,7 +243,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     }
                     let message2 = message
                     DispatchQueue.main.async {
-                        self.messages.insert(message2, at: 0)
+                        withAnimation(Animation.easeIn(duration: 0.1)) {
+                            self.messages.insert(message2, at: 0)
+                        }
                     }
                 }
             }
@@ -273,7 +276,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                           let index = messageMap[message.id] else { return }
                     DispatchQueue.main.async {
                         let i: Int = index
-                        self.messages.remove(at: i)
+                        _ = withAnimation(Animation.easeOut(duration: 0.1)) {
+                            self.messages.remove(at: i)
+                        }
                     }
                 }
             }
@@ -458,7 +463,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             }
         }) { [weak self] messages in
             guard let self = self else { return }
-            Task {
+            Task.detached {
                 await MainActor.run {
                     self.error = nil
                     self.messages = messages
@@ -474,12 +479,10 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                         ChannelView.scrollTo.send((channelID, messages.first?.id ?? ""))
                     })
                 }
-                Task.detached {
-                    guildID == "@me" ? await self.fakeNicksObject() : await self.performSecondStageLoad()
-                    await self.loadPronouns()
-                    await self.ack(channelID: channelID, guildID: guildID)
-                    await self.cacheUsernames()
-                }
+                guildID == "@me" ? await self.fakeNicksObject() : await self.performSecondStageLoad()
+                await self.loadPronouns()
+                await self.ack(channelID: channelID, guildID: guildID)
+                await self.cacheUsernames()
             }
         }
         .store(in: &cancellable)
@@ -532,11 +535,12 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
         .replaceError(with: [:])
         .sink { [weak self] value in
             guard let self = self else { return }
-            Task {
+            Task.detached {
+                let pronouns = value.mapValues {
+                    pronounDBFormed(pronoun: $0)
+                }
                 await MainActor.run {
-                    self.pronouns = value.mapValues {
-                        pronounDBFormed(pronoun: $0)
-                    }
+                    self.pronouns = pronouns
                 }
             }
         }

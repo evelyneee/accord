@@ -31,7 +31,12 @@ extension ServerListView {
         Storage.mergedMembers = readyPacket.merged_members
             .compactMap(\.first)
             .enumerated()
-            .map { [readyPacket.guilds[$0].id: $1] }
+            .compactMap {
+                if let guildID = readyPacket.guilds[safe: $0]?.id {
+                    return [guildID: $1]
+                }
+                return nil
+            }
             .flatMap { $0 }
             .reduce([String: Guild.MergedMember]()) { dict, tuple in
                 var nextDict = dict

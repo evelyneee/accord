@@ -29,7 +29,7 @@ struct ReplyView: View {
                 .frame(width: 15, height: 15)
                 .clipShape(Circle())
             Text(replyNick ?? reply.author?.username ?? "")
-                .font(.subheadline)
+                .font(.system(size: 11))
                 .foregroundColor({ () -> Color in
                     if let replyRole = replyRole, let color = Storage.roleColors[replyRole]?.0 {
                         return Color(int: color)
@@ -43,7 +43,7 @@ struct ReplyView: View {
                 let content = reply?.content ?? ""
                 let hasAttachment = !(reply?.attachments ?? []).isEmpty
                 Text(!content.isEmpty ? content : hasAttachment ? "Click to see attachment" : "       ")
-                    .font(.subheadline)
+                    .font(.system(size: 11))
                     .lineLimit(0)
                     .foregroundColor(.secondary)
             })

@@ -226,7 +226,7 @@ struct PopoverProfileView: View {
                     if let roles = self.guildMember?.roles?.sorted(by: { lhs, rhs in
                         if let lhs = Storage.roleColors[lhs]?.1, let rhs = Storage.roleColors[rhs]?.1 {
                             return lhs > rhs
-                        } else { return true }
+                        } else { return false }
                     }) {
                         RolesView(tags: roles)
                     }
@@ -292,7 +292,7 @@ struct PopoverProfileView: View {
         }
         .frame(width: 290)
         .onAppear {
-            DispatchQueue.global().async {
+            userOperationQueue.async {
                 self.loadUser()
             }
         }

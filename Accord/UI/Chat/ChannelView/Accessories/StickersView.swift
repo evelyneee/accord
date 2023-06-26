@@ -17,7 +17,7 @@ struct StickersView: View {
         get async {
             await withCheckedContinuation { continuation in
                 let folders = appModel.folders
-                DispatchQueue.global().async {
+                userOperationQueue.async {
                     continuation.resume(with: .success(Array(folders
                         .lazy
                         .map(\.guilds)

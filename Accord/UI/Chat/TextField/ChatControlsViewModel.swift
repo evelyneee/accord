@@ -57,11 +57,36 @@ final class ChatControlsViewModel: ObservableObject {
     @_optimize(speed)
     func checkText(guildID: String, channelID: String) async {
         let ogContents = await textFieldContents
-        let mentions = ogContents.matches(precomputed: RegexExpressions.chatTextMentions)
-        let channels = ogContents.matches(precomputed: RegexExpressions.chatTextChannels)
-        let slashes = ogContents.matches(precomputed: RegexExpressions.chatTextSlashCommand)
-        let emoji = ogContents.matches(precomputed: RegexExpressions.chatTextEmoji)
-        let emotes = ogContents.matches(precomputed: RegexExpressions.completedEmote)
+        let mentions = ogContents.matches(precomputed: RegexExpressions.chatTextMentions).map { (str) -> String in
+            if str.first == "@" {
+                return String(str.dropFirst())
+            }
+            return str
+        }
+        let channels = ogContents.matches(precomputed: RegexExpressions.chatTextChannels).map { (str) -> String in
+            if str.first == "#" {
+                return String(str.dropFirst())
+            }
+            return str
+        }
+        let slashes = ogContents.matches(precomputed: RegexExpressions.chatTextSlashCommand).map { (str) -> String in
+            if str.first == "/" {
+                return String(str.dropFirst())
+            }
+            return str
+        }
+        let emoji = ogContents.matches(precomputed: RegexExpressions.chatTextEmoji).map { (str) -> String in
+            if str.first == ":" {
+                return String(str.dropFirst())
+            }
+            return str
+        }
+        let emotes = ogContents.matches(precomputed: RegexExpressions.completedEmote).map { (str) -> String in
+            if str.first == ":" {
+                return String(str.dropFirst())
+            }
+            return str
+        }
 
         emotes.forEach { emoji in
             let emote = emoji.dropLast().dropFirst().stringLiteral
@@ -83,7 +108,7 @@ final class ChatControlsViewModel: ObservableObject {
         }
 
         if let search = mentions.last?.lowercased() {
-            let matchedUsers = await Storage.users
+            let matchedUsers = Storage.users
                 .filterValues { $0.username.lowercased().contains(search.lowercased()) }
                 .map(\.value)
             let matchedRoles = Storage.roleNames
@@ -159,7 +184,8 @@ final class ChatControlsViewModel: ObservableObject {
     
     @MainActor
     func findView() {
-        AppKitLink<NSTextField>.introspect { textField, _ in
+        let stop = UnsafeMutablePointer<Bool>.allocate(capacity: MemoryLayout<Bool>.size)
+        AppKitLink<NSTextField>(stop).introspect { textField, _ in
             print("found view!!!!")
             textField.lineBreakMode = .byWordWrapping
             textField.usesSingleLineMode = false
@@ -341,7 +367,7 @@ final class ChatControlsViewModel: ObservableObject {
     func send(text: String, replyingTo: Message, mention: Bool, guildID: String) {
         Request.ping(url: URL(string: "\(rootURL)/channels/\(replyingTo.channelID)/messages"), headers: Headers(
             token: Globals.token,
-            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention], "message_reference": ["channel_id": replyingTo.channelID, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
+            bodyObject: ["content": text, "allowed_mentions": ["parse": ["users", "roles", "everyone"], "replied_user": mention] as [String : Any], "message_reference": ["channel_id": replyingTo.channelID, "message_id": replyingTo.id], "tts": false, "nonce": generateFakeNonce()],
             type: .POST,
             discordHeaders: true,
             referer: "https://discord.com/channels/\(guildID)/\(replyingTo.channelID)",
@@ -364,12 +390,12 @@ final class ChatControlsViewModel: ObservableObject {
             "nonce":generateFakeNonce(),
             "channel_id":channelID,
             "type":0,
-            "sticker_ids":[],
+            "sticker_ids":[String](),
             "attachments":file.enumerated().map { offset, url in
                 [
                     "filename":url.lastPathComponent,
                     "id":offset
-                ]
+                ] as [String : Any]
             }
         ] :
         [

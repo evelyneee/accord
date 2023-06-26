@@ -31,7 +31,7 @@ struct MentionsView: View {
                     replyingTo: $replyingTo
                 )
                 Button("Jump") {
-                    Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: message.guildID ?? message.reference?.guildID, position: nil, parent_id: nil))
+                    Storage.globals?.select(channel: Channel(id: message.channelID, type: .normal, guild_id: message.guildID ?? message.reference?.guildID, position: nil, permission_overwrites: .init(), parent_id: nil))
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                         ChannelView.scrollTo.send((message.channelID, message.id))
                     })

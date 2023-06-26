@@ -42,12 +42,6 @@ var spotifyToken: String?
     let keychainItemName = "red.evelyn.accord.token"
 #endif
 
-#if !canImport(WeatherKit)
-let ENABLE_NAVIGATIONSPLITVIEW: Bool = false
-#else
-let ENABLE_NAVIGATIONSPLITVIEW: Bool = true
-#endif
-
 enum Globals {
     // static var cancellable: Cancellable?
 

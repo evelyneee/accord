@@ -81,4 +81,5 @@ enum NitroTypes: Int, Codable {
     case classic = 1
     case nitro = 2
     case basic = 3
+    case unknown1 = 4
 }

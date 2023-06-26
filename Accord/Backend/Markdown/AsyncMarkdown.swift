@@ -27,7 +27,7 @@ final class AsyncMarkdownModel: ObservableObject {
     var hasEmojiOnly: Bool = false
 
     private var cancellable: AnyCancellable?
-    static let queue = DispatchQueue(label: "textQueue")
+    static let queue = DispatchQueue.global()
     
     var channelInfo: (String, String)?
 

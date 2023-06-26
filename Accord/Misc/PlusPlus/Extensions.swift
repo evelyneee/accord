@@ -20,19 +20,55 @@ public var doNothing: (Any) -> Void = { _ in }
 @propertyWrapper
 public final class IgnoreFailure<Value: Decodable>: Decodable {
     public var wrappedValue: [Value] = []
-
+    
+    public init() {
+        self.wrappedValue = []
+    }
+    
     private struct _None: Decodable {}
 
     public required init(from decoder: Decoder) throws {
-        var container = try decoder.unkeyedContainer()
-        while !container.isAtEnd {
-            do {
-                let decoded = try container.decode(Value.self)
-                wrappedValue.append(decoded)
-            } catch {
-                print("failed to decode", error)
-                _ = try container.decode(_None.self)
+        let container = try? decoder.unkeyedContainer()
+        if var container {
+            while !container.isAtEnd {
+                do {
+                    let decoded = try container.decode(Value.self)
+                    wrappedValue.append(decoded)
+                } catch {
+                    print("failed to decode", error)
+                    _ = try container.decode(_None.self)
+                }
             }
+        } else {
+            self.wrappedValue = []
+        }
+    }
+}
+
+@propertyWrapper
+public final class IgnoreFailureOptional<Value: Decodable>: Decodable {
+    public var wrappedValue: [Value]? = []
+    
+    public init() {
+        self.wrappedValue = []
+    }
+    
+    private struct _None: Decodable {}
+
+    public required init(from decoder: Decoder) throws {
+        let container = try? decoder.unkeyedContainer()
+        if var container {
+            while !container.isAtEnd {
+                do {
+                    let decoded = try container.decode(Value.self)
+                    wrappedValue?.append(decoded)
+                } catch {
+                    print("failed to decode", error)
+                    _ = try container.decode(_None.self)
+                }
+            }
+        } else {
+            self.wrappedValue = []
         }
     }
 }

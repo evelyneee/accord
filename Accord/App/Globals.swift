@@ -23,7 +23,6 @@ enum Storage {
     
     public static var mergedMembers = [String: Guild.MergedMember]()
     
-    @MainActor
     public static var users = [String:User]()
 
     @MainActor
@@ -116,10 +115,12 @@ final class AppGlobals: ObservableObject {
                 .joined()
                 .filter { $0.id == guildID }
                 .first?.roles?.lazy
-                .filter { Storage.mergedMembers[guildID]?.roles.contains($0.id) == true }
-                .compactMap(\.permissions)
-                .compactMap { Int64($0) }
-                .map { Permissions($0) } ?? [Permissions]()
+                .compactMap { (role) -> Permissions? in
+                    guard Storage.mergedMembers[guildID]?.roles.contains(role.id) == true,
+                          let perms = role.permissions,
+                          let num = Int64(perms) else { return nil }
+                    return Permissions(num)
+                } ?? [Permissions]()
         )
 
         if permsArray.contains(.administrator) {
@@ -143,3 +144,6 @@ final class AppGlobals: ObservableObject {
     }
 
 }
+
+let smallOperationQueue = DispatchQueue.global(qos: .background)
+let userOperationQueue = DispatchQueue.global(qos: .userInteractive)

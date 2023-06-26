@@ -29,7 +29,7 @@ extension Reachability {
 struct GuildHoverAnimation: ViewModifier {
     var color: Color = Color.accentColor.opacity(0.5)
     var hasIcon: Bool
-    var frame: Double = 45
+    var frame: Double = 50
     var selected: Bool
     @State var hovered: Bool = false
 
@@ -42,7 +42,7 @@ struct GuildHoverAnimation: ViewModifier {
                     hovered = res
                 }
             })
-            .cornerRadius(hovered || selected ? 15 : frame / 2)
+            .cornerRadius(hovered || selected ? 13 : frame / 2)
     }
 }
 
@@ -88,6 +88,9 @@ struct ServerListView: View {
     @State var width: Double?
     
     @State var invitePopup: Bool = false
+    
+    @AppStorage("HideMutedChannels")
+    var hideMutedChannels: Bool = false
     
     var onlineButton: some View {
         Button(action: {
@@ -152,16 +155,8 @@ struct ServerListView: View {
                 
                 // MARK: - Loading UI
                 
-                Group {
-                    // these aren't separate views due to the STUPID problem where navigationsplitview glitches
-                    // if the list isn't in the same view :(
-                    if selectedServer == "@me" {
-                        privateChannelsView.animation(nil, value: UUID())
-                    } else if let guild = self.appModel.selectedGuild {
-                        guildView(guild)
-                    }
-                }
-                .frame(minWidth: 240)
+                guildView()
+                    .frame(minWidth: 240)
             }
         }, detail: {
             Group {

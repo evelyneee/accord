@@ -51,7 +51,7 @@ struct MessageCellView: View, Equatable {
         TextField("Edit your message", text: self.$editedText)
         .onSubmit {
             let text = self.editedText
-            DispatchQueue.global().async {
+            userOperationQueue.async {
                 message.edit(now: text)
             }
             self.editing = false
@@ -149,9 +149,9 @@ struct MessageCellView: View, Equatable {
                             popup: self.$popup
                         )
                         .equatable()
-                        .frame(width: 35, height: 35)
                         .clipShape(Circle())
-                        .padding(.trailing, 1.5)
+                        .frame(width: 37, height: 37)
+                        .padding(.trailing, 2)
                     }
                     VStack(alignment: .leading) {
                         if message.isSameAuthor && message.referencedMessage == nil && message.inSameDay {
@@ -188,38 +188,44 @@ struct MessageCellView: View, Equatable {
                     Spacer()
                 }
             }
-            if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
-                StickerView(
-                    stickerItems: stickerItems
-                )
-            }
-            if !message.embeds.isEmpty {
-                ForEach($message.embeds, id: \.id) { embed in
-                    EmbedView(embed: embed)
-                        .equatable()
+            VStack(alignment: .leading) {
+                if let stickerItems = message.stickerItems, !stickerItems.isEmpty {
+                    StickerView(
+                        stickerItems: stickerItems
+                    )
+                }
+                if !message.embeds.isEmpty {
+                    ForEach($message.embeds, id: \.id) { embed in
+                        EmbedView(embed: embed)
+                            .equatable()
+                            .padding(.leading, leftPadding)
+                    }
+                }
+                if !message.attachments.isEmpty {
+                    AttachmentView(media: message.attachments)
+                        .background(
+                            ZStack {
+                                Rectangle()
+                                    .foregroundColor(Color(NSColor.windowBackgroundColor))
+                                    .cornerRadius(5)
+                                ProgressView()
+                            }
+                        )
+                        .cornerRadius(5)
                         .padding(.leading, leftPadding)
+                        .padding(.top, 5)
+                }
+                if !message.reactions.isEmpty {
+                    ReactionsGridView (
+                        message: $message
+                    )
+                    .padding(.leading, leftPadding)
+                    .padding(.top, -5)
                 }
             }
-            if !message.attachments.isEmpty {
-                AttachmentView(media: message.attachments)
-                    .background(
-                        ZStack {
-                            Rectangle()
-                                .foregroundColor(Color(NSColor.windowBackgroundColor))
-                                .cornerRadius(5)
-                            ProgressView()
-                        }
-                    )
-                    .cornerRadius(5)
-                    .padding(.leading, leftPadding)
-                    .padding(.top, 5)
-            }
-            if !message.reactions.isEmpty {
-                ReactionsGridView (
-                    message: $message
-                )
-                .padding(.leading, leftPadding)
-            }
+            .if(self.message.content.isEmpty, transform: {
+                $0.padding(.top, -10)
+            })
         }
         .contextMenu {
             MessageCellMenu(

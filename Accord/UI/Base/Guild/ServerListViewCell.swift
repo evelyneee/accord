@@ -24,15 +24,18 @@ struct ServerListViewCell: View {
                 .equatable()
                 .frame(width: 35, height: 35)
                 .clipShape(Circle())
+                .padding(.trailing, 5)
                 statusDot
             }
             VStack(alignment: .leading) {
                 Text(channel.computedName)
                     .animation(nil, value: UUID())
+                    .font(.system(size: 14.5))
                 if let messageID = channel.last_message_id {
                     if messageID != channel.read_state?.last_message_id {
                         Text("New messages at " + Date(timeIntervalSince1970: Double(parseSnowflake(messageID) / 1000)).makeProperHour())
                             .foregroundColor(.secondary)
+                            .font(.system(size: 12.5))
                     }
                 }
             }
@@ -46,21 +49,29 @@ struct ServerListViewCell: View {
             HStack {
                 Image(systemName: "number")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         case .voice:
             HStack {
                 Image(systemName: "speaker.wave.2.fill")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         case .guild_news:
             HStack {
                 Image(systemName: "megaphone.fill")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         case .stage:
             HStack {
                 Image(systemName: "person.wave.2.fill")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         case .dm:
             dmLabelView
@@ -70,31 +81,41 @@ struct ServerListViewCell: View {
                     Attachment(cdnURL + "/channel-icons/\(channel.id)/\(channelIcon).png?size=48").equatable()
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
+                        .padding(.trailing, 5)
                 } else {
                     Attachment(pfpURL(nil, nil, discriminator: channel.id.suffix(4).stringLiteral))
                         .frame(width: 35, height: 35)
                         .clipShape(Circle())
+                        .padding(.trailing, 5)
                 }
                 VStack(alignment: .leading) {
                     Text(channel.computedName)
+                        .font(.system(size: 14.5))
                     Text(String((channel.recipients?.count ?? 0) + 1) + " members")
                         .foregroundColor(.secondary)
+                        .font(.system(size: 12.5))
                 }
             }
         case .guild_public_thread:
             HStack {
                 Image(systemName: "tray.full")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         case .guild_private_thread:
             HStack {
                 Image(systemName: "tray.full")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         default:
             HStack {
                 Image(systemName: "number")
                 Text(channel.computedName)
+                    .font(.system(size: 14.5))
+                    .padding(.vertical, 2)
             }
         }
     }

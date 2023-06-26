@@ -174,7 +174,7 @@ struct NewInviteSheet: View {
                                "max_uses": self.maxUses,
                                "target_type": NSNull(),
                                "validate": NSNull(),
-                               "temporary": self.maxAge == 0])
+                               "temporary": self.maxAge == 0] as [String : Any])
                 self.code = update.code
             case let .failure(error):
                 print(error)

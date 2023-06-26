@@ -158,5 +158,5 @@ enum MessageType: Int, Codable {
          guildDiscoveryRequalified, guildDiscoveryGracePeriodInitialWarning,
          guildDiscoveryGracePeriodFinalWarning, threadCreated, reply,
          chatInputCommand, threadStarterMessage, guildInviteReminder,
-         contextMenuCommand, likelyScammer
+         contextMenuCommand, likelyScammer, unknown1, unknown2, unknown3, unknown4
 }

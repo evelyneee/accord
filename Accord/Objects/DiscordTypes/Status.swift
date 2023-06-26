@@ -55,8 +55,8 @@ final class Activity: Identifiable {
         }
         if type != 4 {
             dict["assets"] = assets
-            dict["party"] = [:]
-            dict["secrets"] = [:]
+            dict["party"] = [String:Any]()
+            dict["secrets"] = [String:Any]()
         }
         if name == "Spotify" {
             dict["party"] = ["id": "spotify:" + user_id]
@@ -118,9 +118,9 @@ final class ActivityCodable: Codable {
             dict["state"] = state
         }
         if type == 0 {
-            dict["assets"] = [:]
-            dict["party"] = [:]
-            dict["secrets"] = [:]
+            dict["assets"] = [String:Any]()
+            dict["party"] = [String:Any]()
+            dict["secrets"] = [String:Any]()
         }
         if name != "Custom Status" {
             dict["application_id"] = applicationID ?? NSNull()

@@ -33,7 +33,7 @@ struct ProfileEditingView: View {
     @Environment(\.colorScheme) var colorScheme
 
     func updateProfile(settings: Bool = false, _ dict: [String: Any]) {
-        DispatchQueue.global().async {
+        userOperationQueue.async {
             var url = URL(string: rootURL)?
                 .appendingPathComponent("users")
                 .appendingPathComponent("@me")
@@ -156,7 +156,7 @@ struct ProfileEditingView: View {
                                 Activity.current?.state = nil
                                 wss.presences[0] = Activity.current!
                                 try? wss.updatePresence(status: MediaRemoteWrapper.status ?? "online", since: 0, activities: wss.presences)
-                                updateProfile(settings: true, ["custom_status": []])
+                                updateProfile(settings: true, ["custom_status": [Any]()])
                             }
                         }
                     }

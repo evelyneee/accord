@@ -18,19 +18,22 @@ extension AppGlobals {
             }
         }
         guard channel != selectedChannel?.id else { print("currently reading already"); return }
-        let index = self.folders.map { ServerListView.fastIndexGuild(guild, array: $0.guilds) }
-        for (i, v) in index.enumerated() {
-            guard let v = v else { continue }
-            var folderList = self.folders[i].guilds[v].channels
-            folderList.append(contentsOf: self.privateChannels)
-//            if let index = fastIndexChannels(channel, array: folderList) {
-//                DispatchQueue.main.async {
-//                    self.folders[i].guilds[v].channels[index].read_state?.mention_count? += 1
-//                }
-//            }
-        }
-        DispatchQueue.main.async {
-            self.self.objectWillChange.send()
+        Task.detached {
+            let index = await self.folders.map { $0.guilds[indexOf: guild] }
+            await MainActor.run {
+                for (i, v) in index.enumerated() {
+                    guard let v = v else { continue }
+                    self.folders[i].guilds[v].channels.append(contentsOf: self.privateChannels)
+        //            if let index = fastIndexChannels(channel, array: folderList) {
+        //                DispatchQueue.main.async {
+        //                    self.folders[i].guilds[v].channels[index].read_state?.mention_count? += 1
+        //                }
+        //            }
+                }
+                DispatchQueue.main.async {
+                    self.self.objectWillChange.send()
+                }
+            }
         }
     }
 
@@ -61,28 +64,29 @@ extension AppGlobals {
         let messageID = message.id
         let isDM = message.guildID == nil
         let guildID = message.guildID ?? "@me"
-        Task {
+        let privateChannels = self.privateChannels
+        Task.detached {
             let ids = message.mentions.map(\.id)
-            if ids.contains(user_id) || (self.privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                let matchingGuild = Array(self.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
-                let matchingChannel = matchingGuild?.channels[keyed: message.channelID] ?? self.privateChannels[keyed: message.channelID]
-                showNotification(
+            if ids.contains(user_id) || (privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
+                let matchingGuild = await Array(self.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
+                let matchingChannel = matchingGuild?.channels[keyed: message.channelID] ?? privateChannels[keyed: message.channelID]
+                await showNotification(
                     title: message.author?.username ?? "Unknown User",
                     subtitle: matchingGuild == nil ? matchingChannel?.computedName ?? "Direct Messages" : "#\(matchingChannel?.computedName ?? "") • \(matchingGuild?.name ?? "")",
                     description: message.content,
                     pfpURL: pfpURL(message.author?.id, message.author?.avatar, "128"),
                     id: message.channelID
                 )
-                self.addMention(guild: guildID, channel: channelID)
+                await self.addMention(guild: guildID, channel: channelID)
             }
             if isDM {
-                guard let index = self.privateChannels.generateKeyMap()[channelID] else { return }
+                guard let index = await self.privateChannels.generateKeyMap()[channelID] else { return }
                 DispatchQueue.main.async {
                     self.self.privateChannels[index].last_message_id = messageID
                 }
             } else {
-                guard channelID != self.selectedChannel?.id else { print("currently reading already"); return }
-                self.folders.enumerated().forEach { index1, folder in
+                guard await channelID != self.selectedChannel?.id else { print("currently reading already"); return }
+                await self.folders.enumerated().forEach { index1, folder in
                     folder.guilds.enumerated().forEach { index2, guild in
                         guild.channels.enumerated().forEach { index3, channel in
                             if channel.id == channelID {

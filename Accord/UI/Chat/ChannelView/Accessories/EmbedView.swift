@@ -31,17 +31,10 @@ struct EmbedView: View, Equatable {
     private var colorLine: some View {
         if let color = embed.color {
             if #available(macOS 13.0, *) {
-                #if canImport(WeatherKit)
                 RoundedRectangle(cornerRadius: 1)
                     .fill(Color(int: color).gradient)
                     .frame(width: 5)
                     .padding(.trailing, 5)
-                #else
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(Color(int: color))
-                    .frame(width: 5)
-                    .padding(.trailing, 5)
-                #endif
             } else {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(Color(int: color))
@@ -97,8 +90,8 @@ struct EmbedView: View, Equatable {
                                 if let iconURL = author.proxy_icon_url ?? author.icon_url {
                                     Attachment(iconURL, size: CGSize(width: 48, height: 48))
                                         .equatable()
-                                        .frame(width: 21, height: 21)
-                                        .clipShape(Circle())
+                                        .frame(width: 25, height: 25)
+                                        .clipShape(RoundedRectangle(cornerRadius: 5))
                                 }
                                 if let urlString = author.url, let url = URL(string: urlString) {
                                     Button(action: {
@@ -106,14 +99,14 @@ struct EmbedView: View, Equatable {
                                     }) {
                                         Text(author.name)
                                             .fontWeight(.semibold)
-                                            .font(.system(size: 14.5))
-                                            .foregroundColor(Color.primary.opacity(0.85))
+                                            .font(.system(size: 15.5))
+                                            .foregroundColor(Color.primary)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                 } else {
                                     Text(author.name)
-                                        .fontWeight(.medium)
-                                        .font(.system(size: 14.5))
+                                        .fontWeight(.semibold)
+                                        .font(.system(size: 15.5))
                                 }
                             }
                             .padding(.bottom, 2)
