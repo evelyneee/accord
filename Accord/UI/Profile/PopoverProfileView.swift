@@ -210,9 +210,15 @@ struct PopoverProfileView: View {
                     Text(self.guildMember?.nick ?? user?.username ?? "")
                         .font(.title2)
                         .fontWeight(.bold)
-                    Text("\(user?.username ?? "")#\(user?.discriminator ?? "")")
-                        .font(.subheadline)
-                        .foregroundColor(Color.secondary)
+                    if user?.discriminator == "0" {
+                        Text(user?.username ?? "")
+                            .font(.subheadline)
+                            .foregroundColor(Color.secondary)
+                    } else {
+                        Text("\(user?.username ?? "")#\(user?.discriminator ?? "")")
+                            .font(.subheadline)
+                            .foregroundColor(Color.secondary)
+                    }
 
                     if let bio = self.fullUser?.bio, !bio.isEmpty {
                         Divider()

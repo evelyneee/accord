@@ -253,6 +253,7 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
 
         wss.memberChunkSubject
             .receive(on: webSocketQueue)
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .sink { [weak self] msg in
                 guard let chunk = try? JSONDecoder().decode(GuildMemberChunkResponse.self, from: msg),
                       let users = chunk.d?.members,

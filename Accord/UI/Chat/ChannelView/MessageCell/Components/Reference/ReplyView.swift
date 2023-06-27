@@ -49,7 +49,7 @@ struct ReplyView: View {
             })
             .buttonStyle(.borderless)
         }
-        .padding(.bottom, -3)
+        .padding(.bottom, -2)
         .padding(.leading, 15)
     }
 }

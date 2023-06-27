@@ -95,7 +95,6 @@
 		9EDD136627D5A55A000685E6 /* String++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136527D5A55A000685E6 /* String++.swift */; };
 		9EDD136827D6F951000685E6 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD136727D6F951000685E6 /* Regex.swift */; };
 		9EDDB1B32831E4FC00510036 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDDB1B22831E4FC00510036 /* Reachability.swift */; };
-		9EE107C429270F6D007A8426 /* Swizzling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE107C329270F6D007A8426 /* Swizzling.swift */; };
 		9EE2467E28F192DD004AB87B /* PlatformNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE2467D28F192DD004AB87B /* PlatformNavigation.swift */; };
 		9EE7E13628EA234D0021BE4F /* UserGuildSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE7E13528EA234D0021BE4F /* UserGuildSettings.swift */; };
 		9EEC6D6D2890429E0005DF30 /* MessageUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEC6D6C2890429E0005DF30 /* MessageUpdate.swift */; };
@@ -1298,7 +1297,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-                MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
@@ -1349,7 +1348,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-                MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;

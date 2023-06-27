@@ -42,7 +42,7 @@ struct MessageCellView: View, Equatable {
     @AppStorage("GifProfilePictures")
     var gifPfp: Bool = false
 
-    private let leftPadding: Double = 44.5
+    private let leftPadding: Double = 47
 
     @EnvironmentObject
     var appModel: AppGlobals
@@ -224,7 +224,7 @@ struct MessageCellView: View, Equatable {
                 }
             }
             .if(self.message.content.isEmpty, transform: {
-                $0.padding(.top, -10)
+                $0.padding(.top, -8)
             })
         }
         .contextMenu {

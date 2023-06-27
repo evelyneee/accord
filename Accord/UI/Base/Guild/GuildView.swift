@@ -78,7 +78,11 @@ extension ServerListView {
                         )
                         .onReceive(self.appModel.$selectedGuild, perform: { [weak appModel] guild in
                             if let guild, let value = UserDefaults.standard.object(forKey: "AccordChannelIn\(guild.id)") as? String, channel.id == value {
-                                appModel?.selectedChannel = channel
+                                DispatchQueue.main.async {
+                                    DispatchQueue.main.async {
+                                        appModel?.selectedChannel = channel
+                                    }
+                                }
                             }
                         })
                         .foregroundColor({ () -> Color? in

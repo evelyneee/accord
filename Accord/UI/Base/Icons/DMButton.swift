@@ -40,8 +40,8 @@ struct DMButton: View {
                 appModel.selectedChannel = nil
             }
         }) {
-            Image(systemName: "bubble.right.fill")
-                .font(.system(size: 16))
+            Image(systemName: "message.fill")
+                .font(.system(size: 20))
                 .padding()
                 .frame(width: 50, height: 50)
                 .background(selectedServer == "@me" || iconHovered ? Color.accentColor.opacity(0.5) : Color(NSColor.secondaryLabelColor).opacity(0.2))

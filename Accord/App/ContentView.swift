@@ -86,6 +86,7 @@ struct ContentView: View {
                                     switch completion {
                                     case .finished: break
                                     case let .failure(error):
+                                        AccordApp.error(error, text: "Gateway failed to connect", additionalDescription: String(describing: error), reconnectOption: true)
                                         failedToConnect(error)
                                     }
                                 }) { d in

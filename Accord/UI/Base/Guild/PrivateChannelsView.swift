@@ -64,6 +64,17 @@ struct PrivateChannelsView: View {
                     }
                 }
             )
+            .onReceive(self.appModel.$selectedGuild, perform: { [weak appModel] guild in
+                if guild == nil,
+                    let value = UserDefaults.standard.object(forKey: "AccordChannelDMs") as? String,
+                    channel.id == value {
+                    DispatchQueue.main.async {
+                        DispatchQueue.main.async {
+                            appModel?.selectedChannel = channel
+                        }
+                    }
+                }
+            })
             .contextMenu {
                 Button("Copy Channel ID") {
                     NSPasteboard.general.clearContents()

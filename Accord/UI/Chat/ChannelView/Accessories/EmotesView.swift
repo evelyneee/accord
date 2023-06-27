@@ -52,7 +52,43 @@ struct EmotesView: View, Equatable {
                             self.onSelect(DiscordEmote(id: "stock", name: self.search))
                             self.presentationMode.wrappedValue.dismiss()
                         }
-                    TabView(selection: self.$selection) {
+                    HStack {
+                        Button {
+                            withAnimation(.easeInOut) {
+                                self.selection = .emotes
+                            }
+                        } label: {
+                            Text("Emotes")
+                                .fontWeight(.medium)
+                                .padding(5)
+                                .padding(.horizontal, 3)
+                                .if(self.selection == .emotes, transform: {
+                                    $0
+                                        .background(RoundedRectangle(cornerRadius: 5).fill(Color.secondary.opacity(0.5)))
+                                })
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.primary)
+                        Button {
+                            withAnimation(.easeInOut) {
+                                self.selection = .stickers
+                            }
+                        } label: {
+                            Text("Stickers")
+                                .fontWeight(.medium)
+                                .padding(5)
+                                .padding(.horizontal, 3)
+                                .if(self.selection == .stickers, transform: {
+                                    $0
+                                        .background(RoundedRectangle(cornerRadius: 5).fill(Color.secondary.opacity(0.5)))
+                                })
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.primary)
+                    }
+                    .padding(1)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color(NSColor.windowBackgroundColor)))
+                    if self.selection == .emotes {
                         ScrollView {
                             LazyVStack(alignment: .leading) {
                                 if search.isEmpty {
@@ -82,7 +118,7 @@ struct EmotesView: View, Equatable {
                                             }
                                         }
                                     }
-
+                                    
                                 } else {
                                     LazyVGrid(columns: columns) {
                                         ForEach(Storage.emotes.values.flatMap { $0 }.filter { $0.name.contains(search) }, id: \.id) { emote in
@@ -104,10 +140,9 @@ struct EmotesView: View, Equatable {
                             }
                         }
                         .padding()
-                        .tabItem({Text("Emotes")})
+                    } else {
                         if #available(macOS 12.0, *) {
                             StickersView()
-                                .tabItem({Text("Stickers")})
                         }
                     }
                 }
