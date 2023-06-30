@@ -47,23 +47,26 @@ struct MessageCellView: View, Equatable {
     @EnvironmentObject
     var appModel: AppGlobals
     
-    var editingTextField: some View {
-        TextField("Edit your message", text: self.$editedText)
-        .onSubmit {
-            let text = self.editedText
-            userOperationQueue.async {
-                message.edit(now: text)
-            }
-            self.editing = false
-            self.editedText = ""
+    struct EditingTextField: View {
+        @Binding var message: Message
+        @Binding var editedText: String
+        @Binding var editing: Bool
+        var body: some View {
+            TextField("Edit your message", text: self.$editedText)
+                .onSubmit {
+                    let text = self.editedText
+                    userOperationQueue.async {
+                        message.edit(now: text)
+                    }
+                    self.editing = false
+                    self.editedText = ""
+                }
+                .textFieldStyle(SquareBorderTextFieldStyle())
+                .onAppear {
+                    self.editedText = message.content
+                }
+                .id(message.id)
         }
-        .textFieldStyle(SquareBorderTextFieldStyle())
-        .onAppear {
-            self.editedText = message.content
-        }
-        .onChange(of: self.message.content, perform: { content in
-            self.editedText = content
-        })
     }
 
     var body: some View {
@@ -156,7 +159,7 @@ struct MessageCellView: View, Equatable {
                     VStack(alignment: .leading) {
                         if message.isSameAuthor && message.referencedMessage == nil && message.inSameDay {
                             if self.editing {
-                                editingTextField
+                                EditingTextField(message: self.$message, editedText: self.$editedText, editing: self.$editing)
                                     .font(.chatTextFont)
                                     .padding(.leading, leftPadding)
                             } else if !message.content.isEmpty {
@@ -177,7 +180,7 @@ struct MessageCellView: View, Equatable {
                             .equatable()
                             Spacer().frame(height: 1.3)
                             if self.editing {
-                                editingTextField
+                                EditingTextField(message: self.$message, editedText: self.$editedText, editing: self.$editing)
                                     .font(.chatTextFont)
                             } else if !message.content.isEmpty {
                                 AsyncMarkdown(message.content)

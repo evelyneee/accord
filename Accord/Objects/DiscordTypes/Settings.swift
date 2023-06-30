@@ -61,7 +61,7 @@ final class GuildFolder: Decodable, Hashable {
     var color: Int?
     var guild_ids: [String]
     @DefaultEmptyArray
-    var guilds: ContiguousArray<Guild>
+    var guilds: Array<Guild>
 
     var unreadMessages: Bool {
         guilds

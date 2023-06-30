@@ -57,6 +57,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
     var channelID: String {
         self.channel?.id ?? ""
     }
+    
+    @AppStorage("memberListShown")
+    var memberListShown: Bool = false
 
     static var permissionQueue = DispatchQueue(label: "red.evelyn.AccordPermissionQueue")
 
@@ -115,8 +118,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                 }
                 return
             } else {
-                loadChannel(channel)
                 connect()
+                loadChannel(channel)
             }
         }
     }
@@ -152,11 +155,26 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
             guard let self = self else { return }
             print(self.guildID)
             self.getMessages(channelID: self.channelID, guildID: self.guildID)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                if channel.guild_id == nil || channel.guild_id == "@me" {
-                    try? wss.subscribeToDM(self.channelID)
+
+            if channel.guild_id == nil || channel.guild_id == "@me" {
+                try? wss.subscribeToDM(self.channelID)
+            } else if let guildID = self.channel.guild_id {
+                try? wss.subscribe(to: guildID)
+            }
+            
+            if let recipients = self.channel.recipients, !recipients.isEmpty {
+                DispatchQueue.main.async {
+                    self.memberList = recipients.map(OPSItems.init)
                 }
-            })
+            }
+            
+            DispatchQueue.main.async {
+                if let cache = Storage.globals?.listCache[self.channelID] {
+                    self.memberList = cache
+                } else if let guildID = channel.guild_id, guildID != "@me", self.memberListShown {
+                    try? wss.subscribeWithList(for: self.channel.guild_id ?? "@me", in: self.channel.id)
+                }
+            }
             self.loadPermissions(channel)
             DispatchQueue.main.async {
                 Storage.globals?.removeMentions(server: self.guildID)
@@ -230,8 +248,8 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                     if let firstMessage = await self.messages.first {
                         message.sameAuthor = firstMessage.author?.id == message.author?.id
                     }
-                    if await self.messages.count == 50 {
-                        _ = await MainActor.run {
+                    await MainActor.run {
+                        if self.messages.count == 50 {
                             self.messages.removeLast()
                         }
                     }
@@ -360,7 +378,9 @@ final class ChannelViewViewModel: ObservableObject, Equatable {
                             return new
                         }
                     await MainActor.run {
-                        Storage.globals?.listCache[listRoot.d.guild_id ?? self.guildID] = list
+                        if list.count > 10 {
+                            Storage.globals?.listCache[self.channelID] = list
+                        }
                         self.memberList.append(contentsOf: list)
                     }
                 }

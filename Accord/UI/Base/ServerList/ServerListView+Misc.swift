@@ -11,10 +11,6 @@ extension ServerListView {
     static func fastIndexGuild(_ guild: String, array: [Guild]) -> Int? {
         array[indexOf: guild]
     }
-    
-    static func fastIndexGuild(_ guild: String, array: ContiguousArray<Guild>) -> Int? {
-        array[indexOf: guild]
-    }
 
     func fastIndexChannels(_ channel: String, array: [Channel]) -> Int? {
         array[indexOf: channel]

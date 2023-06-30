@@ -42,8 +42,7 @@ struct ReplyView: View {
             }, label: { [weak reply] in
                 let content = reply?.content ?? ""
                 let hasAttachment = !(reply?.attachments ?? []).isEmpty
-                Text(!content.isEmpty ? content : hasAttachment ? "Click to see attachment" : "       ")
-                    .font(.system(size: 11))
+                AsyncMarkdown(!content.isEmpty ? content : hasAttachment ? "Click to see attachment" : "       ", font: .system(size: 11))
                     .lineLimit(0)
                     .foregroundColor(.secondary)
             })

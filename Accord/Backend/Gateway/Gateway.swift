@@ -225,6 +225,7 @@ final class Gateway {
                             try self.handleMessage(event: event)
                         } catch {
                             print(error)
+                            wss.reset()
                         }
                     }
                 }
@@ -275,9 +276,9 @@ final class Gateway {
                     "browser": "Discord Client",
                     "release_channel": "stable",
                     "client_build_number": dscVersion,
-                    "client_version": "0.0.266",
+                    "client_version": "0.0.275",
                     "os_version": NSWorkspace.shared.kernelVersion,
-                    "os_arch": "x64",
+                    "os_arch": "arm64",
                     "system-locale": "\(NSLocale.current.languageCode ?? "en")-\(NSLocale.current.regionCode ?? "US")",
                 ] as [String : Any],
             ] as [String : Any],
@@ -433,6 +434,8 @@ final class Gateway {
                 "activities": true,
                 "threads": true,
                 "guild_id": guild,
+                "members":[],
+                "thread_member_lists":[],
                 "channels": [
                     channel: channels,
                 ],
@@ -441,20 +444,25 @@ final class Gateway {
         try send(json: packet)
     }
     
-    func memberList(for guild: String, in channel: String, channels: [[Int]] = [[0, 99]]) throws {
-        guard !requestedMemberListsForGuilds.contains(guild) else { return }
-        self.requestedMemberListsForGuilds.insert(guild)
-        print("requesting member list")
+    func memberList(for guild: String, in channel: String? = nil, thread: String? = nil, channels: [[Int]] = [[0, 99]]) throws {
         guard guild != "@me" else { return }
+        var d: [String : Any] = [
+            "guild_id": guild,
+        ]
+        
+        if let thread {
+            d["thread_member_lists"] = [thread]
+        } else if let channel {
+            d["channels"] = [
+                channel: channels,
+            ]
+        }
+        
         let packet: [String: Any] = [
             "op": 14,
-            "d": [
-                "channels": [
-                    channel: channels,
-                ],
-                "guild_id": guild,
-            ] as [String : Any],
+            "d": d
         ]
+        
         try send(json: packet)
     }
 

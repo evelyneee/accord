@@ -148,12 +148,13 @@ extension ServerListView {
                             }
                         return guild
                     }
-                    .makeContiguousArray()
                 return folder
             }
             .filter { !$0.guilds.isEmpty }
 
-        appModel.folders = ContiguousArray(folders)
+        print(folders.count)
+        
+        appModel.folders = folders
         
         MediaRemoteWrapper.status = readyPacket.user_settings.status
         Activity.current = Activity (

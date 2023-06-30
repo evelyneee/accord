@@ -120,7 +120,7 @@ final class ChatControlsViewModel: ObservableObject {
             }
         } else if let search = channels.last {
             Task.detached {
-                let matches = await Storage.globals?.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
+                let matches = Storage.globals?.folders.map { $0.guilds.compactMap { $0.channels.filter { $0.name?.contains(search) ?? false } } }
                 let joined: [Channel] = Array(Array(Array(matches ?? []).joined()).joined())
                     .filter { $0.guild_id == guildID }
                     .prefix(10)

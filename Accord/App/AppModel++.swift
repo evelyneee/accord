@@ -19,7 +19,7 @@ extension AppGlobals {
         }
         guard channel != selectedChannel?.id else { print("currently reading already"); return }
         Task.detached {
-            let index = await self.folders.map { $0.guilds[indexOf: guild] }
+            let index = self.folders.map { $0.guilds[indexOf: guild] }
             await MainActor.run {
                 for (i, v) in index.enumerated() {
                     guard let v = v else { continue }
@@ -68,7 +68,7 @@ extension AppGlobals {
         Task.detached {
             let ids = message.mentions.map(\.id)
             if ids.contains(user_id) || (privateChannels.map(\.id).contains(channelID) && message.author?.id != user_id) {
-                let matchingGuild = await Array(self.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
+                let matchingGuild = Array(self.folders.map(\.guilds).joined())[keyed: message.guildID ?? ""]
                 let matchingChannel = matchingGuild?.channels[keyed: message.channelID] ?? privateChannels[keyed: message.channelID]
                 await showNotification(
                     title: message.author?.username ?? "Unknown User",
@@ -86,7 +86,7 @@ extension AppGlobals {
                 }
             } else {
                 guard await channelID != self.selectedChannel?.id else { print("currently reading already"); return }
-                await self.folders.enumerated().forEach { index1, folder in
+                self.folders.enumerated().forEach { index1, folder in
                     folder.guilds.enumerated().forEach { index2, guild in
                         guild.channels.enumerated().forEach { index3, channel in
                             if channel.id == channelID {

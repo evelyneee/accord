@@ -86,11 +86,14 @@ struct AsyncMarkdown: View, Equatable {
     @Environment(\.channelID)
     var channelID: String
     
+    var font: Font
+    
     @MainActor
-    init(_ text: String, binded: Binding<String>? = nil, linkShortening: Bool = false) {
+    init(_ text: String, binded: Binding<String>? = nil, linkShortening: Bool = false, font: Font = .chatTextFont) {
         _model = StateObject(wrappedValue: AsyncMarkdownModel(text: text))
         _text = binded ?? .constant(text)
         self.linkShortening = linkShortening
+        self.font = font
     }
 
     @ViewBuilder
@@ -100,7 +103,10 @@ struct AsyncMarkdown: View, Equatable {
                 if #available(macOS 13.0, *) {
                     model.markdown
                         .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                        .font({
+                            if self.font == .chatTextFont { return self.model.hasEmojiOnly ? .system(size: 48) : font }
+                            return self.font
+                        }())
                         .onChange(of: self.text, perform: { [weak model] text in
                             model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)
                         })
@@ -111,7 +117,10 @@ struct AsyncMarkdown: View, Equatable {
                 } else {
                     model.markdown
                         .textSelection(.enabled)
-                        .font(self.model.hasEmojiOnly ? .system(size: 48) : .chatTextFont)
+                        .font({
+                            if self.font == .chatTextFont { return self.model.hasEmojiOnly ? .system(size: 48) : font }
+                            return self.font
+                        }())
                         .fixedSize(horizontal: false, vertical: true)
                         .onChange(of: self.text, perform: { [weak model] text in
                             model?.make(text: text, usernames: Storage.usernames, allowLinkShortening: linkShortening)

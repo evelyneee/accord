@@ -28,6 +28,8 @@ extension Gateway {
         if let s = event.s {
             seq = s
         }
+        
+        print(event.t.rawValue)
                         
         switch event.t {
         case .messageACK: break

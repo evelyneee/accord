@@ -12,7 +12,11 @@ extension AccordApp {
     static func error(_ error: Error? = nil, text: String? = nil, additionalDescription: String? = nil, reconnectOption _: Bool = true) {
         DispatchQueue.main.async {
             let alert = NSAlert()
-            alert.messageText = error?.localizedDescription ?? text ?? "Unknown error occured"
+            if let gatewayError = error as? Gateway.GatewayErrors {
+                alert.messageText = gatewayError.localizedDescription
+            } else {
+                alert.messageText = error?.localizedDescription ?? text ?? "Unknown error occured"
+            }
             if let additionalDescription = additionalDescription {
                 alert.informativeText = additionalDescription
             }

@@ -48,9 +48,11 @@ final class AppGlobals: ObservableObject {
                     Storage.globals = self
                 }
             } else if let folder {
-                DispatchQueue.main.async {
-                    self?.folders.append(folder)
-                    Storage.globals = self
+                if let id = folder.guild_ids.first, self?.folders.map(\.guild_ids).joined().contains(id) == false {
+                    DispatchQueue.main.async {
+                        self?.folders.append(folder)
+                        Storage.globals = self
+                    }
                 }
             }
         }
@@ -58,8 +60,8 @@ final class AppGlobals: ObservableObject {
         
     var cancellable: AnyCancellable?
     
-    @MainActor @Published
-    public var folders = ContiguousArray<GuildFolder>()
+    @Published
+    public var folders = [GuildFolder]()
     
     @MainActor @Published
     public var privateChannels = [Channel]()

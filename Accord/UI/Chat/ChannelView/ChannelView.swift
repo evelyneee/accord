@@ -372,12 +372,18 @@ struct ChannelView: View {
                 if memberListShown {
                     MemberListView(guildID: $viewModel.guildID, list: $viewModel.memberList)
                         .frame(width: 250)
-                        .onAppear { [weak viewModel] in
+                        .onChange(of: self.memberListShown, perform: { [weak viewModel] shown in
                             guard let viewModel else { return }
-                            if viewModel.memberList.isEmpty && viewModel.guildID != "@me" {
-                                try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
+                            if shown {
+                                if viewModel.memberList.isEmpty && viewModel.guildID != "@me" {
+                                    if viewModel.channel.type == .guild_public_thread || viewModel.channel.type == .guild_private_thread {
+                                        try? wss?.memberList(for: viewModel.guildID, thread: viewModel.channelID)
+                                    } else {
+                                        try? wss?.memberList(for: viewModel.guildID, in: viewModel.channelID)
+                                    }
+                                }
                             }
-                        }
+                        })
                         .onDeleteCommand {
                             self.memberListShown = false
                         }
@@ -405,20 +411,6 @@ struct ChannelView: View {
             Task.detached {
                 await self.viewModel.initializeChannel()
                 await self.viewModel.setPermissions(self.appModel)
-                DispatchQueue.main.async {
-                    if let recipients = viewModel.channel.recipients, !recipients.isEmpty {
-                        viewModel.memberList = recipients.map(OPSItems.init)
-                    }
-                    if let cache = Storage.globals?.listCache[viewModel.channelID] {
-                        DispatchQueue.main.async {
-                            self.viewModel.memberList = cache
-                        }
-                    } else if let guildID = channel?.guild_id, guildID != "@me", memberListShown {
-                        try? wss.subscribeWithList(for: viewModel.channel.guild_id ?? "@me", in: viewModel.channel.id)
-                    } else if let guildID = viewModel.channel.guild_id, guildID != "@me" {
-                        try? wss.subscribe(to: viewModel.channel.guild_id ?? "@me")
-                    }
-                }
             }
         }
         .channelProperties(channelID: self.channel.id, guildID: self.channel.guild_id ?? "@me")
@@ -470,6 +462,7 @@ struct ChannelView: View {
                                 Text("#" + self.channelName)
                                     .fontWeight(.semibold)
                                 Text(topic)
+                                    .lineLimit(5)
                                 if let threads = self.channel.threads {
                                     if #available(macOS 12.0, *) {
                                         Section("Threads", content: {
@@ -491,6 +484,7 @@ struct ChannelView: View {
 
                             }
                             .padding(10)
+                            .frame(maxWidth: 250, maxHeight: .infinity)
                         }
                 }
                 Toggle(isOn: $pins) {

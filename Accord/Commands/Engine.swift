@@ -23,14 +23,43 @@ final class SlashCommands {
         optionValues: [[String: Any]] = []
     ) throws {
         let boundary = "WebKitFormBoundary\(UUID().uuidString)"
-        let optionValues = options
-            .prefix(optionValues.count)
-            .enumerated()
-            .map { index, option -> [String: Any] in
-                var value = optionValues[index]
-                value["type"] = option.type
-                return value
-            }
+        
+        let params: [String:Any] = [
+            "type":type,
+            "application_id":applicationID,
+            "guild_id":guildID,
+            "channel_id":channelID,
+            "session_id":wss.sessionID ?? "",
+            "data":[
+                "version":appVersion,
+                "id":id,
+                "guild_id":guildID,
+                "name":appName,
+                "type":dataType,
+                "options":[],
+                "application_command":[
+                    "id":id,
+                    "application_id":applicationID,
+                    "version":appVersion,
+                    "default_member_permissions":NSNull(),
+                    "type":appType,
+                    "nsfw":false,
+                    "name":appName,
+                    "description":appDescription,
+                    "guild_id":guildID,
+                    "options":options.map { option -> [String: Any] in
+                        [
+                            "description": option.description,
+                            "name": option.name,
+                            "type": option.type,
+                        ]
+                    }
+                ],
+                "attachments":[]
+            ],
+            "nonce":generateFakeNonce()
+        ]
+        /*
         let params: [String: Any] = [
             "type": type,
             "application_id": applicationID,
@@ -65,7 +94,7 @@ final class SlashCommands {
             ] as [String : Any],
             "nonce": generateFakeNonce(),
         ]
-        
+        */
         Request.multipartData(
             url: URL(string: "\(rootURL)/interactions"),
             with: params,

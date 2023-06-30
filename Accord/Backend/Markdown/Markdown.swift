@@ -124,6 +124,7 @@ public final class Markdown {
                 .eraseToAny()
         }
         return Future { promise in
+                        
             let mentions = word.matches(precomputed: RegexExpressions.mentions).map { (str) -> String in
                 if str.hasPrefix("@!") {
                     return String(str.dropFirst(2))
@@ -225,13 +226,17 @@ public final class Markdown {
             }
             if !channels.isEmpty {
                 Task.detached {
-                    guard let channelNameStorage = await Storage.globals?.folders.map(\.guilds).joined().map(\.channels).joined() else { return }
+                    guard let channelNameStorage = Storage.globals?.folders.map(\.guilds).joined().map(\.channels).joined() else { return }
                     
                     for id in channels {
                         let channel = Array(channelNameStorage)[keyed: id]
                         return promise(.success(Text("#\(await channel?.computedName ?? "deleted-channel") ").foregroundColor(Color(NSColor.controlAccentColor)).underline() + Text(" ")))
                     }
                 }
+            }
+                        
+            if word.first == "<" && word.last == ">" {
+                return promise(.success(appleMarkdown(String(word.dropFirst().dropLast()))))
             }
             
             if word == ">" && quote {
@@ -241,7 +246,7 @@ public final class Markdown {
             if word.contains("+") || word.contains("<") || word.contains(">") { // the markdown parser removes these??
                 return promise(.success(Text(word) + Text(" ")))
             }
-
+            
             if #available(macOS 12.0, *), highlight {
                 return promise(.success(Text(bionicMarkdown(word)) + Text(" ")))
             } else {

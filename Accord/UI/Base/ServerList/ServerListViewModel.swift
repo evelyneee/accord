@@ -40,6 +40,7 @@ final class ServerListViewModel: ObservableObject {
                 nextDict.updateValue(tuple.1, forKey: tuple.0)
                 return nextDict
             }
+            .filter { !$1.isEmpty }
     }
 }
 
