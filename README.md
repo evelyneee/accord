@@ -2,6 +2,10 @@
 
 A faster, native discord client for your Mac. Here's a [screenshot](https://github.com/evelyneee/accord#screenshot).
 
+### Important note
+
+I no longer use Discord, so I am not maintaining this app. If you want to make pull requests, they will still be reviewed and merged accordingly. 
+
 ### OS Requirement
 
 Accord requires macOS Big Sur (11.0) or higher
