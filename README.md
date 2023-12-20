@@ -15,11 +15,11 @@ Accord requires macOS Big Sur (11.0) or higher
 #### Homebrew [Recommended]
 [If you have Homebrew installed on your Mac](https://brew.sh), you can get the latest Accord release by installing the `accord` cask:
 ```
-$ brew install --cask accord
+brew install --cask accord
 ```
 To upgrade Accord using Homebrew, run the following:
 ```
-$ brew upgrade --cask accord
+brew upgrade --cask accord
 ```
 
 #### GitHub Releases [Recommended]
